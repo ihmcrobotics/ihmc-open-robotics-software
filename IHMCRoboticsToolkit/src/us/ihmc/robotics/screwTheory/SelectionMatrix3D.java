@@ -132,7 +132,7 @@ public class SelectionMatrix3D
    }
 
    /**
-    * Updates the selection state for the x-axis.
+    * Updates the selection state for the x-axis, does not change the y and z components.
     * <p>
     * Note that it is preferable to also set selection frame to which this selection is referring
     * to.
@@ -146,7 +146,7 @@ public class SelectionMatrix3D
    }
 
    /**
-    * Updates the selection state for the y-axis.
+    * Updates the selection state for the y-axis, does not change the x and z components.
     * <p>
     * Note that it is preferable to also set selection frame to which this selection is referring
     * to.
@@ -160,7 +160,7 @@ public class SelectionMatrix3D
    }
 
    /**
-    * Updates the selection state for the z-axis.
+    * Updates the selection state for the z-axis, does not change the x and y components.
     * <p>
     * Note that it is preferable to also set selection frame to which this selection is referring
     * to.
@@ -183,7 +183,7 @@ public class SelectionMatrix3D
     * 
     * @param destinationFrame the reference frame in which the selection matrix is to be used.
     * @param selectionMatrixToPack the dense-matrix into which the 3-by-3 selection matrix is to be
-    *           inserted.
+    *           inserted. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
@@ -204,7 +204,7 @@ public class SelectionMatrix3D
     * @param startRow the first row index to start writing in the dense-matrix.
     * @param startColumn the first column index to start writing in the dense-matrix.
     * @param selectionMatrixToPack the dense-matrix into which the 3-by-3 selection matrix is to be
-    *           inserted.
+    *           inserted. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
