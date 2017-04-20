@@ -310,8 +310,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public boolean getIKResult()
    {
       setUpHasBeenDone();
-      ThreadTools.sleep(1000);
-      for(int i=0;i<100;i++)
+      //ThreadTools.sleep(1000);
+      for(int i=0;i<50;i++)
       {
          //PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
          ThreadTools.sleep(5);
@@ -326,9 +326,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       if(Debug)
          PrintTools.info("No solution ");
       
-      PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
-                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
-                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
+//      PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+//                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+//                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
       
       forceOut();
       ThreadTools.sleep(10);
