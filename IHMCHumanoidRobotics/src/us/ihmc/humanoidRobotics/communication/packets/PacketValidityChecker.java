@@ -530,7 +530,10 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getTrajectoryPointLists()[jointIndex];
-         errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
+         if(oneJointTrajectoryMessage != null)
+         {
+            errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
+         }
          if (errorMessage != null)
          {
             String messageClassName = message.getClass().getSimpleName();
