@@ -17,19 +17,24 @@ import java.util.List;
 public class ICPPlanToeOffCalculator implements ToeOffCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private static final String namePrefix = "icpProj";
 
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint exitCMP = new FramePoint();
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
    private final FramePoint2d exitCMP2d = new FramePoint2d();
 
+   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final LineSegment2d toeOffContactLine2d = new LineSegment2d();
+
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<BooleanYoVariable> useLineContact = new SideDependentList<>();
 
    private final BooleanYoVariable hasComputedToeOffContactPoint;
+   private final BooleanYoVariable hasComputedToeOffContactLine;
 
    public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-                       YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -37,9 +42,11 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
          soleFrames.put(robotSide, soleFrame);
 
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
+         useLineContact.put(robotSide, new BooleanYoVariable(robotSide.getLowerCaseName() + namePrefix +  "UseLineToeOff", registry));
       }
 
-      hasComputedToeOffContactPoint = new BooleanYoVariable("hasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactLine = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactLine", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -48,6 +55,16 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    {
       exitCMP2d.setToNaN();
       hasComputedToeOffContactPoint.set(false);
+   }
+
+   public boolean getUseLineContact(RobotSide trailingLeg)
+   {
+      return useLineContact.get(trailingLeg).getBooleanValue();
+   }
+
+   public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg)
+   {
+      this.useLineContact.get(trailingLeg).set(useLineContact);
    }
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
@@ -70,5 +87,18 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
          computeToeOffContactPoint(null, trailingLeg);
 
       contactPointToPack.set(toeOffContactPoint2d);
+   }
+
+   public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   {
+      hasComputedToeOffContactLine.set(true);
+   }
+
+   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
+   {
+      if (!hasComputedToeOffContactLine.getBooleanValue())
+         computeToeOffContactLine(null, trailingLeg);
+
+      contactLineToPack.set(toeOffContactLine2d);
    }
 }
