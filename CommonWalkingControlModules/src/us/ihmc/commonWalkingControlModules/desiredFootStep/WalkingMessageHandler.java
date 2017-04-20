@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -557,6 +558,19 @@ public class WalkingMessageHandler
          {
             RecyclingArrayList<FramePoint> positionWaypoints = footstepData.getCustomPositionWaypoints();
             footstep.setCustomPositionWaypoints(positionWaypoints);
+         }
+      }
+      if (trajectoryType == TrajectoryType.WAYPOINTS)
+      {
+         if (footstepData.getSwingTrajectory() == null)
+         {
+            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
+         else
+         {
+            RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = footstepData.getSwingTrajectory();
+            footstep.setSwingTrajectory(swingTrajectory);
          }
       }
 

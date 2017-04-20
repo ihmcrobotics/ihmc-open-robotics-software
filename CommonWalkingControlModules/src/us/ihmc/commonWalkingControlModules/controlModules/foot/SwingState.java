@@ -28,6 +28,7 @@ import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajecto
 import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -385,11 +386,11 @@ public class SwingState extends AbstractUnconstrainedState
       footstep.getPose(footstepPose);
       if (lastFootstepPose.containsNaN())
          initialConfigurationProvider.getPose(lastFootstepPose);
-      
+
       footstepPose.changeFrame(worldFrame);
       footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
       footstepPose.changeFrame(footstep.getTrajectoryFrame());
-      
+
       finalConfigurationProvider.setPose(footstepPose);
 
       // if replanning do not change the original trajectory type
@@ -400,13 +401,17 @@ public class SwingState extends AbstractUnconstrainedState
       this.positionWaypointsForSole.clear();
       footstepPose.changeFrame(worldFrame);
       lastFootstepPose.changeFrame(worldFrame);
-      
+
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          List<FramePoint> positionWaypoints = footstep.getCustomPositionWaypoints();
          for (int i = 0; i < positionWaypoints.size(); i++)
             this.positionWaypointsForSole.add().setIncludingFrame(positionWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
+      }
+      else if (trajectoryType == TrajectoryType.WAYPOINTS)
+      {
+         List<FrameSE3TrajectoryPoint> swingTrajectory = footstep.getSwingTrajectory();
       }
       else
       {
@@ -422,7 +427,7 @@ public class SwingState extends AbstractUnconstrainedState
             trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType, footstep.getSwingHeight()));
          }
       }
-      
+
       // Keep track of the last footstep so that next time the decision to switch to OBSTACLE_CLEARANCE is not dependent
       // on the toe off angle.
       lastFootstepPose.set(footstepPose);
