@@ -85,9 +85,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final FrameOrientation finalOrientation = new FrameOrientation();
    private final FrameVector initialAngularVelocity = new FrameVector();
-
-   private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
    private final DoubleYoVariable finalSwingHeightOffset;
    private final double controlDT;
@@ -109,6 +108,9 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleYoVariable velocityAdjustmentDamping;
    private final YoFrameVector adjustmentVelocityCorrection;
    private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
+   
+   private final FramePose footstepPose = new FramePose();
+   private final FramePose lastFootstepPose = new FramePose();
 
    public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -175,7 +177,6 @@ public class SwingState extends AbstractUnconstrainedState
 
       currentAngularVelocityProvider = new CurrentAngularVelocityProvider(controlFrame, rigidBody, twistCalculator);
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry);
-      hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
 
       swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
       minSwingTimeForDisturbanceRecovery = new DoubleYoVariable(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
@@ -192,6 +193,8 @@ public class SwingState extends AbstractUnconstrainedState
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(controlFramePose);
+      
+      lastFootstepPose.setToNaN();
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -208,24 +211,19 @@ public class SwingState extends AbstractUnconstrainedState
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
    }
 
-   public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
-   {
-      hasInitialAngularConfigurationBeenProvided.set(true);
-      orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
-   }
-
    @Override
    protected void initializeTrajectory()
    {
-      if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
-      {
-         currentAngularVelocityProvider.get(initialAngularVelocity);
-         initialOrientation.setToZero(controlFrame);
-         orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
-      }
-
+      // set orientation trajectory parameters
+      finalConfigurationProvider.getOrientation(finalOrientation);
+      initialConfigurationProvider.getOrientation(initialOrientation);
+      currentAngularVelocityProvider.get(initialAngularVelocity);
+      orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
       orientationTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
+      orientationTrajectoryGenerator.setFinalOrientation(finalOrientation);
+      orientationTrajectoryGenerator.setFinalVelocityToZero();
 
+      // set position trajectory parameters
       TrajectoryType trajectoryType = trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType();
       double swingHeight = trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight();
       initialConfigurationProvider.getPosition(initialPosition);
@@ -240,6 +238,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryGenerator.setSwingHeight(swingHeight);
       swingTrajectoryGenerator.setStanceFootPosition(stanceFootPosition);
 
+      // initialize
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
 
@@ -380,52 +379,53 @@ public class SwingState extends AbstractUnconstrainedState
       return  (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
    }
 
-   private final FramePose footstepSolePose = new FramePose();
-   private final FramePoint oldFootstepPosition = new FramePoint();
-
    public void setFootstep(Footstep footstep, double swingTime)
    {
       swingTimeProvider.setValue(swingTime);
-      footstep.getPose(footstepSolePose);
-
-      footstepSolePose.setZ(footstepSolePose.getZ() + finalSwingHeightOffset.getDoubleValue());
-      finalConfigurationProvider.setPose(footstepSolePose);
-      orientationTrajectoryGenerator.setFinalOrientation(footstepSolePose);
-      orientationTrajectoryGenerator.setFinalVelocityToZero();
+      footstep.getPose(footstepPose);
+      if (lastFootstepPose.containsNaN())
+         initialConfigurationProvider.getPose(lastFootstepPose);
+      
+      footstepPose.changeFrame(worldFrame);
+      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
+      footstepPose.changeFrame(footstep.getTrajectoryFrame());
+      
+      finalConfigurationProvider.setPose(footstepPose);
 
       // if replanning do not change the original trajectory type
       if (replanTrajectory.getBooleanValue())
          return;
 
-      // if the trajectory is custom trust the waypoints...
       TrajectoryType trajectoryType = footstep.getTrajectoryType();
       this.positionWaypointsForSole.clear();
+      footstepPose.changeFrame(worldFrame);
+      lastFootstepPose.changeFrame(worldFrame);
+      
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          List<FramePoint> positionWaypoints = footstep.getCustomPositionWaypoints();
          for (int i = 0; i < positionWaypoints.size(); i++)
             this.positionWaypointsForSole.add().setIncludingFrame(positionWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
-         return;
-      }
-
-      // ... otherwise switch the trajectory type to obstacle clearance if the robot steps up or down
-      // TODO: using the initialConfigurationProvider is not ideal since a high toe off might trigger obstacle clearance mode
-      initialConfigurationProvider.getPosition(oldFootstepPosition);
-
-      footstepSolePose.changeFrame(worldFrame);
-      oldFootstepPosition.changeFrame(worldFrame);
-      double zDifference = Math.abs(footstepSolePose.getZ() - oldFootstepPosition.getZ());
-      boolean stepUpOrDown = zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
-
-      if (stepUpOrDown)
-      {
-         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
       }
       else
       {
-         trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType, footstep.getSwingHeight()));
+         double zDifference = Math.abs(footstepPose.getZ() - lastFootstepPose.getZ());
+         boolean stepUpOrDown = zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
+
+         if (stepUpOrDown)
+         {
+            trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
+         }
+         else
+         {
+            trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType, footstep.getSwingHeight()));
+         }
       }
+      
+      // Keep track of the last footstep so that next time the decision to switch to OBSTACLE_CLEARANCE is not dependent
+      // on the toe off angle.
+      lastFootstepPose.set(footstepPose);
    }
 
    public void replanTrajectory(Footstep newFootstep, double swingTime, boolean continuousReplan)
@@ -488,7 +488,6 @@ public class SwingState extends AbstractUnconstrainedState
    {
       super.doTransitionOutOfAction();
 
-      hasInitialAngularConfigurationBeenProvided.set(false);
       swingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
