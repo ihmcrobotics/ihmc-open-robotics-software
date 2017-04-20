@@ -11,12 +11,10 @@ import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
@@ -42,6 +40,14 @@ public class KinematicsToolboxHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   /**
+    * Convenience method to create and setup a {@link CenterOfMassFeedbackControlCommand} from a
+    * {@link KinematicsToolboxCenterOfMassCommand}.
+    * 
+    * @param command the kinematics toolbox command to convert. Not modified.
+    * @param gains the gains to use in the feedback controller. Not modified.
+    * @return the feedback control command ready to be submitted to the controller core.
+    */
    static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PositionPIDGainsInterface gains)
    {
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -52,10 +58,19 @@ public class KinematicsToolboxHelper
       return feedbackControlCommand;
    }
 
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody elevator, SE3PIDGainsInterface gains)
+   /**
+    * Convenience method to create and setup a {@link SpatialFeedbackControlCommand} from a
+    * {@link KinematicsToolboxRigidBodyCommand}.
+    * 
+    * @param command the kinematics toolbox command to convert. Not modified.
+    * @param base the base used for the control.
+    * @param gains the gains to use in the feedback controller. Not modified.
+    * @return the feedback control command ready to be submitted to the controller core.
+    */
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, SE3PIDGainsInterface gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
-      feedbackControlCommand.set(elevator, command.getEndEffector());
+      feedbackControlCommand.set(base, command.getEndEffector());
       feedbackControlCommand.setGains(gains);
       feedbackControlCommand.setWeightsForSolver(command.getWeightVector());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
@@ -64,13 +79,22 @@ public class KinematicsToolboxHelper
       return feedbackControlCommand;
    }
 
-   static void setRobotStateFromControllerCoreOutput(ControllerCoreOutput controllerCoreOutput, FloatingInverseDynamicsJoint desiredRootJoint,
+   /**
+    * Convenience method that updates the robot state, i.e. configuration and velocity, from the
+    * output of the controller core.
+    * 
+    * @param controllerCoreOutput the output of the controller core from which the robot state is to
+    *           be extracted. Not modified.
+    * @param rootJoint the floating joint to update. Modified.
+    * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
+    */
+   static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingInverseDynamicsJoint rootJoint,
                                                      OneDoFJoint[] oneDoFJoints)
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
-      desiredRootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
-      desiredRootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+      rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
+      rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
 
       LowLevelOneDoFJointDesiredDataHolderReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (OneDoFJoint joint : oneDoFJoints)
@@ -83,9 +107,21 @@ public class KinematicsToolboxHelper
          }
       }
 
-      desiredRootJoint.getPredecessor().updateFramesRecursively();
+      rootJoint.getPredecessor().updateFramesRecursively();
    }
 
+   /**
+    * Convenience method that updates the robot configuration from the robot configuration data
+    * provided by the walking controller.
+    * <p>
+    * Only the configuration is updated, the joint velocities are all set to zero.
+    * </p>
+    * 
+    * @param robotConfigurationData the configuration received from the walking controller from
+    *           which the robot configuration is to be extracted. Not modified.
+    * @param rootJoint the floating joint to update. Modified.
+    * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
+    */
    static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
    {
@@ -106,8 +142,23 @@ public class KinematicsToolboxHelper
       desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
 
+   /**
+    * Convenience method that updates the robot configuration from the privileged configuration
+    * contained in the {@link KinematicsToolboxConfigurationCommand} provided by the user.
+    * <p>
+    * This method performs the update only if the given command has a privileged configuration.
+    * </p>
+    * <p>
+    * Only the configuration is updated, the joint velocities are all set to zero.
+    * </p>
+    * 
+    * @param commandWithPrivilegedConfiguration command possibly holding a privileged configuration
+    *           from which the robot configuration is to be extracted. Not modified.
+    * @param rootJoint the floating joint to update. Modified.
+    * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
+    */
    static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                           FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
+                                                            FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
@@ -143,6 +194,29 @@ public class KinematicsToolboxHelper
       desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
 
+   /**
+    * Convenience method which goes through the given list of active feedback control command to sum
+    * up their tracking error from which the solution quality is calculated.
+    * <p>
+    * For each command, the quality is computed by:
+    * <ul>
+    * <li>applying the command weight to the error such that the tracking for a command with a high
+    * weight value will affect more the solution quality, whereas commands with small weight value
+    * will barely make a change.
+    * <li>this weighted error is then multiplied with the selection matrix from the command. So
+    * uncontrolled axes do not affect the solution quality.
+    * <li>finally the Euclidean norm of the resulting error provides the quality for the command.
+    * </ul>
+    * The overall solution quality is then computed as the sum of each command quality.
+    * </p>
+    * 
+    * @param activeCommands the list of feedback control commands that have been submitted to the
+    *           controller core this control tick. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
+    *           which the commands were submitted. It is used to find the tracking error for each
+    *           command. Not modified.
+    * @return the overall solution quality.
+    */
    static double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       double error = 0.0;
@@ -157,22 +231,26 @@ public class KinematicsToolboxHelper
             error += calculateCommandQuality((CenterOfMassFeedbackControlCommand) command, feedbackControllerDataHolder);
             break;
          case TASKSPACE:
-            error += calculateCommandQuality(((SpatialFeedbackControlCommand) command).getSpatialAccelerationCommand(), feedbackControllerDataHolder);
-            break;
-         case ORIENTATION:
-            error += calculateCommandQuality(((OrientationFeedbackControlCommand) command).getSpatialAccelerationCommand(), feedbackControllerDataHolder);
-            break;
-         case POINT:
-            error += calculateCommandQuality(((PointFeedbackControlCommand) command).getSpatialAccelerationCommand(), feedbackControllerDataHolder);
+            error += calculateCommandQuality((SpatialFeedbackControlCommand) command, feedbackControllerDataHolder);
             break;
          default:
-            break;
+            throw new RuntimeException("The following command is not handled: " + command.getClass());
          }
       }
 
       return error;
    }
 
+   /**
+    * Calculates the quality based on the tracking of the given
+    * {@link CenterOfMassFeedbackControlCommand}.
+    * 
+    * @param command the command to compute the quality of. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
+    *           which the commands were submitted. It is used to find the tracking error for each
+    *           command. Not modified.
+    * @return the quality of the command.
+    */
    private static double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       FrameVector positionError = new FrameVector();
@@ -187,45 +265,45 @@ public class KinematicsToolboxHelper
       return computeQualityFromError(error, weightVector, selectionMatrix);
    }
 
-   private static double calculateCommandQuality(SpatialAccelerationCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   /**
+    * Calculates the quality based on the tracking of the given
+    * {@link SpatialFeedbackControlCommand}.
+    * 
+    * @param accelerationCommand the command to compute the quality of. Not modified.
+    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
+    *           which the commands were submitted. It is used to find the tracking error for each
+    *           command. Not modified.
+    * @return the quality of the command.
+    */
+   private static double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
-      boolean hasData;
-      RigidBody endEffector = command.getEndEffector();
+      SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
+      RigidBody endEffector = accelerationCommand.getEndEffector();
 
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 
       controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
+
       FramePoint currentPosition = new FramePoint();
-      hasData = feedbackControllerDataHolder.getPositionData(endEffector, currentPosition, Type.CURRENT);
-      if (hasData)
-      {
-         currentPosition.changeFrame(worldFrame);
-         controlFrame.setPositionAndUpdate(currentPosition);
-      }
+      feedbackControllerDataHolder.getPositionData(endEffector, currentPosition, Type.CURRENT);
+      currentPosition.changeFrame(worldFrame);
+      controlFrame.setPositionAndUpdate(currentPosition);
+
       FrameOrientation currentOrientation = new FrameOrientation();
-      hasData = feedbackControllerDataHolder.getOrientationData(endEffector, currentOrientation, Type.CURRENT);
-      if (hasData)
-      {
-         currentOrientation.changeFrame(worldFrame);
-         controlFrame.setOrientationAndUpdate(currentOrientation);
-      }
+      feedbackControllerDataHolder.getOrientationData(endEffector, currentOrientation, Type.CURRENT);
+      currentOrientation.changeFrame(worldFrame);
+      controlFrame.setOrientationAndUpdate(currentOrientation);
 
       FrameVector rotationError = new FrameVector();
-      hasData = feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
-      if (hasData)
-         rotationError.changeFrame(controlFrame);
-      else
-         rotationError.setToZero(controlFrame);
+      feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
+      rotationError.changeFrame(controlFrame);
 
       FrameVector positionError = new FrameVector();
-      hasData = feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
-      if (hasData)
-         positionError.changeFrame(controlFrame);
-      else
-         positionError.setToZero(controlFrame);
+      feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
+      positionError.changeFrame(controlFrame);
 
-      DenseMatrix64F selectionMatrix = command.getSelectionMatrix();
-      DenseMatrix64F weightVector = command.getWeightVector();
+      DenseMatrix64F selectionMatrix = accelerationCommand.getSelectionMatrix();
+      DenseMatrix64F weightVector = accelerationCommand.getWeightVector();
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
       rotationError.get(0, error);
@@ -234,17 +312,30 @@ public class KinematicsToolboxHelper
       return computeQualityFromError(error, weightVector, selectionMatrix);
    }
 
+   /**
+    * This is actually where the calculation of the command quality is happening.
+    * 
+    * @param error the 6-by-1 spatial error of the command. It has to be expressed in the control
+    *           frame. Not modified.
+    * @param weightVector the 6-by-1 weight vector of the command. Not modified.
+    * @param selectionMatrix the 6-by-6 selection matrix of the command. Not modified.
+    * @return the command quality.
+    */
    private static double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightVector, DenseMatrix64F selectionMatrix)
    {
       DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
       for (int i = 0; i < 6; i++)
          weightMatrix.set(i, i, weightVector.get(i, 0));
 
+      // Applying the weight to the error
       DenseMatrix64F errorWeighted = new DenseMatrix64F(error.getNumRows(), 1);
       CommonOps.mult(weightMatrix, error, errorWeighted);
 
+      // Selecting only the controlled axes
       DenseMatrix64F errorSubspace = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, errorWeighted, errorSubspace);
+
+      // Returning the Euclidean norm of the error computed as the command quality
       return NormOps.normP2(errorSubspace);
    }
 }
