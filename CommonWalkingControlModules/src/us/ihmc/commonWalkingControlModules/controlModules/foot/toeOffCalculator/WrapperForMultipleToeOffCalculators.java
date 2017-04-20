@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -39,6 +40,12 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
       currentCalculator.setUseLineContact(useLineContact, trailingLeg);
+   }
+
+   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
+   {
+      for (int i = 0; i < toeOffCalculators.size(); i++)
+         toeOffCalculators.get(i).addListenerToUseLineContact(robotSide, listener);
    }
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)

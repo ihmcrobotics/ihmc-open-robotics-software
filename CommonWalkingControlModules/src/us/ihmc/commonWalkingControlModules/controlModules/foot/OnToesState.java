@@ -14,12 +14,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.*;
@@ -95,6 +93,18 @@ public class OnToesState extends AbstractFootControlState
       DenseMatrix64F selectionMatrix = CommonOps.identity(6);
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+
+      toeOffCalculator.addListenerToUseLineContact(robotSide, new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (toeOffCalculator.getUseLineContact(robotSide))
+               setContactPointPositionFromLine();
+            else
+               setContactPointPositionFromPoint();
+         }
+      });
    }
 
    public void setWeight(double weight)

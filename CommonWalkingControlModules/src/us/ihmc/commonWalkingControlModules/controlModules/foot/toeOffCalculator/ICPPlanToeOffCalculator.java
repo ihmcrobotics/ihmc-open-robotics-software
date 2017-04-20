@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -28,7 +29,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final LineSegment2d toeOffContactLine2d = new LineSegment2d();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<BooleanYoVariable> useLineContact = new SideDependentList<>();
+   private final SideDependentList<BooleanYoVariable> useLineContacts = new SideDependentList<>();
 
    private final BooleanYoVariable hasComputedToeOffContactPoint;
    private final BooleanYoVariable hasComputedToeOffContactLine;
@@ -42,7 +43,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
          soleFrames.put(robotSide, soleFrame);
 
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
-         useLineContact.put(robotSide, new BooleanYoVariable(robotSide.getLowerCaseName() + namePrefix +  "UseLineToeOff", registry));
+         useLineContacts.put(robotSide, new BooleanYoVariable(robotSide.getLowerCaseName() + namePrefix +  "UseLineToeOff", registry));
       }
 
       hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
@@ -59,12 +60,17 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
 
    public boolean getUseLineContact(RobotSide trailingLeg)
    {
-      return useLineContact.get(trailingLeg).getBooleanValue();
+      return useLineContacts.get(trailingLeg).getBooleanValue();
    }
 
    public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg)
    {
-      this.useLineContact.get(trailingLeg).set(useLineContact);
+      this.useLineContacts.get(trailingLeg).set(useLineContact);
+   }
+
+   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
+   {
+      useLineContacts.get(robotSide).addVariableChangedListener(listener);
    }
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)

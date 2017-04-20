@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -82,6 +83,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg)
    {
       this.useLineContacts.get(trailingLeg).set(useLineContact);
+   }
+
+   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
+   {
+      useLineContacts.get(robotSide).addVariableChangedListener(listener);
    }
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
