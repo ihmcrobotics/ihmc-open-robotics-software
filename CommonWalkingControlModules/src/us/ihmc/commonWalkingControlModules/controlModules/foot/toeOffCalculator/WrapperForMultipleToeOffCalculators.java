@@ -42,12 +42,6 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
       currentCalculator.setUseLineContact(useLineContact, trailingLeg);
    }
 
-   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
-   {
-      for (int i = 0; i < toeOffCalculators.size(); i++)
-         toeOffCalculators.get(i).addListenerToUseLineContact(robotSide, listener);
-   }
-
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());

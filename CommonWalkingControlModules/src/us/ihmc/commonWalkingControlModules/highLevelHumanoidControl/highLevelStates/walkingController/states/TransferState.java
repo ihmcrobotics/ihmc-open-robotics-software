@@ -110,6 +110,18 @@ public abstract class TransferState extends WalkingState
             controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
       }
+      else
+      {
+         if (!feetManager.usingPointToeContact(trailingLeg))
+         {
+            balanceManager.getDesiredCMP(desiredCMP);
+            balanceManager.getDesiredICP(desiredICPLocal);
+            balanceManager.getCapturePoint(capturePoint2d);
+            balanceManager.getNextExitCMP(nextExitCMP);
+
+            feetManager.switchToPointToeContactIfPossible(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
+         }
+      }
    }
 
    @Override

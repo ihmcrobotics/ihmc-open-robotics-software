@@ -68,11 +68,6 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
       this.useLineContacts.get(trailingLeg).set(useLineContact);
    }
 
-   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
-   {
-      useLineContacts.get(robotSide).addVariableChangedListener(listener);
-   }
-
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);

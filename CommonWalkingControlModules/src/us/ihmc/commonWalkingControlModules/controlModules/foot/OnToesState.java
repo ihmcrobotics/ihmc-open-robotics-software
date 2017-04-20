@@ -93,18 +93,6 @@ public class OnToesState extends AbstractFootControlState
       DenseMatrix64F selectionMatrix = CommonOps.identity(6);
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
-
-      toeOffCalculator.addListenerToUseLineContact(robotSide, new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if (toeOffCalculator.getUseLineContact(robotSide))
-               setContactPointPositionFromLine();
-            else
-               setContactPointPositionFromPoint();
-         }
-      });
    }
 
    public void setWeight(double weight)
@@ -149,9 +137,15 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
       if (toeOffCalculator.getUseLineContact(robotSide))
+      {
          setupContactLine();
+         setControlPointPositionFromContactLine();
+      }
       else
+      {
          setupSingleContactPoint();
+         setControlPointPositionFromContactPoint();
+      }
    }
 
    private void computeDesiredsForFreeMotion()
@@ -210,7 +204,7 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
-   private void setContactPointPositionFromPoint()
+   private void setControlPointPositionFromContactPoint()
    {
       toeOffCalculator.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
@@ -222,7 +216,7 @@ public class OnToesState extends AbstractFootControlState
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 
-   private void setContactPointPositionFromLine()
+   private void setControlPointPositionFromContactLine()
    {
       toeOffCalculator.getToeOffContactLine(toeOffContactLine2d, robotSide);
 
@@ -240,9 +234,9 @@ public class OnToesState extends AbstractFootControlState
       super.doTransitionIntoAction();
 
       if (toeOffCalculator.getUseLineContact(robotSide))
-         setContactPointPositionFromLine();
+         setControlPointPositionFromContactLine();
       else
-         setContactPointPositionFromPoint();
+         setControlPointPositionFromContactPoint();
 
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
