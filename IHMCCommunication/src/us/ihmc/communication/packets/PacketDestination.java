@@ -26,7 +26,8 @@ public enum PacketDestination
    REA_MODULE, // Destination for the robot environment awareness module. Not yet available in the open source repo.
    HEIGHT_QUADTREE_TOOLBOX_MODULE,
    LIDAR_SCAN_LOGGER,
-   OBJECT_DETECTOR;
+   OBJECT_DETECTOR,
+   POSEVALIDITY_TOOLBOX_MODULE;
 
    public static final PacketDestination[] values = values();
 
