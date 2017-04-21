@@ -15,9 +15,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
  * {@link MomentumCommand} is a command meant to be submitted to the {@link WholeBodyControllerCore}
@@ -53,16 +53,14 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    private final DenseMatrix64F weightVector = new DenseMatrix64F(Momentum.SIZE, 1);
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
-    * are to be controlled. A 6-by-6 identity matrix will request the control of all the 6 degrees
-    * of freedom.
+    * are to be controlled. It is initialized such that the controller will by default control all
+    * the DoFs.
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF for the momentum.
+    * If the selection frame is not set, it is assumed that the selection frame is equal to the
+    * centroidal frame.
     * </p>
     */
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -92,7 +90,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    public void setProperties(MomentumRateCommand command)
    {
       weightVector.set(command.getWeightVector());
-      selectionMatrix.set(command.getSelectionMatrix());
+      command.getSelectionMatrix(selectionMatrix);
    }
 
    /**
@@ -201,91 +199,53 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(Momentum.SIZE, Momentum.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the linear part of this
     * command will be considered in the optimization.
-    *
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = | 0 0 0 0 1 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.reshape(3, Momentum.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 3, 1.0);
-      selectionMatrix.set(1, 4, 1.0);
-      selectionMatrix.set(2, 5, 1.0);
+      selectionMatrix.setToLinearSelectionOnly();
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the x and y components of
     * the linear part of this command will be considered in the optimization.
-    *
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = |             |
-    *     \ 0 0 0 0 1 0 /
-    * </pre>
     */
    public void setSelectionMatrixForLinearXYControl()
    {
-      selectionMatrix.reshape(2, Momentum.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 3, 1.0);
-      selectionMatrix.set(1, 4, 1.0);
+      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearZ(false);
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the angular part of this
     * command will be considered in the optimization.
-    *
-    * <pre>
-    *     / 1 0 0 0 0 0 \
-    * S = | 0 1 0 0 0 0 |
-    *     \ 0 0 1 0 0 0 /
-    * </pre>
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(3, Momentum.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Sets this command's selection matrix to the given one.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
-    * are to be controlled. A 6-by-6 identity matrix will request the control of all the 6 degrees
-    * of freedom.
+    * are to be controlled. It is initialized such that the controller will by default control all
+    * the DoFs.
     * </p>
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF for the momentum.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the centroidal frame.
     * </p>
-    *
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
-    *            number of columns different to 6.
+    * 
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > Momentum.SIZE)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != Momentum.SIZE)
-         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
-
       this.selectionMatrix.set(selectionMatrix);
    }
 
@@ -542,13 +502,28 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Gets the reference to the selection matrix to use with this command.
+    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
+    * this command.
     * 
-    * @return the selection matrix.
+    * @param destinationFrame the reference frame in which the selection matrix should be expressed
+    *           in.
+    * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
+    *           stored in. Modified.
     */
-   public DenseMatrix64F getSelectionMatrix()
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      return selectionMatrix;
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+   }
+
+   /**
+    * Packs the value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    * 
+    * @param selectionMatrixToPack the selection matrix to pack.
+    */
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix);
    }
 
    /**

@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -31,6 +32,7 @@ public class ReferenceFrameHashCodeResolver
 
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
+      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
       checkAndAddReferenceFrame(ReferenceFrame.getWorldFrame());
       
       try

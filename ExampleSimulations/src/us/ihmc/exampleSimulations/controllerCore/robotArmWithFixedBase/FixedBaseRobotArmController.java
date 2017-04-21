@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -38,7 +35,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -48,6 +44,8 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
@@ -310,56 +308,39 @@ public class FixedBaseRobotArmController implements RobotController
       trajectory.compute(yoTime.getDoubleValue() - trajectoryStartTime.getDoubleValue());
    }
 
-   private DenseMatrix64F computeLinearSelectionMatrix()
+   private SelectionMatrix3D computeLinearSelectionMatrix()
    {
-      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
-      if (!controlLinearZ.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 5);
-      if (!controlLinearY.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 4);
-      if (!controlLinearX.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 3);
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
-      MatrixTools.removeRow(selectionMatrix, 2);
-      MatrixTools.removeRow(selectionMatrix, 1);
-      MatrixTools.removeRow(selectionMatrix, 0);
+      selectionMatrix.selectXAxis(controlLinearX.getBooleanValue());
+      selectionMatrix.selectYAxis(controlLinearY.getBooleanValue());
+      selectionMatrix.selectZAxis(controlLinearZ.getBooleanValue());
 
       return selectionMatrix;
    }
 
-   private DenseMatrix64F computeAngularSelectionMatrix()
+   private SelectionMatrix3D computeAngularSelectionMatrix()
    {
-      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
-      MatrixTools.removeRow(selectionMatrix, 5);
-      MatrixTools.removeRow(selectionMatrix, 4);
-      MatrixTools.removeRow(selectionMatrix, 3);
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
-      if (!controlAngularZ.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 2);
-      if (!controlAngularY.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 1);
-      if (!controlAngularX.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 0);
+      selectionMatrix.selectXAxis(controlAngularX.getBooleanValue());
+      selectionMatrix.selectYAxis(controlAngularY.getBooleanValue());
+      selectionMatrix.selectZAxis(controlAngularZ.getBooleanValue());
 
       return selectionMatrix;
    }
 
-   private DenseMatrix64F computeSpatialSelectionMatrix()
+   private SelectionMatrix6D computeSpatialSelectionMatrix()
    {
-      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
-      if (!controlLinearZ.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 5);
-      if (!controlLinearY.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 4);
-      if (!controlLinearX.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 3);
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-      if (!controlAngularZ.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 2);
-      if (!controlAngularY.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 1);
-      if (!controlAngularX.getBooleanValue())
-         MatrixTools.removeRow(selectionMatrix, 0);
+      selectionMatrix.selectAngularX(controlAngularX.getBooleanValue());
+      selectionMatrix.selectAngularY(controlAngularY.getBooleanValue());
+      selectionMatrix.selectAngularZ(controlAngularZ.getBooleanValue());
+
+      selectionMatrix.selectLinearX(controlLinearX.getBooleanValue());
+      selectionMatrix.selectLinearY(controlLinearY.getBooleanValue());
+      selectionMatrix.selectLinearZ(controlLinearZ.getBooleanValue());
 
       return selectionMatrix;
    }

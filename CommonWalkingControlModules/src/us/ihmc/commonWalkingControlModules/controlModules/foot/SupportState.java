@@ -28,6 +28,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -62,8 +63,8 @@ public class SupportState extends AbstractFootControlState
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
-   private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
-   private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
+   private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
    private final FramePoint2d cop2d = new FramePoint2d();
    private final FramePoint framePosition = new FramePoint();
@@ -245,10 +246,8 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       // set selection matrices
-      accelerationSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(accelerationSelectionMatrix);
-      feedbackSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(feedbackSelectionMatrix);
+      accelerationSelectionMatrix.resetSelection();
+      feedbackSelectionMatrix.resetSelection();
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
@@ -268,15 +267,13 @@ public class SupportState extends AbstractFootControlState
       for (int i = dofs-1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
-            MatrixTools.removeRow(accelerationSelectionMatrix, i);
+            accelerationSelectionMatrix.selectAxis(i, false);
          else
-            MatrixTools.removeRow(feedbackSelectionMatrix, i);
+            feedbackSelectionMatrix.selectAxis(i, false);
       }
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
-      if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != dofs)
-         throw new RuntimeException("Trying to control too much or too little.");
 
       // update visualization
       frameViz.setToReferenceFrame(controlFrame);
