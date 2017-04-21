@@ -38,6 +38,7 @@ public class PelvisHeightTrajectoryCommand extends SimpleTrajectoryPoint1DList i
 
    /**
     * Same as {@link #set(PelvisHeightTrajectoryCommand)} but does not change the trajectory points.
+    * 
     * @param other
     */
    public void setPropertiesOnly(PelvisHeightTrajectoryCommand other)
