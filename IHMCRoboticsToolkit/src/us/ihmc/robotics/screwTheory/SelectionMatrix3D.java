@@ -30,9 +30,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class SelectionMatrix3D
 {
    /**
-    * When selecting the axes of interest, these axes refer to the selection frame axes. This frame is
-    * optional. It is preferable to provide it when possible, but when it is absent, i.e. equal to
-    * {@code null}, the selection matrix will then be generated assuming the destination frame is
+    * When selecting the axes of interest, these axes refer to the selection frame axes. This frame
+    * is optional. It is preferable to provide it when possible, but when it is absent, i.e. equal
+    * to {@code null}, the selection matrix will then be generated assuming the destination frame is
     * the same as the selection frame.
     * <p>
     * Note that if all the axes are selected or none of them is, the selection matrix becomes
@@ -60,6 +60,16 @@ public class SelectionMatrix3D
     */
    public SelectionMatrix3D()
    {
+   }
+
+   /**
+    * Copy constructor.
+    * 
+    * @param other the selection matrix to copy. Not modified.
+    */
+   public SelectionMatrix3D(SelectionMatrix3D other)
+   {
+      set(other);
    }
 
    /**
@@ -111,6 +121,19 @@ public class SelectionMatrix3D
       xSelected = false;
       ySelected = false;
       zSelected = false;
+   }
+
+   /**
+    * Sets this selection matrix to equal {@code other}.
+    * 
+    * @param other the other selection matrix. Not modified.
+    */
+   public void set(SelectionMatrix3D other)
+   {
+      selectionFrame = other.selectionFrame;
+      xSelected = other.xSelected;
+      ySelected = other.ySelected;
+      zSelected = other.zSelected;
    }
 
    /**
@@ -171,6 +194,36 @@ public class SelectionMatrix3D
    public void selectZAxis(boolean select)
    {
       zSelected = select;
+   }
+
+   /**
+    * Selects an axis based on {@code axisIndex} and updates update the selection state to
+    * {@code select}.
+    * <p>
+    * For an {@code axisIndex} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2
+    * it is {@code z}.
+    * </p>
+    *
+    * @param axisIndex the index of the axis to update the selection state of.
+    * @param select whether the chosen axis is an axis of interest.
+    * @throws IndexOutOfBoundsException if {@code axisIndex} &notin; [0, 2].
+    */
+   public void selectAxis(int axisIndex, boolean select)
+   {
+      switch (axisIndex)
+      {
+      case 0:
+         selectXAxis(select);
+         break;
+      case 1:
+         selectYAxis(select);
+         break;
+      case 2:
+         selectZAxis(select);
+         break;
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(axisIndex));
+      }
    }
 
    /**

@@ -59,6 +59,16 @@ public class SelectionMatrix6D
    }
 
    /**
+    * Copy constructor.
+    * 
+    * @param other the selection matrix to copy. Not modified.
+    */
+   public SelectionMatrix6D(SelectionMatrix6D other)
+   {
+      set(other);
+   }
+
+   /**
     * Sets the selection frame of both the angular and linear parts to {@code null}.
     * <p>
     * When the selection frame is {@code null}, the conversion into a 6-by-6 selection matrix will
@@ -137,6 +147,18 @@ public class SelectionMatrix6D
    }
 
    /**
+    * Deselects all the axes and clears the selection frames.
+    * <p>
+    * Until the selection is changed, this selection matrix is independent from its selection frame.
+    * </p>
+    */
+   public void clearSelection()
+   {
+      angularPart.clearSelection();
+      linearPart.clearSelection();
+   }
+
+   /**
     * Sets this selection matrix to only select the angular axes.
     * <p>
     * The selection frames are cleared and until the selection is changed, this selection matrix is
@@ -160,6 +182,37 @@ public class SelectionMatrix6D
    {
       angularPart.clearSelection();
       linearPart.resetSelection();
+   }
+
+   /**
+    * Sets this selection matrix to {@code other}.
+    * 
+    * @param other the other selection matrix. Not modified.
+    */
+   public void set(SelectionMatrix6D other)
+   {
+      angularPart.set(other.angularPart);
+      linearPart.set(other.linearPart);
+   }
+
+   /**
+    * Sets the angular part of this selection matrix to {@code angularPart}.
+    * 
+    * @param angularPart the new value for the angular part of this selection matrix. Not modified.
+    */
+   public void setAngularPart(SelectionMatrix3D angularPart)
+   {
+      this.angularPart.set(angularPart);
+   }
+
+   /**
+    * Sets the linear part of this selection matrix to {@code linearPart}.
+    * 
+    * @param linearPart the new value for the linear part of this selection matrix. Not modified.
+    */
+   public void setLinearPart(SelectionMatrix3D linearPart)
+   {
+      this.linearPart.set(linearPart);
    }
 
    /**
@@ -292,6 +345,46 @@ public class SelectionMatrix6D
    public void selectLinearZ(boolean select)
    {
       linearPart.selectZAxis(select);
+   }
+
+   /**
+    * Selects an axis based on {@code axisIndex} and updates update the selection state to
+    * {@code select}.
+    * <p>
+    * For an {@code axisIndex} value going from 0 up to 5, the corresponding components are
+    * {@code angularX}, {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY}, and
+    * {@code linearZ}, respectively.
+    * </p>
+    *
+    * @param axisIndex the index of the axis to update the selection state of.
+    * @param select whether the chosen axis is an axis of interest.
+    * @throws IndexOutOfBoundsException if {@code axisIndex} &notin; [0, 5].
+    */
+   public void selectAxis(int axisIndex, boolean select)
+   {
+      switch (axisIndex)
+      {
+      case 0:
+         selectAngularX(select);
+         break;
+      case 1:
+         selectAngularY(select);
+         break;
+      case 2:
+         selectAngularZ(select);
+         break;
+      case 3:
+         selectLinearX(select);
+         break;
+      case 4:
+         selectLinearY(select);
+         break;
+      case 5:
+         selectLinearZ(select);
+         break;
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(axisIndex));
+      }
    }
 
    /**
@@ -429,5 +522,25 @@ public class SelectionMatrix6D
    public ReferenceFrame getLinearSelectionFrame()
    {
       return linearPart.getSelectionFrame();
+   }
+
+   /**
+    * Returns the internal reference to the angular part of this selection matrix.
+    * 
+    * @return the angular part.
+    */
+   public SelectionMatrix3D getAngularPart()
+   {
+      return angularPart;
+   }
+
+   /**
+    * Returns the internal reference to the linear part of this selection matrix.
+    * 
+    * @return the linear part.
+    */
+   public SelectionMatrix3D getLinearPart()
+   {
+      return linearPart;
    }
 }
