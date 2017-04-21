@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,13 +10,14 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryControllerCommand<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
       extends QueueableCommand<T, M> implements FrameBasedCommand<M>
 {
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;
@@ -39,16 +37,14 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public void clear()
    {
       clearQueuableCommandVariables();
-      selectionMatrix.reshape(6, 6);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
    }
 
    public void clear(ReferenceFrame referenceFrame)
    {
       trajectoryPointList.clear(referenceFrame);
       clearQueuableCommandVariables();
-      selectionMatrix.reshape(6, 6);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
    }
 
    @Override
@@ -66,8 +62,13 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
+
       clear(dataFrame);
       set(message);
+
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
+      selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
    }
 
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
@@ -104,7 +105,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       this.trajectoryPointList.setIncludingFrame(trajectoryPointList);
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   public SelectionMatrix6D getSelectionMatrix()
    {
       return selectionMatrix;
    }

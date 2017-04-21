@@ -1,9 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -29,12 +25,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -48,9 +45,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSolverFailed;
    private final BooleanYoVariable hasSentMessageToController;
 
-   private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>(CommonOps.identity(6), CommonOps.identity(6));
-   private final DenseMatrix64F chestSelectionMatrix = initializeAngularSelctionMatrix();
-   private final DenseMatrix64F pelvisSelectionMatrix = initializeAngularSelctionMatrix();
+   private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
+   private final SelectionMatrix3D chestSelectionMatrix = new SelectionMatrix3D();
+   private final SelectionMatrix3D pelvisSelectionMatrix = new SelectionMatrix3D();
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
@@ -123,15 +120,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       clear();
    }
 
-   private DenseMatrix64F initializeAngularSelctionMatrix()
-   {
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
-      return selectionMatrix;
-   }
-
    public void clear()
    {
       currentSolutionQuality.set(Double.POSITIVE_INFINITY);
@@ -175,35 +163,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setHandLinearControlOnly(RobotSide robotSide)
    {
-      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
-      double[] controlledOrientationAxes = new double[] {0.0, 0.0, 0.0};
-      setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
+      handSelectionMatrices.get(robotSide).setToLinearSelectionOnly();
    }
 
    public void setHandLinearControlAndYawPitchOnly(RobotSide robotSide)
    {
-      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
-      double[] controlledOrientationAxes = new double[] {0.0, 1.0, 1.0};
-      setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
-   }
-
-   public void setHandControlledAxes(RobotSide robotSide, double[] controlledPositionAxes, double[] controlledOrientationAxes)
-   {
-      DenseMatrix64F selectionMatrix = handSelectionMatrices.get(robotSide);
-      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
-      organizeDataInSelectionMatrix(selectionMatrix, data);
-   }
-
-   private void organizeDataInSelectionMatrix(DenseMatrix64F selectionMatrix, double[] data)
-   {
-      selectionMatrix.reshape(6, 6);
-      selectionMatrix.zero();
-
-      for (int i = 0; i < 6; i++)
-      {
-         selectionMatrix.set(i, i, data[i]);
-      }
-      MatrixTools.removeZeroRows(selectionMatrix, 1.0e-5);
+      handSelectionMatrices.get(robotSide).resetSelection();
+      handSelectionMatrices.get(robotSide).selectAngularX(false);
    }
 
    public void holdCurrentChestOrientation()
@@ -219,16 +185,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
-      double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
-      double[] controlledOrientationAxes = new double[] {(roll) ? 1.0 : 0.0, (pitch) ? 1.0 : 0.0, (yaw) ? 1.0 : 0.0};
-      setChestControlledAxes(controlledPositionAxes, controlledOrientationAxes);
-   }
-
-   public void setChestControlledAxes(double[] controlledPositionAxes, double[] controlledOrientationAxes)
-   {
-      DenseMatrix64F selectionMatrix = chestSelectionMatrix;
-      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
-      organizeDataInSelectionMatrix(selectionMatrix, data);
+      chestSelectionMatrix.setAxisSelection(roll, pitch, yaw);
    }
 
    public void holdCurrentPelvisOrientation()
@@ -244,15 +201,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
-      double[] controlledOrientationAxes = new double[] {(roll) ? 1.0 : 0.0, (pitch) ? 1.0 : 0.0, (yaw) ? 1.0 : 0.0};
-      setPelvisControlledAxes(controlledOrientationAxes);
-   }
-
-   public void setPelvisControlledAxes(double[] controlledOrientationAxes)
-   {
-      DenseMatrix64F selectionMatrix = pelvisSelectionMatrix;
-      double[] data = ArrayUtils.addAll(controlledOrientationAxes, new double[] {0.0, 0.0, 0.0});
-      organizeDataInSelectionMatrix(selectionMatrix, data);
+      pelvisSelectionMatrix.setAxisSelection(roll, pitch, yaw);
    }
 
    public void holdCurrentPelvisHeight()
