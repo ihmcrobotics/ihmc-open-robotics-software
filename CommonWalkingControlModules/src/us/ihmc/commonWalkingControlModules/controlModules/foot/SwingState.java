@@ -24,6 +24,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -68,6 +69,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint stanceFootPosition = new FramePoint();
    
    private final RecyclingArrayList<FramePoint> positionWaypointsForSole = new RecyclingArrayList<>(FramePoint.class);
+   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints = new RecyclingArrayList<>(FrameSE3TrajectoryPoint.class);
 
    private final DoubleYoVariable swingDuration;
    private final DoubleYoVariable swingHeight;
@@ -220,7 +222,10 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (activeTrajectoryType == TrajectoryType.WAYPOINTS)
       {
-         // TODO: implement me!
+         for (int i = 0; i < swingWaypoints.size(); i++)
+         {
+            swingTrajectory.appendPoseWaypoint(swingWaypoints.get(i));
+         }
       }
       else
       {
@@ -318,9 +323,12 @@ public class SwingState extends AbstractUnconstrainedState
          footstepWasAdjusted = true;
          replanTrajectory.set(false);
       }
-      else if (swingTrajectoryOptimizer.doOptimizationUpdate())
+      else if (activeTrajectoryType != TrajectoryType.WAYPOINTS)
       {
-         reinitializeTrajectory(false);
+         if (swingTrajectoryOptimizer.doOptimizationUpdate())
+         {
+            reinitializeTrajectory(false);
+         }
       }
 
       activeTrajectory.compute(time);
@@ -414,18 +422,20 @@ public class SwingState extends AbstractUnconstrainedState
 
       activeTrajectoryType = footstep.getTrajectoryType();
       this.positionWaypointsForSole.clear();
+      this.swingWaypoints.clear();
       lastFootstepPose.changeFrame(worldFrame);
 
       if (activeTrajectoryType == TrajectoryType.CUSTOM)
       {
-         List<FramePoint> positionWaypoints = footstep.getCustomPositionWaypoints();
-         for (int i = 0; i < positionWaypoints.size(); i++)
-            this.positionWaypointsForSole.add().setIncludingFrame(positionWaypoints.get(i));
+         List<FramePoint> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
+         for (int i = 0; i < positionWaypointsForSole.size(); i++)
+            this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
       }
       else if (activeTrajectoryType == TrajectoryType.WAYPOINTS)
       {
-         // TODO: implement me
-//         List<FrameSE3TrajectoryPoint> swingTrajectory = footstep.getSwingTrajectory();
+         List<FrameSE3TrajectoryPoint> swingWaypoints = footstep.getSwingTrajectory();
+         for (int i = 0; i < swingWaypoints.size(); i++)
+            this.swingWaypoints.add().set(swingWaypoints.get(i));
       }
       else
       {
