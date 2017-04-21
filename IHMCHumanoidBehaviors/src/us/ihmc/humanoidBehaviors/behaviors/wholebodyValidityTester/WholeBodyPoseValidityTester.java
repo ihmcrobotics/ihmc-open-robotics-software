@@ -311,7 +311,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    {
       PrintTools.info("Try to get ik result");
       setUpHasBeenDone();
-      ThreadTools.sleep(10);
+      ThreadTools.sleep(3000);
       for(int i=0;i<100;i++)
       {
          //PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
@@ -327,9 +327,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       if(Debug)
          PrintTools.info("No solution ");
       
-//      PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
-//                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
-//                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
+      PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
       
       forceOut();
       ThreadTools.sleep(10);
@@ -550,7 +550,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      //PrintTools.info("Isdone Returned "+isDone.getBooleanValue());
       return isDone.getBooleanValue();
    }
    
