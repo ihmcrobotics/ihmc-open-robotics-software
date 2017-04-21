@@ -19,10 +19,13 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.poseValidityToolboxModule.PoseValidityToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -66,7 +69,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
+   private PoseValidityToolboxModule poseValidityToolboxModule;
    private PacketCommunicator toolboxCommunicator;
+   private PacketCommunicator poseValidityToolboxCommunicator;
 
    SolarPanel solarPanel;
    
@@ -152,6 +157,15 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
+
+      if (poseValidityToolboxCommunicator != null)
+      {
+         poseValidityToolboxCommunicator.close();
+         poseValidityToolboxCommunicator.closeConnection();
+         poseValidityToolboxCommunicator = null;
+      }
+      
+    
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -268,7 +282,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    }
    
    
-   @Test
+   //@Test
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -346,10 +360,25 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       // show
       // ************************************* //
       PrintTools.info("END");
+     
+   }
+   
+   @Test
+   public void testPoseValidityToolbox() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
-
+      drcBehaviorTestHelper.updateRobotModel();
       
+   
+      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+      message.setDestination(PacketDestination.POSEVALIDITY_TOOLBOX_MODULE);
+      poseValidityToolboxCommunicator.send(message);
+       
+      PrintTools.info("END");
    }
    
    
@@ -361,6 +390,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       DRCRobotModel robotModel = getRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      
+      poseValidityToolboxModule = new PoseValidityToolboxModule(robotModel, true);
+      poseValidityToolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.POSEVALIDITY_TOOLBOX_MODULE_PORT, PacketDestination.POSEVALIDITY_TOOLBOX_MODULE);
    }
    
    
