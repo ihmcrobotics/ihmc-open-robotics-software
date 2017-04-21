@@ -415,8 +415,8 @@ public class MotionQPInputCalculator
     */
    public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -429,12 +429,12 @@ public class MotionQPInputCalculator
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
+      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
@@ -445,7 +445,7 @@ public class MotionQPInputCalculator
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
@@ -459,8 +459,8 @@ public class MotionQPInputCalculator
     */
    public boolean convertMomentumCommand(MomentumCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -473,12 +473,12 @@ public class MotionQPInputCalculator
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
+      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
@@ -487,7 +487,7 @@ public class MotionQPInputCalculator
       linearMomentum.get(3, tempTaskObjective);
 
       // Compute the task objective: p = S * h
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
