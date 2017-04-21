@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -568,6 +570,24 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setWeightForSolver(double weight)
    {
       spatialAccelerationCommand.setWeight(weight);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weightVector dense matrix holding the weights to use for each component of the desired
+    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
+    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
+    *           {@code linearZ}. Not modified.
+    */
+   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   {
+      spatialAccelerationCommand.setWeights(weightVector);
    }
 
    /**

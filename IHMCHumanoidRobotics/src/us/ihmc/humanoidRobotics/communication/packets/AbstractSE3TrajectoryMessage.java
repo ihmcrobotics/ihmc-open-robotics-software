@@ -199,9 +199,9 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * The selection frames coming along with the given selection matrix are used to determine to
     * what reference frame the selected axes are referring to. For instance, if only the hand height
     * in world should be controlled on the linear z component of the selection matrix should be
-    * selected and the reference frame should world frame. When no reference frame is provided with
-    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
-    * if not defined otherwise.
+    * selected and the reference frame should be world frame. When no reference frame is provided
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+    * frame if not defined otherwise.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
