@@ -1,4 +1,4 @@
-package us.ihmc.communication.kinematicsToolboxAPI;
+package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Map;
 
@@ -11,6 +11,7 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
 {
@@ -49,10 +50,10 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public void set(KinematicsToolboxRigidBodyMessage message)
    {
-      set(message, null);
+      set(message, null, null);
    }
 
-   public void set(KinematicsToolboxRigidBodyMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap)
+   public void set(KinematicsToolboxRigidBodyMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       endEffectorNameBasedHashCode = message.getEndEffectorNameBasedHashCode();
       if (rigidBodyNamedBasedHashMap == null)
@@ -61,8 +62,16 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
          endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
       message.getDesiredPose(desiredPose);
       message.getControlFramePose(endEffector, controlFramePose);
-      message.getSelectionMatrix(selectionMatrix);
       message.getWeightVector(weightVector);
+
+      message.getSelectionMatrix(selectionMatrix);
+
+      if (referenceFrameResolver != null)
+      {
+         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
+         selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
+      }
    }
 
    public RigidBody getEndEffector()

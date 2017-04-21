@@ -99,6 +99,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", worldFrame, registry);
       yoDesiredPelvisPosition = new YoFramePoint(behaviorName + "DesiredPelvis", worldFrame, registry);
 
+      pelvisSelectionMatrix.setToAngularSelectionOnly();
+      chestSelectionMatrix.setToAngularSelectionOnly();
+
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
@@ -162,6 +165,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
+      chestSelectionMatrix.setToAngularSelectionOnly();
    }
 
    public void setDesiredChestOrientation(FrameOrientation desiredChestOrientation)
@@ -179,6 +183,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       FrameOrientation currentPelvisOrientation = new FrameOrientation(fullRobotModel.getPelvis().getBodyFixedFrame());
       yoDesiredPelvisOrientation.setAndMatchFrame(currentPelvisOrientation);
+      pelvisSelectionMatrix.setToAngularSelectionOnly();
    }
 
    public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
@@ -398,6 +403,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       chestMessage = null;
       pelvisMessage = null;
       pelvisSelectionMatrix.setToAngularSelectionOnly();
+      chestSelectionMatrix.setToAngularSelectionOnly();
 
       for (RobotSide robotSide : RobotSide.values)
       {
