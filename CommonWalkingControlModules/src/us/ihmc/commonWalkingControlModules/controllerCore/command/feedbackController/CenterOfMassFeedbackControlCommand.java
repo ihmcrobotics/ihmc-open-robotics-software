@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -179,6 +181,26 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    public void setWeightForSolver(double weight)
    {
       momentumRateCommand.setWeight(weight);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weight dense matrix holding the weights to use for each component of the desired center
+    *           of mass position. It is expected to be a 3-by-1 vector ordered as: {@code linearX},
+    *           {@code linearY}, {@code linearZ}. Not modified.
+    */
+   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   {
+      if (weightVector.getNumRows() != 3)
+         throw new RuntimeException("Unexpected number of rows for the given weight vector. Expected 3 but was: " + weightVector.getNumRows());
+
+      momentumRateCommand.setWeights(0.0, 0.0, 0.0, weightVector.get(0, 0), weightVector.get(1, 0), weightVector.get(2, 0));
    }
 
    /**

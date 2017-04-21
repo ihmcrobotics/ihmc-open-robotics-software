@@ -554,16 +554,16 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weight dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
+    * @param weightVector dense matrix holding the weights to use for each component of the desired
+    *           velocity. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
-   public void setWeights(DenseMatrix64F weight)
+   public void setWeights(DenseMatrix64F weightVector)
    {
       for (int i = 0; i < Twist.SIZE; i++)
       {
-         weightVector.set(i, 0, weight.get(i, 0));
+         this.weightVector.set(i, 0, weightVector.get(i, 0));
       }
    }
 
@@ -729,7 +729,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * Packs the control frame and desired spatial velocity held in this command.
     * <p>
     * The first argument {@code controlFrameToPack} is required to properly express the
-    * {@code desiredSpatialVelocityToPack}. Indeed the desired spatial acceleration has to be
+    * {@code desiredSpatialVelocityToPack}. Indeed the desired spatial velocity has to be
     * expressed in the control frame.
     * </p>
     * 
