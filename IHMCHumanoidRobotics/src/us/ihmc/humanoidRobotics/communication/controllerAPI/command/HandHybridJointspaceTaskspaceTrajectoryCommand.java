@@ -5,15 +5,17 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
+public class HandHybridJointspaceTaskspaceTrajectoryCommand
+      extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>
+      implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final ArmTrajectoryCommand jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
    private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
-   
+
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
-   
+
    public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, ArmTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
@@ -40,7 +42,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
    }
-   
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {

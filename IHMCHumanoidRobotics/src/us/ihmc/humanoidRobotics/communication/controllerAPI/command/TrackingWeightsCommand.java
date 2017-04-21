@@ -73,7 +73,7 @@ public class TrackingWeightsCommand implements Command<TrackingWeightsCommand, T
          privilegedConfigurationGain = 50.0;
          privilegedMaxVelocity = Double.POSITIVE_INFINITY;
          break;
-         
+
       case HIGH:
          handWeight = 20.0;
          footWeight = 200.0;
@@ -84,7 +84,7 @@ public class TrackingWeightsCommand implements Command<TrackingWeightsCommand, T
          privilegedConfigurationGain = 50.0;
          privilegedMaxVelocity = Double.POSITIVE_INFINITY;
          break;
-         
+
       default:
          break;
       }

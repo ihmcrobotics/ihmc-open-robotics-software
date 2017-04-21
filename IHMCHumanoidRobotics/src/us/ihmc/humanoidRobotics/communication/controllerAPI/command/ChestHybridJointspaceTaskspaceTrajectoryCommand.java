@@ -6,7 +6,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
-      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
+      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>
+      implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
    private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
@@ -35,7 +36,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
    }
-   
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
