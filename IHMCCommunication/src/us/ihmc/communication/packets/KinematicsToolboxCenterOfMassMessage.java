@@ -2,8 +2,6 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.*;
 
-import java.util.Arrays;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -11,8 +9,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
  * {@link KinematicsToolboxCenterOfMassMessage} is part of the API of the
@@ -33,14 +32,8 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
     */
    public Point3D32 desiredPositionInWorld;
 
-   /**
-    * Array of 3 booleans used to create a selection matrix on the solver side:<br>
-    * <code>boolean[] selectionMatrix = {controlX, controlY, controlZ};</code>
-    * <p>
-    * The three booleans define which axis to control the position of in the world frame.
-    * </p>
-    */
-   public boolean[] selectionMatrix;
+   // TODO add doc
+   public SelectionMatrix3DMessage selectionMatrix;
    /**
     * Array of 3 floats used to define the priority of this task on the solver side:<br>
     * <code>float[] weights = {weightX, weightY, weightZ};</code>
@@ -123,58 +116,38 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
    }
 
    /**
-    * Ensures that the array for the selection matrix is initialized.
-    * <p>
-    * If the array has to be created, it is initialized with {@code true}s.
-    * </p>
-    */
-   private void initializeSelectionMatrix()
-   {
-      if (selectionMatrix == null)
-      {
-         selectionMatrix = new boolean[3];
-         Arrays.fill(selectionMatrix, true);
-      }
-   }
-
-   /**
     * Enables the control of all the degrees of freedom of the end-effector.
     */
    public void setSelectionMatrixToIdentity()
    {
-      initializeSelectionMatrix();
-      Arrays.fill(selectionMatrix, true);
+      selectionMatrix = new SelectionMatrix3DMessage();
    }
 
    /**
-    * Sets the selection matrix by setting individually which axis is to be controlled.
+    * Sets the selection matrix to use for executing this message.
+    * <p>
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * </p>
+    * <p>
+    * The selection frame coming along with the given selection matrix is used to determine to what
+    * reference frame the selected axes are referring to. For instance, if only the hand height in
+    * world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should world frame. When no reference frame is provided with
+    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
+    * if not defined otherwise.
+    * </p>
     * 
-    * @param enableAxesControl array of 3 booleans specifying whether each axis is to be controlled,
-    *           in order: linearX, linearY, linearZ. Not modified.
-    * @throws RuntimeException if the given array has length different than 3.
+    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    *           modified.
     */
-   public void setSelectionMatrix(boolean[] enableAxesControl)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
-      if (enableAxesControl.length != 3)
-         throw new RuntimeException("Unexpected size. Expected 3, was: " + enableAxesControl.length);
-      initializeSelectionMatrix();
-      for (int i = 0; i < 3; i++)
-         selectionMatrix[i] = enableAxesControl[i];
-   }
-
-   /**
-    * Sets the selection matrix by setting individually which axis is to be controlled.
-    * 
-    * @param enableX whether to control the x-axis.
-    * @param enableY whether to control the y-axis.
-    * @param enableZ whether to control the z-axis.
-    */
-   public void setSelectionMatrix(boolean enableX, boolean enableY, boolean enableZ)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[0] = enableX;
-      selectionMatrix[1] = enableY;
-      selectionMatrix[2] = enableZ;
+      if (this.selectionMatrix == null)
+         this.selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix);
+      else
+         this.selectionMatrix.set(selectionMatrix);
    }
 
    public void getDesiredPosition(FramePoint desiredPositionToPack)
@@ -182,20 +155,29 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
       desiredPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredPositionInWorld);
    }
 
-   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(3, 6);
-      for (int i = 0; i < 3; i++)
-         selectionMatrixToPack.set(i, i, 1.0);
-
+      selectionMatrixToPack.clearSelection();
       if (selectionMatrix != null)
-      {
-         for (int i = 2; i >= 0; i--)
-         {
-            if (!selectionMatrix[i])
-               MatrixTools.removeRow(selectionMatrixToPack, i);
-         }
-      }
+         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+   }
+
+   /**
+    * Returns the unique ID referring to the selection frame to use with the selection matrix of
+    * this message.
+    * <p>
+    * If this message does not have a selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the selection matrix.
+    */
+   public long getSelectionFrameId()
+   {
+      if (selectionMatrix != null)
+         return selectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    public void getWeightVector(DenseMatrix64F weightVectorToPack)
@@ -228,8 +210,8 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
    {
       if (!nullEqualsAndEpsilonEquals(desiredPositionInWorld, desiredPositionInWorld, epsilon))
          return false;
-      if (!Arrays.equals(selectionMatrix, other.selectionMatrix))
-         return false;
+
+      // TODO Add the selection matrix in there
 
       if (weights == null && other.weights == null)
          return true;

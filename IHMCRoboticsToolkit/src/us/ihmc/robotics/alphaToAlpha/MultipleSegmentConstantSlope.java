@@ -24,8 +24,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 
    public double getAlphaPrime(double alpha)
    {
-      if (alpha <= 0.0)
-         return 0.0;
+      if (alpha < 0.0)
+         return segmentPoints[0].getY();
 
       for (int i = 0; i < segmentPoints.length - 1; i++)
       {

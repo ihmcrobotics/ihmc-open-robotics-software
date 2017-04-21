@@ -15,10 +15,10 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class PushRecoveryControlModule
@@ -292,15 +292,12 @@ public class PushRecoveryControlModule
 
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
    {
-      ContactablePlaneBody foot = feet.get(robotSide);
-      ReferenceFrame footReferenceFrame = foot.getRigidBody().getParentJoint().getFrameAfterJoint();
-      FramePose framePose = new FramePose(footReferenceFrame);
+      RigidBody foot = feet.get(robotSide).getRigidBody();
+      FramePose framePose = new FramePose(soleFrames.get(robotSide));
       framePose.changeFrame(worldFrame);
 
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
-
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
+      Footstep footstep = new Footstep(foot, robotSide, framePose, trustHeight);
 
       return footstep;
    }

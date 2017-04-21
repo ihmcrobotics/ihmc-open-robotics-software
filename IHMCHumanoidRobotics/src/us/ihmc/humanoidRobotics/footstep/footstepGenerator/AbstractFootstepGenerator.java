@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -187,8 +186,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
       FramePose leftPose = new FramePose();
       FramePose rightPose = new FramePose();
-      left.getSolePose(leftPose);
-      right.getSolePose(rightPose);
+      left.getPose(leftPose);
+      right.getPose(rightPose);
 
       FramePose2d leftPose2d = new FramePose2d();
       FramePose2d rightPose2d = new FramePose2d();

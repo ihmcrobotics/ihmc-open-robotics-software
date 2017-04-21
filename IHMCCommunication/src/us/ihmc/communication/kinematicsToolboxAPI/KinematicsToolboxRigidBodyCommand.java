@@ -3,7 +3,6 @@ package us.ihmc.communication.kinematicsToolboxAPI;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
@@ -11,6 +10,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
 {
@@ -21,7 +21,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
 
    private final FramePose desiredPose = new FramePose();
    private final FramePose controlFramePose = new FramePose();
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final DenseMatrix64F weightVector = new DenseMatrix64F(6, 1);
 
    @Override
@@ -31,8 +31,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       endEffector = null;
       desiredPose.setToNaN(ReferenceFrame.getWorldFrame());
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
-      selectionMatrix.reshape(6, 6);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
       weightVector.zero();
    }
 
@@ -76,7 +75,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       return weightVector;
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   public SelectionMatrix6D getSelectionMatrix()
    {
       return selectionMatrix;
    }

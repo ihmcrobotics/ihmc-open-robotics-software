@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -14,6 +15,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
@@ -22,6 +25,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final ICPOptimizationController icpOptimizationController;
    private final DoubleYoVariable yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
@@ -44,36 +49,52 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       this.yoTime = yoTime;
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         ReferenceFrame ankleFrame = contactableFoot.getRigidBody().getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+      }
 
       icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
             bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
+   @Override
    public void clearPlan()
    {
       icpOptimizationController.clearPlan();
    }
 
+   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpOptimizationController.addFootstepToPlan(footstep, timing);
    }
 
+   @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
    }
 
+   @Override
    public void initializeForStanding()
    {
       icpOptimizationController.initializeForStanding(yoTime.getDoubleValue());
    }
 
+   @Override
    public void initializeForSingleSupport()
    {
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0);
    }
 
+   @Override
    public void initializeForTransfer()
    {
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide, omega0);
@@ -104,14 +125,17 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
 
-   @Override public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
+   @Override
+   public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
-         footstepToPack.getPose(footstepPose);
+         RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepToPack.getRobotSide());
+         
+         footstepToPack.getAnklePose(footstepPose, ankleToSole);
          icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
          footstepPose.setXYFromPosition2d(footstepPositionSolution);
-         footstepToPack.setPose(footstepPose);
+         footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
       }
 
       return icpOptimizationController.wasFootstepAdjusted();

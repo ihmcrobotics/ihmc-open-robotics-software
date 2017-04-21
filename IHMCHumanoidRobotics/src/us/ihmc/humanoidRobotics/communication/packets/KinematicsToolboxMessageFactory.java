@@ -14,6 +14,7 @@ import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class KinematicsToolboxMessageFactory
 {
@@ -97,7 +98,11 @@ public class KinematicsToolboxMessageFactory
       calculator.compute();
       message.setDesiredPosition(calculator.getCenterOfMass());
       message.setWeight(DEFAULT_CENTER_OF_MASS_WEIGHT);
-      message.setSelectionMatrix(holdX, holdY, holdZ);
+
+      SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
+      selectionMatrix3D.setAxisSelection(holdX, holdY, holdZ);
+
+      message.setSelectionMatrix(selectionMatrix3D);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;

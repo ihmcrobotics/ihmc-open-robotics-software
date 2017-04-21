@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -82,10 +83,11 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       Robot robot = new Robot("Dummy");
       DoubleYoVariable yoTime = robot.getYoTime();
+      SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
-            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, anklePositionsInSoleFrame, yoTime, yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
 
@@ -124,7 +126,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-      FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet, ankleFrames);
+      FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet);
 
       //    double stepWidth = 0.3;
       //    double stepLength = 0.75;
@@ -163,16 +165,16 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
          FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
          FramePoint transferFromFootFramePoint = new FramePoint();
-         transferFromFootstep.getPositionIncludingFrame(transferFromFootFramePoint);
+         transferFromFootstep.getPosition(transferFromFootFramePoint);
          FrameOrientation transferFromFootOrientation = new FrameOrientation();
-         transferFromFootstep.getOrientationIncludingFrame(transferFromFootOrientation);
+         transferFromFootstep.getOrientation(transferFromFootOrientation);
          transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
 
          FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
          FramePoint transferToFootFramePoint = new FramePoint();
-         transferToFootstep.getPositionIncludingFrame(transferToFootFramePoint);
+         transferToFootstep.getPosition(transferToFootFramePoint);
          FrameOrientation transferToFootOrientation = new FrameOrientation();
-         transferToFootstep.getOrientationIncludingFrame(transferToFootOrientation);
+         transferToFootstep.getOrientation(transferToFootOrientation);
          transferToFootSpoof.setPose(transferToFootFramePoint, transferToFootOrientation);
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -224,8 +226,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             FramePoint2d transferFromFootPosition = new FramePoint2d();
             FramePoint2d transferToFootPosition = new FramePoint2d();
 
-            transferFromFootstep.getPosition2d(transferFromFootPosition);
-            transferToFootstep.getPosition2d(transferToFootPosition);
+            transferFromFootstep.getFootstepPose().getPosition2dIncludingFrame(transferFromFootPosition);
+            transferToFootstep.getFootstepPose().getPosition2dIncludingFrame(transferToFootPosition);
 
             FramePoint2d queryPosition = new FramePoint2d();
 
