@@ -66,7 +66,7 @@ public class YoGraphicFactory
 
       case COORDINATE_SYSTEM_DGO:
          return new YoGraphicCoordinateSystem(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],
-               (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], consts[0]);
+               (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], consts);
 
       case LINE_SEGMENT_DGO:
          return new YoGraphicLineSegment(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],

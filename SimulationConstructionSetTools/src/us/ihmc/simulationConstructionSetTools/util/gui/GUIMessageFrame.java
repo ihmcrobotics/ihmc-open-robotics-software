@@ -8,9 +8,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -24,7 +24,7 @@ public class GUIMessageFrame
 {
    private static final boolean SHOW_GUI_MESSAGE_FRAME = true;
 
-   private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
+   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("M/d/uu h:mm a: ");
 
    private final JFrame messageWindow;
    private final JTabbedPane jTabbedPane;
@@ -164,7 +164,7 @@ public class GUIMessageFrame
 
    public String computeTime()
    {
-      return simpleDateFormat.format(new Date()) + ": ";
+      return LocalDateTime.now().format(dateTimeFormatter);
    }
 
    public void appendMessageToPanel(int panelIndex, String message, Color color)

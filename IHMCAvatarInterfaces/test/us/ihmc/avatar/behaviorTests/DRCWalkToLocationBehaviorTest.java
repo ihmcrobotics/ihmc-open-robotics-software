@@ -1,6 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -28,9 +29,9 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -181,9 +182,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FramePose2d currentFootstepPose = new FramePose2d();
       for (Footstep footstep : walkToLocationBehavior.getFootSteps())
       {
-         footstep.getPose2d(currentFootstepPose);
+         footstep.getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
          assertEquals("Current footstep orientation does not match start orientation.", 0.0, currentFootstepPose.getOrientationDistance(startMidFeetPose2d),
-               ORIENTATION_THRESHOLD);
+                      ORIENTATION_THRESHOLD);
       }
 
       PrintTools.debug(this, "Starting to Execute Behavior");
@@ -217,7 +218,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FramePose2d currentFootstepPose = new FramePose2d();
       for (int numberOfStepsFromTarget = 0; numberOfStepsFromTarget <= numberOfFootstepsBetweenStartAndTarget; numberOfStepsFromTarget++)
       {
-         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getPose2d(currentFootstepPose);
+         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
          assertEquals("Current footstep orientation does not match end orientation.", 0.0, currentFootstepPose.getOrientationDistance(targetMidFeetPose2d),
                ORIENTATION_THRESHOLD);
       }
@@ -257,7 +258,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       int numberOfStepsAlignedWithMeanOrientation = 0;
       for (Footstep footstep : footsteps)
       {
-         footstep.getPose2d(currentFootstepPose);
+         footstep.getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
          if (currentFootstepPose.getOrientationDistance(startTargetMidPose2dMean) < ORIENTATION_THRESHOLD)
             numberOfStepsAlignedWithMeanOrientation++;
       }

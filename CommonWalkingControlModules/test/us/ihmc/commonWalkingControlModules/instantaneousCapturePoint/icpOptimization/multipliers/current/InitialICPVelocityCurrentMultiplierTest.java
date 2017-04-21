@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class InitialICPVelocityCurrentMultiplierTest
 {
@@ -24,9 +23,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
       int maxSteps = 5;
@@ -38,11 +34,15 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
 
@@ -53,18 +53,9 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
@@ -91,6 +82,8 @@ public class InitialICPVelocityCurrentMultiplierTest
 
          Assert.assertEquals(position.get(0, 0), initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -99,9 +92,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationOneCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
       int maxSteps = 5;
@@ -113,11 +103,15 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
 
@@ -128,18 +122,9 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
@@ -166,6 +151,8 @@ public class InitialICPVelocityCurrentMultiplierTest
 
          Assert.assertEquals(position.get(0, 0), initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -174,9 +161,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationProjectForwardTwoCMPFirstSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -190,26 +174,21 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -233,6 +212,8 @@ public class InitialICPVelocityCurrentMultiplierTest
 
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -242,9 +223,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPSecondSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -259,26 +237,21 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -302,8 +275,9 @@ public class InitialICPVelocityCurrentMultiplierTest
          initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer);
 
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
-
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -312,9 +286,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPThirdSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -329,26 +300,21 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -371,8 +337,9 @@ public class InitialICPVelocityCurrentMultiplierTest
          initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer);
 
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
-
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -381,9 +348,6 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationOneCMPSwing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -398,26 +362,21 @@ public class InitialICPVelocityCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
-
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -441,6 +400,8 @@ public class InitialICPVelocityCurrentMultiplierTest
 
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(initialICPVelocityCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 }

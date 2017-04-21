@@ -4,7 +4,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractDesiredAccelerationsMessage;
 
-public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCommand<T, M>, M extends AbstractDesiredAccelerationsMessage<M>> implements Command<T, M>
+public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCommand<T, M>, M extends AbstractDesiredAccelerationsMessage<M>>
+      implements Command<T, M>
 {
    private final TDoubleArrayList desiredJointAccelerations = new TDoubleArrayList(10);
 
@@ -35,7 +36,7 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
       for (int i = 0; i < other.getNumberOfJoints(); i++)
          desiredJointAccelerations.add(other.getDesiredJointAcceleration(i));
    }
-   
+
    public int getNumberOfJoints()
    {
       return desiredJointAccelerations.size();

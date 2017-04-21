@@ -16,13 +16,13 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.YoPoint3D;
 
 public class YoGraphicPointCloud extends YoGraphic
 {
@@ -30,7 +30,7 @@ public class YoGraphicPointCloud extends YoGraphic
    private Graphics3DObject graphics3dObject;
    
    private final int capacity;
-   private final YoPoint3D[] points;
+   private final Point3D[] points;
    
    private final Node node;
    private final Material material;
@@ -47,11 +47,11 @@ public class YoGraphicPointCloud extends YoGraphic
       this.jmeRenderer = jmeRenderer;
       this.capacity = capacity;
       
-      points = new YoPoint3D[capacity];
+      points = new Point3D[capacity];
       
       for (int i = 0; i < capacity; i++)
       {
-         points[i] = new YoPoint3D(name + i, null, registry);
+         points[i] = new Point3D();
       }
 
       pointBuffer = BufferUtils.createFloatBuffer(3 * capacity);

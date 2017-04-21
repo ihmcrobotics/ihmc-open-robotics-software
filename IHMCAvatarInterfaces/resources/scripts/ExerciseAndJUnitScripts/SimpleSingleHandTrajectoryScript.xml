@@ -1,10 +1,11 @@
 <object-stream>
-  <long>1457583856432</long>
+  <long>1492627391789</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
-    <previousMessageId>0</previousMessageId>
+    <source>0</source>
     <executionMode>OVERRIDE</executionMode>
+    <previousMessageId>0</previousMessageId>
     <taskspaceTrajectoryPoints>
       <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
         <uniqueId>0</uniqueId>
@@ -31,18 +32,14 @@
           <y>0.0</y>
           <z>0.0</z>
         </angularVelocity>
-        <tempQuaternionForTransform>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
-        </tempQuaternionForTransform>
       </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
     </taskspaceTrajectoryPoints>
+    <trajectoryReferenceFrameId>0</trajectoryReferenceFrameId>
+    <dataReferenceFrameId>0</dataReferenceFrameId>
+    <useCustomControlFrame>false</useCustomControlFrame>
     <robotSide>LEFT</robotSide>
-    <baseForControl>WORLD</baseForControl>
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage>
-  <long>1457583856433</long>
+  <long>1492627391790</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>

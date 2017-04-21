@@ -7,9 +7,8 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -26,6 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.Line2d;
@@ -106,6 +106,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
    private final LongYoVariable lastCommandId;
 
@@ -115,14 +117,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final DoubleYoVariable yoTime,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
+      this.transformsFromAnkleToSole = transformsFromAnkleToSole;
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
       offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
@@ -352,8 +355,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
       else
          hasBeenInitializedWithNextStep.set(false);
 
-      FramePoint transferFromContactFramePosition = new FramePoint(transferFromFootstep.getPoseReferenceFrame());
-      FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getPoseReferenceFrame());
+      FramePoint transferFromContactFramePosition = new FramePoint();
+      FramePoint transferToContactFramePosition = new FramePoint();
+      transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
+      transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
 
       FrameVector fromContactFrameDrift = null;
 
@@ -370,7 +375,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          else
          {
-            FramePoint transferFromDesiredContactFramePosition = new FramePoint(transferFromDesiredFootstep.getPoseReferenceFrame());
+            FramePoint transferFromDesiredContactFramePosition = new FramePoint();
+            transferFromDesiredFootstep.getAnklePosition(transferFromDesiredContactFramePosition, transformsFromAnkleToSole.get(transferFromDesiredFootstep.getRobotSide()));
             transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
 
             fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
@@ -386,7 +392,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       FramePoint nextContactFramePosition = null;
       if (nextFootstep != null)
       {
-         nextContactFramePosition = new FramePoint(nextFootstep.getPoseReferenceFrame());
+         nextContactFramePosition = new FramePoint();
+         nextFootstep.getAnklePosition(nextContactFramePosition, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
 
          if (fromContactFrameDrift != null)
          {
@@ -1003,13 +1010,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private void printFootstepConstructor(Footstep footstep)
    {
       RobotSide robotSide = footstep.getRobotSide();
-      Point3D position = new Point3D();
-      footstep.getPositionInWorldFrame(position);
-      Quaternion orientation = new Quaternion();
-      footstep.getOrientationInWorldFrame(orientation);
+      FramePoint position = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(position, orientation);
+      position.changeFrame(worldFrame);
+      orientation.changeFrame(worldFrame);
 
       System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3D(" + position.getX() + ", "
-            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getS() + ", " + orientation.getX() + ", " + orientation.getY() + ", "
-            + orientation.getZ() + ")));");
+            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getQuaternion().getS() + ", " + orientation.getQuaternion().getX()
+            + ", " + orientation.getQuaternion().getY() + ", " + orientation.getQuaternion().getZ() + ")));");
    }
 }

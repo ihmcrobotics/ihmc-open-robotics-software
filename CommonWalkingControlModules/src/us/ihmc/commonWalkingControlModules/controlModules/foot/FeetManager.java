@@ -15,10 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -45,13 +42,11 @@ public class FeetManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-
-   private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
 
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -70,7 +65,7 @@ public class FeetManager
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       YoSE3PIDGainsInterface swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
       YoSE3PIDGainsInterface holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
@@ -82,20 +77,9 @@ public class FeetManager
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
-         footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
          footControlModules.put(robotSide, footControlModule);
       }
-
-      attemptToStraightenLegs.set(walkingControllerParameters.attemptToStraightenLegs());
-      attemptToStraightenLegs.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override public void variableChanged(YoVariable<?> v)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-               footControlModules.get(robotSide).setAttemptToStraightenLegs(attemptToStraightenLegs.getBooleanValue());
-         }
-      });
 
       parentRegistry.addChild(registry);
    }
@@ -139,9 +123,9 @@ public class FeetManager
    {
       if (!footstep.getTrustHeight())
       {
-         FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
-         supportAnklePosition.changeFrame(footstep.getParentFrame());
-         double newHeight = supportAnklePosition.getZ();
+         FramePoint supportSolePosition = new FramePoint(soleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
+         supportSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
+         double newHeight = supportSolePosition.getZ();
          footstep.setZ(newHeight);
       }
 
@@ -311,7 +295,7 @@ public class FeetManager
     * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public boolean checkIfToeOffSafeDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       walkOnTheEdgesManager.inDoubleSupport();
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
@@ -351,9 +335,9 @@ public class FeetManager
       walkOnTheEdgesManager.reset();
    }
 
-   public boolean doToeOffIfPossible()
+   public boolean doToeOffIfPossibleInDoubleSupport()
    {
-      return walkOnTheEdgesManager.doToeOffIfPossible();
+      return walkOnTheEdgesManager.doToeOffIfPossibleInDoubleSupport();
    }
 
    public boolean doToeOffIfPossibleInSingleSupport()

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
@@ -24,7 +25,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -32,8 +32,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class HighLevelControlManagerFactory
 {
@@ -46,6 +44,7 @@ public class HighLevelControlManagerFactory
    private HeadOrientationManager headOrientationManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private KneeAngleManager kneeAngleManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -185,6 +184,22 @@ public class HighLevelControlManagerFactory
       Vector3D defaultAngularFootWeight = momentumOptimizationSettings.getDefaultAngularFootWeight();
       feetManager.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
       return feetManager;
+   }
+
+   public KneeAngleManager getOrCreateKneeAngleManager()
+   {
+      if (kneeAngleManager != null)
+         return kneeAngleManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(KneeAngleManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(KneeAngleManager.class))
+         return null;
+      if (!hasMomentumOptimizationSettings(KneeAngleManager.class))
+         return null;
+
+      kneeAngleManager = new KneeAngleManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
+      return kneeAngleManager;
    }
 
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()
