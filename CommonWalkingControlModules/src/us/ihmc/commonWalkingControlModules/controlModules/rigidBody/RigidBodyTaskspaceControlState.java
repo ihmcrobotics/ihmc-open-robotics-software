@@ -412,7 +412,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (command.useCustomControlFrame())
       {
-         command.packControlFramePose(controlFrameTransform);
+         command.getControlFramePose(controlFrameTransform);
          setControlFramePose(controlFrameTransform);
       }
       else
@@ -469,7 +469,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (command.useCustomControlFrame())
       {
-         command.packControlFramePose(controlFrameTransform);
+         command.getControlFramePose(controlFrameTransform);
          setControlFramePose(controlFrameTransform);
       }
       else

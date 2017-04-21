@@ -58,7 +58,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       setPropertiesOnly(other);
       trajectoryFrame = other.getTrajectoryFrame();
       useCustomControlFrame = other.useCustomControlFrame();
-      other.packControlFramePose(controlFramePoseInBodyFrame);
+      other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
    @Override
@@ -218,13 +218,11 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       this.trajectoryFrame = trajectoryFrame;
    }
 
-   @Override
-   public void packControlFramePose(RigidBodyTransform transformToPack)
+   public void getControlFramePose(RigidBodyTransform transformToPack)
    {
       transformToPack.set(controlFramePoseInBodyFrame);
    }
 
-   @Override
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
