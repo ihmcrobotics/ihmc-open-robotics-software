@@ -70,12 +70,12 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
    /**
     * Register a new reference frame.
     * @param newReferenceFrame
-    * @throws RuntimeException if newReferenceFrame is null
     */
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
-      if (newReferenceFrame == null) throw new RuntimeException("The Reference Frames cannot be null.");
-      
+      if (newReferenceFrame == null)
+         return;
+
       if (isReferenceFrameRegistered(newReferenceFrame))
       {
          return;
