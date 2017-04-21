@@ -2,10 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.communication.packets.QueueableMessage;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -17,12 +15,15 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
+public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends QueueableMessage<T>
+      implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
    @RosIgnoredField
-   public float[] selectionMatrixDiagonal;
+   public SelectionMatrix3DMessage angularSelectionMatrix;
+   @RosIgnoredField
+   public SelectionMatrix3DMessage linearSelectionMatrix;
 
    @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
@@ -52,7 +53,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[randomNumberOfPoints];
-      for(int i = 0; i < randomNumberOfPoints; i++)
+      for (int i = 0; i < randomNumberOfPoints; i++)
       {
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
       }
@@ -77,7 +78,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long dataFrameId, long trajectoryReferenceFrameId)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long dataFrameId,
+                                       long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -88,7 +90,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       this.dataReferenceFrameId = dataFrameId;
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame dataFrame, ReferenceFrame trajectoryReferenceFrame)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame dataFrame,
+                                       ReferenceFrame trajectoryReferenceFrame)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -126,21 +129,27 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
-               se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+                                                      se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
    }
 
    /**
     * Create a trajectory point.
+    * 
     * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
-    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when
+    *           the trajectory starts.
+    * @param position define the desired 3D position to be reached at this trajectory point. It is
+    *           expressed in world frame.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
+    *           It is expressed in world frame.
+    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory
+    *           point. It is expressed in world frame.
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
+    *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-         Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
+                                        Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
       checkIfTrajectoryFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -149,15 +158,21 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    /**
     * Create a trajectory point.
+    * 
     * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
-    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when
+    *           the trajectory starts.
+    * @param position define the desired 3D position to be reached at this trajectory point. It is
+    *           expressed in world frame.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
+    *           It is expressed in world frame.
+    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory
+    *           point. It is expressed in world frame.
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
+    *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-         Vector3D angularVelocity, long expressedInReferenceFrameId)
+                                        Vector3D angularVelocity, long expressedInReferenceFrameId)
    {
       checkIfFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -172,19 +187,35 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    }
 
    /**
-    * The selectionMatrix needs to be 6x6.
-    * @param selectionMatrix
+    * Sets the selection matrix to use for executing this message.
+    * <p>
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * </p>
+    * <p>
+    * The selection frames coming along with the given selection matrix are used to determine to
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+    * in world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should world frame. When no reference frame is provided with
+    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
+    * if not defined otherwise.
+    * </p>
+    * 
+    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    *           modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
    {
-      if (selectionMatrixDiagonal == null)
-         selectionMatrixDiagonal = new float[6];
+      if (angularSelectionMatrix == null)
+         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+      else
+         angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
 
-      DenseMatrix64F inner = new DenseMatrix64F(selectionMatrix.getNumCols(), selectionMatrix.getNumCols());
-      CommonOps.multInner(selectionMatrix, inner);
-
-      for (int i = 0; i < inner.getNumRows(); i++)
-         selectionMatrixDiagonal[i] = (float) inner.get(i, i);
+      if (linearSelectionMatrix == null)
+         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+      else
+         linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -215,40 +246,35 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    public boolean hasSelectionMatrix()
    {
-      return selectionMatrixDiagonal != null;
+      return angularSelectionMatrix != null && linearSelectionMatrix != null;
    }
 
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
       selectionMatrixToPack.resetSelection();
-      if (selectionMatrixDiagonal != null)
-      {
-         selectionMatrixToPack.selectAngularX(selectionMatrixDiagonal[0] > 0.9f);
-         selectionMatrixToPack.selectAngularY(selectionMatrixDiagonal[1] > 0.9f);
-         selectionMatrixToPack.selectAngularZ(selectionMatrixDiagonal[2] > 0.9f);
-         selectionMatrixToPack.selectLinearX(selectionMatrixDiagonal[3] > 0.9f);
-         selectionMatrixToPack.selectLinearY(selectionMatrixDiagonal[4] > 0.9f);
-         selectionMatrixToPack.selectLinearZ(selectionMatrixDiagonal[5] > 0.9f);
-      }
+      if (angularSelectionMatrix != null)
+         angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
+      if (linearSelectionMatrix != null)
+         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
    }
 
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException(
-               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
+               + getNumberOfTrajectoryPoints());
    }
 
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
 
-      if(dataReferenceFrameId != other.getDataReferenceFrameId())
+      if (dataReferenceFrameId != other.getDataReferenceFrameId())
       {
          return false;
       }
 
-      if(trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
+      if (trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
       {
          return false;
       }

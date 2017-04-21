@@ -3,6 +3,7 @@ package us.ihmc.communication.packets;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
 {
@@ -24,6 +25,29 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
     */
    public SelectionMatrix3DMessage()
    {
+   }
+
+   /**
+    * Copy constructor.
+    * 
+    * @param selectionMatrix3D the original selection matrix to copy. Not modified.
+    */
+   public SelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D)
+   {
+      set(selectionMatrix3D);
+   }
+
+   /**
+    * Sets this selection matrix message to {@code selectionMatrix3D}.
+    * 
+    * @param selectionMatrix3D the selection matrix to copy the data of. Not modified.
+    */
+   public void set(SelectionMatrix3D selectionMatrix3D)
+   {
+      setSelectionFrame(selectionMatrix3D.getSelectionFrame());
+      this.xSelected = selectionMatrix3D.isXSelected();
+      this.ySelected = selectionMatrix3D.isYSelected();
+      this.zSelected = selectionMatrix3D.isZSelected();
    }
 
    /**
@@ -52,7 +76,10 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
     */
    public void setSelectionFrame(ReferenceFrame selectionFrame)
    {
-      this.selectionFrameId = selectionFrame.getNameBasedHashCode();
+      if (selectionFrame == null)
+         selectionFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
+      else
+         selectionFrameId = selectionFrame.getNameBasedHashCode();
    }
 
    /**
@@ -64,6 +91,23 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
    public void setSelectionFrameId(long selectionFrameId)
    {
       this.selectionFrameId = selectionFrameId;
+   }
+
+   /**
+    * Unpacks this message into the given {@code selectionMatrix3D}.
+    * <p>
+    * Note that the selection frame can not be retrieved here, it has to be set afterwards.
+    * </p>
+    * 
+    * @param selectionMatrix3D the selection matrix into which this message is being unpacked.
+    *           Modified.
+    */
+   public void getSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
+   {
+      selectionMatrix3D.clearSelection();
+      selectionMatrix3D.selectXAxis(xSelected);
+      selectionMatrix3D.selectYAxis(ySelected);
+      selectionMatrix3D.selectZAxis(zSelected);
    }
 
    @Override
