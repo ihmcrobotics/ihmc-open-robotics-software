@@ -1,8 +1,5 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -20,6 +17,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class HexapodMomentumController
 {
@@ -34,7 +32,7 @@ public class HexapodMomentumController
    private final Vector3D angularMomentumWeight = new Vector3D(0.01, 0.01, 0.01);
    
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final HexapodReferenceFrames referenceFrames;
    private final FramePoint desiredComPosition = new FramePoint();
    private final StraightLineCartesianTrajectoryGenerator trajectoryGenerator;

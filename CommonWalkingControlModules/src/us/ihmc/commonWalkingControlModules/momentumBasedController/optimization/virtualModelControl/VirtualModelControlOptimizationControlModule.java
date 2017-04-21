@@ -215,7 +215,7 @@ public class VirtualModelControlOptimizationControlModule
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       groundContactForceOptimization.submitMomentumRateCommand(command);
-      momentumSelectionMatrix.set(command.getSelectionMatrix());
+      command.getSelectionMatrix(centerOfMassFrame, momentumSelectionMatrix);
    }
 
    private final DenseMatrix64F currentColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
