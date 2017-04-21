@@ -309,9 +309,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    public boolean getIKResult()
    {
+      PrintTools.info("Try to get ik result");
       setUpHasBeenDone();
-      //ThreadTools.sleep(1000);
-      for(int i=0;i<50;i++)
+      ThreadTools.sleep(10);
+      for(int i=0;i<100;i++)
       {
          //PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
          ThreadTools.sleep(5);
@@ -405,17 +406,21 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             cnt++;
             if(false)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality);
-            if(false)
+            if(true)
                PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
                                +" isReceived "+isReceived
                                +" isGoodSolutionCur "+isGoodSolutionCur                            
                                +" isSolved "+isSolved);
 
+//            PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+//                            +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+//                            +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
+            
             if(isSolved == true || forceOut == true)
             {
-               if(Debug)
+               if(true)
                   PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality());
-               if(Debug)
+               if(true)
                   PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
                                +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
                                +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
@@ -545,7 +550,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      PrintTools.info("Isdone Returned "+isDone.getBooleanValue());
+      //PrintTools.info("Isdone Returned "+isDone.getBooleanValue());
       return isDone.getBooleanValue();
    }
    

@@ -49,7 +49,6 @@ public class NetworkPorts
    public static final NetworkPorts VALVE_DETECTOR_SERVER_PORT = new NetworkPorts(6024);
    public static final NetworkPorts VALVE_DETECTOR_FEEDBACK_PORT = new NetworkPorts(6025);
    public static final NetworkPorts MOCAP_MODULE_VIZ = new NetworkPorts(6026);
-   public static final NetworkPorts POSEVALIDITY_TOOLBOX_MODULE_PORT = new NetworkPorts(6027);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);

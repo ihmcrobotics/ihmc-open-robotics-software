@@ -13,7 +13,6 @@ import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDat
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
-import us.ihmc.avatar.networkProcessor.poseValidityToolboxModule.PoseValidityToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
@@ -64,7 +63,6 @@ public class DRCNetworkProcessor
          setupHeightQuadTreeToolboxModule(robotModel, params);
          setupLidarScanLogger();
          setupRemoteObjectDetectionFeedbackEndpoint(params);
-         setupPoseValidityToolboxModule(robotModel, params);
       }
       catch (IOException e)
       {
@@ -205,24 +203,6 @@ public class DRCNetworkProcessor
       printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
    }
    
-   private void setupPoseValidityToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
-   {
-      PrintTools.info("setupPoseValidityToolboxModule");
-      if (!params.isPoseValitityToolboxEnabled())
-         return;
-      
-      PrintTools.info("setupPoseValidityToolboxModule");
-      new PoseValidityToolboxModule(robotModel, false);
-
-      PrintTools.info("setupPoseValidityToolboxModule");
-      PacketCommunicator poseValidityToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.POSEVALIDITY_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.POSEVALIDITY_TOOLBOX_MODULE, poseValidityToolboxCommunicator);
-      poseValidityToolboxCommunicator.connect();
-
-      String methodName = "setupPoseValidityModule";
-      printModuleConnectedDebugStatement(PacketDestination.POSEVALIDITY_TOOLBOX_MODULE, methodName);
-   }
-
    private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isMultisenseManualTestModuleEnabled())
