@@ -229,7 +229,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void setSelectionMatrixForLinearXYControl()
    {
       selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.selectLinearY(false);
+      selectionMatrix.selectLinearZ(false);
    }
 
    /**
