@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
@@ -16,6 +17,7 @@ public abstract class ToolboxController
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
+      PrintTools.info("Check");
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
    }
