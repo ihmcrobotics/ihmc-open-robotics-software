@@ -202,7 +202,7 @@ public class DRCNetworkProcessor
       String methodName = "setupFootstepPlanningModule";
       printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
    }
-   
+
    private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isMultisenseManualTestModuleEnabled())
