@@ -445,4 +445,10 @@ public class SelectionMatrix3D
    {
       return selectionFrame;
    }
+
+   @Override
+   public String toString()
+   {
+      return "(" + xSelected + ", " + ySelected + ", " + zSelected + ") " + selectionFrame;
+   }
 }
