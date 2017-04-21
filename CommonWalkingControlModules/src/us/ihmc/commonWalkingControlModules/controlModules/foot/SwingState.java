@@ -22,6 +22,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -297,34 +298,34 @@ public class SwingState extends AbstractUnconstrainedState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
       
+      PoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
       {
-         touchdownTrajectory.compute(time);
-         touchdownTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         touchdownTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-         transformDesiredsFromSoleFrameToControlFrame();
-         return;
+         activeTrajectory = touchdownTrajectory;
       }
-
+      else
+      {
+         activeTrajectory = swingTrajectory;
+      }
+      
       boolean footstepWasAdjusted = false;
       if (replanTrajectory.getBooleanValue())
       {
-         swingTrajectory.compute(time);
-         swingTrajectory.getPosition(unadjustedPosition);
+         activeTrajectory.compute(time);
+         activeTrajectory.getPosition(unadjustedPosition);
          reinitializeTrajectory(true);
 
          footstepWasAdjusted = true;
          replanTrajectory.set(false);
       }
-
-      if (swingTrajectoryOptimizer.doOptimizationUpdate())
+      else if (swingTrajectoryOptimizer.doOptimizationUpdate())
       {
          reinitializeTrajectory(false);
       }
 
-      swingTrajectory.compute(time);
-      swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      activeTrajectory.compute(time);
+      activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       if (footstepWasAdjusted)
       {
