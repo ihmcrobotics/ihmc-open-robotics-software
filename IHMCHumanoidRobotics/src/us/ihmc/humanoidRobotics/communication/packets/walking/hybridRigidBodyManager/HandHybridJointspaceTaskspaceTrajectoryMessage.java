@@ -6,8 +6,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -82,57 +80,23 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
       this.armTrajectoryMessage = armTrajectoryMessage;
    }
    
-   @Override
-   public long getTrajectoryReferenceFrameId()
-   {
-      return handTrajectoryMessage.getTrajectoryReferenceFrameId();
-   }
-
-   @Override
-   public long getDataReferenceFrameId()
-   {
-      return handTrajectoryMessage.getDataReferenceFrameId();
-   }
-
-   @Override
    public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
    {
       handTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       handTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
    }
 
-   @Override
    public void setDataReferenceFrameId(long expressedInReferenceFrameId)
    {
       handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
    }
 
-   @Override
    public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
    {
       handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
-   }
-
-   @Override
-   public Point3D getControlFramePosition()
-   {
-      return handTrajectoryMessage.getControlFramePosition();
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return handTrajectoryMessage.getControlFrameOrientation();
-   }
-   
-   @Override
-   public boolean useCustomControlFrame()
-   {
-      return handTrajectoryMessage.useCustomControlFrame();
    }
 }

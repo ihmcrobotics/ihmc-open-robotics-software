@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.*;
+
 import java.util.Random;
 
 import us.ihmc.communication.packets.QueueableMessage;
@@ -7,6 +9,8 @@ import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,11 +38,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
 
-   @RosExportedField(documentation = "Position of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Point3D controlFramePosition = new Point3D();
-
-   @RosExportedField(documentation = "Orientation of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Quaternion controlFrameOrientation = new Quaternion();
+   @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
+   public final QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
    public AbstractSE3TrajectoryMessage()
    {
@@ -291,37 +292,31 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       return super.epsilonEquals(other, epsilon);
    }
 
-   @Override
    public long getTrajectoryReferenceFrameId()
    {
       return trajectoryReferenceFrameId;
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
    {
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
 
-   @Override
    public long getDataReferenceFrameId()
    {
       return dataReferenceFrameId;
    }
 
-   @Override
    public void setDataReferenceFrameId(long expressedInReferenceFrameId)
    {
       this.dataReferenceFrameId = expressedInReferenceFrameId;
    }
 
-   @Override
    public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
    {
       this.dataReferenceFrameId = expressedInReferenceFrame.getNameBasedHashCode();
@@ -334,29 +329,21 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    public void setControlFramePosition(Point3D controlFramePosition)
    {
-      this.controlFramePosition.set(controlFramePosition);
+      controlFramePose.setTranslation(controlFramePosition);
    }
 
    public void setControlFrameOrientation(Quaternion controlFrameOrientation)
    {
-      this.controlFrameOrientation.set(controlFrameOrientation);
+      controlFramePose.setRotation(controlFrameOrientation);
    }
 
-   @Override
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
    }
 
-   @Override
-   public Point3D getControlFramePosition()
+   public void getControlFramePose(RigidBodyTransform controlFrameTransformToPack)
    {
-      return controlFramePosition;
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return controlFrameOrientation;
+      controlFrameTransformToPack.set(controlFramePose);
    }
 }

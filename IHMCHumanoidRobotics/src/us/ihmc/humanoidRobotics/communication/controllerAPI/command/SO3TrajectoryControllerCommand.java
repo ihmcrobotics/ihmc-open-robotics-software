@@ -10,8 +10,10 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M> implements FrameBasedCommand<M>
+public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
+      extends QueueableCommand<T, M> implements FrameBasedCommand<M>
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -51,16 +53,17 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
-      this.trajectoryFrame = trajectoryFrame;
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
       clear(dataFrame);
       set(message);
    }
 
    /**
-    * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command from a pose {@link #SE3TrajectoryControllerCommand}
-    * trajectory command.
+    * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command
+    * from a pose {@link #SE3TrajectoryControllerCommand} trajectory command.
     */
    public void set(SE3TrajectoryControllerCommand<?, ?> command)
    {
@@ -70,6 +73,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
 
    /**
     * Same as {@link #set(T)} but does not change the trajectory points.
+    * 
     * @param other
     */
    public void setPropertiesOnly(T other)
@@ -85,7 +89,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       setQueueqableCommandVariables(message);
       message.getSelectionMatrix(selectionMatrix);
       useCustomControlFrame = message.useCustomControlFrame();
-      message.getTransformFromBodyToControlFrame(controlFramePoseInBodyFrame);
+      message.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
    public void setTrajectoryPointList(FrameSO3TrajectoryPointList trajectoryPointList)
@@ -117,7 +121,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public int getNumberOfTrajectoryPoints()
    {
@@ -125,7 +130,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
@@ -133,7 +139,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public void addTrajectoryPoint(double time, Quaternion orientation, Vector3D angularVelocity)
    {
@@ -141,7 +148,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public void addTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
    {
@@ -149,7 +157,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public FrameSO3TrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
    {
@@ -157,7 +166,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public FrameSO3TrajectoryPoint getLastTrajectoryPoint()
    {
@@ -165,7 +175,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public void changeFrame(ReferenceFrame referenceFrame)
    {
@@ -178,7 +189,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
     */
    public void checkReferenceFrameMatch(ReferenceFrame frame)
    {

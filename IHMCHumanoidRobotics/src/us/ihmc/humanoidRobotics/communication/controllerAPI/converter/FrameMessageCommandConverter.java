@@ -4,12 +4,11 @@ import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FrameMessageCommandConverter implements CommandConversionInterface
 {
-   private ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
+   private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public FrameMessageCommandConverter(ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver)
    {
@@ -29,29 +28,6 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
    public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
    {
       FrameBasedCommand<M> frameBasedCommand = (FrameBasedCommand<M>) command;
-      FrameBasedMessage frameBasedMessage = (FrameBasedMessage) message;
-      
-      long trajectoryReferenceFrameID = frameBasedMessage.getTrajectoryReferenceFrameId();
-      ReferenceFrame trajectoryReferenceFrame = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(trajectoryReferenceFrameID);
-      
-      long expressedInReferenceFrameID = frameBasedMessage.getDataReferenceFrameId();
-      ReferenceFrame expressedInReferenceFrame = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(expressedInReferenceFrameID);
-      
-      frameBasedCommand.set(expressedInReferenceFrame, trajectoryReferenceFrame, message);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public <C extends Command<?, M>, M extends Packet<M>> boolean isFrameBasedCommandHolder(C command)
-   {
-      return command instanceof FrameBasedCommandHolder;
-   }
-
-   /** {@inheritDoc} */
-   @SuppressWarnings("unchecked")
-   @Override
-   public <C extends Command<?, M>, M extends Packet<M>> void processFrameBasedCommandHolder(C command, M message)
-   {
-      ((FrameBasedCommandHolder<M>) command).set(this, message);
+      frameBasedCommand.set(referenceFrameHashCodeResolver, message);
    }
 }

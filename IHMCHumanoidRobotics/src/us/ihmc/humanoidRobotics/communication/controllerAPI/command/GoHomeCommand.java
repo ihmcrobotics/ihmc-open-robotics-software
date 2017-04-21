@@ -11,10 +11,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- * Upon receiving a {@link GoHomeCommand} the controller will bring the given part of the body back to a default configuration called 'home'.
- * It is useful to get back to a safe configuration before walking.
- * 
- * 
+ * Upon receiving a {@link GoHomeCommand} the controller will bring the given part of the body back
+ * to a default configuration called 'home'. It is useful to get back to a safe configuration before
+ * walking.
+ *
+ *
  * @author Sylvain
  *
  */
@@ -25,7 +26,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    private double trajectoryTime = 1.0;
 
    /**
-    * 
+    *
     */
    public GoHomeCommand()
    {
@@ -110,7 +111,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
          }
          else if (other.getRequest(bodyPart))
          {
-               otherBodyPartRequestMap.get(bodyPart).setTrue();
+            otherBodyPartRequestMap.get(bodyPart).setTrue();
          }
       }
    }
@@ -124,8 +125,9 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    }
 
    /**
-    * Get the request for going home for a given body part.
-    * This method is to use only for body parts that are not side dependent, like the pelvis.
+    * Get the request for going home for a given body part. This method is to use only for body
+    * parts that are not side dependent, like the pelvis.
+    * 
     * @param bodyPart body part to check the request for.
     * @return true if the go home is requested, false otherwise.
     * @throws RuntimeException if the robot side is need for the given body part.
@@ -138,8 +140,9 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    }
 
    /**
-    * Get the request for going home for a given body part.
-    * This method is to use for body parts that are side dependent, like a foot.
+    * Get the request for going home for a given body part. This method is to use for body parts
+    * that are side dependent, like a foot.
+    * 
     * @param robotSide which side the body part belongs to.
     * @param bodyPart body part to check the request for.
     * @return true if the go home is requested, false otherwise.
