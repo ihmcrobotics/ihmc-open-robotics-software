@@ -165,7 +165,7 @@ public class SelectionMatrix6D
     * independent from its selection frame.
     * </p>
     */
-   public void setToAngularSelection()
+   public void setToAngularSelectionOnly()
    {
       angularPart.resetSelection();
       linearPart.clearSelection();
@@ -178,7 +178,7 @@ public class SelectionMatrix6D
     * independent from its selection frame.
     * </p>
     */
-   public void setToLinearSelection()
+   public void setToLinearSelectionOnly()
    {
       angularPart.clearSelection();
       linearPart.resetSelection();
@@ -428,14 +428,14 @@ public class SelectionMatrix6D
     *           set to represent this. The zero-rows of the resulting matrix are removed. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getEfficientSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(6, 6);
       selectionMatrixToPack.zero();
 
       // Need to do the linear part first as rows might be removed.
-      linearPart.getEfficientSelectionMatrixInFrame(destinationFrame, 3, 3, selectionMatrixToPack);
-      angularPart.getEfficientSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
+      linearPart.getCompactSelectionMatrixInFrame(destinationFrame, 3, 3, selectionMatrixToPack);
+      angularPart.getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
 
    /**

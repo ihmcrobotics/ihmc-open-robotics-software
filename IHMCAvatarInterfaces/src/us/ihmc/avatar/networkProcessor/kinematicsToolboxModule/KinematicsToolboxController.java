@@ -430,7 +430,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    public Twist computeDesiredTwist(FramePose desiredPose, RigidBody endEffector, ReferenceFrame controlFrame, SelectionMatrix6D selectionMatrix, MutableDouble errorMagnitude)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
+      selectionMatrix.getCompactSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
 
       errorFramePose.setIncludingFrame(desiredPose);
       errorFramePose.changeFrame(controlFrame);
@@ -459,7 +459,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, ReferenceFrame controlFrame, SelectionMatrix6D selectionMatrix, MutableDouble errorMagnitude)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
+      selectionMatrix.getCompactSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
       errorFrameOrientation.setIncludingFrame(desiredOrientation);
       errorFrameOrientation.changeFrame(controlFrame);
       errorFrameOrientation.getAxisAngle(errorAxisAngle);
@@ -486,7 +486,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    public Twist computeDesiredTwist(FramePoint desiredPosition, RigidBody endEffector, ReferenceFrame controlFrame, SelectionMatrix6D selectionMatrix, MutableDouble errorMagnitude)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
+      selectionMatrix.getCompactSelectionMatrixInFrame(controlFrame, selectionDenseMatrix);
       errorFramePose.setPoseIncludingFrame(desiredPosition, new FrameOrientation(desiredPosition.getReferenceFrame()));
       errorFramePose.changeFrame(controlFrame);
       errorFramePose.getPosition(errorPosition);
@@ -576,11 +576,11 @@ public class KinematicsToolboxController extends ToolboxController
 
       desiredChestOrientationReference.set(null);
       chestSelectionMatrix = new SelectionMatrix6D();
-      chestSelectionMatrix.setToAngularSelection();
+      chestSelectionMatrix.setToAngularSelectionOnly();
 
       desiredPelvisOrientationReference.set(null);
       pelvisSelectionMatrix = new SelectionMatrix6D();
-      pelvisSelectionMatrix.setToAngularSelection();
+      pelvisSelectionMatrix.setToAngularSelectionOnly();
 
       desiredPelvisHeight.setToNaN();
 

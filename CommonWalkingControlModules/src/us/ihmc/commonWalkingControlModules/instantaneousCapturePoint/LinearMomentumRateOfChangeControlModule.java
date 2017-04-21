@@ -125,10 +125,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
       linearAndAngularZSelectionMatrix.selectAngularX(false);
       linearAndAngularZSelectionMatrix.selectAngularY(false);
 
-      linearXYSelectionMatrix.setToLinearSelection();
+      linearXYSelectionMatrix.setToLinearSelectionOnly();
       linearXYSelectionMatrix.selectLinearZ(false); // remove height
 
-      linearXYAndAngularZSelectionMatrix.setToLinearSelection();
+      linearXYAndAngularZSelectionMatrix.setToLinearSelectionOnly();
       linearXYAndAngularZSelectionMatrix.selectLinearZ(false); // remove height
       linearXYAndAngularZSelectionMatrix.selectAngularZ(true);
 

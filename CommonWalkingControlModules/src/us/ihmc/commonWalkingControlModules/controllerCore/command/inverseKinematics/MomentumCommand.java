@@ -208,7 +208,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
    }
 
    /**
@@ -217,7 +217,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void setSelectionMatrixForLinearXYControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearZ(false);
    }
 
@@ -227,7 +227,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
@@ -512,7 +512,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
 
    /**
