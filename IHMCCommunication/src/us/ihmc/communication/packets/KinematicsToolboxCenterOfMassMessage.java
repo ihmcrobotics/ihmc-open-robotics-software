@@ -116,7 +116,7 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
    }
 
    /**
-    * Enables the control of all the degrees of freedom of the end-effector.
+    * Enables the control of all the degrees of freedom of the center of mass.
     */
    public void setSelectionMatrixToIdentity()
    {
@@ -126,9 +126,9 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
    /**
     * Sets the selection matrix to use for executing this message.
     * <p>
-    * The selection matrix is used to determinate which degree of freedom of the end-effector should
-    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
-    * freedom of the end-effector should be controlled.
+    * The selection matrix is used to determinate which degree of freedom of the center of mass
+    * should be controlled. When it is NOT provided, the controller will assume that all the degrees
+    * of freedom should be controlled.
     * </p>
     * <p>
     * The selection frame coming along with the given selection matrix is used to determine to what
