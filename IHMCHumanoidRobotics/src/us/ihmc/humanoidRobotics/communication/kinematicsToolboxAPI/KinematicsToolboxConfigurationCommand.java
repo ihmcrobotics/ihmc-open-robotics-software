@@ -1,4 +1,4 @@
-package us.ihmc.communication.kinematicsToolboxAPI;
+package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;

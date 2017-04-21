@@ -135,6 +135,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
       ik.holdCurrentPelvisOrientation();
+      ik.holdCurrentPelvisHeight();
 
       drcBehaviorTestHelper.updateRobotModel();
       FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);

@@ -5,11 +5,14 @@ import java.util.Map;
 
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 /**
  * This class allows the retrieve the rigid-body from its hash code when converting a
@@ -21,10 +24,13 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class KinematicsToolboxCommandConverter implements CommandConversionInterface
 {
    private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
+   private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
-   public KinematicsToolboxCommandConverter(RigidBody robotBody)
+   public KinematicsToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
    {
-      RigidBody rootBody = ScrewTools.getRootBody(robotBody);
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+
+      RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
          rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
@@ -47,6 +53,6 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    {
       KinematicsToolboxRigidBodyMessage rigiBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
       KinematicsToolboxRigidBodyCommand rigiBodyCommand = (KinematicsToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap);
+      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
    }
 }

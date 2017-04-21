@@ -1,4 +1,4 @@
-package us.ihmc.communication.kinematicsToolboxAPI;
+package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import org.ejml.data.DenseMatrix64F;
 
