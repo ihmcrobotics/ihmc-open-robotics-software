@@ -464,62 +464,20 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /** {@inheritDoc} */
-   @Override
    public long getTrajectoryReferenceFrameId()
    {
       return trajectoryReferenceFrameId;
    }
 
    /** {@inheritDoc} */
-   @Override
    public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
    {
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
    }
 
    /** {@inheritDoc} */
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
-
-   /** {@inheritDoc} */
-   @Override
-   public long getDataReferenceFrameId()
-   {
-      // the data frame is not supported by footsteps
-      return trajectoryReferenceFrameId;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setDataReferenceFrameId(long dataReferenceFrameId)
-   {
-      throw new RuntimeException("The data frame is not supported by footsteps");
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setDataReferenceFrameId(ReferenceFrame dataReferenceFrame)
-   {
-      throw new RuntimeException("The data frame is not supported by footsteps");
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public Point3D getControlFramePosition()
-   {
-      // The choice of control frame is not implemented for stepping. Waypoints need to be defined for the sole frame.
-      return null;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      // The choice of control frame is not implemented for stepping. Waypoints need to be defined for the sole frame.
-      return null;
-   }
-
 }

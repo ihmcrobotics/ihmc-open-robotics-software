@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>, FrameBasedCommand<AdjustFootstepMessage>
 {
@@ -65,12 +66,9 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    }
    
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, AdjustFootstepMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, AdjustFootstepMessage message)
    {
-      // footsteps do not allow the use of a data frame
-      dataFrame.checkReferenceFrameMatch(trajectoryFrame);
-
-      this.trajectoryFrame = trajectoryFrame;
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       set(message);
    }
 

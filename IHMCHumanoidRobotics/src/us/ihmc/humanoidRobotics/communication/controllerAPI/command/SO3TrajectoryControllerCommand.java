@@ -11,6 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M> implements FrameBasedCommand<M>
 {
@@ -62,9 +63,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
-      this.trajectoryFrame = trajectoryFrame;
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
       clear(dataFrame);
       set(message);
    }
@@ -96,7 +98,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       setQueueqableCommandVariables(message);
       message.getSelectionMatrix(selectionMatrix);
       useCustomControlFrame = message.useCustomControlFrame();
-      message.getTransformFromBodyToControlFrame(controlFramePoseInBodyFrame);
+      message.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
    public void setTrajectoryPointList(FrameSO3TrajectoryPointList trajectoryPointList)
