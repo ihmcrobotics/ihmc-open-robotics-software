@@ -3,17 +3,19 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
+public class HeadHybridJointspaceTaskspaceTrajectoryCommand
+      extends QueueableCommand<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceTrajectoryMessage>
+      implements FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final NeckTrajectoryCommand jointspaceTrajectoryCommand = new NeckTrajectoryCommand();
    private final HeadTrajectoryCommand taskspaceTrajectoryCommand = new HeadTrajectoryCommand();
-   
+
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
-   
+
    public HeadHybridJointspaceTaskspaceTrajectoryCommand(HeadTrajectoryCommand taskspaceTrajectoryCommand, NeckTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
@@ -40,12 +42,12 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
    }
-   
+
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getHeadTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getHeadTrajectoryMessage());
    }
 
    @Override

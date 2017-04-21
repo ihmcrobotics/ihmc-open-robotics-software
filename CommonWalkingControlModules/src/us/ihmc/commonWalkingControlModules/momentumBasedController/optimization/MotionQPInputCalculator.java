@@ -57,6 +57,8 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+
    private final FrameVector angularMomentum = new FrameVector();
    private final FrameVector linearMomentum = new FrameVector();
    private final ReferenceFrame centerOfMassFrame;
@@ -189,9 +191,10 @@ public class MotionQPInputCalculator
     */
    public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
+      commandToConvert.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -206,13 +209,12 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
       RigidBody base = commandToConvert.getBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
-      commandToConvert.getControlFrame(controlFrame);
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
@@ -231,12 +233,12 @@ public class MotionQPInputCalculator
       jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
       commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
       CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(selectionMatrix, tempTaskJacobian);
+      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
@@ -308,8 +310,9 @@ public class MotionQPInputCalculator
    public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
       // Gets the M-by-6 selection matrix S.
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getControlFrame(controlFrame);
+      commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -324,13 +327,12 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
       RigidBody base = commandToConvert.getBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
-      commandToConvert.getControlFrame(controlFrame);
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
@@ -345,12 +347,12 @@ public class MotionQPInputCalculator
        * @formatter:on
        */
       commandToConvert.getDesiredSpatialVelocity(tempTaskObjective);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(selectionMatrix, tempTaskJacobian);
+      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
@@ -413,8 +415,8 @@ public class MotionQPInputCalculator
     */
    public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -427,12 +429,12 @@ public class MotionQPInputCalculator
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
+      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
@@ -443,7 +445,7 @@ public class MotionQPInputCalculator
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
@@ -457,8 +459,8 @@ public class MotionQPInputCalculator
     */
    public boolean convertMomentumCommand(MomentumCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      int taskSize = tempSelectionMatrix.getNumRows();
 
       if (taskSize == 0)
          return false;
@@ -471,12 +473,12 @@ public class MotionQPInputCalculator
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
+      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
@@ -485,7 +487,7 @@ public class MotionQPInputCalculator
       linearMomentum.get(3, tempTaskObjective);
 
       // Compute the task objective: p = S * h
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 

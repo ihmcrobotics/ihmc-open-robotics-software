@@ -1,9 +1,6 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -19,9 +16,10 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
  * {@link KinematicsToolboxRigidBodyMessage} is part of the API of the
@@ -68,19 +66,11 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * end-effector.
     */
    public Quaternion32 controlFrameOrientationInEndEffector;
-   /**
-    * Array of 6 booleans used to create a selection matrix on the solver side:<br>
-    * <code>boolean[] selectionMatrix = {controlAngularX, controlAngularY, controlAngularZ, controlLinearX, controlLinearY, controlLinearZ};</code>
-    * <ul>
-    * <li>The three booleans <code>(controlAngularX, controlAngularY, controlAngularZ)</code> define
-    * which axis to control the orientation of in the control frame. If {@code controlFrame} has not
-    * been defined, it is instead in {@code endEffector.getBodyFixedFrame()}.
-    * <li>The three booleans <code>(controlLinearX, controlLinearY, controlLinearZ)</code> define
-    * which axis to control the position of in the control frame. If {@code controlFrame} has not
-    * been defined, it is instead in {@code endEffector.getBodyFixedFrame()}.
-    * </ul>
-    */
-   public boolean[] selectionMatrix;
+
+   // TODO Add doc
+   public SelectionMatrix3DMessage angularSelectionMatrix;
+   public SelectionMatrix3DMessage linearSelectionMatrix;
+
    /**
     * Array of 6 floats used to define the priority of this task on the solver side:<br>
     * <code>float[] weights = {weightAngularX, weightAngularY, weightAngularZ, weightLinearX, weightLinearY, weightLinearZ};</code>
@@ -373,27 +363,12 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    }
 
    /**
-    * Ensures that the array for the selection matrix is initialized.
-    * <p>
-    * If the array has to be created, it is initialized with {@code true}s.
-    * </p>
-    */
-   private void initializeSelectionMatrix()
-   {
-      if (selectionMatrix == null)
-      {
-         selectionMatrix = new boolean[6];
-         Arrays.fill(selectionMatrix, true);
-      }
-   }
-
-   /**
     * Enables the control of all the degrees of freedom of the end-effector.
     */
    public void setSelectionMatrixToIdentity()
    {
-      initializeSelectionMatrix();
-      Arrays.fill(selectionMatrix, true);
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
    }
 
    /**
@@ -402,12 +377,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     */
    public void setSelectionMatrixForLinearControl()
    {
-      initializeSelectionMatrix();
-      for (int i = 0; i < 3; i++)
-      {
-         selectionMatrix[i] = false;
-         selectionMatrix[i + 3] = true;
-      }
+      angularSelectionMatrix = null;
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
    }
 
    /**
@@ -416,124 +387,40 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     */
    public void setSelectionMatrixForAngularControl()
    {
-      initializeSelectionMatrix();
-      for (int i = 0; i < 3; i++)
-      {
-         selectionMatrix[i] = true;
-         selectionMatrix[i + 3] = false;
-      }
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix = null;
    }
 
    /**
-    * Sets the selection matrix by setting individually which axis is to be controlled.
-    * 
-    * @param enableAxesControl array of 6 booleans specifying whether each axis is to be controlled,
-    *           in order: angularX, angularY, angularZ, linearX, linearY, linearZ. Not modified.
-    * @throws RuntimeException if the given array has length different than 6.
-    */
-   public void setSelectionMatrix(boolean[] enableAxesControl)
-   {
-      if (enableAxesControl.length != 6)
-         throw new RuntimeException("Unexpected size. Expected 6, was: " + enableAxesControl.length);
-      initializeSelectionMatrix();
-      for (int i = 0; i < 6; i++)
-         selectionMatrix[i] = enableAxesControl[i];
-   }
-
-   /**
-    * Specifies whether the rotation about the x-axis of the control frame should be controlled or
-    * not.
+    * Sets the selection matrix to use for executing this message.
     * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * </p>
+    * <p>
+    * The selection frames coming along with the given selection matrix are used to determine to
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+    * in world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should be world frame. When no reference frame is provided
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+    * frame if not defined otherwise.
     * </p>
     * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
+    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    *           modified.
     */
-   public void enableAngularControlX(boolean enable)
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
    {
-      initializeSelectionMatrix();
-      selectionMatrix[0] = enable;
-   }
+      if (angularSelectionMatrix == null)
+         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+      else
+         angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
 
-   /**
-    * Specifies whether the rotation about the y-axis of the control frame should be controlled or
-    * not.
-    * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
-    * </p>
-    * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
-    */
-   public void enableAngularControlY(boolean enable)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[1] = enable;
-   }
-
-   /**
-    * Specifies whether the rotation about the z-axis of the control frame should be controlled or
-    * not.
-    * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
-    * </p>
-    * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
-    */
-   public void enableAngularControlZ(boolean enable)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[2] = enable;
-   }
-
-   /**
-    * Specifies whether the position along the x-axis of the control frame should be controlled or
-    * not.
-    * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
-    * </p>
-    * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
-    */
-   public void enableLinearControlX(boolean enable)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[3] = enable;
-   }
-
-   /**
-    * Specifies whether the position along the y-axis of the control frame should be controlled or
-    * not.
-    * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
-    * </p>
-    * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
-    */
-   public void enableLinearControlY(boolean enable)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[4] = enable;
-   }
-
-   /**
-    * Specifies whether the position along the z-axis of the control frame should be controlled or
-    * not.
-    * <p>
-    * By default the control frame is coincident to {@code endEffector.getBodyFixedFrame()}.
-    * </p>
-    * 
-    * @param enable {@code true} to control the degree of freedom of the end-effector, {@code false}
-    *           otherwise.
-    */
-   public void enableLinearControlZ(boolean enable)
-   {
-      initializeSelectionMatrix();
-      selectionMatrix[5] = enable;
+      if (linearSelectionMatrix == null)
+         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+      else
+         linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
 
    /**
@@ -661,19 +548,49 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
          controlFramePoseToPack.setOrientation(controlFrameOrientationInEndEffector);
    }
 
-   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(6, 6);
-      CommonOps.setIdentity(selectionMatrixToPack);
+      selectionMatrixToPack.resetSelection();
+      if (angularSelectionMatrix != null)
+         angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
+      if (linearSelectionMatrix != null)
+         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
+   }
 
-      if (selectionMatrix != null)
-      {
-         for (int i = 5; i >= 0; i--)
-         {
-            if (!selectionMatrix[i])
-               MatrixTools.removeRow(selectionMatrixToPack, i);
-         }
-      }
+   /**
+    * Returns the unique ID referring to the selection frame to use with the angular part of the
+    * selection matrix of this message.
+    * <p>
+    * If this message does not have a angular selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the angular part of the selection matrix.
+    */
+   public long getAngularSelectionFrameId()
+   {
+      if (angularSelectionMatrix != null)
+         return angularSelectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+
+   /**
+    * Returns the unique ID referring to the selection frame to use with the linear part of the
+    * selection matrix of this message.
+    * <p>
+    * If this message does not have a linear selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the linear part of the selection matrix.
+    */
+   public long getLinearSelectionFrameId()
+   {
+      if (linearSelectionMatrix != null)
+         return linearSelectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    public void getWeightVector(DenseMatrix64F weightVectorToPack)
@@ -714,8 +631,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
          return false;
       if (!nullEqualsAndEpsilonEquals(controlFrameOrientationInEndEffector, other.controlFrameOrientationInEndEffector, epsilon))
          return false;
-      if (!Arrays.equals(selectionMatrix, other.selectionMatrix))
-         return false;
+
+      // TODO Add the selection matrix back in here
 
       if (weights == null && other.weights == null)
          return true;

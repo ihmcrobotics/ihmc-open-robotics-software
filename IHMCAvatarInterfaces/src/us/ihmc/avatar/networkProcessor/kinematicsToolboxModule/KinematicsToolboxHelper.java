@@ -255,8 +255,8 @@ public class KinematicsToolboxHelper
    {
       FrameVector positionError = new FrameVector();
       feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
-
-      DenseMatrix64F selectionMatrix = command.getMomentumRateCommand().getSelectionMatrix();
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
+      command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
       DenseMatrix64F weightVector = command.getMomentumRateCommand().getWeightVector();
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
@@ -302,7 +302,8 @@ public class KinematicsToolboxHelper
       feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
       positionError.changeFrame(controlFrame);
 
-      DenseMatrix64F selectionMatrix = accelerationCommand.getSelectionMatrix();
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
+      accelerationCommand.getSelectionMatrix(controlFrame, selectionMatrix);
       DenseMatrix64F weightVector = accelerationCommand.getWeightVector();
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);

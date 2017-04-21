@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.Arrays;
-
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
@@ -27,6 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -40,9 +39,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSolverFailed;
    private final BooleanYoVariable hasSentMessageToController;
 
-   private final SideDependentList<boolean[]> handSelectionMatrices = new SideDependentList<>(new boolean[6], new boolean[6]);
-   private boolean[] chestSelectionMatrix = {true, true, true, false, false, false};
-   private boolean[] pelvisSelectionMatrix = {true, true, true, false, false, false};
+   private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
+   private final SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D pelvisSelectionMatrix = new SelectionMatrix6D();
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
@@ -104,9 +103,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
 
-      for (RobotSide robotSide : RobotSide.values)
-         Arrays.fill(handSelectionMatrices.get(robotSide), true);
-
       clear();
    }
 
@@ -153,12 +149,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setHandLinearControlOnly(RobotSide robotSide)
    {
-      handSelectionMatrices.put(robotSide, new boolean[] {false, false, false, true, true, true});
+      handSelectionMatrices.get(robotSide).setToLinearSelectionOnly();
    }
 
    public void setHandLinearControlAndYawPitchOnly(RobotSide robotSide)
    {
-      handSelectionMatrices.put(robotSide, new boolean[] {false, true, true, true, true, true});
+      handSelectionMatrices.get(robotSide).resetSelection();
+      handSelectionMatrices.get(robotSide).selectAngularX(false);
    }
 
    public void holdCurrentChestOrientation()
@@ -174,7 +171,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
-      chestSelectionMatrix = new boolean[] {roll, pitch, yaw, false, false, false};
+      chestSelectionMatrix.setAngularAxisSelection(roll, pitch, yaw);
+      chestSelectionMatrix.clearLinearSelection();
    }
 
    public void holdCurrentPelvisOrientation()
@@ -190,27 +188,32 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
-      pelvisSelectionMatrix[0] = roll;
-      pelvisSelectionMatrix[1] = pitch;
-      pelvisSelectionMatrix[2] = yaw;
+      pelvisSelectionMatrix.setAngularAxisSelection(roll, pitch, yaw);
+      pelvisSelectionMatrix.clearLinearSelection();
    }
 
    public void holdCurrentPelvisHeight()
    {
       yoDesiredPelvisPosition.setFromReferenceFrame(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
-      pelvisSelectionMatrix[3] = true;
+      pelvisSelectionMatrix.clearLinearSelection();
+      pelvisSelectionMatrix.selectLinearZ(true);
+      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
    }
 
    public void setDesiredPelvisHeight(FramePoint pointContainingDesiredHeight)
    {
       yoDesiredPelvisPosition.setAndMatchFrame(pointContainingDesiredHeight);
-      pelvisSelectionMatrix[3] = true;
+      pelvisSelectionMatrix.clearLinearSelection();
+      pelvisSelectionMatrix.selectLinearZ(true);
+      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
    }
 
    public void setDesiredPelvisHeight(double desiredHeightInWorld)
    {
       yoDesiredPelvisPosition.setZ(desiredHeightInWorld);
-      pelvisSelectionMatrix[3] = true;
+      pelvisSelectionMatrix.clearLinearSelection();
+      pelvisSelectionMatrix.selectLinearZ(true);
+      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
    }
 
    public double getSolutionQuality()
@@ -394,7 +397,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       chestMessage = null;
       pelvisMessage = null;
-      pelvisSelectionMatrix = new boolean[] {true, true, true, false, false, false};
+      pelvisSelectionMatrix.setToAngularSelectionOnly();
 
       for (RobotSide robotSide : RobotSide.values)
       {

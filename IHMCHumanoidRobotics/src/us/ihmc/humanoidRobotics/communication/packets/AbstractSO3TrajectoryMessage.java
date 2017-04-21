@@ -1,29 +1,33 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.*;
+
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.communication.packets.QueueableMessage;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T>
+      implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
    @RosIgnoredField
-   public float[] selectionMatrixDiagonal;
+   public SelectionMatrix3DMessage selectionMatrix;
 
    @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
@@ -34,11 +38,8 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
 
-   @RosExportedField(documentation = "Position of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Point3D controlFramePosition = new Point3D();
-
-   @RosExportedField(documentation = "Orientation of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Quaternion controlFrameOrientation = new Quaternion();
+   @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
+   public final QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
    /**
     * Empty constructor for serialization.
@@ -56,7 +57,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[randomNumberOfPoints];
-      for(int i = 0; i < randomNumberOfPoints; i++)
+      for (int i = 0; i < randomNumberOfPoints; i++)
       {
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
       }
@@ -112,7 +113,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
-               so3TrajectoryPointMessage.angularVelocity);
+                                                      so3TrajectoryPointMessage.angularVelocity);
       }
    }
 
@@ -129,12 +130,17 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    /**
     * Create a trajectory point.
+    * 
     * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
+    * @param time time at which the trajectory point has to be reached. The time is relative to when
+    *           the trajectory starts.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
+    *           It is should be expressed in the frame defined by referenceFrameId
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
+    *           point. It is should be expressed in the frame defined by referenceFrameId
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
+                                        ReferenceFrame expressedInReferenceFrame)
    {
       checkIfTrajectoryFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -143,12 +149,17 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    /**
     * Create a trajectory point.
+    * 
     * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
+    * @param time time at which the trajectory point has to be reached. The time is relative to when
+    *           the trajectory starts.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
+    *           It is should be expressed in the frame defined by referenceFrameId
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
+    *           point. It is should be expressed in the frame defined by referenceFrameId
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity, long expressedInReferenceFrameId)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
+                                        long expressedInReferenceFrameId)
    {
       checkIfFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -163,19 +174,30 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    }
 
    /**
-    * The selectionMatrix needs to be nx6 or nx3.
-    * @param selectionMatrix
+    * Sets the selection matrix to use for executing this message.
+    * <p>
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * </p>
+    * <p>
+    * The selection frame coming along with the given selection matrix is used to determine to what
+    * reference frame the selected axes are referring to. For instance, if only the hand height in
+    * world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should world frame. When no reference frame is provided with
+    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
+    * if not defined otherwise.
+    * </p>
+    * 
+    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    *           modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
-      if (selectionMatrixDiagonal == null)
-         selectionMatrixDiagonal = new float[3];
-
-      DenseMatrix64F inner = new DenseMatrix64F(selectionMatrix.getNumCols(), selectionMatrix.getNumCols());
-      CommonOps.multInner(selectionMatrix, inner);
-
-      for (int i = 0; i < 3; i++)
-         selectionMatrixDiagonal[i] = (float) inner.get(i, i);
+      if (this.selectionMatrix == null)
+         this.selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix);
+      else
+         this.selectionMatrix.set(selectionMatrix);
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -206,32 +228,39 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public boolean hasSelectionMatrix()
    {
-      return selectionMatrixDiagonal != null;
+      return selectionMatrix != null;
    }
 
-   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(3, 6);
-      selectionMatrixToPack.zero();
+      selectionMatrixToPack.clearSelection();
+      if (selectionMatrix != null)
+         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+   }
 
-      if (selectionMatrixDiagonal != null)
-      {
-         for (int i = 0; i < 3; i++)
-            selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
-         MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
-      }
+   /**
+    * Returns the unique ID referring to the selection frame to use with the selection matrix of
+    * this message.
+    * <p>
+    * If this message does not have a selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the selection matrix.
+    */
+   public long getSelectionFrameId()
+   {
+      if (selectionMatrix != null)
+         return selectionMatrix.getSelectionFrameId();
       else
-      {
-         for (int i = 0; i < 3; i++)
-            selectionMatrixToPack.set(i, i, 1.0);
-      }
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException(
-               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
+               + getNumberOfTrajectoryPoints());
    }
 
    /** {@inheritDoc} */
@@ -254,12 +283,12 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
-      if(dataReferenceFrameId != other.dataReferenceFrameId)
+      if (dataReferenceFrameId != other.dataReferenceFrameId)
       {
          return false;
       }
 
-      if(trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
+      if (trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
       {
          return false;
       }
@@ -276,37 +305,31 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       return super.epsilonEquals(other, epsilon);
    }
 
-   @Override
    public long getTrajectoryReferenceFrameId()
    {
       return trajectoryReferenceFrameId;
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
    {
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
 
-   @Override
    public long getDataReferenceFrameId()
    {
       return dataReferenceFrameId;
    }
 
-   @Override
    public void setDataReferenceFrameId(long dataReferenceFrameId)
    {
       this.dataReferenceFrameId = dataReferenceFrameId;
    }
 
-   @Override
    public void setDataReferenceFrameId(ReferenceFrame dataReferenceFrame)
    {
       this.dataReferenceFrameId = dataReferenceFrame.getNameBasedHashCode();
@@ -319,29 +342,21 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void setControlFramePosition(Point3D controlFramePosition)
    {
-      this.controlFramePosition.set(controlFramePosition);
+      controlFramePose.setTranslation(controlFramePosition);
    }
 
    public void setControlFrameOrientation(Quaternion controlFrameOrientation)
    {
-      this.controlFrameOrientation.set(controlFrameOrientation);
+      controlFramePose.setRotation(controlFrameOrientation);
    }
 
-   @Override
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
    }
 
-   @Override
-   public Point3D getControlFramePosition()
+   public void getControlFramePose(RigidBodyTransform controlFrameTransformToPack)
    {
-      return controlFramePosition;
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return controlFrameOrientation;
+      controlFrameTransformToPack.set(controlFramePose);
    }
 }

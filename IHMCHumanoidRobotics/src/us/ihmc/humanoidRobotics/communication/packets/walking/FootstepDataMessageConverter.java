@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -37,7 +36,6 @@ public class FootstepDataMessageConverter
          footstepPose.getOrientation(orientation);
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (footstep.hasFoothold())
          {
@@ -74,7 +72,6 @@ public class FootstepDataMessageConverter
          footstepPose.getOrientation(orientation);
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (footstep.hasFoothold())
          {

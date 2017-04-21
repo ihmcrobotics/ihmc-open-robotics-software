@@ -3,10 +3,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
-      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
+      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>
+      implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
    private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
@@ -35,12 +36,12 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
    }
-   
+
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getChestTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getChestTrajectoryMessage());
    }
 
    @Override
