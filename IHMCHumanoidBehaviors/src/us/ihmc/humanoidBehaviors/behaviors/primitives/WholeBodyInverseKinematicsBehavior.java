@@ -36,6 +36,7 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -366,6 +367,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       if (!hasSentMessageToController.getBooleanValue())
       {
+         ThreadTools.sleep(250);
+         PrintTools.info(""+currentSolutionQuality.getDoubleValue());
          for (RobotSide robotSide : RobotSide.values)
          {
             if (handTrajectoryMessage.get(robotSide) != null)
@@ -430,6 +433,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
                outputConverter.computePelvisTrajectoryMessage();
                PrintTools.info("");
                PrintTools.info("send to controller "+yoTime.getDoubleValue());
+               PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
+               PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
                PrintTools.info("");
                sendPacketToController(message);
                hasSentMessageToController.set(true);
