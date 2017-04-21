@@ -90,12 +90,12 @@ public class SolarPanelMotionPlanner
          RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
          RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
          
-         node1.isValidNode();
-         ThreadTools.sleep(5000);
-         node2.isValidNode();
-         ThreadTools.sleep(5000);
-         node3.isValidNode();
-         ThreadTools.sleep(5000);
+         PrintTools.info(""+node1.isValidNode());
+         ThreadTools.sleep(1000);
+         PrintTools.info(""+node2.isValidNode());
+         ThreadTools.sleep(1000);
+         PrintTools.info(""+node3.isValidNode());
+         ThreadTools.sleep(1000);
          
 //         rrtPlanner.expandingTreesAndShortCut(200);
 //         

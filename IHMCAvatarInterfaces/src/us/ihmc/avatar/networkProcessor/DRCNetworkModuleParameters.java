@@ -35,7 +35,6 @@ public class DRCNetworkModuleParameters
    private boolean useRobotEnvironmentAwarenessModule = true;
    private boolean useHeightQuadTreeToolbox = true;
    private boolean useRemoteObjectDetectionFeedback = true;
-   private boolean usePoseValidityToolbox = true;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -72,11 +71,6 @@ public class DRCNetworkModuleParameters
    public boolean isFootstepPlanningToolboxEnabled()
    {
       return useFootstepPlanningToolbox;
-   }
-   
-   public boolean isPoseValitityToolboxEnabled()
-   {
-      return usePoseValidityToolbox;
    }
 
    public boolean isKinematicsToolboxVisualizerEnabled()

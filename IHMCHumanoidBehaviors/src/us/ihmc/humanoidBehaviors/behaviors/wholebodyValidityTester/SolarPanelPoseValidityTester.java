@@ -62,7 +62,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
       Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
-//      PrintTools.info("IN "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
+      PrintTools.info("IN "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    
