@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -13,14 +15,22 @@ public class TransferToWalkingSingleSupportState extends TransferState
 {
    private final DoubleYoVariable minimumTransferTime = new DoubleYoVariable("minimumTransferTime", registry);
 
+   private final KneeAngleManager kneeAngleManager;
+   private final DoubleYoVariable percentOfTransferToCollapseLeg = new DoubleYoVariable("percentOfTransferToCollapseLeg", registry);
+
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, WalkingFailureDetectionControlModule failureDetectionControlModule,
+         double minimumTransferTime, YoVariableRegistry parentRegistry)
    {
       super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);
+
+      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
+
+      percentOfTransferToCollapseLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getPercentOfTransferToCollapseLeg());
    }
 
    @Override
@@ -44,10 +54,24 @@ public class TransferToWalkingSingleSupportState extends TransferState
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
-      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer(walkingMessageHandler.peekTiming(0).getSwingTime(), walkingMessageHandler.peekTiming(0).getTransferTime(),
+            finalTransferTime);
+
+      kneeAngleManager.beginStraightening(transferToSide);
+   }
+
+   @Override
+   public void doAction()
+   {
+      super.doAction();
+
+      double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
+
+      if (getTimeInCurrentState() > percentOfTransferToCollapseLeg.getDoubleValue() * transferDuration)
+      {
+         kneeAngleManager.collapseLegDuringTransfer(transferToSide);
+      }
    }
 
    /**

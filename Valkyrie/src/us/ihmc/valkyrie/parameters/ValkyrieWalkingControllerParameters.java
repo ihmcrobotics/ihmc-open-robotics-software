@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -58,6 +59,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
+   private final StraightLegWalkingParameters straightLegWalkingParameters;
+
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
       this(jointMap, DRCRobotModel.RobotTarget.SCS);
@@ -67,6 +70,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       this.jointMap = jointMap;
       this.target = target;
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
 
       // Genreated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -1295,11 +1301,24 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    /** {@inheritDoc} */
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      return straightLegWalkingParameters;
+   }
+
+   /** {@inheritDoc} */
    @Override
    public boolean minimizeAngularMomentumRateZDuringSwing()
    {
       // For some reason it causes the test ValkyrieEndToEndCinderBlockFieldTest to fail by making the state estimator drift more than usual.
       // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
       return target == RobotTarget.REAL_ROBOT;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSupportState()
+   {
+      return true;
    }
 }

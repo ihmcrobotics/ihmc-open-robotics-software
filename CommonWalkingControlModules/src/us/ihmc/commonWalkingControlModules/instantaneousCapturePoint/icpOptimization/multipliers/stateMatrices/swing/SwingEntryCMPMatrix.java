@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SwingEntryCMPMatrix extends DenseMatrix64F
@@ -24,6 +23,7 @@ public class SwingEntryCMPMatrix extends DenseMatrix64F
    {
       zero();
 
+      // project forward from the initial ICP state
       double projection = Math.exp(omega0 * startOfSplineTime.getDoubleValue());
 
       set(0, 0, 1.0 - projection);

@@ -131,6 +131,12 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.jointAngularAccelerationDesired.setZ(matrix.get(rowStart + 2, 0));
    }
 
+   @Override
+   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   {
+      jointTorque.set(matrix.get(rowStart + 0), matrix.get(rowStart + 1), matrix.get(rowStart + 2));
+   }
+
    public void setRotation(double yaw, double pitch, double roll)
    {
       jointRotation.setYawPitchRoll(yaw, pitch, roll);

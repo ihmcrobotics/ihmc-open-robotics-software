@@ -152,6 +152,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final YoFrameVector2d pelvisShiftScaleFactor;
 
@@ -265,6 +266,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       //icp variables
       isIcpOffsetSenderEnabled = new BooleanYoVariable("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
@@ -1372,10 +1374,10 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceFlexUpFlexDown()
    {
       RobotSide robotSide = RobotSide.LEFT;
-      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+      ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide);
 
       //put the left foot forward
-      FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
@@ -1408,10 +1410,10 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceFlexDown()
    {
       RobotSide robotSide = RobotSide.LEFT;
-      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+      ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide);
 
       //put the left foot forward
-      FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
@@ -1494,12 +1496,12 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void bow(RobotSide robotSide)
    {
-      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
+      ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide.getOppositeSide());
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       boolean mirrorOrientationForRightSide = true;
 
       //put the foot forward and prepare the arms
-      FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.25), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
@@ -1562,7 +1564,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pipeLine.requestNewStage();
 
       //square up the feet
-      desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      desiredFootstepPosition = new FramePose(soleZUpFrame);
       position = new Point3D(0., robotSide.negateIfRightSide(0.25), 0.0);
       orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);

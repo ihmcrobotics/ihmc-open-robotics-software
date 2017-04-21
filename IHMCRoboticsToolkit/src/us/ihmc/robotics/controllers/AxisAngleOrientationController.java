@@ -74,8 +74,8 @@ public class AxisAngleOrientationController
       integralTerm = new FrameVector(bodyFrame);
 
       feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
-      rateLimitedFeedbackAngularAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "",
-            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
+      rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "", registry,
+                                                                      gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }
@@ -164,7 +164,7 @@ public class AxisAngleOrientationController
 
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
-      if (errorAngleAxis.getAngle() > maximumError)
+      if (Math.abs(errorAngleAxis.getAngle()) > maximumError)
       {
          errorAngleAxis.setAngle(Math.signum(errorAngleAxis.getAngle()) * maximumError);
       }

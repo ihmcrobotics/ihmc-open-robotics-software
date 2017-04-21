@@ -1,13 +1,20 @@
 package us.ihmc.simulationconstructionset.physics.featherstone;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UniversalJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.MemoryTools;
+
+import java.io.IOException;
 
 import static junit.framework.TestCase.fail;
 
@@ -17,6 +24,19 @@ import static junit.framework.TestCase.fail;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class FeatherstoneAlgorithmTest
 {
+   @Before
+   public void setup()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      ParameterRegistry.destroyAndRecreateInstance();
+   }
+
+   @After
+   public void tearDown()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    @Test
@@ -41,6 +61,14 @@ public class FeatherstoneAlgorithmTest
       double epsilon = 1e-2;
       CartPoleRobot cartPoleRobot = new CartPoleRobot("cartPole", 0.3, -1.3, 0.4);
       testAgainstLagrangianCalculation(cartPoleRobot, epsilon);
+   }
+
+   @Test
+   public void testUniversalJointAgainLagrangianCalculation()
+   {
+      double epsilon = 1e-4;
+      UniversalJointRobot universalJointRobot = new UniversalJointRobot("universalJoint", 0.4, -0.2, -0.4, 0.3);
+      testAgainstLagrangianCalculation(universalJointRobot, epsilon);
    }
 
    private void testAgainstLagrangianCalculation(RobotWithClosedFormDynamics robotWithClosedFormDynamics, double epsilon)

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -14,11 +13,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,16 +26,17 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>
+public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>, FrameBasedMessage
 {
-   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
-   public FootstepOrigin origin;
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
    public Point3D location;
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
    public Quaternion orientation;
+
+   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all pose data in this message.")
+   public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to keep the contact points used for the original footstep. Contact points  are expressed in sole frame. This ordering does not matter.\n"
@@ -51,7 +51,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage()
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
@@ -73,7 +72,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          TrajectoryType trajectoryType, double swingHeight)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -86,7 +84,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
@@ -105,6 +102,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       }
    }
 
+   @Override
    public AdjustFootstepMessage clone()
    {
       return new AdjustFootstepMessage(this);
@@ -113,12 +111,15 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(Footstep footstep)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3D();
-      orientation = new Quaternion();
-      footstep.getPositionInWorldFrame(location);
-      footstep.getOrientationInWorldFrame(orientation);
+
+      FramePoint location = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(location, orientation);
+      ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
+      setTrajectoryReferenceFrameId(trajectoryFrame);
+      this.location = location.getPoint();
+      this.orientation = orientation.getQuaternion();
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -140,11 +141,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       {
          predictedContactPoints = null;
       }
-   }
-
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
    }
 
    public List<Point2D> getPredictedContactPoints()
@@ -182,11 +178,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.robotSide = robotSide;
    }
 
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
-   }
-
    public void setLocation(Point3D location)
    {
       if (this.location == null) this.location = new Point3D();
@@ -204,6 +195,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.predictedContactPoints = predictedContactPoints;
    }
 
+   @Override
    public String toString()
    {
       String ret = "";
@@ -225,6 +217,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return ret;
    }
 
+   @Override
    public boolean epsilonEquals(AdjustFootstepMessage footstepData, double epsilon)
    {
       boolean robotSideEquals = robotSide == footstepData.robotSide;
@@ -265,6 +258,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
    }
 
+   @Override
    public AdjustFootstepMessage transform(RigidBodyTransform transform)
    {
       AdjustFootstepMessage ret = this.clone();
@@ -280,7 +274,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(Random random)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
       this.orientation = RandomGeometry.nextQuaternion(random);
@@ -298,5 +291,23 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public String validateMessage()
    {
       return PacketValidityChecker.validateFootstepDataMessage(this);
+   }
+
+   /** {@inheritDoc} */
+   public long getTrajectoryReferenceFrameId()
+   {
+      return trajectoryReferenceFrameId;
+   }
+
+   /** {@inheritDoc} */
+   public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
+   {
+      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
+   }
+
+   /** {@inheritDoc} */
+   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   {
+      trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
 }

@@ -4,7 +4,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-
 public class RateLimitedYoVariable extends DoubleYoVariable
 {
    private final DoubleYoVariable maxRateVariable;
@@ -20,7 +19,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name  + "Limited", registry);
+      this.limited = new BooleanYoVariable(name + "Limited", registry);
 
       this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
       this.maxRateVariable.set(maxRate);
@@ -36,7 +35,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name  + "Limited", registry);
+      this.limited = new BooleanYoVariable(name + "Limited", registry);
 
       this.maxRateVariable = maxRateVariable;
       this.position = null;
@@ -49,7 +48,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name  + "Limited", registry);
+      this.limited = new BooleanYoVariable(name + "Limited", registry);
 
       position = positionVariable;
 
@@ -65,7 +64,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name  + "Limited", registry);
+      this.limited = new BooleanYoVariable(name + "Limited", registry);
 
       position = positionVariable;
       this.maxRateVariable = maxRateVariable;
@@ -89,7 +88,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       if (position == null)
       {
-         throw new NullPointerException("YoAlphaFilteredVariable must be constructed with a non null "
+         throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
                + "position variable to call update(), otherwise use update(double)");
       }
 

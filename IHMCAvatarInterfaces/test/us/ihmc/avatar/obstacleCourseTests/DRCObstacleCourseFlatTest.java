@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -298,28 +297,24 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          Point3D position = new Point3D(0.0, 0.2, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(0.3, -0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(0.8, 0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(0.8, -0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
@@ -333,28 +328,24 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          position = new Point3D(1.0, 0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(1.3, -0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(1.8, 0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
          position = new Point3D(1.8, -0.2, 0.0);
          orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
-         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
@@ -407,14 +398,12 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         Point3D position = new Point3D(0.3, 0.2, 0.0);
         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
         position = new Point3D(0.3, -0.2, 0.0);
         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
         footstepList.addFootstep(footstepCommand);
 
@@ -438,28 +427,24 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         position = new Point3D(0.65, 0.2, 0.0);
         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
         position = new Point3D(0.65, -0.2, 0.0);
         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
         footstepList.addFootstep(footstepCommand);
 
         position = new Point3D(1.1, 0.2, 0.0);
         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
         position = new Point3D(1.1, -0.2, 0.0);
         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
-        footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
         footstepList.addFootstep(footstepCommand);
 

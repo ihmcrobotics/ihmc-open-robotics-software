@@ -50,8 +50,8 @@ public class InverseDynamicsCalculator
    public InverseDynamicsCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
          List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms, TwistCalculator twistCalculator)
    {
-      this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(twistCalculator.getRootBody(), inertialFrame, rootAcceleration,
-            twistCalculator, doVelocityTerms, doAccelerationTerms, true), twistCalculator);
+      this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
+            doAccelerationTerms, true), twistCalculator);
    }
 
    public InverseDynamicsCalculator(ReferenceFrame inertialFrame, HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,

@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -26,12 +25,10 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -66,8 +63,8 @@ public class SupportState extends AbstractFootControlState
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
-   private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
-   private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
+   private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
    private final FramePoint2d cop2d = new FramePoint2d();
    private final FramePoint framePosition = new FramePoint();
@@ -98,10 +95,6 @@ public class SupportState extends AbstractFootControlState
 
    // For straight legs with privileged configuration
    private final RigidBody pelvis;
-   private final OneDoFJoint kneePitch;
-   private final YoPolynomial kneePrivilegedConfigurationTrajectory;
-   private final DoubleYoVariable durationForStanceLegStraightening;
-   private final DoubleYoVariable straightKneeAngle;
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -156,13 +149,6 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
 
-      kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-      kneePrivilegedConfigurationTrajectory = new YoPolynomial(prefix + "KneePrivilegedConfiguration", 4, registry);
-      durationForStanceLegStraightening = new DoubleYoVariable(prefix + "DurationForStanceLegStraightening", registry);
-      straightKneeAngle = new DoubleYoVariable(prefix + "StraightKneeAngle", registry);
-      durationForStanceLegStraightening.set(footControlHelper.getWalkingControllerParameters().getDurationForStanceLegStraightening());
-      straightKneeAngle.set(footControlHelper.getWalkingControllerParameters().getStraightKneeAngle());
-
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
@@ -182,10 +168,6 @@ public class SupportState extends AbstractFootControlState
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       updateHoldPositionSetpoints();
-
-      double currentKneeAngle = kneePitch.getQ();
-
-      kneePrivilegedConfigurationTrajectory.setCubic(0.0, durationForStanceLegStraightening.getDoubleValue(), currentKneeAngle, 0.0, straightKneeAngle.getDoubleValue(), 0.0);
    }
 
    @Override
@@ -264,10 +246,8 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       // set selection matrices
-      accelerationSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(accelerationSelectionMatrix);
-      feedbackSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(feedbackSelectionMatrix);
+      accelerationSelectionMatrix.resetSelection();
+      feedbackSelectionMatrix.resetSelection();
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
@@ -287,29 +267,16 @@ public class SupportState extends AbstractFootControlState
       for (int i = dofs-1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
-            MatrixTools.removeRow(accelerationSelectionMatrix, i);
+            accelerationSelectionMatrix.selectAxis(i, false);
          else
-            MatrixTools.removeRow(feedbackSelectionMatrix, i);
+            feedbackSelectionMatrix.selectAxis(i, false);
       }
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
-      if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != dofs)
-         throw new RuntimeException("Trying to control too much or too little.");
 
       // update visualization
       frameViz.setToReferenceFrame(controlFrame);
-
-      updatePrivilegedConfiguration();
-   }
-
-   private void updatePrivilegedConfiguration()
-   {
-      double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, durationForStanceLegStraightening.getDoubleValue());
-      kneePrivilegedConfigurationTrajectory.compute(timeInTrajectory);
-
-      straightLegsPrivilegedConfigurationCommand.clear();
-      straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, kneePrivilegedConfigurationTrajectory.getPosition());
    }
 
    private void updateHoldPositionSetpoints()
@@ -362,11 +329,6 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
-
-      if (attemptToStraightenLegs)
-         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
-      else
-         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
 
       return inverseDymamicsCommandsList;
    }

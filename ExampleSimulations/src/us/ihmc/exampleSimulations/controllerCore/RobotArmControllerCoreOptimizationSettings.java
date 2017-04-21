@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
+package us.ihmc.exampleSimulations.controllerCore;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;

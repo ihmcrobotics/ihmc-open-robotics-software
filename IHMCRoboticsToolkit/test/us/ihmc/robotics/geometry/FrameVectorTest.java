@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -325,6 +323,44 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
          v1.normalize();
          double sumOfSquares = v1.getX()*v1.getX() + v1.getY()*v1.getY() + v1.getZ()*v1.getZ(); 
          assertEquals("These should be equal", 1.0, sumOfSquares, epsilon);
+      }
+   }
+
+	@Test
+   public void testLimitLength() throws Exception
+   {
+      Random random = new Random(546456);
+
+      FrameVector expectedVector = new FrameVector(theFrame);
+
+      for (int i = 0; i < 100; i++)
+      {
+         double maximumLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
+         double smallLength = random.nextDouble() * maximumLength;
+         FrameVector smallVector = new FrameVector(theFrame, EuclidCoreRandomTools.generateRandomVector3DWithFixedLength(random, smallLength));
+         expectedVector.set(smallVector);
+
+         boolean hasBeenLimited = smallVector.limitLength(maximumLength);
+
+         assertFalse(hasBeenLimited);
+         assertTrue(smallVector.length() < maximumLength); // Redundant assertion but this is what the method does at the end.
+
+         assertEquals(expectedVector.getReferenceFrame(), smallVector.getReferenceFrame());
+         EuclidCoreTestTools.assertTuple3DEquals(expectedVector.getVector(), smallVector.getVector(), epsilon);
+
+         double bigLength = RandomNumbers.nextDouble(random, 1.0, 10.0) * maximumLength;
+         FrameVector bigVector = new FrameVector(theFrame, EuclidCoreRandomTools.generateRandomVector3DWithFixedLength(random, bigLength));
+         expectedVector.set(bigVector);
+         expectedVector.normalize();
+         expectedVector.scale(maximumLength);
+         
+         hasBeenLimited = bigVector.limitLength(maximumLength);
+
+         assertTrue(hasBeenLimited);
+         assertEquals(bigVector.length(), maximumLength, epsilon);
+
+         assertEquals(expectedVector.getReferenceFrame(), bigVector.getReferenceFrame());
+         EuclidCoreTestTools.assertTuple3DEquals(expectedVector.getVector(), bigVector.getVector(), epsilon);
       }
    }
 
