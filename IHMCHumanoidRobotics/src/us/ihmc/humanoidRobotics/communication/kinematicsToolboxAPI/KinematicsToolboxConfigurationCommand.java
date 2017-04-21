@@ -10,11 +10,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 public class KinematicsToolboxConfigurationCommand implements Command<KinematicsToolboxConfigurationCommand, KinematicsToolboxConfigurationMessage>
 {
    private boolean holdCurrentCenterOfMassXYPosition = true;
-   private boolean holdSupporFootPositions = true;
+   private boolean holdSupportFootPositions = true;
 
-   private boolean hasPrivilegedRooJointPosition = false;
+   private boolean hasPrivilegedRootJointPosition = false;
    private final Point3D privilegedRootJointPosition = new Point3D();
-   private boolean hasPrivilegedRooJointOrientation = false;
+   private boolean hasPrivilegedRootJointOrientation = false;
    private final Quaternion privilegedRootJointOrientation = new Quaternion();
 
    private boolean hasPrivilegedJointAngles = false;
@@ -25,11 +25,11 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public void clear()
    {
       holdCurrentCenterOfMassXYPosition = true;
-      holdSupporFootPositions = true;
+      holdSupportFootPositions = true;
 
-      hasPrivilegedRooJointPosition = false;
+      hasPrivilegedRootJointPosition = false;
       privilegedRootJointPosition.setToNaN();
-      hasPrivilegedRooJointOrientation = false;
+      hasPrivilegedRootJointOrientation = false;
       privilegedRootJointOrientation.setToNaN();
    }
 
@@ -37,23 +37,23 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public void set(KinematicsToolboxConfigurationCommand other)
    {
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
-      holdSupporFootPositions = other.holdSupporFootPositions;
+      holdSupportFootPositions = other.holdSupportFootPositions;
    }
 
    @Override
    public void set(KinematicsToolboxConfigurationMessage message)
    {
       holdCurrentCenterOfMassXYPosition = message.holdCurrentCenterOfMassXYPosition();
-      holdSupporFootPositions = message.holdSupporFootPositions();
+      holdSupportFootPositions = message.holdSupportFootPositions();
 
-      hasPrivilegedRooJointPosition = message.getPrivilegedRootJointPosition() != null;
-      if (hasPrivilegedRooJointPosition)
+      hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
+      if (hasPrivilegedRootJointPosition)
          privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition());
       else
          privilegedRootJointPosition.setToNaN();
 
-      hasPrivilegedRooJointOrientation = message.getPrivilegedRootJointOrientation() != null;
-      if (hasPrivilegedRooJointOrientation)
+      hasPrivilegedRootJointOrientation = message.getPrivilegedRootJointOrientation() != null;
+      if (hasPrivilegedRootJointOrientation)
          privilegedRootJointOrientation.set(message.getPrivilegedRootJointOrientation());
       else
          privilegedRootJointOrientation.setToNaN();
@@ -73,19 +73,19 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       return holdCurrentCenterOfMassXYPosition;
    }
 
-   public boolean holdSupporFootPositions()
+   public boolean holdSupportFootPositions()
    {
-      return holdSupporFootPositions;
+      return holdSupportFootPositions;
    }
 
-   public boolean hasPrivilegedRooJointPosition()
+   public boolean hasPrivilegedRootJointPosition()
    {
-      return hasPrivilegedRooJointPosition;
+      return hasPrivilegedRootJointPosition;
    }
 
-   public boolean hasPrivilegedRooJointOrientation()
+   public boolean hasPrivilegedRootJointOrientation()
    {
-      return hasPrivilegedRooJointOrientation;
+      return hasPrivilegedRootJointOrientation;
    }
 
    public boolean hasPrivilegedJointAngles()

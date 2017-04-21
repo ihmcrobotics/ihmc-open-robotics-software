@@ -589,7 +589,7 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
-         holdSupportFootPose.set(command.holdSupporFootPositions());
+         holdSupportFootPose.set(command.holdSupportFootPositions());
 
          /*
           * If there is a new privileged configuration, the desired robot state is updated alongside
@@ -597,7 +597,7 @@ public class KinematicsToolboxController extends ToolboxController
           * poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
-         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRooJointPosition() || command.hasPrivilegedRooJointOrientation())
+         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
             updateCoMPositionAndFootPoses();
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();

@@ -175,7 +175,7 @@ public class KinematicsToolboxHelper
          }
       }
 
-      boolean hasPrivilegedRooJointPosition = commandWithPrivilegedConfiguration.hasPrivilegedRooJointPosition();
+      boolean hasPrivilegedRooJointPosition = commandWithPrivilegedConfiguration.hasPrivilegedRootJointPosition();
 
       if (hasPrivilegedRooJointPosition)
       {
@@ -183,7 +183,7 @@ public class KinematicsToolboxHelper
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
       }
 
-      boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRooJointOrientation();
+      boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
 
       if (hasPrivilegedRooJointOrientation)
       {
