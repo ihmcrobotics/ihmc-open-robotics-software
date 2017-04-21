@@ -57,8 +57,12 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
+
       clear(dataFrame);
       set(message);
+
+      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionFrameId());
+      selectionMatrix.setSelectionFrame(selectionFrame);
    }
 
    /**
