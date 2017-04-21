@@ -312,7 +312,7 @@ public class SelectionMatrix3D
     */
    public void getEfficientSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      getEfficientSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
+      getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
 
    /**
@@ -336,7 +336,7 @@ public class SelectionMatrix3D
     *           inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getEfficientSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
+   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
    {
       int numRows = selectionMatrixToPack.getNumRows();
       int numCols = selectionMatrixToPack.getNumCols();

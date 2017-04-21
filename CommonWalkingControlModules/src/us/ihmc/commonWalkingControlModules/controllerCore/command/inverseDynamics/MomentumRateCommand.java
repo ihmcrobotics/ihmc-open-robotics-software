@@ -202,7 +202,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
    }
 
    /**
@@ -228,7 +228,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForLinearXYControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearY(false);
    }
 
@@ -238,7 +238,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
@@ -523,7 +523,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
 
    /**

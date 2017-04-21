@@ -387,7 +387,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
    }
 
    /**
@@ -413,7 +413,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
@@ -795,7 +795,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
 
    /**

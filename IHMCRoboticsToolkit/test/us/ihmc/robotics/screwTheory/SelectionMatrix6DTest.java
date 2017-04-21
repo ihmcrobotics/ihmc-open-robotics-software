@@ -86,7 +86,7 @@ public class SelectionMatrix6DTest
          assertTrue(selectionMatrix6D.isLinearYSelected());
          assertTrue(selectionMatrix6D.isLinearZSelected());
 
-         selectionMatrix6D.setToLinearSelection();
+         selectionMatrix6D.setToLinearSelectionOnly();
          assertFalse(selectionMatrix6D.isAngularXSelected());
          assertFalse(selectionMatrix6D.isAngularYSelected());
          assertFalse(selectionMatrix6D.isAngularZSelected());
@@ -94,7 +94,7 @@ public class SelectionMatrix6DTest
          assertTrue(selectionMatrix6D.isLinearYSelected());
          assertTrue(selectionMatrix6D.isLinearZSelected());
 
-         selectionMatrix6D.setToAngularSelection();
+         selectionMatrix6D.setToAngularSelectionOnly();
          assertTrue(selectionMatrix6D.isAngularXSelected());
          assertTrue(selectionMatrix6D.isAngularYSelected());
          assertTrue(selectionMatrix6D.isAngularZSelected());
@@ -114,12 +114,12 @@ public class SelectionMatrix6DTest
          assertNull(selectionMatrix6D.getLinearSelectionFrame());
 
          selectionMatrix6D.setSelectionFrame(randomFrame);
-         selectionMatrix6D.setToLinearSelection();
+         selectionMatrix6D.setToLinearSelectionOnly();
          assertNull(selectionMatrix6D.getAngularSelectionFrame());
          assertNull(selectionMatrix6D.getLinearSelectionFrame());
 
          selectionMatrix6D.setSelectionFrame(randomFrame);
-         selectionMatrix6D.setToAngularSelection();
+         selectionMatrix6D.setToAngularSelectionOnly();
          assertNull(selectionMatrix6D.getAngularSelectionFrame());
          assertNull(selectionMatrix6D.getLinearSelectionFrame());
 
@@ -275,7 +275,7 @@ public class SelectionMatrix6DTest
                selectionMatrix6D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
                MatrixTools.removeZeroRows(expectedSelectionMatrix, 1.0e-7);
 
-               selectionMatrix6D.getEfficientSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
+               selectionMatrix6D.getCompactSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
 
                assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
             }

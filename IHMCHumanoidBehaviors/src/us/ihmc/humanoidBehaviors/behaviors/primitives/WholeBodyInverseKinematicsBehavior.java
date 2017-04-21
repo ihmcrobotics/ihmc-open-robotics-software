@@ -163,7 +163,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setHandLinearControlOnly(RobotSide robotSide)
    {
-      handSelectionMatrices.get(robotSide).setToLinearSelection();
+      handSelectionMatrices.get(robotSide).setToLinearSelectionOnly();
    }
 
    public void setHandLinearControlAndYawPitchOnly(RobotSide robotSide)

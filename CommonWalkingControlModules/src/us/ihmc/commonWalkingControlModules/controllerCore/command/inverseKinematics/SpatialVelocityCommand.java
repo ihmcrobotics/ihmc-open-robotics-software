@@ -402,7 +402,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
    }
 
    /**
@@ -428,7 +428,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
@@ -475,7 +475,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixForPlanarLinearControl()
    {
-      selectionMatrix.setToLinearSelection();
+      selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearY(false);
    }
 
@@ -816,7 +816,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getEfficientSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
 
    /**

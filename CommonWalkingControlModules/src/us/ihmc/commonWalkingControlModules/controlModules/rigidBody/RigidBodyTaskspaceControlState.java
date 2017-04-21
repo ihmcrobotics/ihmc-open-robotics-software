@@ -350,7 +350,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       resetLastCommandId();
       queueInitialPoint();
 
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
 
       trajectoryStopped.set(false);
       trajectoryDone.set(false);
@@ -434,7 +434,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             return false;
       }
 
-      selectionMatrix.setToAngularSelection();
+      selectionMatrix.setToAngularSelectionOnly();
 
       trackingOrientation.set(true);
       trackingPosition.set(false);
