@@ -518,6 +518,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
 
       hasWalkingControllerBeenInitialized.set(true);
+      
+      commandConsumer.setTimeOfLastManipulationAbortToCurrent();
    }
 
    public void initializeDesiredHeightToCurrent()

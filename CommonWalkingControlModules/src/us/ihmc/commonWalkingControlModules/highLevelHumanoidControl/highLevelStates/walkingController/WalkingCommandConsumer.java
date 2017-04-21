@@ -120,6 +120,11 @@ public class WalkingCommandConsumer
 
       parentRegistry.addChild(registry);
    }
+   
+   public void setTimeOfLastManipulationAbortToCurrent()
+   {
+      timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
+   }
 
    public void consumeHeadCommands()
    {
