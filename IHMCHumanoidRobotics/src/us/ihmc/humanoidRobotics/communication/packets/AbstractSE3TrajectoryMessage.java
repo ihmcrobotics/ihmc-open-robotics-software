@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -257,6 +258,42 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
       if (linearSelectionMatrix != null)
          linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
+   }
+
+   /**
+    * Returns the unique ID referring to the selection frame to use with the angular part of the
+    * selection matrix of this message.
+    * <p>
+    * If this message does not have a angular selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the angular part of the selection matrix.
+    */
+   public long getAngularSelectionFrameId()
+   {
+      if (angularSelectionMatrix != null)
+         return angularSelectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+
+   /**
+    * Returns the unique ID referring to the selection frame to use with the linear part of the
+    * selection matrix of this message.
+    * <p>
+    * If this message does not have a linear selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the linear part of the selection matrix.
+    */
+   public long getLinearSelectionFrameId()
+   {
+      if (linearSelectionMatrix != null)
+         return linearSelectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    private void rangeCheck(int trajectoryPointIndex)

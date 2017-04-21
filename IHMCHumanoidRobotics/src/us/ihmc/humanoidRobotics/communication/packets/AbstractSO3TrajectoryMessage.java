@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
@@ -235,6 +236,24 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       selectionMatrixToPack.clearSelection();
       if (selectionMatrix != null)
          selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+   }
+
+   /**
+    * Returns the unique ID referring to the selection frame to use with the selection matrix of
+    * this message.
+    * <p>
+    * If this message does not have a selection matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the selection matrix.
+    */
+   public long getSelectionFrameId()
+   {
+      if (selectionMatrix != null)
+         return selectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    private void rangeCheck(int trajectoryPointIndex)

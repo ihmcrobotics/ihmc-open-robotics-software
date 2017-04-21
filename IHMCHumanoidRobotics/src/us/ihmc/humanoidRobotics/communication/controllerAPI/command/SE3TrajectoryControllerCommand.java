@@ -62,8 +62,13 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
+
       clear(dataFrame);
       set(message);
+
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
+      selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
    }
 
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)

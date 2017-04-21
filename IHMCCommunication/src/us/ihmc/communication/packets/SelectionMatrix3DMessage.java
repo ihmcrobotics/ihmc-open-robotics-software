@@ -110,6 +110,16 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       selectionMatrix3D.selectZAxis(zSelected);
    }
 
+   /**
+    * Returns the unique ID referring to the selection frame to use with this selection matrix.
+    * 
+    * @return the selection frame ID.
+    */
+   public long getSelectionFrameId()
+   {
+      return selectionFrameId;
+   }
+
    @Override
    public boolean epsilonEquals(SelectionMatrix3DMessage other, double epsilon)
    {
