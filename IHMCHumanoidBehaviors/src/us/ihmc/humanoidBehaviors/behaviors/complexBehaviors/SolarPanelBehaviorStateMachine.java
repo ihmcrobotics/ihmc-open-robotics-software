@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPanelStates>
 {
@@ -54,9 +55,9 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
       this.atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setSolarPanel(solarPanel);
       this.solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
       
-//      RRTNode1DTimeDomain.nodeValidityTester = this.atlasPrimitiveActions.solarPanelPoseValidityTestBehavior;
-//      
-//      RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
+      RRTNode1DTimeDomain.nodeValidityTester = this.atlasPrimitiveActions.solarPanelPoseValidityTestBehavior;
+      
+      RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
 
       
       
@@ -78,26 +79,30 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
          protected void setBehaviorInput()
          {
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Goto Ready Pose");
+            TextToSpeechPacket p1 = new TextToSpeechPacket("gotoReadyPoseAction");
             sendPacket(p1);
             PrintTools.info("gotoReadyPoseAction");
             
-            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-                            
-            if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
-            {
-               wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-            }
+//            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+//                            
+//            if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
+//            {
+//               wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+//            }
           
             FramePoint rHandPoint = new FramePoint(ReferenceFrame.getWorldFrame(), 0.7, -0.35, 1.2);
             FrameOrientation rHandOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), new Quaternion());
                         
             PrintTools.info(""+solarPanelPlanner.getMotionTime());
-            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(solarPanelPlanner.getMotionTime());
+            
+            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3.0);
             atlasPrimitiveActions.wholeBodyBehavior.holdCurrentChestOrientation();
             atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisHeight();
             atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisOrientation();
-            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rHandPoint, rHandOrientation);            
+            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rHandPoint, rHandOrientation);
+            PrintTools.info("Set gotoReadyPoseAction End");
+            ThreadTools.sleep(10000);
+            PrintTools.info("Set gotoReadyPoseAction End");
          }
          
 
@@ -112,68 +117,44 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
             TextToSpeechPacket p1 = new TextToSpeechPacket("activateTesterAction");
             sendPacket(p1);
             PrintTools.info("activateTesterAction");
-          
-//            RRTNode1DTimeDomain.nodeValidityTester = atlasPrimitiveActions.solarPanelPoseValidityTestBehavior;            
-//            RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
-//            
-//            Pose dummyPose = new Pose(new Point3D(0.7, -0.35, 1.2), new Quaternion());
-//            RRTNode1DTimeDomain.nodeValidityTester.setWholeBodyPose(dummyPose, 0.0);
-         }
-         
-         
-//         @Override
-//         public void doTransitionOutOfAction()
-//         {
-//            PrintTools.info("do transition without cleanup actions");
-//            //doPostBehaviorCleanup();
-//         }
-      };
-      
-      BehaviorAction<SolarPanelStates> planningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.PLANNING, atlasPrimitiveActions.solarPanelPoseValidityTestBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("planningAction");
-            sendPacket(p1);
-            PrintTools.info("planningAction");            
-            
             //atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setIsDone(true);
-            
-//            if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
-//            {
-//               // atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.onBehaviorExited();
-//            }
-//            
-//            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(10.0);
+            ThreadTools.sleep(10000);
+            PrintTools.info("Set activateTesterAction End");
          }
-         
+      };
+//      
+//      BehaviorAction<SolarPanelStates> planningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.PLANNING, atlasPrimitiveActions.solarPanelPoseValidityTestBehavior)
+//      {
 //         @Override
-//         public void doTransitionOutOfAction()
+//         protected void setBehaviorInput()
 //         {
-//            doPostBehaviorCleanup();
+//            TextToSpeechPacket p1 = new TextToSpeechPacket("planningAction");
+//            sendPacket(p1);
+//            PrintTools.info("planningAction");
+//            atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setIsDone(true);
 //         }
-      };
-      
-      
-      
-      BehaviorAction<SolarPanelStates> cleaningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.CLEANING_MOTION, atlasPrimitiveActions.solarPanelPoseValidityTestBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Cleaning Linear Path");
-            sendPacket(p1);
-            PrintTools.info("cleaningAction");            
-            
+//      };
+//      
+//      
+//      
+//      BehaviorAction<SolarPanelStates> cleaningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.CLEANING_MOTION, atlasPrimitiveActions.solarPanelPoseValidityTestBehavior)
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            TextToSpeechPacket p1 = new TextToSpeechPacket("cleaningAction");
+//            sendPacket(p1);
+//            PrintTools.info("cleaningAction");            
+//            atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setIsDone(true);
+//
+//         }
+//      };
 
-         }
-      };
-
-      statemachine.addStateWithDoneTransition(gotoReadyPoseAction, SolarPanelStates.ACTIVATE_TESTER);
-      statemachine.addStateWithDoneTransition(activateTesterAction, SolarPanelStates.PLANNING);
-      statemachine.addStateWithDoneTransition(planningAction, SolarPanelStates.CLEANING_MOTION);
-      statemachine.addState(cleaningAction);      
+//      statemachine.addStateWithDoneTransition(gotoReadyPoseAction, SolarPanelStates.ACTIVATE_TESTER);
+      statemachine.addState(gotoReadyPoseAction);
+//      statemachine.addStateWithDoneTransition(activateTesterAction, SolarPanelStates.PLANNING);
+//      statemachine.addStateWithDoneTransition(planningAction, SolarPanelStates.CLEANING_MOTION);
+//      statemachine.addState(cleaningAction);      
       
       statemachine.setStartState(SolarPanelStates.GOTO_READYPOSE);
 

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -427,6 +428,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
                outputConverter.computeHandTrajectoryMessages();
                outputConverter.computeChestTrajectoryMessage();
                outputConverter.computePelvisTrajectoryMessage();
+               PrintTools.info("");
+               PrintTools.info("send to controller "+yoTime.getDoubleValue());
+               PrintTools.info("");
                sendPacketToController(message);
                hasSentMessageToController.set(true);
                deactivateKinematicsToolboxModule();
@@ -444,7 +448,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             sendPacket(solutionSentToController);
 
          if (yoTime.getDoubleValue() - timeSolutionSentToController.getDoubleValue() > trajectoryTime.getDoubleValue())
-         {
+         {            
             isDone.set(true);
          }
       }
