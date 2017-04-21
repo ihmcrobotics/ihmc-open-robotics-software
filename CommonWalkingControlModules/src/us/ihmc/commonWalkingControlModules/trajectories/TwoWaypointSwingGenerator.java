@@ -10,7 +10,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -32,11 +31,11 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
    private final BooleanYoVariable isDone;
-   private final EnumYoVariable<TrajectoryType> trajectoryType;
    private final DoubleYoVariable swingHeight;
    private final DoubleYoVariable maxSwingHeight;
    private final DoubleYoVariable minSwingHeight;
 
+   private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
 
    private final FramePoint initialPosition = new FramePoint();
@@ -60,7 +59,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
       isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
-      trajectoryType = new EnumYoVariable<>(namePrefix + "TrajectoryType", registry, TrajectoryType.class);
       swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
       swingHeight.set(minSwingHeight);
 
@@ -108,19 +106,19 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
          PrintTools.warn("Recieved no waypoints but trajectory type is custom. Using default trajectory.");
-         this.trajectoryType.set(TrajectoryType.DEFAULT);
+         this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
       {
          PrintTools.warn("Recieved unexpected amount of waypoints. Using default trajectory.");
-         this.trajectoryType.set(TrajectoryType.DEFAULT);
+         this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
       {
-         this.trajectoryType.set(trajectoryType);
+         this.trajectoryType = trajectoryType;
       }
 
-      if (this.trajectoryType.getEnumValue() != TrajectoryType.CUSTOM)
+      if (this.trajectoryType != TrajectoryType.CUSTOM)
          return;
 
       for (int i = 0; i < numberWaypoints; i++)
@@ -162,7 +160,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       finalPosition.changeFrame(worldFrame);
       double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
 
-      switch (trajectoryType.getEnumValue())
+      switch (trajectoryType)
       {
       case OBSTACLE_CLEARANCE:
          for (int i = 0; i < numberWaypoints; i++)

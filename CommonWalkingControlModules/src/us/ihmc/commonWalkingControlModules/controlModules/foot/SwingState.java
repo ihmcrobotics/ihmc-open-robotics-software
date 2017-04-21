@@ -15,12 +15,15 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -45,7 +48,7 @@ public class SwingState extends AbstractUnconstrainedState
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
-   private TrajectoryType activeTrajectoryType = TrajectoryType.DEFAULT;
+   private final EnumYoVariable<TrajectoryType> activeTrajectoryType;
    
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
@@ -106,6 +109,11 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePose lastFootstepPose = new FramePose();
    
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
+   
+   private final YoFramePoint yoDesiredSolePosition;
+   private final YoFrameQuaternion yoDesiredSoleOrientation;
+   private final YoFrameVector yoDesiredSoleLinearVelocity;
+   private final YoFrameVector yoDesiredSoleAngularVelocity;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -161,6 +169,7 @@ public class SwingState extends AbstractUnconstrainedState
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentStateProvider(soleFrame, foot, twistCalculator);
       
+      activeTrajectoryType = new EnumYoVariable<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
       swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration", registry);
       swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
       
@@ -181,6 +190,11 @@ public class SwingState extends AbstractUnconstrainedState
       
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
+      
+      yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
+      yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
+      yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
+      yoDesiredSoleAngularVelocity = new YoFrameVector(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -220,7 +234,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
 
-      if (activeTrajectoryType == TrajectoryType.WAYPOINTS)
+      if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
@@ -261,7 +275,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.setInitialConditions(initialPosition, initialLinearVelocity);
       swingTrajectoryOptimizer.setFinalConditions(finalPosition, finalLinearVelocity);
       swingTrajectoryOptimizer.setStepTime(swingDuration.getDoubleValue());
-      swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType, positionWaypointsForSole);
+      swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType.getEnumValue(), positionWaypointsForSole);
       swingTrajectoryOptimizer.setSwingHeight(swingHeight.getDoubleValue());
       swingTrajectoryOptimizer.setStanceFootPosition(stanceFootPosition);
       swingTrajectoryOptimizer.initialize();
@@ -270,7 +284,7 @@ public class SwingState extends AbstractUnconstrainedState
    protected void reinitializeTrajectory(boolean initializeOptimizer)
    {
       // Can not yet replan if trajectory type is WAYPOINTS
-      if (activeTrajectoryType == TrajectoryType.WAYPOINTS)
+      if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
          return;
       }
@@ -323,7 +337,7 @@ public class SwingState extends AbstractUnconstrainedState
          footstepWasAdjusted = true;
          replanTrajectory.set(false);
       }
-      else if (activeTrajectoryType != TrajectoryType.WAYPOINTS)
+      else if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS)
       {
          if (swingTrajectoryOptimizer.doOptimizationUpdate())
          {
@@ -359,9 +373,13 @@ public class SwingState extends AbstractUnconstrainedState
          desiredLinearAcceleration.scale(speedUpFactorSquared);
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
+      
+      yoDesiredSolePosition.setAndMatchFrame(desiredPosition);
+      yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
+      yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
 
       transformDesiredsFromSoleFrameToControlFrame();
-
       secondaryJointWeightScale.set(computeScaleFactor(time));
    }
 
@@ -420,18 +438,18 @@ public class SwingState extends AbstractUnconstrainedState
       if (replanTrajectory.getBooleanValue())
          return;
 
-      activeTrajectoryType = footstep.getTrajectoryType();
+      activeTrajectoryType.set(footstep.getTrajectoryType());
       this.positionWaypointsForSole.clear();
       this.swingWaypoints.clear();
       lastFootstepPose.changeFrame(worldFrame);
 
-      if (activeTrajectoryType == TrajectoryType.CUSTOM)
+      if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
          List<FramePoint> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
          for (int i = 0; i < positionWaypointsForSole.size(); i++)
             this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
       }
-      else if (activeTrajectoryType == TrajectoryType.WAYPOINTS)
+      else if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
          List<FrameSE3TrajectoryPoint> swingWaypoints = footstep.getSwingTrajectory();
          for (int i = 0; i < swingWaypoints.size(); i++)
@@ -446,7 +464,7 @@ public class SwingState extends AbstractUnconstrainedState
 
          if (stepUpOrDown)
          {
-            activeTrajectoryType = TrajectoryType.OBSTACLE_CLEARANCE;
+            activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
          }
       }
    }
@@ -515,5 +533,10 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.informDone();
 
       adjustmentVelocityCorrection.setToZero();
+      
+      yoDesiredSolePosition.setToNaN();
+      yoDesiredSoleOrientation.setToNaN();
+      yoDesiredSoleLinearVelocity.setToNaN();
+      yoDesiredSoleAngularVelocity.setToNaN();
    }
 }
