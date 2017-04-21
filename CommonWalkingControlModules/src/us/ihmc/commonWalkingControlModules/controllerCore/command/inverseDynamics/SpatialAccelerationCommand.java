@@ -394,8 +394,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * Convenience method that sets up the selection matrix by disabling the angular part of this
     * command and applying the given selection matrix to the linear part.
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
@@ -420,8 +420,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * Convenience method that sets up the selection matrix by disabling the linear part of this
     * command and applying the given selection matrix to the angular part.
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this
@@ -441,8 +441,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * all the end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to copy data from. Not modified.

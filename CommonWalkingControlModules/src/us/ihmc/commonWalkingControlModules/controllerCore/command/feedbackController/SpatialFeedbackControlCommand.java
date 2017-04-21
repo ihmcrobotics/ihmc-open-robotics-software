@@ -139,34 +139,38 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    /**
     * Sets whether or not to scale the weights on the joints below the intermediate base defined by
-    * {@link #setPrimaryBase(RigidBody)}. Indicates that we would like to custom scale the weights on the joints
-    * in the kinematic chain below the {@code primaryBase} when controlling the {@code endEffector}.
+    * {@link #setPrimaryBase(RigidBody)}. Indicates that we would like to custom scale the weights
+    * on the joints in the kinematic chain below the {@code primaryBase} when controlling the
+    * {@code endEffector}.
     * <p>
-    *    If false, as is the case in the default setting, the controller uses the default scaling factor
-    *    {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    * If false, as is the case in the default setting, the controller uses the default scaling
+    * factor
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
     * </p>
     * <p>
-    *    If true, the controller uses the custom defined scaling factor {@param secondaryTaskJointWeightScale}
-    *    to scale the weights before the {@code primaryBase} in the kinematic chain between the {@code base}
-    *    and {@code endEffector}.
+    * If true, the controller uses the custom defined scaling factor
+    * {@param secondaryTaskJointWeightScale} to scale the weights before the {@code primaryBase} in
+    * the kinematic chain between the {@code base} and {@code endEffector}.
     * </p>
     * <p>
-    *    A scale factor greater than 1.0 indicates that it is desired to use the joints in the kinematic
-    *    chain between {@code base} and {@code primaryBase} to control the {@code endEffector} more than
-    *    the joints between the {@code primaryBase} and the {@code endEffector}. For example, this can be used
-    *    to say that we would prefer to use the pelvis to control the foot acceleration than the leg joints.
+    * A scale factor greater than 1.0 indicates that it is desired to use the joints in the
+    * kinematic chain between {@code base} and {@code primaryBase} to control the
+    * {@code endEffector} more than the joints between the {@code primaryBase} and the
+    * {@code endEffector}. For example, this can be used to say that we would prefer to use the
+    * pelvis to control the foot acceleration than the leg joints.
     * </p>
     * <p>
-    *    A scale factor less than 1.0 indicates that it is desired to use the joints in the kinematic
-    *    chain between {@code primaryBase} and {@code endEffector} to control the {@code endEffector} more than
-    *    the joints between the {@code base} and the {@code primaryBase}. For example, this can be used to say
-    *    that we would prefer to use the leg joints to control the foot acceleration than the pelvis.
+    * A scale factor less than 1.0 indicates that it is desired to use the joints in the kinematic
+    * chain between {@code primaryBase} and {@code endEffector} to control the {@code endEffector}
+    * more than the joints between the {@code base} and the {@code primaryBase}. For example, this
+    * can be used to say that we would prefer to use the leg joints to control the foot acceleration
+    * than the pelvis.
     * </p>
     *
-    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
-    *                                      below the primary base. Optional.
-    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
-    *                                      Optional.
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the
+    *           joints below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary
+    *           base. Optional.
     */
    public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
@@ -174,8 +178,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
-    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase} to its
-    * default value.
+    * Resets the secondary task joint weight scaling factor on the joints below the
+    * {@code primaryBase} to its default value.
     */
    public void resetSecondaryTaskJointWeightScale()
    {
@@ -540,8 +544,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * all the end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to copy data from. Not modified.

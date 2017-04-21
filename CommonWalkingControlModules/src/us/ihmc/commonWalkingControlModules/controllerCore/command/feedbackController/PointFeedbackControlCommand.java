@@ -231,8 +231,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * all the end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
