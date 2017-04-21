@@ -147,6 +147,28 @@ public class SelectionMatrix6D
    }
 
    /**
+    * Selects all the angular axes and clears the angular selection frame.
+    * <p>
+    * The linear part remains unmodified.
+    * </p>
+    */
+   public void resetAngularSelection()
+   {
+      angularPart.resetSelection();
+   }
+
+   /**
+    * Selects all the linear axes and clears the linear selection frame.
+    * <p>
+    * The angular part remains unmodified.
+    * </p>
+    */
+   public void resetLinearSelection()
+   {
+      linearPart.resetSelection();
+   }
+
+   /**
     * Deselects all the axes and clears the selection frames.
     * <p>
     * Until the selection is changed, this selection matrix is independent from its selection frame.
@@ -155,6 +177,28 @@ public class SelectionMatrix6D
    public void clearSelection()
    {
       angularPart.clearSelection();
+      linearPart.clearSelection();
+   }
+
+   /**
+    * Deselects all the angular axes and clears the angular selection frame.
+    * <p>
+    * The linear part remains unmodified.
+    * </p>
+    */
+   public void clearAngularSelection()
+   {
+      angularPart.clearSelection();
+   }
+
+   /**
+    * Deselects all the linear axes and clears the linear selection frame.
+    * <p>
+    * The angular part remains unmodified.
+    * </p>
+    */
+   public void clearLinearSelection()
+   {
       linearPart.clearSelection();
    }
 
