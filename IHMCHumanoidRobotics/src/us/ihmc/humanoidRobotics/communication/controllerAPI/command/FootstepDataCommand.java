@@ -14,6 +14,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>, FrameBasedCommand<FootstepDataMessage>
 {
@@ -98,12 +99,14 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       transferDuration = other.transferDuration;
    }
    
-   @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, FootstepDataMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataMessage message)
    {
-      // footsteps do not allow the use of a data frame
-      dataFrame.checkReferenceFrameMatch(trajectoryFrame);
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
+      set(message);
+   }
 
+   public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
+   {
       this.trajectoryFrame = trajectoryFrame;
       set(message);
    }

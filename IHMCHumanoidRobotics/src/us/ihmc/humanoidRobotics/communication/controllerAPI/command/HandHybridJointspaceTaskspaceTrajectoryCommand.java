@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
@@ -42,10 +42,10 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
    }
    
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, HandHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getHandTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
    }
 
    @Override
