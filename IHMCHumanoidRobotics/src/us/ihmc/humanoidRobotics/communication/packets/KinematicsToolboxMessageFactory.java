@@ -117,7 +117,7 @@ public class KinematicsToolboxMessageFactory
     * able to hold their configurations. Depending on the context, it may make sense to disable this
     * feature by setting to {@code false} the fields
     * {@link KinematicsToolboxConfigurationMessage#holdCurrentCenterOfMassXYPosition} and
-    * {@link KinematicsToolboxConfigurationMessage#holdSupporFootPositions}.
+    * {@link KinematicsToolboxConfigurationMessage#holdSupportFootPositions}.
     * </p>
     * <p>
     * Note that by sending a privileged configuration the solver will get reinitialized to start off

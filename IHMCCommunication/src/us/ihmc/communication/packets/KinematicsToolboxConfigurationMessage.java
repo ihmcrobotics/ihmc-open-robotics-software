@@ -27,7 +27,7 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
    /**
     * When set to {@code true}, the solver will hold the pose of the active support foot/feet.
     */
-   public boolean holdSupporFootPositions = true;
+   public boolean holdSupportFootPositions = true;
 
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the
@@ -70,11 +70,11 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
     * Specifies whether the {@code KinematicsToolboxController} should the initial pose of the
     * current support foot/feet.
     * 
-    * @param holdSupporFootPositions whether the support foot/feet should be held in place.
+    * @param holdSupportFootPositions whether the support foot/feet should be held in place.
     */
-   public void setHoldSupporFootPositions(boolean holdSupporFootPositions)
+   public void setHoldSupportFootPositions(boolean holdSupportFootPositions)
    {
-      this.holdSupporFootPositions = holdSupporFootPositions;
+      this.holdSupportFootPositions = holdSupportFootPositions;
    }
 
    /**
@@ -182,9 +182,9 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
       return holdCurrentCenterOfMassXYPosition;
    }
 
-   public boolean holdSupporFootPositions()
+   public boolean holdSupportFootPositions()
    {
-      return holdSupporFootPositions;
+      return holdSupportFootPositions;
    }
 
    public Point3D32 getPrivilegedRootJointPosition()
@@ -223,7 +223,7 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
    {
       if (holdCurrentCenterOfMassXYPosition != other.holdCurrentCenterOfMassXYPosition)
          return false;
-      if (holdSupporFootPositions != other.holdSupporFootPositions)
+      if (holdSupportFootPositions != other.holdSupportFootPositions)
          return false;
       return true;
    }
