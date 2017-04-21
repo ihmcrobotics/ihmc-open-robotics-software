@@ -79,7 +79,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
 
    /**
     * Same as {@link #set(T)} but does not change the trajectory points.
-    * 
+    *
     * @param other
     */
    public void setPropertiesOnly(T other)

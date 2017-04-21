@@ -42,7 +42,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       // this is so scripts work.
       PrintTools.warn(getClass().getSimpleName() + " contains frame information. No frame resolver was provided. Assuming all data is in world frame.");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      
+
       clear();
 
       defaultSwingDuration = message.defaultSwingDuration;
@@ -57,7 +57,8 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
             footsteps.add().set(worldFrame, dataList.get(i));
       }
    }
-   
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataListMessage message)
    {
       clear();

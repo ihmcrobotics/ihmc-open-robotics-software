@@ -28,7 +28,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
-   
+
    private ReferenceFrame trajectoryFrame;
 
    public FootstepDataCommand()
@@ -98,10 +98,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
    }
-   
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataMessage message)
    {
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
+      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       set(message);
    }
 
@@ -135,7 +136,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
-      for(int i = 0; i < predictedContactPoints.size(); i++)
+      for (int i = 0; i < predictedContactPoints.size(); i++)
          this.predictedContactPoints.add().set(predictedContactPoints.get(i));
    }
 
@@ -148,7 +149,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       return trajectoryType;
    }
-   
+
    public ReferenceFrame getTrajectoryFrame()
    {
       return trajectoryFrame;
