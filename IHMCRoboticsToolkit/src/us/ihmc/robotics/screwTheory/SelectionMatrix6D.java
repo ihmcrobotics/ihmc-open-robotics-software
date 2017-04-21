@@ -587,4 +587,10 @@ public class SelectionMatrix6D
    {
       return linearPart;
    }
+
+   @Override
+   public String toString()
+   {
+      return "Angular: " + angularPart + ", linear: " + linearPart;
+   }
 }
