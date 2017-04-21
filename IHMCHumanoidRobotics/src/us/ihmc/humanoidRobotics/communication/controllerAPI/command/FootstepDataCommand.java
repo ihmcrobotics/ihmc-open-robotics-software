@@ -14,6 +14,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>, FrameBasedCommand<FootstepDataMessage>
 {
@@ -27,7 +28,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
-   
+
    private ReferenceFrame trajectoryFrame;
 
    public FootstepDataCommand()
@@ -97,13 +98,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
    }
-   
-   @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, FootstepDataMessage message)
-   {
-      // footsteps do not allow the use of a data frame
-      dataFrame.checkReferenceFrameMatch(trajectoryFrame);
 
+   @Override
+   public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataMessage message)
+   {
+      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
+      set(message);
+   }
+
+   public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
+   {
       this.trajectoryFrame = trajectoryFrame;
       set(message);
    }
@@ -132,7 +136,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
-      for(int i = 0; i < predictedContactPoints.size(); i++)
+      for (int i = 0; i < predictedContactPoints.size(); i++)
          this.predictedContactPoints.add().set(predictedContactPoints.get(i));
    }
 
@@ -145,7 +149,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       return trajectoryType;
    }
-   
+
    public ReferenceFrame getTrajectoryFrame()
    {
       return trajectoryFrame;

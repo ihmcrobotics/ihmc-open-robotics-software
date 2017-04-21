@@ -6,8 +6,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
@@ -83,57 +81,23 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMe
       this.spineTrajectoryMessage = spineTrajectoryMessage;
    }
 
-   @Override
-   public long getTrajectoryReferenceFrameId()
-   {
-      return chestTrajectoryMessage.getTrajectoryReferenceFrameId();
-   }
-
-   @Override
-   public long getDataReferenceFrameId()
-   {
-      return chestTrajectoryMessage.getDataReferenceFrameId();
-   }
-
-   @Override
    public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
    {
       chestTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       chestTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
    }
 
-   @Override
    public void setDataReferenceFrameId(long expressedInReferenceFrameId)
    {
       chestTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
    }
 
-   @Override
    public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
    {
       chestTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
-   }
-
-   @Override
-   public Point3D getControlFramePosition()
-   {
-      return chestTrajectoryMessage.getControlFramePosition();
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return chestTrajectoryMessage.getControlFrameOrientation();
-   }
-   
-   @Override
-   public boolean useCustomControlFrame()
-   {
-      return chestTrajectoryMessage.useCustomControlFrame();
    }
 }
