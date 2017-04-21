@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
@@ -16,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.CenterOfMassFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
@@ -33,6 +35,7 @@ public class WholeBodyFeedbackController
 
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
+   private CenterOfMassFeedbackController centerOfMassFeedbackController;
    private final Map<RigidBody, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
    private final Map<RigidBody, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
    private final Map<RigidBody, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
@@ -77,6 +80,9 @@ public class WholeBodyFeedbackController
             break;
          case JOINTSPACE:
             registerJointspaceControllers((JointspaceFeedbackControlCommand) commandExample);
+            break;
+         case MOMENTUM:
+            registerCenterOfMassController((CenterOfMassFeedbackControlCommand) commandExample);
             break;
          case COMMAND_LIST:
             registerControllers((FeedbackControlCommandList) commandExample);
@@ -142,6 +148,14 @@ public class WholeBodyFeedbackController
       }
    }
 
+   private void registerCenterOfMassController(CenterOfMassFeedbackControlCommand commandExample)
+   {
+      if (centerOfMassFeedbackController != null)
+         return;
+      centerOfMassFeedbackController = new CenterOfMassFeedbackController(coreToolbox, feedbackControllerToolbox, registry);
+      allControllers.add(centerOfMassFeedbackController);
+   }
+
    public void initialize()
    {
       for (int i = 0; i < allControllers.size(); i++)
@@ -153,9 +167,6 @@ public class WholeBodyFeedbackController
 
    public void reset()
    {
-      // FIXME This results into discontinuities in the remote visualizer, need to change it such as the YoVariables change only once per tick.
-//      feedbackControllerToolbox.clearData();
-
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
@@ -194,6 +205,7 @@ public class WholeBodyFeedbackController
             inverseKinematicsOutput.addCommand(controller.getInverseKinematicsOutput());
          }
       }
+      feedbackControllerToolbox.clearUnusedData();
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -211,6 +223,7 @@ public class WholeBodyFeedbackController
             virtualModelControlOutput.addCommand(controller.getVirtualModelControlOutput());
          }
       }
+      feedbackControllerToolbox.clearUnusedData();
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -247,6 +260,9 @@ public class WholeBodyFeedbackController
             break;
          case JOINTSPACE:
             submitJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) feedbackControlCommand);
+            break;
+         case MOMENTUM:
+            submitCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) feedbackControlCommand);
             break;
          case COMMAND_LIST:
             submitFeedbackControlCommandList((FeedbackControlCommandList) feedbackControlCommand);
@@ -306,6 +322,12 @@ public class WholeBodyFeedbackController
       }
    }
 
+   private void submitCenterOfMassFeedbackControlCommand(CenterOfMassFeedbackControlCommand feedbackControlCommand)
+   {
+      centerOfMassFeedbackController.submitFeedbackControlCommand(feedbackControlCommand);
+      centerOfMassFeedbackController.setEnabled(true);
+   }
+
    public InverseDynamicsCommandList getInverseDynamicsOutput()
    {
       return inverseDynamicsOutput;
@@ -319,5 +341,10 @@ public class WholeBodyFeedbackController
    public InverseDynamicsCommandList getVirtualModelControlOutput()
    {
       return virtualModelControlOutput;
+   }
+
+   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   {
+      return feedbackControllerToolbox;
    }
 }

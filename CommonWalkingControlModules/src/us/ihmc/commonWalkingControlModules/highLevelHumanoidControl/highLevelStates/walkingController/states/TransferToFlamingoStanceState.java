@@ -38,12 +38,12 @@ public class TransferToFlamingoStanceState extends TransferState
       // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      double swingTime = Double.POSITIVE_INFINITY;
+      double transferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      double defaultSwingTime = Double.POSITIVE_INFINITY;
-      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer(swingTime, transferTime, finalTransferTime);
    }
 }

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -28,6 +29,8 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   private StraightLegWalkingParameters straightLegWalkingParameters;
+
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    protected DynamicReachabilityParameters dynamicReachabilityParameters;
 
@@ -37,13 +40,47 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * <p>
     * It is {@code false} by default and this method should be overridden to return otherwise.
     * </p>
-    * 
+    *
     * @return {@code true} if the desired acceleration should be integrated into desired velocity
     *         and position for all the joints.
     */
    public boolean enableJointAccelerationIntegrationForAllJoints()
    {
       return false;
+   }
+
+   /**
+    * Returns a map from joint name to joint acceleration integration parameters.
+    * <p>
+    * Note that this method is only called if
+    * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
+    * </p>
+    * <p>
+    * This method is called by the controller to know the set of joints for which specific
+    * parameters are to be used.
+    * </p>
+    * <p>
+    * If a joint is not added to this map, the default parameters will be used.
+    * </p>
+    * 
+    * @param registry the controller registry allowing to create {@code YoVariable}s for the
+    *           parameters.
+    * @return the map from the names of the joints with their specific parameters to use.
+    */
+   public Map<String, JointAccelerationIntegrationParametersReadOnly> getJointAccelerationIntegrationParameters(YoVariableRegistry registry)
+   {
+      /* @formatter:off
+       * Example a robot for which we want to provide specific parameters for the elbow joints only:
+       * Map<String, JointAccelerationIntegrationParametersReadOnly> jointParameters = new HashMap<>();
+       * JointAccelerationIntegrationParametersReadOnly elbowParameters = new YoJointAccelerationIntegrationParameters("elbow", 0.999, 0.95, 0.1, 0.1, registry);
+       * jointParameters.put("leftElbow", elbowParameters);
+       * jointParameters.put("rightElbow", elbowParameters);
+       * return jointParameters;
+       * 
+       * Note that it is better to save the created Map as a field such that the next time this method is called, the same instance of the map is used.
+       * @formatter:on
+       */
+      return null;
    }
 
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
@@ -80,7 +117,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
+   /**
+    * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the ECMP location.
+    */
    public abstract boolean checkECMPLocationToTriggerToeOff();
+
+   /**
+    * Maximum distance of the ECMP to the toe off support polygon before allowing toe off.
+    *
+    * @return ECMP distance (m).
+    */
+   public double getECMPProximityForToeOff()
+   {
+      return 0.0;
+   }
 
    /**
     * Minimum stance length in double support to enable toe off.
@@ -111,6 +163,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return -1.0;
    }
+
    /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
@@ -438,7 +491,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
+    * Determines whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
     */
    public boolean useSupportState()
    {
@@ -447,7 +500,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /**
     *
-    * Determined whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
+    * Determines whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
     */
    public boolean useCenterOfMassVelocityFromEstimator()
    {
@@ -473,6 +526,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return 0.0;
    }
 
+   @Override
    public double getMinSwingHeightFromStanceFoot()
    {
       return 0.1;
@@ -499,6 +553,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the parameters used for straight leg walking
+    */
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      if (straightLegWalkingParameters == null)
+         straightLegWalkingParameters = new StraightLegWalkingParameters();
+
+      return straightLegWalkingParameters;
+   }
+
+   /**
     * Returns the parameters in the dynamic reachability calculator.
     */
    public DynamicReachabilityParameters getDynamicReachabilityParameters()
@@ -522,25 +587,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
-    * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
-    * @return boolean (true = try and straighten, false = do not try and straighten)
-    */
-   public boolean attemptToStraightenLegs()
-   {
-      return false;
-   }
-
-   /**
-    * Returns a percent of the swing state to switch the privileged configuration to having straight knees
-    * @return ratio of swing state (0.0 to 1.0)
-    */
-   public double getPercentOfSwingToStraightenLeg()
-   {
-      return 0.8;
-   }
-
-   /**
     * In transfer, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
     * This distance is determined by finding the stance length, and multiplying it by the returned variable.
     * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
@@ -560,24 +606,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getICPPercentOfStanceForSSToeOff()
    {
       return 0.0;
-   }
-
-   /**
-    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
-    * @return time in seconds for straightening
-    */
-   public double getDurationForStanceLegStraightening()
-   {
-      return 1.3;
-   }
-
-   /**
-    * Angle used by the privileged configuration that is defined as straight for the knees.
-    * @return angle in radians
-    */
-   public double getStraightKneeAngle()
-   {
-      return 0.05;
    }
 
    /**
@@ -609,6 +637,15 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * @return whether or not to edit the timing based on the reachability of the step.
     */
    public boolean editStepTimingForReachability()
+   {
+      return false;
+   }
+
+   /**
+    * Whether or not to use a secondary joint scaling factor during swing, where the secondary joint is any joint located in the kinematic chain between
+    * the base and the optional primary base of a SpatialAccelerationCommand and a SpatialVelocityCommand.
+    */
+   public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
    }

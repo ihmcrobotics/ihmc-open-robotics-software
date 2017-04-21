@@ -1,15 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
 
 public class InitialICPVelocityCurrentMultiplier
 {
@@ -26,15 +25,15 @@ public class InitialICPVelocityCurrentMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public InitialICPVelocityCurrentMultiplier(YoVariableRegistry registry)
+   public InitialICPVelocityCurrentMultiplier(String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(null, null, registry);
+      this(null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, YoVariableRegistry registry)
+   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable("InitialICPVelocityCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("InitialICPCVelocityCurrentVelocityMultiplier", registry);
+      positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
       if (cubicMatrix == null)
       {
@@ -63,8 +62,8 @@ public class InitialICPVelocityCurrentMultiplier
 
    public void reset()
    {
-      positionMultiplier.set(0.0);
-      velocityMultiplier.set(0.0);
+      positionMultiplier.setToNaN();
+      velocityMultiplier.setToNaN();
    }
 
    public double getPositionMultiplier()
@@ -77,7 +76,7 @@ public class InitialICPVelocityCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
@@ -94,7 +93,7 @@ public class InitialICPVelocityCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 

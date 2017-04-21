@@ -108,15 +108,15 @@ public class WholeBodyControlCoreToolbox
     * @param twistCalculator calculator to compute the twist of the robot bodies from the measured
     *           joint velocities. This tool is assumed to be updated from outside the controller
     *           core.
-    * @param momentumOptimizationSettings set of parameters used to initialize the optimization
-    *           problems.
+    * @param controllerCoreOptimizationSettings set of parameters used to initialize the
+    *           optimization problems.
     * @param yoGraphicsListRegistry the registry in which the {@link YoGraphic}s and
     *           {@link Artifact}s of the controller core are registered.
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
-                                      ControllerCoreOptimizationSettings momentumOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
@@ -124,7 +124,7 @@ public class WholeBodyControlCoreToolbox
       this.rootJoint = rootJoint;
       this.centerOfMassFrame = centerOfMassFrame;
       this.twistCalculator = twistCalculator;
-      this.optimizationSettings = momentumOptimizationSettings;
+      this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       RigidBody rootBody = twistCalculator.getRootBody();

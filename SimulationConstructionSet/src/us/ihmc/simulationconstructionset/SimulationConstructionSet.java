@@ -2967,7 +2967,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void setScrollGraphsEnabled(boolean enable)
    {
-      myDataBuffer.setSafeToChangeIndex(enable);
+      if (myDataBuffer != null)
+         myDataBuffer.setSafeToChangeIndex(enable);
    }
 
    public boolean isSafeToScroll()

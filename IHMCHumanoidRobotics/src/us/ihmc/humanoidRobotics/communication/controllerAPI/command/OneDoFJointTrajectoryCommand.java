@@ -14,6 +14,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
    }
 
+   @Override
    public void clear()
    {
       super.clear();
@@ -62,13 +63,13 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
       this.weight = weight;
    }
-   
+
    @Override
    public boolean isCommandValid()
    {
       boolean numberOfTrajectoryPointsIsPositive = getNumberOfTrajectoryPoints() > 0;
       boolean weightIsValid = !Double.isInfinite(getWeight());
-      if(Double.isFinite(weight))
+      if (Double.isFinite(weight))
       {
          weightIsValid &= weight >= 0;
       }

@@ -38,14 +38,6 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s origin field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
       packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
       if (packetFieldErrorType != null)
       {
@@ -159,14 +151,6 @@ public abstract class PacketValidityChecker
    public static String validateFootstepDataMessage(AdjustFootstepMessage packetToCheck)
    {
       ObjectErrorType packetFieldErrorType;
-
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s origin field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
 
       packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
       if (packetFieldErrorType != null)
@@ -546,7 +530,10 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getTrajectoryPointLists()[jointIndex];
-         errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
+         if(oneJointTrajectoryMessage != null)
+         {
+            errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
+         }
          if (errorMessage != null)
          {
             String messageClassName = message.getClass().getSimpleName();

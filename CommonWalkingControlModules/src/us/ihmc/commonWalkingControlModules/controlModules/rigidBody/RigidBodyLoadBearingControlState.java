@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
@@ -46,8 +46,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
 
-   private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
-   private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
+   private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FramePose bodyFixedControlledPose = new FramePose();
@@ -205,21 +205,16 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       contactPointInWorld.setAndMatchFrame(contactPoint);
 
       // assemble the selection matrices for the controller core commands
-      accelerationSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(accelerationSelectionMatrix);
-      feedbackSelectionMatrix.reshape(dofs, dofs);
-      CommonOps.setIdentity(feedbackSelectionMatrix);
+      accelerationSelectionMatrix.resetSelection();
+      feedbackSelectionMatrix.resetSelection();
 
       for (int i = dofs-1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
-            MatrixTools.removeRow(accelerationSelectionMatrix, i);
+            accelerationSelectionMatrix.selectAxis(i, false);
          else
-            MatrixTools.removeRow(feedbackSelectionMatrix, i);
+            feedbackSelectionMatrix.selectAxis(i, false);
       }
-
-      if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != dofs)
-         throw new RuntimeException("Trying to control too much or too little.");
    }
 
    @Override

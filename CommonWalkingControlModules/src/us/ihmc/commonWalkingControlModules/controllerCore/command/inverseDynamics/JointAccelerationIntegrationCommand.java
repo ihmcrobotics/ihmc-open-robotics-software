@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -30,10 +35,8 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
    private final int initialCapacity = 15;
    private final List<String> jointNamesToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
-   private final TDoubleArrayList jointAlphaPosition = new TDoubleArrayList(initialCapacity);
-   private final TDoubleArrayList jointAlphaVelocity = new TDoubleArrayList(initialCapacity);
-   private final TDoubleArrayList jointMaxPositionError = new TDoubleArrayList(initialCapacity);
-   private final TDoubleArrayList jointMaxVelocity = new TDoubleArrayList(initialCapacity);
+   private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
+                                                                                                                       JointAccelerationIntegrationParameters.class);
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -41,6 +44,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     */
    public JointAccelerationIntegrationCommand()
    {
+      jointParameters.clear();
    }
 
    /**
@@ -53,10 +57,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
    {
       jointNamesToComputeDesiredPositionFor.clear();
       jointsToComputeDesiredPositionFor.clear();
-      jointAlphaPosition.reset();
-      jointAlphaVelocity.reset();
-      jointMaxPositionError.reset();
-      jointMaxVelocity.reset();
+      jointParameters.clear();
    }
 
    /**
@@ -75,10 +76,19 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
    {
       jointNamesToComputeDesiredPositionFor.add(joint.getName());
       jointsToComputeDesiredPositionFor.add(joint);
-      jointAlphaPosition.add(Double.NaN);
-      jointAlphaVelocity.add(Double.NaN);
-      jointMaxPositionError.add(Double.NaN);
-      jointMaxVelocity.add(Double.NaN);
+      jointParameters.add().reset();
+   }
+
+   /**
+    * Sets the acceleration integration parameters for the {@code jointIndex}<sup>th</sup> of this
+    * command to {@code jointParameters}.
+    * 
+    * @param jointIndex the index of the joint to provide parameters for.
+    * @param jointParameters the set of parameters to use for the joint. Not modified.
+    */
+   public void setJointParameters(int jointIndex, JointAccelerationIntegrationParametersReadOnly jointParameters)
+   {
+      this.jointParameters.get(jointIndex).set(jointParameters);
    }
 
    /**
@@ -90,8 +100,8 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
     * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
     * Desired position:<br>
-    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t - &Delta;t</sup>
-    * + &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
+    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
+    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
     * qDot<sub>des</sub><sup>t</sup>)
     * </p>
     * <p>
@@ -109,7 +119,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * cause the joint to never settle by having stick-slip behavior around the "true" desired
     * position the high-level controller is trying to achieve. It can simply be downtuned until this
     * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
+    * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
     * </p>
     * 
     * @param jointIndex the index of the joint to provide parameters for.
@@ -118,8 +128,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     */
    public void setJointAlphas(int jointIndex, double alphaPosition, double alphaVelocity)
    {
-      jointAlphaPosition.set(jointIndex, alphaPosition);
-      jointAlphaVelocity.set(jointIndex, alphaVelocity);
+      jointParameters.get(jointIndex).setAlphas(alphaPosition, alphaVelocity);
    }
 
    /**
@@ -146,13 +155,13 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * </p>
     * 
     * @param jointIndex the index of the joint to provide parameters for.
-    * @param maxPositionError limits the gap between the desired joint position and the actual joint position.
+    * @param maxPositionError limits the gap between the desired joint position and the actual joint
+    *           position.
     * @param maxVelocity limits the maximum value of the desired joint velocity.
     */
    public void setJointMaxima(int jointIndex, double maxPositionError, double maxVelocity)
    {
-      jointMaxPositionError.set(jointIndex, maxPositionError);
-      jointMaxVelocity.set(jointIndex, maxVelocity);
+      jointParameters.get(jointIndex).setMaxima(maxPositionError, maxVelocity);
    }
 
    /**
@@ -182,24 +191,9 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       return jointsToComputeDesiredPositionFor.get(jointIndex);
    }
 
-   public double getJointAlphaPosition(int jointIndex)
+   public JointAccelerationIntegrationParametersReadOnly getJointParameters(int jointIndex)
    {
-      return jointAlphaPosition.get(jointIndex);
-   }
-
-   public double getJointAlphaVelocity(int jointIndex)
-   {
-      return jointAlphaVelocity.get(jointIndex);
-   }
-
-   public double getJointMaxPositionError(int jointIndex)
-   {
-      return jointMaxPositionError.get(jointIndex);
-   }
-
-   public double getJointMaxVelocity(int jointIndex)
-   {
-      return jointMaxVelocity.get(jointIndex);
+      return jointParameters.get(jointIndex);
    }
 
    public int getNumberOfJointsToComputeDesiredPositionFor()

@@ -150,7 +150,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorChainRobot() throws Exception
    {
@@ -182,6 +182,27 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
+         jacobianCalculator.computeJacobianMatrix();
+
+         compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
+
+         // Test with a random Jacobian frame attached to end effector
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.setTranslation(EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0));
+         ReferenceFrame fixedInEndEffector = ReferenceFrame.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
+                                                                                                          randomEndEffector.getBodyFixedFrame(),
+                                                                                                          transformToParent);
+
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(rootBody, randomEndEffector);
+         jacobianCalculator.setJacobianFrame(fixedInEndEffector);
+         jacobianCalculator.computeJacobianMatrix();
+
+         compareJacobianTwistAgainstTwistCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-12);
+
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
+         jacobianCalculator.setJacobianFrame(fixedInEndEffector);
          jacobianCalculator.computeJacobianMatrix();
 
          compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
@@ -230,8 +251,7 @@ public class GeometricJacobianCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false,
-                                                                                                         false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false, false);
 
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();
@@ -266,8 +286,7 @@ public class GeometricJacobianCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false,
-                                                                                                         false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false, false);
 
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();
@@ -278,7 +297,9 @@ public class GeometricJacobianCalculatorTest
 
          RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.setTranslation(EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0));
-         ReferenceFrame fixedInEndEffector = ReferenceFrame.constructFrameWithUnchangingTransformToParent("fixedFrame" + i, randomEndEffector.getBodyFixedFrame(), transformToParent);
+         ReferenceFrame fixedInEndEffector = ReferenceFrame.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
+                                                                                                          randomEndEffector.getBodyFixedFrame(),
+                                                                                                          transformToParent);
 
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
@@ -454,6 +475,8 @@ public class GeometricJacobianCalculatorTest
       ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
 
       twistCalculator.getRelativeTwist(base, endEffector, expectedTwist);
+      expectedTwist.changeFrame(jacobianCalculator.getJacobianFrame());
+
       jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
 
       TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, epsilon);

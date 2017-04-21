@@ -1,20 +1,21 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
 
 public class TransferEntryCMPMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
-   public TransferEntryCMPMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio)
+   public TransferEntryCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions)
    {
       super(4, 1);
 
-      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
    }
 
    public void reset()
@@ -22,22 +23,40 @@ public class TransferEntryCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
-   {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), omega0);
-   }
-
-   public void compute(double doubleSupportDuration, double omega0)
+   public void compute(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         boolean useTwoCMPs, double omega0)
    {
       zero();
 
-      double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+      double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double timeOnEntryCMP;
 
-      double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
+      if (numberOfFootstepsToConsider == 0)
+      { // the ending corner point is the current entry corner point
+         timeOnEntryCMP = 0.0;
+      }
+      else
+      { // the ending corner point is after the next step
+         if (useTwoCMPs)
+         {
+            // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+            // project forward to the end of double support
+            double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+            timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+         }
+         else
+         {
+            // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+            // project forward to the end of double support
+            double nextTransferOnEntry = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            timeOnEntryCMP = currentTransferOnEntry + singleSupportDurations.get(0).getDoubleValue() + nextTransferOnEntry;
+         }
+      }
 
-      double stepProjection = (1.0 - endOfDoubleSupportProjection);
+      double projection = Math.exp(omega0 * (currentTransferOnEntry - timeOnEntryCMP));
 
-      set(2, 0, stepProjection);
-      set(3, 0, -omega0 * endOfDoubleSupportProjection);
+      set(2, 0, 1.0 - projection);
+      set(3, 0, -omega0 * projection);
    }
 }

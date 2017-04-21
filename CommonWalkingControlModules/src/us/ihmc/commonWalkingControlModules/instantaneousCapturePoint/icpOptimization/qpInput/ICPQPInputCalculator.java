@@ -66,26 +66,26 @@ public class ICPQPInputCalculator
 
    private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
 
-   public void computeDynamicsConstraint(ICPEqualityConstraintInput icpEqualityInput, DenseMatrix64F currentICP, DenseMatrix64F finalICPRecursion,
+   public void computeDynamicsConstraint(ICPEqualityConstraintInput icpEqualityInputToPack, DenseMatrix64F currentICP, DenseMatrix64F finalICPRecursion,
          DenseMatrix64F cmpConstantEffect, DenseMatrix64F feedbackGain, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
    {
-      MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
 
       CommonOps.invert(feedbackGain);
-      MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getFeedbackCMPIndex(), 0, feedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, indexHandler.getFeedbackCMPIndex(), 0, feedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useStepAdjustment())
       {
          for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
          {
-            MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, 2 * i, 0, footstepRecursionMultipliers.get(i), 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, 2 * i, 0, footstepRecursionMultipliers.get(i), 0, 0, 2, 2, 1.0);
          }
       }
 
       CommonOps.subtractEquals(currentICP, finalICPRecursion);
       CommonOps.subtractEquals(currentICP, cmpConstantEffect);
 
-      MatrixTools.setMatrixBlock(icpEqualityInput.beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(icpEqualityInputToPack.beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
    }
 
    public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)

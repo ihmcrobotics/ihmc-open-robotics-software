@@ -11,7 +11,7 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public HandTrajectoryCommand()
    {
    }
-   
+
    public HandTrajectoryCommand(RobotSide robotSide, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       super(dataFrame, trajectoryFrame);
@@ -41,6 +41,7 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
 
    /**
     * Same as {@link #set(HandTrajectoryCommand)} but does not change the trajectory points.
+    * 
     * @param other
     */
    @Override
@@ -54,7 +55,7 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public void set(HandTrajectoryMessage message)
    {
       super.set(message);
-      this.robotSide = message.getRobotSide();
+      robotSide = message.getRobotSide();
    }
 
    public void setRobotSide(RobotSide robotSide)

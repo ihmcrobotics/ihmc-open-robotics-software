@@ -9,7 +9,6 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -82,7 +81,6 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       stepPose.getPose(location, orientation);
 
       FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footsteps.add(footstepData);
 
       sendPacket(footsteps);

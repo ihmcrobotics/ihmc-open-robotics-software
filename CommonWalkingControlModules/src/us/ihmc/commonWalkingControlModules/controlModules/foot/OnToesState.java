@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -20,8 +17,8 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -86,8 +83,8 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.setPrimaryBase(pelvis);
       feedbackControlCommand.setGains(gains);
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
-      MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.selectAngularY(false); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
@@ -205,10 +202,7 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (attemptToStraightenLegs)
-         return straightLegsPrivilegedConfigurationCommand;
-      else
-         return bentLegsPrivilegedConfigurationCommand;
+      return null;
    }
 
    @Override

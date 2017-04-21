@@ -1,23 +1,25 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
 
 public class SwingStateEndMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
-   private final DoubleYoVariable exitCMPRatio;
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
+
    private final DoubleYoVariable endOfSplineTime;
 
-   public SwingStateEndMatrix(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable endOfSplineTime)
+   public SwingStateEndMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
+         DoubleYoVariable endOfSplineTime)
    {
       super(4, 1);
 
-      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
-      this.exitCMPRatio = exitCMPRatio;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
+
       this.endOfSplineTime = endOfSplineTime;
    }
 
@@ -26,19 +28,18 @@ public class SwingStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         double omega0)
    {
-      compute(doubleSupportDurations.get(1).getDoubleValue(), doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0);
-   }
+      // recurse backward from upcoming corner point to current corner point, then project forward to end of spline
+      double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnExitCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double timeOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
 
-   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0)
-   {
-      double currentStepDuration = currentDoubleSupportDuration + singleSupportDuration;
-      double upcomingInitialDoubleSupportTime = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-      double timeSpentOnCurentExitCMP = exitCMPRatio.getDoubleValue() * currentStepDuration;
+      double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double splineDurationOnExitCMP = endOfSplineTime.getDoubleValue() - currentSwingOnEntryCMP;
 
-      double duration = endOfSplineTime.getDoubleValue() - singleSupportDuration + timeSpentOnCurentExitCMP - upcomingInitialDoubleSupportTime;
-      double projection = Math.exp(omega0 * duration);
+      double projection = Math.exp(omega0 * (splineDurationOnExitCMP - timeOnExitCMP));
 
       zero();
 
