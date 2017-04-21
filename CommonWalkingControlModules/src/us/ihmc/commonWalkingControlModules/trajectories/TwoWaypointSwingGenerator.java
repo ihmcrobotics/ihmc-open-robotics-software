@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -47,6 +48,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final FrameVector initialVelocityNoTimeDimension = new FrameVector();
    private final FrameVector finalVelocityNoTimeDiemension = new FrameVector();
+   private final FrameVector tempWaypointVelocity = new FrameVector();
 
    private final BagOfBalls waypointViz;
 
@@ -210,6 +212,11 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       for (int i = 0; i < numberWaypoints; i++)
          waypointViz.setBall(waypointPositions.get(i), i);
    }
+   
+   public boolean doOptimizationUpdate()
+   {
+      return trajectory.doOptimizationUpdate();
+   }
 
    @Override
    public void compute(double time)
@@ -274,6 +281,23 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public static double[] getDefaultWaypointProportions()
    {
       return waypointProportions;
+   }
+   
+   public int getNumberOfWaypoints()
+   {
+      return numberWaypoints;
+   }
+
+   public void getWaypointData(int waypointIndex, FrameEuclideanTrajectoryPoint waypointDataToPack)
+   {
+      double waypointTime = stepTime.getDoubleValue() * trajectory.getWaypointTime(waypointIndex);
+      trajectory.getWaypointVelocity(waypointIndex, tempWaypointVelocity);
+      tempWaypointVelocity.scale(1.0 / stepTime.getDoubleValue());
+
+      waypointDataToPack.setToNaN(worldFrame);
+      waypointDataToPack.setTime(waypointTime);
+      waypointDataToPack.setPosition(waypointPositions.get(waypointIndex));
+      waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
    }
 
    public double computeAndGetMaxSpeed()

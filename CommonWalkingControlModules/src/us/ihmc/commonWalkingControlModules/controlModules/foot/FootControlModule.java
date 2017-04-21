@@ -23,6 +23,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -112,11 +113,16 @@ public class FootControlModule
 
       setupContactStatesMap();
 
-      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      touchdownVelocityProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
+      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
+      YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
+      yoTouchdownVelocity.set(touchdownVelocity);
 
-      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      touchdownAccelerationProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
+      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration());
+      YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
+      yoTouchdownAcceleration.set(touchdownAcceleration);
+
+      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(yoTouchdownVelocity);
+      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(yoTouchdownAcceleration);
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
@@ -150,7 +156,7 @@ public class FootControlModule
             exploreFootPolygonState = null;
       }
 
-      swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
+      swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
 
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
