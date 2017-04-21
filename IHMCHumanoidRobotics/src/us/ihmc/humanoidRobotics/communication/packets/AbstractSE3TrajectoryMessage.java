@@ -13,9 +13,9 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
 {
@@ -218,19 +218,17 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       return selectionMatrixDiagonal != null;
    }
 
-   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(6, 6);
-      if (selectionMatrixDiagonal == null)
+      selectionMatrixToPack.resetSelection();
+      if (selectionMatrixDiagonal != null)
       {
-         CommonOps.setIdentity(selectionMatrixToPack);
-      }
-      else
-      {
-         selectionMatrixToPack.zero();
-         for (int i = 0; i < 6; i++)
-            selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
-         MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
+         selectionMatrixToPack.selectAngularX(selectionMatrixDiagonal[0] > 0.9f);
+         selectionMatrixToPack.selectAngularY(selectionMatrixDiagonal[1] > 0.9f);
+         selectionMatrixToPack.selectAngularZ(selectionMatrixDiagonal[2] > 0.9f);
+         selectionMatrixToPack.selectLinearX(selectionMatrixDiagonal[3] > 0.9f);
+         selectionMatrixToPack.selectLinearY(selectionMatrixDiagonal[4] > 0.9f);
+         selectionMatrixToPack.selectLinearZ(selectionMatrixDiagonal[5] > 0.9f);
       }
    }
 

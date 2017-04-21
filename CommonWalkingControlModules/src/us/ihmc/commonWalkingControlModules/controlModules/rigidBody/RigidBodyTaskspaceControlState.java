@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Collection;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -30,7 +27,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -42,7 +38,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
@@ -52,7 +48,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Twist.SIZE, Twist.SIZE);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoOrientationPIDGainsInterface orientationGains;
    private final YoPositionPIDGainsInterface positionGains;
@@ -354,10 +350,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       resetLastCommandId();
       queueInitialPoint();
 
-      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
-      for (int i = 0; i < 3; i++)
-         MatrixTools.removeRow(selectionMatrix, 3);
+      selectionMatrix.setToAngularSelection();
 
       trajectoryStopped.set(false);
       trajectoryDone.set(false);
@@ -371,8 +364,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       resetLastCommandId();
       queueInitialPoint();
 
-      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
 
       trajectoryStopped.set(false);
       trajectoryDone.set(false);
@@ -442,10 +434,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             return false;
       }
 
-      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
-      for (int i = 0; i < 3; i++)
-         MatrixTools.removeRow(selectionMatrix, 3);
+      selectionMatrix.setToAngularSelection();
 
       trackingOrientation.set(true);
       trackingPosition.set(false);
@@ -499,8 +488,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             return false;
       }
 
-      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
 
       trackingOrientation.set(true);
       trackingPosition.set(true);

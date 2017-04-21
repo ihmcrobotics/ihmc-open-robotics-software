@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,11 +9,12 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M> implements FrameBasedCommand<M>
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3,6);
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;
@@ -31,24 +30,14 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
-      selectionMatrix.reshape(3, 6);
-      selectionMatrix.zero();
-      for (int i = 0; i < 3; i++)
-      {
-         selectionMatrix.set(i, i, 1.0);
-      }
+      selectionMatrix.resetSelection();
    }
 
    public void clear(ReferenceFrame referenceFrame)
    {
       clearQueuableCommandVariables();
       trajectoryPointList.clear(referenceFrame);
-      selectionMatrix.reshape(3, 6);
-      selectionMatrix.zero();
-      for (int i = 0; i < 3; i++)
-      {
-         selectionMatrix.set(i, i, 1.0);
-      }
+      selectionMatrix.resetSelection();
    }
 
    @Override
@@ -104,7 +93,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       this.trajectoryPointList.setIncludingFrame(trajectoryPointList);
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   public SelectionMatrix3D getSelectionMatrix()
    {
       return selectionMatrix;
    }

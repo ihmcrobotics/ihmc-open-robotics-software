@@ -1,8 +1,5 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -13,7 +10,7 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerParameters
 {
@@ -31,7 +28,7 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    private final double bodyDampingRatio = 1.1;
    private final YoFrameVector bodySpatialLinearQPWeight;
    private final YoFrameVector bodySpatialAngularQPWeight;
-   private final DenseMatrix64F bodySpatialSelectionMatrix = CommonOps.identity(SpatialAccelerationVector.SIZE);
+   private final SelectionMatrix6D bodySpatialSelectionMatrix = new SelectionMatrix6D();
    
    public RhinoBeetleInverseDynamicsParameters(YoVariableRegistry parentRegistry)
    {
@@ -101,7 +98,7 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    }
 
    @Override
-   public DenseMatrix64F getBodySpatialSelectionMatrix()
+   public SelectionMatrix6D getBodySpatialSelectionMatrix()
    {
       return bodySpatialSelectionMatrix;
    }
