@@ -17,13 +17,12 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * {@link SpatialAccelerationCommand} is a command meant to be submitted to the
@@ -65,16 +64,14 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * If the selection frame is not set, it is assumed that the selection frame is equal to the
+    * control frame.
     * </p>
     */
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(SpatialAccelerationVector.SIZE);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
@@ -91,6 +88,20 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    private String baseName;
    private String endEffectorName;
    private String optionalPrimaryBaseName;
+
+   /**
+    * Flag to indicate whether or not to custom scale the weights below the intermediate base
+    * {@code optionalPrimaryBase} to control against, as opposed to using the default weight in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    */
+   private boolean scaleSecondaryTaskJointWeight = false;
+
+   /**
+    * Scale factor to apply to the weights on the task below the {@code optionalPrimaryBase}. This
+    * weight replaces the scale factor in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    */
+   private double secondaryTaskJointWeightScale = 1.0;
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -117,6 +128,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+      scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
+      secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
       controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
@@ -166,6 +179,21 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   /**
+    * Indicates that we would like to custom scale the weights on the joints in the kinematic chain
+    * below the {@code primaryBase} when controlling the {@code endEffector}.
+    *
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the
+    *           joints below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary
+    *           base. Optional.
+    */
+   public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
+   {
+      this.scaleSecondaryTaskJointWeight = scaleSecondaryTaskJointWeight;
+      this.secondaryTaskJointWeightScale = secondaryTaskJointWeightScale;
    }
 
    /**
@@ -259,7 +287,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param desiredLinearAcceleration the desired linear acceleration of the origin of the control
     *           frame with respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} or
-    *            {@code desiredLineaerAcceleration} is not expressed in control frame.
+    *            {@code desiredLinearAcceleration} is not expressed in control frame.
     */
    public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector desiredAngularAcceleration, FrameVector desiredLinearAcceleration)
    {
@@ -286,8 +314,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
-    * {@code endEffector.getBodyFixedFrame()}.
-    * </p>
+    * {@code endEffector.getBodyFixedFrame()}. </p*
+    *
     * 
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
@@ -350,73 +378,77 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the linear part of this
     * command will be considered in the optimization.
-    * 
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = | 0 0 0 0 1 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 3, 1.0);
-      selectionMatrix.set(1, 4, 1.0);
-      selectionMatrix.set(2, 5, 1.0);
+      selectionMatrix.setToLinearSelectionOnly();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the angular part of this
+    * command and applying the given selection matrix to the linear part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
+    * </p>
+    * 
+    * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
+   {
+      selectionMatrix.clearSelection();
+      selectionMatrix.setLinearPart(linearSelectionMatrix);
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the angular part of this
     * command will be considered in the optimization.
-    * 
-    * <pre>
-    *     / 1 0 0 0 0 0 \
-    * S = | 0 1 0 0 0 0 |
-    *     \ 0 0 1 0 0 0 /
-    * </pre>
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Convenience method that sets up the selection matrix by disabling the linear part of this
+    * command and applying the given selection matrix to the angular part.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
-    * </p>
-    * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
-    *            number of columns different to 6.
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this
+    *           command. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > SpatialAccelerationVector.SIZE)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
-         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
+      selectionMatrix.clearSelection();
+      selectionMatrix.setAngularPart(angularSelectionMatrix);
+   }
 
+   /**
+    * Sets this command's selection matrix to the given one.
+    * <p>
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
+    * </p>
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
+    * </p>
+    * 
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
+    */
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
       this.selectionMatrix.set(selectionMatrix);
    }
 
@@ -476,16 +508,41 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weight dense matrix holding the weights to use for each component of the desired
+    * @param angularX the weight to use for the x-axis of the angular part of this command.
+    * @param angularY the weight to use for the y-axis of the angular part of this command.
+    * @param angularZ the weight to use for the z-axis of the angular part of this command.
+    * @param linearX the weight to use for the x-axis of the linear part of this command.
+    * @param linearY the weight to use for the y-axis of the linear part of this command.
+    * @param linearZ the weight to use for the z-axis of the linear part of this command.
+    */
+   public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
+   {
+      weightVector.set(0, 0, angularX);
+      weightVector.set(1, 0, angularY);
+      weightVector.set(2, 0, angularZ);
+      weightVector.set(3, 0, linearX);
+      weightVector.set(4, 0, linearY);
+      weightVector.set(5, 0, linearZ);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weightVector dense matrix holding the weights to use for each component of the desired
     *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
-   public void setWeights(DenseMatrix64F weight)
+   public void setWeights(DenseMatrix64F weightVector)
    {
       for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
       {
-         weightVector.set(i, 0, weight.get(i, 0));
+         this.weightVector.set(i, 0, weightVector.get(i, 0));
       }
    }
 
@@ -728,13 +785,28 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the reference to the selection matrix to use with this command.
+    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
+    * this command.
     * 
-    * @return the selection matrix.
+    * @param destinationFrame the reference frame in which the selection matrix should be expressed
+    *           in.
+    * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
+    *           stored in. Modified.
     */
-   public DenseMatrix64F getSelectionMatrix()
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      return selectionMatrix;
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+   }
+
+   /**
+    * Packs the value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    * 
+    * @param selectionMatrixToPack the selection matrix to pack.
+    */
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix);
    }
 
    /**
@@ -809,6 +881,57 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
+   }
+
+   /**
+    * Gets whether or not to scale the weights on the joints below the {@code primaryBase} when
+    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the
+    * joints in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more
+    * to control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use
+    * the joints before the {@code primaryBase} (such as the floating base) to control the
+    * {@code endEffector}.
+    *
+    * <p>
+    * This parameter is optional. If provided, it will scale the weights before the
+    * {@code primaryBase} by the factor defined in {@code secondaryTaskJointWeightScale} to control
+    * the {@code endEffector}.
+    * </p>
+    *
+    * @return whether or not to scale the joints below the {@code primaryBase} (true) or not (false
+    *         and default).
+    */
+   public boolean scaleSecondaryTaskJointWeight()
+   {
+      return scaleSecondaryTaskJointWeight;
+   }
+
+   /**
+    * Gets the scaling factor for the weights on the joints below the {@code primaryBase} when
+    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the
+    * joints in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more
+    * to control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use
+    * the joints before the {@code primaryBase} (such as the floating base) to control the
+    * {@code endEffector}.
+    *
+    * <p>
+    * This parameter is optional. If provided, it will be used to scale the weights before the
+    * {@code primaryBase} to control the {@code endEffector}.
+    * </p>
+    *
+    * @return scale factor for the joints below the {@code primaryBase}.
+    */
+   public double getSecondaryTaskJointWeightScale()
+   {
+      return secondaryTaskJointWeightScale;
+   }
+
+   /**
+    * Resets the secondary task joint weight scaling factor on the joints below the
+    * {@code primaryBase} to its default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      secondaryTaskJointWeightScale = 1.0;
    }
 
    /**

@@ -215,7 +215,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    public PacketCommunicator createAndStartPacketCommunicator(NetworkPorts port, PacketDestination destination) throws IOException
    {
-      PrintTools.info(""+port+" "+destination);
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
       networkProcessor.attachPacketCommunicator(destination, packetCommunicator);
       packetCommunicator.connect();

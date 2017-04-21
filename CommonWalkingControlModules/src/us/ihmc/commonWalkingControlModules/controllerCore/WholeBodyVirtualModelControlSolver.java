@@ -76,6 +76,8 @@ public class WholeBodyVirtualModelControlSolver
    private final SpatialAccelerationVector tmpAcceleration = new SpatialAccelerationVector();
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", ReferenceFrame.getWorldFrame());
 
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(6, 6);
+
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
@@ -385,7 +387,8 @@ public class WholeBodyVirtualModelControlSolver
       tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
-      virtualWrenchCommand.set(controlledBody, tmpWrench, command.getSelectionMatrix());
+      command.getSelectionMatrix(controlFrame, tempSelectionMatrix);
+      virtualWrenchCommand.set(controlledBody, tmpWrench, tempSelectionMatrix);
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
 
       if (controlledBody == controlRootBody)
@@ -396,7 +399,7 @@ public class WholeBodyVirtualModelControlSolver
          optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
       }
 
-      optimizationControlModule.addSelection(command.getSelectionMatrix());
+      optimizationControlModule.addSelection(tempSelectionMatrix);
    }
 
    private void handleVirtualWrenchCommand(VirtualWrenchCommand command)
