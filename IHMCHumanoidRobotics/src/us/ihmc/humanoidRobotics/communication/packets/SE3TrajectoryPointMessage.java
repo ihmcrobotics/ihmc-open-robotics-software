@@ -37,6 +37,10 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
     */
    public SE3TrajectoryPointMessage()
    {
+      position = new Point3D();
+      orientation = new Quaternion();
+      linearVelocity = new Vector3D();
+      angularVelocity = new Vector3D();
    }
 
    public SE3TrajectoryPointMessage(Random random)
