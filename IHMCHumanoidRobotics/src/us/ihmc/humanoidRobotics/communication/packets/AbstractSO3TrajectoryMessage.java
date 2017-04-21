@@ -13,9 +13,9 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
 {
@@ -209,21 +209,14 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       return selectionMatrixDiagonal != null;
    }
 
-   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(3, 6);
-      selectionMatrixToPack.zero();
-
+      selectionMatrixToPack.clearSelection();
       if (selectionMatrixDiagonal != null)
       {
-         for (int i = 0; i < 3; i++)
-            selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
-         MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
-      }
-      else
-      {
-         for (int i = 0; i < 3; i++)
-            selectionMatrixToPack.set(i, i, 1.0);
+         selectionMatrixToPack.selectXAxis(selectionMatrixDiagonal[0] > 0.9f);
+         selectionMatrixToPack.selectYAxis(selectionMatrixDiagonal[1] > 0.9f);
+         selectionMatrixToPack.selectZAxis(selectionMatrixDiagonal[2] > 0.9f);
       }
    }
 
