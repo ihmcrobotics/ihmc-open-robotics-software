@@ -22,7 +22,7 @@ public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTr
    public void set(FootTrajectoryMessage message)
    {
       super.set(message);
-      this.robotSide = message.getRobotSide();
+      robotSide = message.getRobotSide();
    }
 
    @Override
@@ -34,8 +34,10 @@ public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTr
 
    /**
     * Same as {@link #set(FootTrajectoryCommand)} but does not change the trajectory points.
+    * 
     * @param other
     */
+   @Override
    public void setPropertiesOnly(FootTrajectoryCommand other)
    {
       super.setPropertiesOnly(other);

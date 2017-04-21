@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -42,7 +43,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
-   protected final BooleanYoVariable hasSwitchedToStraightLegs;
+   protected final BooleanYoVariable scaleSecondaryJointWeights;
+   protected final DoubleYoVariable secondaryJointWeightScale;
 
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
@@ -66,7 +68,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
 
-      hasSwitchedToStraightLegs = new BooleanYoVariable(namePrefix + "HasSwitchedToStraightLegs", registry);
+      scaleSecondaryJointWeights = new BooleanYoVariable(namePrefix + "ScaleSecondaryJointWeights", registry);
+      secondaryJointWeightScale = new DoubleYoVariable(namePrefix + "SecondaryJointWeightScale", registry);
+      secondaryJointWeightScale.set(1.0);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
@@ -128,8 +132,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
-
-      hasSwitchedToStraightLegs.set(false);
+      spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 
       initializeTrajectory();
    }
@@ -175,6 +178,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       angularWeight.get(tempAngularWeightVector);
       linearWeight.get(tempLinearWeightVector);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
+      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
 
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
@@ -208,10 +212,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (hasSwitchedToStraightLegs.getBooleanValue())
-         return straightLegsPrivilegedConfigurationCommand;
-      else
-         return bentLegsPrivilegedConfigurationCommand;
+      return null;
    }
 
    @Override

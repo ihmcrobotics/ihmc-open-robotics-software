@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -177,7 +176,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       message.add(footstepData);
    }
 
@@ -204,7 +202,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setLocation(placeToStepInWorld.getPointCopy());
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(stepSide);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       message.add(footstepData);
 
       drcSimulationTestHelper.send(message);

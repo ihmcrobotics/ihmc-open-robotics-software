@@ -29,6 +29,18 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class YoGraphicFactory
 {
+   private static YoVariable<?> getVariableOrNull(YoVariable<?>[] vars, int i)
+   {
+      if(i < vars.length)
+      {
+         return vars[i];
+      }
+      else
+      {
+         return null;
+      }
+   }
+   
    public static RemoteYoGraphic yoGraphicFromMessage(RemoteGraphicType type, String name, YoVariable<?>[] vars, double[] consts,
          AppearanceDefinition appearance)
    {
@@ -49,12 +61,12 @@ public class YoGraphicFactory
                (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], consts[0], appearance, true);
 
       case POSITION_DGO:
-         return new YoGraphicPosition(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2], consts[0], appearance,
+         return new YoGraphicPosition(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) getVariableOrNull(vars, 2), consts[0], appearance,
                YoGraphicPosition.GraphicType.values()[(int) (double) consts[1]]);
 
       case COORDINATE_SYSTEM_DGO:
          return new YoGraphicCoordinateSystem(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],
-               (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], consts[0]);
+               (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], consts);
 
       case LINE_SEGMENT_DGO:
          return new YoGraphicLineSegment(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],

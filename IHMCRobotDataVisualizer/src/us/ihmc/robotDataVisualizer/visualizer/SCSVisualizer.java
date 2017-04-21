@@ -104,6 +104,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             jointUpdaters.get(i).update();
          }
          scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+         updateLocalVariables();
          scs.tickAndUpdate();
       }
    }
@@ -333,6 +334,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
+   }
+   
+   /**
+    * Overridable method to update local variables.
+    * 
+    * Needs to return in less than your visualization dt.
+    */
+   public void updateLocalVariables()
+   {
+      
    }
 
    public static void main(String[] args)

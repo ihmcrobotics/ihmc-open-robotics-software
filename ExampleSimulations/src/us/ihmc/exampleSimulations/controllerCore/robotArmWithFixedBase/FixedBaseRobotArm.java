@@ -1,12 +1,14 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
-import java.util.ArrayList;
-import java.util.List;
+import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.*;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,23 +17,27 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
-public class RobotArm extends Robot
+public class FixedBaseRobotArm extends Robot
 {
    private static final double SMALL_MASS = 0.2;
-   private final Vector3D X_AXIS = new Vector3D(1.0, 0.0, 0.0);
-   private final Vector3D Y_AXIS = new Vector3D(0.0, 1.0, 0.0);
-   private final Vector3D Z_AXIS = new Vector3D(0.0, 0.0, 1.0);
+   private static final Vector3D X_AXIS = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y_AXIS = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z_AXIS = new Vector3D(0.0, 0.0, 1.0);
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
@@ -80,14 +86,18 @@ public class RobotArm extends Robot
    private final RevoluteJoint wristYaw;
    private final RigidBody hand;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.2));
+   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
+   private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslationVector(), this);
+   private final DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummy", new YoVariableRegistry("dummy"));
+   private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
+   private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
-   private final List<Pair<OneDoFJoint, OneDegreeOfFreedomJoint>> idToSCSJointPairs = new ArrayList<>();
+   private final Map<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
 
-   public RobotArm()
+   public FixedBaseRobotArm(double dt)
    {
-      super(RobotArm.class.getSimpleName());
+      super(FixedBaseRobotArm.class.getSimpleName());
       this.setGravity(0.0, 0.0, -gravity);
 
       elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
@@ -115,9 +125,20 @@ public class RobotArm extends Robot
 
       handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
+      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+                                                                           controlFrameTracker.getYoVelocity());
+      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+                                                                            controlFrameTracker.getYoAngularVelocity());
+
       setJointLimits();
 
       setupSCSRobot();
+   }
+
+   public void updateControlFrameAcceleration()
+   {
+      controlFrameLinearAcceleration.update();
+      controlFrameAngularAcceleration.update();
    }
 
    private void setJointLimits()
@@ -139,6 +160,15 @@ public class RobotArm extends Robot
       PinJoint scsWristPitch = new PinJoint("wristPitch", wristPitchOffset, this, Axis.Y);
       PinJoint scsWristRoll = new PinJoint("wristRoll", wristRollOffset, this, Axis.X);
       PinJoint scsWristYaw = new PinJoint("wristYaw", wristYawOffset, this, Axis.Z);
+
+      double b_damp = 0.025;
+      scsShoulderYaw.setDamping(b_damp);
+      scsShoulderRoll.setDamping(b_damp);
+      scsShoulderPitch.setDamping(b_damp);
+      scsElbowPitch.setDamping(b_damp);
+      scsWristPitch.setDamping(b_damp);
+      scsWristRoll.setDamping(b_damp);
+      scsWristYaw.setDamping(b_damp);
 
       Link scsShoulderYawLink = new Link("shoulderYawLink");
       scsShoulderYawLink.setMass(SMALL_MASS);
@@ -193,13 +223,15 @@ public class RobotArm extends Robot
       scsWristRoll.addJoint(scsWristYaw);
       scsWristYaw.setLink(scsHandLink);
 
-      idToSCSJointPairs.add(new ImmutablePair<>(shoulderYaw, scsShoulderYaw));
-      idToSCSJointPairs.add(new ImmutablePair<>(shoulderRoll, scsShoulderRoll));
-      idToSCSJointPairs.add(new ImmutablePair<>(shoulderPitch, scsShoulderPitch));
-      idToSCSJointPairs.add(new ImmutablePair<>(elbowPitch, scsElbowPitch));
-      idToSCSJointPairs.add(new ImmutablePair<>(wristPitch, scsWristPitch));
-      idToSCSJointPairs.add(new ImmutablePair<>(wristRoll, scsWristRoll));
-      idToSCSJointPairs.add(new ImmutablePair<>(wristYaw, scsWristYaw));
+      scsWristYaw.addKinematicPoint(controlFrameTracker);
+
+      idToSCSJointMap.put(shoulderYaw, scsShoulderYaw);
+      idToSCSJointMap.put(shoulderRoll, scsShoulderRoll);
+      idToSCSJointMap.put(shoulderPitch, scsShoulderPitch);
+      idToSCSJointMap.put(elbowPitch, scsElbowPitch);
+      idToSCSJointMap.put(wristPitch, scsWristPitch);
+      idToSCSJointMap.put(wristRoll, scsWristRoll);
+      idToSCSJointMap.put(wristYaw, scsWristYaw);
    }
 
    public void setupHandGraphics(Link scsHandLink)
@@ -231,33 +263,64 @@ public class RobotArm extends Robot
 
    public void updateSCSRobotJointTaus(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(pair.getLeft());
-         pair.getRight().setTau(tau);
+         OneDoFJoint oneDoFJoint = pair.getKey();
+
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredTorqueForJoint(oneDoFJoint))
+         {
+            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(oneDoFJoint);
+            pair.getValue().setTau(tau);
+         }
       }
    }
 
    public void updateSCSRobotJointConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(pair.getLeft());
-         double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(pair.getLeft());
+         OneDoFJoint oneDoFJoint = pair.getKey();
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredPositionForJoint(oneDoFJoint))
+         {
+            double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(oneDoFJoint);
+            pair.getValue().setQ(q);
+         }
 
-         pair.getRight().setQ(q);
-         pair.getRight().setQd(qd);
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredVelocityForJoint(oneDoFJoint))
+         {
+            double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(oneDoFJoint);
+            pair.getValue().setQd(qd);
+         }
       }
    }
 
    public void updateIDRobot()
    {
-      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         pair.getLeft().setQ(pair.getRight().getQ());
-         pair.getLeft().setQd(pair.getRight().getQD());
+         pair.getKey().setQ(pair.getValue().getQ());
+         pair.getKey().setQd(pair.getValue().getQD());
       }
       elevator.updateFramesRecursively();
+   }
+
+   public void setRandomConfiguration()
+   {
+      Random random = new Random();
+
+      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      {
+         OneDegreeOfFreedomJoint joint = pair.getValue();
+
+         double lowerLimit = joint.getJointLowerLimit();
+         if (!Double.isFinite(lowerLimit))
+            lowerLimit = -Math.PI;
+         double upperLimit = joint.getJointUpperLimit();
+         if (!Double.isFinite(upperLimit))
+            upperLimit = Math.PI;
+
+         joint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+      }
    }
 
    public RigidBody getElevator()

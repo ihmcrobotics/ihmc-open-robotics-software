@@ -2,14 +2,18 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>
+public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>, FrameBasedCommand<FootstepDataListMessage>
 {
    private double defaultSwingDuration;
    private double defaultTransferDuration;
@@ -35,6 +39,10 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    @Override
    public void set(FootstepDataListMessage message)
    {
+      // this is so scripts work.
+      PrintTools.warn(getClass().getSimpleName() + " contains frame information. No frame resolver was provided. Assuming all data is in world frame.");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
       clear();
 
       defaultSwingDuration = message.defaultSwingDuration;
@@ -46,7 +54,25 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
-            footsteps.add().set(dataList.get(i));
+            footsteps.add().set(worldFrame, dataList.get(i));
+      }
+   }
+
+   @Override
+   public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataListMessage message)
+   {
+      clear();
+
+      defaultSwingDuration = message.defaultSwingDuration;
+      defaultTransferDuration = message.defaultTransferDuration;
+      finalTransferDuration = message.finalTransferDuration;
+      executionMode = message.executionMode;
+      executionTiming = message.executionTiming;
+      ArrayList<FootstepDataMessage> dataList = message.getDataList();
+      if (dataList != null)
+      {
+         for (int i = 0; i < dataList.size(); i++)
+            footsteps.add().set(resolver, dataList.get(i));
       }
    }
 
@@ -149,4 +175,5 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       return getNumberOfFootsteps() > 0;
    }
+
 }

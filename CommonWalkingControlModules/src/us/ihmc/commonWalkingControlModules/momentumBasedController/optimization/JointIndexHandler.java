@@ -26,11 +26,25 @@ public class JointIndexHandler
       indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      populateColumnIndices();
+   }
 
-      for (InverseDynamicsJoint joint : jointsToIndex)
+   public JointIndexHandler(List<? extends InverseDynamicsJoint> jointsToIndex)
+   {
+      indexedJoints = new InverseDynamicsJoint[jointsToIndex.size()];
+      jointsToIndex.toArray(indexedJoints);
+      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+
+      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      populateColumnIndices();
+   }
+
+   private void populateColumnIndices()
+   {
+      for (InverseDynamicsJoint joint : indexedJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndexForJoint(jointsToIndex, listToPackIndices, joint);
+         ScrewTools.computeIndexForJoint(indexedJoints, listToPackIndices, joint);
          int[] indices = listToPackIndices.toArray();
 
          columnsForJoints.put(joint, indices);
@@ -62,7 +76,32 @@ public class JointIndexHandler
       return true;
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   {
+      fullMatrix.zero();
+
+      for (int index = 0; index < joints.size(); index++)
+      {
+         InverseDynamicsJoint joint = joints.get(index);
+         indicesIntoCompactBlock.reset();
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
+         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
+
+         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
+            return false;
+
+         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
+         {
+            int compactBlockIndex = indicesIntoCompactBlock.get(i);
+            int fullBlockIndex = indicesIntoFullBlock[i];
+            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+         }
+      }
+
+      return true;
+   }
+
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
 

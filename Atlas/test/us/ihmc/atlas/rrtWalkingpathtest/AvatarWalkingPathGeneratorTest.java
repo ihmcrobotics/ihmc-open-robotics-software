@@ -17,7 +17,6 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -64,10 +63,10 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private HumanoidRobotDataReceiver robotDataReceiver;
    private HumanoidFloatingRootJointRobot robot;
    private static final boolean DEBUG = false;
-   
+
    Point3D goalState;
    Point3D initialState;
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -78,8 +77,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
-      //if (simulationTestingParameters.getKeepSCSUp())
+//      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -106,20 +105,20 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
 
          addBoxEnvironment(RRT2DNodeWalkingPath.boxes[0], YoAppearance.Grey());
-         
+
          for(int i=1;i<RRT2DNodeWalkingPath.boxes.length;i++)
          {
             addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i], YoAppearance.Red());
          }
-                  
+
          EnvSet.addSphere(goalState.getX(), goalState.getY(), goalState.getZ(), 0.1, YoAppearance.Blue());
-         
+
          RigidBodyTransform location = new RigidBodyTransform();
          location.setTranslation(initialState);
-         
+
          // EnvSet.addCylinder(location, 1.0, 0.4, YoAppearance.Wheat());
       }
-      
+
       public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box, AppearanceDefinition app)
       {
          EnvSet.addBox(box.centerX - box.sizeX/2, box.centerY - box.sizeY/2,
@@ -182,15 +181,15 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       initialState = new Point3D(0.0, 0.0, 0.0);
       goalState = new Point3D(8.0, -4.0, 0.0);
-      
+
       RRTNode startNode = new RRT2DNodeWalkingPath(initialState.getX(), initialState.getY());
       RRTNode goalNode = new RRT2DNodeWalkingPath(goalState.getX(), goalState.getY());
-      
+
       RRT2DPlannerWalkingPath rrtPlanner = new RRT2DPlannerWalkingPath(startNode, goalNode, 0.4);
-      
+
       RRTNode upperBoundNode = new RRT2DNodeWalkingPath(12.0, 3.0);
       RRTNode lowerBoundNode = new RRT2DNodeWalkingPath(-2.0, -7.0);
-      
+
       rrtPlanner.getRRTTree().setUpperBound(upperBoundNode);
       rrtPlanner.getRRTTree().setLowerBound(lowerBoundNode);
 
@@ -198,7 +197,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WalkingPathTestEnvironment();
       setUpSimulationTestHelper(commonAvatarEnvironmentInterface, selectedLocation);
 
@@ -212,45 +211,45 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       // RRT Planning ******************* //
       // ******************************** //
-           
-      
-      rrtPlanner.expandTreeGoal(2000);      
+
+
+      rrtPlanner.expandTreeGoal(2000);
       PrintTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
-            
+
       simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-      
+
       rrtPlanner.updateOptimalPath(50, 200);
       simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Aqua()));
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-      
+
       PrintTools.info("shortcut optimized path has "+rrtPlanner.getOptimalPath().size()+" nodes");
-      
-            
+
+
       // footstep
       rrtPlanner.createFootStepPlanner(0.5, 0.35);
-      
+
       SkeletonPathFootStepPlanner footStepPlanner = rrtPlanner.getFootStepPlanner();
-      
+
       simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsLeftSide.get()));
       simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsRightSide.get()));
-      
+
       footStepPlanner.setZeroStep(RobotSide.LEFT);
       footStepPlanner.createFootSteps();
-            
+
       simulationConstructionSet.addStaticLinkGraphics(getPrintFootSteps(footStepPlanner.footSteps));
       simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(footStepPlanner.tempPoint, YoAppearance.Black()));
-      
-      
-      
-      
-      
+
+
+
+
+
       // ******************************** //
       // Foot Step Planning ************* //
       // ******************************** //
-//      
+//
 //      double swingTime = 2.0;
 //      double transferTime = 0.8;
 //      int steps = 3;
@@ -296,10 +295,10 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 //      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       // ******************************** //
 
-      
+
       PrintTools.info("END!!");
-      
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
    }
@@ -315,17 +314,17 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    // Print
    // ******************************** //
 
-   
-      
+
+
    private ArrayList<Graphics3DObject> getPrintNodePath(ArrayList<RRTNode> nodePath, AppearanceDefinition app)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
+
       for(int i =0;i<nodePath.size()-1;i++)
       {
-         ret.addAll(getPrintNodeConnection(nodePath.get(i), nodePath.get(i+1), app));         
+         ret.addAll(getPrintNodeConnection(nodePath.get(i), nodePath.get(i+1), app));
       }
-      
+
       return ret;
    }
 
@@ -336,60 +335,60 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       Graphics3DObject nodeOneSphere = new Graphics3DObject();
       Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-      
+
       Graphics3DObject lineCapsule = new Graphics3DObject();
-      
+
       Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
       nodeOneSphere.translate(translationNodeOne);
       nodeOneSphere.addSphere(0.05, YoAppearance.DarkGray());
-      
+
       Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
       nodeTwoSphere.translate(translationNodeTwo);
       nodeTwoSphere.addSphere(0.05, YoAppearance.DarkGray());
-      
+
       Point3D translationLine = new Point3D((nodeOne.getNodeData(0)+nodeTwo.getNodeData(0))/2, (nodeOne.getNodeData(1)+nodeTwo.getNodeData(1))/2, 0);
       AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
       lineCapsule.translate(translationLine);
       lineCapsule.rotate(rotationLine);
       lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), YoAppearance.Gray());
-      
+
       ret.add(nodeOneSphere);
       ret.add(nodeTwoSphere);
       ret.add(lineCapsule);
 
       return ret;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, AppearanceDefinition app)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
       Graphics3DObject nodeOneSphere = new Graphics3DObject();
       Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-      
+
       Graphics3DObject lineCapsule = new Graphics3DObject();
-      
+
       Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
       nodeOneSphere.translate(translationNodeOne);
       nodeOneSphere.addSphere(0.05, app);
-      
+
       Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
       nodeTwoSphere.translate(translationNodeTwo);
       nodeTwoSphere.addSphere(0.05, app);
-      
+
       Point3D translationLine = new Point3D((nodeOne.getNodeData(0)+nodeTwo.getNodeData(0))/2, (nodeOne.getNodeData(1)+nodeTwo.getNodeData(1))/2, 0);
       AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
       lineCapsule.translate(translationLine);
       lineCapsule.rotate(rotationLine);
       lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), app);
-      
+
       ret.add(nodeOneSphere);
       ret.add(nodeTwoSphere);
       ret.add(lineCapsule);
 
       return ret;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintFootStep(FootstepDataListMessage footsteps)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
@@ -397,7 +396,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       for(int i =0;i<footsteps.size();i++)
       {
          Graphics3DObject singleStep = new Graphics3DObject();
-         
+
          singleStep.translate(footsteps.get(i).location);
          if(footsteps.get(i).robotSide == RobotSide.RIGHT)
          {
@@ -407,24 +406,24 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          {
             singleStep.addSphere(0.05, YoAppearance.Green());
          }
-         
+
          ret.add(singleStep);
       }
       return ret;
    }
-   
+
    private Graphics3DObject getPrintFootStep(SkeletonPathFootStep footstep)
    {
       Graphics3DObject ret = new Graphics3DObject();
-      
+
       double sizeX = 0.3;
       double sizeY = 0.15;
-      double sizeZ = 0.01;      
-      
+      double sizeZ = 0.01;
+
       Point3D location = new Point3D(footstep.getLocation().getX(), footstep.getLocation().getY(), 0);
       AxisAngle rotation = new AxisAngle();
       rotation.appendYawRotation(footstep.getYawAngle());
-      
+
       ret.translate(location);
       ret.rotate(rotation);
       if(footstep.getRobotSide() == RobotSide.RIGHT)
@@ -432,29 +431,29 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Green());
          //PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
-      
+
       else
       {
          ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Blue());
          //PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
-         
+
       return ret;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintFootSteps(ArrayList<SkeletonPathFootStep> footSteps)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
+
       for(int i=0;i<footSteps.size();i++)
       {
          ret.add(getPrintFootStep(footSteps.get(i)));
 //         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
       }
-         
+
       return ret;
    }
-   
+
    private Graphics3DObject getPrintSphere(Point2D aPoint, AppearanceDefinition app)
    {
       Graphics3DObject aSphere = new Graphics3DObject();
@@ -462,37 +461,37 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       aSphere.addSphere(0.05, app);
       return aSphere;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintSegment(Line2D pathSegment)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
       Graphics3DObject nodeOneSphere = new Graphics3DObject();
       Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-      
+
       Graphics3DObject lineCapsule = new Graphics3DObject();
-      
+
       Point3D translationNodeOne = new Point3D(pathSegment.getX1(), pathSegment.getY1(), 0);
       nodeOneSphere.translate(translationNodeOne);
       nodeOneSphere.addSphere(0.05, YoAppearance.DarkGray());
-      
+
       Point3D translationNodeTwo = new Point3D(pathSegment.getX2(), pathSegment.getY2(), 0);
       nodeTwoSphere.translate(translationNodeTwo);
       nodeTwoSphere.addSphere(0.05, YoAppearance.DarkGray());
-      
+
       Point3D translationLine = new Point3D((pathSegment.getX1()+pathSegment.getX2())/2, (pathSegment.getY1()+pathSegment.getY2())/2, 0);
       AxisAngle rotationLine = new AxisAngle(-(pathSegment.getY1()-pathSegment.getY2()), (pathSegment.getX1()-pathSegment.getX2()), 0, Math.PI/2);
       lineCapsule.translate(translationLine);
       lineCapsule.rotate(rotationLine);
       lineCapsule.addCapsule(0.02, pathSegment.getP1().distance(pathSegment.getP2()), YoAppearance.Gray());
-      
+
       ret.add(nodeOneSphere);
       ret.add(nodeTwoSphere);
       ret.add(lineCapsule);
 
       return ret;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintSegments(ArrayList<Line2D> pathSegments)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();

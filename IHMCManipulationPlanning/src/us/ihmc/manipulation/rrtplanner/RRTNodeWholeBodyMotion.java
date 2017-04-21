@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.rrtplanner;
+package us.ihmc.manipulation.rrtplanner;
 
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;

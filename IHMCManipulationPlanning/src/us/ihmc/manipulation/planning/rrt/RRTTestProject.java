@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.commons.PrintTools;
 
-class DrawPanel extends JPanel
+public class RRTTestProject extends JPanel
 {
    double xUpper;
    double xLower;
@@ -31,7 +31,7 @@ class DrawPanel extends JPanel
 
    RRTPlanner info;
 
-   DrawPanel(int scaleF, double[] pointInfo, RRTPlanner info)
+   public RRTTestProject(int scaleF, double[] pointInfo, RRTPlanner info)
    {
       this.scale = scaleF;
       xUpper = info.getRRTTree().upperBoundNode.getNodeData(0);
@@ -73,7 +73,7 @@ class DrawPanel extends JPanel
       point(g, 0.0, 0.0, 4);
 
       // path
-      g.setColor(Color.MAGENTA);      
+      g.setColor(Color.MAGENTA);
       ArrayList<RRTNode> infoPathNode = info.getRRTTree().pathNode;
       for (int i =1;i<infoPathNode.size();i++)
       {
@@ -84,7 +84,7 @@ class DrawPanel extends JPanel
       g.setColor(Color.blue);
       point(g, info.getGoalNode().getNodeData(0), info.getGoalNode().getNodeData(1), 4);
 
-//      g.setColor(Color.red);      
+      //      g.setColor(Color.red);
       // box
       branch(g, boxInfo[0] + boxInfo[2] * 0.5, boxInfo[1] + boxInfo[3] * 0.5, boxInfo[0] + boxInfo[2] * 0.5, boxInfo[1] - boxInfo[3] * 0.5, 2);
       branch(g, boxInfo[0] + boxInfo[2] * 0.5, boxInfo[1] + boxInfo[3] * 0.5, boxInfo[0] - boxInfo[2] * 0.5, boxInfo[1] + boxInfo[3] * 0.5, 2);
@@ -92,8 +92,8 @@ class DrawPanel extends JPanel
       branch(g, boxInfo[0] - boxInfo[2] * 0.5, boxInfo[1] - boxInfo[3] * 0.5, boxInfo[0] + boxInfo[2] * 0.5, boxInfo[1] - boxInfo[3] * 0.5, 2);
 
       // piecewise
-      g.setColor(Color.green);      
-      ArrayList<RRTNode> piecewisePath = info.getPiecewisePath().getPiecewisePath();      
+      g.setColor(Color.green);
+      ArrayList<RRTNode> piecewisePath = info.getPiecewisePath().getPiecewisePath();
       for (int i =0;i< piecewisePath.size()-1;i++)
       {
          double p1x = piecewisePath.get(i).getNodeData(0);
@@ -102,9 +102,9 @@ class DrawPanel extends JPanel
          double p2y = piecewisePath.get(i+1).getNodeData(1);
          branch(g, p1x, p1y, p2x, p2y, 4);
       }
-      
+
       // shortcut
-      g.setColor(Color.black);      
+      g.setColor(Color.black);
       ArrayList<RRTNode> optimalPath = info.getOptimalPath();
       for (int i =0;i< optimalPath.size()-1;i++)
       {
@@ -125,7 +125,7 @@ class DrawPanel extends JPanel
    {
       return (int) Math.round(((-py) + yUpper) * scale);
    }
-   
+
    public void branch(Graphics g, double p1x, double p1y, double p2x, double p2y, int size)
    {
       point(g, p1x, p1y, size);
@@ -133,7 +133,7 @@ class DrawPanel extends JPanel
 
       g.drawLine(y2u(p1y), x2v(p1x), y2u(p2y), x2v(p2x));
    }
-   
+
    public void branchFill(Graphics g, double p1x, double p1y, double p2x, double p2y, int size)
    {
       pointFill(g, p1x, p1y, size);
@@ -141,22 +141,19 @@ class DrawPanel extends JPanel
 
       g.drawLine(y2u(p1y), x2v(p1x), y2u(p2y), x2v(p2x));
    }
-   
+
    public void point(Graphics g, double px, double py, int size)
    {
       int diameter = size;
       g.drawOval(y2u(py) - diameter / 2, x2v(px) - diameter / 2, diameter, diameter);
    }
-   
+
    public void pointFill(Graphics g, double px, double py, int size)
    {
       int diameter = size;
       g.fillOval(y2u(py) - diameter / 2, x2v(px) - diameter / 2, diameter, diameter);
    }
-}
 
-public class RRTTestProject
-{
    public static void main(String[] args)
    {
       PrintTools.info("Start!!! ");
@@ -202,7 +199,6 @@ public class RRTTestProject
       }
 
       JFrame frame;
-      DrawPanel drawPanel;
       Dimension dim;
       
 //      String newAmount = new Scanner(System.in).nextLine();
@@ -210,7 +206,7 @@ public class RRTTestProject
       rrtPlanner.updateOptimalPath(101, 100);
 
       frame = new JFrame("RRTTest");
-      drawPanel = new DrawPanel(100, rrtPointInfo, rrtPlanner);
+      RRTTestProject drawPanel = new RRTTestProject(100, rrtPointInfo, rrtPlanner);
       dim = new Dimension(drawPanel.sizeU, drawPanel.sizeV);
       frame.setPreferredSize(dim);
       frame.setLocation(200, 100);
@@ -220,7 +216,9 @@ public class RRTTestProject
       frame.setVisible(true);
       
       
-      
-      
+
+
    }
 }
+
+

@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -110,17 +109,19 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
 
 
    @Override
-   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
+   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
+   {
+      // can only snap footsteps in world frame
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
       //set to the sole pose
-      Vector3D position = new Vector3D();
-      Quaternion orientation = new Quaternion();
-      RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
-      solePose.get(orientation, position);
-      originalFootstep.setLocation(new Point3D(position));
-      originalFootstep.setOrientation(orientation);
-
+      FramePoint position = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(position, orientation);
+      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setOrientation(orientation.getQuaternion());
+      
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
       if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null){
@@ -129,7 +130,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
-      footstep.setSolePose(solePoseInWorld);
+      footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
       footstep.setTrajectoryType(originalFootstep.getTrajectoryType());

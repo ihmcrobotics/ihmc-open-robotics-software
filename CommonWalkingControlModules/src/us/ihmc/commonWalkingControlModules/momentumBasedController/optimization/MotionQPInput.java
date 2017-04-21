@@ -12,6 +12,18 @@ public class MotionQPInput
    private boolean isMotionConstraint = false;
    private final int numberOfDoFs;
 
+   /**
+    * <p>
+    *    Motion objective input into the QP solver.
+    *    Must be in the form
+    * </p>
+    * <p>
+    *    J*x - x
+    * </p>
+    * <p>
+    *    where the overall desire is minimize the objective.
+    * </p>
+    */
    public MotionQPInput(int numberOfDoFs)
    {
       this.numberOfDoFs = numberOfDoFs;

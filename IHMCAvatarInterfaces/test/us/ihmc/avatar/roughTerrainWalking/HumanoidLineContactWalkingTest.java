@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -35,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -52,14 +51,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -133,12 +132,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
          FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
-         placeToStepInWorld.setX(0.3 * (double)i);
+         placeToStepInWorld.setX(0.3 * i);
 
          footstepData.setLocation(placeToStepInWorld.getPointCopy());
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -188,12 +186,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
          FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
-         placeToStepInWorld.setX(0.3 * (double)i);
+         placeToStepInWorld.setX(0.3 * i);
 
          footstepData.setLocation(placeToStepInWorld.getPointCopy());
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -245,12 +242,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
          FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
-         placeToStepInWorld.setX(0.3 * (double)i);
+         placeToStepInWorld.setX(0.3 * i);
 
          footstepData.setLocation(placeToStepInWorld.getPointCopy());
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);

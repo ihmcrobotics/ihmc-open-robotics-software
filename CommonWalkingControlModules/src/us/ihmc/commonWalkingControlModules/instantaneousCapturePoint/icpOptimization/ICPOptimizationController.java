@@ -1,15 +1,21 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,6 +36,7 @@ public class ICPOptimizationController
    private static final boolean VISUALIZE = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
+   private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
 
    private static final String yoNamePrefix = "controller";
@@ -37,27 +44,33 @@ public class ICPOptimizationController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final IntegerYoVariable numberOfFootstepsToConsider = new IntegerYoVariable("numberOfFootstepsToConsider", registry);
+   private final IntegerYoVariable numberOfFootstepsToConsider = new IntegerYoVariable(yoNamePrefix + "NumberOfFootstepsToConsider", registry);
 
    private final boolean useTwoCMPs;
    private final boolean useFootstepRegularization;
    private final boolean useFeedbackRegularization;
 
-   private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable("useStepAdjustment", registry);
+   private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
 
-   private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable("scaleStepRegularizationWeightWithTime", registry);
-   private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable("scaleFeedbackWeightWithGain", registry);
-   private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable("scaleUpcomingStepWeights", registry);
+   private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
+   private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
+   private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
 
    private final BooleanYoVariable swingSpeedUpEnabled = new BooleanYoVariable(yoNamePrefix + "SwingSpeedUpEnabled", registry);
 
    private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
-   private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(yoNamePrefix + "IsInitialTransfer", registry);
 
-   private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable(yoNamePrefix + "DoubleSupportDuration", registry);
-   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable(yoNamePrefix + "SingleSupportDuration", registry);
-   private final DoubleYoVariable initialDoubleSupportDuration = new DoubleYoVariable(yoNamePrefix + "InitialTransferDuration", registry);
+   private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
+   private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
+   private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(yoNamePrefix + "FinalTransferDuration", registry);
+
+   private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+   private final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+   private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
+   private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
+
+   private final DoubleYoVariable transferSplitFractionUnderDisturbance;
 
    private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
@@ -75,8 +88,8 @@ public class ICPOptimizationController
 
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMP", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
-   private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
-   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d("dynamicRelaxation", "", worldFrame, registry);
+   private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
+   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxation", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpConstantEffects = new FramePoint2d();
@@ -111,9 +124,6 @@ public class ICPOptimizationController
 
    private final BooleanYoVariable doingBigAdjustment = new BooleanYoVariable(yoNamePrefix + "DoingBigAdjustment", registry);
 
-   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
-   private final DoubleYoVariable defaultDoubleSupportSplitFraction;
-   private final DoubleYoVariable doubleSupportSplitFractionUnderDisturbance;
    private final DoubleYoVariable magnitudeForBigAdjustment;
    private final boolean useDifferentSplitRatioForBigAdjustment;
    private final double minimumTimeOnInitialCMPForBigAdjustment;
@@ -139,6 +149,8 @@ public class ICPOptimizationController
 
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
@@ -147,11 +159,19 @@ public class ICPOptimizationController
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         ReferenceFrame ankleFrame = contactableFoot.getRigidBody().getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+      }
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
-
-      initialDoubleSupportDuration.set(walkingControllerParameters.getDefaultInitialTransferTime());
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -188,38 +208,69 @@ public class ICPOptimizationController
 
       dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable(yoNamePrefix + "TimeSpentOnExitCMPInPercentOfStepTime", registry);
-      defaultDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultDoubleSupportSplitFraction", registry);
-      doubleSupportSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
-      upcomingDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "UpcomingDoubleSupportSplitFraction", registry);
+      defaultSwingSplitFraction.set(icpPlannerParameters.getSwingDurationAlpha());
+      defaultTransferSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
+
+      transferSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
       magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
-      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getSwingDurationAlpha());
-      defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
-      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
-      upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
+      transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, exitCMPDurationInPercentOfStepTime, defaultDoubleSupportSplitFraction,
-            upcomingDoubleSupportSplitFraction, maximumNumberOfFootstepsToConsider, registry);
+      stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
+            swingSplitFractions, maximumNumberOfFootstepsToConsider, yoNamePrefix, registry);
 
-      cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
-      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, VISUALIZE, DEBUG, registry, yoGraphicsListRegistry);
+      cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, transformsFromAnkleToSole, VISUALIZE, DEBUG,
+                                                           yoNamePrefix, registry, yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
-            stateMultiplierCalculator, doubleSupportDuration, singleSupportDuration, exitCMPDurationInPercentOfStepTime, VISUALIZE, registry, yoGraphicsListRegistry);
+            stateMultiplierCalculator, transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         upcomingFootstepLocations.add(new YoFramePoint2d("upcomingFootstepLocation" + i, worldFrame, registry));
-         footstepSolutions.add(new YoFramePoint2d("footstepSolutionLocation" + i, worldFrame, registry));
+         upcomingFootstepLocations.add(new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation" + i, worldFrame, registry));
+         footstepSolutions.add(new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation" + i, worldFrame, registry));
          unclippedFootstepSolutions.add(new FramePoint2d(worldFrame));
+
+         DoubleYoVariable swingDuration = new DoubleYoVariable(yoNamePrefix + "SwingDuration" + i, registry);
+         swingDuration.setToNaN();
+         swingDurations.add(swingDuration);
+         DoubleYoVariable transferDuration = new DoubleYoVariable(yoNamePrefix + "TransferDuration" + i, registry);
+         transferDuration.setToNaN();
+         transferDurations.add(transferDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable(yoNamePrefix + "TransferSplitFraction" + i,
+               "Repartition of the transfer duration around the entry corner point.", registry);
+         transferSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable(yoNamePrefix + "SwingSplitFraction" + i,
+               "Repartition of the transfer duration around the entry corner point.", registry);
+         swingSplitFraction.setToNaN();
+         swingSplitFractions.add(swingSplitFraction);
       }
+
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry, VISUALIZE);
 
       parentRegistry.addChild(registry);
    }
+
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
+   {
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
+            YoGraphicPosition.GraphicType.SOLID_BALL);
+
+      artifactList.add(beginningOfStateICP.createArtifact());
+      artifactList.setVisible(visualize);
+
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+
 
    public void setFootstepWeights(double forwardWeight, double lateralWeight)
    {
@@ -238,45 +289,49 @@ public class ICPOptimizationController
       dynamicRelaxationWeight.set(relaxationWeight);
    }
 
-   public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
-   {
-      setDoubleSupportDuration(doubleSupportDuration);
-      setSingleSupportDuration(singleSupportDuration);
-   }
-
-   public void setDoubleSupportDuration(double doubleSupportDuration)
-   {
-      this.doubleSupportDuration.set(doubleSupportDuration);
-   }
-
-   public void setSingleSupportDuration(double singleSupportDuration)
-   {
-      this.singleSupportDuration.set(singleSupportDuration);
-   }
-
    public void clearPlan()
    {
       upcomingFootsteps.clear();
 
       inputHandler.clearPlan();
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
+      {
          upcomingFootstepLocations.get(i).setToZero();
+
+         swingDurations.get(i).setToNaN();
+         transferDurations.get(i).setToNaN();
+
+         swingSplitFractions.get(i).setToNaN();
+         transferSplitFractions.get(i).setToNaN();
+      }
+   }
+
+   public void setFinalTransferDuration(double finalTransferDuration)
+   {
+      this.finalTransferDuration.set(finalTransferDuration);
    }
 
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
-   public void addFootstepToPlan(Footstep footstep)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+      if (footstep != null)
       {
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
          {
             upcomingFootsteps.add(footstep);
-            footstep.getPosition2d(tmpFramePoint2d);
+            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstep.getRobotSide());
+            footstep.getAnklePosition2d(tmpFramePoint2d, ankleToSole);
             upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
             inputHandler.addFootstepToPlan(footstep);
 
             footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
             unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+
+            int footstepIndex = upcomingFootsteps.size() - 1;
+            swingDurations.get(footstepIndex).set(timing.getSwingTime());
+            transferDurations.get(footstepIndex).set(timing.getTransferTime());
+            swingSplitFractions.get(footstepIndex).set(defaultSwingSplitFraction.getDoubleValue());
+            transferSplitFractions.get(footstepIndex).set(defaultTransferSplitFraction.getDoubleValue());
          }
          else
          {
@@ -300,16 +355,15 @@ public class ICPOptimizationController
       this.initialTime.set(initialTime);
       isStanding.set(true);
       isInTransfer.set(false);
-      isInitialTransfer.set(true);
 
       setProblemBooleans();
-
-      stateMultiplierCalculator.resetTimes();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       speedUpTime.set(0.0);
+      transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
    }
 
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
@@ -319,19 +373,13 @@ public class ICPOptimizationController
          transferToSide = RobotSide.LEFT;
       isInTransfer.set(true);
 
-      upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
+      int numberOfFootstepRegistered = upcomingFootsteps.size();
+      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(numberOfFootstepRegistered).set(defaultTransferSplitFraction.getDoubleValue());
+
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
 
-      stateMultiplierCalculator.resetTimes();
-      if (isInitialTransfer.getBooleanValue())
-         stateMultiplierCalculator.submitTimes(0, initialDoubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      else
-         stateMultiplierCalculator.submitTimes(0, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
-      for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
-         stateMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
 
@@ -340,7 +388,7 @@ public class ICPOptimizationController
    }
 
    /**
-    * Notifies the icp optimization controller that teh robot is now in single support
+    * Notifies the icp optimization controller that the robot is now in single support
     * @param initialTime controller time at the start of the current single support phase
     * @param supportSide sets the side of the support foot for the upcoming single support
     * @param omega0 current inverted pendulum natural frequency
@@ -350,19 +398,14 @@ public class ICPOptimizationController
       this.supportSide.set(supportSide);
       isStanding.set(false);
       isInTransfer.set(false);
-      isInitialTransfer.set(false);
 
-      upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
+      int numberOfFootstepRegistered = upcomingFootsteps.size();
+      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(numberOfFootstepRegistered).set(defaultTransferSplitFraction.getDoubleValue());
+
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
 
-      stateMultiplierCalculator.resetTimes();
-      stateMultiplierCalculator.submitTimes(0, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
-      for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
-         stateMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
 
@@ -378,7 +421,6 @@ public class ICPOptimizationController
 
       this.initialTime.set(initialTime);
       speedUpTime.set(0.0);
-
 
       beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
       beginningOfStateICPVelocity.set(solutionHandler.getControllerReferenceICPVelocity());
@@ -473,7 +515,7 @@ public class ICPOptimizationController
 
          solver.getCMPFeedbackDifference(desiredCMPDelta);
 
-         if (COMPUTE_COST_TO_GO && DEBUG)
+         if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
       }
 
@@ -523,7 +565,7 @@ public class ICPOptimizationController
 
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
-      inputHandler.update(timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
+      inputHandler.update(numberOfFootstepsToConsider, timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion);
       inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d(),
             useTwoCMPs, isInTransfer.getBooleanValue());
@@ -544,7 +586,7 @@ public class ICPOptimizationController
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
 
-      if (localUseStepAdjustment && !isInTransfer.getBooleanValue())
+      if (localUseStepAdjustment && (!isInTransfer.getBooleanValue() || ALLOW_ADJUSTMENT_IN_TRANSFER))
       {
          for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
             submitFootstepConditionsToSolver(footstepIndex);
@@ -584,7 +626,7 @@ public class ICPOptimizationController
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, upcomingFootsteps.size());
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, maximumNumberOfFootstepsToConsider);
 
-      if (!localUseStepAdjustment || isInTransfer.getBooleanValue() || isStanding.getBooleanValue())
+      if (!localUseStepAdjustment || (isInTransfer.getBooleanValue() && !ALLOW_ADJUSTMENT_IN_TRANSFER) || isStanding.getBooleanValue())
          numberOfFootstepsToConsider = 0;
 
       return numberOfFootstepsToConsider;
@@ -634,9 +676,9 @@ public class ICPOptimizationController
       {
          double remainingTime;
          if (isInTransfer.getBooleanValue())
-            remainingTime = doubleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
+            remainingTime = transferDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue();
          else
-            remainingTime = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
+            remainingTime = swingDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue();
 
          timeRemainingInState.set(remainingTime);
       }
@@ -646,7 +688,7 @@ public class ICPOptimizationController
    {
       if (scaleStepRegularizationWeightWithTime.getBooleanValue())
       {
-         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / singleSupportDuration.getDoubleValue();
+         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / swingDurations.get(0).getDoubleValue();
          scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
       }
       else
@@ -677,14 +719,14 @@ public class ICPOptimizationController
    {
       double footstepAdjustmentSize = solutionHandler.getFootstepAdjustment().length();
 
-      double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / doubleSupportDuration.getDoubleValue();
-      minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+      double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / transferDurations.get(0).getDoubleValue();
+      minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, transferSplitFractionUnderDisturbance.getDoubleValue());
 
       if (footstepAdjustmentSize > magnitudeForBigAdjustment.getDoubleValue() && !doingBigAdjustment.getBooleanValue())
       {
          doingBigAdjustment.set(true);
-         upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
-         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+         transferSplitFractions.get(1).set(minimumDoubleSupportSplitFraction);
+         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, upcomingFootsteps.size(), isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
       }
    }
 
