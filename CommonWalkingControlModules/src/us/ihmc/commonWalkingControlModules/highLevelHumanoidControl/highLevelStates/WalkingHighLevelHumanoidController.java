@@ -56,7 +56,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -107,8 +106,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
-
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final GenericStateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
@@ -166,8 +163,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.managerFactory = managerFactory;
 
-      this.yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
       // Getting parameters from the HighLevelHumanoidControllerToolbox
       this.controllerToolbox = controllerToolbox;
       fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -221,6 +216,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
 
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
@@ -522,6 +518,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
 
       hasWalkingControllerBeenInitialized.set(true);
+      
+      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
    public void initializeDesiredHeightToCurrent()
@@ -849,7 +847,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          footStepCommand.setRobotSide(state.getTransferToSide() == null ? state.getSupportSide() : state.getTransferToSide());
          footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
          footStepCommand.setSwingHeight(0);
-         footStepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          cmd.addFootstep(footStepCommand);
          
          walkingMessageHandler.handleFootstepDataListCommand(cmd);

@@ -28,11 +28,12 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -54,6 +55,7 @@ public class WalkingMessageHandler
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
@@ -100,11 +102,9 @@ public class WalkingMessageHandler
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
          RigidBody endEffector = contactableFoot.getRigidBody();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame(sidePrefix + "FootstepAtCurrentLocation", worldFrame);
-         Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame);
+         Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
+         soleFrames.put(robotSide, contactableFoot.getSoleFrame());
 
          upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class));
       }
@@ -248,20 +248,9 @@ public class WalkingMessageHandler
          return false;
       }
 
-      Point3D adjustedPosition = requestedFootstepAdjustment.getPosition();
-      Quaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
-
-      switch (requestedFootstepAdjustment.getOrigin())
-      {
-      case AT_ANKLE_FRAME:
-         footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
-         break;
-      case AT_SOLE_FRAME:
-         footstepToAdjust.setSolePose(adjustedPosition, adjustedOrientation);
-         break;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
+      FramePoint adjustedPosition = requestedFootstepAdjustment.getPosition();
+      FrameOrientation adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+      footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
 
       if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
       {
@@ -419,7 +408,7 @@ public class WalkingMessageHandler
 
    public Footstep getFootstepAtCurrentLocation(RobotSide robotSide)
    {
-      tempPose.setToZero(contactableFeet.get(robotSide).getFrameAfterParentJoint());
+      tempPose.setToZero(soleFrames.get(robotSide));
       tempPose.changeFrame(worldFrame);
       Footstep footstep = footstepsAtCurrentLocation.get(robotSide);
       footstep.setPose(tempPose);
@@ -538,8 +527,7 @@ public class WalkingMessageHandler
 
    private Footstep createFootstep(FootstepDataCommand footstepData)
    {
-      FramePose footstepPose = new FramePose(worldFrame, footstepData.getPosition(), footstepData.getOrientation());
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+      FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
 
       List<Point2D> contactPoints;
       if (footstepData.getPredictedContactPoints().isEmpty())
@@ -555,36 +543,25 @@ public class WalkingMessageHandler
       TrajectoryType trajectoryType = footstepData.getTrajectoryType();
 
       ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      Footstep footstep = new Footstep(rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
+      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, true, contactPoints);
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         if (footstepData.getTrajectoryWaypoints() == null)
+         if (footstepData.getCustomPositionWaypoints() == null)
          {
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
          else
          {
-            RecyclingArrayList<Point3D> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
-            footstep.setSwingWaypoints(trajectoryWaypoints);
+            RecyclingArrayList<FramePoint> positionWaypoints = footstepData.getCustomPositionWaypoints();
+            footstep.setCustomPositionWaypoints(positionWaypoints);
          }
       }
 
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
-      switch (footstepData.getOrigin())
-      {
-      case AT_ANKLE_FRAME:
-         break;
-      case AT_SOLE_FRAME:
-         footstep.setSolePose(footstepPose);
-         break;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
       return footstep;
    }
 

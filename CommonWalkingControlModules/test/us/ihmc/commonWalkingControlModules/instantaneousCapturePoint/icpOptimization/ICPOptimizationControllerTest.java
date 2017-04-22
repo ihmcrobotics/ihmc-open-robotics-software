@@ -82,7 +82,7 @@ public class ICPOptimizationControllerTest
 
       double stepLength = 0.2;
       double stepWidth = 0.1;
-      FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
+      FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
       FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
       icpPlanner.setFinalTransferDuration(doubleSupportDuration);

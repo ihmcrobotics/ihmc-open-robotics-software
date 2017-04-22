@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -65,7 +64,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint finalPosition = new FramePoint();
    private final FrameVector finalVelocity = new FrameVector();
    private final FramePoint stanceFootPosition = new FramePoint();
-   private final RecyclingArrayList<FramePoint> swingWaypointsForSole = new RecyclingArrayList<>(FramePoint.class);
+   private final RecyclingArrayList<FramePoint> positionWaypointsForSole = new RecyclingArrayList<>(FramePoint.class);
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -237,7 +236,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryGenerator.setInitialConditions(initialPosition, initialVelocity);
       swingTrajectoryGenerator.setFinalConditions(finalPosition, finalVelocity);
       swingTrajectoryGenerator.setStepTime(swingTimeProvider.getValue());
-      swingTrajectoryGenerator.setTrajectoryType(trajectoryType, swingWaypointsForSole);
+      swingTrajectoryGenerator.setTrajectoryType(trajectoryType, positionWaypointsForSole);
       swingTrajectoryGenerator.setSwingHeight(swingHeight);
       swingTrajectoryGenerator.setStanceFootPosition(stanceFootPosition);
 
@@ -257,7 +256,7 @@ public class SwingState extends AbstractUnconstrainedState
       touchdownVelocityProvider.get(finalVelocity);
       swingTrajectoryGenerator.setFinalConditions(finalPosition, finalVelocity);
       swingTrajectoryGenerator.setStepTime(swingTimeProvider.getValue());
-      swingTrajectoryGenerator.setTrajectoryType(trajectoryType, swingWaypointsForSole);
+      swingTrajectoryGenerator.setTrajectoryType(trajectoryType, positionWaypointsForSole);
 
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
@@ -387,7 +386,7 @@ public class SwingState extends AbstractUnconstrainedState
    public void setFootstep(Footstep footstep, double swingTime)
    {
       swingTimeProvider.setValue(swingTime);
-      footstep.getSolePose(footstepSolePose);
+      footstep.getPose(footstepSolePose);
 
       footstepSolePose.setZ(footstepSolePose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(footstepSolePose);
@@ -400,12 +399,12 @@ public class SwingState extends AbstractUnconstrainedState
 
       // if the trajectory is custom trust the waypoints...
       TrajectoryType trajectoryType = footstep.getTrajectoryType();
-      this.swingWaypointsForSole.clear();
+      this.positionWaypointsForSole.clear();
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         List<Point3D> swingWaypoints = footstep.getSwingWaypoints();
-         for (int i = 0; i < swingWaypoints.size(); i++)
-            this.swingWaypointsForSole.add().setIncludingFrame(worldFrame, swingWaypoints.get(i));
+         List<FramePoint> positionWaypoints = footstep.getCustomPositionWaypoints();
+         for (int i = 0; i < positionWaypoints.size(); i++)
+            this.positionWaypointsForSole.add().setIncludingFrame(positionWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
          return;
       }

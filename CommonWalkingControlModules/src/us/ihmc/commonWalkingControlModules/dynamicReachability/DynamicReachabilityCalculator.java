@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import java.util.ArrayList;
+
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
@@ -18,7 +20,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.LineSegment1d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,8 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import java.util.ArrayList;
 
 public class DynamicReachabilityCalculator
 {
@@ -99,6 +104,7 @@ public class DynamicReachabilityCalculator
    private final ArrayList<FrameVector2d> higherTransferGradients = new ArrayList<>();
 
    private final SideDependentList<FramePoint> ankleLocations = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
    private final SideDependentList<FramePoint> adjustedAnkleLocations = new SideDependentList<>();
    private final SideDependentList<FrameVector> hipOffsets = new SideDependentList<>();
 
@@ -118,7 +124,7 @@ public class DynamicReachabilityCalculator
 
    private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
    private final FrameOrientation stanceFootOrientation = new FrameOrientation();
-   private final FrameOrientation footstepOrientation = new FrameOrientation();
+   private final FrameOrientation footstepAnkleOrientation = new FrameOrientation();
 
    private final FrameVector tempGradient = new FrameVector();
    private final FrameVector tempVector = new FrameVector();
@@ -173,6 +179,12 @@ public class DynamicReachabilityCalculator
          YoFramePoint hipMinimumLocation = new YoFramePoint(robotSide.getShortLowerCaseName() + "PredictedHipMinimumPoint", worldFrame, registry);
          hipMaximumLocations.put(robotSide, hipMaximumLocation);
          hipMinimumLocations.put(robotSide, hipMinimumLocation);
+         
+         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+         ReferenceFrame ankleFrame = fullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint();
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
 
       int numberOfFootstepsToConsider = icpPlanner.getNumberOfFootstepsToConsider();
@@ -295,18 +307,18 @@ public class DynamicReachabilityCalculator
       predictedCoMPosition.setXY(tempFinalCoM);
 
       stanceFootOrientation.setToZero(fullRobotModel.getFoot(stanceSide).getBodyFixedFrame());
-      nextFootstep.getOrientationIncludingFrame(footstepOrientation);
+      nextFootstep.getAnkleOrientation(footstepAnkleOrientation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
 
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       stanceFootOrientation.changeFrame(pelvisFrame);
-      footstepOrientation.changeFrame(pelvisFrame);
+      footstepAnkleOrientation.changeFrame(pelvisFrame);
       predictedPelvisOrientation.setToZero(pelvisFrame);
-      predictedPelvisOrientation.interpolate(stanceFootOrientation, footstepOrientation, 0.5);
+      predictedPelvisOrientation.interpolate(stanceFootOrientation, footstepAnkleOrientation, 0.5);
 
       FramePoint stanceAnkleLocation = ankleLocations.get(stanceSide);
       FramePoint upcomingStepLocation = ankleLocations.get(swingSide);
       stanceAnkleLocation.setToZero(fullRobotModel.getLegJoint(stanceSide, LegJointName.ANKLE_PITCH).getFrameAfterJoint());
-      nextFootstep.getPositionIncludingFrame(upcomingStepLocation);
+      nextFootstep.getAnklePosition(upcomingStepLocation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
       upcomingStepLocation.changeFrame(worldFrame);
       stanceAnkleLocation.changeFrame(worldFrame);
 

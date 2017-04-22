@@ -92,6 +92,8 @@ public class PelvisOrientationManager
    private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
    private final DoubleYoVariable pelvisYawSineFrequence = new DoubleYoVariable("pelvisYawSineFrequence", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
@@ -149,6 +151,16 @@ public class PelvisOrientationManager
 
       pelvisYawSineFrequence.set(1.0);
       parentRegistry.addChild(registry);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+      }
    }
 
    public void setWeight(double weight)
@@ -554,14 +566,15 @@ public class PelvisOrientationManager
       desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
       initialPelvisOrientation.set(tempOrientation);
 
-      upcomingFootstep.getOrientationIncludingFrame(upcomingFootstepOrientation);
+      RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(upcomingFootstepSide);
+      upcomingFootstep.getAnkleOrientation(upcomingFootstepOrientation, ankleToSole);
       upcomingFootstepOrientation.changeFrame(worldFrame);
       tempOrientation.setToZero(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
       tempOrientation.changeFrame(worldFrame);
 
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(upcomingFootstepOrientation.getYaw(), tempOrientation.getYaw());
 
-      upcomingFootstep.getPositionIncludingFrame(upcomingFootstepLocation);
+      upcomingFootstep.getAnklePosition(upcomingFootstepLocation, ankleToSole);
       upcomingFootstepLocation.changeFrame(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
 
       double desiredSwingPelvisYawAngle = 0.0;

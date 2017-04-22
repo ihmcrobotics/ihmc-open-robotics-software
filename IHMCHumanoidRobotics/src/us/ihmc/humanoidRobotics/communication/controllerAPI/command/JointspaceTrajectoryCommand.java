@@ -6,7 +6,8 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 
-public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectoryCommand<T, M>, M extends AbstractJointspaceTrajectoryMessage<M>> extends QueueableCommand<T, M>
+public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectoryCommand<T, M>, M extends AbstractJointspaceTrajectoryMessage<M>>
+      extends QueueableCommand<T, M>
 {
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
 
@@ -50,7 +51,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
-         if(oneJointTrajectoryMessage != null)
+         if (oneJointTrajectoryMessage != null)
          {
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());

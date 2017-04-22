@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -246,8 +247,8 @@ public class FootstepGeneratorsTest
       double endX = -3.0;
       double endY = 0.0;
 
-      // Visualization vis = Visualization.VISUALIZE;
-      Visualization vis = Visualization.NO_VISUALIZATION;
+       Visualization vis = Visualization.VISUALIZE;
+//      Visualization vis = Visualization.NO_VISUALIZATION;
 
       String testDescription = "Walk " + pathDirection.toString();
       testTurnStraightFootstepGenerator("RStance, turn staight, " + testDescription, startX, startY, startYaw, RobotSide.RIGHT, pathDirection, endX, endY, vis);
@@ -1855,9 +1856,9 @@ public class FootstepGeneratorsTest
          Footstep firstFootstep = footsteps.get(i);
          Footstep nextFootstep = footsteps.get(i + 2);
          FramePose firstFootstepPose = new FramePose();
-         firstFootstep.getSolePose(firstFootstepPose);
+         firstFootstep.getPose(firstFootstepPose);
          FramePose nextFootstepPose = new FramePose();
-         nextFootstep.getSolePose(nextFootstepPose);
+         nextFootstep.getPose(nextFootstepPose);
          FramePoint2d firstFootstepPosition2d = new FramePoint2d();
          FramePoint2d nextFootstepPosition2d = new FramePoint2d();
          firstFootstepPose.getPosition2dIncludingFrame(firstFootstepPosition2d);
@@ -1876,7 +1877,7 @@ public class FootstepGeneratorsTest
    private void assertFootstepInAngleRange(String testDescription, Footstep footstep, double startYaw, double endYaw)
    {
       FramePose footPose = new FramePose();
-      footstep.getSolePose(footPose);
+      footstep.getPose(footPose);
 
       FrameOrientation2d footOrientation = new FrameOrientation2d();
       footPose.getOrientation2dIncludingFrame(footOrientation);
@@ -1904,9 +1905,9 @@ public class FootstepGeneratorsTest
          footstep1 = footsteps.get(i);
          footstep2 = footsteps.get(i + 1);
          FramePoint position2 = new FramePoint();
-         footstep2.getPositionIncludingFrame(position2);
+         footstep2.getPosition(position2);
          FramePoint position1 = new FramePoint();
-         footstep1.getPositionIncludingFrame(position1);
+         footstep1.getPosition(position1);
          double dis = position2.distance(position1);
          assertTrue(String.format(message + " %.2f<=%.2f? step %d to %d", dis, distTest, i, i + 1), dis < distTest + 1e-14);
       }
@@ -1924,9 +1925,9 @@ public class FootstepGeneratorsTest
          footstep1 = footsteps.get(i);
          footstep2 = footsteps.get(i + 2);
          FramePoint position2 = new FramePoint();
-         footstep2.getPositionIncludingFrame(position2);
+         footstep2.getPosition(position2);
          FramePoint position1 = new FramePoint();
-         footstep1.getPositionIncludingFrame(position1);
+         footstep1.getPosition(position1);
          double dis = position2.distance(position1);
 
          //       assertTrue(true);
@@ -1966,7 +1967,7 @@ public class FootstepGeneratorsTest
       else
          generator = new TranslationFootstepGenerator(feet, soleFrames, endPoint, translationalPathType, startStanceSide);
 
-      ArrayList<Footstep> footsteps = (ArrayList<Footstep>) generator.generateDesiredFootstepList();
+      ArrayList<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       /////////////////////////////////////
       // Validate footsteps
@@ -2026,7 +2027,7 @@ public class FootstepGeneratorsTest
       TurnTranslateTurnFootstepGenerator generator = new TurnTranslateTurnFootstepGenerator(feet, soleFrames, pathOrientation, endPose, pathType,
             translationalPathType);
 
-      ArrayList<Footstep> footsteps = (ArrayList<Footstep>) generator.generateDesiredFootstepList();
+      ArrayList<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       /////////////////////////////////////
       // Validate footsteps
@@ -2069,7 +2070,7 @@ public class FootstepGeneratorsTest
       else
          generator = new TurningThenStraightFootstepGenerator(feet, soleFrames, endPoint, pathType, startStanceSide);
 
-      ArrayList<Footstep> footsteps = (ArrayList<Footstep>) generator.generateDesiredFootstepList();
+      ArrayList<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       /////////////////////////////////////
       // Validate footsteps
@@ -2112,7 +2113,7 @@ public class FootstepGeneratorsTest
       else
          generator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType, startStanceSide);
 
-      ArrayList<Footstep> footsteps = (ArrayList<Footstep>) generator.generateDesiredFootstepList();
+      ArrayList<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       /////////////////////////////////////
       // Validate footsteps
@@ -2161,7 +2162,7 @@ public class FootstepGeneratorsTest
       else
          generator = new TwoSegmentFootstepGenerator(feet, soleFrames, midPose, endPoint, pathType, pathType2, startStanceSide, midStanceStartSide);
 
-      ArrayList<Footstep> footsteps = (ArrayList<Footstep>) generator.generateDesiredFootstepList();
+      ArrayList<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       /////////////////////////////////////
       // Validate footsteps
@@ -2250,7 +2251,7 @@ public class FootstepGeneratorsTest
       double eps = 1e-15;
       for (Footstep footstep : footSteps)
       {
-         assertEquals(message + " foot should be level and zero height.", zToAnkle, footstep.getZ(), eps);
+         assertEquals(message + " foot should be level and zero height.", 0.0, footstep.getZ(), eps);
       }
    }
 
@@ -2337,9 +2338,9 @@ public class FootstepGeneratorsTest
          Footstep lastFootstep = footsteps.get(i);
          Footstep compareToLastFootstep = footsteps.get(i - 2);
          FramePose lastFootstepPose = new FramePose();
-         lastFootstep.getSolePose(lastFootstepPose);
+         lastFootstep.getPose(lastFootstepPose);
          FramePose compareToLastFootstepPose = new FramePose();
-         compareToLastFootstep.getSolePose(compareToLastFootstepPose);
+         compareToLastFootstep.getPose(compareToLastFootstepPose);
          FramePoint2d lastFootstepPosition2d = new FramePoint2d();
          FramePoint2d compareToLastFootstepPosition2d = new FramePoint2d();
          lastFootstepPose.getPosition2dIncludingFrame(lastFootstepPosition2d);
@@ -2355,7 +2356,7 @@ public class FootstepGeneratorsTest
    private static void assertStepIsPointingCorrectly(String message, Footstep footstep, FrameOrientation2d endOrientation)
    {
       FramePose footPose = new FramePose();
-      footstep.getSolePose(footPose);
+      footstep.getPose(footPose);
 
       // System.out.println(Math.toDegrees(endOrientation.getYaw()) + "?=" + Math.toDegrees(footPose.getYaw()));
       // System.out.println(Math.toDegrees(footPose.getRoll()) + "?=" + Math.toDegrees(footPose.getPitch()) + "?=" + 0.0);

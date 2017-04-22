@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -22,22 +22,21 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
@@ -80,10 +79,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
-         Point3D location = new Point3D((double) stepIndex * stepLength, y, 0.0);
+         Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (stepIndex == 0)
             footstepData.setTransferDuration(swingStartInterval);
@@ -95,7 +93,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       double controllerDt = getRobotModel().getControllerDT();
-      double timeEpsilon = (double) TICK_EPSILON * controllerDt;
+      double timeEpsilon = TICK_EPSILON * controllerDt;
 
       drcSimulationTestHelper.send(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingStartInterval - timeEpsilon));
@@ -137,7 +135,6 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Point3D location = new Point3D(0.0, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepData.setTransferDuration(minimumTransferTime / 2.0);
          footsteps.add(footstepData);
       }
@@ -189,7 +186,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
          for (int i = 0; i < 50; i++)
          {
-            double xStart = flatArea + (double) i * flatArea - flatArea / 2.0;
+            double xStart = flatArea + i * flatArea - flatArea / 2.0;
             double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
             double length = flatArea;
             terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);

@@ -8,7 +8,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -21,6 +20,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepListBehavior extends AbstractBehavior
@@ -73,12 +74,13 @@ public class FootstepListBehavior extends AbstractBehavior
       for (int i = 0; i < footsteps.size(); i++)
       {
          Footstep footstep = footsteps.get(i);
-         Point3D location = new Point3D(footstep.getX(), footstep.getY(), footstep.getZ());
-         Quaternion orientation = new Quaternion();
-         footstep.getOrientation(orientation);
+         FramePoint position = new FramePoint();
+         FrameOrientation orientation = new FrameOrientation();
+         footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
+         footstepData.setTrajectoryReferenceFrameId(footstep.getFootstepPose().getReferenceFrame());
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);
