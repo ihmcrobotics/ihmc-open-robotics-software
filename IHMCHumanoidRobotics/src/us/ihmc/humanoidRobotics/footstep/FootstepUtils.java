@@ -9,7 +9,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,24 +34,22 @@ public class FootstepUtils
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
-      FramePose footFramePose = new FramePose(endEffector.getFrameAfterParentJoint());
+      FramePose footFramePose = new FramePose(endEffector.getSoleFrame());
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footFramePose);
-      Footstep footstep = new Footstep(endEffector.getRigidBody(), side, endEffector.getSoleFrame(), footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(endEffector.getRigidBody(), side, footFramePose, trustHeight);
 
       return footstep;
    }
 
    public static Footstep generateStandingFootstep(RobotSide side, RigidBody foot, ReferenceFrame soleFrame)
    {
-      FramePose footFramePose = new FramePose(foot.getParentJoint().getFrameAfterJoint());
+      FramePose footFramePose = new FramePose(soleFrame);
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footFramePose);
-      Footstep footstep = new Footstep(foot, side, soleFrame, footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot, side, footFramePose, trustHeight);
 
       return footstep;
    }
@@ -126,7 +123,7 @@ public class FootstepUtils
       for (RobotSide side : RobotSide.values)
       {
          FramePoint footstepPosition = new FramePoint();
-         footSteps.get(side).getPositionIncludingFrame(footstepPosition);
+         footSteps.get(side).getPosition(footstepPosition);
          footstepPosition.changeFrame(worldFrame);
          distances.set(side, new Double(footstepPosition.distanceSquared(destinationInWorld)));
       }

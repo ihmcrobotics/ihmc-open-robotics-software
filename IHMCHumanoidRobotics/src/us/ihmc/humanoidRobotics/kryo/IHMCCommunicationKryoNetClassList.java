@@ -11,7 +11,10 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
+import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.Packet;
@@ -26,6 +29,7 @@ import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
@@ -152,7 +156,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
@@ -172,7 +175,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
@@ -242,6 +244,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector3D.class);
       registerPacketField(Vector2D32.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
+      registerPacketClass(QuaternionBasedTransform.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);
       registerPacketField(Vector3D32.class);
@@ -269,7 +272,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FootTrajectoryMessage.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
-      registerPacketClass(TrackingWeightsMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
       registerPacketClass(GoHomeMessage.class);
       registerPacketClass(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
@@ -320,10 +322,15 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Toolbox modules
       registerPacketClass(ToolboxStateMessage.class);
       registerPacketField(ToolboxState.class);
-      registerPacketClass(KinematicsToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningRequestPacket.class);
       registerPacketClass(FootstepPlanningResult.class);
+
+      // Packets for the kinematics toolbox
+      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      registerPacketClass(KinematicsToolboxCenterOfMassMessage.class);
+      registerPacketClass(KinematicsToolboxRigidBodyMessage.class);
+      registerPacketClass(KinematicsToolboxConfigurationMessage.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
@@ -334,7 +341,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
       registerPacketClass(AdjustFootstepMessage.class);
-      registerPacketField(FootstepOrigin.class);
       registerPacketField(ArrayList.class);
 
       registerPacketClass(FootstepDataListMessage.class);
@@ -540,6 +546,5 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BoundingBoxesPacket.class);
 
       registerPacketClass(ObjectDetectorResultPacket.class);
-
    }
 }

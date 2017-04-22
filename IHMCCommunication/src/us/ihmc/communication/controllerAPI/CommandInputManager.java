@@ -186,7 +186,9 @@ public class CommandInputManager
          commandConverter.process(nextCommand, message);
       }
       else
+      {
          nextCommand.set(message);
+      }
          
       buffer.commit();
 

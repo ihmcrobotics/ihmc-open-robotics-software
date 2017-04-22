@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,6 +19,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.HullFace;
@@ -183,16 +184,17 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    @Override
    public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
    {
+      // can only snap footsteps in world frame
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      Vector3D position = new Vector3D();
-      Quaternion orientation = new Quaternion();
-      RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
-      solePose.get(orientation, position);
-      originalFootstep.setLocation(new Point3D(position));
-      originalFootstep.setOrientation(orientation);
+      FramePoint position = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(position, orientation);
+      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setOrientation(orientation.getQuaternion());
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
@@ -203,7 +205,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
-      footstep.setSolePose(solePoseInWorld);
+      footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
       footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
@@ -236,23 +238,24 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    public Footstep.FootstepType snapFootstep(Footstep footstep, List<Point3D> pointList, double defaultHeight)
    {
+      // can only snap footsteps in world frame
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      Vector3D position = new Vector3D();
-      Quaternion orientation = new Quaternion();
-      RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
-      solePose.get(orientation, position);
-      originalFootstep.setLocation(new Point3D(position));
-      originalFootstep.setOrientation(orientation);
+      FramePoint position = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(position, orientation);
+      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setOrientation(orientation.getQuaternion());
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, pointList, defaultHeight);
       footstep.setFootstepType(type);
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
-      footstep.setSolePose(solePoseInWorld);
+      footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
       footstep.setTrajectoryType(originalFootstep.getTrajectoryType());

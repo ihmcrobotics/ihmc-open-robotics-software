@@ -1,17 +1,23 @@
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url "http://dl.bintray.com/ihmcrobotics/maven-release"
+        }
     }
-  }
-  dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
-  }
+    dependencies {
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
+        classpath "gradle.plugin.us.ihmc.continuousIntegration:IHMCContinuousIntegrationGradlePlugin:0.10.8"
+    }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
+apply plugin: "us.ihmc.continuousIntegration.ihmc-continuous-integration-plugin"
 
-if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware'))
+{
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
@@ -32,9 +38,9 @@ repositories {
     maven {
         url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
-   maven {
+    maven {
         url "http://artifactory.ihmc.us/artifactory/releases/"
-   }
+    }
 }
 
 def strings = ['ihmc', 'robotics']
@@ -68,7 +74,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
     compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
     compile "org.boofcv:recognition:0.24.1"
-    
+
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
@@ -98,8 +104,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
     compile ihmc.getProjectDependency(":IHMCManipulationPlanning")
 
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+    testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
     testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")

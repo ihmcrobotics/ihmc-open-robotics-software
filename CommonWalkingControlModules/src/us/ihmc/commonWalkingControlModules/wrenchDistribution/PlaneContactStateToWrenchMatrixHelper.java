@@ -68,6 +68,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoFramePoint previousCoP;
 
    private final BooleanYoVariable hasReceivedCenterOfPressureCommand;
+   private final BooleanYoVariable isFootholdAreaLargeEnough;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
@@ -113,6 +114,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
 
       hasReceivedCenterOfPressureCommand = new BooleanYoVariable(namePrefix + "HasReceivedCoPCommand", registry);
+      isFootholdAreaLargeEnough = new BooleanYoVariable(namePrefix + "isFootholdAreaLargeEnough", registry);
       desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
 
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
@@ -200,9 +202,8 @@ public class PlaneContactStateToWrenchMatrixHelper
          }
       }
 
-      boolean isFootholdAreaLargeEnough = yoPlaneContactState.getFootholdArea() > 1.0e-3;
-
-      if (yoPlaneContactState.inContact() && !resetRequested.getBooleanValue() && isFootholdAreaLargeEnough)
+      isFootholdAreaLargeEnough.set(yoPlaneContactState.getFootholdArea() > 1.0e-3);
+      if (yoPlaneContactState.inContact() && !resetRequested.getBooleanValue() && isFootholdAreaLargeEnough.getBooleanValue())
       {
          if (hasReceivedCenterOfPressureCommand.getBooleanValue())
          {

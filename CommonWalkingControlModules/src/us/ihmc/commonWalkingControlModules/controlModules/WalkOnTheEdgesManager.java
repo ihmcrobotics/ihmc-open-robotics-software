@@ -612,7 +612,7 @@ public class WalkOnTheEdgesManager
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
+      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
@@ -680,9 +680,9 @@ public class WalkOnTheEdgesManager
       RobotSide nextTrailingLeg = transferToSide.getOppositeSide();
       ReferenceFrame nextFrontFootFrame;
       if (nextFootstep != null)
-         nextFrontFootFrame = nextFootstep.getPoseReferenceFrame();
+         nextFrontFootFrame = nextFootstep.getSoleReferenceFrame();
       else
-         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getFrameAfterParentJoint();
+         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getSoleFrame();
 
       return isFrontFootWellPositionedForToeOff(nextTrailingLeg, nextFrontFootFrame);
    }

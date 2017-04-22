@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -148,6 +149,8 @@ public class ICPOptimizationController
 
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
@@ -156,6 +159,16 @@ public class ICPOptimizationController
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         ReferenceFrame ankleFrame = contactableFoot.getRigidBody().getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+      }
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
@@ -211,7 +224,8 @@ public class ICPOptimizationController
 
       cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
-      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, VISUALIZE, DEBUG, yoNamePrefix, registry, yoGraphicsListRegistry);
+      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, transformsFromAnkleToSole, VISUALIZE, DEBUG,
+                                                           yoNamePrefix, registry, yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             stateMultiplierCalculator, transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
@@ -305,7 +319,8 @@ public class ICPOptimizationController
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
          {
             upcomingFootsteps.add(footstep);
-            footstep.getPosition2d(tmpFramePoint2d);
+            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstep.getRobotSide());
+            footstep.getAnklePosition2d(tmpFramePoint2d, ankleToSole);
             upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
             inputHandler.addFootstepToPlan(footstep);
 
