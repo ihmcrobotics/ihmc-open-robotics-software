@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -286,23 +287,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       if (isUpToDate)
          return;
 
-      // Need to reorder the vertices so they are clockwise ordered
-      if (numberOfVertices >= 3 && !InPlaceConvexHullCalculator2d.isConvexAndClockwise(clockwiseOrderedListOfPoints, numberOfVertices))
-      {
-         numberOfVertices = InPlaceConvexHullCalculator2d.inPlaceGiftWrapConvexHull2d(clockwiseOrderedListOfPoints, numberOfVertices);
-      }
-      // Only two distinct vertices: trivial case
-      else if (numberOfVertices == 2 && !clockwiseOrderedListOfPoints.get(0).equals(clockwiseOrderedListOfPoints.get(1)))
-      {
-         Point2D p0 = clockwiseOrderedListOfPoints.get(0);
-         Point2D p1 = clockwiseOrderedListOfPoints.get(1);
-
-         if (!(p0.getX() < p1.getX()) || ((p0.getX() == p1.getX()) && (p0.getY() > p1.getY())))
-         {
-            Collections.swap(clockwiseOrderedListOfPoints, 1, 0);
-         }
-      }
-      // Else, nothing to do, it's either 0 vertex, 1 vertex, 2 identical vertices, or the vertices are already clockwise ordered
+      numberOfVertices = EuclidGeometryPolygonTools.inPlaceGiftWrapConvexHull2D(clockwiseOrderedListOfPoints, numberOfVertices);
       isUpToDate = true;
 
       updateCentroidAndArea();

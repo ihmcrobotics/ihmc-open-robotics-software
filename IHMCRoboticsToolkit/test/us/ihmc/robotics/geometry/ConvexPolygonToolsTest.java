@@ -262,7 +262,7 @@ public class ConvexPolygonToolsTest
          }
 
          // check if the number of vertices is correct
-         Assert.assertEquals(desiredNumberOfVertices, polygon.getNumberOfVertices());
+         Assert.assertTrue(desiredNumberOfVertices >= polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
          Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon.getConvexPolygon2d(), 10E-10, originalPolygon.getConvexPolygon2d()));
       }
