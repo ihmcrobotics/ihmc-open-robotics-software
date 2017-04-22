@@ -311,7 +311,6 @@ public class FeetManager
     */
    public void updateToeOffSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP)
    {
-      toeOffManager.inSingleSupport();
       toeOffManager.submitNextFootstep(nextFootstep);
       toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredICP, currentICP);
    }
@@ -322,7 +321,6 @@ public class FeetManager
     */
    public void updateToeOffDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
-      toeOffManager.inDoubleSupport();
       toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
    }
 
