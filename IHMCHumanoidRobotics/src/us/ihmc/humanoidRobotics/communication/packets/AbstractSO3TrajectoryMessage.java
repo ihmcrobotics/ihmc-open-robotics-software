@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.*;
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.checkIfFrameIdsMatch;
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.checkIfTrajectoryFrameIdsMatch;
 
 import java.util.Random;
 

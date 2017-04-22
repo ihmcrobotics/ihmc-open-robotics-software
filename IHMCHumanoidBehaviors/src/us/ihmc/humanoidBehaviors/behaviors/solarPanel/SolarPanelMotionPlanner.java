@@ -49,8 +49,6 @@ public class SolarPanelMotionPlanner
    {      
       this.wholeBodyTrajectoryMessage.clear();
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
-      
-      
            
       switch(motion)
       {
@@ -74,8 +72,7 @@ public class SolarPanelMotionPlanner
          cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
          cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
          cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-                  
-         
+                           
          this.motionTime = cleaningPath.getArrivalTime().get(cleaningPath.getArrivalTime().size()-1);
          PrintTools.info("motionTime :: "+this.motionTime);
          
@@ -86,29 +83,29 @@ public class SolarPanelMotionPlanner
          
          rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
          
-         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
-         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
-         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
-         
-         PrintTools.info(""+node1.isValidNode());
-         ThreadTools.sleep(1000);
-         PrintTools.info(""+node2.isValidNode());
-         ThreadTools.sleep(1000);
-         PrintTools.info(""+node3.isValidNode());
-         ThreadTools.sleep(1000);
-         
-//         rrtPlanner.expandingTreesAndShortCut(200);
+//         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+//         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
+//         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
 //         
-//        
-//         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
-//
-//         // *** message *** //
-//         PrintTools.info("Putting on Message");
-//         motionFactory.setCleaningPath(cleaningPath);         
-//         motionFactory.setMessage(rrtPlanner.getRRTPath());
-//         
-//         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
-//         PrintTools.info("Complete putting on message");
+//         PrintTools.info(""+node1.isValidNode());
+//         ThreadTools.sleep(1000);
+//         PrintTools.info(""+node2.isValidNode());
+//         ThreadTools.sleep(1000);
+//         PrintTools.info(""+node3.isValidNode());
+//         ThreadTools.sleep(1000);
+         
+         rrtPlanner.expandingTreesAndShortCut(200);
+         
+        
+         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+
+         // *** message *** //
+         PrintTools.info("Putting on Message");
+         motionFactory.setCleaningPath(cleaningPath);         
+         motionFactory.setMessage(rrtPlanner.getRRTPath());
+         
+         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
+         PrintTools.info("Complete putting on message");
          
          break;
          
