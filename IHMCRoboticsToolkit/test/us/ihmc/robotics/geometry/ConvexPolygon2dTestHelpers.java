@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -95,9 +97,10 @@ public class ConvexPolygon2dTestHelpers
 
       if (polygon.isPointInside(testPoint))
       {
-         double distance = testPoint.distance(projectionPoint);
-         if (distance > 1e-7)
-            throw new RuntimeException();
+         assertNull(projectionPoint);
+//         double distance = testPoint.distance(projectionPoint);
+//         if (distance > 1e-7)
+//            throw new RuntimeException();
 
          return;
       }

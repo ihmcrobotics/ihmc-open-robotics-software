@@ -693,24 +693,31 @@ public class ConvexPolygon2dTest
          FramePoint2d expectedSolution2d = new FramePoint2d(zUpFrame, pointAndSolutionToTest[2], pointAndSolutionToTest[3]);
 
          FramePoint2d closestPoint = polygon.orthogonalProjectionCopy(pointToTest2d);
-         ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, pointToTest2d, closestPoint);
-
-         if (closestPoint.epsilonEquals(pointToTest2d, 1e-7))
+         if (polygon.isPointInside(pointToTest2d))
          {
-            notOutsidePoints.add(pointToTest2d);
-            if (!polygon.isPointInside(pointToTest2d))
-               throw new RuntimeException("Point is outside, yet projection was itself!!");
+            assertNull(closestPoint);
          }
-
          else
          {
-            projections.add(new FrameLineSegment2d(pointToTest2d, closestPoint));
-
-            // verify something!
-            if (polygon.isPointInside(pointToTest2d))
-               throw new RuntimeException("Point is inside, yet found a projection!");
-            verifyEpsilonEquals(closestPoint, expectedSolution2d);
-
+            ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, pointToTest2d, closestPoint);
+            
+            if (closestPoint.epsilonEquals(pointToTest2d, 1e-7))
+            {
+               notOutsidePoints.add(pointToTest2d);
+               if (!polygon.isPointInside(pointToTest2d))
+                  throw new RuntimeException("Point is outside, yet projection was itself!!");
+            }
+            
+            else
+            {
+               projections.add(new FrameLineSegment2d(pointToTest2d, closestPoint));
+               
+               // verify something!
+               if (polygon.isPointInside(pointToTest2d))
+                  throw new RuntimeException("Point is inside, yet found a projection!");
+               verifyEpsilonEquals(closestPoint, expectedSolution2d);
+               
+            }
          }
       }
 
@@ -729,7 +736,7 @@ public class ConvexPolygon2dTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test //(timeout = 30000)
    public void testOrthogonalProjectionThree()
    {
       Random random = new Random(1776L);
@@ -760,6 +767,9 @@ public class ConvexPolygon2dTest
 
          FramePoint2d projectedPoint = polygon.orthogonalProjectionCopy(testPoint);
          ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, testPoint, projectedPoint);
+
+         if (polygon.isPointInside(testPoint))
+            continue;
 
          boolean isInside = polygon.isPointInside(projectedPoint, 1.0E-10);
 
@@ -806,6 +816,112 @@ public class ConvexPolygon2dTest
          waitForButtonOrPause(testFrame);
       }
 
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(-1.0, -1.0));
+      polygon.addVertex(new Point2D(1.0, -1.0));
+      polygon.addVertex(new Point2D(-1.0, 1.0));
+      polygon.update();
+
+      Point2D point1 = new Point2D(0.5, 0.5);
+      assertPointsEqual(new Point2D(0.0, 0.0), polygon.orthogonalProjectionCopy(point1));
+
+      Point2D point2 = new Point2D(-0.25, -0.25);
+      assertNull(polygon.orthogonalProjectionCopy(point2));
+
+      Point2D point3 = new Point2D(-2.0, -2.0);
+      assertPointsEqual(new Point2D(-1.0, -1.0), polygon.orthogonalProjectionCopy(point3));
+
+      Point2D point4 = new Point2D(-0.9, -2.0);
+      assertPointsEqual(new Point2D(-0.9, -1.0), polygon.orthogonalProjectionCopy(point4));
+
+      Point2D point5 = new Point2D(-1.1, -2.0);
+      assertPointsEqual(new Point2D(-1.0, -1.0), polygon.orthogonalProjectionCopy(point5));
+
+      Point2D point6 = new Point2D(1.8, -1.0);
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.orthogonalProjectionCopy(point6));
+
+      Point2D point7 = new Point2D(1.8, -0.8);
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.orthogonalProjectionCopy(point7));
+
+      Point2D point8 = new Point2D(0.5, 0.0);
+      assertPointsEqual(new Point2D(0.25, -0.25), polygon.orthogonalProjectionCopy(point8));
+
+      Point2D point9 = new Point2D(0.0, 0.5);
+      assertPointsEqual(new Point2D(-0.25, 0.25), polygon.orthogonalProjectionCopy(point9));
+
+      Point2D point10 = new Point2D(0.0, 0.0);
+      assertNull(polygon.orthogonalProjectionCopy(point10));
+
+      Point2D point11 = new Point2D(1.0, -1.0);
+      assertNull(polygon.orthogonalProjectionCopy(point11));
+
+      Point2D point12 = new Point2D(-1.1, 0.0);
+      assertPointsEqual(new Point2D(-1.0, 0.0), polygon.orthogonalProjectionCopy(point12));
+
+      Point2D point13 = new Point2D(-1.5, 3.0);
+      assertPointsEqual(new Point2D(-1.0, 1.0), polygon.orthogonalProjectionCopy(point13));
+
+      Point2D point14 = new Point2D(3.0, -1.5);
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.orthogonalProjectionCopy(point14));
+
+      Point2D point15 = new Point2D(1.6, -1.5);
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.orthogonalProjectionCopy(point15));
+
+      Point2D point16 = new Point2D(-2.0, 0.9);
+      assertPointsEqual(new Point2D(-1.0, 0.9), polygon.orthogonalProjectionCopy(point16));
+
+      Point2D point17 = new Point2D(-2.0, -0.9);
+      assertPointsEqual(new Point2D(-1.0, -0.9), polygon.orthogonalProjectionCopy(point17));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection2()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.orthogonalProjectionCopy(new Point2D());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection3()
+   {
+      // single point polygon
+      Point2D vertex = new Point2D(1.0, 2.0);
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex);
+      polygon.update();
+
+      assertPointsEqual(vertex, polygon.orthogonalProjectionCopy(new Point2D(0.0, 0.0)));
+      assertPointsEqual(vertex, polygon.orthogonalProjectionCopy(new Point2D(1.0, -0.2)));
+      assertPointsEqual(vertex, polygon.orthogonalProjectionCopy(new Point2D(1.0, 2.0)));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection4()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(1.0, 2.0));
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.update();
+
+      Point2D point1 = new Point2D(1.0, -1.0);
+      assertPointsEqual(new Point2D(1.0, 1.0), polygon.orthogonalProjectionCopy(point1));
+
+      Point2D point2 = new Point2D(3.0, 2.1);
+      assertPointsEqual(new Point2D(1.0, 2.0), polygon.orthogonalProjectionCopy(point2));
+
+      Point2D point3 = new Point2D(0.2, 1.2);
+      assertPointsEqual(new Point2D(1.0, 1.2), polygon.orthogonalProjectionCopy(point3));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1782,8 +1898,11 @@ public class ConvexPolygon2dTest
 
             Point2D projectedPoint = convexPolygon.orthogonalProjectionCopy(testPoint);
 
-            assertTrue("Projected point was not inside the polygon for point\n" + projectedPoint + "\nand convex polygon \n" + convexPolygon,
-                       ConvexPolygon2dCalculator.isPointInside(projectedPoint, 1.0E-10, convexPolygon));
+            if (convexPolygon.isPointInside(testPoint))
+               assertNull(projectedPoint);
+            else
+               assertTrue("Projected point was not inside the polygon for point\n" + projectedPoint + "\nand convex polygon \n" + convexPolygon,
+                          ConvexPolygon2dCalculator.isPointInside(projectedPoint, 1.0E-10, convexPolygon));
          }
       }
    }
@@ -2284,6 +2403,15 @@ public class ConvexPolygon2dTest
       catch (InterruptedException ex)
       {
       }
+   }
+
+   private static void assertPointsEqual(Point2D expected, Point2D actual)
+   {
+      if (expected == null && actual == null)
+         return;
+
+      double localEpsilon = epsilon * expected.distance(new Point2D());
+      assertTrue("Point does not match expected.", expected.epsilonEquals(actual, localEpsilon));
    }
 
    private void verifyEpsilonEquals(FramePoint2d point1, FramePoint2d point2)
