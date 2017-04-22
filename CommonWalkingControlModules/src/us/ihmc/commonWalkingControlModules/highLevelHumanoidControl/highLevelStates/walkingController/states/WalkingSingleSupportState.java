@@ -240,7 +240,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
       boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
 
-      if ((shouldComputeToeLineContact && shouldComputeToePointContact) || feetManager.isInFlatSupportState(supportSide))
+      if (shouldComputeToeLineContact || shouldComputeToePointContact || feetManager.isInFlatSupportState(supportSide))
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICP);
@@ -299,7 +299,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
       double extraToeOffHeight = 0.0;
       if (feetManager.willDoToeOffSingleSupport(nextFootstep, swingSide))
-         extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
