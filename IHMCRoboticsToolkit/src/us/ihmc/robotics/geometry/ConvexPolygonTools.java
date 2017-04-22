@@ -911,56 +911,56 @@ public class ConvexPolygonTools
          vertices = polygon.getNumberOfVertices();
       }
 
-      while (vertices < desiredVertices)
-      {
-         int index = -1;
-         double longestEdgeLength = Double.NEGATIVE_INFINITY;
-         Point2DReadOnly lastVertex = polygon.getVertex(0);
-         for (int i = 1; i < vertices+1; i++)
-         {
-            Point2DReadOnly nextVertex = null;
-            if (i == vertices)
-            {
-               nextVertex = polygon.getVertex(0);
-            }
-            else
-            {
-               nextVertex = polygon.getVertex(i);
-            }
-
-            double edgeLength = lastVertex.distance(nextVertex);
-            if (edgeLength > longestEdgeLength)
-            {
-               longestEdgeLength = edgeLength;
-               index = i;
-            }
-            lastVertex = nextVertex;
-         }
-
-         int idx1 = -1;
-         int idx2 = -1;
-         if (index == vertices)
-         {
-            idx1 = vertices-1;
-            idx2 = 0;
-         }
-         else
-         {
-            idx1 = index;
-            idx2 = index-1;
-         }
-
-         Point2DReadOnly vertexA = polygon.getVertex(idx1);
-         Point2DReadOnly vertexB = polygon.getVertex(idx2);
-         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
-         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
-
-         polygon.scale(1.0 - 10E-10);
-         polygon.addVertex(xNew, yNew);
-         polygon.update();
-
-         vertices = polygon.getNumberOfVertices();
-      }
+//      while (vertices < desiredVertices)
+//      {
+//         int index = -1;
+//         double longestEdgeLength = Double.NEGATIVE_INFINITY;
+//         Point2DReadOnly lastVertex = polygon.getVertex(0);
+//         for (int i = 1; i < vertices+1; i++)
+//         {
+//            Point2DReadOnly nextVertex = null;
+//            if (i == vertices)
+//            {
+//               nextVertex = polygon.getVertex(0);
+//            }
+//            else
+//            {
+//               nextVertex = polygon.getVertex(i);
+//            }
+//
+//            double edgeLength = lastVertex.distance(nextVertex);
+//            if (edgeLength > longestEdgeLength)
+//            {
+//               longestEdgeLength = edgeLength;
+//               index = i;
+//            }
+//            lastVertex = nextVertex;
+//         }
+//
+//         int idx1 = -1;
+//         int idx2 = -1;
+//         if (index == vertices)
+//         {
+//            idx1 = vertices-1;
+//            idx2 = 0;
+//         }
+//         else
+//         {
+//            idx1 = index;
+//            idx2 = index-1;
+//         }
+//
+//         Point2DReadOnly vertexA = polygon.getVertex(idx1);
+//         Point2DReadOnly vertexB = polygon.getVertex(idx2);
+//         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+//         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
+//
+//         polygon.scale(1.0 - 10E-10);
+//         polygon.addVertex(xNew, yNew);
+//         polygon.update();
+//
+//         vertices = polygon.getNumberOfVertices();
+//      }
    }
 
    /**
