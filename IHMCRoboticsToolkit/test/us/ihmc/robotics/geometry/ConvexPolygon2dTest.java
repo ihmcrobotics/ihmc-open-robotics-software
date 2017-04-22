@@ -364,6 +364,113 @@ public class ConvexPolygon2dTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(-1.0, 0.0));
+      polygon.addVertex(new Point2D(0.0, 1.0));
+      polygon.addVertex(new Point2D(2.0, 0.0));
+      polygon.addVertex(new Point2D(1.0, -1.0));
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2D(5.0, -3.0), new Vector2D(0.0, 1.0));
+      assertPointsEqual(new Point2D(2.0, 0.0), polygon.getClosestPointWithRay(ray1));
+
+      Line2d ray2 = new Line2d(new Point2D(1.0, 1.0), new Vector2D(0.5, 0.5));
+      assertPointsEqual(new Point2D(4.0/5.0, 3.0/5.0), polygon.getClosestPointWithRay(ray2));
+
+      Line2d ray3 = new Line2d(new Point2D(1.0, 1.0), new Vector2D(-0.5, 0.1));
+      assertPointsEqual(new Point2D(0.0, 1.0), polygon.getClosestPointWithRay(ray3));
+
+      Line2d ray4 = new Line2d(new Point2D(-0.75, 0.75), new Vector2D(0.0, 0.1));
+      assertPointsEqual(new Point2D(-0.5, 0.5), polygon.getClosestPointWithRay(ray4));
+
+      Line2d ray5 = new Line2d(new Point2D(-0.75, 0.75), new Vector2D(0.3, 0.3));
+      assertPointsEqual(new Point2D(-0.5, 0.5), polygon.getClosestPointWithRay(ray5));
+
+      Line2d ray6 = new Line2d(new Point2D(-0.75, 0.75), new Vector2D(-0.3, -0.3));
+      assertPointsEqual(new Point2D(-0.5, 0.5), polygon.getClosestPointWithRay(ray6));
+
+      Line2d ray7 = new Line2d(new Point2D(-0.75, 0.75), new Vector2D(0.3, 0.31));
+      assertPointsEqual(new Point2D(-0.5, 0.5), polygon.getClosestPointWithRay(ray7));
+
+      Line2d ray8 = new Line2d(new Point2D(-0.75, 0.75), new Vector2D(0.3, 0.29));
+      assertPointsEqual(new Point2D(0.0, 1.0), polygon.getClosestPointWithRay(ray8));
+
+      Line2d ray9 = new Line2d(new Point2D(1.75, -0.75), new Vector2D(1.0, 1.0));
+      assertPointsEqual(new Point2D(1.5, -0.5), polygon.getClosestPointWithRay(ray9));
+
+      Line2d ray10 = new Line2d(new Point2D(1.75, -0.75), new Vector2D(-0.3, -0.3));
+      assertPointsEqual(new Point2D(1.5, -0.5), polygon.getClosestPointWithRay(ray10));
+
+      Line2d ray11 = new Line2d(new Point2D(1.0, -1.2), new Vector2D(-2.0, 1.0));
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.getClosestPointWithRay(ray11));
+
+      Line2d ray12 = new Line2d(new Point2D(1.0, -1.2), new Vector2D(2.0, -1.0));
+      assertPointsEqual(new Point2D(1.0, -1.0), polygon.getClosestPointWithRay(ray12));
+
+      Line2d ray13 = new Line2d(new Point2D(-0.1, -0.7), new Vector2D(-2.0, 1.0));
+      assertPointsEqual(new Point2D(0.0, -0.5), polygon.getClosestPointWithRay(ray13));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay2()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      assertTrue(polygon.getClosestPointWithRay(new Line2d()) == null);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay3()
+   {
+      Point2D vertex = new Point2D(1.0, -1.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex);
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2D(5.0, -3.0), new Vector2D(0.0, 1.0));
+      assertPointsEqual(vertex, polygon.getClosestPointWithRay(ray1));
+
+      Line2d ray2 = new Line2d(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
+      assertPointsEqual(vertex, polygon.getClosestPointWithRay(ray2));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay4()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(2.0, -5.0));
+      polygon.addVertex(new Point2D(1.0, -6.0));
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2D(1.0, -5.0), new Vector2D(1.0, 0.1));
+      assertPointsEqual(new Point2D(2.0, -5.0), polygon.getClosestPointWithRay(ray1));
+
+      Line2d ray2 = new Line2d(new Point2D(1.25, -5.25), new Vector2D(0.75, 0.3));
+      assertPointsEqual(new Point2D(2.0, -5.0), polygon.getClosestPointWithRay(ray2));
+
+      Line2d ray3 = new Line2d(new Point2D(1.25, -5.25), new Vector2D(0.75, 0.8));
+      assertPointsEqual(new Point2D(1.5, -5.5), polygon.getClosestPointWithRay(ray3));
+
+      Line2d ray4 = new Line2d(new Point2D(1.25, -5.25), new Vector2D(1.0, 1.0));
+      assertPointsEqual(new Point2D(1.5, -5.5), polygon.getClosestPointWithRay(ray4));
+
+      Line2d ray5 = new Line2d(new Point2D(1.25, -5.25), new Vector2D(-1.0, -1.0));
+      assertPointsEqual(new Point2D(1.5, -5.5), polygon.getClosestPointWithRay(ray5));
+
+      Line2d ray6 = new Line2d(new Point2D(1.75, -5.75), new Vector2D(1.0, 1.0));
+      assertPointsEqual(new Point2D(1.5, -5.5), polygon.getClosestPointWithRay(ray6));
+
+      Line2d ray7 = new Line2d(new Point2D(1.75, -5.75), new Vector2D(-1.0, -1.0));
+      assertPointsEqual(new Point2D(1.5, -5.5), polygon.getClosestPointWithRay(ray7));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNANRay()
    {

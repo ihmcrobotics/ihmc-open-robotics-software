@@ -126,41 +126,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Packs the point on the polygon that is closest to the given ray. If the ray is parallel to the
-    * closest edge this will return the point on that edge closest to the ray origin. If the ray
-    * intersects the polygon the result of this method will be wrong. If unsure check first using the
-    * intersectionWithRay method.
-    */
-   public static boolean getClosestPointToRay(Line2d ray, Point2DBasics pointToPack, ConvexPolygon2d polygon)
-   {
-      if (!polygon.hasAtLeastOneVertex())
-         return false;
-
-      Point2D rayStart = ray.getPoint();
-      Vector2D rayDirection = ray.getNormalizedVector();
-      int closestVertexIndex = getClosestVertexIndex(ray, polygon);
-      Point2DReadOnly closestVertexToLine = polygon.getVertex(closestVertexIndex);
-
-      // validate the closest vertex is in front of the ray:
-      boolean vertexValid = isPointInFrontOfRay(rayStart, rayDirection, closestVertexToLine);
-
-      // check edges adjacent to the closest vertex to determine if they are parallel to the ray:
-      boolean edge1Parallel = isEdgeParallel(closestVertexIndex, rayDirection, polygon);
-      boolean edge2Parallel = isEdgeParallel(polygon.getNextVertexIndex(closestVertexIndex), rayDirection, polygon);
-      boolean rayParallelToEdge = edge1Parallel || edge2Parallel;
-
-      if (vertexValid && !rayParallelToEdge)
-         pointToPack.set(closestVertexToLine);
-      else
-      {
-         pointToPack.set(rayStart);
-         polygon.orthogonalProjection(pointToPack);
-      }
-
-      return true;
-   }
-
-   /**
     * Determines if the point is inside the bounding box of the convex polygon.
     */
    public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
@@ -893,14 +858,6 @@ public class ConvexPolygon2dCalculator
          return new Point2D[] {point1, point2};
       if (intersections == 1)
          return new Point2D[] {point1};
-      return null;
-   }
-
-   public static Point2D getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)
-   {
-      Point2D ret = new Point2D();
-      if (getClosestPointToRay(ray, ret, polygon))
-         return ret;
       return null;
    }
 
