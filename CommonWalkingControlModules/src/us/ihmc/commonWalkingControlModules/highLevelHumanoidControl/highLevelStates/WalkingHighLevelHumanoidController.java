@@ -519,7 +519,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       hasWalkingControllerBeenInitialized.set(true);
       
-      commandConsumer.setTimeOfLastManipulationAbortToCurrent();
+      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
    public void initializeDesiredHeightToCurrent()
