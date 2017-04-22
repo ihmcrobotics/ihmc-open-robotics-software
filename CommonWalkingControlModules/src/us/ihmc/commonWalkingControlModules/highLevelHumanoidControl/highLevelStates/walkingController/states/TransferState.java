@@ -92,9 +92,12 @@ public abstract class TransferState extends WalkingState
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
 
+      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
+      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
+
       // the only case left for determining the contact state of the trailing foot
       // // FIXME: 4/22/17 have this update properly
-      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES || !feetManager.willDoPointToeOff())
+      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES || (shouldComputeToeLineContact && shouldComputeToePointContact))
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
@@ -105,14 +108,14 @@ public abstract class TransferState extends WalkingState
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
 
-         if (feetManager.willDoPointToeOff())
+         if (feetManager.willDoPointToeOff() && shouldComputeToePointContact)
          {
             feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.useToeOffPointContact(trailingLeg);
             feetManager.requestToeOff(trailingLeg);
             controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
-         else if (feetManager.willDoLineToeOff())
+         else if (feetManager.willDoLineToeOff() && shouldComputeToeLineContact)
          {
             feetManager.computeToeOffContactLine(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.useToeOffLineContact(trailingLeg);

@@ -368,6 +368,16 @@ public class FeetManager
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
+   public boolean shouldComputeToeLineContact()
+   {
+      return walkOnTheEdgesManager.shouldComputeToeLineContact();
+   }
+
+   public boolean shouldComputeToePointContact()
+   {
+      return walkOnTheEdgesManager.shouldComputeToePointContact();
+   }
+
    public void reset()
    {
       walkOnTheEdgesManager.reset();
