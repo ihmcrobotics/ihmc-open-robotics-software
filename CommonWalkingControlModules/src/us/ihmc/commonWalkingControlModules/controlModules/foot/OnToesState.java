@@ -16,10 +16,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
@@ -47,6 +46,7 @@ public class OnToesState extends AbstractFootControlState
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
    private final List<YoContactPoint> contactPointsInContact = new ArrayList<>();
 
+   private final BooleanYoVariable usePointContact;
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
@@ -70,6 +70,8 @@ public class OnToesState extends AbstractFootControlState
 
       contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
       contactableFoot.getToeOffContactLine(toeOffContactLine2d);
+
+      usePointContact = new BooleanYoVariable(namePrefix + "UsePointContact", registry);
 
       toeOffDesiredPitchAngle = new DoubleYoVariable(namePrefix + "ToeOffDesiredPitchAngle", registry);
       toeOffDesiredPitchVelocity = new DoubleYoVariable(namePrefix + "ToeOffDesiredPitchVelocity", registry);
@@ -105,6 +107,11 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.setWeightsForSolver(angular, linear);
    }
 
+   public void setUsePointContact(boolean usePointContact)
+   {
+      this.usePointContact.set(usePointContact);
+   }
+
    @Override
    public void doSpecificAction()
    {
@@ -136,15 +143,15 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-      if (toeOffCalculator.getUseLineContact(robotSide))
-      {
-         setupContactLine();
-         setControlPointPositionFromContactLine();
-      }
-      else
+      if (usePointContact.getBooleanValue())
       {
          setupSingleContactPoint();
          setControlPointPositionFromContactPoint();
+      }
+      else
+      {
+         setupContactLine();
+         setControlPointPositionFromContactLine();
       }
    }
 
@@ -233,10 +240,10 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      if (toeOffCalculator.getUseLineContact(robotSide))
-         setControlPointPositionFromContactLine();
-      else
+      if (usePointContact.getBooleanValue())
          setControlPointPositionFromContactPoint();
+      else
+         setControlPointPositionFromContactLine();
 
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);

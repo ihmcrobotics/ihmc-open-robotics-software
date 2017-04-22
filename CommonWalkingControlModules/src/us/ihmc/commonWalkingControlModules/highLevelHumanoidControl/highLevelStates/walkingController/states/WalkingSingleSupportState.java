@@ -237,6 +237,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePoint2d currentICP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
+      // // FIXME: 4/22/17 have this update properly 
       if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
          balanceManager.getDesiredCMP(desiredCMP);
@@ -244,12 +245,23 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.getCapturePoint(currentICP);
          balanceManager.getNextExitCMP(nextExitCMP);
 
-         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, nextExitCMP, desiredCMP, currentICP, desiredICP))
-         {
-            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
+         feetManager.updateToeOffSingleSupport(nextFootstep, nextExitCMP, desiredCMP, desiredICP, currentICP);
 
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
+
+         if (feetManager.willDoPointToeOff())
+         {
             feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.useToeOffPointContact(supportSide);
             feetManager.requestToeOff(supportSide);
+            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+         }
+         else if (feetManager.willDoLineToeOff())
+         {
+            feetManager.computeToeOffContactLine(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.useToeOffLineContact(supportSide);
+            feetManager.requestToeOff(supportSide);
+            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
       }
    }
@@ -284,7 +296,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
       double extraToeOffHeight = 0.0;
-      if (feetManager.willDoToeOff(nextFootstep, swingSide))
+      if (feetManager.willDoToeOffSingleSupport(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 

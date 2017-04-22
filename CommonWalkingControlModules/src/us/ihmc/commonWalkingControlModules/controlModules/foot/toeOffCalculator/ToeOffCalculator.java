@@ -7,11 +7,6 @@ public interface ToeOffCalculator
 {
    public void clear();
 
-   public boolean getUseLineContact(RobotSide trailingLeg);
-
-   public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg);
-
-
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg);
 
    public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg);

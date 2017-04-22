@@ -91,35 +91,33 @@ public abstract class TransferState extends WalkingState
    public void switchToToeOffIfPossible()
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
+
       // the only case left for determining the contact state of the trailing foot
-      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES)
+      // // FIXME: 4/22/17 have this update properly
+      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES || !feetManager.willDoPointToeOff())
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
          balanceManager.getNextExitCMP(nextExitCMP);
 
-         boolean doToeOff = feetManager.checkIfToeOffSafeDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
+         feetManager.updateToeOffDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
 
-         if (doToeOff)
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
+
+         if (feetManager.willDoPointToeOff())
          {
-            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
-
             feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
+            feetManager.useToeOffPointContact(trailingLeg);
             feetManager.requestToeOff(trailingLeg);
             controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
-      }
-      else
-      {
-         if (!feetManager.usingPointToeContact(trailingLeg))
+         else if (feetManager.willDoLineToeOff())
          {
-            balanceManager.getDesiredCMP(desiredCMP);
-            balanceManager.getDesiredICP(desiredICPLocal);
-            balanceManager.getCapturePoint(capturePoint2d);
-            balanceManager.getNextExitCMP(nextExitCMP);
-
-            feetManager.switchToPointToeContactIfPossible(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
+            feetManager.computeToeOffContactLine(trailingLeg, nextExitCMP, filteredDesiredCoP);
+            feetManager.useToeOffLineContact(trailingLeg);
+            feetManager.requestToeOff(trailingLeg);
+            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
       }
    }
