@@ -20,57 +20,6 @@ public class ConvexPolygon2dCalculator
    private static final double epsilon = 1.0E-10;
 
    /**
-    * Moves the given point onto the boundary of the polygon if the point lies outside the
-    * polygon. If the point is inside the polygon it is not modified.
-    */
-   public static void orthogonalProjection(Point2DBasics pointToProject, ConvexPolygon2d polygon)
-   {
-      if (!polygon.hasAtLeastOneVertex())
-         return;
-
-      if (polygon.hasExactlyOneVertex())
-      {
-         pointToProject.set(polygon.getVertex(0));
-         return;
-      }
-
-      if (isPointInside(pointToProject, polygon))
-         return;
-
-      int closestVertexIndex = getClosestVertexIndex(pointToProject, polygon);
-
-      // the orthogonal projection is either on the edge from point 1 to 2 or on the edge from 2 to 3.
-      Point2DReadOnly point1 = polygon.getPreviousVertex(closestVertexIndex);
-      Point2DReadOnly point2 = polygon.getVertex(closestVertexIndex);
-      Point2DReadOnly point3 = polygon.getNextVertex(closestVertexIndex);
-
-      // check first edge from point 2 to 3
-      double edgeVector1X = point3.getX() - point2.getX();
-      double edgeVector1Y = point3.getY() - point2.getY();
-      double lambda1 = getIntersectionLambda(point2.getX(), point2.getY(), edgeVector1X, edgeVector1Y, pointToProject.getX(), pointToProject.getY(), -edgeVector1Y, edgeVector1X);
-      lambda1 = Math.max(lambda1, 0.0);
-      double candidate1X = point2.getX() + lambda1 * edgeVector1X;
-      double candidate1Y = point2.getY() + lambda1 * edgeVector1Y;
-
-      // check second edge from point 1 to 2
-      double edgeVector2X = point2.getX() - point1.getX();
-      double edgeVector2Y = point2.getY() - point1.getY();
-      double lambda2 = getIntersectionLambda(point1.getX(), point1.getY(), edgeVector2X, edgeVector2Y, pointToProject.getX(), pointToProject.getY(), -edgeVector2Y, edgeVector2X);
-      lambda2 = Math.min(lambda2, 1.0);
-      double candidate2X = point1.getX() + lambda2 * edgeVector2X;
-      double candidate2Y = point1.getY() + lambda2 * edgeVector2Y;
-
-      double distanceSquared1 = (pointToProject.getX() - candidate1X) * (pointToProject.getX() - candidate1X) + (pointToProject.getY() - candidate1Y) * (pointToProject.getY() - candidate1Y);
-      double distanceSquared2 = (pointToProject.getX() - candidate2X) * (pointToProject.getX() - candidate2X) + (pointToProject.getY() - candidate2Y) * (pointToProject.getY() - candidate2Y);
-
-      if (distanceSquared1 < distanceSquared2)
-         pointToProject.set(candidate1X, candidate1Y);
-      else
-         pointToProject.set(candidate2X, candidate2Y);
-
-   }
-
-   /**
     * Returns the index of the closest vertex of the polygon to the given line. If there
     * are multiple closest vertices (line parallel to an edge) this will return the smaller
     * index.
@@ -205,7 +154,7 @@ public class ConvexPolygon2dCalculator
       else
       {
          pointToPack.set(rayStart);
-         orthogonalProjection(pointToPack, polygon);
+         polygon.orthogonalProjection(pointToPack);
       }
 
       return true;
@@ -945,13 +894,6 @@ public class ConvexPolygon2dCalculator
       if (intersections == 1)
          return new Point2D[] {point1};
       return null;
-   }
-
-   public static Point2D orthogonalProjectionCopy(Point2DReadOnly pointToProject, ConvexPolygon2d polygon)
-   {
-      Point2D ret = new Point2D(pointToProject);
-      orthogonalProjection(ret, polygon);
-      return ret;
    }
 
    public static Point2D getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)

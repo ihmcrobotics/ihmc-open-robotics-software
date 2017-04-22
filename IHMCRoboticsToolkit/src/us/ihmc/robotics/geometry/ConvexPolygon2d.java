@@ -990,12 +990,25 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    public double signedDistance(Point2DReadOnly point)
    {
+      checkIfUpToDate();
       return EuclidGeometryPolygonTools.signedDistanceFromPoint2DToConvexPolygon2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
    public void orthogonalProjection(Point2DBasics point2d)
    {
-      ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
+      orthogonalProjection(point2d, point2d);
+   }
+
+   public void orthogonalProjection(Point2DReadOnly point2d, Point2DBasics projectionToPack)
+   {
+      checkIfUpToDate();
+      EuclidGeometryPolygonTools.orthogonalProjectionOnConvexPolygon2D(point2d, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, projectionToPack);
+   }
+
+   public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.orthogonalProjectionOnConvexPolygon2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
    public boolean pointIsOnPerimeter(Point2DReadOnly point)
@@ -1021,11 +1034,6 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    public Point2D[] intersectionWithRayCopy(Line2d ray)
    {
       return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
-   }
-
-   public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
-   {
-      return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
    }
 
    public Point2D[] intersectionWith(LineSegment2d lineSegment2d)
