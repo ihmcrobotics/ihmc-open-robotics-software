@@ -202,7 +202,7 @@ public class RobotCollisionModel
       {
          for (int i = 0; i<collisionDetectionResult.getNumberOfCollisions();i++)
          {
-            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
+//            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
             
          }
          PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());

@@ -202,15 +202,17 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
       desiredHandPose.setOrientation(new Quaternion());
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      
       tester.holdCurrentChestOrientation();
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
       
       PrintTools.info("Start Yo Time "+ drcBehaviorTestHelper.getYoTime());
-      PrintTools.info("");
+      PrintTools.info("");      
       PrintTools.info("Final Result is "+tester.getIKResult());
-      
+      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
+      PrintTools.info("");      
       
       
       
@@ -219,14 +221,16 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.setPosition(new Point3D(1.0, -0.05, 1.0));
       desiredHandPose.setOrientation(new Quaternion());
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      
       tester.holdCurrentChestOrientation();
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
       
       PrintTools.info("");
       PrintTools.info("Final Result is "+tester.getIKResult());
-      
+      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
+      PrintTools.info("");
       
       
       handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
@@ -234,13 +238,16 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
       desiredHandPose.setOrientation(new Quaternion());
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      
       tester.holdCurrentChestOrientation();
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
       
-      PrintTools.info("");
+      PrintTools.info("");      
       PrintTools.info("Final Result is "+tester.getIKResult());
+      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
+      PrintTools.info("");
       
       
       
@@ -249,22 +256,20 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.setPosition(new Point3D(0.9, -0.4, 0.9));
       desiredHandPose.setOrientation(new Quaternion());
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      
       tester.holdCurrentChestOrientation();
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
       
-      PrintTools.info("");
+      PrintTools.info("");      
       PrintTools.info("Final Result is "+tester.getIKResult());
+      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
+      PrintTools.info("");
       
       
       tester.onBehaviorExited();
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.4);
-      
-
-
-
-      
    }
    
    
@@ -280,12 +285,12 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      for(int i=0;i<25;i++)
+      for(int i=0;i<sdfFullRobotModel.getOneDoFJoints().length;i++)
       {
          OneDoFJoint aJoint = sdfFullRobotModel.getOneDoFJoints()[i];
          PrintTools.info(""+aJoint.getName()+" "+aJoint.getJointLimitLower()+" "+aJoint.getJointLimitUpper());
       }
-      
+            
             
       setUpSolarPanel();
             
