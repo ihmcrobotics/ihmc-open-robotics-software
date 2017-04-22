@@ -16,6 +16,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -110,6 +111,8 @@ public class SwingState extends AbstractUnconstrainedState
    
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
    
+   // for unit testing and debugging:
+   private final IntegerYoVariable currentTrajectoryWaypoint;
    private final YoFramePoint yoDesiredSolePosition;
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
@@ -191,6 +194,7 @@ public class SwingState extends AbstractUnconstrainedState
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
       
+      currentTrajectoryWaypoint = new IntegerYoVariable(namePrefix + "CurrentTrajectoryWaypoint", registry);
       yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
@@ -243,6 +247,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       else
       {
+         // TODO: initialize optimizer somewhere else
          if (initializeOptimizer)
          {
             initializeOptimizer();
@@ -378,6 +383,7 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
       yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      currentTrajectoryWaypoint.set(swingTrajectory.getCurrentPositionWaypointIndex());
 
       transformDesiredsFromSoleFrameToControlFrame();
       secondaryJointWeightScale.set(computeScaleFactor(time));

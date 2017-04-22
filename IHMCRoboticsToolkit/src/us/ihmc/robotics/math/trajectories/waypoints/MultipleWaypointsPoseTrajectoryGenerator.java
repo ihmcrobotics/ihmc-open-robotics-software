@@ -84,6 +84,11 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       orientationTrajectory.changeFrame(referenceFrame);
       activeFrame = referenceFrame;
    }
+
+   public int getCurrentPositionWaypointIndex()
+   {
+      return positionTrajectory.getCurrentWaypointIndex();
+   }
    
    @Override
    public void initialize()
