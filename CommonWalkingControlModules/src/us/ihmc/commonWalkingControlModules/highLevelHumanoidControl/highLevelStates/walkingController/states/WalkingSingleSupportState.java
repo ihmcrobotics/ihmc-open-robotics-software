@@ -237,8 +237,10 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePoint2d currentICP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
-      // // FIXME: 4/22/17 have this update properly 
-      if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
+      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
+      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
+
+      if ((shouldComputeToeLineContact && shouldComputeToePointContact) || feetManager.isInFlatSupportState(supportSide))
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICP);
@@ -249,14 +251,14 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
-         if (feetManager.willDoPointToeOff())
+         if (feetManager.willDoPointToeOff() && shouldComputeToePointContact)
          {
             feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.useToeOffPointContact(supportSide);
             feetManager.requestToeOff(supportSide);
             controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
-         else if (feetManager.willDoLineToeOff())
+         else if (feetManager.willDoLineToeOff() && shouldComputeToeLineContact)
          {
             feetManager.computeToeOffContactLine(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.useToeOffLineContact(supportSide);

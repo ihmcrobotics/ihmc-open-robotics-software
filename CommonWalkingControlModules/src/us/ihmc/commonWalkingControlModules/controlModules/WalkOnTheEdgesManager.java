@@ -40,9 +40,12 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable doPointToeOff = new BooleanYoVariable("doPointToeOff", registry);
    private final BooleanYoVariable doLineToeOff = new BooleanYoVariable("doLineToeOff", registry);
 
-   private final BooleanYoVariable useToePointContact = new BooleanYoVariable("useToePointContact", registry);
    private final BooleanYoVariable useToeLineContactInSwing = new BooleanYoVariable("useToeLineContactInSwing", registry);
    private final BooleanYoVariable useToeLineContactInTransfer = new BooleanYoVariable("useToeLineContactInTransfer", registry);
+   private final BooleanYoVariable computeToeLineContact = new BooleanYoVariable("computeToeLineContact", registry);
+   private final BooleanYoVariable computeToePointContact = new BooleanYoVariable("computeToePointContact", registry);
+   private final BooleanYoVariable updateLineContactDuringToeOff = new BooleanYoVariable("updateLineContactDuringToeOff", registry);
+   private final BooleanYoVariable updatePointContactDuringToeOff = new BooleanYoVariable("updatePointContactDuringToeOff", registry);
 
    private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
    private final DoubleYoVariable icpProximityToLeadingFootForDSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForDSToeOff", registry);
@@ -203,13 +206,11 @@ public class WalkOnTheEdgesManager
       {
          updateLineToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
          doToeOff = doLineToeOff.getBooleanValue();
-         useToePointContact.set(false);
       }
       else
       {
          updatePointToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
          doToeOff = doPointToeOff.getBooleanValue();
-         useToePointContact.set(doToeOff);
       }
       return doToeOff;
    }
@@ -221,13 +222,11 @@ public class WalkOnTheEdgesManager
       {
          updateLineToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
          doToeOff = doLineToeOff.getBooleanValue();
-         this.useToePointContact.set(false);
       }
       else
       {
          updatePointToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
          doToeOff = doPointToeOff.getBooleanValue();
-         this.useToePointContact.set(doToeOff);
       }
 
       return doToeOff;
@@ -266,7 +265,9 @@ public class WalkOnTheEdgesManager
          {
             doLineToeOff.set(false);
             isDesiredECMPOKForToeOff.set(false);
+
             isDesiredECMPOKForToeOffFilt.set(false);
+            computeToeLineContact.set(false);
             return;
          }
          else
@@ -285,6 +286,7 @@ public class WalkOnTheEdgesManager
             needToSwitchToToeOffForAnkleLimit.set(false);
 
             isDesiredECMPOKForToeOffFilt.set(false);
+            computeToeLineContact.set(false);
             return;
          }
          else
@@ -337,6 +339,7 @@ public class WalkOnTheEdgesManager
             doPointToeOff.set(false);
             isDesiredECMPOKForToeOff.set(false);
             isDesiredECMPOKForToeOffFilt.set(false);
+            computeToePointContact.set(false);
             return;
          }
          else
@@ -348,13 +351,14 @@ public class WalkOnTheEdgesManager
       }
       else
       {
-         if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
+         if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
          {
             doPointToeOff.set(false);
             isDesiredECMPOKForToeOff.set(false);
             needToSwitchToToeOffForAnkleLimit.set(false);
 
             isDesiredECMPOKForToeOffFilt.set(false);
+            computeToePointContact.set(false);
             return;
          }
          else
@@ -529,19 +533,20 @@ public class WalkOnTheEdgesManager
 
    private boolean evaluateLineToeOffConditions(RobotSide trailingLeg)
    {
-      return evaluateToeOffConditions(trailingLeg, doLineToeOff);
+      return evaluateToeOffConditions(trailingLeg, doLineToeOff, computeToeLineContact, updateLineContactDuringToeOff.getBooleanValue());
    }
 
    private boolean evaluatePointToeOffConditions(RobotSide trailingLeg)
    {
-      return evaluateToeOffConditions(trailingLeg, doPointToeOff);
+      return evaluateToeOffConditions(trailingLeg, doPointToeOff, computeToePointContact, updatePointContactDuringToeOff.getBooleanValue());
    }
 
-   private boolean evaluateToeOffConditions(RobotSide trailingLeg, BooleanYoVariable doToeOff)
+   private boolean evaluateToeOffConditions(RobotSide trailingLeg, BooleanYoVariable doToeOff, BooleanYoVariable computeToePoints, boolean updateDuringToeOff)
    {
       if (!this.isDesiredICPOKForToeOffFilt.getBooleanValue() || !this.isCurrentICPOKForToeOffFilt.getBooleanValue())
       {
          doToeOff.set(false);
+         computeToePoints.set(true);
          return false;
       }
 
@@ -549,12 +554,14 @@ public class WalkOnTheEdgesManager
       if (needToSwitchToToeOffForAnkleLimit.getBooleanValue())
       {
          doToeOff.set(true);
+         computeToePoints.set(updateDuringToeOff);
          return false;
       }
 
       if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
       {
          doToeOff.set(false);
+         computeToePoints.set(true);
          return false;
       }
 
@@ -582,9 +589,11 @@ public class WalkOnTheEdgesManager
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
          doLineToeOff.set(false);
+         computeToeLineContact.set(true);
          return;
       }
 
+      computeToeLineContact.set(updateLineContactDuringToeOff.getBooleanValue());
       doLineToeOff.set(true);
    }
 
@@ -593,9 +602,11 @@ public class WalkOnTheEdgesManager
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
          doPointToeOff.set(false);
+         computeToePointContact.set(true);
          return;
       }
 
+      computeToePointContact.set(updatePointContactDuringToeOff.getBooleanValue());
       doPointToeOff.set(true);
    }
 
@@ -696,6 +707,16 @@ public class WalkOnTheEdgesManager
       return doToeOffIfPossibleInSingleSupport.getBooleanValue();
    }
 
+   public boolean shouldComputeToeLineContact()
+   {
+      return computeToeLineContact.getBooleanValue();
+   }
+
+   public boolean shouldComputeToePointContact()
+   {
+      return computeToePointContact.getBooleanValue();
+   }
+
    public void setDoToeOffIfPossibleInDoubleSupport(boolean doToeOff)
    {
       doToeOffIfPossibleInDoubleSupport.set(doToeOff);
@@ -719,6 +740,9 @@ public class WalkOnTheEdgesManager
 
       isCurrentICPOKForToeOff.set(false);
       isCurrentICPOKForToeOffFilt.set(false);
+
+      computeToeLineContact.set(true);
+      computeToePointContact.set(true);
 
       doLineToeOff.set(false);
       doPointToeOff.set(false);
