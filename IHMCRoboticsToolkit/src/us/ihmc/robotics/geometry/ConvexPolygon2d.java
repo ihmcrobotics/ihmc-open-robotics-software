@@ -980,7 +980,14 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2d ray)
    {
-      return ConvexPolygon2dCalculator.getClosestPointToRay(ray, pointToPack, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, pointToPack);
+   }
+
+   public Point2D getClosestPointWithRay(Line2d ray)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
    public double distance(Point2DReadOnly point)
