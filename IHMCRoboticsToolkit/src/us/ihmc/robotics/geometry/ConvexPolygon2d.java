@@ -29,6 +29,7 @@ import us.ihmc.robotics.random.RandomGeometry;
  */
 public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 {
+   private final boolean clockwiseOrdered = true;
    private final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
    private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
@@ -984,7 +985,12 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    public double distance(Point2DReadOnly point)
    {
-      return Math.max(0.0, ConvexPolygon2dCalculator.getSignedDistance(point, this));
+      return Math.max(0.0, signedDistance(point));
+   }
+
+   public double signedDistance(Point2DReadOnly point)
+   {
+      return EuclidGeometryPolygonTools.signedDistanceFromPoint2DToConvexPolygon2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
    public void orthogonalProjection(Point2DBasics point2d)
@@ -994,7 +1000,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    public boolean pointIsOnPerimeter(Point2DReadOnly point)
    {
-      return Math.abs(ConvexPolygon2dCalculator.getSignedDistance(point, this)) < 1.0E-10;
+      return distance(point) < 1.0E-10;
    }
 
    public Point2D[] intersectionWith(Line2d line)

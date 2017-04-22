@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.polygonWiggling;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -117,7 +118,7 @@ public class PolygonWigglingTest
       for (int i=0; i<foot.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = foot.getVertex(i);
-         double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(vertex, plane);
+         double signedDistance = plane.signedDistance(vertex);
 
          if (signedDistance > largestDistance)
          {
@@ -301,7 +302,7 @@ public class PolygonWigglingTest
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
       WiggleParameters parameters = new WiggleParameters();
-      parameters.maxX = 0.0;
+      parameters.maxX = 1.0e-15;
       parameters.maxY = 1.0;
       ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
@@ -313,10 +314,16 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() <= parameters.maxX);
-      assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() >= parameters.minX);
-      assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() <= parameters.maxY);
-      assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() >= parameters.minY);
+      Point2DReadOnly footCentroid = foot.getCentroid();
+      Point2DReadOnly initialFootCentroid = initialFoot.getCentroid();
+
+      System.out.println("footCentroid: " + footCentroid);
+      System.out.println("initialFootCentroid: " + initialFootCentroid);
+
+      assertTrue(footCentroid.getX() - initialFootCentroid.getX() <= parameters.maxX);
+      assertTrue(footCentroid.getX() - initialFootCentroid.getX() >= parameters.minX);
+      assertTrue(footCentroid.getY() - initialFootCentroid.getY() <= parameters.maxY);
+      assertTrue(footCentroid.getY() - initialFootCentroid.getY() >= parameters.minY);
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
    }
 
@@ -467,13 +474,18 @@ public class PolygonWigglingTest
 
       // expected:
       ArrayList<Point2D> expected = new ArrayList<>();
+      expected.add(new Point2D(0.6946910259467516, 0.3057219822306081));
       expected.add(new Point2D(0.7021375429674444, 0.405444343736243));
       expected.add(new Point2D(0.901582265978714, 0.39055130969485763));
       expected.add(new Point2D(0.8941357489580215, 0.2908289481892227));
-      expected.add(new Point2D(0.6946910259467516, 0.3057219822306081));
 
       for (int i = 0; i < foot.getNumberOfVertices(); i++)
-         assertTrue(foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10));
+      {
+         if (!foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10))
+         {
+            fail("Failed at vertex index: " + i + ", expected: " + expected + ", was: " + foot);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

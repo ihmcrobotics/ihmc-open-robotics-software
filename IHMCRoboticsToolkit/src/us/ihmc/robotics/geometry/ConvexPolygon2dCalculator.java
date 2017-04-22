@@ -20,28 +20,6 @@ public class ConvexPolygon2dCalculator
    private static final double epsilon = 1.0E-10;
 
    /**
-    * Returns distance from the point to the boundary of this polygon. The return value
-    * is negative if the point is inside the polygon.
-    */
-   public static double getSignedDistance(Point2DReadOnly point, ConvexPolygon2d polygon)
-   {
-      double closestDistance = Double.POSITIVE_INFINITY;
-      for (int index = 0; index < polygon.getNumberOfVertices(); index++)
-      {
-         Point2DReadOnly pointOne = polygon.getVertex(index);
-         Point2DReadOnly pointTwo = polygon.getNextVertex(index);
-
-         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, pointOne, pointTwo);
-         if (distance < closestDistance)
-            closestDistance = distance;
-      }
-
-      if (isPointInside(point, polygon))
-         return -closestDistance;
-      return closestDistance;
-   }
-
-   /**
     * Moves the given point onto the boundary of the polygon if the point lies outside the
     * polygon. If the point is inside the polygon it is not modified.
     */

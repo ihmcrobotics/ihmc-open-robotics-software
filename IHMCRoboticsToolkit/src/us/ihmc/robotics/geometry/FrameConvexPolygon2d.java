@@ -773,9 +773,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
     * Returns distance from the point to the boundary of this polygon. The return value
     * is positive if the point is inside and negative if it is outside.
     */
-   public double getSignedDistance(FramePoint2d point)
+   public double signedDistance(FramePoint2d point)
    {
-      return ConvexPolygon2dCalculator.getSignedDistance(point.tuple, this.convexPolygon);
+      return convexPolygon.signedDistance(point.getPoint());
    }
 
    public BoundingBox2D getBoundingBoxCopy()
