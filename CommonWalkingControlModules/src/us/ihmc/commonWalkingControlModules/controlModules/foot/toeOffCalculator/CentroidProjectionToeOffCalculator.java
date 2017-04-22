@@ -34,7 +34,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<BooleanYoVariable> useLineContacts = new SideDependentList<>();
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
@@ -53,9 +52,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          soleFrames.put(robotSide, soleFrame);
 
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
-
-         BooleanYoVariable useLineContact = new BooleanYoVariable(robotSide.getLowerCaseName() + namePrefix +  "UseLineToeOff", registry);
-         useLineContacts.put(robotSide, useLineContact);
       }
 
       toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
@@ -73,17 +69,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       hasComputedToeOffContactPoint.set(false);
       hasComputedToeOffContactLine.set(false);
    }
-
-   public boolean getUseLineContact(RobotSide trailingLeg)
-   {
-      return useLineContacts.get(trailingLeg).getBooleanValue();
-   }
-
-   public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg)
-   {
-      this.useLineContacts.get(trailingLeg).set(useLineContact);
-   }
-
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {

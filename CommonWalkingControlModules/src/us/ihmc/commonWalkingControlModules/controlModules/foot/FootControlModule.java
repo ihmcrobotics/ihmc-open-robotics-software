@@ -79,8 +79,8 @@ public class FootControlModule
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
 
-   public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
-         YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
+   public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
+         YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       this.toeOffCalculator = toeOffCalculator;
@@ -380,6 +380,11 @@ public class FootControlModule
    public boolean isInToeOff()
    {
       return getCurrentConstraintType() == ConstraintType.TOES;
+   }
+
+   public void setUsePointContactInToeOff(boolean usePointContact)
+   {
+      onToesState.setUsePointContact(usePointContact);
    }
 
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
