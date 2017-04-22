@@ -31,7 +31,7 @@ public class TransferToFlamingoStanceState extends TransferState
          TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
          double extraToeOffHeight = 0.0;
          if (feetManager.willDoToeOffDoubleSupport(null, transferToSide))
-            extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+            extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
          comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
       }
 

@@ -97,7 +97,7 @@ public abstract class TransferState extends WalkingState
 
       // the only case left for determining the contact state of the trailing foot
       // // FIXME: 4/22/17 have this update properly
-      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES || (shouldComputeToeLineContact && shouldComputeToePointContact))
+      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES || shouldComputeToeLineContact || shouldComputeToePointContact)
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
