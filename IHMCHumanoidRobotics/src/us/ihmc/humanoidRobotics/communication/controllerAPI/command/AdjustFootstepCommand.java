@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>, FrameBasedCommand<AdjustFootstepMessage>
 {
@@ -20,7 +21,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    private final FramePoint adjustedPosition = new FramePoint();
    private final FrameOrientation adjustedOrientation = new FrameOrientation();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
-   
+
    private ReferenceFrame trajectoryFrame;
 
    public AdjustFootstepCommand()
@@ -63,14 +64,11 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
    }
-   
-   @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, AdjustFootstepMessage message)
-   {
-      // footsteps do not allow the use of a data frame
-      dataFrame.checkReferenceFrameMatch(trajectoryFrame);
 
-      this.trajectoryFrame = trajectoryFrame;
+   @Override
+   public void set(ReferenceFrameHashCodeResolver resolver, AdjustFootstepMessage message)
+   {
+      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
       set(message);
    }
 
@@ -81,14 +79,14 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
 
    public void setPose(Point3D position, Quaternion orientation)
    {
-      this.adjustedPosition.set(position);
-      this.adjustedOrientation.set(orientation);
+      adjustedPosition.set(position);
+      adjustedOrientation.set(orientation);
    }
 
    public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
-      for(int i = 0; i < predictedContactPoints.size(); i++)
+      for (int i = 0; i < predictedContactPoints.size(); i++)
          this.predictedContactPoints.add().set(predictedContactPoints.get(i));
    }
 
