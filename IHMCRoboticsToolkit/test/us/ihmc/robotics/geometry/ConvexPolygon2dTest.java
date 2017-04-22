@@ -25,7 +25,7 @@ public class ConvexPolygon2dTest
    private Random random = new Random(1176L);
    private static final boolean PLOT_RESULTS = false;
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
-   private final double epsilon = 1e-10;
+   private static final double epsilon = 1e-10;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -48,12 +48,7 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d list = new ConvexPolygon2d(verticesList);
       assertEquals("Number of vertices should be 4", 4.0, list.getNumberOfVertices(), epsilon);
 
-      double[][] verticesArray = {
-            {0.0, 0.0},
-            {0.0, 1.0},
-            {1.0, 0.0},
-            {1.0, 1.0}
-      };
+      double[][] verticesArray = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
 
       ConvexPolygon2d doubleInt = new ConvexPolygon2d(verticesArray, numberOfVertices);
       assertEquals("Number of vertices should be four", 4.0, doubleInt.getNumberOfVertices(), epsilon);
@@ -96,12 +91,7 @@ public class ConvexPolygon2dTest
    {
       ConvexPolygon2d doubleInt = new ConvexPolygon2d();
       int numberOfVertices = 4;
-      double[][] verticesArray = {
-            {0.0, 0.0},
-            {0.0, 1.0},
-            {1.0, 0.0},
-            {1.0, 1.0}
-      };
+      double[][] verticesArray = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
       doubleInt.setAndUpdate(verticesArray, numberOfVertices);
       assertEquals("Number of vertices should be 4", 4.0, doubleInt.getNumberOfVertices(), epsilon);
       assertTrue(doubleInt.isUpToDate());
@@ -111,12 +101,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testGetCentroid()
    {
-      double[][] verticesArray = {
-            {0.0, 0.0},
-            {0.0, 1.0},
-            {1.0, 0.0},
-            {1.0, 1.0}
-      };
+      double[][] verticesArray = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
       Point2D centroid = new Point2D();
 
@@ -128,12 +113,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testGetBoundingBox()
    {
-      double[][] verticesArray = {
-            {0.0, 0.0},
-            {0.0, 1.0},
-            {1.0, 0.0},
-            {1.0, 1.0}
-      };
+      double[][] verticesArray = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
       BoundingBox2D box = doubles.getBoundingBox();
 
@@ -147,12 +127,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testGetNextVertexCCWGetPreviousVertexCCW()
    {
-      double[][] verticesArray = {
-            {0.0, 0.0},
-            {0.0, 1.0},
-            {1.0, 0.0},
-            {1.0, 1.0}
-      };
+      double[][] verticesArray = {{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
 
       Point2DReadOnly oneNext = doubles.getNextVertexCCW(0); //(1.0, 0.0)
@@ -176,12 +151,7 @@ public class ConvexPolygon2dTest
    public void testScale()
    {
       double scaleFactor = 2.0;
-      double[][] verticesArray = {
-            {-1.0, 1.0},
-            {1.0, 1.0},
-            {1.0, -1.0},
-            {-1.0, -1.0}
-      };
+      double[][] verticesArray = {{-1.0, 1.0}, {1.0, 1.0}, {1.0, -1.0}, {-1.0, -1.0}};
 
       ConvexPolygon2d polygon = new ConvexPolygon2d(verticesArray);
       polygon.scale(scaleFactor);
@@ -207,15 +177,10 @@ public class ConvexPolygon2dTest
    public void testIsPointInside()
    {
       Random random = new Random(4564656L);
-      double[][] verticesArray = {
-            {-10.0, 10.0},
-            {10.0, 10.0},
-            {10.0, -10.0},
-            {-10.0, -10.0}
-      };
+      double[][] verticesArray = {{-10.0, 10.0}, {10.0, 10.0}, {10.0, -10.0}, {-10.0, -10.0}};
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
 
-      for(int i = 0; i < 10; i++)
+      for (int i = 0; i < 10; i++)
       {
          int x = random.nextInt(10);
          int y = random.nextInt(10);
@@ -227,30 +192,10 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testIntersectionWith()
    {
-      double[][] verticesArray1 = {
-            {-10.0, 10.0},
-            {10.0, 10.0},
-            {10.0, -10.0},
-            {-10.0, -10.0}
-      };
-      double[][] verticesArray2 = {
-            {-5.0, 5.0},
-            {5.0, 5.0},
-            {5.0, -5.0},
-            {-5.0, -5.0}
-      };
-      double[][] verticesArray3 = {
-            {15.0, 20.0},
-            {20.0, 20.0},
-            {20.0, 15.0},
-            {15.0, 15.0}
-      };
-      double[][] verticesArray4 = {
-            {-5.0, -10.0},
-            {-5.0, 10.0},
-            {15.0, -10.0},
-            {15.0, 10.0}
-      };
+      double[][] verticesArray1 = {{-10.0, 10.0}, {10.0, 10.0}, {10.0, -10.0}, {-10.0, -10.0}};
+      double[][] verticesArray2 = {{-5.0, 5.0}, {5.0, 5.0}, {5.0, -5.0}, {-5.0, -5.0}};
+      double[][] verticesArray3 = {{15.0, 20.0}, {20.0, 20.0}, {20.0, 15.0}, {15.0, 15.0}};
+      double[][] verticesArray4 = {{-5.0, -10.0}, {-5.0, 10.0}, {15.0, -10.0}, {15.0, 10.0}};
 
       ConvexPolygon2d polygon1 = new ConvexPolygon2d(verticesArray1);
       ConvexPolygon2d polygon2 = new ConvexPolygon2d(verticesArray2);
@@ -261,21 +206,20 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d allIntersect = new ConvexPolygon2d();
       ConvexPolygon2d someIntersect = new ConvexPolygon2d();
 
-
       assertTrue(polygon1.intersectionWith(polygon2, allIntersect));
       assertFalse("Should be false", polygon1.intersectionWith(polygon3, noIntersect));
       assertTrue(polygon1.intersectionWith(polygon4, someIntersect));
-//
-//      System.out.println("No" + noIntersect);
-//      System.out.println("Some" + someIntersect);
-//      System.out.println("all" + allIntersect);
+      //
+      //      System.out.println("No" + noIntersect);
+      //      System.out.println("Some" + someIntersect);
+      //      System.out.println("all" + allIntersect);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTriangleConstructor()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 2.0, 0.0 }, { 1.0, 0.1 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {2.0, 0.0}, {1.0, 0.1}};
 
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
 
@@ -443,9 +387,9 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testIsInside()
    {
-      double[][] polygonPoints = new double[][] { { -0.05107802536335158, 0.04155594197133163 }, { -0.05052044462374434, 0.1431544119584275 },
-            { 0.12219695435431863, 0.14220652470109518 }, { 0.12219695435431865, -0.041946248489056696 }, { 0.12163937361471142, -0.1435447184761526 },
-            { -0.05107802536335154, -0.14259683121882027 } };
+      double[][] polygonPoints = new double[][] {{-0.05107802536335158, 0.04155594197133163}, {-0.05052044462374434, 0.1431544119584275},
+            {0.12219695435431863, 0.14220652470109518}, {0.12219695435431865, -0.041946248489056696}, {0.12163937361471142, -0.1435447184761526},
+            {-0.05107802536335154, -0.14259683121882027}};
 
       Point2D testPoint = new Point2D(-0.04907805548171582, 2.6934439541712686E-4);
 
@@ -460,14 +404,14 @@ public class ConvexPolygon2dTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistancePoint2dConvexPolygon2d()
-    {
-       ArrayList<Point2D> points = new ArrayList<Point2D>();
-       points.add(new Point2D());
-       points.add(new Point2D());
-       points.add(new Point2D());
-       ConvexPolygon2d test = new ConvexPolygon2d(points);
-       test.distance(new Point2D());
-    }
+   {
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      points.add(new Point2D());
+      points.add(new Point2D());
+      points.add(new Point2D());
+      ConvexPolygon2d test = new ConvexPolygon2d(points);
+      test.distance(new Point2D());
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -497,13 +441,13 @@ public class ConvexPolygon2dTest
       {
          FramePoint2d point = square.getFrameVertexCopy(i);
          assertFalse("frontmostLeft wrong, frontMostLeft = " + frontmostLeft + ", point = " + point,
-               ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
+                     ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
          assertFalse("frontmostRight wrong, frontmostRight = " + frontmostRight + ", point = " + point,
-               ((point.getX() > frontmostRight.getX()) || ((point.getX() == frontmostRight.getX()) && (point.getY() > frontmostRight.getY()))));
+                     ((point.getX() > frontmostRight.getX()) || ((point.getX() == frontmostRight.getX()) && (point.getY() > frontmostRight.getY()))));
          assertFalse("backmostRight wrong, backmostRight = " + backmostRight + ", point = " + point,
-               ((point.getX() > backmostRight.getX()) || ((point.getX() == backmostRight.getX()) && (point.getY() < backmostRight.getY()))));
+                     ((point.getX() > backmostRight.getX()) || ((point.getX() == backmostRight.getX()) && (point.getY() < backmostRight.getY()))));
          assertFalse("backmostLeft wrong, backmostLeft = " + backmostLeft + ", point = " + point,
-               ((point.getX() < backmostLeft.getX()) || ((point.getX() == backmostLeft.getX()) && (point.getY() < backmostLeft.getY()))));
+                     ((point.getX() < backmostLeft.getX()) || ((point.getX() == backmostLeft.getX()) && (point.getY() < backmostLeft.getY()))));
       }
 
       if (PLOT_RESULTS)
@@ -526,13 +470,13 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testInsideWithSimpleSquare()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
 
-      double[][] pointsOutside = new double[][] { { 1.5, 0.5 }, { 1.1, 1.1 }, { 1.1, 0.5 }, { -0.1, -0.1 }, { -0.1, 0.5 } };
-      double[][] pointsInside = new double[][] { { 0.5, 0.5 }, { 0.1, 0.7 }, { 0.3, 0.5 }, { 0.99, 0.99 }, { 0.01, 0.01 }, { 0.01, 0.99 }, { 0.99, 0.01 } };
-      double[][] boundaryPoints = new double[][] { { 0.0, 0.5 }, { 0.5, 0.0 }, { 1.0, 0.5 }, { 0.5, 1.0 } };
+      double[][] pointsOutside = new double[][] {{1.5, 0.5}, {1.1, 1.1}, {1.1, 0.5}, {-0.1, -0.1}, {-0.1, 0.5}};
+      double[][] pointsInside = new double[][] {{0.5, 0.5}, {0.1, 0.7}, {0.3, 0.5}, {0.99, 0.99}, {0.01, 0.01}, {0.01, 0.99}, {0.99, 0.01}};
+      double[][] boundaryPoints = new double[][] {{0.0, 0.5}, {0.5, 0.0}, {1.0, 0.5}, {0.5, 1.0}};
 
       for (double[] pointOutside : pointsOutside)
       {
@@ -567,8 +511,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testTiming()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 }, { 1.7, 0.5 }, { -0.6, 1.2 }, { 1.8, 1.1 }, { 0.5, 0.5 },
-            { 0.2, 1.56 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.7, 0.5}, {-0.6, 1.2}, {1.8, 1.1}, {0.5, 0.5}, {0.2, 1.56}};
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
 
       int numberOfTests = 100000;
@@ -700,13 +643,13 @@ public class ConvexPolygon2dTest
       {
          FramePoint2d point = randomPolygon.getFrameVertexCopy(i);
          assertFalse("frontmostLeft wrong, frontMostLeft = " + frontmostLeft + ", point = " + point,
-               ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
+                     ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
          assertFalse("frontmostRight wrong, frontmostRight = " + frontmostRight + ", point = " + point,
-               ((point.getX() > frontmostRight.getX()) || ((point.getX() == frontmostRight.getX()) && (point.getY() > frontmostRight.getY()))));
+                     ((point.getX() > frontmostRight.getX()) || ((point.getX() == frontmostRight.getX()) && (point.getY() > frontmostRight.getY()))));
          assertFalse("backmostRight wrong, backmostRight = " + backmostRight + ", point = " + point,
-               ((point.getX() > backmostRight.getX()) || ((point.getX() == backmostRight.getX()) && (point.getY() < backmostRight.getY()))));
+                     ((point.getX() > backmostRight.getX()) || ((point.getX() == backmostRight.getX()) && (point.getY() < backmostRight.getY()))));
          assertFalse("backmostLeft wrong, backmostLeft = " + backmostLeft + ", point = " + point,
-               ((point.getX() < backmostLeft.getX()) || ((point.getX() == backmostLeft.getX()) && (point.getY() < backmostLeft.getY()))));
+                     ((point.getX() < backmostLeft.getX()) || ((point.getX() == backmostLeft.getX()) && (point.getY() < backmostLeft.getY()))));
       }
 
       if (PLOT_RESULTS)
@@ -728,21 +671,18 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testOrthogonalProjectionOne()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
       ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
 
-      double[][] pointsAndSolutionToTest = new double[][] {
-            { 0.5, -0.5, 0.5, 0.0 }, // Straight toward the heart.
-            { 1.5, 0.5, 1.0, 0.5 }, { 0.5, 1.5, 0.5, 1.0 }, { -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, -0.5, 0.0, 0.0 }, // Diagonal to a vertex.
-            { 1.5, -0.5, 1.0, 0.0 }, { 1.5, 1.5, 1.0, 1.0 }, { -0.5, 1.5, 0.0, 1.0 },
-            { 0.0, -0.5, 0.0, 0.0 }, // Along an edge vertex normal vector.
-            { -0.5, 0.0, 0.0, 0.0 }, { 1.0, -0.5, 1.0, 0.0 }, { 1.5, 0.0, 1.0, 0.0 }, { 1.0, 1.5, 1.0, 1.0 }, { 1.5, 1.0, 1.0, 1.0 }, { 0.0, 1.5, 0.0, 1.0 },
-            { -0.5, 1.0, 0.0, 1.0 }, { 0.5, 0.5, 0.5, 0.5 }, // inside the Polygon. Should return the testPoint itself.
-            { 0.25, 0.25, 0.25, 0.25 }, { 0.65, 0.9, 0.65, 0.9 }, };
+      double[][] pointsAndSolutionToTest = new double[][] {{0.5, -0.5, 0.5, 0.0}, // Straight toward the heart.
+            {1.5, 0.5, 1.0, 0.5}, {0.5, 1.5, 0.5, 1.0}, {-0.5, 0.5, 0.0, 0.5}, {-0.5, -0.5, 0.0, 0.0}, // Diagonal to a vertex.
+            {1.5, -0.5, 1.0, 0.0}, {1.5, 1.5, 1.0, 1.0}, {-0.5, 1.5, 0.0, 1.0}, {0.0, -0.5, 0.0, 0.0}, // Along an edge vertex normal vector.
+            {-0.5, 0.0, 0.0, 0.0}, {1.0, -0.5, 1.0, 0.0}, {1.5, 0.0, 1.0, 0.0}, {1.0, 1.5, 1.0, 1.0}, {1.5, 1.0, 1.0, 1.0}, {0.0, 1.5, 0.0, 1.0},
+            {-0.5, 1.0, 0.0, 1.0}, {0.5, 0.5, 0.5, 0.5}, // inside the Polygon. Should return the testPoint itself.
+            {0.25, 0.25, 0.25, 0.25}, {0.65, 0.9, 0.65, 0.9},};
 
       ArrayList<FrameLineSegment2d> projections = new ArrayList<FrameLineSegment2d>();
       ArrayList<FramePoint2d> notOutsidePoints = new ArrayList<FramePoint2d>();
@@ -872,13 +812,12 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testGetLineOfSightVerticesOne()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
 
-      double[][] pointsToTest = new double[][] { { 0.5, -0.5 }, { 1.5, 0.5 }, { 0.5, 1.5 }, { -0.5, 0.5 }, { -0.5, -0.5 }, { 1.5, -0.5 }, { 1.5, 1.5 },
-            { -0.5, 1.5 } };
+      double[][] pointsToTest = new double[][] {{0.5, -0.5}, {1.5, 0.5}, {0.5, 1.5}, {-0.5, 0.5}, {-0.5, -0.5}, {1.5, -0.5}, {1.5, 1.5}, {-0.5, 1.5}};
 
       for (double[] pointToTestDoubles : pointsToTest)
       {
@@ -888,8 +827,8 @@ public class ConvexPolygon2dTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
    public void testGetLineOfSightVerticesTwo()
    {
       Random random = new Random(1092L);
@@ -990,7 +929,7 @@ public class ConvexPolygon2dTest
 
       ConvexPolygon2d randomPPolygon = ConvexPolygon2dTestHelpers.generateRandomPolygon(random, zUpFrame, -0.1, 0.1, -0.1, 0.1, 5).getConvexPolygon2dCopy();
       ArrayList<FrameConvexPolygon2d> randomQPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax,
-            heightMax, numberOfPoints, numberOfPolygons);
+                                                                                                          heightMax, numberOfPoints, numberOfPolygons);
 
       // Find the matrix of intersecting polygons:
       ConvexPolygon2d[] shrunkenPolygons = new ConvexPolygon2d[randomQPolygons.size()];
@@ -1115,7 +1054,7 @@ public class ConvexPolygon2dTest
       int numberOfPolygons = 30;
 
       ArrayList<FrameConvexPolygon2d> randomPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax,
-            heightMax, numberOfPoints, numberOfPolygons);
+                                                                                                         heightMax, numberOfPoints, numberOfPolygons);
 
       FrameGeometryTestFrame testFrame = null;
       FrameGeometry2dPlotter plotter = null;
@@ -1143,7 +1082,8 @@ public class ConvexPolygon2dTest
 
             ConvexPolygon2d intersectingPolygon = new ConvexPolygon2d();
             boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon1, convexPolygon2, intersectingPolygon);
-            if (!success) intersectingPolygon = null;
+            if (!success)
+               intersectingPolygon = null;
             intersectingPolygons[i][j] = intersectingPolygon;
 
             if ((success) && (i != j))
@@ -1186,7 +1126,8 @@ public class ConvexPolygon2dTest
                   assertNotNull(intersectionPolygon);
                }
 
-               boolean insideIntersection = ((intersectionPolygon != null) && (ConvexPolygon2dCalculator.isPointInside(testPoint.getPointCopy(), intersectionPolygon)));
+               boolean insideIntersection = ((intersectionPolygon != null)
+                     && (ConvexPolygon2dCalculator.isPointInside(testPoint.getPointCopy(), intersectionPolygon)));
                if (insideIntersection)
                {
                   insideAnyIntersection = true;
@@ -1308,7 +1249,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testTroublesomeIntersection()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(worldFrame, vertices);
@@ -1323,33 +1264,22 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testIntersectionWithLinesOne()
    {
-      double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
+      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
       ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
 
-      double[][] pointsAndLinesToTest = new double[][] {
-            { 0.5, -0.5, 0.0, 1.0 }, // Straight through the heart.
-            { 1.5, 0.5, -1.0, 0.0 },
-            { 0.5, 1.5, 0.0, -1.0 },
-            { -0.5, 0.5, 1.0, 0.0 },
-            { -0.5, -0.5, 1.0, 1.0 }, // Diagonal through two vertices.
-            { 1.5, -0.5, -1.0, 1.0 },
-            { 1.5, 1.5, -1.0, -1.0 },
-            { -0.5, 1.5, 1.0, -1.0 },
-            { -0.5, -0.5, 0.0, 1.0 }, // Don't intersect at all.
-            { -0.5, -0.5, 1.0, 0.0 }, { 1.5, -0.5, -1.0, 0.0 }, { 1.5, -0.5, 0.0, 1.0 }, { 1.5, 1.5, -1.0, 0.0 }, { 1.5, 1.5, 0.0, -1.0 },
-            { -0.5, 1.5, 0.0, -1.0 },
-            { -0.5, 1.5, 1.0, 0.0 },
-            { -1.0, 0.0, 1.0, 0.0 }, // Parallel to an edge. These should return null.
-            { 0.0, -1.0, 0.0, 1.0 }, { 1.0, -1.0, 0.0, 1.0 }, { 2.0, 0.0, -1.0, 0.0 }, { 1.0, 2.0, 0.0, -1.0 }, { 2.0, 1.0, -1.0, 0.0 },
-            { 0.0, 2.0, 0.0, -1.0 }, { -1.0, 1.0, 1.0, 0.0 },
-            { 0.5, -0.5, 0.0, -1.0 }, // Line points away from Polygon. These should return null. We treat the line as a ray!
-            { 1.5, 0.5, 1.0, 0.0 }, { 0.5, 1.5, 0.0, 1.0 }, { -0.5, 0.5, -1.0, 0.0 },
-            { 0.5, 0.5, 0.0, 1.0 }, // Line starts inside the Polygon. Should only be one leaving point.
-            { 0.5, 0.5, 0.0, -1.0 }, { 0.5, 0.5, 1.0, 0.0 }, { 0.5, 0.5, -1.0, 0.0 }, { 0.5, 0.5, 1.0, 1.0 }, { 0.5, 0.5, 1.0, -1.0 }, { 0.5, 0.5, -1.0, 1.0 },
-            { 0.5, 0.5, -1.0, -1.0 }, { 1.0, 0.5, 1.5, 0.5 } };
+      double[][] pointsAndLinesToTest = new double[][] {{0.5, -0.5, 0.0, 1.0}, // Straight through the heart.
+            {1.5, 0.5, -1.0, 0.0}, {0.5, 1.5, 0.0, -1.0}, {-0.5, 0.5, 1.0, 0.0}, {-0.5, -0.5, 1.0, 1.0}, // Diagonal through two vertices.
+            {1.5, -0.5, -1.0, 1.0}, {1.5, 1.5, -1.0, -1.0}, {-0.5, 1.5, 1.0, -1.0}, {-0.5, -0.5, 0.0, 1.0}, // Don't intersect at all.
+            {-0.5, -0.5, 1.0, 0.0}, {1.5, -0.5, -1.0, 0.0}, {1.5, -0.5, 0.0, 1.0}, {1.5, 1.5, -1.0, 0.0}, {1.5, 1.5, 0.0, -1.0}, {-0.5, 1.5, 0.0, -1.0},
+            {-0.5, 1.5, 1.0, 0.0}, {-1.0, 0.0, 1.0, 0.0}, // Parallel to an edge. These should return null.
+            {0.0, -1.0, 0.0, 1.0}, {1.0, -1.0, 0.0, 1.0}, {2.0, 0.0, -1.0, 0.0}, {1.0, 2.0, 0.0, -1.0}, {2.0, 1.0, -1.0, 0.0}, {0.0, 2.0, 0.0, -1.0},
+            {-1.0, 1.0, 1.0, 0.0}, {0.5, -0.5, 0.0, -1.0}, // Line points away from Polygon. These should return null. We treat the line as a ray!
+            {1.5, 0.5, 1.0, 0.0}, {0.5, 1.5, 0.0, 1.0}, {-0.5, 0.5, -1.0, 0.0}, {0.5, 0.5, 0.0, 1.0}, // Line starts inside the Polygon. Should only be one leaving point.
+            {0.5, 0.5, 0.0, -1.0}, {0.5, 0.5, 1.0, 0.0}, {0.5, 0.5, -1.0, 0.0}, {0.5, 0.5, 1.0, 1.0}, {0.5, 0.5, 1.0, -1.0}, {0.5, 0.5, -1.0, 1.0},
+            {0.5, 0.5, -1.0, -1.0}, {1.0, 0.5, 1.5, 0.5}};
 
       ArrayList<FrameLine2d> nonIntersectingLines = new ArrayList<FrameLine2d>();
       ArrayList<FrameLine2d> intersectingLines = new ArrayList<FrameLine2d>();
@@ -1397,12 +1327,11 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testGetOppositeMidEdgeWhenPublic()
    {
-      int[][] leftRightNumExpecteds = new int[][] { { 0, 0, 6, 3 }, { 1, 1, 6, 4 }, { 2, 2, 6, 5 }, { 3, 3, 6, 0 }, { 4, 4, 6, 1 }, { 5, 5, 6, 2 },
-            { 1, 0, 6, 1 }, { 2, 0, 6, 1 }, { 3, 0, 6, 2 }, { 4, 0, 6, 2 }, { 5, 0, 6, 3 }, { 2, 1, 6, 2 }, { 3, 1, 6, 2 }, { 4, 1, 6, 3 }, { 5, 1, 6, 3 },
-            { 3, 2, 6, 3 }, { 4, 2, 6, 3 }, { 5, 2, 6, 4 }, { 4, 3, 6, 4 }, { 5, 3, 6, 4 }, { 5, 4, 6, 5 }, { 0, 1, 6, 4 }, { 0, 2, 6, 4 }, { 0, 3, 6, 5 },
-            { 0, 4, 6, 5 }, { 0, 5, 6, 0 }, { 1, 2, 6, 5 }, { 1, 3, 6, 5 }, { 1, 4, 6, 0 }, { 1, 5, 6, 0 }, { 2, 3, 6, 0 }, { 2, 4, 6, 0 }, { 2, 5, 6, 1 },
-            { 3, 4, 6, 1 }, { 3, 5, 6, 1 }, { 4, 5, 6, 2 }, { 0, 0, 3, 2 }, { 1, 1, 3, 0 }, { 2, 2, 3, 1 }, { 0, 1, 3, 2 }, { 0, 2, 3, 0 }, { 1, 2, 3, 0 },
-            { 1, 0, 3, 1 }, { 2, 0, 3, 1 }, { 2, 1, 3, 2 }, };
+      int[][] leftRightNumExpecteds = new int[][] {{0, 0, 6, 3}, {1, 1, 6, 4}, {2, 2, 6, 5}, {3, 3, 6, 0}, {4, 4, 6, 1}, {5, 5, 6, 2}, {1, 0, 6, 1},
+            {2, 0, 6, 1}, {3, 0, 6, 2}, {4, 0, 6, 2}, {5, 0, 6, 3}, {2, 1, 6, 2}, {3, 1, 6, 2}, {4, 1, 6, 3}, {5, 1, 6, 3}, {3, 2, 6, 3}, {4, 2, 6, 3},
+            {5, 2, 6, 4}, {4, 3, 6, 4}, {5, 3, 6, 4}, {5, 4, 6, 5}, {0, 1, 6, 4}, {0, 2, 6, 4}, {0, 3, 6, 5}, {0, 4, 6, 5}, {0, 5, 6, 0}, {1, 2, 6, 5},
+            {1, 3, 6, 5}, {1, 4, 6, 0}, {1, 5, 6, 0}, {2, 3, 6, 0}, {2, 4, 6, 0}, {2, 5, 6, 1}, {3, 4, 6, 1}, {3, 5, 6, 1}, {4, 5, 6, 2}, {0, 0, 3, 2},
+            {1, 1, 3, 0}, {2, 2, 3, 1}, {0, 1, 3, 2}, {0, 2, 3, 0}, {1, 2, 3, 0}, {1, 0, 3, 1}, {2, 0, 3, 1}, {2, 1, 3, 2},};
 
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       for (int[] leftRightNumExpected : leftRightNumExpecteds)
@@ -1714,7 +1643,7 @@ public class ConvexPolygon2dTest
 
       int numberOfPoints = 10000;
       ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1,
-            numberOfPoints);
+                                                                                                    numberOfPoints);
 
       FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(points);
       double computedArea = polygon.getArea();
@@ -1727,9 +1656,9 @@ public class ConvexPolygon2dTest
 
    private ConvexPolygon2d createSomeValidPolygon()
    {
-      double[][] polygonPoints = new double[][] { { -0.05107802536335158, 0.04155594197133163 }, { -0.05052044462374434, 0.1431544119584275 },
-            { 0.12219695435431863, 0.14220652470109518 }, { 0.12219695435431865, -0.041946248489056696 }, { 0.12163937361471142, -0.1435447184761526 },
-            { -0.05107802536335154, -0.14259683121882027 } };
+      double[][] polygonPoints = new double[][] {{-0.05107802536335158, 0.04155594197133163}, {-0.05052044462374434, 0.1431544119584275},
+            {0.12219695435431863, 0.14220652470109518}, {0.12219695435431865, -0.041946248489056696}, {0.12163937361471142, -0.1435447184761526},
+            {-0.05107802536335154, -0.14259683121882027}};
 
       ConvexPolygon2d polygon = new ConvexPolygon2d(polygonPoints);
 
@@ -1779,7 +1708,7 @@ public class ConvexPolygon2dTest
          }
 
          FrameLineSegment2d testLineSegment = FrameLineSegment2d.generateRandomFrameLineSegment2d(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin,
-               2.0 * yMax);
+                                                                                                  2.0 * yMax);
 
          FramePoint2d[] intersectionsWithLineSegment = polygon.intersectionWith(testLineSegment);
 
@@ -1854,7 +1783,7 @@ public class ConvexPolygon2dTest
             Point2D projectedPoint = convexPolygon.orthogonalProjectionCopy(testPoint);
 
             assertTrue("Projected point was not inside the polygon for point\n" + projectedPoint + "\nand convex polygon \n" + convexPolygon,
-                  ConvexPolygon2dCalculator.isPointInside(projectedPoint, 1.0E-10, convexPolygon));
+                       ConvexPolygon2dCalculator.isPointInside(projectedPoint, 1.0E-10, convexPolygon));
          }
       }
    }
@@ -1887,7 +1816,8 @@ public class ConvexPolygon2dTest
          Line2d arbitraryLine = new Line2d(arbitraryPoint0, arbitraryPoint1);
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
-         assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).distance(arbitraryPoint0), epsilon);
+         assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0),
+                      ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMaxPoint().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMinPoint().equals(pointThatDefinesThePolygon));
@@ -1932,7 +1862,8 @@ public class ConvexPolygon2dTest
          Point2DReadOnly point1 = combinedPolygons.getVertex(1);
          assertEqualsInEitherOrder(pointThatDefinesThePolygon, pointThatDefinesAnotherPolygon, point0, point1);
 
-         ConvexPolygon2dAndConnectingEdges combinedDisjointPolygons = ConvexPolygonTools.combineDisjointPolygons(polygonWithOnePoint, anotherPolygonWithOnePoint);
+         ConvexPolygon2dAndConnectingEdges combinedDisjointPolygons = ConvexPolygonTools.combineDisjointPolygons(polygonWithOnePoint,
+                                                                                                                 anotherPolygonWithOnePoint);
          assertEquals(2, combinedDisjointPolygons.getConvexPolygon2d().getNumberOfVertices());
          point0 = combinedDisjointPolygons.getConvexPolygon2d().getVertex(0);
          point1 = combinedDisjointPolygons.getConvexPolygon2d().getVertex(1);
@@ -1946,7 +1877,7 @@ public class ConvexPolygon2dTest
          assertTrue(intersection.getVertex(0).equals(pointThatDefinesThePolygon));
          assertTrue(ConvexPolygonTools.intersection(arbitraryLineSegment, polygonWithOnePoint) == null);
          assertTrue(ConvexPolygonTools.intersection(new LineSegment2d(pointThatDefinesThePolygon, arbitraryPoint0),
-               polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
+                                                    polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
 
          ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
          ConvexPolygon2d shrunkenOnePointPolygon = new ConvexPolygon2d();
@@ -1956,9 +1887,82 @@ public class ConvexPolygon2dTest
          assertTrue(shrunkenOnePointPolygon.epsilonEquals(polygonWithOnePoint, 1e-7));
 
          assertEquals(1, ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithOnePoint).getNumberOfVertices());
-         assertTrue(ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0,
-               polygonWithOnePoint).getVertex(0).equals(pointThatDefinesThePolygon));
+         assertTrue(ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithOnePoint).getVertex(0).equals(pointThatDefinesThePolygon));
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetSignedDistance1()
+   {
+      // single point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(0.0, 0.0));
+      polygon.update();
+
+      Point2D point = new Point2D(2.5, 1.0);
+      double distance = polygon.signedDistance(point);
+      assertDistanceCorrect(Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetSignedDistance2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(0.0, 0.0));
+      polygon.addVertex(new Point2D(1.0, 0.0));
+      polygon.update();
+
+      Point2D point1 = new Point2D(2.5, 1.0);
+      double distance1 = polygon.signedDistance(point1);
+      assertDistanceCorrect(Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
+
+      Point2D point2 = new Point2D(0.5, 1.0);
+      double distance2 = polygon.signedDistance(point2);
+      assertDistanceCorrect(1.0, distance2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetSignedDistance3()
+   {
+      // triangle polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(0.0, 0.0));
+      polygon.addVertex(new Point2D(10.0, 0.0));
+      polygon.addVertex(new Point2D(0.0, 10.0));
+      polygon.update();
+
+      Point2D point1 = new Point2D(10.0, 10.0);
+      double distance1 = polygon.signedDistance(point1);
+      assertDistanceCorrect(5.0 * Math.sqrt(2.0), distance1);
+
+      Point2D point2 = new Point2D(1.2, 1.1);
+      double distance2 = polygon.signedDistance(point2);
+      assertDistanceCorrect(-1.1, distance2);
+
+      Point2D point3 = new Point2D(0.05, 9.8);
+      double distance3 = polygon.signedDistance(point3);
+      assertDistanceCorrect(-0.05, distance3);
+
+      Point2D point4 = new Point2D(9.8, 0.15);
+      double distance4 = polygon.signedDistance(point4);
+      assertDistanceCorrect(-0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
+
+      Point2D point5 = new Point2D(5.0, -0.15);
+      double distance5 = polygon.signedDistance(point5);
+      assertDistanceCorrect(0.15, distance5);
+
+      Point2D point6 = new Point2D(15.0, -0.15);
+      double distance6 = polygon.signedDistance(point6);
+      assertDistanceCorrect(Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
+   }
+
+   private static void assertDistanceCorrect(double expected, double actual)
+   {
+      assertEquals("Distance does not equal expected.", expected, actual, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1994,18 +1998,18 @@ public class ConvexPolygon2dTest
 
          // one line tests
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
-               ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints).distance(arbitraryPoint0), epsilon);
+                      ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithTwoPoints.getArea(), epsilon);
-         Point2D minPoint = new Point2D(Math.min(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.min(
-               pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
-         Point2D maxPoint = new Point2D(Math.max(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.max(
-               pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
+         Point2D minPoint = new Point2D(Math.min(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()),
+                                        Math.min(pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
+         Point2D maxPoint = new Point2D(Math.max(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()),
+                                        Math.max(pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
          assertTrue(polygonWithTwoPoints.getBoundingBoxCopy().getMinPoint().equals(minPoint));
          assertTrue(polygonWithTwoPoints.getBoundingBoxCopy().getMaxPoint().equals(maxPoint));
          assertTrue(polygonWithTwoPoints.getCentroid().equals(lineSegmentThatDefinesThePolygon.midpoint()));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, polygonWithTwoPoints.getVertex(0),
-               polygonWithTwoPoints.getVertex(1));
+                                   polygonWithTwoPoints.getVertex(1));
          assertFalse(ConvexPolygon2dCalculator.isPointInside(arbitraryPoint0, polygonWithTwoPoints));
          assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithTwoPoints));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
@@ -2023,7 +2027,7 @@ public class ConvexPolygon2dTest
 
          // getCounterClockwiseOrderedListOfPointsCopy
          assertEqualsInEitherOrder(polygonWithTwoPoints.getVertexCCW(0), polygonWithTwoPoints.getVertexCCW(1), pointThatDefinesThePolygon0,
-               pointThatDefinesThePolygon1);
+                                   pointThatDefinesThePolygon1);
 
          // getLineOfSightVertices
          assertEquals(2, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithTwoPoints).length);
@@ -2034,7 +2038,7 @@ public class ConvexPolygon2dTest
          LineSegment2d[] nearestEdges = ConvexPolygon2dTestHelpers.getNearestEdges(arbitraryPoint0, polygonWithTwoPoints);
          assertTrue(nearestEdges.length == 1);
          assertEqualsInEitherOrder(nearestEdges[0].getEndpoints()[0], nearestEdges[0].getEndpoints()[1], pointThatDefinesThePolygon0,
-               pointThatDefinesThePolygon1);
+                                   pointThatDefinesThePolygon1);
 
          // orthoganolProjectionCopy
          Point2D expectedProjection = lineSegmentThatDefinesThePolygon.orthogonalProjectionCopy(arbitraryPoint0);
@@ -2056,8 +2060,10 @@ public class ConvexPolygon2dTest
 
          // getIntersectingEdges
          LineSegment2d[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);
-         boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope() + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
-         boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope() + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
+         boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope()
+               + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
+         boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope()
+               + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
          boolean lineCrossesThroughPolygon = isLineAbovePoint0 ^ isLineAbovePoint1;
 
          if (!lineCrossesThroughPolygon)
@@ -2066,7 +2072,7 @@ public class ConvexPolygon2dTest
          }
          else
          {
-            for (int j : new int[] { 0, 1 })
+            for (int j : new int[] {0, 1})
             {
                Point2DReadOnly[] endPoints = intersectingEdges[j].getEndpoints();
                assertEqualsInEitherOrder(endPoints[0], endPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
@@ -2113,7 +2119,7 @@ public class ConvexPolygon2dTest
 
          // intersectionWith
          Point2D[] expectedIntersectionWithSparePolygon = sparePolygon.intersectionWith(new LineSegment2d(pointThatDefinesThePolygon0,
-               pointThatDefinesThePolygon1));
+                                                                                                          pointThatDefinesThePolygon1));
          ConvexPolygon2d actualIntersectionWithSparePolygon = sparePolygon.intersectionWith(polygonWithTwoPoints);
 
          if (expectedIntersectionWithSparePolygon == null)
@@ -2129,7 +2135,7 @@ public class ConvexPolygon2dTest
          {
             assertTrue(actualIntersectionWithSparePolygon.getNumberOfVertices() == 2);
             assertEqualsInEitherOrder(expectedIntersectionWithSparePolygon[0], expectedIntersectionWithSparePolygon[1],
-                  actualIntersectionWithSparePolygon.getVertex(0), actualIntersectionWithSparePolygon.getVertex(1));
+                                      actualIntersectionWithSparePolygon.getVertex(0), actualIntersectionWithSparePolygon.getVertex(1));
          }
          else
          {
@@ -2182,7 +2188,8 @@ public class ConvexPolygon2dTest
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0].epsilonEquals(polygonIntersection.getVertex(0), epsilon));
          else if (polygonIntersection.getNumberOfVertices() == 2)
             assertEqualsInEitherOrder(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0],
-                  sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[1], polygonIntersection.getVertex(0), polygonIntersection.getVertex(1));
+                                      sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[1], polygonIntersection.getVertex(0),
+                                      polygonIntersection.getVertex(1));
          else
             fail();
 
@@ -2233,7 +2240,8 @@ public class ConvexPolygon2dTest
       }
    }
 
-   private void assertEqualsInAnyOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly expected2, Point2DReadOnly actual0, Point2DReadOnly actual1, Point2DReadOnly actual2)
+   private void assertEqualsInAnyOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly expected2, Point2DReadOnly actual0,
+                                       Point2DReadOnly actual1, Point2DReadOnly actual2)
    {
       if (expected0.equals(actual0) && expected1.equals(actual1))
          assertTrue(expected2.equals(actual2));

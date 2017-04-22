@@ -29,75 +29,6 @@ public class ConvexPolygon2dCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
-   public void testGetSignedDistance1()
-   {
-      // single point polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.update();
-
-      Point2D point = new Point2D(2.5, 1.0);
-      double distance = ConvexPolygon2dCalculator.getSignedDistance(point, polygon);
-      assertDistanceCorrect(Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testGetSignedDistance2()
-   {
-      // line polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.addVertex(new Point2D(1.0, 0.0));
-      polygon.update();
-
-      Point2D point1 = new Point2D(2.5, 1.0);
-      double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
-
-      Point2D point2 = new Point2D(0.5, 1.0);
-      double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(1.0, distance2);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testGetSignedDistance3()
-   {
-      // triangle polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.addVertex(new Point2D(10.0, 0.0));
-      polygon.addVertex(new Point2D(0.0, 10.0));
-      polygon.update();
-
-      Point2D point1 = new Point2D(10.0, 10.0);
-      double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(5.0 * Math.sqrt(2.0), distance1);
-
-      Point2D point2 = new Point2D(1.2, 1.1);
-      double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(-1.1, distance2);
-
-      Point2D point3 = new Point2D(0.05, 9.8);
-      double distance3 = ConvexPolygon2dCalculator.getSignedDistance(point3, polygon);
-      assertDistanceCorrect(-0.05, distance3);
-
-      Point2D point4 = new Point2D(9.8, 0.15);
-      double distance4 = ConvexPolygon2dCalculator.getSignedDistance(point4, polygon);
-      assertDistanceCorrect(-0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
-
-      Point2D point5 = new Point2D(5.0, -0.15);
-      double distance5 = ConvexPolygon2dCalculator.getSignedDistance(point5, polygon);
-      assertDistanceCorrect(0.15, distance5);
-
-      Point2D point6 = new Point2D(15.0, -0.15);
-      double distance6 = ConvexPolygon2dCalculator.getSignedDistance(point6, polygon);
-      assertDistanceCorrect(Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
    public void testGetClosestVertexPoint1()
    {
       Point2D vertex1 = new Point2D(0.0, 0.0);
@@ -2124,11 +2055,6 @@ public class ConvexPolygon2dCalculatorTest
    private static void assertIndexCorrect(int expected, int actual)
    {
       assertEquals("Index does not equal expected.", expected, actual);
-   }
-
-   private static void assertDistanceCorrect(double expected, double actual)
-   {
-      assertEquals("Distance does not equal expected.", expected, actual, epsilon);
    }
 
    private static void assertPointsEqual(Point2D expected, Point2D actual)
