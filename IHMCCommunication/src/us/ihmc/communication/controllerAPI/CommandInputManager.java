@@ -185,10 +185,6 @@ public class CommandInputManager
       {
          commandConverter.process(nextCommand, message);
       }
-      else if (commandConverter != null && commandConverter.isFrameBasedCommandHolder(nextCommand))
-      {
-         commandConverter.processFrameBasedCommandHolder(nextCommand, message);
-      }
       else
       {
          nextCommand.set(message);

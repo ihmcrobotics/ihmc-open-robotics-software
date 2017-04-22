@@ -11,13 +11,12 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class KinematicsToolboxModule extends ToolboxModule
@@ -30,24 +29,36 @@ public class KinematicsToolboxModule extends ToolboxModule
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
       super(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, robotModel, yoGraphicsListRegistry, registry);
-      packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController.createRobotConfigurationDataConsumer());
+      kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry, registry);
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
+      packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController::updateRobotConfigurationData);
+      packetCommunicator.attachListener(CapturabilityBasedStatus.class, kinematicsToolBoxController::updateCapturabilityBasedStatus);
       startYoVariableServer();
    }
 
+   /**
+    * This method defines the input API for this toolbox. You can find the corresponding messages to
+    * these commands that can be sent over the network.
+    * <p>
+    * Do not forget that this toolbox will ignore any message with a destination different from
+    * {@value KinematicsToolboxModule#PACKET_DESTINATION}. This toolbox will also ignore any message
+    * that does not extend {@link TrackablePacket}.
+    * </p>
+    */
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(HandTrajectoryCommand.class);
-      commands.add(ChestTrajectoryCommand.class);
-      commands.add(PelvisHeightTrajectoryCommand.class);
-      commands.add(PelvisOrientationTrajectoryCommand.class);
-      commands.add(WholeBodyTrajectoryCommand.class);
-      commands.add(TrackingWeightsCommand.class);
+      commands.add(KinematicsToolboxCenterOfMassCommand.class);
+      commands.add(KinematicsToolboxRigidBodyCommand.class);
+      commands.add(KinematicsToolboxConfigurationCommand.class);
       return commands;
    }
 
+   /**
+    * This method defines the output API for this toolbox. The message that this toolbox sends are
+    * directed to the source the of the input messages.
+    */
    @Override
    public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
    {

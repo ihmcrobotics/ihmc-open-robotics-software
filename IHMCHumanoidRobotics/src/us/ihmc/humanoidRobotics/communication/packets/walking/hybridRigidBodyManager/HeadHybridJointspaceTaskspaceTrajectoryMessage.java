@@ -6,8 +6,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
@@ -82,57 +80,23 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
       this.neckTrajectoryMessage = neckTrajectoryMessage;
    }
    
-   @Override
-   public long getTrajectoryReferenceFrameId()
-   {
-      return headTrajectoryMessage.getTrajectoryReferenceFrameId();
-   }
-
-   @Override
-   public long getDataReferenceFrameId()
-   {
-      return headTrajectoryMessage.getDataReferenceFrameId();
-   }
-
-   @Override
    public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
    {
       headTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
    }
 
-   @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       headTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
    }
 
-   @Override
    public void setDataReferenceFrameId(long expressedInReferenceFrameId)
    {
       headTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
    }
 
-   @Override
    public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
    {
       headTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
-   }
-
-   @Override
-   public Point3D getControlFramePosition()
-   {
-      return headTrajectoryMessage.getControlFramePosition();
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return headTrajectoryMessage.getControlFrameOrientation();
-   }
-   
-   @Override
-   public boolean useCustomControlFrame()
-   {
-      return headTrajectoryMessage.useCustomControlFrame();
    }
 }
