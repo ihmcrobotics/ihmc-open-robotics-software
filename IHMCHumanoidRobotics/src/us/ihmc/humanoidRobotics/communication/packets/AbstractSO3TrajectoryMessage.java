@@ -39,7 +39,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
+   public QuaternionBasedTransform controlFramePose;
 
    /**
     * Empty constructor for serialization.
@@ -342,11 +342,15 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void setControlFramePosition(Point3D controlFramePosition)
    {
+      if (controlFramePose == null)
+         controlFramePose = new QuaternionBasedTransform();
       controlFramePose.setTranslation(controlFramePosition);
    }
 
    public void setControlFrameOrientation(Quaternion controlFrameOrientation)
    {
+      if (controlFramePose == null)
+         controlFramePose = new QuaternionBasedTransform();
       controlFramePose.setRotation(controlFrameOrientation);
    }
 
@@ -357,6 +361,9 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getControlFramePose(RigidBodyTransform controlFrameTransformToPack)
    {
-      controlFrameTransformToPack.set(controlFramePose);
+      if (controlFramePose == null)
+         controlFrameTransformToPack.setToNaN();
+      else
+         controlFrameTransformToPack.set(controlFramePose);
    }
 }
