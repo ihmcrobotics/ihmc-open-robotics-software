@@ -152,10 +152,10 @@ public class ConvexPolygonTools
          R1 = lineOfSight1EndIndex;
       }
 
-      verticesIndices[0][0] = R1;
-      verticesIndices[0][1] = L1;
-      verticesIndices[1][0] = L2;
-      verticesIndices[1][1] = R2;
+      verticesIndices[0][0] = L1;
+      verticesIndices[0][1] = R1;
+      verticesIndices[1][0] = R2;
+      verticesIndices[1][1] = L2;
       return true;
    }
 
