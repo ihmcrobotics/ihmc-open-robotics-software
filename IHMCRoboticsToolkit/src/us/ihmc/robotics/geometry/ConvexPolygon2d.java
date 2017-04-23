@@ -30,7 +30,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 {
    private final boolean clockwiseOrdered = true;
-   private final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
+   final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
    private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
    private int numberOfVertices = 0;
@@ -1016,6 +1016,74 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    {
       checkIfUpToDate();
       return EuclidGeometryPolygonTools.orthogonalProjectionOnConvexPolygon2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
+   public int lineOfSightStartIndex(Point2DReadOnly observer)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.lineOfSightStartIndex(observer, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
+   public int lineOfSightEndIndex(Point2DReadOnly observer)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.lineOfSightEndIndex(observer, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
+   public int[] lineOfSightIndices(Point2DReadOnly observer)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.lineOfSightIndices(observer, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
+   public boolean lineOfSightStartVertex(Point2DReadOnly observer, Point2DBasics startVertexToPack)
+   {
+      checkIfUpToDate();
+      int lineOfSightStartIndex = lineOfSightStartIndex(observer);
+
+      if (lineOfSightStartIndex == -1)
+         return false;
+
+      startVertexToPack.set(getVertexUnsafe(lineOfSightStartIndex));
+
+      return true;
+   }
+
+   public boolean lineOfSightEndVertex(Point2DReadOnly observer, Point2DBasics endVertexToPack)
+   {
+      checkIfUpToDate();
+      int lineOfSightEndIndex = lineOfSightEndIndex(observer);
+
+      if (lineOfSightEndIndex == -1)
+         return false;
+
+      endVertexToPack.set(getVertexUnsafe(lineOfSightEndIndex));
+
+      return true;
+   }
+
+   public Point2D lineOfSightStartVertex(Point2DReadOnly observer)
+   {
+      Point2D startVertex = new Point2D();
+      boolean success = lineOfSightStartVertex(observer, startVertex);
+      return success ? startVertex : null;
+   }
+
+   public Point2D lineOfSightEndVertex(Point2DReadOnly observer)
+   {
+      Point2D endVertex = new Point2D();
+      boolean success = lineOfSightEndVertex(observer, endVertex);
+      return success ? endVertex : null;
+   }
+
+   public Point2D[] lineOfSightVertices(Point2DReadOnly observer)
+   {
+      Point2D startVertex = lineOfSightStartVertex(observer);
+      Point2D endVertex = lineOfSightEndVertex(observer);
+      if (startVertex == null || endVertex == null)
+         return null;
+      else
+         return new Point2D[]{startVertex, endVertex};
    }
 
    public boolean pointIsOnPerimeter(Point2DReadOnly point)
