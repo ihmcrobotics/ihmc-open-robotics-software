@@ -500,7 +500,13 @@ public class ToeOffManager
       return isStepLongEnough && isStepLongEnoughAlongX;
    }
 
-   public boolean canDoToeOffSingleSupoprt(Footstep nextFootstep, RobotSide transferToSide)
+   /**
+    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
+    * @param nextFootstep footstep to consider.
+    * @param transferToSide upcoming support side.
+    * @return whether or not the footstep location is ok.
+    */
+   public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
       if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
          return false;
@@ -508,7 +514,13 @@ public class ToeOffManager
       return canDoToeOff(nextFootstep, transferToSide);
    }
 
-   public boolean canDoToeOffDoubleSupport(Footstep nextFootstep, RobotSide transferToSide)
+   /**
+    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
+    * @param nextFootstep footstep to consider.
+    * @param transferToSide upcoming support side.
+    * @return whether or not the footstep location is ok.
+    */
+   public boolean canDoDoubleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
       if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
          return false;
