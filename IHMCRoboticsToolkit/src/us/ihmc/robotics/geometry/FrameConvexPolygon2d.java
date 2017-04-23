@@ -807,7 +807,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public boolean isPointInside(FramePoint2d framePoint, double epsilon)
    {
       framePoint.checkReferenceFrameMatch(referenceFrame);
-      return ConvexPolygon2dCalculator.isPointInside(framePoint.tuple, epsilon, this.convexPolygon);
+      return convexPolygon.isPointInside(framePoint.tuple, epsilon);
    }
 
    /**

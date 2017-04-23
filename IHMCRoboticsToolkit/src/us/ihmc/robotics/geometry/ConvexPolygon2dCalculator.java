@@ -169,85 +169,13 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the point is inside the convex polygon.
-    */
-   public static boolean isPointInside(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
-   {
-      if (polygon.hasExactlyOneVertex())
-      {
-         Point2DReadOnly vertex = polygon.getVertex(0);
-         if (Math.abs(vertex.getX() - pointX) > epsilon)
-            return false;
-         if (Math.abs(vertex.getY() - pointY) > epsilon)
-            return false;
-         return true;
-      }
-
-      if (polygon.hasExactlyTwoVertices())
-      {
-         Point2DReadOnly lineStart = polygon.getVertex(0);
-         Point2DReadOnly lineEnd = polygon.getVertex(1);
-         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(pointX, pointY, lineStart, lineEnd);
-         if (distance > epsilon)
-            return false;
-         return true;
-      }
-
-      if (polygon.hasAtLeastTwoVertices())
-      {
-         // Determine whether the point is on the right side of each edge:
-         for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-         {
-            Point2DReadOnly edgeStart = polygon.getVertex(i);
-            Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
-            double distanceToEdgeLine = EuclidGeometryTools.distanceFromPoint2DToLine2D(pointX, pointY, edgeStart.getX(), edgeStart.getY(), edgeEnd.getX() - edgeStart.getX(), edgeEnd.getY() - edgeStart.getY());
-
-            boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
-            if (!pointOutside)
-               distanceToEdgeLine = -distanceToEdgeLine;
-
-            if (distanceToEdgeLine > epsilon)
-               return false;
-         }
-
-         return true;
-      }
-
-      return false;
-   }
-
-   /**
-    * Determines if the point is inside the convex polygon.
-    */
-   public static boolean isPointInside(double pointX, double pointY, ConvexPolygon2d polygon)
-   {
-      return isPointInside(pointX, pointY, 0.0, polygon);
-   }
-
-   /**
-    * Determines if the pointToTest is inside the convex polygon.
-    */
-   public static boolean isPointInside(Point2DReadOnly pointToTest, ConvexPolygon2d polygon)
-   {
-      return isPointInside(pointToTest, 0.0, polygon);
-   }
-
-   /**
-    * Determines if the pointToTest is inside the convex polygon.
-    */
-   public static boolean isPointInside(Point2DReadOnly pointToTest, double epsilon, ConvexPolygon2d polygon)
-   {
-      return isPointInside(pointToTest.getX(), pointToTest.getY(), epsilon, polygon);
-   }
-
-   /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
    public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, double epsilon, ConvexPolygon2d polygon)
    {
       for (int i = 0; i < polygonToTest.getNumberOfVertices(); i++)
       {
-         if (!isPointInside(polygonToTest.getVertex(i), epsilon, polygon))
+         if (!polygon.isPointInside(polygonToTest.getVertex(i), epsilon))
             return false;
       }
 
