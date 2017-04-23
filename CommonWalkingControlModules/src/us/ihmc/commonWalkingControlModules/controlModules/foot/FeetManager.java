@@ -53,7 +53,6 @@ public class FeetManager
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
@@ -180,11 +179,6 @@ public class FeetManager
       }
    }
 
-   public boolean isInFlatSupportState(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).isInFlatSupportState();
-   }
-
    public void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -295,72 +289,151 @@ public class FeetManager
       return toeOffManager;
    }
 
-   public boolean willDoToeOffDoubleSupport(Footstep nextFootstep, RobotSide transferToSide)
+   /**
+    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
+    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(Footstep, RobotSide)}.
+    *
+    * @param nextFootstep footstep to consider.
+    * @param transferToSide upcoming support side.
+    * @return whether or not the footstep location is ok.
+    */
+   public boolean canDoDoubleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
-      return toeOffManager.canDoToeOffDoubleSupport(nextFootstep, transferToSide);
-   }
-
-   public boolean willDoToeOffSingleSupport(Footstep nextFootstep, RobotSide transferToSide)
-   {
-      return toeOffManager.canDoToeOffSingleSupoprt(nextFootstep, transferToSide);
+      return toeOffManager.canDoDoubleSupportToeOff(nextFootstep, transferToSide);
    }
 
    /**
-    * {@link ToeOffManager#updateToeOffStatusSingleSupport(FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}
-    * @return {@link ToeOffManager#doLineToeOff} or {@link ToeOffManager#doPointToeOff()}
+    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
+    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(Footstep, RobotSide)}.
+    *
+    * @param nextFootstep footstep to consider.
+    * @param transferToSide upcoming support side.
+    * @return whether or not the footstep location is ok.
     */
-   public void updateToeOffSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP)
+   public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   {
+      return toeOffManager.canDoSingleSupportToeOff(nextFootstep, transferToSide);
+   }
+
+   /**
+    * <p>
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * </p>
+    * <p>
+    * These checks include:
+    * </p>
+    * <ol>
+    *   <li>doToeOffIfPossibleInDoubleSupport</li>
+    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    *   <li>desiredICP location being within the leading foot base of support.</li>
+    *   <li>currentICP location being within the leading foot base of support.</li>
+    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * </ol>
+    * <p>
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
+    * positioning of the leading leg to determine if it is acceptable.
+    * </p>
+    *
+    * @param nextFootstep next desired footstep to take.
+    * @param exitCMP exit CMP in the current foot
+    * @param desiredECMP current desired ECMP from ICP feedback.
+    * @param desiredICP current desired ICP from the reference trajectory.
+    * @param currentICP current ICP based on the robot state.
+    */
+   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
       toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredICP, currentICP);
    }
 
    /**
-    * {@link ToeOffManager#updateToeOffStatusDoubleSupport(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}
-    * @return {@link ToeOffManager#doLineToeOff} or {@link ToeOffManager#doPointToeOff()}
+    * <p>
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * </p>
+    * <p>
+    * These checks include:
+    * </p>
+    * <ol>
+    *   <li>doToeOffIfPossibleInDoubleSupport</li>
+    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    *   <li>desiredICP location being within the leading foot base of support.</li>
+    *   <li>currentICP location being within the leading foot base of support.</li>
+    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * </ol>
+    * <p>
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
+    * positioning of the leading leg to determine if it is acceptable.
+    * </p>
+    *
+    * @param trailingLeg robot side for the trailing leg
+    * @param desiredECMP current desired ECMP from ICP feedback.
+    * @param desiredICP current desired ICP from the reference trajectory.
+    * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
    }
 
-   public boolean willDoPointToeOff()
+   /**
+    * Returns whether or not the current robot state is ok toe-off using a point toe contact.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}, based on the walking state.
+    * Calls {@link ToeOffManager#doPointToeOff}.
+    */
+   public boolean okForPointToeOff()
    {
       return toeOffManager.doPointToeOff();
    }
 
-   public boolean willDoLineToeOff()
+   /**
+    * Returns whether or not the current robot state is ok toe-off using a line toe contact.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}, based on the walking state.
+    * Calls {@link ToeOffManager#doLineToeOff}.
+    */
+   public boolean okForLineToeOff()
    {
       return toeOffManager.doLineToeOff();
    }
 
-   public void useToeOffPointContact(RobotSide trailingLeg)
+   /**
+    * Computes the desired toe off point, and sets the contact state in the foot control module to the toe off state.
+    *
+    * @param trailingLeg trailing leg in the state
+    * @param exitCMP exit CMP from the ICP plan in the stance foot
+    * @param desiredCMP current desired CMP location
+    */
+   public void requestPointToeOff(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
+      toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
+      toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
       footControlModules.get(trailingLeg).setUsePointContactInToeOff(true);
+      requestToeOff(trailingLeg);
+      controllerToolbox.updateBipedSupportPolygons();
    }
 
-   public void useToeOffLineContact(RobotSide trailingLeg)
+   /**
+    * Computes the desired toe off line, and sets the contact state in the foot control module to the toe off state.
+    *
+    * @param trailingLeg trailing leg in the state
+    * @param exitCMP exit CMP from the ICP plan in the stance foot
+    * @param desiredCMP current desired CMP location
+    */
+   public void requestLineToeOff(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
+      toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
+      toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
       footControlModules.get(trailingLeg).setUsePointContactInToeOff(false);
+      requestToeOff(trailingLeg);
+      controllerToolbox.updateBipedSupportPolygons();
    }
 
-   public void requestToeOff(RobotSide trailingLeg)
+   private void requestToeOff(RobotSide trailingLeg)
    {
       if (footControlModules.get(trailingLeg).isInToeOff())
          return;
       setOnToesContactState(trailingLeg);
-   }
-
-   public void computeToeOffContactLine(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
-   {
-      toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
-      toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
-   }
-
-   public void computeToeOffContactPoint(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
-   {
-      toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
-      toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    public boolean shouldComputeToeLineContact()
@@ -387,7 +460,7 @@ public class FeetManager
    /**
     * Request the swing trajectory to speed up using the given speed up factor.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
-    * @param speedUpFactor
+    * @param speedUpFactor multiplier on the current time
     * @return the current swing time remaining for the swing foot trajectory
     */
    public double requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)

@@ -95,8 +95,6 @@ public abstract class TransferState extends WalkingState
       boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
       boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
 
-      // the only case left for determining the contact state of the trailing foot
-      // // FIXME: 4/22/17 have this update properly
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
          balanceManager.getDesiredCMP(desiredCMP);
@@ -104,24 +102,14 @@ public abstract class TransferState extends WalkingState
          balanceManager.getCapturePoint(capturePoint2d);
          balanceManager.getNextExitCMP(nextExitCMP);
 
-         feetManager.updateToeOffDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
+         feetManager.updateToeOffStatusDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
 
-         if (feetManager.willDoPointToeOff() && shouldComputeToePointContact)
-         {
-            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
-            feetManager.useToeOffPointContact(trailingLeg);
-            feetManager.requestToeOff(trailingLeg);
-            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
-         }
-         else if (feetManager.willDoLineToeOff() && shouldComputeToeLineContact)
-         {
-            feetManager.computeToeOffContactLine(trailingLeg, nextExitCMP, filteredDesiredCoP);
-            feetManager.useToeOffLineContact(trailingLeg);
-            feetManager.requestToeOff(trailingLeg);
-            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
-         }
+         if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
+            feetManager.requestPointToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
+         else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
+            feetManager.requestLineToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
       }
    }
 
