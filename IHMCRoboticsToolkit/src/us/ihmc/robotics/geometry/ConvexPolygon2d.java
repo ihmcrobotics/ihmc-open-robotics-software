@@ -1170,9 +1170,19 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
    }
 
+   public int intersectionWith(LineSegment2d lineSegment2d, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(lineSegment2d.getFirstEndpoint(), lineSegment2d.getSecondEndpoint(),
+                                                                                           clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered,
+                                                                                           firstIntersectionToPack, secondIntersectionToPack);
+   }
+
    public Point2D[] intersectionWith(LineSegment2d lineSegment2d)
    {
-      return ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(lineSegment2d, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(lineSegment2d.getFirstEndpoint(), lineSegment2d.getSecondEndpoint(),
+                                                                                           clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
    // TODO: clean up garbage in / implement the following methods
