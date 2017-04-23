@@ -18,10 +18,13 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
- * <p>Title: ConvexPolygon2d</p>
+ * <p>
+ * Title: ConvexPolygon2d
+ * </p>
  *
- * <p>Description: Describes a planar convex polygon.
- * The vertices of this polygon are clockwise and are all different.
+ * <p>
+ * Description: Describes a planar convex polygon. The vertices of this polygon are clockwise and
+ * are all different.
  * </p>
  *
  * @author IHMC Biped Team
@@ -51,10 +54,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using a list of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * Creates an empty convex polygon, adds N new vertices using a list of {@code Point2d}, updates
+    * the vertices so they are clockwise ordered, and initializes some essential numbers such as the
+    * centroid.
+    * 
     * @param vertices {@code List<Point2d>} the list of points that is used to creates the vertices.
     * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
-    * Note the: {@code pointList.size()} can be greater or equal to numberOfVertices.
+    *           Note the: {@code pointList.size()} can be greater or equal to numberOfVertices.
     */
    public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
@@ -62,9 +68,12 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using a list of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * Creates an empty convex polygon, adds N new vertices using a list of {@code Point2d}, updates
+    * the vertices so they are clockwise ordered, and initializes some essential numbers such as the
+    * centroid.
+    * 
     * @param vertices {@code List<Point2d>} the list of points that is used to creates the vertices.
-    * The number of vertices of this polygon will be equal to the size of the point list.
+    *           The number of vertices of this polygon will be equal to the size of the point list.
     */
    public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices)
    {
@@ -72,10 +81,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d},
+    * updates the vertices so they are clockwise ordered, and initializes some essential numbers
+    * such as the centroid.
+    * 
     * @param vertices {@code Point2d[]} the array of points that is used to creates the vertices.
     * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
-    * Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    *           Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
    public ConvexPolygon2d(Point2DReadOnly[] vertices, int numberOfVertices)
    {
@@ -83,9 +95,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d},
+    * updates the vertices so they are clockwise ordered, and initializes some essential numbers
+    * such as the centroid.
+    * 
     * @param vertices {@code Point2d[]} the array of points that is used to creates the vertices.
-    * The number of vertices of this polygon will be equal to the length of the point array.
+    *           The number of vertices of this polygon will be equal to the length of the point
+    *           array.
     */
    public ConvexPolygon2d(Point2DReadOnly[] vertices)
    {
@@ -93,10 +109,16 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * @param vertices {@code double[>=numberOfVertices][>=2]} the array of points that is used to creates the vertices. The each row contains one point whereas the (at least) two columns contains the coordinates x and y.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon.
-    * Note the: {@code pointListArray.length} can be greater or equal to numberOfVertices.
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d},
+    * updates the vertices so they are clockwise ordered, and initializes some essential numbers
+    * such as the centroid.
+    * 
+    * @param vertices {@code double[>=numberOfVertices][>=2]} the array of points that is used to
+    *           creates the vertices. The each row contains one point whereas the (at least) two
+    *           columns contains the coordinates x and y.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the
+    *           polygon. Note the: {@code pointListArray.length} can be greater or equal to
+    *           numberOfVertices.
     */
    public ConvexPolygon2d(double[][] vertices, int numberOfVertices)
    {
@@ -106,10 +128,14 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * @param vertices {@code double[N][>=2]} the array of points that is used to creates the vertices.
-    * Each row contains one point whereas the (at least) two columns contains the coordinates x and y.
-    * The number of vertices of this polygon will be equal to the length of the point array.
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d},
+    * updates the vertices so they are clockwise ordered, and initializes some essential numbers
+    * such as the centroid.
+    * 
+    * @param vertices {@code double[N][>=2]} the array of points that is used to creates the
+    *           vertices. Each row contains one point whereas the (at least) two columns contains
+    *           the coordinates x and y. The number of vertices of this polygon will be equal to the
+    *           length of the point array.
     */
    public ConvexPolygon2d(double[][] vertices)
    {
@@ -118,6 +144,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    /**
     * Creates a polygon with the same properties as the other polygon.
+    * 
     * @param otherPolygon {@code ConvexPolygon2d} the other convex polygon.
     */
    public ConvexPolygon2d(ConvexPolygon2d otherPolygon)
@@ -126,9 +153,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Creates a new convex polygon by combining two other convex polygons. The result is the smallest convex hull that contains both polygons.
-    * Then it updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * <p/> TODO: Make this more efficient by finding the rotating calipers, as in the intersection method.<p/>
+    * Creates a new convex polygon by combining two other convex polygons. The result is the
+    * smallest convex hull that contains both polygons. Then it updates the vertices so they are
+    * clockwise ordered, and initializes some essential numbers such as the centroid.
+    * <p/>
+    * TODO: Make this more efficient by finding the rotating calipers, as in the intersection
+    * method.
+    * <p/>
     *
     * @param firstPolygon {@code ConvexPolygon2d}
     * @param secondPolygon {@code ConvexPolygon2d}
@@ -153,8 +184,8 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * After calling this method, the polygon has no vertex, area, or centroid.
-    * Note that calling that method doesn't generate garbage.
+    * After calling this method, the polygon has no vertex, area, or centroid. Note that calling
+    * that method doesn't generate garbage.
     */
    public void clear()
    {
@@ -166,8 +197,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    /**
     * After calling this method, the polygon has no vertex, area, or centroid and isUpToDate = true.
-    * Use only when an empty is desired.
-    * Note that calling that method doesn't generate garbage.
+    * Use only when an empty is desired. Note that calling that method doesn't generate garbage.
     */
    public void clearAndUpdate()
    {
@@ -176,8 +206,8 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Add a vertex to this polygon.
-    * Note that this method recycles memory.
+    * Add a vertex to this polygon. Note that this method recycles memory.
+    * 
     * @param vertex {@code Point2d} the new vertex.
     */
    public void addVertex(Point2DReadOnly vertex)
@@ -188,8 +218,8 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Add a vertex to this polygon.
-    * Note that this method recycles memory.
+    * Add a vertex to this polygon. Note that this method recycles memory.
+    * 
     * @param x {@code double} first coordinate of the new vertex.
     * @param y {@code double} second coordinate of the new vertex.
     */
@@ -201,10 +231,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Adds N new vertices to this polygon using a list of {@code Point2d}.
-    * Note that this method recycles memory.
+    * Adds N new vertices to this polygon using a list of {@code Point2d}. Note that this method
+    * recycles memory.
+    * 
     * @param vertices {@code List<Point2d>} the list of new vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to
+    *           this polygon. Note the: {@code vertices.size()} can be greater or equal to
+    *           numberOfVertices.
     */
    public void addVertices(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
@@ -214,10 +247,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Adds N new vertices to this polygon using an array of {@code Point2d}.
-    * Note that this method recycles memory.
+    * Adds N new vertices to this polygon using an array of {@code Point2d}. Note that this method
+    * recycles memory.
+    * 
     * @param vertices {@code Point2d[]} the list of new vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to
+    *           this polygon. Note the: {@code vertices.length} can be greater or equal to
+    *           numberOfVertices.
     */
    public void addVertices(Point2DReadOnly[] vertices, int numberOfVertices)
    {
@@ -227,10 +263,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Adds N new vertices to this polygon using an array of {@code Point2d}.
-    * Note that this method recycles memory.
+    * Adds N new vertices to this polygon using an array of {@code Point2d}. Note that this method
+    * recycles memory.
+    * 
     * @param vertices {@code double[>=numberOfVertices][>=2]} the array of new vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to
+    *           this polygon. Note the: {@code vertices.length} can be greater or equal to
+    *           numberOfVertices.
     */
    public void addVertices(double[][] vertices, int numberOfVertices)
    {
@@ -240,9 +279,11 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Adds new vertices to this polygon from another convex polygon.
-    * Note that this method recycles memory.
-    * @param otherPolygon {@code ConvexPolygon2d} the other convex polygon that is used to add new vertices to this polygon.
+    * Adds new vertices to this polygon from another convex polygon. Note that this method recycles
+    * memory.
+    * 
+    * @param otherPolygon {@code ConvexPolygon2d} the other convex polygon that is used to add new
+    *           vertices to this polygon.
     */
    public void addVertices(ConvexPolygon2d otherPolygon)
    {
@@ -279,9 +320,8 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Modifies the vertices so they are clockwise ordered.
-    * Updates centroid, area and the bounding box.
-    * Call this method once new vertices have been added.
+    * Modifies the vertices so they are clockwise ordered. Updates centroid, area and the bounding
+    * box. Call this method once new vertices have been added.
     */
    public void update()
    {
@@ -296,12 +336,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * This method does:
-    * 1- {@code clear()};
-    * 2- {@code addVertices(vertices, numberOfVertices)};
-    * 3- {@code update()}.
+    * This method does: 1- {@code clear()}; 2- {@code addVertices(vertices, numberOfVertices)}; 3-
+    * {@code update()}.
+    * 
     * @param vertices {@code List<Point2d>} the list of points that is used to creates the vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the
+    *           polygon. Note the: {@code vertices.size()} can be greater or equal to
+    *           numberOfVertices.
     */
    public void setAndUpdate(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
@@ -311,12 +352,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * This method does:
-    * 1- {@code clear()};
-    * 2- {@code addVertices(vertices, numberOfVertices)};
-    * 3- {@code update()}.
+    * This method does: 1- {@code clear()}; 2- {@code addVertices(vertices, numberOfVertices)}; 3-
+    * {@code update()}.
+    * 
     * @param vertices {@code Point2d[]} the list of points that is used to creates the vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the
+    *           polygon. Note the: {@code vertices.length} can be greater or equal to
+    *           numberOfVertices.
     */
    public void setAndUpdate(Point2DReadOnly[] vertices, int numberOfVertices)
    {
@@ -326,10 +368,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * This method does:
-    * 1- {@code clear()};
-    * 2- {@code addVertices(vertices, numberOfVertices)};
-    * 3- {@code update()}.
+    * This method does: 1- {@code clear()}; 2- {@code addVertices(vertices, numberOfVertices)}; 3-
+    * {@code update()}.
+    * 
     * @param vertices {@code double[>=numberOfVertices][>=2]}
     * @param numberOfVertices {@code int}
     */
@@ -341,11 +382,12 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * This method does:
-    * 1- clear();
-    * 2- addVertices(otherPolygon);
-    * 3- update().
-    * <p/> TODO There is no need to call update() there, instead update everything from the other polygon to make it faster.<p/>
+    * This method does: 1- clear(); 2- addVertices(otherPolygon); 3- update().
+    * <p/>
+    * TODO There is no need to call update() there, instead update everything from the other polygon
+    * to make it faster.
+    * <p/>
+    * 
     * @param otherPolygon {@code ConvexPolygon2d}
     */
    public void setAndUpdate(ConvexPolygon2d otherPolygon)
@@ -356,12 +398,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * This method does:
-    * 1- {@code clear()};
-    * 2- {@code addVertices(firstPolygon)};
-    * 2- {@code addVertices(secondPolygon)};
-    * 3- {@code update()}.
-    * <p/> TODO: Make this more efficient by finding the rotating calipers, as in the intersection method.<p/>
+    * This method does: 1- {@code clear()}; 2- {@code addVertices(firstPolygon)}; 2-
+    * {@code addVertices(secondPolygon)}; 3- {@code update()}.
+    * <p/>
+    * TODO: Make this more efficient by finding the rotating calipers, as in the intersection
+    * method.
+    * <p/>
+    * 
     * @param firstPolygon {@code ConvexPolygon2d}
     * @param secondPolygon {@code ConvexPolygon2d}
     */
@@ -552,7 +595,10 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return getVertexUnsafe(vertexIndex);
    }
 
-   /** Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be careful when using it! */
+   /**
+    * Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be
+    * careful when using it!
+    */
    protected Point2D getVertexUnsafe(int vertexIndex)
    {
       checkNonEmpty();
@@ -643,7 +689,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    }
 
    /**
-    * Scale this convex polygon about its centroid, i.e. once scaled the polygon centroid remains unchanged.
+    * Scale this convex polygon about its centroid, i.e. once scaled the polygon centroid remains
+    * unchanged.
+    * 
     * @param scaleFactor
     */
    public void scale(double scaleFactor)
@@ -653,6 +701,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    /**
     * Scale this convex polygon about pointToScaleAbout.
+    * 
     * @param scaleFactor
     */
    public void scale(Point2DReadOnly pointToScaleAbout, double scaleFactor)
@@ -983,13 +1032,15 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2d ray)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, pointToPack);
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices,
+                                                                          clockwiseOrdered, pointToPack);
    }
 
    public Point2D getClosestPointWithRay(Line2d ray)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices,
+                                                                          clockwiseOrdered);
    }
 
    public double distance(Point2DReadOnly point)
@@ -1011,7 +1062,8 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    public void orthogonalProjection(Point2DReadOnly point2d, Point2DBasics projectionToPack)
    {
       checkIfUpToDate();
-      EuclidGeometryPolygonTools.orthogonalProjectionOnConvexPolygon2D(point2d, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, projectionToPack);
+      EuclidGeometryPolygonTools.orthogonalProjectionOnConvexPolygon2D(point2d, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered,
+                                                                       projectionToPack);
    }
 
    public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
@@ -1085,7 +1137,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       if (startVertex == null || endVertex == null)
          return null;
       else
-         return new Point2D[]{startVertex, endVertex};
+         return new Point2D[] {startVertex, endVertex};
    }
 
    public boolean canObserverSeeEdge(int edgeIndex, Point2DReadOnly observer)
