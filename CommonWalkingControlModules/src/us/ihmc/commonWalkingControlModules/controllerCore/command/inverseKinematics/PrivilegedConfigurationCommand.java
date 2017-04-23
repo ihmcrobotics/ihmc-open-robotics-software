@@ -5,9 +5,12 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.SimplePDGainsHolder;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -23,7 +26,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
    /** internal memory to save the desired configurations in */
-   private final TDoubleArrayList privilegedOneDoFJointConfigurations;
+   private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointConfigurations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
    /** internal memory to save the privileged configuration options in */
    private final TLongObjectHashMap<PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions;
 
@@ -36,12 +39,12 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
    }
 
-   private PrivilegedConfigurationOption defaultOption;
-   private double weight = Double.NaN;
-   private double configurationGain = Double.NaN;
-   private double velocityGain = Double.NaN;
-   private double maxVelocity = Double.NaN;
-   private double maxAcceleration = Double.NaN;
+   private PrivilegedConfigurationOption option;
+   private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   private final RecyclingArrayList<MutableDouble> configurationGains = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   private final RecyclingArrayList<MutableDouble> velocityGains = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   private final RecyclingArrayList<MutableDouble> maxVelocities = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   private final RecyclingArrayList<MutableDouble> maxAccelerations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
    private double defaultWeight = Double.NaN;
    private double defaultConfigurationGain = Double.NaN;
@@ -54,9 +57,8 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    public PrivilegedConfigurationCommand()
    {
-      privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
-      privilegedOneDoFJointConfigurationOptions = new TLongObjectHashMap<PrivilegedConfigurationOption>(initialCapacity);
-      
+      privilegedOneDoFJointConfigurationOptions = new TLongObjectHashMap<>(initialCapacity);
+
       clear();
    }
 
@@ -66,16 +68,17 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    public void clear()
    {
       enable = false;
-      defaultOption = null;
-      weight = Double.NaN;
-      configurationGain = Double.NaN;
-      velocityGain = Double.NaN;
-      maxVelocity = Double.NaN;
-      maxAcceleration = Double.NaN;
+      option = null;
       jointNames.clear();
       joints.clear();
-      privilegedOneDoFJointConfigurations.reset();
+      privilegedOneDoFJointConfigurations.clear();
       privilegedOneDoFJointConfigurationOptions.clear();
+
+      weights.clear();
+      configurationGains.clear();
+      velocityGains.clear();
+      maxVelocities.clear();
+      maxAccelerations.clear();
    }
 
    public void disable()
@@ -128,35 +131,59 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultMaxAcceleration = defaultMaxAcceleration;
    }
 
-   public void setWeight(double weight)
+   public void setWeight(int jointIndex, double weight)
    {
-      this.weight = weight;
+      weights.get(jointIndex).setValue(weight);
    }
 
-   public void setConfigurationGain(double configurationGain)
+   public void setConfigurationGain(int jointIndex, double configurationGain)
    {
-      this.configurationGain = configurationGain;
+      configurationGains.get(jointIndex).setValue(configurationGain);
    }
 
-   public void setVelocityGain(double velocityGain)
+   public void setVelocityGain(int jointIndex, double velocityGain)
    {
-      this.velocityGain = velocityGain;
+      velocityGains.get(jointIndex).setValue(velocityGain);
    }
 
-   public void setMaxVelocity(double maxVelocity)
+   public void setMaxVelocity(int jointIndex, double maxVelocity)
    {
-      this.maxVelocity = maxVelocity;
+      maxVelocities.get(jointIndex).setValue(maxVelocity);
    }
 
-   public void setMaxAcceleration(double maxAcceleration)
+   public void setMaxAcceleration(int jointIndex, double maxAcceleration)
    {
-      this.maxAcceleration = maxAcceleration;
+      maxAccelerations.get(jointIndex).setValue(maxAcceleration);
+   }
+
+   public void setConfigurationGains(double configurationGain)
+   {
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         setConfigurationGain(jointIndex, configurationGain);
+   }
+
+   public void setVelocityGains(double velocityGain)
+   {
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         setVelocityGain(jointIndex, velocityGain);
+   }
+
+   public void setMaxVelocities(double maxVelocity)
+   {
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         setMaxVelocity(jointIndex, maxVelocity);
+   }
+
+   public void setMaxAccelerations(double maxAcceleration)
+   {
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         setMaxAcceleration(jointIndex, maxAcceleration);
    }
 
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
    {
       enable();
-      this.defaultOption = option;
+      this.option = option;
    }
 
    /**
@@ -170,8 +197,14 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
-      privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
+      privilegedOneDoFJointConfigurations.add().setValue(privilegedConfiguration);
       privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), null);
+
+      weights.add().setValue(Double.NaN);
+      configurationGains.add().setValue(Double.NaN);
+      velocityGains.add().setValue(Double.NaN);
+      maxVelocities.add().setValue(Double.NaN);
+      maxAccelerations.add().setValue(Double.NaN);
    }
 
    /**
@@ -185,8 +218,14 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
-      privilegedOneDoFJointConfigurations.add(Double.NaN);
+      privilegedOneDoFJointConfigurations.add().setValue(Double.NaN);
       privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), privilegedConfiguration);
+
+      weights.add().setValue(Double.NaN);
+      configurationGains.add().setValue(Double.NaN);
+      velocityGains.add().setValue(Double.NaN);
+      maxVelocities.add().setValue(Double.NaN);
+      maxAccelerations.add().setValue(Double.NaN);
    }
 
    /**
@@ -199,7 +238,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    {
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
-      privilegedOneDoFJointConfigurations.set(jointIndex, privilegedConfiguration);
+      privilegedOneDoFJointConfigurations.get(jointIndex).setValue(privilegedConfiguration);
       privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), null);
    }
 
@@ -213,7 +252,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    {
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
-      privilegedOneDoFJointConfigurations.set(jointIndex, Double.NaN);
+      privilegedOneDoFJointConfigurations.get(jointIndex).setValue(Double.NaN);
       privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), privilegedConfiguration);
    }
 
@@ -227,13 +266,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    {
       clear();
       enable = other.enable;
-      defaultOption = other.defaultOption;
-
-      weight = other.weight;
-      configurationGain = other.configurationGain;
-      velocityGain = other.velocityGain;
-      maxVelocity = other.maxVelocity;
-      maxAcceleration = other.maxAcceleration;
+      option = other.option;
 
       defaultWeight = other.defaultWeight;
       defaultConfigurationGain = other.defaultConfigurationGain;
@@ -246,8 +279,14 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          OneDoFJoint joint = other.joints.get(i);
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
-         privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
+         privilegedOneDoFJointConfigurations.add().setValue(other.privilegedOneDoFJointConfigurations.get(i));
          privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.getNameBasedHashCode()));
+
+         weights.add().setValue(other.weights.get(i));
+         configurationGains.add().setValue(other.configurationGains.get(i));
+         velocityGains.add().setValue(other.velocityGains.get(i));
+         maxVelocities.add().setValue(other.maxVelocities.get(i));
+         maxAccelerations.add().setValue(other.maxAccelerations.get(i));
       }
    }
 
@@ -266,9 +305,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return if there is a weight available.
     */
-   public boolean hasWeight()
+   public boolean hasWeight(int jointIndex)
    {
-      return !Double.isNaN(weight);
+      return !Double.isNaN(getWeight(jointIndex));
    }
 
    /**
@@ -276,9 +315,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return Weight.
     */
-   public double getWeight()
+   public double getWeight(int jointIndex)
    {
-      return weight;
+      return weights.get(jointIndex).doubleValue();
    }
 
    /**
@@ -286,9 +325,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return if there is a configuration gain available.
     */
-   public boolean hasConfigurationGain()
+   public boolean hasConfigurationGain(int jointIndex)
    {
-      return !Double.isNaN(configurationGain);
+      return !Double.isNaN(getConfigurationGain(jointIndex));
    }
 
    /**
@@ -296,9 +335,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return configuration gain.
     */
-   public double getConfigurationGain()
+   public double getConfigurationGain(int jointIndex)
    {
-      return configurationGain;
+      return configurationGains.get(jointIndex).doubleValue();
    }
 
    /**
@@ -306,9 +345,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return if there is a velocity gain available.
     */
-   public boolean hasVelocityGain()
+   public boolean hasVelocityGain(int jointIndex)
    {
-      return !Double.isNaN(velocityGain);
+      return !Double.isNaN(getVelocityGain(jointIndex));
    }
 
    /**
@@ -316,9 +355,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return velocity gain.
     */
-   public double getVelocityGain()
+   public double getVelocityGain(int jointIndex)
    {
-      return velocityGain;
+      return velocityGains.get(jointIndex).doubleValue();
    }
 
    /**
@@ -326,9 +365,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return if there is a max velocity available.
     */
-   public boolean hasMaxVelocity()
+   public boolean hasMaxVelocity(int jointIndex)
    {
-      return !Double.isNaN(maxVelocity);
+      return !Double.isNaN(getMaxVelocity(jointIndex));
    }
 
    /**
@@ -336,9 +375,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return max velocity.
     */
-   public double getMaxVelocity()
+   public double getMaxVelocity(int jointIndex)
    {
-      return maxVelocity;
+      return maxVelocities.get(jointIndex).doubleValue();
    }
 
    /**
@@ -346,9 +385,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return if there is a max acceleration available.
     */
-   public boolean hasMaxAcceleration()
+   public boolean hasMaxAcceleration(int jointIndex)
    {
-      return !Double.isNaN(maxAcceleration);
+      return !Double.isNaN(getMaxAcceleration(jointIndex));
    }
 
    /**
@@ -356,9 +395,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     *
     * @return max acceleration.
     */
-   public double getMaxAcceleration()
+   public double getMaxAcceleration(int jointIndex)
    {
-      return maxAcceleration;
+      return maxAccelerations.get(jointIndex).doubleValue();
    }
 
    /**
@@ -468,7 +507,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    public boolean hasNewPrivilegedConfigurationDefaultOption()
    {
-      return defaultOption != null;
+      return option != null;
    }
 
    /**
@@ -478,7 +517,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    public PrivilegedConfigurationOption getPrivilegedConfigurationDefaultOption()
    {
-      return defaultOption;
+      return option;
    }
 
    /**
@@ -488,7 +527,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    public boolean hasNewPrivilegedConfiguration(int jointIndex)
    {
-      return !Double.isNaN(privilegedOneDoFJointConfigurations.get(jointIndex));
+      return !Double.isNaN(privilegedOneDoFJointConfigurations.get(jointIndex).doubleValue());
    }
 
    /**
@@ -498,7 +537,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    public double getPrivilegedConfiguration(int jointIndex)
    {
-      return privilegedOneDoFJointConfigurations.get(jointIndex);
+      return privilegedOneDoFJointConfigurations.get(jointIndex).doubleValue();
    }
 
    public boolean hasNewPrivilegedConfigurationOption(int jointIndex)
