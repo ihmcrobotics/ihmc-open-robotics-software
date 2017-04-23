@@ -206,30 +206,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
-    * the vertex at the start of the edge when moving clockwise around the polygon. Will return false if the
-    * observer is on the edge.
-    */
-   public static boolean canObserverSeeEdge(int edgeIndex, double observerX, double observerY, ConvexPolygon2d polygon)
-   {
-      Point2DReadOnly vertexOne = polygon.getVertex(edgeIndex);
-      Point2DReadOnly vertexTwo = polygon.getNextVertex(edgeIndex);
-      double edgeVectorX = vertexTwo.getX() - vertexOne.getX();
-      double edgeVectorY = vertexTwo.getY() - vertexOne.getY();
-      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(observerX, observerY, vertexOne.getX(), vertexOne.getY(), edgeVectorX, edgeVectorY, true);
-   }
-
-   /**
-    * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
-    * the vertex at the start of the edge when moving clockwise around the polygon. Will return false if the
-    * observer is on the edge.
-    */
-   public static boolean canObserverSeeEdge(int edgeIndex, Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      return canObserverSeeEdge(edgeIndex, observer.getX(), observer.getY(), polygon);
-   }
-
-   /**
     * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
     * index that corresponds to the vertex on the specified side.
     */

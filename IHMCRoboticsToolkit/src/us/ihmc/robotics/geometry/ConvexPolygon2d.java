@@ -1088,6 +1088,11 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
          return new Point2D[]{startVertex, endVertex};
    }
 
+   public boolean canObserverSeeEdge(int edgeIndex, Point2DReadOnly observer)
+   {
+      return EuclidGeometryPolygonTools.canObserverSeeEdge(edgeIndex, observer, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
    public boolean pointIsOnPerimeter(Point2DReadOnly point)
    {
       return distance(point) < 1.0E-10;

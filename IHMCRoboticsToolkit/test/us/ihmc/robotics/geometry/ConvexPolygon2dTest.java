@@ -2302,14 +2302,6 @@ public class ConvexPolygon2dTest
          Point2DReadOnly point2 = combinedPolygons.getVertex(2);
          assertEqualsInAnyOrder(point0, point1, point2, pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, pointThatDefinesAnotherPolygon);
 
-         // combineDisjointPolygons
-         ConvexPolygon2dAndConnectingEdges combinedDisjointPolygons = ConvexPolygonTools.combineDisjointPolygons(polygonWithTwoPoints, polygonWithOnePointx);
-         assertEquals(3, combinedDisjointPolygons.getConvexPolygon2d().getNumberOfVertices());
-         point0 = combinedDisjointPolygons.getConvexPolygon2d().getVertex(0);
-         point1 = combinedDisjointPolygons.getConvexPolygon2d().getVertex(1);
-         point2 = combinedDisjointPolygons.getConvexPolygon2d().getVertex(2);
-         assertEqualsInAnyOrder(point0, point1, point2, pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, pointThatDefinesAnotherPolygon);
-
          // computeIntersectionOfPolygons
          ConvexPolygon2d polygonIntersection = new ConvexPolygon2d();
          boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(polygonWithTwoPoints, sparePolygon, polygonIntersection);
@@ -2357,6 +2349,75 @@ public class ConvexPolygon2dTest
          shrinkInto = ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithTwoPoints);
          assertEqualsInEitherOrder(shrinkInto.getVertex(0), shrinkInto.getVertex(1), pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testCanObserverSeeEdge1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(0.0, 0.0));
+      polygon.addVertex(new Point2D(1.0, 0.0));
+      polygon.addVertex(new Point2D(0.0, 1.0));
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.update();
+
+      // observer inside polygon can not see any outside edges
+      Point2D observer1 = new Point2D(0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+         assertFalse(polygon.canObserverSeeEdge(i, observer1));
+
+      // this observer should be able to see the edge starting at vertex (0.0, 0.0)
+      Point2D observer2 = new Point2D(-0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2D(0.0, 0.0), epsilon))
+            assertTrue(polygon.canObserverSeeEdge(i, observer2));
+         else
+            assertFalse(polygon.canObserverSeeEdge(i, observer2));
+      }
+
+      // this observer should be able to see the edges starting at vertex (0.0, 1.0) and at (1.0, 1.0)
+      Point2D observer3 = new Point2D(1.5, 1.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2D(0.0, 1.0), epsilon))
+            assertTrue(polygon.canObserverSeeEdge(i, observer3));
+         else if (polygon.getVertex(i).epsilonEquals(new Point2D(1.0, 1.0), epsilon))
+            assertTrue(polygon.canObserverSeeEdge(i, observer3));
+         else
+            assertFalse(polygon.canObserverSeeEdge(i, observer3));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testCanObserverSeeEdge2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(1.0, 0.0));
+      polygon.addVertex(new Point2D(0.0, 1.0));
+      polygon.update();
+
+      // should be able to see one edge
+      Point2D observer1 = new Point2D(0.0, 0.0);
+      boolean seeEdge1 = polygon.canObserverSeeEdge(0, observer1);
+      boolean seeEdge2 = polygon.canObserverSeeEdge(1, observer1);
+      assertTrue((seeEdge1 || seeEdge2) && !(seeEdge1 && seeEdge2));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testCanObserverSeeEdge3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.update();
+
+      Point2D observer1 = new Point2D(0.0, 0.0);
+      assertFalse(polygon.canObserverSeeEdge(0, observer1));
    }
 
    private void assertEqualsInEitherOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly actual0, Point2DReadOnly actual1)
