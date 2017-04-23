@@ -32,6 +32,11 @@ public class ToeOffManager
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
+   private static final double forwardSteppingThreshold = -0.05;
+   private static final double stepDownTooFarForToeOff = -0.10;
+   private static final double minimumAngleForSideStepping = 45.0;
+   private static final double extraCoMHeightWithToes = 0.08;
+
    private static final int largeGlitchWindowSize = 10;
    private static final int smallGlitchWindowSize = 2;
 
@@ -128,14 +133,16 @@ public class ToeOffManager
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
-      //TODO: extract param
-      extraCoMMaxHeightWithToes.set(0.08);
+      extraCoMMaxHeightWithToes.set(extraCoMHeightWithToes);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
       minStepHeightForToeOff.set(walkingControllerParameters.getMinStepHeightForToeOff());
 
-      useToeLineContactInSwing.set(true);
-      useToeLineContactInTransfer.set(false);
+      useToeLineContactInSwing.set(walkingControllerParameters.useToeOffLineContactInSwing());
+      useToeLineContactInTransfer.set(walkingControllerParameters.useToeOffLineContactInTransfer());
+
+      updateLineContactDuringToeOff.set(walkingControllerParameters.updateLineContactDuringToeOff());
+      updatePointContactDuringToeOff.set(walkingControllerParameters.updatePointContactDuringToeOff());
 
       footDefaultPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -439,7 +446,7 @@ public class ToeOffManager
    private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
    {
       OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
-      double lowerLimit = Math.max(anklePitch.getJointLimitLower() + 0.02, ankleLowerLimitToTriggerToeOff.getDoubleValue());
+      double lowerLimit = Math.max(anklePitch.getJointLimitLower() + 0.02, ankleLowerLimitToTriggerToeOff.getDoubleValue()); // todo extract variable
       isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit);
       isRearAnklePitchHittingLimitFilt.update();
 
@@ -472,8 +479,7 @@ public class ToeOffManager
       if (isNextStepHighEnough)
          return true;
 
-      //// TODO: 4/22/17  extract variable
-      boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
+      boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > forwardSteppingThreshold;
       if (!isForwardOrSideStepping)
          return false;
 
@@ -485,13 +491,12 @@ public class ToeOffManager
       }
       else
       {
-         //// TODO: 4/22/17  extract variable
-         boolean isNextStepTooLow = stepHeight < -0.10;
+         boolean isNextStepTooLow = stepHeight < stepDownTooFarForToeOff;
          if (isNextStepTooLow)
             return false;
       }
 
-      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(45.0);
+      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
       if (isSideStepping && !DO_TOEOFF_FOR_SIDE_STEPS)
          return false;
 
