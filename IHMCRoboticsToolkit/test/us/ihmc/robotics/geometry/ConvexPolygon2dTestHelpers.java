@@ -515,48 +515,6 @@ public class ConvexPolygon2dTestHelpers
 
    }
 
-   public static FrameLineSegment2d[] getNearestEdges(FramePoint2d testPoint, FrameConvexPolygon2d polygon)
-   {
-      polygon.checkReferenceFrameMatch(testPoint);
-
-      LineSegment2d[] edges = getNearestEdges(testPoint.getPoint(), polygon.getConvexPolygon2d());
-
-      FrameLineSegment2d[] ret = new FrameLineSegment2d[edges.length];
-
-      for (int i = 0; i < edges.length; i++)
-      {
-         ret[i] = new FrameLineSegment2d(polygon.getReferenceFrame(), edges[i]);
-      }
-
-      return ret;
-   }
-
-   public static LineSegment2d[] getNearestEdges(Point2D testPoint, ConvexPolygon2d polygon)
-   {
-      int[] tempTwoIndices = new int[2];
-
-      polygon.checkIfUpToDate();
-      if (!polygon.hasAtLeastTwoVertices())
-      {
-         return null;
-      }
-
-      int numberOfEdges = getNearestEdgeIndices(testPoint, tempTwoIndices, polygon);
-      if (numberOfEdges == 0)
-         return null;
-
-      LineSegment2d[] ret = new LineSegment2d[numberOfEdges];
-      for (int i = 0; i < numberOfEdges; i++)
-      {
-         int edgeIndex = tempTwoIndices[i];
-         LineSegment2d edge = new LineSegment2d(polygon.getVertex(edgeIndex), polygon.getNextVertex(edgeIndex));
-
-         ret[i] = edge;
-      }
-
-      return ret;
-   }
-
    private static int getNearestEdgeIndices(Point2D pointToProject, int[] indicesToPack, ConvexPolygon2d polygon)
    {
       int[] tempTwoIndices = new int[2];

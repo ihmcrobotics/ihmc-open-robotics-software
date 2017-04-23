@@ -945,22 +945,24 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 
    public boolean isPointInside(double x, double y)
    {
-      return ConvexPolygon2dCalculator.isPointInside(x, y, this);
+      return isPointInside(x, y, 0.0);
    }
 
    public boolean isPointInside(double x, double y, double epsilon)
    {
-      return ConvexPolygon2dCalculator.isPointInside(x, y, epsilon, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(x, y, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, epsilon);
    }
 
    public boolean isPointInside(Point2DReadOnly point)
    {
-      return ConvexPolygon2dCalculator.isPointInside(point, this);
+      return isPointInside(point, 0.0);
    }
 
    public boolean isPointInside(Point2DReadOnly point, double epsilon)
    {
-      return ConvexPolygon2dCalculator.isPointInside(point, epsilon, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered, epsilon);
    }
 
    public ConvexPolygon2d translateCopy(Tuple2DReadOnly translation)
