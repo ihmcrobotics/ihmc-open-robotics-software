@@ -1024,11 +1024,6 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
 
-   public int intersectionWithRay(Line2d ray, Point2DBasics intersectionToPack1, Point2DBasics intersectionToPack2)
-   {
-      return ConvexPolygon2dCalculator.intersectionWithRay(ray, intersectionToPack1, intersectionToPack2, this);
-   }
-
    public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2d ray)
    {
       checkIfUpToDate();
@@ -1150,24 +1145,34 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return distance(point) < 1.0E-10;
    }
 
+   public int intersectionWith(Line2d line, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints,
+                                                                                    numberOfVertices, clockwiseOrdered, firstIntersectionToPack,
+                                                                                    secondIntersectionToPack);
+   }
+
    public Point2D[] intersectionWith(Line2d line)
    {
-      return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints,
+                                                                                    numberOfVertices, clockwiseOrdered);
    }
 
-   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2DReadOnly point)
+   public int intersectionWithRay(Line2d ray, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
-      return ConvexPolygon2dCalculator.getClosestEdge(point, this, closestEdgeToPack);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints,
+                                                                                   numberOfVertices, clockwiseOrdered, firstIntersectionToPack,
+                                                                                   secondIntersectionToPack);
    }
 
-   public LineSegment2d getClosestEdgeCopy(Point2DReadOnly point)
+   public Point2D[] intersectionWithRay(Line2d ray)
    {
-      return ConvexPolygon2dCalculator.getClosestEdgeCopy(point, this);
-   }
-
-   public Point2D[] intersectionWithRayCopy(Line2d ray)
-   {
-      return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints,
+                                                                                   numberOfVertices, clockwiseOrdered);
    }
 
    public int intersectionWith(LineSegment2d lineSegment2d, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
@@ -1183,6 +1188,16 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       checkIfUpToDate();
       return EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(lineSegment2d.getFirstEndpoint(), lineSegment2d.getSecondEndpoint(),
                                                                                            clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
+   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2DReadOnly point)
+   {
+      return ConvexPolygon2dCalculator.getClosestEdge(point, this, closestEdgeToPack);
+   }
+
+   public LineSegment2d getClosestEdgeCopy(Point2DReadOnly point)
+   {
+      return ConvexPolygon2dCalculator.getClosestEdgeCopy(point, this);
    }
 
    // TODO: clean up garbage in / implement the following methods
