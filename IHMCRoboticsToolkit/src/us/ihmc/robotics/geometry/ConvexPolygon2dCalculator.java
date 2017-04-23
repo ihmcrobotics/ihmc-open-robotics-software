@@ -375,64 +375,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * An observer looking at the polygon from the outside will see two vertices at the outside edges of the
-    * polygon. This method packs the indices corresponding to these vertices. The vertex on the left from the
-    * observer point of view will be the first vertex packed. The argument vertexIndices is expected to
-    * have at least length two. If it is longer only the first two entries will be used.
-    */
-   public static boolean getLineOfSightVertexIndices(Point2DReadOnly observer, int[] vertexIndicesToPack, ConvexPolygon2d polygon)
-   {
-      if (!polygon.hasAtLeastOneVertex())
-         return false;
-
-      if (polygon.hasExactlyOneVertex())
-      {
-         if (isPointInside(observer, polygon))
-            return false;
-
-         vertexIndicesToPack[0] = 0;
-         vertexIndicesToPack[1] = 0;
-         return true;
-      }
-
-      if (polygon.hasExactlyTwoVertices())
-      {
-         if (isPointInside(observer, polygon))
-            return false;
-
-         vertexIndicesToPack[0] = getVertexOnLeft(0, 1, observer, polygon);
-         vertexIndicesToPack[1] = vertexIndicesToPack[0] == 0 ? 1 : 0;
-         return true;
-      }
-
-      int numberOfVertices = polygon.getNumberOfVertices();
-      boolean edgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(numberOfVertices - 1, observer, polygon);
-      int foundCorners = 0;
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         boolean nextEdgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer, polygon);
-         if (edgeVisible && !nextEdgeVisible)
-         {
-            vertexIndicesToPack[0] = i;
-            foundCorners++;
-         }
-         if (!edgeVisible && nextEdgeVisible)
-         {
-            vertexIndicesToPack[1] = i;
-            foundCorners++;
-         }
-
-         if (foundCorners == 2) break; // performance only
-         edgeVisible = nextEdgeVisible;
-      }
-
-      if (foundCorners != 2)
-         return false;
-
-      return true;
-   }
-
-   /**
     * Computes the points of intersection between the line segment and the polygon and packs them into pointToPack1
     * and pointToPack2. If there is only one intersection it will be stored in pointToPack1. Returns the number of
     * intersections found.
@@ -785,28 +727,6 @@ public class ConvexPolygon2dCalculator
       ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
       translatePolygon(translation, ret);
       return ret;
-   }
-
-   public static int[] getLineOfSightVertexIndicesCopy(Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      int[] ret = new int[2];
-      if (getLineOfSightVertexIndices(observer, ret, polygon))
-         return ret;
-      return null;
-   }
-
-   public static Point2D[] getLineOfSightVerticesCopy(Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      int[] indices = getLineOfSightVertexIndicesCopy(observer, polygon);
-      if (indices == null)
-         return null;
-
-      Point2D point1 = new Point2D(polygon.getVertex(indices[0]));
-      Point2D point2 = new Point2D(polygon.getVertex(indices[1]));
-
-      if (indices[0] == indices[1])
-         return new Point2D[] {point1};
-      return new Point2D[] {point1, point2};
    }
 
    public static LineSegment2d[] getIntersectingEdgesCopy(Line2d line, ConvexPolygon2d polygon)

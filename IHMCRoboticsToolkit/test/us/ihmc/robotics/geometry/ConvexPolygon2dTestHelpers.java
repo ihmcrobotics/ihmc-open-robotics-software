@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -89,45 +87,6 @@ public class ConvexPolygon2dTestHelpers
       }
 
       throw new RuntimeException("List doesn't contain " + framePointToTest);
-   }
-
-   public static void verifyOrthogonalProjection(FrameConvexPolygon2d polygon, FramePoint2d testPoint, FramePoint2d projectionPoint)
-   {
-      // If the test point is inside, then the projection should be itself:
-
-      if (polygon.isPointInside(testPoint))
-      {
-         assertNull(projectionPoint);
-//         double distance = testPoint.distance(projectionPoint);
-//         if (distance > 1e-7)
-//            throw new RuntimeException();
-
-         return;
-      }
-
-      // The projected point should be inside the polygon:
-
-      if (!polygon.isPointInside(projectionPoint, 1.0E-10))
-      {
-         throw new RuntimeException("ProjectionPoint is not inside the polygon!");
-      }
-
-      FrameLineSegment2d[] edges = getNearestEdges(testPoint, polygon);
-      int numEdges = edges.length;
-
-      // Verify that the projection with each edge is correct:
-      for (int i = 0; i < numEdges; i++)
-      {
-         FrameLineSegment2d edge = edges[i];
-
-         FramePoint2d verifyProjection = edge.orthogonalProjectionCopy(testPoint);
-
-         double distance = verifyProjection.distance(projectionPoint);
-
-         if (distance > 1e-7)
-            throw new RuntimeException("testPoint = " + testPoint + ", projectionPoint = " + projectionPoint + ", verifyProjection = " + verifyProjection);
-      }
-
    }
 
    public static ArrayList<FrameConvexPolygon2d> generateRandomPolygons(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin,
@@ -606,7 +565,9 @@ public class ConvexPolygon2dTestHelpers
          throw new RuntimeException("Expected array of length two");
 
       // First find the line of sight vertices. If inside the Polygon, then return null.
-      if (!ConvexPolygon2dCalculator.getLineOfSightVertexIndices(pointToProject, tempTwoIndices, polygon))
+      tempTwoIndices[0] = polygon.lineOfSightStartIndex(pointToProject);
+      tempTwoIndices[1] = polygon.lineOfSightEndIndex(pointToProject);
+      if (tempTwoIndices[0] == -1 || tempTwoIndices[1] == -1)
       {
          indicesToPack[0] = -1;
          indicesToPack[1] = -1;

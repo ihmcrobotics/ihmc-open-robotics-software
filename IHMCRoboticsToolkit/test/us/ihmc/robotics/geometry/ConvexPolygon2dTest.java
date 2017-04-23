@@ -775,157 +775,6 @@ public class ConvexPolygon2dTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testOrthogonalProjectionOne()
-   {
-      double[][] vertices = new double[][] {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}};
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
-
-      FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
-      ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
-
-      double[][] pointsAndSolutionToTest = new double[][] {{0.5, -0.5, 0.5, 0.0}, // Straight toward the heart.
-            {1.5, 0.5, 1.0, 0.5}, {0.5, 1.5, 0.5, 1.0}, {-0.5, 0.5, 0.0, 0.5}, {-0.5, -0.5, 0.0, 0.0}, // Diagonal to a vertex.
-            {1.5, -0.5, 1.0, 0.0}, {1.5, 1.5, 1.0, 1.0}, {-0.5, 1.5, 0.0, 1.0}, {0.0, -0.5, 0.0, 0.0}, // Along an edge vertex normal vector.
-            {-0.5, 0.0, 0.0, 0.0}, {1.0, -0.5, 1.0, 0.0}, {1.5, 0.0, 1.0, 0.0}, {1.0, 1.5, 1.0, 1.0}, {1.5, 1.0, 1.0, 1.0}, {0.0, 1.5, 0.0, 1.0},
-            {-0.5, 1.0, 0.0, 1.0}, {0.5, 0.5, 0.5, 0.5}, // inside the Polygon. Should return the testPoint itself.
-            {0.25, 0.25, 0.25, 0.25}, {0.65, 0.9, 0.65, 0.9},};
-
-      ArrayList<FrameLineSegment2d> projections = new ArrayList<FrameLineSegment2d>();
-      ArrayList<FramePoint2d> notOutsidePoints = new ArrayList<FramePoint2d>();
-
-      for (double[] pointAndSolutionToTest : pointsAndSolutionToTest)
-      {
-         FramePoint2d pointToTest2d = new FramePoint2d(zUpFrame, pointAndSolutionToTest[0], pointAndSolutionToTest[1]);
-         FramePoint2d expectedSolution2d = new FramePoint2d(zUpFrame, pointAndSolutionToTest[2], pointAndSolutionToTest[3]);
-
-         FramePoint2d closestPoint = polygon.orthogonalProjectionCopy(pointToTest2d);
-         if (polygon.isPointInside(pointToTest2d))
-         {
-            assertNull(closestPoint);
-         }
-         else
-         {
-            ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, pointToTest2d, closestPoint);
-            
-            if (closestPoint.epsilonEquals(pointToTest2d, 1e-7))
-            {
-               notOutsidePoints.add(pointToTest2d);
-               if (!polygon.isPointInside(pointToTest2d))
-                  throw new RuntimeException("Point is outside, yet projection was itself!!");
-            }
-            
-            else
-            {
-               projections.add(new FrameLineSegment2d(pointToTest2d, closestPoint));
-               
-               // verify something!
-               if (polygon.isPointInside(pointToTest2d))
-                  throw new RuntimeException("Point is inside, yet found a projection!");
-               verifyEpsilonEquals(closestPoint, expectedSolution2d);
-               
-            }
-         }
-      }
-
-      if (PLOT_RESULTS)
-      {
-         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-1.0, 2.0, -1.0, 2.0);
-
-         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-         plotter.setPolygonToCheckInside(polygon);
-
-         plotter.addFrameLineSegments2d(projections, Color.green);
-
-         testFrame.addTestPoints(notOutsidePoints);
-         waitForButtonOrPause(testFrame);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test //(timeout = 30000)
-   public void testOrthogonalProjectionThree()
-   {
-      Random random = new Random(1776L);
-
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
-      double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
-
-      ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 20);
-
-      FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(points);
-      ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
-
-      // Generate random points and test the projectsions:
-
-      int numberOfTests = 1000;
-
-      ArrayList<FramePoint2d> originalPoints = new ArrayList<FramePoint2d>();
-      ArrayList<FramePoint2d> projectedPoints = new ArrayList<FramePoint2d>();
-      ArrayList<FramePoint2d> projectedPointsThatAreStillOutside = new ArrayList<FramePoint2d>();
-
-      ArrayList<FrameLineSegment2d> goodProjectionSegments = new ArrayList<FrameLineSegment2d>();
-      ArrayList<FrameLineSegment2d> badProjectionSegments = new ArrayList<FrameLineSegment2d>();
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         FramePoint2d testPoint = FramePoint2d.generateRandomFramePoint2d(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
-         originalPoints.add(testPoint);
-
-         FramePoint2d projectedPoint = polygon.orthogonalProjectionCopy(testPoint);
-         ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, testPoint, projectedPoint);
-
-         if (polygon.isPointInside(testPoint))
-            continue;
-
-         boolean isInside = polygon.isPointInside(projectedPoint, 1.0E-10);
-
-         if (isInside)
-         {
-            projectedPoints.add(projectedPoint);
-
-            if (testPoint.distance(projectedPoint) > 1e-7)
-            {
-               FrameLineSegment2d goodSegment = new FrameLineSegment2d(testPoint, projectedPoint);
-               goodProjectionSegments.add(goodSegment);
-            }
-         }
-         else
-         {
-            projectedPointsThatAreStillOutside.add(projectedPoint);
-
-            if (testPoint.distance(projectedPoint) > 1e-7)
-            {
-               FrameLineSegment2d badSegment = new FrameLineSegment2d(testPoint, projectedPoint);
-               badProjectionSegments.add(badSegment);
-            }
-         }
-      }
-
-      if (!projectedPointsThatAreStillOutside.isEmpty())
-         throw new RuntimeException("Some projected points are still on the outside of the polygon!");
-
-      if (PLOT_RESULTS)
-      {
-         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
-
-         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-         plotter.setPolygonToCheckInside(polygon);
-         plotter.setDrawPointsLarge();
-
-         plotter.addFramePoints2d(originalPoints, Color.blue);
-         plotter.addFramePoints2d(projectedPoints, Color.green);
-         plotter.addFramePoints2d(projectedPointsThatAreStillOutside, Color.red);
-
-         plotter.addFrameLineSegments2d(goodProjectionSegments, Color.green);
-         plotter.addFrameLineSegments2d(badProjectionSegments, Color.red);
-
-         waitForButtonOrPause(testFrame);
-      }
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testOrthogonalProjection1()
    {
@@ -2057,8 +1906,8 @@ public class ConvexPolygon2dTest
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertexCCW(0).equals(pointThatDefinesThePolygon));
          assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithOnePoint) == null);
-         assertEquals(1, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint).length);
-         assertTrue(ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
+         assertTrue(polygonWithOnePoint.getVertex(polygonWithOnePoint.lineOfSightStartIndex(arbitraryPoint0)).equals(pointThatDefinesThePolygon));
+         assertTrue(polygonWithOnePoint.getVertex(polygonWithOnePoint.lineOfSightEndIndex(arbitraryPoint0)).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
          assertTrue(ConvexPolygon2dTestHelpers.getNearestEdges(arbitraryPoint0, polygonWithOnePoint) == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
@@ -2256,8 +2105,9 @@ public class ConvexPolygon2dTest
                                    pointThatDefinesThePolygon1);
 
          // getLineOfSightVertices
-         assertEquals(2, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithTwoPoints).length);
-         Point2D[] lineOfSightPoints = ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithTwoPoints);
+         Point2DReadOnly[] lineOfSightPoints = new Point2D[2];
+         lineOfSightPoints[0] = polygonWithTwoPoints.getVertex(polygonWithTwoPoints.lineOfSightStartIndex(arbitraryPoint0));
+         lineOfSightPoints[1] = polygonWithTwoPoints.getVertex(polygonWithTwoPoints.lineOfSightEndIndex(arbitraryPoint0));
          assertEqualsInEitherOrder(lineOfSightPoints[0], lineOfSightPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // getNearestEdges
