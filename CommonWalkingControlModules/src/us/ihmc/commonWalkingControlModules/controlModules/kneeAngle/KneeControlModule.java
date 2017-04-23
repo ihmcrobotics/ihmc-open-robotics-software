@@ -29,6 +29,8 @@ public class KneeControlModule
       STRAIGHTEN_TO_STRAIGHT, STRAIGHT, STRAIGHTEN_TO_CONTROLLABLE, BENT, CONTROLLABLE
    }
 
+   private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = true;
+
    private final YoVariableRegistry registry;
 
    private final EnumYoVariable<KneeControlType> requestedState;
@@ -256,10 +258,17 @@ public class KneeControlModule
          double estimatedDT = estimateDT();
          double currentPosition = kneeJoint.getQ();
 
-         if (currentPosition > startingPosition) // the knee is bending
-            dwellTime += estimatedDT;
+         if (ONLY_MOVE_PRIV_POS_IF_NOT_BENDING)
+         {
+            if (currentPosition > startingPosition) // the knee is bending
+               dwellTime += estimatedDT;
+            else
+               desiredPrivilegedPosition -= estimatedDT * straighteningSpeed;
+         }
          else
+         {
             desiredPrivilegedPosition -= estimatedDT * straighteningSpeed;
+         }
 
          /*
          double absoluteError = Math.abs(kneeJoint.getQ() - desiredPrivilegedPosition) / (2.0 * Math.PI);
@@ -267,10 +276,10 @@ public class KneeControlModule
          */
 
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredPrivilegedPosition);
-         privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
-         privilegedConfigurationCommand.setConfigurationGain(straightPrivPositionGain.getDoubleValue());
-         privilegedConfigurationCommand.setVelocityGain(straightPrivVelocityGain.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(0, straightPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(0, straightPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(0, straightPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(0, privMaxAccel.getDoubleValue());
 
 
          if (isDone())
@@ -338,10 +347,10 @@ public class KneeControlModule
          */
 
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue());
-         privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
-         privilegedConfigurationCommand.setConfigurationGain(straightPrivPositionGain.getDoubleValue());
-         privilegedConfigurationCommand.setVelocityGain(straightPrivVelocityGain.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(0, straightPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(0, straightPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(0, straightPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(0, privMaxAccel.getDoubleValue());
 
          jointspaceFeedbackControlCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue(), 0.0, 0.0);
          jointspaceFeedbackControlCommand.setGains(jointspaceGains);
@@ -387,10 +396,10 @@ public class KneeControlModule
       public void doAction()
       {
          privilegedConfigurationCommand.setOneDoFJoint(0, PrivilegedConfigurationOption.AT_MID_RANGE);
-         privilegedConfigurationCommand.setWeight(bentPrivWeight.getDoubleValue());
-         privilegedConfigurationCommand.setConfigurationGain(bentPrivPositionGain.getDoubleValue());
-         privilegedConfigurationCommand.setVelocityGain(bentPrivVelocityGain.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(0, bentPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(0, bentPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(0, bentPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(0, privMaxAccel.getDoubleValue());
       }
 
       @Override
@@ -423,10 +432,10 @@ public class KneeControlModule
       public void doAction()
       {
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngle.getDoubleValue());
-         privilegedConfigurationCommand.setWeight(bentPrivWeight.getDoubleValue());
-         privilegedConfigurationCommand.setConfigurationGain(bentPrivPositionGain.getDoubleValue());
-         privilegedConfigurationCommand.setVelocityGain(bentPrivVelocityGain.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(0, bentPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(0, bentPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(0, bentPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(0, privMaxAccel.getDoubleValue());
       }
 
       @Override
