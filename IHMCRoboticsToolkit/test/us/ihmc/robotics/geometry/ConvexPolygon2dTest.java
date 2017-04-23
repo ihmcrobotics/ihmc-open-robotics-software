@@ -2420,6 +2420,301 @@ public class ConvexPolygon2dTest
       assertFalse(polygon.canObserverSeeEdge(0, observer1));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test//(timeout = 3000)
+   public void testIntersectionWithLineSegment1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(-1.0, -1.0));
+      polygon.addVertex(new Point2D(1.0, -1.0));
+      polygon.addVertex(new Point2D(-1.0, 1.0));
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.update();
+
+      Point2D result1 = new Point2D();
+      Point2D result2 = new Point2D();
+
+      LineSegment2d segment1 = new LineSegment2d(new Point2D(0.0, 0.0), new Point2D(2.0, 0.0));
+      Point2D[] expected1 = new Point2D[] {new Point2D(1.0, 0.0)};
+      assertPointsEqual(expected1, polygon.intersectionWith(segment1), false);
+      assertTrue(polygon.intersectionWith(segment1, result1, result2) == 1);
+
+      LineSegment2d segment2 = new LineSegment2d(new Point2D(-2.0, 0.0), new Point2D(2.0, 0.0));
+      Point2D[] expected2 = new Point2D[] {new Point2D(-1.0, 0.0), new Point2D(1.0, 0.0)};
+      assertPointsEqual(expected2, polygon.intersectionWith(segment2), false);
+      assertTrue(polygon.intersectionWith(segment2, result1, result2) == 2);
+
+      LineSegment2d segment3 = new LineSegment2d(new Point2D(-0.5, 0.0), new Point2D(0.5, 0.0));
+      Point2D[] expected3 = null;
+      assertPointsEqual(expected3, polygon.intersectionWith(segment3), false);
+      assertTrue(polygon.intersectionWith(segment3, result1, result2) == 0);
+
+      LineSegment2d segment4 = new LineSegment2d(new Point2D(-3.5, 0.0), new Point2D(-1.5, 0.0));
+      Point2D[] expected4 = null;
+      assertPointsEqual(expected4, polygon.intersectionWith(segment4), false);
+      assertTrue(polygon.intersectionWith(segment4, result1, result2) == 0);
+
+      LineSegment2d segment5 = new LineSegment2d(new Point2D(-1.5, 0.0), new Point2D(0.0, 1.5));
+      Point2D[] expected5 = new Point2D[] {new Point2D(-1.0, 0.5), new Point2D(-0.5, 1.0)};
+      assertPointsEqual(expected5, polygon.intersectionWith(segment5), false);
+      assertTrue(polygon.intersectionWith(segment5, result1, result2) == 2);
+
+      LineSegment2d segment6 = new LineSegment2d(new Point2D(-1.0, 0.5), new Point2D(-0.5, 1.0));
+      Point2D[] expected6 = new Point2D[] {new Point2D(-1.0, 0.5), new Point2D(-0.5, 1.0)};
+      assertPointsEqual(expected6, polygon.intersectionWith(segment6), false);
+      assertTrue(polygon.intersectionWith(segment6, result1, result2) == 2);
+
+      LineSegment2d segment7 = new LineSegment2d(new Point2D(-1.5, 1.0), new Point2D(1.5, 1.0));
+      Point2D[] expected7 = new Point2D[] {new Point2D(-1.0, 1.0), new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected7, polygon.intersectionWith(segment7), false);
+      assertTrue(polygon.intersectionWith(segment7, result1, result2) == 2);
+
+      LineSegment2d segment8 = new LineSegment2d(new Point2D(-2.5, 1.0), new Point2D(-1.5, 1.0));
+      Point2D[] expected8 = null;
+      assertPointsEqual(expected8, polygon.intersectionWith(segment8), false);
+      assertTrue(polygon.intersectionWith(segment8, result1, result2) == 0);
+
+      LineSegment2d segment9 = new LineSegment2d(new Point2D(1.0, 0.0), new Point2D(1.0, 2.0));
+      Point2D[] expected9 = new Point2D[] {new Point2D(1.0, 0.0), new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected9, polygon.intersectionWith(segment9), false);
+      assertTrue(polygon.intersectionWith(segment9, result1, result2) == 2);
+
+      LineSegment2d segment10 = new LineSegment2d(new Point2D(1.0, 0.0), new Point2D(1.0, 0.5));
+      Point2D[] expected10 = new Point2D[] {new Point2D(1.0, 0.0), new Point2D(1.0, 0.5)};
+      assertPointsEqual(expected10, polygon.intersectionWith(segment10), false);
+      result1.set(expected10[0]);
+      result2.set(expected10[0]);
+      assertTrue(polygon.intersectionWith(segment10, result1, result2) == 2);
+      result1.set(expected10[1]);
+      result2.set(expected10[1]);
+      assertTrue(polygon.intersectionWith(segment10, result1, result2) == 2);
+
+      LineSegment2d segment11 = new LineSegment2d(new Point2D(-0.5, 1.0), new Point2D(-1.0, 0.5));
+      Point2D[] expected11 = new Point2D[] {new Point2D(-1.0, 0.5), new Point2D(-0.5, 1.0)};
+      assertPointsEqual(expected11, polygon.intersectionWith(segment11), false);
+      assertTrue(polygon.intersectionWith(segment11, result1, result2) == 2);
+
+      LineSegment2d segment12 = new LineSegment2d(new Point2D(-1.5, 0.5), new Point2D(1.5, 0.5));
+      Point2D[] expected12 = new Point2D[] {new Point2D(-1.0, 0.5), new Point2D(1.0, 0.5)};
+      assertPointsEqual(expected12, polygon.intersectionWith(segment12), false);
+      result1.set(expected12[0]);
+      result2.set(expected12[0]);
+      assertTrue(polygon.intersectionWith(segment12, result1, result2) == 2);
+      result1.set(expected12[1]);
+      result2.set(expected12[1]);
+      assertTrue(polygon.intersectionWith(segment12, result1, result2) == 2);
+
+      LineSegment2d segment13 = new LineSegment2d(new Point2D(0.0, -1.5), new Point2D(1.5, -1.5));
+      Point2D[] expected13 = null;
+      assertPointsEqual(expected13, polygon.intersectionWith(segment13), false);
+      assertTrue(polygon.intersectionWith(segment13, result1, result2) == 0);
+
+      LineSegment2d segment14 = new LineSegment2d(new Point2D(0.0, 1.5), new Point2D(1.5, 1.5));
+      Point2D[] expected14 = null;
+      assertPointsEqual(expected14, polygon.intersectionWith(segment14), false);
+      assertTrue(polygon.intersectionWith(segment14, result1, result2) == 0);
+
+      LineSegment2d segment15 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(0.5, 1.0));
+      Point2D[] expected15 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(0.5, 1.0)};
+      assertPointsEqual(expected15, polygon.intersectionWith(segment15), false);
+      assertTrue(polygon.intersectionWith(segment15, result1, result2) == 2);
+
+      LineSegment2d segment16 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(1.0, 0.5));
+      Point2D[] expected16 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(1.0, 0.5)};
+      assertPointsEqual(expected16, polygon.intersectionWith(segment16), false);
+      assertTrue(polygon.intersectionWith(segment16, result1, result2) == 2);
+
+      LineSegment2d segment17 = new LineSegment2d(new Point2D(0.5, 1.0), new Point2D(1.0, 1.0));
+      Point2D[] expected17 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(0.5, 1.0)};
+      assertPointsEqual(expected17, polygon.intersectionWith(segment17), false);
+      assertTrue(polygon.intersectionWith(segment17, result1, result2) == 2);
+
+      LineSegment2d segment18 = new LineSegment2d(new Point2D(1.0, 0.5), new Point2D(1.0, 1.0));
+      Point2D[] expected18 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(1.0, 0.5)};
+      assertPointsEqual(expected18, polygon.intersectionWith(segment18), false);
+      assertTrue(polygon.intersectionWith(segment18, result1, result2) == 2);
+
+      LineSegment2d segment19 = new LineSegment2d(new Point2D(-1.5, 1.0), new Point2D(-0.5, 1.0));
+      Point2D[] expected19 = new Point2D[] {new Point2D(-1.0, 1.0), new Point2D(-0.5, 1.0)};
+      assertPointsEqual(expected19, polygon.intersectionWith(segment19), false);
+      assertTrue(polygon.intersectionWith(segment19, result1, result2) == 2);
+
+      LineSegment2d segment20 = new LineSegment2d(new Point2D(-1.5, 1.0), new Point2D(-1.0, 1.0));
+      Point2D[] expected20 = new Point2D[] {new Point2D(-1.0, 1.0)};
+      assertPointsEqual(expected20, polygon.intersectionWith(segment20), false);
+      assertTrue(polygon.intersectionWith(segment20, result1, result2) == 1);
+
+      LineSegment2d segment21 = new LineSegment2d(new Point2D(-1.0, 1.0), new Point2D(-1.5, 1.0));
+      Point2D[] expected21 = new Point2D[] {new Point2D(-1.0, 1.0)};
+      assertPointsEqual(expected21, polygon.intersectionWith(segment21), false);
+      assertTrue(polygon.intersectionWith(segment21, result1, result2) == 1);
+
+      LineSegment2d segment22 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(1.5, 1.0));
+      Point2D[] expected22 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected22, polygon.intersectionWith(segment22), false);
+      assertTrue(polygon.intersectionWith(segment22, result1, result2) == 1);
+
+      LineSegment2d segment23 = new LineSegment2d(new Point2D(1.5, 1.0), new Point2D(1.0, 1.0));
+      Point2D[] expected23 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected23, polygon.intersectionWith(segment23), false);
+      assertTrue(polygon.intersectionWith(segment23, result1, result2) == 1);
+
+      LineSegment2d segment24 = new LineSegment2d(new Point2D(1.5, 1.5), new Point2D(1.0, 1.0));
+      Point2D[] expected24 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected24, polygon.intersectionWith(segment24), false);
+      assertTrue(polygon.intersectionWith(segment24, result1, result2) == 1);
+
+      LineSegment2d segment25 = new LineSegment2d(new Point2D(0.5, 1.5), new Point2D(1.0, 1.0));
+      Point2D[] expected25 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected25, polygon.intersectionWith(segment25), false);
+      result1.set(expected25[0]);
+      result2.set(expected25[0]);
+      assertTrue(polygon.intersectionWith(segment25, result1, result2) == 1);
+
+      LineSegment2d segment26 = new LineSegment2d(new Point2D(-1.0, -1.0), new Point2D(0.8, 1.0));
+      Point2D[] expected26 = new Point2D[] {new Point2D(0.8, 1.0), new Point2D(-1.0, -1.0)};
+      assertPointsEqual(expected26, polygon.intersectionWith(segment26), false);
+      result1.set(expected26[0]);
+      result2.set(expected26[0]);
+      assertTrue(polygon.intersectionWith(segment26, result1, result2) == 2);
+      result1.set(expected26[1]);
+      result2.set(expected26[1]);
+      assertTrue(polygon.intersectionWith(segment26, result1, result2) == 2);
+
+      LineSegment2d segment27 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(-1.0, -1.0));
+      Point2D[] expected27 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(-1.0, -1.0)};
+      assertPointsEqual(expected27, polygon.intersectionWith(segment27), false);
+      result1.set(expected27[0]);
+      result2.set(expected27[0]);
+      assertTrue(polygon.intersectionWith(segment27, result1, result2) == 2);
+      result1.set(expected27[1]);
+      result2.set(expected27[1]);
+      assertTrue(polygon.intersectionWith(segment27, result1, result2) == 2);
+
+      LineSegment2d segment28 = new LineSegment2d(new Point2D(1.0, -0.5), new Point2D(1.0, 0.0));
+      Point2D[] expected28 = new Point2D[] {new Point2D(1.0, 0.0), new Point2D(1.0, -0.5)};
+      assertPointsEqual(expected28, polygon.intersectionWith(segment28), false);
+      result1.set(expected28[0]);
+      result2.set(expected28[0]);
+      assertTrue(polygon.intersectionWith(segment28, result1, result2) == 2);
+      result1.set(expected28[1]);
+      result2.set(expected28[1]);
+      assertTrue(polygon.intersectionWith(segment28, result1, result2) == 2);
+
+      LineSegment2d segment29 = new LineSegment2d(new Point2D(1.0, -1.5), new Point2D(1.0, 0.5));
+      Point2D[] expected29 = new Point2D[] {new Point2D(1.0, 0.5), new Point2D(1.0, -1.0)};
+      assertPointsEqual(expected29, polygon.intersectionWith(segment29), false);
+      result1.set(expected29[0]);
+      result2.set(expected29[0]);
+      assertTrue(polygon.intersectionWith(segment29, result1, result2) == 2);
+      result1.set(expected29[1]);
+      result2.set(expected29[1]);
+      assertTrue(polygon.intersectionWith(segment29, result1, result2) == 2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLineSegment2()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+
+      Point2D result1 = new Point2D();
+      Point2D result2 = new Point2D();
+
+      LineSegment2d segment1 = new LineSegment2d();
+      Point2D[] expected1 = null;
+      assertPointsEqual(expected1, polygon.intersectionWith(segment1), false);
+      assertTrue(polygon.intersectionWith(segment1, result1, result2) == 0);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLineSegment3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.update();
+
+      Point2D result1 = new Point2D();
+      Point2D result2 = new Point2D();
+
+      LineSegment2d segment1 = new LineSegment2d(new Point2D(1.0, 0.0), new Point2D(2.0, 0.0));
+      Point2D[] expected1 = null;
+      assertPointsEqual(expected1, polygon.intersectionWith(segment1), false);
+      assertTrue(polygon.intersectionWith(segment1, result1, result2) == 0);
+
+      LineSegment2d segment2 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(2.0, 0.0));
+      Point2D[] expected2 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected2, polygon.intersectionWith(segment2), false);
+      assertTrue(polygon.intersectionWith(segment2, result1, result2) == 1);
+
+      LineSegment2d segment3 = new LineSegment2d(new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
+      Point2D[] expected3 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected3, polygon.intersectionWith(segment3), false);
+      assertTrue(polygon.intersectionWith(segment3, result1, result2) == 1);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLineSegment4()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(1.0, 1.0));
+      polygon.addVertex(new Point2D(3.0, 3.0));
+      polygon.update();
+
+      Point2D result1 = new Point2D();
+      Point2D result2 = new Point2D();
+
+      LineSegment2d segment1 = new LineSegment2d(new Point2D(0.0, 0.0), new Point2D(3.0, 3.0));
+      Point2D[] expected1 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(3.0, 3.0)};
+      assertPointsEqual(expected1, polygon.intersectionWith(segment1), false);
+      assertTrue(polygon.intersectionWith(segment1, result1, result2) == 2);
+
+      LineSegment2d segment2 = new LineSegment2d(new Point2D(1.5, 1.5), new Point2D(2.5, 2.5));
+      Point2D[] expected2 = new Point2D[] {new Point2D(1.5, 1.5), new Point2D(2.5, 2.5)};
+      assertPointsEqual(expected2, polygon.intersectionWith(segment2), false);
+      assertTrue(polygon.intersectionWith(segment2, result1, result2) == 2);
+
+      LineSegment2d segment3 = new LineSegment2d(new Point2D(0.5, 0.5), new Point2D(3.5, 3.5));
+      Point2D[] expected3 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(3.0, 3.0)};
+      assertPointsEqual(expected3, polygon.intersectionWith(segment3), false);
+      assertTrue(polygon.intersectionWith(segment3, result1, result2) == 2);
+
+      LineSegment2d segment4 = new LineSegment2d(new Point2D(1.0, 1.0), new Point2D(3.0, 3.0));
+      Point2D[] expected4 = new Point2D[] {new Point2D(1.0, 1.0), new Point2D(3.0, 3.0)};
+      assertPointsEqual(expected4, polygon.intersectionWith(segment4), false);
+      assertTrue(polygon.intersectionWith(segment4, result1, result2) == 2);
+
+      LineSegment2d segment5 = new LineSegment2d(new Point2D(0.0, 0.0), new Point2D(0.5, 0.5));
+      Point2D[] expected5 = null;
+      assertPointsEqual(expected5, polygon.intersectionWith(segment5), false);
+      assertTrue(polygon.intersectionWith(segment5, result1, result2) == 0);
+
+      LineSegment2d segment6 = new LineSegment2d(new Point2D(0.5, 0.5), new Point2D(1.0, 1.0));
+      Point2D[] expected6 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected6, polygon.intersectionWith(segment6), false);
+      assertTrue(polygon.intersectionWith(segment6, result1, result2) == 1);
+
+      LineSegment2d segment7 = new LineSegment2d(new Point2D(2.0, 0.5), new Point2D(2.0, 5.0));
+      Point2D[] expected7 = new Point2D[] {new Point2D(2.0, 2.0)};
+      assertPointsEqual(expected7, polygon.intersectionWith(segment7), false);
+      assertTrue(polygon.intersectionWith(segment7, result1, result2) == 1);
+
+      LineSegment2d segment8 = new LineSegment2d(new Point2D(2.0, 0.5), new Point2D(1.0, 1.0));
+      Point2D[] expected8 = new Point2D[] {new Point2D(1.0, 1.0)};
+      assertPointsEqual(expected8, polygon.intersectionWith(segment8), false);
+      assertTrue(polygon.intersectionWith(segment8, result1, result2) == 1);
+
+      LineSegment2d segment9 = new LineSegment2d(new Point2D(4.0, 4.0), new Point2D(2.0, 2.0));
+      Point2D[] expected9 = new Point2D[] {new Point2D(3.0, 3.0), new Point2D(2.0, 2.0)};
+      assertPointsEqual(expected9, polygon.intersectionWith(segment9), false);
+      assertTrue(polygon.intersectionWith(segment9, result1, result2) == 2);
+   }
+
    private void assertEqualsInEitherOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly actual0, Point2DReadOnly actual1)
    {
       if (expected0.epsilonEquals(actual0, epsilon))
@@ -2475,6 +2770,34 @@ public class ConvexPolygon2dTest
       }
       catch (InterruptedException ex)
       {
+      }
+   }
+
+   private static void assertPointsEqual(Point2D[] expected, Point2D[] actual, boolean enforceOrder)
+   {
+      if (expected == null || actual == null)
+      {
+         assertTrue("Expected did not equal actual. One of them was null.", expected == actual);
+         return;
+      }
+
+      assertEquals("Array lengths are not equal.", expected.length, actual.length);
+      int points = expected.length;
+      for (int i = 0; i < points; i++)
+      {
+         if (enforceOrder)
+         {
+            assertPointsEqual(expected[i], actual[i]);
+            continue;
+         }
+
+         boolean foundPoint = false;
+         for (int j = 0; j < points; j++)
+         {
+            if (expected[i].epsilonEquals(actual[j], epsilon))
+               foundPoint = true;
+         }
+         assertTrue("Did not find point.", foundPoint);
       }
    }
 
