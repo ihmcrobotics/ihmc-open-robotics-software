@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -50,8 +49,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final YoOrientationPIDGainsInterface orientationGains;
-   private final YoPositionPIDGainsInterface positionGains;
+   private YoOrientationPIDGainsInterface orientationGains = null;
+   private YoPositionPIDGainsInterface positionGains = null;
+
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
@@ -113,9 +113,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
-
-      orientationGains = new YoSymmetricSE3PIDGains(prefix + "OrientationGains", registry);
-      positionGains = new YoSymmetricSE3PIDGains(prefix + "PositionGains", registry);
 
       numberOfPointsInQueue = new IntegerYoVariable(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new IntegerYoVariable(prefix + "NumberOfPointsInGenerator", registry);
@@ -215,25 +212,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void setGains(YoOrientationPIDGainsInterface orientationGains, YoPositionPIDGainsInterface positionGains)
    {
-      if (orientationGains != null)
-      {
-         this.orientationGains.set(orientationGains);
-         hasOrientaionGains.set(true);
-      }
-      else
-      {
-         hasOrientaionGains.set(false);
-      }
-
-      if (positionGains != null)
-      {
-         this.positionGains.set(positionGains);
-         hasPositionGains.set(true);
-      }
-      else
-      {
-         hasPositionGains.set(false);
-      }
+      this.orientationGains = orientationGains;
+      this.positionGains = positionGains;
+      hasOrientaionGains.set(orientationGains != null);
+      hasPositionGains.set(positionGains != null);
    }
 
    @Override
@@ -595,6 +577,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
+   @Override
    public void clear()
    {
       orientationTrajectoryGenerator.clear();
