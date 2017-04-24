@@ -64,6 +64,7 @@ public class PelvisOrientationManager
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationOffsetTrajectoryGenerator;
 
+   private final YoFrameOrientation desiredPelvisOffsetWhileWalking = new YoFrameOrientation("desiredPelvisOffsetWhileWalking", worldFrame, registry);
    private final YoFrameQuaternion desiredPelvisQuaternionWithOffset = new YoFrameQuaternion("desiredPelvisOrientationWithOffset", worldFrame, registry);
    private final YoFrameOrientation desiredPelvisOrientationWithOffset = new YoFrameOrientation("desiredPelvisOrientationWithOffset", worldFrame, registry);
 
@@ -92,13 +93,17 @@ public class PelvisOrientationManager
    private final LongYoVariable numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisOrientationTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisOrientationTrajectoryCommand.class);
 
+   private final BooleanYoVariable isStanding = new BooleanYoVariable("pelvisIsStanding", registry);
+   private final BooleanYoVariable isInTransfer = new BooleanYoVariable("pelvisInInTransfer", registry);
+
    private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
    private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
 
    private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
    private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
-   private final DoubleYoVariable pelvisPitchOffset = new DoubleYoVariable("pelvisPitchOffset", registry);
+
+   private RobotSide supportSide;
 
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
@@ -278,15 +283,22 @@ public class PelvisOrientationManager
 
       if (addPelvisOffsetsBasedOnStep.getBooleanValue())
       {
-         double desiredYaw = tempOrientation.getYaw();
-         double desiredPitch = tempOrientation.getPitch();
-         double desiredRoll = tempOrientation.getRoll();
-
-         desiredPitch += pelvisPitchOffset.getDoubleValue();
-
-         tempOrientation.setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
-
+         computePelvisOffsetWhileWalking();
       }
+      else
+      {
+         desiredPelvisOffsetWhileWalking.setToZero();
+      }
+
+      double desiredYaw = tempOrientation.getYaw();
+      double desiredPitch = tempOrientation.getPitch();
+      double desiredRoll = tempOrientation.getRoll();
+
+      desiredYaw += desiredPelvisOffsetWhileWalking.getYaw().getDoubleValue();
+      desiredPitch += desiredPelvisOffsetWhileWalking.getPitch().getDoubleValue();
+      desiredRoll += desiredPelvisOffsetWhileWalking.getRoll().getDoubleValue();
+
+      tempOrientation.setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
 
       desiredPelvisQuaternionWithOffset.set(tempOrientation);
       desiredPelvisOrientationWithOffset.set(tempOrientation);
@@ -322,8 +334,6 @@ public class PelvisOrientationManager
       tempOrientation.setToZero(desiredPelvisFrame);
       orientationOffsetTrajectoryGenerator.appendWaypoint(trajectoryTime, tempOrientation, tempAngularVelocity);
       orientationOffsetTrajectoryGenerator.initialize();
-
-      pelvisPitchOffset.set(0.0);
 
       isTrajectoryStopped.set(false);
    }
@@ -484,8 +494,6 @@ public class PelvisOrientationManager
       desiredPelvisQuaternion.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
 
-      pelvisPitchOffset.set(0.0);
-
       resetOrientationOffset();
       initialize(trajectoryFrame);
    }
@@ -498,8 +506,6 @@ public class PelvisOrientationManager
       finalPelvisOrientation.set(tempOrientation);
       desiredPelvisQuaternion.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
-
-      pelvisPitchOffset.set(0.0);
 
       resetOrientationOffset();
       initialize(worldFrame);
@@ -527,8 +533,6 @@ public class PelvisOrientationManager
       initialPelvisOrientation.set(tempOrientation);
       finalPelvisOrientation.set(tempOrientation);
 
-      pelvisPitchOffset.set(0.0);
-
       initialize(desiredTrajectoryFrame);
    }
 
@@ -543,8 +547,6 @@ public class PelvisOrientationManager
       desiredPelvisQuaternion.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
 
-      pelvisPitchOffset.set(0.0);
-
       initialize(supportAnkleZUp);
    }
 
@@ -557,8 +559,6 @@ public class PelvisOrientationManager
       finalPelvisOrientation.set(tempOrientation);
       desiredPelvisQuaternion.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
-
-      pelvisPitchOffset.set(0.0);
 
       initialize(midFeetZUpFrame);
    }
@@ -584,8 +584,6 @@ public class PelvisOrientationManager
 
       finalPelvisOrientation.set(finalDesiredPelvisYawAngle, 0.0, 0.0);
 
-      pelvisPitchOffset.set(0.0);
-
       initialize(supportAnkleZUpFrame);
    }
 
@@ -600,8 +598,6 @@ public class PelvisOrientationManager
       tempOrientation.setToZero(supportAnkleZUp);
       tempOrientation.changeFrame(worldFrame);
       finalPelvisOrientation.set(tempOrientation);
-
-      pelvisPitchOffset.set(0.0);
 
       initialize(supportAnkleZUp);
    }
@@ -623,11 +619,13 @@ public class PelvisOrientationManager
       tempOrientation.setToZero(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
       tempOrientation.changeFrame(worldFrame);
 
+      // computes the yaw angle as being the average of the stance orientation yaw and the footstep orientation yaw
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(upcomingFootstepOrientation.getYaw(), tempOrientation.getYaw());
 
       upcomingFootstep.getAnklePosition(upcomingFootstepLocation, ankleToSole);
       upcomingFootstepLocation.changeFrame(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
 
+      // adds additional yaw to account for the angle between the actual feet
       double desiredSwingPelvisYawAngle = 0.0;
       if (Math.abs(upcomingFootstepLocation.getX()) > 0.1)
       {
@@ -641,6 +639,43 @@ public class PelvisOrientationManager
       initialize(worldFrame);
    }
 
+   public void initializeStanding()
+   {
+      isStanding.set(true);
+      isInTransfer.set(false);
+   }
+
+   public void initializeTransfer(RobotSide transferToSide)
+   {
+      supportSide = transferToSide;
+
+      isStanding.set(false);
+      isInTransfer.set(true);
+   }
+
+   public void initializeSwing(RobotSide supportSide)
+   {
+      this.supportSide = supportSide;
+
+      isStanding.set(false);
+      isInTransfer.set(false);
+   }
+
+   private void computePelvisOffsetWhileWalking()
+   {
+      if (isStanding.getBooleanValue())
+      {
+         desiredPelvisOffsetWhileWalking.setToZero();
+      }
+      else if (isInTransfer.getBooleanValue())
+      {
+      }
+      else
+      {
+         updatePelvisPitchOffsetInSwing(supportSide);
+      }
+   }
+
    private final FramePoint tmpPoint = new FramePoint();
    public void updatePelvisPitchOffsetInSwing(RobotSide supportSide) // // TODO: 4/23/17  make this internal
    {
@@ -651,7 +686,7 @@ public class PelvisOrientationManager
       double supportLegAngle = Math.atan2(distanceFromFoot, heightFromFoot);
 
       // // TODO: 4/23/17  make the pelvis pitch offset calculation reduce pitch based on knee bend
-      pelvisPitchOffset.set(pelvisPitchAngleRatio.getDoubleValue() * supportLegAngle);
+      desiredPelvisOffsetWhileWalking.setPitch(pelvisPitchAngleRatio.getDoubleValue() * supportLegAngle);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
