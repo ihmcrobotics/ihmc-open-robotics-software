@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * This calculator class contains methods for computations with a ConvexPolygon2d such as
@@ -202,50 +201,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
-    * index that corresponds to the vertex on the specified side.
-    */
-   public static int getVertexOnSide(int index1, int index2, RobotSide side, Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      Point2DReadOnly point1 = polygon.getVertex(index1);
-      Point2DReadOnly point2 = polygon.getVertex(index2);
-      double observerToPoint1X = point1.getX() - observer.getX();
-      double observerToPoint1Y = point1.getY() - observer.getY();
-      double observerToPoint2X = point2.getX() - observer.getX();
-      double observerToPoint2Y = point2.getY() - observer.getY();
-
-      // Rotate the vector from observer to point 2 90 degree counter clockwise.
-      double observerToPoint2PerpendicularX = - observerToPoint2Y;
-      double observerToPoint2PerpendicularY = observerToPoint2X;
-
-      // Assuming the observer is looking at point 1 the dot product will be positive if point 2 is on the right of point 1.
-      double dotProduct = observerToPoint1X * observerToPoint2PerpendicularX + observerToPoint1Y * observerToPoint2PerpendicularY;
-
-      dotProduct = side.negateIfLeftSide(dotProduct);
-      if (dotProduct > 0.0)
-         return index2;
-      return index1;
-   }
-
-   /**
-    * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
-    * index that corresponds to the vertex on the left side.
-    */
-   public static int getVertexOnLeft(int index1, int index2, Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      return getVertexOnSide(index1, index2, RobotSide.LEFT, observer, polygon);
-   }
-
-   /**
-    * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
-    * index that corresponds to the vertex on the right side.
-    */
-   public static int getVertexOnRight(int index1, int index2, Point2DReadOnly observer, ConvexPolygon2d polygon)
-   {
-      return getVertexOnSide(index1, index2, RobotSide.RIGHT, observer, polygon);
-   }
-
-   /**
     * Returns the index in the middle of the range from firstIndex to secondIndex moving counter clockwise.
     * E.g. in a polygon with 6 vertices given indices 0 and 2 (in this order) the method will return the
     * middle of the range [0 5 4 3 2]: 4
@@ -336,7 +291,7 @@ public class ConvexPolygon2dCalculator
       double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
       double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
 
-      if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, 1.0e-7))
+      if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, EuclidGeometryTools.ONE_TEN_MILLIONTH))
             return false;
       else
          return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.normalizedVector, edgeStart, edgeEnd);
