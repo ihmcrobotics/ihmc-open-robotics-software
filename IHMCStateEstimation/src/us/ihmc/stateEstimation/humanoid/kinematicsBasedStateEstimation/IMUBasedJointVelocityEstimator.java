@@ -122,7 +122,7 @@ public class IMUBasedJointVelocityEstimator
          jointVelocities.get(joint).update(qd_fused);
 
          double q_sensorMap = sensorMap.getJointPositionProcessedOutput(joint);
-         double q_IMU = jointPositionsFromIMUOnly.get(joint).getDoubleValue() + estimatorDT * qd_IMU;
+         double q_IMU = jointPositions.get(joint).getDoubleValue() + estimatorDT * qd_IMU; // is qd_IMU or qd_fused better here?
          double q_fused = (1.0 - alphaPosition.getDoubleValue()) * q_sensorMap + alphaPosition.getDoubleValue() * q_IMU;
 
          jointPositionsFromIMUOnly.get(joint).set(q_IMU);
