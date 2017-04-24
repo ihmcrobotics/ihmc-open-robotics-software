@@ -83,44 +83,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Packs the index of the closest edge to the given point. The index corresponds to the index
-    * of the vertex at the start of the edge.
-    */
-   public static int getClosestEdgeIndex(Point2DReadOnly point, ConvexPolygon2d polygon)
-   {
-      int index = -1;
-      if (!polygon.hasAtLeastTwoVertices())
-         return index;
-
-      double minDistance = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly start = polygon.getVertex(i);
-         Point2DReadOnly end = polygon.getNextVertex(i);
-         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, start, end);
-         if (distance < minDistance)
-         {
-            index = i;
-            minDistance = distance;
-         }
-      }
-
-      return index;
-   }
-
-   /**
-    * Packs the closest edge to the given point.
-    */
-   public static boolean getClosestEdge(Point2DReadOnly point, ConvexPolygon2d polygon, LineSegment2d edgeToPack)
-   {
-      int edgeIndex = getClosestEdgeIndex(point, polygon);
-      if (edgeIndex == -1)
-         return false;
-      edgeToPack.set(polygon.getVertex(edgeIndex), polygon.getNextVertex(edgeIndex));
-      return true;
-   }
-
-   /**
     * Determines if the point is inside the bounding box of the convex polygon.
     */
    public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
@@ -331,14 +293,6 @@ public class ConvexPolygon2dCalculator
          return new LineSegment2d[] {edge1, edge2};
       if (edges == 1)
          return new LineSegment2d[] {edge1};
-      return null;
-   }
-
-   public static LineSegment2d getClosestEdgeCopy(Point2DReadOnly point, ConvexPolygon2d polygon)
-   {
-      LineSegment2d ret = new LineSegment2d();
-      if (getClosestEdge(point, polygon, ret))
-         return ret;
       return null;
    }
 }
