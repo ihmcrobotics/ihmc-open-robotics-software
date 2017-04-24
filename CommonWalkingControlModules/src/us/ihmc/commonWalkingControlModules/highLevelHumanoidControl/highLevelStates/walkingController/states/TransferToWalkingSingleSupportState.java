@@ -51,6 +51,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      pelvisOrientationManager.initializeTransfer(transferToSide);
+
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
