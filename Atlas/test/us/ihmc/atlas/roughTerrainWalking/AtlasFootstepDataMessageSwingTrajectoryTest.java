@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -19,7 +20,7 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
    {
       super.testSwingTrajectoryInWorld();
    }
-
+   
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -32,4 +33,10 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
+   public double getLegLength()
+   {
+      AtlasPhysicalProperties physicalProperties = new AtlasPhysicalProperties();
+      return physicalProperties.getShinLength() + physicalProperties.getThighLength();
+   }
 }
