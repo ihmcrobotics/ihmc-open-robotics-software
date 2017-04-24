@@ -1,9 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -14,49 +12,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
  */
 public class ConvexPolygon2dCalculator
 {
-   /**
-    * Determines if the point is inside the bounding box of the convex polygon.
-    */
-   public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
-   {
-      BoundingBox2D boundingBox = polygon.getBoundingBox();
-
-      if (pointX < boundingBox.getMinPoint().getX() - epsilon)
-         return false;
-      if (pointY < boundingBox.getMinPoint().getY() - epsilon)
-         return false;
-      if (pointX > boundingBox.getMaxPoint().getX() + epsilon)
-         return false;
-      if (pointY > boundingBox.getMaxPoint().getY() + epsilon)
-         return false;
-
-      return true;
-   }
-
-   /**
-    * Determines if the point is inside the bounding box of the convex polygon.
-    */
-   public static boolean isPointInBoundingBox(double pointX, double pointY, ConvexPolygon2d polygon)
-   {
-      return isPointInBoundingBox(pointX, pointY, 0.0, polygon);
-   }
-
-   /**
-    * Determines if the pointToTest is inside the bounding box of the convex polygon.
-    */
-   public static boolean isPointInBoundingBox(Point2DReadOnly pointToTest, double epsilon, ConvexPolygon2d polygon)
-   {
-      return isPointInBoundingBox(pointToTest.getX(), pointToTest.getY(), epsilon, polygon);
-   }
-
-   /**
-    * Determines if the point is inside the bounding box of the convex polygon.
-    */
-   public static boolean isPointInBoundingBox(Point2DReadOnly pointToTest, ConvexPolygon2d polygon)
-   {
-      return isPointInBoundingBox(pointToTest, 0.0, polygon);
-   }
-
    /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
