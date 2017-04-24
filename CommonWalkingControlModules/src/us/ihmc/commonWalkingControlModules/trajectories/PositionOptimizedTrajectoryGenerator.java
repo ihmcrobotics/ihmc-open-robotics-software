@@ -323,6 +323,21 @@ public class PositionOptimizedTrajectoryGenerator
 
       trajectoryViz.showGraphic();
    }
+   
+   /**
+    * Attempt at improving the trajectory if iterative improvement is desired.
+    * @return whether an optimization step was done or not.
+    */
+   public boolean doOptimizationUpdate()
+   {
+      if (!hasConverged.getBooleanValue())
+      {
+         hasConverged.set(optimizer.doFullTimeUpdate());
+         updateVariablesFromOptimizer();
+      }
+      
+      return !hasConverged();
+   }
 
    /**
     * Evaluates the trajectory at the given dimensionless time. Time is assumed to go from 0.0 at
@@ -332,12 +347,7 @@ public class PositionOptimizedTrajectoryGenerator
     */
    public void compute(double time)
    {
-      if (!hasConverged.getBooleanValue())
-      {
-         hasConverged.set(optimizer.doFullTimeUpdate());
-         updateVariablesFromOptimizer();
-      }
-
+      doOptimizationUpdate();
       isDone.set(time > 1.0);
 
       if (isDone())
