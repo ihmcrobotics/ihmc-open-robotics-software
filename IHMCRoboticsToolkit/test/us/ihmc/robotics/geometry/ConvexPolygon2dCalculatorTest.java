@@ -2,8 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.*;
 
-import java.util.Random;
-
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -550,157 +548,6 @@ public class ConvexPolygon2dCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
-   public void testGetIntersectionLambda1()
-   {
-      Random random = new Random(84587278988L);
-      for (int i = 0; i < 1000; i++)
-      {
-         Point2D point1 = new Point2D(random.nextGaussian(), random.nextGaussian());
-         Vector2D direction1 = new Vector2D(random.nextGaussian(), random.nextGaussian());
-         Point2D point2 = new Point2D(random.nextGaussian(), random.nextGaussian());
-         Vector2D direction2 = new Vector2D(random.nextGaussian(), random.nextGaussian());
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-         Point2D intersection = new Point2D(point1);
-         direction1.scale(lambda);
-         intersection.add(direction1);
-
-         Line2d line1 = new Line2d(point1, direction1);
-         Line2d line2 = new Line2d(point2, direction2);
-         assertPointsEqual(line1.intersectionWith(line2), intersection);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testGetIntersectionLambda2()
-   {
-      Random random = new Random(8458475566478988L);
-      for (int i = 0; i < 1000; i++)
-      {
-         Point2D point1 = new Point2D(random.nextGaussian(), random.nextGaussian());
-         Vector2D direction1 = new Vector2D(random.nextGaussian(), random.nextGaussian());
-         Point2D point2 = new Point2D(random.nextGaussian(), random.nextGaussian());
-         Vector2D direction2 = new Vector2D(direction1);
-         direction2.scale(random.nextGaussian());
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-
-         assertTrue("Lines are parallel expected lambda to ne NaN.", Double.isNaN(lambda));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testGetIntersectionLambda3()
-   {
-      // check directions aligned with axes
-      {
-         Point2D point1 = new Point2D(1.0, 1.0);
-         Vector2D direction1 = new Vector2D(0.5, 0.5);
-         Point2D point2 = new Point2D(point1);
-         Vector2D direction2 = new Vector2D(0, 1.0);
-         Point2D expected = new Point2D(point1);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-
-         Point2D intersection = new Point2D(point1);
-         direction1.scale(lambda);
-         intersection.add(direction1);
-
-         assertPointsEqual(expected, intersection);
-      }
-
-      {
-         Point2D point1 = new Point2D(-1.0, -1.0);
-         Vector2D direction1 = new Vector2D(0.5, 0.5);
-         Point2D point2 = new Point2D(point1);
-         Vector2D direction2 = new Vector2D(1.0, 0.0);
-         Point2D expected = new Point2D(point1);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-
-         Point2D intersection = new Point2D(point1);
-         direction1.scale(lambda);
-         intersection.add(direction1);
-
-         assertPointsEqual(expected, intersection);
-      }
-
-      {
-         Point2D point1 = new Point2D(0.0, 1.0);
-         Vector2D direction1 = new Vector2D(0.0, 2.0);
-         Point2D point2 = new Point2D(0.0, 0.0);
-         Vector2D direction2 = new Vector2D(0.5, 0.0);
-         Point2D expected = new Point2D(0.0, 0.0);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-
-         Point2D intersection = new Point2D(point1);
-         direction1.scale(lambda);
-         intersection.add(direction1);
-
-         assertPointsEqual(expected, intersection);
-      }
-
-      {
-         Point2D point1 = new Point2D(1.0, 0.0);
-         Vector2D direction1 = new Vector2D(2.0, 0.0);
-         Point2D point2 = new Point2D(0.0, 0.0);
-         Vector2D direction2 = new Vector2D(0.0, 0.5);
-         Point2D expected = new Point2D(0.0, 0.0);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-
-         Point2D intersection = new Point2D(point1);
-         direction1.scale(lambda);
-         intersection.add(direction1);
-
-         assertPointsEqual(expected, intersection);
-      }
-
-      {
-         Point2D point1 = new Point2D(0.0, 0.0);
-         Vector2D direction1 = new Vector2D(0.0, 1.0);
-         Point2D point2 = new Point2D(point1);
-         Vector2D direction2 = new Vector2D(0.0, 1.0);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-         assertTrue("Lines are parallel expected lambda to ne NaN.", Double.isNaN(lambda));
-      }
-
-      {
-         Point2D point1 = new Point2D(1.0, 0.0);
-         Vector2D direction1 = new Vector2D(0.0, 1.0);
-         Point2D point2 = new Point2D(2.0, 0.0);
-         Vector2D direction2 = new Vector2D(0.0, 1.0);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-         assertTrue("Lines are parallel expected lambda to ne NaN.", Double.isNaN(lambda));
-      }
-
-      {
-         Point2D point1 = new Point2D(1.0, 2.0);
-         Vector2D direction1 = new Vector2D(1.0, 0.0);
-         Point2D point2 = new Point2D(1.0, 1.0);
-         Vector2D direction2 = new Vector2D(1.0, 0.0);
-
-         double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(),
-               direction2.getY());
-         assertTrue("Lines are parallel expected lambda to ne NaN.", Double.isNaN(lambda));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
    public void testDoesLineIntersectEdge1()
    {
       // add in order so update does not change indices:
@@ -767,7 +614,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line4, 0, polygon));
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line4, 1, polygon));
 
-      Line2d line5 = new Line2d(new Point2D(-epsilon, 0.3), new Vector2D(0.0, -1.0));
+      Line2d line5 = new Line2d(new Point2D(-1.0e-6, 0.3), new Vector2D(0.0, -1.0));
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line5, 0, polygon));
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line5, 1, polygon));
 

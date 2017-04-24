@@ -331,39 +331,18 @@ public class ConvexPolygon2dCalculator
       if (!polygon.hasAtLeastTwoVertices())
          return false;
 
-      Point2DReadOnly edgePointOne = polygon.getVertex(edgeIndex);
-      Point2DReadOnly edgePointTwo = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
+      Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
 
-      double edgeVectorX = edgePointTwo.getX() - edgePointOne.getX();
-      double edgeVectorY = edgePointTwo.getY() - edgePointOne.getY();
-      double lambdaOne = getIntersectionLambda(edgePointOne.getX(), edgePointOne.getY(), edgeVectorX, edgeVectorY, line.getPoint().getX(), line.getPoint().getY(),
-            line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
-      if (Double.isNaN(lambdaOne) || lambdaOne < 0.0 || lambdaOne > 1.0)
-         return false;
+      double lineDirectionX = line.normalizedVector.getX();
+      double lineDirectionY = line.normalizedVector.getY();
+      double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
+      double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
 
-      return true;
-   }
-
-   /**
-    * Method that intersects two lines. Returns lambda such that the intersection point is
-    * intersection = point1 + lambda * direction1
-    */
-   public static double getIntersectionLambda(double point1X, double point1Y, double direction1X, double direction1Y, double point2X, double point2Y,
-         double direction2X, double direction2Y)
-   {
-      if (direction2X == 0.0 && direction1X != 0.0)
-         return (point2X - point1X) / direction1X;
-      if (direction2Y == 0.0 && direction1Y != 0.0)
-         return (point2Y - point1Y) / direction1Y;
-
-      double denumerator = direction1X / direction2X - direction1Y / direction2Y;
-
-      // check if lines parallel:
-      if (Math.abs(denumerator) < epsilon)
-         return Double.NaN;
-
-      double numerator = (point1Y - point2Y) / direction2Y - (point1X - point2X) / direction2X;
-      return numerator / denumerator;
+      if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, 1.0e-7))
+            return false;
+      else
+         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.normalizedVector, edgeStart, edgeEnd);
    }
 
    /**
