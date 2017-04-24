@@ -87,7 +87,9 @@ public class JointStateUpdater
          double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
          IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
          iMUBasedJointVelocityEstimator.compute();
-         iMUBasedJointVelocityEstimator.setAlphaFuse(stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation());
+         double alphaIMUsForSpineJointVelocityEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation();
+         double alphaIMUsForSpineJointPositionEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointPositionEstimation();
+         iMUBasedJointVelocityEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
          return iMUBasedJointVelocityEstimator;
       }
       else
@@ -128,18 +130,21 @@ public class JointStateUpdater
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
 
-         oneDoFJoint.setQ(positionSensorData);
-         oneDoFJoint.setEnabled(jointEnabledIndicator);
-
          if (enableIMUBasedJointVelocityEstimator.getBooleanValue() && iMUBasedJointVelocityEstimator != null)
          {
             double estimatedJointVelocity = iMUBasedJointVelocityEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
+
+            double estimatedJointPosition = iMUBasedJointVelocityEstimator.getEstimatedJointPosition(oneDoFJoint);
+            if (!Double.isNaN(estimatedJointPosition))
+               positionSensorData = estimatedJointPosition;
          }
 
+         oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
          oneDoFJoint.setTauMeasured(torqueSensorData);
+         oneDoFJoint.setEnabled(jointEnabledIndicator);
       }
 
       rootBody.updateFramesRecursively();

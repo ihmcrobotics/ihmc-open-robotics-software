@@ -30,6 +30,13 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return Double.NaN;
    }
 
+   /** @deprecated Need to switch to frequency */
+   @Deprecated
+   public double getAlphaIMUsForSpineJointPositionEstimation()
+   {
+      return Double.NaN;
+   }
+
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
       return null;
