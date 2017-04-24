@@ -16,8 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -25,12 +24,15 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -48,6 +50,12 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   /**
+    * Method used to scale down trajectories for different robots.
+    * @return shinLength + thighLength of the robot
+    */
+   public abstract double getLegLength();
+
    public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -61,7 +69,13 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       
-      double swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 3.0;
+      double robotScale = getLegLength();
+      double pelvisTrajectoryTime = 0.5;
+      PelvisHeightTrajectoryMessage pelvisHeightMessage = new PelvisHeightTrajectoryMessage(pelvisTrajectoryTime, 1.1 * robotScale);
+      drcSimulationTestHelper.send(pelvisHeightMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryTime));
+      
+      double swingTime = 2.0;
       double transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double initialTransferTime = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
@@ -79,11 +93,10 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       footstep.setTrajectoryReferenceFrameId(worldFrame);
       footstep.setTimings(swingTime, initialTransferTime);
 
-      double radius = 0.075;
+      double radius = robotScale * 0.10;
       double pitch = Math.toRadians(10.0);
-      FramePoint circleCenter = new FramePoint(soleFrame, 0.0, 0.0, 0.125);
-      int points = 8;
-      double timeBetweenWaypoints = swingTime / (points + 1);
+      FramePoint circleCenter = new FramePoint(soleFrame, 0.0, 0.0, robotScale * 0.15);
+      int points = 6;
       
       SE3TrajectoryPointMessage[] waypoints = new SE3TrajectoryPointMessage[points];
       for (int i = 0; i < points; i++)
@@ -101,6 +114,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          FrameVector waypointLinearVelocity = new FrameVector(soleFrame);
          if (i > 0 && i < points - 1)
          {
+            double timeBetweenWaypoints = swingTime / (points + 1);
             double scale = 1.0 / timeBetweenWaypoints;
             double xVelocity = scale * Math.cos(angleInCircle) * radius;
             double zVelocity = scale * Math.sin(angleInCircle) * radius;
@@ -141,56 +155,47 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       
       footstepDataList.add(footstep);
       drcSimulationTestHelper.send(footstepDataList);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
       
-      String format = EuclidCoreIOTools.getStringFormat(6, 4);
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-      String swingStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
-      String namePrefix = sidePrefix + "Foot";
-      String typeName = namePrefix + TrajectoryType.class.getSimpleName();
-      String posName = namePrefix + "DesiredSolePositionInWorld";
-      String oriName = namePrefix + "DesiredSoleOrientationInWorld";
-      String linName = namePrefix + "DesiredSoleLinearVelocityInWorld";
-      String angName = namePrefix + "DesiredSoleAngularVelocityInWorld";
+      String format = EuclidCoreIOTools.getStringFormat(6, 4);
+      String prefix = sidePrefix + "FootSwing";
+      String linearNamespace = prefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
+      String angularNamespace = prefix + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
       
-      String currentWaypointVariable = namePrefix + "CurrentTrajectoryWaypoint";
-      YoVariable<?> currentWaypointIndex = scs.getVariable(swingStateNamespace, currentWaypointVariable);
-      
-      double epsilon = 1.0E-6;
-      
-      currentWaypointIndex.addVariableChangedListener(new VariableChangedListener()
+      for (int i = 0; i < waypoints.length; i++)
       {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            // this makes sure the asserts are not triggered when scs is in playback mode
-            if (!scs.isSimulating())
-            {
-               return;
-            }
-            
-            int waypointIndex = (int) v.getValueAsLongBits() - 1;
-            
-            if (waypointIndex < 0 || waypointIndex >= points)
-               return;
+         SE3TrajectoryPointMessage waypoint = waypoints[i];
 
-            SE3TrajectoryPointMessage expectedDesired = waypoints[waypointIndex];
-            
-            @SuppressWarnings("unchecked")
-            EnumYoVariable<TrajectoryType> currentTrajectoryType = (EnumYoVariable<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
-            Point3D currentDesiredPosition = EndToEndHandTrajectoryMessageTest.findPoint3d(swingStateNamespace, posName, scs);
-            Quaternion currentDesiredOrientation = EndToEndHandTrajectoryMessageTest.findQuat4d(swingStateNamespace, oriName, scs);
-            Vector3D currentDesiredLinearVelocity = EndToEndHandTrajectoryMessageTest.findVector3d(swingStateNamespace, linName, scs);
-            Vector3D currentDesiredAngularVelocity = EndToEndHandTrajectoryMessageTest.findVector3d(swingStateNamespace, angName, scs);
-            
-            assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
-            EuclidCoreTestTools.assertTuple3DEquals("Position", expectedDesired.position, currentDesiredPosition, epsilon, format);
-            EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", expectedDesired.orientation, currentDesiredOrientation, epsilon, format);
-            EuclidCoreTestTools.assertTuple3DEquals("LinearVelocity", expectedDesired.linearVelocity, currentDesiredLinearVelocity, epsilon, format);
-            EuclidCoreTestTools.assertTuple3DEquals("AngularVelocity", expectedDesired.angularVelocity, currentDesiredAngularVelocity, epsilon, format);
-         }
-      });
+         String suffix = "AtWaypoint" + (i + 1);
+
+         String positionPrefix = YoFrameVariableNameTools.createName(prefix, "position", "");
+         Tuple3DBasics desiredPosition = EndToEndHandTrajectoryMessageTest.findTuple3d(linearNamespace, positionPrefix, suffix, scs);
+         String linearVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "linearVelocity", "");
+         Tuple3DBasics desiredLinearVelocity = EndToEndHandTrajectoryMessageTest.findTuple3d(linearNamespace, linearVelocityPrefix, suffix, scs);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.position, desiredPosition, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.linearVelocity, desiredLinearVelocity, 1.0E-10, format);
+         
+         String orientationPrefix = YoFrameVariableNameTools.createName(prefix, "orientation", "");
+         Quaternion desiredOrientation = EndToEndHandTrajectoryMessageTest.findQuat4d(angularNamespace, orientationPrefix, suffix, scs);
+         String angularVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "angularVelocity", "");
+         Tuple3DBasics desiredAngularVelocity = EndToEndHandTrajectoryMessageTest.findTuple3d(angularNamespace, angularVelocityPrefix, suffix, scs);
+
+         EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.orientation, desiredOrientation, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, desiredAngularVelocity, 1.0E-10, format);
+      }
       
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + swingTime + transferTime));
+      String currentIndexName = prefix + "CurrentWaypointIndex";
+      String swingStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
+      String typeName = sidePrefix + "Foot" + TrajectoryType.class.getSimpleName();
+      
+      @SuppressWarnings("unchecked")
+      EnumYoVariable<TrajectoryType> currentTrajectoryType = (EnumYoVariable<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
+      YoVariable<?> currentWaypointIndex = scs.getVariable(linearNamespace, currentIndexName);
+
+      assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + transferTime));
       assertEquals("Swing Trajectory did not execute.", points, currentWaypointIndex.getValueAsLongBits());
    }
    
