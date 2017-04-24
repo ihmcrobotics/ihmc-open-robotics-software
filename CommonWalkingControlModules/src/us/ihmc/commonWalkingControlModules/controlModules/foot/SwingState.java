@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.robotics.trajectories.providers.CurrentStateProvider;
+import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 
 public class SwingState extends AbstractUnconstrainedState
 {
@@ -55,7 +55,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
    
-   private final CurrentStateProvider currentStateProvider;
+   private final CurrentRigidBodyStateProvider currentStateProvider;
    
    private final YoFrameVector yoTouchdownAcceleration;
    private final YoFrameVector yoTouchdownVelocity;
@@ -170,7 +170,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", 10, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
-      currentStateProvider = new CurrentStateProvider(soleFrame, foot, twistCalculator);
+      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame, foot, twistCalculator);
       
       activeTrajectoryType = new EnumYoVariable<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
       swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration", registry);

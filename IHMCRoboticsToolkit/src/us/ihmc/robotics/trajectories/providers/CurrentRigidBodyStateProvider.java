@@ -8,14 +8,14 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-public class CurrentStateProvider
+public class CurrentRigidBodyStateProvider
 {
    private final ReferenceFrame frameOfInterest;
    private final RigidBody rigidBody;
    private final TwistCalculator twistCalculator;
    private final Twist twist = new Twist();
 
-   public CurrentStateProvider(ReferenceFrame frameOfInterest, RigidBody rigidBody, TwistCalculator twistCalculator)
+   public CurrentRigidBodyStateProvider(ReferenceFrame frameOfInterest, RigidBody rigidBody, TwistCalculator twistCalculator)
    {
       this.frameOfInterest = frameOfInterest;
       this.rigidBody = rigidBody;
