@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -41,7 +42,7 @@ public class FeetManager
    private final ToeOffCalculator toeOffCalculator;
    private final ToeOffManager toeOffManager;
 
-   private final SideDependentList<? extends ContactablePlaneBody> feet;
+   private final SideDependentList<ContactableFoot> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
@@ -62,9 +63,13 @@ public class FeetManager
 
       ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters, registry);
       ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
+      ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
+
       HashMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators = new HashMap<>();
       toeOffCalculators.put(centroidProjectionCalculator.getEnum(), centroidProjectionCalculator);
       toeOffCalculators.put(icpPlanCalculator.getEnum(), icpPlanCalculator);
+      toeOffCalculators.put(simpleCalculator.getEnum(), simpleCalculator);
+
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
       toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry);

@@ -23,6 +23,7 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
       this.toeOffCalculators = toeOffCalculators;
 
       activeToeOffCalculator = EnumYoVariable.create("ActiveToeOffCalculator", ToeOffEnum.class, registry);
+      activeToeOffCalculator.set(ToeOffEnum.CENTROID_PROJECTION);
    }
 
    public ToeOffEnum getEnum()
