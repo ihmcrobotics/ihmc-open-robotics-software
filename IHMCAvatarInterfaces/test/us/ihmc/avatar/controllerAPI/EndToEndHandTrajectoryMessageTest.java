@@ -191,6 +191,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
          handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
          handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setControlFramePosition(new Point3D(0.0, 0.02, 0.0));
          handTrajectoryMessage.setUseCustomControlFrame(true);
          handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
 

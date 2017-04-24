@@ -357,7 +357,13 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    {
       return 0.95;
    }
-   
+
+   @Override
+   public double getAlphaIMUsForSpineJointPositionEstimation()
+   {
+      return 0.95;
+   }
+
    @Override
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {

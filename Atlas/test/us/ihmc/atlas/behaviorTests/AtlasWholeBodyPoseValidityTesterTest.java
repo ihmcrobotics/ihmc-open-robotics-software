@@ -1,12 +1,12 @@
-package us.ihmc.atlas.rrtManipulationtest;
+package us.ihmc.atlas.behaviorTests;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.behaviorTests.WholeBodyPoseValidityTesterTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.manipulation.planning.avatartest.AvatarSolarPanelCleaningMotionTest;
 
-public class AtlasSolarPanelCleaningMotionTest extends AvatarSolarPanelCleaningMotionTest
+public class AtlasWholeBodyPoseValidityTesterTest extends WholeBodyPoseValidityTesterTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
