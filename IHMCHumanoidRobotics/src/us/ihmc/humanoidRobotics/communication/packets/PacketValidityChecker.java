@@ -407,6 +407,12 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
+      if (handTrajectoryMessage.useCustomControlFrame() && handTrajectoryMessage.controlFramePose == null)
+      {
+         String messageClassName = handTrajectoryMessage.getClass().getSimpleName();
+         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
+      }
+
       return null;
    }
 
@@ -609,6 +615,12 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
+      if (message.useCustomControlFrame() && message.controlFramePose == null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
+      }
+
       return null;
    }
 
@@ -691,6 +703,12 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
+      if (pelvisTrajectoryMessage.useCustomControlFrame() && pelvisTrajectoryMessage.controlFramePose == null)
+      {
+         String messageClassName = pelvisTrajectoryMessage.getClass().getSimpleName();
+         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
+      }
+
       return null;
    }
 
@@ -739,6 +757,12 @@ public abstract class PacketValidityChecker
          String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s robotSide field " + errorType.getMessage();
          return errorMessage;
+      }
+
+      if (footTrajectoryMessage.useCustomControlFrame() && footTrajectoryMessage.controlFramePose == null)
+      {
+         String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
+         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
       }
 
       return null;
