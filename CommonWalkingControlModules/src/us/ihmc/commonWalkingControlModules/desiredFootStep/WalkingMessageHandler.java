@@ -160,10 +160,10 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         Footstep newFootstep = createFootstep(command.getFootstep(i));
-         upcomingFootsteps.add(newFootstep);
          FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
+         Footstep newFootstep = createFootstep(command.getFootstep(i), newFootstepTiming.getSwingTime());
+         upcomingFootsteps.add(newFootstep);
       }
 
       if (!checkTimings(upcomingFootstepTimings))
@@ -526,7 +526,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataCommand footstepData)
+   private Footstep createFootstep(FootstepDataCommand footstepData, double swingTime)
    {
       FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
 
@@ -562,14 +562,19 @@ public class WalkingMessageHandler
       }
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
-         if (footstepData.getSwingTrajectory() == null)
+         RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = footstepData.getSwingTrajectory();
+         if (swingTrajectory == null)
          {
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
+         if (swingTrajectory.getLast().getTime() >= swingTime)
+         {
+            PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
          else
          {
-            RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = footstepData.getSwingTrajectory();
             footstep.setSwingTrajectory(swingTrajectory);
          }
       }
