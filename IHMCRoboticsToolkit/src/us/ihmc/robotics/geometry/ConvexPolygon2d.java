@@ -1214,6 +1214,52 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
          return null;
    }
 
+   public int getClosestVertexIndex(Point2DReadOnly point)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.closestVertexIndexToPoint2D(point, clockwiseOrderedListOfPoints, numberOfVertices);
+   }
+   
+   public boolean getClosestVertex(Point2DReadOnly point, Point2DBasics vertexToPack)
+   {
+      int vertexIndex = getClosestVertexIndex(point);
+      if (vertexIndex == -1)
+         return false;
+      vertexToPack.set(getVertex(vertexIndex));
+      return true;
+   }
+   
+   public Point2D getClosestVertexCopy(Point2DReadOnly point)
+   {
+      int vertexIndex = getClosestVertexIndex(point);
+      if (vertexIndex == -1)
+         return null;
+      return new Point2D(getVertex(vertexIndex));
+   }
+
+   public int getClosestVertexIndex(Line2d line)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.closestVertexIndexToLine2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices);
+   }
+   
+   public boolean getClosestVertex(Line2d line, Point2DBasics vertexToPack)
+   {
+      int vertexIndex = getClosestVertexIndex(line);
+      if (vertexIndex == -1)
+         return false;
+      vertexToPack.set(getVertex(vertexIndex));
+      return true;
+   }
+   
+   public Point2D getClosestVertexCopy(Line2d line)
+   {
+      int vertexIndex = getClosestVertexIndex(line);
+      if (vertexIndex == -1)
+         return null;
+      return new Point2D(getVertex(vertexIndex));
+   }
+
    public void getEdge(int edgeIndex, LineSegment2d edgeToPack)
    {
       edgeToPack.set(getVertex(edgeIndex), getNextVertex(edgeIndex));
