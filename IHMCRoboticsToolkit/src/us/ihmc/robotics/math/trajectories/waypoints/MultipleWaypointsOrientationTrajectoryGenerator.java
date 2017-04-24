@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.*;
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 
@@ -242,10 +242,16 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    {
       currentTrajectoryTime.set(time);
 
-      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+      boolean changedSubTrajectory = false;
+      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
+         changedSubTrajectory = true;
+      }
+
+      if (changedSubTrajectory)
+      {
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 

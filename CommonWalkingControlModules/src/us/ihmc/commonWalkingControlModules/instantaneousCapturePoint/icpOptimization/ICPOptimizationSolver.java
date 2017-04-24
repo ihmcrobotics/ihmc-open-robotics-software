@@ -67,7 +67,7 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
-   private static final boolean useQuadProg = false;
+   private static final boolean useQuadProg = true;
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleDiagonalActiveSetQPSolver();
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 

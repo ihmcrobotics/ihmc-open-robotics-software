@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public abstract class PacketValidityChecker
 {
@@ -77,7 +78,8 @@ public abstract class PacketValidityChecker
          }
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getTrajectoryType());
+      TrajectoryType trajectoryType = packetToCheck.getTrajectoryType();
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(trajectoryType);
       if (packetFieldErrorType != null)
       {
          String messageClassName = packetToCheck.getClass().getSimpleName();
@@ -92,6 +94,30 @@ public abstract class PacketValidityChecker
          String messageClassName = packetToCheck.getClass().getSimpleName();
          String errorMessage = messageClassName + "'s swingHeight field " + packetFieldErrorType.getMessage();
          return errorMessage;
+      }
+      
+      if (trajectoryType == TrajectoryType.WAYPOINTS)
+      {
+         SE3TrajectoryPointMessage[] swingTrajectory = packetToCheck.getSwingTrajectory();
+         double lastTime = 0.0;
+         for (int waypointIdx = 0; waypointIdx < swingTrajectory.length; waypointIdx++)
+         {
+            double waypointTime = swingTrajectory[waypointIdx].getTime();
+            if (waypointTime <= lastTime)
+            {
+               String messageClassName = packetToCheck.getClass().getSimpleName();
+               String errorMessage = messageClassName + "'s swing trajectory has non-increasing waypoint times.";
+               return errorMessage;
+            }
+            lastTime = waypointTime;
+         }
+
+         if (packetToCheck.getSwingDuration() > 0.0 && lastTime >= packetToCheck.getSwingDuration())
+         {
+            String messageClassName = packetToCheck.getClass().getSimpleName();
+            String errorMessage = messageClassName + "'s swing trajectory has waypoints with time larger then the swing time.";
+            return errorMessage;
+         }
       }
 
       return null;
