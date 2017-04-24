@@ -52,6 +52,11 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
       parentRegistry.addChild(registry);
    }
 
+   public ToeOffEnum getEnum()
+   {
+      return ToeOffEnum.ICP_PLAN;
+   }
+
    public void clear()
    {
       exitCMP2d.setToNaN();

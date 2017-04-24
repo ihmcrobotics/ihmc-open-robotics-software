@@ -28,10 +28,10 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.junit.Assert.*;
 
 public class WrapperForMultipleToeOffCalculatorsTest
 {
@@ -42,7 +42,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    private static final double toeWidthForControl = 0.0825;
 
    private WrapperForMultipleToeOffCalculators generator;
-   private ArrayList<ToeOffCalculator> toeOffCalculators;
+   private HashMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
    private YoVariableRegistry parentRegistry;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
@@ -52,7 +52,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      toeOffCalculators = new ArrayList<>();
+      toeOffCalculators = new HashMap<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -82,7 +82,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
       }
 
       ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
-      toeOffCalculators.add(toeOffCalculator);
+      toeOffCalculators.put(toeOffCalculator.getEnum(), toeOffCalculator);
    }
 
    @After
