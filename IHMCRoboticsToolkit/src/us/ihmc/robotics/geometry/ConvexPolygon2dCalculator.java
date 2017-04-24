@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -16,8 +15,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class ConvexPolygon2dCalculator
 {
-   private static final double epsilon = 1.0E-10;
-
    /**
     * Returns the index of the closest vertex of the polygon to the given line. If there
     * are multiple closest vertices (line parallel to an edge) this will return the smaller
@@ -343,22 +340,6 @@ public class ConvexPolygon2dCalculator
             return false;
       else
          return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.normalizedVector, edgeStart, edgeEnd);
-   }
-
-   /**
-    * Determines if edge i of the polygon is parallel to the given direction. If the edge is too
-    * short to determine its direction this method will return false.
-    */
-   public static boolean isEdgeParallel(int edgeIndex, Vector2DReadOnly direction, ConvexPolygon2d polygon)
-   {
-      Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
-      Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
-
-      double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
-      double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
-
-      double crossProduct = -edgeDirectionY * direction.getX() + edgeDirectionX * direction.getY();
-      return Math.abs(crossProduct) < epsilon;
    }
 
    // --- Methods that generate garbage ---
