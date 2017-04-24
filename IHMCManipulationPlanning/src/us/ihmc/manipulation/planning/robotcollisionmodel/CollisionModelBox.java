@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.robotcollisionmodel;
+package us.ihmc.manipulation.planning.robotcollisionmodel;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -6,12 +6,14 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 
 public class CollisionModelBox extends AbstractCollisionModel
 {
-   private ReferenceFrame referenceFrame;
+   public ReferenceFrame referenceFrame;
 
    private Point3D translationToCenter;
    private double sizeX;
