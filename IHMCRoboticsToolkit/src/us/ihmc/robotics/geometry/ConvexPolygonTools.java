@@ -751,26 +751,6 @@ public class ConvexPolygonTools
       return null;
    }
 
-   // TODO move to convexPolygon2d currently is only called from linesegment
-   public static Point2D[] intersection(LineSegment2d lineSegment, ConvexPolygon2d convexPolygon)
-   {
-      Point2D[] intersectingPoints = convexPolygon.intersectionWith(lineSegment);
-
-      if (intersectingPoints == null)
-         return null;
-
-      Point2D[] ret = new Point2D[intersectingPoints.length];
-
-      for (int i = 0; i < intersectingPoints.length; i++)
-      {
-         ret[i] = new Point2D(intersectingPoints[i]);
-      }
-
-      return ret;
-
-      //    throw new RuntimeException("Not yet implemented");
-   }
-
    public static boolean combineDisjointPolygons(FrameConvexPolygon2d polygon1, FrameConvexPolygon2d polygon2, FrameConvexPolygon2d combinedPolygonToPack,
                                                  FrameLineSegment2d connectingEdge1ToPack, FrameLineSegment2d connectingEdge2ToPack)
    {
