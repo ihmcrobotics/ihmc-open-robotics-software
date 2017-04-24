@@ -2218,9 +2218,8 @@ public class ConvexPolygon2dTest
          assertEquals(1, intersection.getNumberOfVertices());
          ConvexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, polygonWithOnePoint, intersection);
          assertTrue(intersection.getVertex(0).equals(pointThatDefinesThePolygon));
-         assertTrue(ConvexPolygonTools.intersection(arbitraryLineSegment, polygonWithOnePoint) == null);
-         assertTrue(ConvexPolygonTools.intersection(new LineSegment2d(pointThatDefinesThePolygon, arbitraryPoint0),
-                                                    polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
+         assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLineSegment) == null);
+         assertTrue(polygonWithOnePoint.intersectionWith(new LineSegment2d(pointThatDefinesThePolygon, arbitraryPoint0))[0].equals(pointThatDefinesThePolygon));
 
          ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
          ConvexPolygon2d shrunkenOnePointPolygon = new ConvexPolygon2d();
@@ -2524,7 +2523,7 @@ public class ConvexPolygon2dTest
             fail();
 
          // intersection
-         Point2D[] intersection = ConvexPolygonTools.intersection(arbitraryLineSegment, polygonWithTwoPoints);
+         Point2D[] intersection = polygonWithTwoPoints.intersectionWith(arbitraryLineSegment);
          if (intersection == null)
             assertTrue(arbitraryLineSegment.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
          else if (intersection.length == 1)
