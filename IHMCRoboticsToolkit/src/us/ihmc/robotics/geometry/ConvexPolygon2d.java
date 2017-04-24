@@ -1190,14 +1190,33 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
                                                                                            clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
+   public int getClosestEdgeIndex(Point2DReadOnly point)
+   {
+      checkIfUpToDate();
+      return EuclidGeometryPolygonTools.closestEdgeIndexToPoint2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
+   }
+
    public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2DReadOnly point)
    {
-      return ConvexPolygon2dCalculator.getClosestEdge(point, this, closestEdgeToPack);
+      int edgeIndex = getClosestEdgeIndex(point);
+      if (edgeIndex == -1)
+         return false;
+      getEdge(edgeIndex, closestEdgeToPack);
+      return true;
    }
 
    public LineSegment2d getClosestEdgeCopy(Point2DReadOnly point)
    {
-      return ConvexPolygon2dCalculator.getClosestEdgeCopy(point, this);
+      LineSegment2d closestEdge = new LineSegment2d();
+      if (getClosestEdge(closestEdge, point))
+         return closestEdge;
+      else
+         return null;
+   }
+
+   public void getEdge(int edgeIndex, LineSegment2d edgeToPack)
+   {
+      edgeToPack.set(getVertex(edgeIndex), getNextVertex(edgeIndex));
    }
 
    // TODO: clean up garbage in / implement the following methods
