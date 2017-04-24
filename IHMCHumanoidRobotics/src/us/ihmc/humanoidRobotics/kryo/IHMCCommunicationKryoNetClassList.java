@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
@@ -243,6 +244,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector3D.class);
       registerPacketField(Vector2D32.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
+      registerPacketClass(QuaternionBasedTransform.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);
       registerPacketField(Vector3D32.class);

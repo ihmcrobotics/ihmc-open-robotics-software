@@ -62,6 +62,7 @@ public class WalkingCommandConsumer
    private final DoubleYoVariable minimumDurationBetweenTwoManipulationAborts = new DoubleYoVariable("minimumDurationBetweenTwoManipulationAborts", registry);
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
+   private final DoubleYoVariable allowManipulationAbortAfterThisTime = new DoubleYoVariable("allowManipulationAbortAfterThisTime", registry);
 
    private final DoubleYoVariable yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
@@ -117,8 +118,14 @@ public class WalkingCommandConsumer
       minimumDurationBetweenTwoManipulationAborts.set(5.0);
       manipulationIgnoreInputsDurationAfterAbort.set(2.0);
       timeOfLastManipulationAbortRequest.set(Double.NEGATIVE_INFINITY);
+      allowManipulationAbortAfterThisTime.set(Double.NEGATIVE_INFINITY);
 
       parentRegistry.addChild(registry);
+   }
+   
+   public void avoidManipulationAbortForDuration(double durationToAvoidAbort)
+   {
+      allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
 
    public void consumeHeadCommands()
@@ -290,6 +297,9 @@ public class WalkingCommandConsumer
          return;
 
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < minimumDurationBetweenTwoManipulationAborts.getDoubleValue())
+         return;
+      
+      if (yoTime.getDoubleValue() < allowManipulationAbortAfterThisTime.getDoubleValue())
          return;
 
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortManipulation.getDoubleValue())
