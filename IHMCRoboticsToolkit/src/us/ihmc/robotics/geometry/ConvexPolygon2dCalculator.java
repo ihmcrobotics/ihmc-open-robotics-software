@@ -15,74 +15,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 public class ConvexPolygon2dCalculator
 {
    /**
-    * Returns the index of the closest vertex of the polygon to the given line. If there
-    * are multiple closest vertices (line parallel to an edge) this will return the smaller
-    * index.
-    */
-   public static int getClosestVertexIndex(Line2d line, ConvexPolygon2d polygon)
-   {
-      double minDistance = Double.POSITIVE_INFINITY;
-      int index = -1;
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = polygon.getVertex(i);
-         double distance = line.distance(vertex);
-         if (distance < minDistance)
-         {
-            index = i;
-            minDistance = distance;
-         }
-      }
-
-      return index;
-   }
-
-   /**
-    * Packs the closest vertex of the polygon to the given line.
-    */
-   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2DBasics pointToPack)
-   {
-      int index = getClosestVertexIndex(line, polygon);
-      if (index < 0)
-         return false;
-      pointToPack.set(polygon.getVertex(index));
-      return true;
-   }
-
-   /**
-    * Returns the index of the closest vertex of the polygon to the given point
-    */
-   public static int getClosestVertexIndex(Point2DReadOnly point, ConvexPolygon2d polygon)
-   {
-      double minDistance = Double.POSITIVE_INFINITY;
-      int index = -1;
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = polygon.getVertex(i);
-         double distance = vertex.distance(point);
-         if (distance < minDistance)
-         {
-            index = i;
-            minDistance = distance;
-         }
-      }
-
-      return index;
-   }
-
-   /**
-    * Packs the closest vertex of the polygon to the given point
-    */
-   public static boolean getClosestVertex(Point2DReadOnly point, ConvexPolygon2d polygon, Point2DBasics pointToPack)
-   {
-      int index = getClosestVertexIndex(point, polygon);
-      if (index < 0)
-         return false;
-      pointToPack.set(polygon.getVertex(index));
-      return true;
-   }
-
-   /**
     * Determines if the point is inside the bounding box of the convex polygon.
     */
    public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
@@ -260,22 +192,6 @@ public class ConvexPolygon2dCalculator
    }
 
    // --- Methods that generate garbage ---
-   public static Point2D getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
-   {
-      Point2D ret = new Point2D();
-      if (getClosestVertex(line, polygon, ret))
-         return ret;
-      return null;
-   }
-
-   public static Point2D getClosestVertexCopy(Point2DReadOnly point, ConvexPolygon2d polygon)
-   {
-      Point2D ret = new Point2D();
-      if (getClosestVertex(point, polygon, ret))
-         return ret;
-      return null;
-   }
-
    public static ConvexPolygon2d translatePolygonCopy(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
    {
       ConvexPolygon2d ret = new ConvexPolygon2d(polygon);

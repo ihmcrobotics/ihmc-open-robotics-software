@@ -1898,7 +1898,7 @@ public class ConvexPolygon2dTest
 
       LineSegment2d closestEdge = polygon.getClosestEdgeCopy(point);
 
-      Point2D closestVertex = ConvexPolygon2dCalculator.getClosestVertexCopy(point, polygon);
+      Point2D closestVertex = polygon.getClosestVertexCopy(point);
 
       int otherEdgeVertexIndex = 0;
       boolean isClosestVertexPartOfClosestEdge = false;
@@ -2161,7 +2161,7 @@ public class ConvexPolygon2dTest
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
          assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0),
-                      ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).distance(arbitraryPoint0), epsilon);
+                      polygonWithOnePoint.getClosestVertexCopy(arbitraryPoint0).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMaxPoint().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMinPoint().equals(pointThatDefinesThePolygon));
@@ -2170,8 +2170,8 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getClosestEdgeCopy(arbitraryPoint0) == null);
          assertTrue(polygonWithOnePoint.getClosestEdgeIndex(arbitraryPoint0) == -1);
-         assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryLine, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
-         assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
+         assertTrue(polygonWithOnePoint.getClosestVertexCopy(arbitraryLine).equals(pointThatDefinesThePolygon));
+         assertTrue(polygonWithOnePoint.getClosestVertexCopy(arbitraryPoint0).equals(pointThatDefinesThePolygon));
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertexCCW(0).equals(pointThatDefinesThePolygon));
          assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithOnePoint) == null);
@@ -2341,7 +2341,7 @@ public class ConvexPolygon2dTest
 
          // one line tests
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
-                      ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints).distance(arbitraryPoint0), epsilon);
+                      polygonWithTwoPoints.getClosestVertexCopy(arbitraryPoint0).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithTwoPoints.getArea(), epsilon);
          Point2D minPoint = new Point2D(Math.min(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()),
                                         Math.min(pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
@@ -2384,13 +2384,13 @@ public class ConvexPolygon2dTest
          assertTrue(expectedProjection.epsilonEquals(actualProjection, epsilon));
 
          // getClosestVertexCopy
-         Point2D closestVertexToLine = ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryLine, polygonWithTwoPoints);
+         Point2D closestVertexToLine = polygonWithTwoPoints.getClosestVertexCopy(arbitraryLine);
          if (arbitraryLine.distance(pointThatDefinesThePolygon0) < arbitraryLine.distance(pointThatDefinesThePolygon1))
             assertEquals(closestVertexToLine, pointThatDefinesThePolygon0);
          else
             assertEquals(closestVertexToLine, pointThatDefinesThePolygon1);
 
-         Point2D closestVertexToPoint = ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints);
+         Point2D closestVertexToPoint = polygonWithTwoPoints.getClosestVertexCopy(arbitraryPoint0);
          if (arbitraryPoint0.distance(pointThatDefinesThePolygon0) < arbitraryPoint0.distance(pointThatDefinesThePolygon1))
             assertEquals(closestVertexToPoint, pointThatDefinesThePolygon0);
          else
@@ -2642,6 +2642,51 @@ public class ConvexPolygon2dTest
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       assertTrue(polygon.getClosestEdgeCopy(new Point2D()) == null);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestVertexPoint1()
+   {
+      Point2D vertex1 = new Point2D(0.0, 0.0);
+      Point2D vertex2 = new Point2D(10.0, 0.0);
+      Point2D vertex3 = new Point2D(0.0, 10.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.addVertex(vertex3);
+      polygon.update();
+
+      Point2D point1 = new Point2D(-1.0, -1.0);
+      assertPointsEqual(vertex1, polygon.getClosestVertexCopy(point1));
+
+      Point2D point2 = new Point2D(1.0, 1.0);
+      assertPointsEqual(vertex1, polygon.getClosestVertexCopy(point2));
+
+      Point2D point3 = new Point2D(10.0, 0.0);
+      assertPointsEqual(vertex2, polygon.getClosestVertexCopy(point3));
+
+      Point2D point4 = new Point2D(9.8, 0.0);
+      assertPointsEqual(vertex2, polygon.getClosestVertexCopy(point4));
+
+      Point2D point5 = new Point2D(10.0, 11.0);
+      assertPointsEqual(vertex3, polygon.getClosestVertexCopy(point5));
+
+      Point2D point6 = new Point2D(-3.0, 8.0);
+      assertPointsEqual(vertex3, polygon.getClosestVertexCopy(point6));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestVertexPoint2()
+   {
+      // make sure the method fails as expected with an empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D closestVertex = new Point2D();
+
+      assertFalse(polygon.getClosestVertex(new Point2D(), closestVertex));
+      assertTrue(polygon.getClosestVertexCopy(new Point2D()) == null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
