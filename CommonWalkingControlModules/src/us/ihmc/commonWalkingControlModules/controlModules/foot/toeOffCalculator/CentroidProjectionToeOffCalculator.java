@@ -63,6 +63,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       parentRegistry.addChild(registry);
    }
 
+   public ToeOffEnum getEnum()
+   {
+      return ToeOffEnum.CENTROID_PROJECTION;
+   }
+
    public void clear()
    {
       exitCMP2d.setToNaN();
