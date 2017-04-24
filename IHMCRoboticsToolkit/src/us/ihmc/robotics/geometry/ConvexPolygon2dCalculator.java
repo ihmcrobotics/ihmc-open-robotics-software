@@ -346,32 +346,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if a point is laying in front of a ray. This means that an observer standing at the
-    * start point looking in the direction of the ray will see the point in front of him. If the point
-    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
-    * observer) the method will return true.
-    */
-   public static boolean isPointInFrontOfRay(Point2DReadOnly rayStart, Vector2DReadOnly rayDirection, Point2DReadOnly pointToTest)
-   {
-      return isPointInFrontOfRay(rayStart.getX(), rayStart.getY(), rayDirection.getX(), rayDirection.getY(), pointToTest.getX(), pointToTest.getY());
-   }
-
-   /**
-    * Determines if a point is laying in front of a ray. This means that an observer standing at the
-    * start point looking in the direction of the ray will see the point in front of him. If the point
-    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
-    * observer) the method will return true.
-    */
-   public static boolean isPointInFrontOfRay(double rayStartX, double rayStartY, double rayDirectionX, double rayDirectionY, double pointToTestX,
-         double pointToTestY)
-   {
-      double rayStartToVertexX = pointToTestX - rayStartX;
-      double rayStartToVertexY = pointToTestY - rayStartY;
-      double dotProduct = rayStartToVertexX * rayDirectionX + rayStartToVertexY * rayDirectionY;
-      return Math.signum(dotProduct) != -1;
-   }
-
-   /**
     * Determines if edge i of the polygon is parallel to the given direction. If the edge is too
     * short to determine its direction this method will return false.
     */
