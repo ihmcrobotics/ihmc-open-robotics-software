@@ -137,7 +137,7 @@ public class InterpolationTools
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
-   private static double hermite00Coefficient(double alpha)
+   public static double hermite00Coefficient(double alpha)
    {
       return 2.0 * Math.pow(alpha, 3.0) - 3.0 * Math.pow(alpha, 2.0) + 1.0;
    }
@@ -151,7 +151,7 @@ public class InterpolationTools
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
-   private static double hermite10Coefficient(double alpha)
+   public static double hermite10Coefficient(double alpha)
    {
       return Math.pow(alpha, 3.0) - 2.0 * Math.pow(alpha, 2.0) + alpha;
    }
@@ -165,7 +165,7 @@ public class InterpolationTools
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
-   private static double hermite01Coefficient(double alpha)
+   public static double hermite01Coefficient(double alpha)
    {
       return -2.0 * Math.pow(alpha, 3.0) + 3.0 * Math.pow(alpha, 2.0);
    }
@@ -179,7 +179,7 @@ public class InterpolationTools
     * @param alpha the percentage to use for the interpolation.
     * @return coefficient
     */
-   private static double hermite11Coefficient(double alpha)
+   public static double hermite11Coefficient(double alpha)
    {
       return Math.pow(alpha, 3.0) - Math.pow(alpha, 2.0);
    }
