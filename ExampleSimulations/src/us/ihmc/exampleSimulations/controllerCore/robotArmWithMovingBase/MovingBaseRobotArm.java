@@ -43,7 +43,6 @@ public class MovingBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final ReferenceFrame elevatorFrame;
    private final RigidBody elevator;
 
    private final Vector3D baseXOffset = new Vector3D(0.0, 0.0, 0.3);
@@ -114,8 +113,7 @@ public class MovingBaseRobotArm extends Robot
       super(MovingBaseRobotArm.class.getSimpleName());
       this.setGravity(0.0, 0.0, -gravity);
 
-      elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
 
       // Moving (and actuated) base 
       baseX = ScrewTools.addPrismaticJoint("baseX", elevator, baseXOffset, X_AXIS);

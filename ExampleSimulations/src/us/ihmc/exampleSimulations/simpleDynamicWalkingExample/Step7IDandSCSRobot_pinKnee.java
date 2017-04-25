@@ -7,7 +7,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -70,7 +69,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+   private final ReferenceFrame elevatorFrame;
    private FramePoint bodyPosition = new FramePoint();
    private FramePoint footPosition = new FramePoint();
 
@@ -162,7 +161,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       super("Robot");
 
       /****************** ID ROBOT ***********************/
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      elevatorFrame = elevator.getBodyFixedFrame();
 
       bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
       bodyRigidBody = createBodyRB(LinkNames.BODY_LINK, bodyJointID);

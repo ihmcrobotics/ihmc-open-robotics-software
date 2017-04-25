@@ -98,8 +98,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
       /*
        * Create root object
        */
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator, elevatorFrame);
       if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {

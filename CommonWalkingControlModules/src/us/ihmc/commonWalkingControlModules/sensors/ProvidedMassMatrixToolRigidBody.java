@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -17,13 +18,11 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -38,7 +37,6 @@ public class ProvidedMassMatrixToolRigidBody
 {
    private final YoVariableRegistry registry;
 
-   private final PoseReferenceFrame toolFrame;
    private final RigidBody toolBody;
 
    private final ReferenceFrame handFixedFrame;
@@ -70,12 +68,9 @@ public class ProvidedMassMatrixToolRigidBody
       this.handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
-      toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
-
-      RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3D(), 0.0);
 
       this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
-      this.toolBody = new RigidBody(name + "Body", inertia, toolJoint);
+      this.toolBody = new RigidBody(name + "Body", toolJoint, new Matrix3D(), 0.0, new RigidBodyTransform());
 
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);
       objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
@@ -122,11 +117,10 @@ public class ProvidedMassMatrixToolRigidBody
       toolBody.getInertia().setMass(objectMass.getDoubleValue());
 
       temporaryPoint.setIncludingFrame(objectCenterOfMass.getFrameTuple());
-      temporaryPoint.changeFrame(elevatorFrame);
-      toolFrame.setPositionAndUpdate(temporaryPoint);
+      temporaryPoint.changeFrame(toolBody.getBodyFixedFrame());
+      toolBody.setCoMOffset(temporaryPoint);
 
       // Visualization
-      toolFramePoint.setToZero(toolFrame);
       toolFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       objectCenterOfMassInWorld.set(toolFramePoint);
    }
