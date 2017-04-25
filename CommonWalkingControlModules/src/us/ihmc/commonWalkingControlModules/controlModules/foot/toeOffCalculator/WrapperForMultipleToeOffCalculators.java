@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 
 public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
@@ -16,9 +17,9 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    private final String namePostfix = getClass().getSimpleName();
 
    private final EnumYoVariable<ToeOffEnum> activeToeOffCalculator;
-   private final HashMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
+   private final EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
 
-   public WrapperForMultipleToeOffCalculators(HashMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators, YoVariableRegistry registry)
+   public WrapperForMultipleToeOffCalculators(EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators, YoVariableRegistry registry)
    {
       this.toeOffCalculators = toeOffCalculators;
 
