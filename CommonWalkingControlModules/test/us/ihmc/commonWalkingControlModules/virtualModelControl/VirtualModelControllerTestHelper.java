@@ -229,8 +229,8 @@ public class VirtualModelControllerTestHelper
       robotLeg.setGravity(gravity);
       HashMap<InverseDynamicsJoint, Joint> jointMap = new HashMap<>();
 
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3D(), robotLeg);
       robotLeg.addRootJoint(floatingJoint);
@@ -620,8 +620,8 @@ public class VirtualModelControllerTestHelper
 
       public PlanarRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          upperArm = createUpperArm(elevator);
@@ -917,8 +917,8 @@ public class VirtualModelControllerTestHelper
 
       public RobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -1243,8 +1243,8 @@ public class VirtualModelControllerTestHelper
 
       public ForkedRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -1605,8 +1605,8 @@ public class VirtualModelControllerTestHelper
 
       public PlanarForkedRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          List<InverseDynamicsJoint> joints = new ArrayList<>();

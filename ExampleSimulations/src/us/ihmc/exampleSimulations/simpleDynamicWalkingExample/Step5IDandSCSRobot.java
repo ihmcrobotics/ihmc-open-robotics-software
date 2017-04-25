@@ -6,8 +6,6 @@ import java.util.LinkedHashMap;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
@@ -48,7 +46,7 @@ public class Step5IDandSCSRobot extends Robot
 
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+   private final ReferenceFrame elevatorFrame;
    private FramePoint bodyPosition = new FramePoint();
 
    private final Vector3D jointAxesHip = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
@@ -103,7 +101,8 @@ public class Step5IDandSCSRobot extends Robot
       super("Robot");
 
       /****************** ID ROBOT ***********************/
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      elevatorFrame = elevator.getBodyFixedFrame();
 
       bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);

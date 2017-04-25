@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -73,7 +75,17 @@ public class RigidBody implements NameBasedHashCodeHolder
     */
    private final long nameBasedHashCode;
 
-   public RigidBody(String name, ReferenceFrame rootBodyFrame) // root body constructor
+   public RigidBody(String bodyName, ReferenceFrame parentInertialFrame)
+   {
+      this(bodyName, new RigidBodyTransform(), parentInertialFrame, true);
+   }
+
+   public RigidBody(String name, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame) // root body constructor
+   {
+      this(name, transformToParent, parentInertialFrame, false);
+   }
+
+   private RigidBody(String name, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame, boolean isZUpFrame) // root body constructor
    {
       if (name == null)
       {
@@ -82,19 +94,21 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(name);
       this.name = name;
       this.inertia = null;
-      this.bodyFixedFrame = rootBodyFrame;
+      this.bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "Frame", parentInertialFrame, transformToParent, true, isZUpFrame);
       this.parentJoint = null;
    }
 
-   public RigidBody(String name, RigidBodyInertia inertia, InverseDynamicsJoint parentJoint)
+   public RigidBody(String bodyName, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
-      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
-      this.name = name;
-      this.inertia = inertia;
-      this.bodyFixedFrame = inertia.getBodyFrame();
+      this.name = bodyName;
       this.parentJoint = parentJoint;
-      this.parentJoint.setSuccessor(this);
+
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
+      ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
+      bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
+      inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
+      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
+      parentJoint.setSuccessor(this);
    }
 
    public RigidBodyInertia getInertia()

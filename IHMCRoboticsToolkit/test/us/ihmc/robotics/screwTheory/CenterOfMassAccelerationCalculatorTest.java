@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -11,7 +11,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,8 +29,8 @@ public class CenterOfMassAccelerationCalculatorTest
       Random random = new Random(1779L);
       double mass = 1.0;
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevatorFrame);
       ScrewTools.addRigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
@@ -69,8 +68,8 @@ public class CenterOfMassAccelerationCalculatorTest
       Random random = new Random(1779L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(1.0, 0.0, 0.0);
       PrismaticJoint j1 = ScrewTools.addPrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
       RigidBody r1 = ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
@@ -116,8 +115,8 @@ public class CenterOfMassAccelerationCalculatorTest
       Vector3D comOffset = new Vector3D(0.0, 0.0, length);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(0.0, 1.0, 0.0);
       RevoluteJoint j1 = ScrewTools.addRevoluteJoint("j1", elevator, new Vector3D(), jointAxis);
       ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), mass, comOffset);
@@ -150,8 +149,8 @@ public class CenterOfMassAccelerationCalculatorTest
       Random random = new Random(1779L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(1.0, 0.0, 0.0);
       PrismaticJoint j1 = ScrewTools.addPrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
       ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));

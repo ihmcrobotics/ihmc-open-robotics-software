@@ -87,8 +87,8 @@ public class SkippyRobotV2 extends Robot
       super("SkippyV2");
 
       // --- id robot ---
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       bodyMap.put(SkippyBody.ELEVATOR, elevator);
 
       rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);

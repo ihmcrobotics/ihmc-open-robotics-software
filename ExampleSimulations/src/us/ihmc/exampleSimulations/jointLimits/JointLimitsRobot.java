@@ -1,8 +1,6 @@
 package us.ihmc.exampleSimulations.jointLimits;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -41,8 +39,7 @@ public class JointLimitsRobot extends Robot
       super("JointLimitTestingRobot");
 
       // --- id robot ---
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
       idJoint = ScrewTools.addRevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
       Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
       RigidBody arm = ScrewTools.addRigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
