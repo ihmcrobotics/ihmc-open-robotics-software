@@ -253,23 +253,23 @@ public class JointPrivilegedConfigurationHandler
                   PrintTools.warn(this, "Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
 
-            processConfigurationWeightsAndGains(command, jointIndex);
+            processConfigurationWeightsAndGains(command, jointIndex, jointNumber);
          }
       }
    }
 
-   private void processConfigurationWeightsAndGains(PrivilegedConfigurationCommand command, int jointIndex)
+   private void processConfigurationWeightsAndGains(PrivilegedConfigurationCommand command, int jointIndex, int commandJointNumber)
    {
-      if (command.hasWeight())
-         privilegedConfigurationWeights.set(jointIndex, jointIndex, command.getWeight());
-      if (command.hasConfigurationGain())
-         privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain());
-      if (command.hasVelocityGain())
-         privilegedVelocityGains.set(jointIndex, 0, command.getVelocityGain());
-      if (command.hasMaxVelocity())
-         privilegedMaxVelocities.set(jointIndex, 0, command.getMaxVelocity());
-      if (command.hasMaxAcceleration())
-         privilegedMaxAccelerations.set(jointIndex, 0, command.getMaxAcceleration());
+      if (command.hasWeight(commandJointNumber))
+         privilegedConfigurationWeights.set(jointIndex, jointIndex, command.getWeight(commandJointNumber));
+      if (command.hasConfigurationGain(commandJointNumber))
+         privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain(commandJointNumber));
+      if (command.hasVelocityGain(commandJointNumber))
+         privilegedVelocityGains.set(jointIndex, 0, command.getVelocityGain(commandJointNumber));
+      if (command.hasMaxVelocity(commandJointNumber))
+         privilegedMaxVelocities.set(jointIndex, 0, command.getMaxVelocity(commandJointNumber));
+      if (command.hasMaxAcceleration(commandJointNumber))
+         privilegedMaxAccelerations.set(jointIndex, 0, command.getMaxAcceleration(commandJointNumber));
    }
 
    private void setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption option, int jointIndex)

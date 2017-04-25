@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -34,12 +35,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @RosExportedField(documentation = "Specifies the position of the footstep.")
+   @RosExportedField(documentation = "Specifies the position of the footstep (sole frame).")
    public Point3D location;
-   @RosExportedField(documentation = "Specifies the orientation of the footstep.")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame).")
    public Quaternion orientation;
    
-   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all pose data in this message.")
+   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all data in this message (except"
+         + "the predictedContactPoints).")
    public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
@@ -53,10 +55,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE.")
    public double swingHeight = 0.0;
-   @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions in workd."
+   @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
    		+ "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
    		+ "trajectory is desired use the trajectory type WAYPOINTS instead.")
    public Point3D[] positionWaypoints = new Point3D[0];
+   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, up to ten swing waypoints can be specified here. The waypoints do not include the"
+         + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
+         + "All waypoints are for the sole frame and expressed in the trajectory frame.")
+   public SE3TrajectoryPointMessage[] swingTrajectory = null;
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default swingDuration.")
@@ -271,6 +277,16 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setCustomPositionWaypoints(Point3D[] trajectoryWaypoints)
    {
       this.positionWaypoints = trajectoryWaypoints;
+   }
+
+   public SE3TrajectoryPointMessage[] getSwingTrajectory()
+   {
+      return swingTrajectory;
+   }
+
+   public void setSwingTrajectory(SE3TrajectoryPointMessage[] swingTrajectory)
+   {
+      this.swingTrajectory = swingTrajectory;
    }
 
    public void setTimings(double swingDuration, double transferDuration)

@@ -1,27 +1,28 @@
-package us.ihmc.manipulation.planning.rrttimedomain;
+package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
 import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
 public class RRTTreeTimeDomain extends RRTTree
 {
-   protected double motionTime;
+   protected double motionMaximumTime;
    protected double timeScaleForMatric = 0.5;
 
-   protected double maximumDisplacementOfStep = 0.4;   
-   protected double maximumTimeGapOfStep = 0.4;
+   protected double maximumDisplacementOfStep = 0.5;   
+   protected double maximumTimeGapOfStep = 0.8;
 
    public RRTTreeTimeDomain(RRTNode rootNode)
    {
       super(rootNode);
    }
 
-   public void setMotionTime(double motionTime)
+   public void setMaximumMotionTime(double motionTime)
    {
-      this.motionTime = motionTime;
+      this.motionMaximumTime = motionTime;
    }
 
    public void setMaximumDisplacementOfStep(double maximumDisplacementOfStep)
@@ -41,7 +42,7 @@ public class RRTTreeTimeDomain extends RRTTree
    
    public double getMotionTime()
    {
-      return motionTime;
+      return motionMaximumTime;
    }
       
    public double getTime(RRTNode node)
@@ -89,9 +90,9 @@ public class RRTTreeTimeDomain extends RRTTree
          randomNode.setNodeData(i, randonValue);
       }
 
-      if (randomNode.getNodeData(0) > motionTime)
+      if (randomNode.getNodeData(0) > motionMaximumTime)
       {
-         randomNode.setNodeData(0, motionTime);
+         randomNode.setNodeData(0, motionMaximumTime);
       }
 
       return randomNode;
@@ -121,10 +122,8 @@ public class RRTTreeTimeDomain extends RRTTree
    public boolean expandTreeTimeDomain()
    {
       RRTNode node = getRandomNode();
-       
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNodeTimeDomain(node);
-
       return addNewNodeTimeDomain();
    }   
    
@@ -133,17 +132,19 @@ public class RRTTreeTimeDomain extends RRTTree
       if (this.newNode.isValidNode() == true)
       {
          RRTValidConnection rrtValidConnection = new RRTValidConnection(this.nearNode, this.newNode);
+         rrtValidConnection.reInitialize(3);
          if (rrtValidConnection.isValidConnection())
          {
               nearNode.addChildNode(this.newNode);
               wholeNodes.add(newNode);
+//              PrintTools.info("Node Added");
               return true;
          }
       }
       else
       {
          failNodes.add(newNode);
-         // PrintTools.info("The newly created node is unvalid");
+//         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
       }
       return false;
    }

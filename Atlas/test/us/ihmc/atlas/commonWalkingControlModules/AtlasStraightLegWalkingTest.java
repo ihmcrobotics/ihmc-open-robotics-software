@@ -134,6 +134,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new AtlasStraightLegWalkingParameters(false)
                   {
                      @Override
+                     public boolean includeHipPitchPrivilegedConfiguration()
+                     {
+                        return true;
+                     }
+
+                     @Override
                      public double getSpeedForStanceLegStraightening()
                      {
                         return 1.0;
@@ -164,37 +170,37 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getStraightLegPrivilegedConfigurationGain()
+                     public double getKneeStraightLegPrivilegedConfigurationGain()
                      {
                         return 50.0;
                      }
 
                      @Override
-                     public double getStraightLegPrivilegedVelocityGain()
+                     public double getKneeStraightLegPrivilegedVelocityGain()
                      {
                         return 4.0; // 6.0;
                      }
 
                      @Override
-                     public double getStraightLegPrivilegedWeight()
+                     public double getKneeStraightLegPrivilegedWeight()
                      {
                         return 100.0;
                      }
 
                      @Override
-                     public double getBentLegPrivilegedConfigurationGain()
+                     public double getKneeBentLegPrivilegedConfigurationGain()
                      {
                         return 150.0;
                      }
 
                      @Override
-                     public double getBentLegPrivilegedVelocityGain()
+                     public double getKneeBentLegPrivilegedVelocityGain()
                      {
                         return 4.0;
                      }
 
                      @Override
-                     public double getBentLegPrivilegedWeight()
+                     public double getKneeBentLegPrivilegedWeight()
                      {
                         return 10.0;
                      }
