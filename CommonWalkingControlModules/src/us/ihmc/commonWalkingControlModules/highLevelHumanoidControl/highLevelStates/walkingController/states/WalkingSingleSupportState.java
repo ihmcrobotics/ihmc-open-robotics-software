@@ -150,7 +150,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       walkingMessageHandler.clearFootTrajectory();
-      pelvisOrientationManager.updatePelvisPitchOffsetInSwing(supportSide);
 
       switchToToeOffIfPossible(supportSide);
    }
@@ -211,6 +210,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       kneeAngleManager.startSwing(swingSide);
 
+      pelvisOrientationManager.submitTiming(footstepTiming);
       pelvisOrientationManager.initializeSwing(supportSide);
 
       nextFootstep.getPose(desiredFootPoseInWorld);

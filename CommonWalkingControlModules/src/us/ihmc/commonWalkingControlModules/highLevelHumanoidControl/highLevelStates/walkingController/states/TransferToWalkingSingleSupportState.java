@@ -51,6 +51,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      pelvisOrientationManager.submitTiming(walkingMessageHandler.peekTiming(0));
       pelvisOrientationManager.initializeTransfer(transferToSide);
 
       for (int i = 0; i < 3; i++)
