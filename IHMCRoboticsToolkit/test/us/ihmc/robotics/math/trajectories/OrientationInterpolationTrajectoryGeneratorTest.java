@@ -40,7 +40,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    @Before
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST", false, true, true);
+      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST", true, true);
       orientation = new FrameOrientation(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);

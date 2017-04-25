@@ -32,7 +32,7 @@ public class ViconFrames
          viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
       else
       {
-         viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, false, true, false)
+         viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, true, false)
          {
             /**
              * 

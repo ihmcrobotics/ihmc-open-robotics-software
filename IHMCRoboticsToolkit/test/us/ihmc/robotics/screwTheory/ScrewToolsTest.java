@@ -45,8 +45,8 @@ public class ScrewToolsTest
    private ArrayList<RevoluteJoint> joints;
 
    protected static final double epsilon = 1e-10;
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", false, true, true);
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", true, true);
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", true, true);
 
    @Before
    public void setUp()
