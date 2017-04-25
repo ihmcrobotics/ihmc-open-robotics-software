@@ -106,7 +106,7 @@ public class ReferenceFrameTest
 
       public RandomlyChangingFrame(String frameName, ReferenceFrame parentFrame)
       {
-         super(frameName, parentFrame, false, false, false);
+         super(frameName, parentFrame, false, false);
       }
 
       protected void updateTransformToParent(RigidBodyTransform transformToParent)

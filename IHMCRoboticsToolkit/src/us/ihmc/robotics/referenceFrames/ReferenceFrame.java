@@ -41,7 +41,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private final RigidBodyTransform transformToRoot;
    private final RigidBodyTransform inverseTransformToRoot;
 
-   private final boolean isBodyCenteredFrame;
    private final boolean isWorldFrame;
    private final boolean isZupFrame;
 
@@ -49,7 +48,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public static ReferenceFrame constructAWorldFrame(String frameName)
    {
-      ReferenceFrame ret = new ReferenceFrame(frameName, false, true, true)
+      ReferenceFrame ret = new ReferenceFrame(frameName, true, true)
       {
          private static final long serialVersionUID = -8828178814213025690L;
 
@@ -64,12 +63,12 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public static ReferenceFrame constructARootFrame(String frameName)
    {
-      return constructARootFrame(frameName, false, false, false);
+      return constructARootFrame(frameName, false, false);
    }
 
-   public static ReferenceFrame constructARootFrame(String frameName, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
+   public static ReferenceFrame constructARootFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
    {
-      ReferenceFrame ret = new ReferenceFrame(frameName, isBodyCenteredFrame, isWorldFrame, isZupFrame)
+      ReferenceFrame ret = new ReferenceFrame(frameName, isWorldFrame, isZupFrame)
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
@@ -182,7 +181,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       //      if (!RotationFunctions.isRotationProper(transformToParent))
       //         throw new RuntimeException("Rotation not normalized: " + transformToParent);
-      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, true, false, true)
+      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, false, true)
       {
          private static final long serialVersionUID = 5370847059108953557L;
 
@@ -212,25 +211,25 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslation(translationFromParent);
 
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, true, false, false);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
    public static ReferenceFrame constructBodyFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, true, false, false);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false, false);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent,
-         boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
+         boolean isWorldFrame, boolean isZupFrame)
    {
       //      if (!RotationFunctions.isRotationProper(transformToParent))
       //         throw new RuntimeException("Rotation not normalized: " + transformToParent);
-      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, isBodyCenteredFrame, isWorldFrame, isZupFrame)
+      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, isWorldFrame, isZupFrame)
       {
          private static final long serialVersionUID = 4694374344134623529L;
 
@@ -262,7 +261,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.inverseTransformToRoot = new RigidBodyTransform();
       this.transformToParent = new RigidBodyTransform();
 
-      this.isBodyCenteredFrame = false;
       this.isWorldFrame = false;
       this.isZupFrame = false;
    }
@@ -294,7 +292,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     *
     * @param frameName String
     */
-   public ReferenceFrame(String frameName, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
+   public ReferenceFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
@@ -307,7 +305,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.inverseTransformToRoot = null;
       this.transformToParent = null;
 
-      this.isBodyCenteredFrame = isBodyCenteredFrame;
       this.isWorldFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
    }
@@ -322,8 +319,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @param parentFrame Frame
     * @param transformToParent Transform3D
     */
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isBodyCenteredFrame, boolean isWorldFrame,
-         boolean isZupFrame)
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.frameName = frameName;
@@ -336,18 +332,16 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       transformToParent.normalizeRotationPart();
       this.transformToParent = transformToParent;
 
-      this.isBodyCenteredFrame = isBodyCenteredFrame;
       this.isWorldFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
    }
 
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
-      this.isBodyCenteredFrame = isBodyCenteredFrame;
       this.isWorldFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
 
@@ -363,11 +357,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
       }
-   }
-
-   public boolean isBodyCenteredFrame()
-   {
-      return isBodyCenteredFrame;
    }
 
    public boolean isWorldFrame()

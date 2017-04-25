@@ -24,7 +24,7 @@ public class MidFootZUpGroundFrame extends ReferenceFrame
 
    public MidFootZUpGroundFrame(String name, ReferenceFrame frameOne, ReferenceFrame frameTwo)
    {
-      super(name, worldFrame, false, false, true);
+      super(name, worldFrame, false, true);
       this.frameOne = frameOne;
       this.frameTwo = frameTwo;
    }
