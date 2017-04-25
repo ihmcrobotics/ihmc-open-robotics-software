@@ -210,8 +210,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       kneeAngleManager.startSwing(swingSide);
 
-      pelvisOrientationManager.submitTiming(footstepTiming);
-      pelvisOrientationManager.initializeSwing(supportSide);
+      pelvisOrientationManager.initializeSwing(supportSide, swingTime, walkingMessageHandler.peekTiming(0).getTransferTime());
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
