@@ -13,8 +13,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -97,7 +99,7 @@ public class ScrewTools
       return joint;
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, Vector3D centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
       String comFrameName = name + "CoM";
       ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), centerOfMassOffset, comFrameName);
@@ -107,7 +109,7 @@ public class ScrewTools
       return ret;
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
       String comFrameName = name + "CoM";
       ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), inertiaPose, comFrameName);
@@ -117,7 +119,7 @@ public class ScrewTools
       return ret;
    }
 
-   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3D offset, String frameName)
+   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3DReadOnly offset, String frameName)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslationAndIdentityRotation(offset);
