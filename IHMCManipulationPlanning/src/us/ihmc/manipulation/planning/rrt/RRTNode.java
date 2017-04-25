@@ -70,6 +70,14 @@ public abstract class RRTNode implements RRTInterface
    {
       nodeData.setQ(index, data);
    }
+   
+   public final void setNodeData(RRTNode copyNode)
+   {
+      for(int i=0;i<copyNode.getDimensionOfNodeData();i++)
+      {
+         nodeData.setQ(i, copyNode.getNodeData(i));
+      }
+   }
 
    public final void addChildNode(RRTNode childNode)
    {

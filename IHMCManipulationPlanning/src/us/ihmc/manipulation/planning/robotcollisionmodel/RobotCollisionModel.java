@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.robotcollisionmodel;
+package us.ihmc.manipulation.planning.robotcollisionmodel;
 
 import java.util.ArrayList;
 
@@ -15,9 +15,10 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 
 public class RobotCollisionModel
 {
+   private static boolean Debug = false;
    private FullHumanoidRobotModel fullRobotModel;
    
-   private SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
+   public SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
    private CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
 
    private SimpleCollisionShapeFactory shapeFactory;
@@ -27,19 +28,19 @@ public class RobotCollisionModel
    
    private CollisionModelCapsule rightUpperArm;
    private CollisionModelCapsule rightLowerArm;
-   private CollisionModelBox rightHand;
+   public CollisionModelBox rightHand;
    
    private CollisionModelCapsule leftUpperArm;
    private CollisionModelCapsule leftLowerArm;
-   private CollisionModelBox leftHand;
+   public CollisionModelBox leftHand;
    
    private CollisionModelCapsule rightUpperLeg;
    private CollisionModelCapsule rightLowerLeg; 
-   private CollisionModelBox rightFoot;
+   public CollisionModelBox rightFoot;
    
    private CollisionModelCapsule leftUpperLeg;
    private CollisionModelCapsule leftLowerLeg;
-   private CollisionModelBox leftFoot;
+   public CollisionModelBox leftFoot;
    
 
    
@@ -80,12 +81,14 @@ public class RobotCollisionModel
       Point3D translationLFoot = new Point3D(0.02, 0, 0.01);
       leftFoot = new CollisionModelBox(shapeFactory, fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), translationLFoot, 0.26, 0.135, 0.06);      
       
-      PrintTools.info("CollisionShape Define Finished");
+      if(Debug)
+         PrintTools.info("CollisionShape Define Finished");
    }
    
    private void setCollisionMaskAndGroup()
    {
-      PrintTools.info("setCollisionMaskAndGroup Started");
+      if(Debug)
+         PrintTools.info("setCollisionMaskAndGroup Started");
       
       chestBody.getCollisionShape().setCollisionMask        (0b00000000000001);
       pelvisBody.getCollisionShape().setCollisionMask       (0b00000000000010);
@@ -121,24 +124,33 @@ public class RobotCollisionModel
       
       
       
+      if(Debug)
+      {
+         PrintTools.info("chestBody Mask " + chestBody.getCollisionShape().getCollisionMask() +" Group "+chestBody.getCollisionShape().getCollisionGroup());
+         PrintTools.info("pelvisBody Mask " + pelvisBody.getCollisionShape().getCollisionMask() +" Group "+pelvisBody.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightUpperArm Mask " + rightUpperArm.getCollisionShape().getCollisionMask() +" Group "+rightUpperArm.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightLowerArm Mask " + rightLowerArm.getCollisionShape().getCollisionMask() +" Group "+rightLowerArm.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightHand Mask " + rightHand.getCollisionShape().getCollisionMask() +" Group "+rightHand.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftLowerArm Mask " + leftLowerArm.getCollisionShape().getCollisionMask() +" Group "+leftLowerArm.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftUpperArm Mask " + leftUpperArm.getCollisionShape().getCollisionMask() +" Group "+leftUpperArm.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftHand Mask " + leftHand.getCollisionShape().getCollisionMask() +" Group "+leftHand.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightUpperLeg Mask " + rightUpperLeg.getCollisionShape().getCollisionMask() +" Group "+rightUpperLeg.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightLowerLeg Mask " + rightLowerLeg.getCollisionShape().getCollisionMask() +" Group "+rightLowerLeg.getCollisionShape().getCollisionGroup());
+         PrintTools.info("rightFoot Mask " + rightFoot.getCollisionShape().getCollisionMask() +" Group "+rightFoot.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftUpperLeg Mask " + leftUpperLeg.getCollisionShape().getCollisionMask() +" Group "+leftUpperLeg.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftLowerLeg Mask " + leftLowerLeg.getCollisionShape().getCollisionMask() +" Group "+leftLowerLeg.getCollisionShape().getCollisionGroup());
+         PrintTools.info("leftFoot Mask " + leftFoot.getCollisionShape().getCollisionMask() +" Group "+leftFoot.getCollisionShape().getCollisionGroup());
+         
+         PrintTools.info("setCollisionMaskAndGroup Finished");   
+      }
       
-      PrintTools.info("chestBody Mask " + chestBody.getCollisionShape().getCollisionMask() +" Group "+chestBody.getCollisionShape().getCollisionGroup());
-      PrintTools.info("pelvisBody Mask " + pelvisBody.getCollisionShape().getCollisionMask() +" Group "+pelvisBody.getCollisionShape().getCollisionGroup());
-      PrintTools.info("rightUpperArm Mask " + rightUpperArm.getCollisionShape().getCollisionMask() +" Group "+rightUpperArm.getCollisionShape().getCollisionGroup());
-      PrintTools.info("rightLowerArm Mask " + rightLowerArm.getCollisionShape().getCollisionMask() +" Group "+rightLowerArm.getCollisionShape().getCollisionGroup());
-      PrintTools.info("leftUpperArm Mask " + leftUpperArm.getCollisionShape().getCollisionMask() +" Group "+leftUpperArm.getCollisionShape().getCollisionGroup());
-      PrintTools.info("leftLowerArm Mask " + leftLowerArm.getCollisionShape().getCollisionMask() +" Group "+leftLowerArm.getCollisionShape().getCollisionGroup());
-      PrintTools.info("rightUpperLeg Mask " + rightUpperLeg.getCollisionShape().getCollisionMask() +" Group "+rightUpperLeg.getCollisionShape().getCollisionGroup());
-      PrintTools.info("rightLowerLeg Mask " + rightLowerLeg.getCollisionShape().getCollisionMask() +" Group "+rightLowerLeg.getCollisionShape().getCollisionGroup());
-      PrintTools.info("leftUpperLeg Mask " + leftUpperLeg.getCollisionShape().getCollisionMask() +" Group "+leftUpperLeg.getCollisionShape().getCollisionGroup());
-      PrintTools.info("leftLowerLeg Mask " + leftLowerLeg.getCollisionShape().getCollisionMask() +" Group "+leftLowerLeg.getCollisionShape().getCollisionGroup());
-      
-      PrintTools.info("setCollisionMaskAndGroup Finished");
    }
    
    public void update()
    {
-      PrintTools.info("update Start");
+      if(Debug)
+         PrintTools.info("update Start");
+      
       chestBody.updateRighdBodyTransform();
       pelvisBody.updateRighdBodyTransform();
       
@@ -177,7 +189,8 @@ public class RobotCollisionModel
       leftLowerLeg.updateCollisionShape();
       leftFoot.updateCollisionShape();
       
-      PrintTools.info("update Finished");
+      if(Debug)
+         PrintTools.info("update Finished");
    }
    
    public boolean getCollisionResult()
@@ -189,7 +202,7 @@ public class RobotCollisionModel
       {
          for (int i = 0; i<collisionDetectionResult.getNumberOfCollisions();i++)
          {
-            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
+//            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
             
          }
          PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());

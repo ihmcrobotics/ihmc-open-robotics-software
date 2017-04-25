@@ -91,6 +91,7 @@ import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
 import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
@@ -101,7 +102,6 @@ import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisua
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.ThreadTools;
@@ -860,7 +860,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       double simulationDT = this.getDT();
       long recordFrequency = this.getRecordFreq();
-      double timePerRecordTick = ((double) recordFrequency) * simulationDT;
+      double timePerRecordTick = (recordFrequency) * simulationDT;
       return timePerRecordTick;
    }
 
@@ -2352,6 +2352,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
                // Notify all the listeners that the simulation stopped...
                mySimulation.notifySimulateDoneListenersOfException(ex);
+            }
+            catch (AssertionError ae)
+            {
+               System.err.println("\nAssertionError while running simulation:");
+               ae.printStackTrace();
+               stop();
+
+               // Notify all the listeners that the simulation stopped...
+               mySimulation.notifySimulateDoneListenersOfException(ae);
             }
          }
          else if (isPlaying)
