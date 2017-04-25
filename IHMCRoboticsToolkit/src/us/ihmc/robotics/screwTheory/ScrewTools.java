@@ -101,12 +101,9 @@ public class ScrewTools
 
    public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
-      String comFrameName = name + "CoM";
-      ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), centerOfMassOffset, comFrameName);
-      RigidBodyInertia inertia = new RigidBodyInertia(comFrame, momentOfInertia, mass);
-      RigidBody ret = new RigidBody(name, inertia, parentJoint);
-
-      return ret;
+      RigidBodyTransform inertiaPose = new RigidBodyTransform();
+      inertiaPose.setTranslation(centerOfMassOffset);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
    public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
@@ -117,14 +114,6 @@ public class ScrewTools
       RigidBody ret = new RigidBody(name, inertia, parentJoint);
 
       return ret;
-   }
-
-   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3DReadOnly offset, String frameName)
-   {
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslationAndIdentityRotation(offset);
-
-      return createOffsetFrame(parentFrame, transformToParent, frameName);
    }
 
    public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)
