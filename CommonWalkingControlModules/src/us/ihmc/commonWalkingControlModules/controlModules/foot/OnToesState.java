@@ -223,12 +223,13 @@ public class OnToesState extends AbstractFootControlState
    private void setControlPointPositionFromContactLine()
    {
       toeOffCalculator.getToeOffContactLine(toeOffContactLine2d, robotSide);
+      toeOffContactLine2d.midpoint(toeOffContactPoint2d);
 
-      contactPointPosition.setXYIncludingFrame(toeOffContactLine2d.midpoint());
+      contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
-      desiredContactPointPosition.setXYIncludingFrame(toeOffContactLine2d.midpoint());
+      desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 
