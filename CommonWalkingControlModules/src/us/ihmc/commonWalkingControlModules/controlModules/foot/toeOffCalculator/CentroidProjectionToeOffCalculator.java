@@ -63,11 +63,13 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public ToeOffEnum getEnum()
    {
       return ToeOffEnum.CENTROID_PROJECTION;
    }
 
+   @Override
    public void clear()
    {
       exitCMP2d.setToNaN();
@@ -75,6 +77,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       hasComputedToeOffContactLine.set(false);
    }
 
+   @Override
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
@@ -84,6 +87,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
    }
 
+   @Override
    public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
@@ -121,6 +125,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       hasComputedToeOffContactPoint.set(true);
    }
 
+   @Override
    public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactPoint.getBooleanValue())
@@ -129,6 +134,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       contactPointToPack.set(toeOffContactPoint2d);
    }
 
+   @Override
    public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
    {
       computeFootPolygon(trailingLeg);
@@ -156,6 +162,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       hasComputedToeOffContactLine.set(true);
    }
 
+   @Override
    public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
