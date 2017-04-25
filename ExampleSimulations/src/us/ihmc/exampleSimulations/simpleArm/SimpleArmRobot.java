@@ -76,8 +76,7 @@ public class SimpleArmRobot extends Robot
       this.setGravity(0.0, 0.0, -gravity);
 
       // --- id robot ---
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       bodyMap.put(ArmBody.ELEVATOR, elevator);
 
       RevoluteJoint idYawJoint = ScrewTools.addRevoluteJoint("idYawJoint", elevator, new Vector3D(0.0, 0.0, baseHeight), new Vector3D(0.0, 0.0, 1.0));
