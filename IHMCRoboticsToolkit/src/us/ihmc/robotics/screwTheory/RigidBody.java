@@ -44,7 +44,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * This is a reference rigidly attached this rigid-body. It's usually centered at the
     * rigid-body's center of mass.
     */
-   private final ReferenceFrame bodyFixedFrame;
+   private final BodyFixedReferenceFrame bodyFixedFrame;
    /**
     * The parent joint is the joint directly connected to a rigid-body and located between the
     * rigid-body and the robot's root.
@@ -72,6 +72,10 @@ public class RigidBody implements NameBasedHashCodeHolder
    /**
     * A secondary unique hash code representing this rigid-body that is computed based on
     * {@link #name} and the parent joint name if any.
+    * <p>
+    * This hash code has the benefit of remaining the same when creating several instances of the
+    * same robot, such that it can be used to serialize and deserialize robot information.
+    * </p>
     */
    private final long nameBasedHashCode;
 
@@ -93,7 +97,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       this.name = bodyName;
       this.inertia = null;
-      this.bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(bodyName + "Frame", parentInertialFrame, transformToParent, true, isZUpFrame);
+      this.bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, true, isZUpFrame);
       this.parentJoint = null;
    }
 
@@ -107,7 +111,7 @@ public class RigidBody implements NameBasedHashCodeHolder
 
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
-      bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
+      bodyFixedFrame = new BodyFixedReferenceFrame("CoM", this, frameAfterJoint, inertiaPose, false);
       inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
       inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
       parentJoint.setSuccessor(this);
