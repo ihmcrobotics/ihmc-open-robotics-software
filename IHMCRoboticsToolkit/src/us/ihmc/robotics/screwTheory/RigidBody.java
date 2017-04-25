@@ -80,26 +80,28 @@ public class RigidBody implements NameBasedHashCodeHolder
       this(bodyName, new RigidBodyTransform(), parentInertialFrame, true);
    }
 
-   public RigidBody(String name, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame) // root body constructor
+   public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame) // root body constructor
    {
-      this(name, transformToParent, parentInertialFrame, false);
+      this(bodyName, transformToParent, parentInertialFrame, false);
    }
 
-   private RigidBody(String name, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame, boolean isZUpFrame) // root body constructor
+   private RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame, boolean isZUpFrame) // root body constructor
    {
-      if (name == null)
-      {
+      if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
-      }
-      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(name);
-      this.name = name;
+
+      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
+      this.name = bodyName;
       this.inertia = null;
-      this.bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "Frame", parentInertialFrame, transformToParent, true, isZUpFrame);
+      this.bodyFixedFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(bodyName + "Frame", parentInertialFrame, transformToParent, true, isZUpFrame);
       this.parentJoint = null;
    }
 
    public RigidBody(String bodyName, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
+      if (bodyName == null)
+         throw new IllegalArgumentException("Name can not be null");
+
       this.name = bodyName;
       this.parentJoint = parentJoint;
 
