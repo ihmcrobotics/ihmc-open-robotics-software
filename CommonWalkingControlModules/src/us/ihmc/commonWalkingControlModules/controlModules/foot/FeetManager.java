@@ -27,6 +27,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 
 public class FeetManager
@@ -65,7 +66,7 @@ public class FeetManager
       ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
       ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
 
-      HashMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators = new HashMap<>();
+      EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators = new EnumMap<>(ToeOffEnum.class);
       toeOffCalculators.put(centroidProjectionCalculator.getEnum(), centroidProjectionCalculator);
       toeOffCalculators.put(icpPlanCalculator.getEnum(), icpPlanCalculator);
       toeOffCalculators.put(simpleCalculator.getEnum(), simpleCalculator);
