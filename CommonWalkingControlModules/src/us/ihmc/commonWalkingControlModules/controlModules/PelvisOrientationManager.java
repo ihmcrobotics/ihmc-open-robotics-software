@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -48,7 +49,7 @@ public class PelvisOrientationManager
    private static final double pelvisYawAngleDegrees = 40.0; // degrees
    private static final double pelvisPitchRatio = 0.2;
    private static final boolean PELVIS_YAW_FROM_FEET_POSITIONS = true;
-   private static final boolean addPelvisOffsetsWhileStepping = false;
+   private static final boolean addPelvisOffsetsWhileStepping = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -108,14 +109,15 @@ public class PelvisOrientationManager
    private final DoubleYoVariable transferDuration = new DoubleYoVariable("pelvisTransferDuration", registry);
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("pelvisSwingDuration", registry);
 
-   private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
    private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
-   private final DoubleYoVariable pelvisYawRatio = new DoubleYoVariable("pelvisYawRatio", registry);
-   private final DoubleYoVariable pelvisYawAngle = new DoubleYoVariable("pelvisYawAngle", registry);
+   private final DoubleYoVariable pelvisYawAngleRatio = new DoubleYoVariable("pelvisYawAngleRatio", registry);
 
    private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
    private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
+
+   private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
+   private final DoubleYoVariable pelvisYawAngle = new DoubleYoVariable("pelvisYawAngle", registry);
 
    private RobotSide supportSide;
 
@@ -178,7 +180,7 @@ public class PelvisOrientationManager
       addPelvisOffsetsBasedOnStep.set(addPelvisOffsetsWhileStepping);
       pelvisPitchAngleRatio.set(pelvisPitchRatio);
       pelvisYawAngle.set(pelvisYawAngleDegrees);
-      pelvisYawRatio.set(0.2);
+      pelvisYawAngleRatio.set(0.2);
 
       parentRegistry.addChild(registry);
       
@@ -706,7 +708,7 @@ public class PelvisOrientationManager
          tmpPoint.setToZero(ankleZUpFrames.get(supportSide));
          tmpPoint.changeFrame(ankleZUpFrames.get(supportSide.getOppositeSide()));
          double stepAngle = transferToSide.negateIfLeftSide(computeStepAngle(tmpPoint));
-         double pelvisYawSineMagnitude = pelvisYawRatio.getDoubleValue() * stepAngle;
+         double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
 
          // compute pelvis frequency
          double initialPelvisDesiredYaw = desiredPelvisOffsetWhileWalking.getYaw().getDoubleValue();
@@ -740,7 +742,7 @@ public class PelvisOrientationManager
          tmpPoint.setToZero(ankleZUpFrames.get(supportSide));
          tmpPoint.changeFrame(ankleZUpFrames.get(supportSide.getOppositeSide()));
          double stepAngle = supportSide.negateIfRightSide(computeStepAngle(upcomingFootstepLocation));
-         double pelvisYawSineMagnitude = pelvisYawRatio.getDoubleValue() * stepAngle;
+         double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
          this.pelvisYawSineMagnitude.set(pelvisYawSineMagnitude);
 
          // compute pelvis frequency
@@ -775,8 +777,10 @@ public class PelvisOrientationManager
       }
    }
 
+   // // TODO: 4/25/17  make the angle also a function of the height 
    private final FramePoint stanceLine = new FramePoint();
    private final FramePoint trailingStanceLine = new FramePoint();
+
    private void updatePelvisPitchOffsetInTransfer(RobotSide transferToSide)
    {
       stanceLine.setToZero(pelvisFrame);
@@ -792,8 +796,9 @@ public class PelvisOrientationManager
       double trailingLegAngle = Math.atan2(distanceFromTrailingFoot, heightFromTrailingFoot);
 
       double phaseInState = timeInState.getDoubleValue() / transferDuration.getDoubleValue();
+      double interpolation = hermiteInterpolation(phaseInState);
 
-      double interpolatedLegAngle = TupleTools.interpolate(trailingLegAngle, leadingLegAngle, phaseInState);
+      double interpolatedLegAngle = TupleTools.interpolate(trailingLegAngle, leadingLegAngle, interpolation);
 
       desiredPelvisOffsetWhileWalking.setPitch(pelvisPitchAngleRatio.getDoubleValue() * interpolatedLegAngle);
    }
@@ -843,6 +848,13 @@ public class PelvisOrientationManager
          double yaw = pelvisYawSineMagnitude.getDoubleValue() * Math.sin(timeInStep * pelvisYawSineFrequency.getDoubleValue() * 2.0 * Math.PI);
          desiredPelvisOffsetWhileWalking.setYaw(yaw);
       }
+   }
+
+   private static double hermiteInterpolation(double phase)
+   {
+      phase = MathTools.clamp(phase, 0.0, 1.0);
+
+      return -2.0 * Math.pow(phase, 3.0) + 3.0 * Math.pow(phase, 2.0);
    }
 
 
