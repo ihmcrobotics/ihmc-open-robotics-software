@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavio
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
@@ -235,7 +235,7 @@ public class IHMCHumanoidBehaviorManager
                                                                                                              fiducialDetectorBehaviorService));
       
       dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR,
-                             new SolarPanelBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, wholeBodyControllerParameters, fullRobotModel));
+                             new SolarPanelStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, wholeBodyControllerParameters, fullRobotModel));
 
       if (objectDetectorBehaviorService != null)
       {
