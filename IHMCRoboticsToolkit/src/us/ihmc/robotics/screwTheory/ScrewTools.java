@@ -99,6 +99,16 @@ public class ScrewTools
       return joint;
    }
 
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
+   {
+      Matrix3D momentOfInertia = new Matrix3D();
+      momentOfInertia.setIdentity();
+      momentOfInertia.setM00(Ixx);
+      momentOfInertia.setM11(Iyy);
+      momentOfInertia.setM22(Izz);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
+   }
+
    public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
