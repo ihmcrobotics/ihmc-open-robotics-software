@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -113,7 +114,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       clear();
       
       this.ikFullRobotModel = getFullHumanoidRobotModel();
-
       this.robotCollisionModel = new RobotCollisionModel(this.ikFullRobotModel); 
    }
    
@@ -267,10 +267,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       setUpHasBeenDone();
       
       ThreadTools.sleep(10);
-      for(int i=0;i<1500;i++)
+      for(int i=0;i<10;i++)
       {
-         //PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
-         ThreadTools.sleep(1);
+         PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
+         ThreadTools.sleep(150);
          if(isSolved == true)
          {
             //PrintTools.info("SQ "+ currentSolutionQuality);
@@ -313,7 +313,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
-                                                                                                  desiredHandOrientation);
+                                                                                                  desiredHandOrientation);            
             handMessage.setWeight(20.0);
             handMessages.put(robotSide, handMessage);
          }
@@ -366,7 +366,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    @Override
    public void doControl()
-   {      
+   {  
+      ThreadTools.sleep(500);
+      PrintTools.info("!!!");
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable())
       {
          if(isSendingPacket == true)
@@ -434,7 +436,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
-            if(false)
+            if(true)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality);
             if(false)
                PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
@@ -461,7 +463,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      PrintTools.info("Validity Tester start! ");      
+      PrintTools.info("");
+      PrintTools.info("Validity Tester start! ");
+      PrintTools.info("");
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);
@@ -511,7 +515,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       
       if(cntOfSeries > 20)
       {
-         OneDoFJoint oneDoFJoint = getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit];
+//         OneDoFJoint oneDoFJoint = getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit];
 //         PrintTools.info("limit index is "+ oneDoFJoint.getName()+" " + oneDoFJoint.getJointLimitLower()+" " + oneDoFJoint.getJointLimitUpper() + " " +newestSolution.getJointAngles()[indexOfLimit]
 //               +" "+jointLimitThreshold.getDoubleValue());
          return true;
@@ -542,6 +546,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
+      PrintTools.info("");
+      PrintTools.info("Validity Tester END END! ");
+      PrintTools.info("");
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);
@@ -581,17 +588,12 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    private void getCollisionResult()
    {
-      // collision tester
       robotCollisionModel = new RobotCollisionModel(getFullHumanoidRobotModel());
       addEnvironmentCollisionModel();
       
       robotCollisionModel.update();
       isCollisionFree = robotCollisionModel.getCollisionResult();
 
-//      // joint limit tester
-//      /*
-//       * joint limit should be added. 170401
-//       */
 //      isGoodIKSolution = true;
    }
 

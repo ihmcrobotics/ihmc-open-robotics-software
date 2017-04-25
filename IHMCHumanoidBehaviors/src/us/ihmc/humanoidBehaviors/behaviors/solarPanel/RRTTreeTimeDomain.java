@@ -137,14 +137,14 @@ public class RRTTreeTimeDomain extends RRTTree
          {
               nearNode.addChildNode(this.newNode);
               wholeNodes.add(newNode);
-//              PrintTools.info("Node Added");
+              PrintTools.info("Node Added");
               return true;
          }
       }
       else
       {
          failNodes.add(newNode);
-//         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
+         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
       }
       return false;
    }

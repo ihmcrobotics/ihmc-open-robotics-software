@@ -235,7 +235,7 @@ public class IHMCHumanoidBehaviorManager
                                                                                                              fiducialDetectorBehaviorService));
       
       dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR,
-                             new SolarPanelBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
+                             new SolarPanelBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, wholeBodyControllerParameters, fullRobotModel));
 
       if (objectDetectorBehaviorService != null)
       {

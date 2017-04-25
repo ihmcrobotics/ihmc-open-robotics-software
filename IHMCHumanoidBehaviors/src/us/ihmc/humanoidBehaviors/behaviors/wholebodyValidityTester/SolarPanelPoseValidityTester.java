@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -24,6 +25,8 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
                                        FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModelFactory, outgoingCommunicationBridge, fullRobotModel);
+      PrintTools.info("");
+      PrintTools.info(""+fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW).getQ());
    }
    
    public void setSolarPanel(SolarPanel solarPanel)
@@ -62,7 +65,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
       Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
-      //PrintTools.info("IN "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
+      // PrintTools.info("IN "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    
