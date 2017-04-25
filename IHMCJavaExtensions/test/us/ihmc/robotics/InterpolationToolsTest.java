@@ -327,4 +327,68 @@ public class InterpolationToolsTest
          assertEquals(value, average, epsilon);
       }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testHermiteCoefficients()
+   {
+      // left bound
+      double h00 = InterpolationTools.hermite00Coefficient(0.0);
+      assertEquals(h00, 1.0, epsilon);
+
+      double h10 = InterpolationTools.hermite10Coefficient(0.0);
+      assertEquals(h10, 0.0, epsilon);
+
+      double h01 = InterpolationTools.hermite01Coefficient(0.0);
+      assertEquals(h01, 0.0, epsilon);
+
+      double h11 = InterpolationTools.hermite11Coefficient(0.0);
+      assertEquals(h11, 0.0, epsilon);
+
+      // right bound
+      h00 = InterpolationTools.hermite00Coefficient(1.0);
+      assertEquals(h00, 0.0, epsilon);
+
+      h10 = InterpolationTools.hermite10Coefficient(1.0);
+      assertEquals(h10, 0.0, epsilon);
+
+      h01 = InterpolationTools.hermite01Coefficient(1.0);
+      assertEquals(h01, 1.0, epsilon);
+
+      h11 = InterpolationTools.hermite11Coefficient(1.0);
+      assertEquals(h11, 0.0, epsilon);
+
+      // midpoint
+      h00 = InterpolationTools.hermite00Coefficient(0.5);
+      assertEquals(h00, 0.5, epsilon);
+
+      h10 = InterpolationTools.hermite10Coefficient(0.5);
+      assertEquals(h10, 0.125, epsilon);
+
+      h01 = InterpolationTools.hermite01Coefficient(0.5);
+      assertEquals(h01, 0.5, epsilon);
+
+      h11 = InterpolationTools.hermite11Coefficient(0.5);
+      assertEquals(h11, -0.125, epsilon);
+
+      for (int i = 0; i < iters; i++)
+      {
+         double alpha = random.nextDouble();
+         h00 = InterpolationTools.hermite00Coefficient(alpha);
+         double h00ShouldBe = 2.0 * Math.pow(alpha, 3.0) - 3.0 * Math.pow(alpha, 2.0) + 1.0;
+         assertEquals(h00, h00ShouldBe, epsilon);
+
+         h10 = InterpolationTools.hermite10Coefficient(alpha);
+         double h10ShouldBe = Math.pow(alpha, 3.0) - 2.0 * Math.pow(alpha, 2.0) + alpha;
+         assertEquals(h10, h10ShouldBe, epsilon);
+
+         h01 = InterpolationTools.hermite01Coefficient(alpha);
+         double h01ShouldBe = -2.0 * Math.pow(alpha, 3.0) + 3.0 * Math.pow(alpha, 2.0);
+         assertEquals(h01, h01ShouldBe, epsilon);
+
+         h11 = InterpolationTools.hermite11Coefficient(alpha);
+         double h11ShouldBe = Math.pow(alpha, 3.0) - Math.pow(alpha, 2.0);
+         assertEquals(h11, h11ShouldBe, epsilon);
+      }
+   }
 }
