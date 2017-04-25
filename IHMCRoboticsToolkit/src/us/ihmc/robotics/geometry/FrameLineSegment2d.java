@@ -119,13 +119,13 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       lineSegment.set(lineSegment.endpoints[0], secondEndpoint.getPoint());
    }
 
-   public void setFirstEndpoint(ReferenceFrame referenceFrame, Point2D firstEndPoint)
+   public void setFirstEndpoint(ReferenceFrame referenceFrame, Point2DReadOnly firstEndPoint)
    {
       this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
       lineSegment.set(firstEndPoint, lineSegment.endpoints[1]);
    }
 
-   public void setSecondEndpoint(ReferenceFrame referenceFrame, Point2D secondEndPoint)
+   public void setSecondEndpoint(ReferenceFrame referenceFrame, Point2DReadOnly secondEndPoint)
    {
       this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
       lineSegment.set(lineSegment.endpoints[0], secondEndPoint);
@@ -173,12 +173,12 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       secondEndpointToPack.set(lineSegment.endpoints[1]);
    }
 
-   public Point2D getFirstEndpoint()
+   public Point2DReadOnly getFirstEndpoint()
    {
       return lineSegment.endpoints[0];
    }
 
-   public Point2D getSecondEndpoint()
+   public Point2DReadOnly getSecondEndpoint()
    {
       return lineSegment.endpoints[1];
    }
