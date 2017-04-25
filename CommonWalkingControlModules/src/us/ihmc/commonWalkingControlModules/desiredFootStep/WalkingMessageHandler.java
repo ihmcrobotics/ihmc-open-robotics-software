@@ -70,6 +70,8 @@ public class WalkingMessageHandler
    private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
    private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
 
+   private final BooleanYoVariable isWalking = new BooleanYoVariable("isWalking", registry);
+
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
    private final EnumYoVariable<RobotSide>[] upcomingFoostepSide = new EnumYoVariable[numberOfFootstepsToVisualize];
@@ -368,6 +370,7 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
       statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      isWalking.set(true);
    }
 
    public void reportWalkingComplete()
@@ -375,6 +378,7 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+      isWalking.set(false);
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
@@ -595,7 +599,7 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         if (upcomingFootstepTimings.isEmpty())
+         if (upcomingFootstepTimings.isEmpty() && !isWalking.getBooleanValue())
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
