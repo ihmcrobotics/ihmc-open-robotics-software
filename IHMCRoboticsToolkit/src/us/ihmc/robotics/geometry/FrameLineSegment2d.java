@@ -260,6 +260,12 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return new FramePoint2d(referenceFrame, x, y);
    }
 
+   public void midpoint(FramePoint2d midpointToPack)
+   {
+      midpointToPack.setToZero(referenceFrame);
+      midpointToPack.interpolate(lineSegment.endpoints[0], lineSegment.endpoints[1], 0.5);
+   }
+
    public double dotProduct(FrameLineSegment2d frameLineSegment2d)
    {
       checkReferenceFrameMatch(frameLineSegment2d);
