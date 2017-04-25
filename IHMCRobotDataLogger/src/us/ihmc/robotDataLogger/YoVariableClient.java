@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
-import javax.swing.plaf.synth.SynthSplitPaneUI;
-
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
