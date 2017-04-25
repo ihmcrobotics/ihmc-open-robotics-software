@@ -1,6 +1,6 @@
 package us.ihmc.atlas.packets;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 
@@ -21,7 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -52,7 +52,7 @@ public class AtlasRobotConfigurationDataTest
          joints[i] = new RevoluteJoint("noot", body, ReferenceFrame.getWorldFrame(), new FrameVector(ReferenceFrame.getWorldFrame(), 1, 0, 0));
       }
       
-      RigidBody body2 = new RigidBody("mies", new RigidBodyInertia(ReferenceFrame.getWorldFrame(), new Matrix3D(), 10.0), joints[0]);
+      RigidBody body2 = ScrewTools.addRigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());
       IMUDefinition imuSensorDefinitions[] = new IMUDefinition[3];
       for (int i = 0; i < imuSensorDefinitions.length; i++)
       {

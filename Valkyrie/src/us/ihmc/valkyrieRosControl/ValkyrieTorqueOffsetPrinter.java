@@ -16,7 +16,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -172,8 +171,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       ValkyrieTorqueOffsetPrinter printer = new ValkyrieTorqueOffsetPrinter();
       
       List<RevoluteJoint> revoluteJoints = new ArrayList<>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("elevatorFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody("elevator", elevatorFrame);
+      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       final Random random = new Random();
       Vector3D[] jointAxes = new Vector3D[random.nextInt(10)];
       for (int i = 0; i < jointAxes.length; i++)

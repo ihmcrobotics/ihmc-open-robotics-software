@@ -312,9 +312,9 @@ public class SimulatedIMURawSensorReaderTest
       public TestingRobotModel()
       {
          worldFrame = ReferenceFrame.getWorldFrame();
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
 
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
 
          rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
 
