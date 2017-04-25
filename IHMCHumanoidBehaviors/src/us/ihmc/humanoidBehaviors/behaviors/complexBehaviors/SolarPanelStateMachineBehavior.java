@@ -4,7 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelBehaviorStateMachine.SolarPanelStates;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelStateMachineBehavior.SolarPanelStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
@@ -29,7 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPanelStates>
+public class SolarPanelStateMachineBehavior extends StateMachineBehavior<SolarPanelStates>
 {
    private final AtlasPrimitiveActions atlasPrimitiveActions;   
    
@@ -49,7 +49,7 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
       HOME_MOTION, GET_SOLARPANEL, READY_MOTION, TESTER_ACTIVATE, PLANNING, CLEANING_MOTION, DONE
    }
    
-   public SolarPanelBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, 
+   public SolarPanelStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, 
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel)
    {
       super("SolarPanelBehaviorStateMachine", SolarPanelStates.class, yoTime, communicationBridge);

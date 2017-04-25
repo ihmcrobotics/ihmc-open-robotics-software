@@ -83,7 +83,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.06);
       solutionStableThreshold = new DoubleYoVariable(behaviorName + "solutionStableThreshold", registry);
-      solutionStableThreshold.set(0.005);
+      solutionStableThreshold.set(0.006);
       jointLimitThreshold = new DoubleYoVariable(behaviorName + "jointLimitThreshold", registry);
       jointLimitThreshold.set(Math.PI/180 * 0.5);
       isPaused = new BooleanYoVariable(behaviorName + "IsPaused", registry);
@@ -267,10 +267,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       setUpHasBeenDone();
       
       ThreadTools.sleep(10);
-      for(int i=0;i<10;i++)
+      for(int i=0;i<3000;i++)
       {
-         PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
-         ThreadTools.sleep(150);
+         ThreadTools.sleep(1);
          if(isSolved == true)
          {
             //PrintTools.info("SQ "+ currentSolutionQuality);
@@ -288,7 +287,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       if(Debug)
          PrintTools.info("No solution ");
       
-      forceOut();      
+      forceOut();       
       
       return false;
    }
@@ -367,8 +366,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void doControl()
    {  
-      ThreadTools.sleep(500);
-      PrintTools.info("!!!");
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable())
       {
          if(isSendingPacket == true)
@@ -421,24 +418,14 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             // break condition 2. joint limit            
             isJointLimit = isJointLimit(newestSolution);
             
-            
-            
-            
-            
-            
-            
-            
-            
             outputConverter.updateFullRobotModel(newestSolution);
-            
-            
             
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
             if(true)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality);
-            if(false)
+            if(true)
                PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
                                +" isReceived "+isReceived
                                +" isGoodSolutionCur "+isGoodSolutionCur                            

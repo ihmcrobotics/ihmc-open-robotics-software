@@ -30,6 +30,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.RRTExpandingStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomainTree;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
@@ -168,10 +171,10 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       setupKinematicsToolboxModule();
    }
    
-   //@Test
+   @Test
    public void testAPose() throws SimulationExceededMaximumTimeException, IOException
    {
-      ThreadTools.sleep(10000);
+      ThreadTools.sleep(15000);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -213,7 +216,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("Final Result is "+tester.getIKResult());
       PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
       PrintTools.info("");      
-      
       
       
       handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
@@ -273,7 +275,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    }
    
    
-   @Test
+   //@Test
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -354,7 +356,33 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
      
    }
    
-   
+   //@Test
+   public void testRRTPlannerBehavior() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      
+      TimeDomain1DNode rootNode = new TimeDomain1DNode();      
+            
+      TimeDomainTree rrtTree = new TimeDomainTree(rootNode);
+      
+      RRTExpandingStateMachineBehavior treeExpandingBehavior = new RRTExpandingStateMachineBehavior(rootNode, rrtTree, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                    drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      
+      drcBehaviorTestHelper.dispatchBehavior(treeExpandingBehavior);
+      
+      
+      
+      
+      
+           
+   }
    
    
   
