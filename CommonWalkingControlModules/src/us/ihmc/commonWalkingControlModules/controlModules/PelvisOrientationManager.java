@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -17,7 +18,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -42,6 +45,9 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 public class PelvisOrientationManager
 {
    private static final double defaultTrajectoryTime = 1.0;
+
+   private static final double pelvisYawAngleDegrees = 10.0; // degrees
+   private static final double pelvisPitchRatio = 0.2;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -69,6 +75,8 @@ public class PelvisOrientationManager
    private final YoFrameOrientation desiredPelvisOrientationWithOffset = new YoFrameOrientation("desiredPelvisOrientationWithOffset", worldFrame, registry);
 
    private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable timeInState = new DoubleYoVariable("pelvisOrientationTimeInState", registry);
+   private double initialTime;
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final YoFrameVector yoPelvisAngularWeight = new YoFrameVector("pelvisWeight", null, registry);
@@ -96,9 +104,13 @@ public class PelvisOrientationManager
    private final BooleanYoVariable isStanding = new BooleanYoVariable("pelvisIsStanding", registry);
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable("pelvisInInTransfer", registry);
 
+   private final DoubleYoVariable transferDuration = new DoubleYoVariable("pelvisTransferDuration", registry);
+   private final DoubleYoVariable swingDuration = new DoubleYoVariable("pelvisSwingDuration", registry);
+
    private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
    private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
+   private final DoubleYoVariable pelvisYawAngle = new DoubleYoVariable("pelvisYawAngle", registry);
 
    private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
    private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
@@ -161,10 +173,9 @@ public class PelvisOrientationManager
       isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisOrientationTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
-      pelvisYawSineFrequency.set(1.0);
-
       addPelvisOffsetsBasedOnStep.set(true);
-      pelvisPitchAngleRatio.set(0.2);
+      pelvisPitchAngleRatio.set(pelvisPitchRatio);
+      pelvisYawAngle.set(pelvisYawAngleDegrees);
 
       parentRegistry.addChild(registry);
       
@@ -224,6 +235,7 @@ public class PelvisOrientationManager
    public void compute()
    {
       double deltaTime = yoTime.getDoubleValue() - initialPelvisOrientationTime.getDoubleValue();
+
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
       pelvisOrientationTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
 
@@ -645,17 +657,35 @@ public class PelvisOrientationManager
       isInTransfer.set(false);
    }
 
+   public void submitTiming(FootstepTiming timing)
+   {
+      transferDuration.set(timing.getTransferTime());
+      swingDuration.set(timing.getSwingTime());
+   }
+
    public void initializeTransfer(RobotSide transferToSide)
    {
       supportSide = transferToSide;
+
+      initialTime = yoTime.getDoubleValue();
+
+      double stepDuration = transferDuration.getDoubleValue() + swingDuration.getDoubleValue();
+      pelvisYawSineFrequency.set(1.0 / stepDuration);
+      pelvisYawSineMagnitude.set(transferToSide.negateIfRightSide(Math.toRadians(pelvisYawAngle.getDoubleValue())));
 
       isStanding.set(false);
       isInTransfer.set(true);
    }
 
-   public void initializeSwing(RobotSide supportSide)
+   public void initializeSwing(RobotSide supportSide)//, Footstep upcomingFootstep)
    {
       this.supportSide = supportSide;
+
+      initialTime = yoTime.getDoubleValue();
+
+      double stepDuration = transferDuration.getDoubleValue() + swingDuration.getDoubleValue();
+      pelvisYawSineFrequency.set(1.0 / stepDuration);
+      pelvisYawSineMagnitude.set(supportSide.negateIfRightSide(Math.toRadians(pelvisYawAngle.getDoubleValue())));
 
       isStanding.set(false);
       isInTransfer.set(false);
@@ -667,27 +697,72 @@ public class PelvisOrientationManager
       {
          desiredPelvisOffsetWhileWalking.setToZero();
       }
-      else if (isInTransfer.getBooleanValue())
-      {
-      }
       else
       {
-         updatePelvisPitchOffsetInSwing(supportSide);
+         timeInState.set(yoTime.getDoubleValue() - initialTime);
+
+         if (isInTransfer.getBooleanValue())
+         {
+            pelvisYawSineMagnitude.set(supportSide.negateIfLeftSide(Math.toRadians(pelvisYawAngle.getDoubleValue())));
+            updatePelvisPitchOffsetInTransfer(supportSide);
+            updatePelvisYawOffsetInTransfer();
+         }
+         else
+         {
+            pelvisYawSineMagnitude.set(supportSide.negateIfRightSide(Math.toRadians(pelvisYawAngle.getDoubleValue())));
+            updatePelvisPitchOffsetInSwing(supportSide);
+            updatePelvisYawOffsetInSwing();
+         }
       }
    }
 
-   private final FramePoint tmpPoint = new FramePoint();
-   public void updatePelvisPitchOffsetInSwing(RobotSide supportSide) // // TODO: 4/23/17  make this internal
+   private final FramePoint stanceLine = new FramePoint();
+   private void updatePelvisPitchOffsetInSwing(RobotSide supportSide)
    {
-      tmpPoint.setToZero(pelvisFrame);
-      tmpPoint.changeFrame(ankleZUpFrames.get(supportSide));
-      double distanceFromFoot = tmpPoint.getX();
-      double heightFromFoot = tmpPoint.getZ();
+      stanceLine.setToZero(pelvisFrame);
+      stanceLine.changeFrame(ankleZUpFrames.get(supportSide));
+      double distanceFromFoot = stanceLine.getX();
+      double heightFromFoot = stanceLine.getZ();
       double supportLegAngle = Math.atan2(distanceFromFoot, heightFromFoot);
 
-      // // TODO: 4/23/17  make the pelvis pitch offset calculation reduce pitch based on knee bend
       desiredPelvisOffsetWhileWalking.setPitch(pelvisPitchAngleRatio.getDoubleValue() * supportLegAngle);
    }
+
+   private final FramePoint trailingStanceLine = new FramePoint();
+   private void updatePelvisPitchOffsetInTransfer(RobotSide transferToSide)
+   {
+      stanceLine.setToZero(pelvisFrame);
+      stanceLine.changeFrame(ankleZUpFrames.get(transferToSide));
+      double distanceFromSupportFoot = stanceLine.getX();
+      double heightFromSupportFoot = stanceLine.getZ();
+      double leadingLegAngle = Math.atan2(distanceFromSupportFoot, heightFromSupportFoot);
+
+      trailingStanceLine.setToZero(pelvisFrame);
+      trailingStanceLine.changeFrame(ankleZUpFrames.get(transferToSide.getOppositeSide()));
+      double distanceFromTrailingFoot = trailingStanceLine.getX();
+      double heightFromTrailingFoot = trailingStanceLine.getZ();
+      double trailingLegAngle = Math.atan2(distanceFromTrailingFoot, heightFromTrailingFoot);
+
+      double phaseInState = timeInState.getDoubleValue() / transferDuration.getDoubleValue();
+
+      double interpolatedLegAngle = TupleTools.interpolate(trailingLegAngle, leadingLegAngle, phaseInState);
+
+      desiredPelvisOffsetWhileWalking.setPitch(pelvisPitchAngleRatio.getDoubleValue() * interpolatedLegAngle);
+   }
+
+   private void updatePelvisYawOffsetInSwing()
+   {
+      double timeInState = this.timeInState.getDoubleValue() + transferDuration.getDoubleValue();
+      double yaw = pelvisYawSineMagnitude.getDoubleValue() * Math.sin(timeInState * pelvisYawSineFrequency.getDoubleValue() * 2.0 * Math.PI);
+      desiredPelvisOffsetWhileWalking.setYaw(yaw);
+   }
+
+   private void updatePelvisYawOffsetInTransfer()
+   {
+      double yaw = pelvisYawSineMagnitude.getDoubleValue() * Math.sin(timeInState.getDoubleValue() * pelvisYawSineFrequency.getDoubleValue() * 2.0 * Math.PI);
+      desiredPelvisOffsetWhileWalking.setYaw(yaw);
+   }
+
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
