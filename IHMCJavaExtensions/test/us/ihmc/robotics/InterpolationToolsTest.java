@@ -1,8 +1,6 @@
 package us.ihmc.robotics;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -147,6 +145,22 @@ public class InterpolationToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testLinearInterpolate()
+   {
+      for (int i = 0; i < iters; i++)
+      {
+         double boundA = 10.0 * random.nextDouble();
+         double boundB = 10.0 * random.nextDouble();
+
+         double average = 0.5 * (boundA + boundB);
+
+         double value = InterpolationTools.linearInterpolate(boundA, boundB, 0.5);
+         assertEquals(value, average, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testHermite01InterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -159,6 +173,22 @@ public class InterpolationToolsTest
 
          value = InterpolationTools.hermite01Interpolate(boundA, boundB, 1.0);
          assertEquals(value, boundB, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testHermite01Interpolate()
+   {
+      for (int i = 0; i < iters; i++)
+      {
+         double boundA = 10.0 * random.nextDouble();
+         double boundB = 10.0 * random.nextDouble();
+
+         double average = 0.5 * (boundA + boundB);
+
+         double value = InterpolationTools.hermite01Interpolate(boundA, boundB, 0.5);
+         assertEquals(value, average, epsilon);
       }
    }
 
@@ -189,6 +219,22 @@ public class InterpolationToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testHermiteInterpolate()
+   {
+      for (int i = 0; i < iters; i++)
+      {
+         double boundA = 10.0 * random.nextDouble();
+         double boundB = 10.0 * random.nextDouble();
+
+         double average = 0.5 * (boundA + boundB);
+
+         double value = InterpolationTools.hermiteInterpolate(boundA, boundB, 0.5);
+         assertEquals(value, average, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLogisticInterpolateBounds()
    {
       for (int i = 0; i < iters; i++)
@@ -201,9 +247,37 @@ public class InterpolationToolsTest
 
          value = InterpolationTools.logisticInterpolate(boundA, boundB, 1.0);
          assertEquals(value, boundB, 1e-1);
-      }
 
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, -0.1);
+         assertEquals(value, boundA, 1e-1);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, -1.0);
+         assertEquals(value, boundA, 1e-1);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, 1.1);
+         assertEquals(value, boundB, 1e-1);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, 2.0);
+         assertEquals(value, boundB, 1e-1);
+      }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testLogisticInterpolate()
+   {
+      for (int i = 0; i < iters; i++)
+      {
+         double boundA = 10.0 * random.nextDouble();
+         double boundB = 10.0 * random.nextDouble();
+
+         double average = 0.5 * (boundA + boundB);
+
+         double value = InterpolationTools.logisticInterpolate(boundA, boundB, 0.5);
+         assertEquals(value, average, epsilon);
+      }
+   }
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -214,12 +288,43 @@ public class InterpolationToolsTest
          double boundA = 10.0 * random.nextDouble();
          double boundB = 10.0 * random.nextDouble();
 
-         double value = InterpolationTools.logisticInterpolate(boundA, boundB, 0.0, 10.0);
+         double slope = 10.0;
+
+         double value = InterpolationTools.logisticInterpolate(boundA, boundB, 0.0, slope);
          assertEquals(value, boundA, epsilon);
 
-         value = InterpolationTools.logisticInterpolate(boundA, boundB, 1.0, 10.0);
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, 1.0, slope);
+         assertEquals(value, boundB, epsilon);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, -0.1, slope);
+         assertEquals(value, boundA, epsilon);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, -1.0, slope);
+         assertEquals(value, boundA, epsilon);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, 1.1, slope);
+         assertEquals(value, boundB, epsilon);
+
+         value = InterpolationTools.logisticInterpolate(boundA, boundB, 2.0, slope);
          assertEquals(value, boundB, epsilon);
       }
+   }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testLogisticInterpolateSloped()
+   {
+      for (int i = 0; i < iters; i++)
+      {
+         double boundA = 10.0 * random.nextDouble();
+         double boundB = 10.0 * random.nextDouble();
+
+         double slope = 10.0;
+
+         double average = 0.5 * (boundA + boundB);
+
+         double value = InterpolationTools.logisticInterpolate(boundA, boundB, 0.5, slope);
+         assertEquals(value, average, epsilon);
+      }
    }
 }
