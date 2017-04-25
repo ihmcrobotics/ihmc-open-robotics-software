@@ -31,27 +31,32 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public ToeOffEnum getEnum()
    {
       return ToeOffEnum.SIMPLE;
    }
 
+   @Override
    public void clear()
    {
       hasComputedToeOffContactPoint.set(false);
       hasComputedToeOffContactLine.set(false);
    }
 
+   @Override
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
    }
 
+   @Override
    public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg)
    {
       feet.get(trailingLeg).getToeOffContactPoint(toeOffContactPoint2d);
       hasComputedToeOffContactPoint.set(true);
    }
 
+   @Override
    public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactPoint.getBooleanValue())
@@ -60,12 +65,14 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
       contactPointToPack.set(toeOffContactPoint2d);
    }
 
+   @Override
    public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
    {
       feet.get(trailingLeg).getToeOffContactLine(toeOffContactLine2d);
       hasComputedToeOffContactLine.set(true);
    }
 
+   @Override
    public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
