@@ -2,9 +2,12 @@ package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,6 +29,11 @@ public class SolarPanelPath
    public ArrayList<Double> getArrivalTime()
    {
       return arrivalTime;
+   }
+   
+   public ArrayList<SolarPanelLinearPath> getLinearPath()
+   {
+      return linearPath;
    }
    
    public void addCleaningPose(SolarPanelCleaningPose cleaningPose, double timeToGo)
@@ -62,11 +70,10 @@ public class SolarPanelPath
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);      
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(defaultMotionTime, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-      
+
       message.setHandTrajectoryMessage(handTrajectoryMessage);
       message.setChestTrajectoryMessage(chestTrajectoryMessage);
       //message.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);      
-      
       
       return message;
    }

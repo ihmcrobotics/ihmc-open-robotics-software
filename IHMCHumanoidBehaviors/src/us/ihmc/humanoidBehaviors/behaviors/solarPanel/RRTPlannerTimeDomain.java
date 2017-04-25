@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrttimedomain;
+package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
 public class RRTPlannerTimeDomain
 {
-   private RRTNode rootNode;
+   protected RRTNode rootNode;
    private RRTTreeTimeDomain rrtTree;
 
    private RRTPiecewisePath rrtPiecewisePath;
@@ -40,7 +40,7 @@ public class RRTPlannerTimeDomain
             if (rrtTree.getTime(rrtTree.getNewNode()) == rrtTree.getMotionTime())
             {
                PrintTools.info("Reach "+i);
-               rrtTree.updatePath(rrtTree.getNewNode());
+               rrtTree.updatePathNode(rrtTree.getNewNode());
                optimalPath = rrtTree.getPathNode();
                return true;
             }
@@ -68,7 +68,7 @@ public class RRTPlannerTimeDomain
    public void updateOptimalPath(int sizeOfPiecewisePath, int numberOfIteration)
    {
       PrintTools.info("Buliding Started");      
-      if(firstShortCut() == true)
+      if(firstShortCut(sizeOfPiecewisePath) == true)
       {
          
       }
@@ -103,7 +103,7 @@ public class RRTPlannerTimeDomain
       int sizeOfPiecewisePath = optimalPath.size() * 4;
       
       PrintTools.info("Buliding Started");
-      if(firstShortCut() == true)
+      if(firstShortCut(sizeOfPiecewisePath) == true)
       {
          PrintTools.info("First cut Success");
       }
@@ -134,10 +134,10 @@ public class RRTPlannerTimeDomain
       PrintTools.info("OptimalPath is Built");
    }
    
-   private boolean firstShortCut()
+   private boolean firstShortCut(int numberOfPiece)
    {
       RRTValidConnection fastShortCut = new RRTValidConnection(optimalPath.get(0), optimalPath.get(optimalPath.size()-1));
-      fastShortCut.initialize(200);
+      fastShortCut.reInitialize(numberOfPiece);
       if(fastShortCut.isValidConnection() == true)
       {
          ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();

@@ -1,5 +1,7 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
+import us.ihmc.commons.PrintTools;
+
 public class SolarPanelLinearPath
 {
    private SolarPanelCleaningPose startPose;

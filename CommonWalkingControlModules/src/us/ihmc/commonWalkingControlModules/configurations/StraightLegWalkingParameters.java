@@ -2,6 +2,11 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 public class StraightLegWalkingParameters
 {
+   public boolean includeHipPitchPrivilegedConfiguration()
+   {
+      return false;
+   }
+
    /**
     * This is the speed used to straighten the desire privileged configuration of the stance leg's knee.
     * @return rad/second for straightening
@@ -48,32 +53,47 @@ public class StraightLegWalkingParameters
       return false;
    }
 
-   public double getStraightLegPrivilegedConfigurationGain()
+   public double getHipPrivilegedConfigurationGain()
    {
       return 40.0;
    }
 
-   public double getStraightLegPrivilegedVelocityGain()
+   public double getHipPrivilegedVelocityGain()
    {
       return 6.0;
    }
 
-   public double getStraightLegPrivilegedWeight()
+   public double getHipPrivilegedWeight()
    {
       return 5.0;
    }
 
-   public double getBentLegPrivilegedConfigurationGain()
+   public double getKneeStraightLegPrivilegedConfigurationGain()
    {
       return 40.0;
    }
 
-   public double getBentLegPrivilegedVelocityGain()
+   public double getKneeStraightLegPrivilegedVelocityGain()
    {
       return 6.0;
    }
 
-   public double getBentLegPrivilegedWeight()
+   public double getKneeStraightLegPrivilegedWeight()
+   {
+      return 5.0;
+   }
+
+   public double getKneeBentLegPrivilegedConfigurationGain()
+   {
+      return 40.0;
+   }
+
+   public double getKneeBentLegPrivilegedVelocityGain()
+   {
+      return 6.0;
+   }
+
+   public double getKneeBentLegPrivilegedWeight()
    {
       return 5.0;
    }
