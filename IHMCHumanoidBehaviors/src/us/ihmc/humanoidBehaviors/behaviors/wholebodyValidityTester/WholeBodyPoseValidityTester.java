@@ -1,12 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -27,6 +29,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -81,9 +84,11 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
-      solutionQualityThreshold.set(0.06);
+      //solutionQualityThreshold.set(0.06);
+      solutionQualityThreshold.set(0.01);
       solutionStableThreshold = new DoubleYoVariable(behaviorName + "solutionStableThreshold", registry);
-      solutionStableThreshold.set(0.006);
+      //solutionStableThreshold.set(0.006);
+      solutionStableThreshold.set(0.001);
       jointLimitThreshold = new DoubleYoVariable(behaviorName + "jointLimitThreshold", registry);
       jointLimitThreshold.set(Math.PI/180 * 0.5);
       isPaused = new BooleanYoVariable(behaviorName + "IsPaused", registry);
@@ -240,7 +245,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private int cnt = 0;
    
    private boolean isSendingPacket = false;
-   private boolean forceOut = false;
    
    private boolean isReceived = false;
    
@@ -256,40 +260,33 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
-   }
-   
-   public boolean getIKResult()
-   {
-      putHandMessage();
-      putChestMessage();
-      putPelvisMessage();
       
-      setUpHasBeenDone();
+      ThreadTools.sleep(1);
       
-      ThreadTools.sleep(10);
-      for(int i=0;i<3000;i++)
+      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
+      
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
+      float[] privilegedJointAngles = new float[oneDoFJoints.length];
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         ThreadTools.sleep(1);
-         if(isSolved == true)
-         {
-            //PrintTools.info("SQ "+ currentSolutionQuality);
-            if(Debug)
-               PrintTools.info("Solution Get "+i); 
-            
-            return true;
-         }
-         if(isJointLimit == true)
-         {
-            return false;
-         }
+         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
+         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+         PrintTools.info(""+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
       }
+
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      Point3D privilegedRootJointPosition = new Point3D();
+      rootJoint.getTranslation(privilegedRootJointPosition);
+      Quaternion privilegedRootJointOrientation = new Quaternion();
+      rootJoint.getRotation(privilegedRootJointOrientation);
+
+      privilegedMessage.setPrivilegedRobotConfiguration(privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
+      privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       
-      if(Debug)
-         PrintTools.info("No solution ");
-      
-      forceOut();       
-      
-      return false;
+      sendPacket(privilegedMessage);
    }
    
    private void putHandMessage()
@@ -366,6 +363,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void doControl()
    {  
+      
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable())
       {
          if(isSendingPacket == true)
@@ -424,24 +422,34 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             
             cnt++;
             if(true)
-               PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality);
-            if(true)
+               PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
+                               +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
+            if(false)
                PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
                                +" isReceived "+isReceived
                                +" isGoodSolutionCur "+isGoodSolutionCur                            
                                +" isSolved "+isSolved);
             
-            if(isSolved == true || forceOut == true || isJointLimit == true)
-            {
-               if(false)
-                  PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality());
-               if(false)
-                  PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
-                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
-                               +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
+            if(isSolved == true || isJointLimit == true || cnt == 100)
+            {               
+               cntOfSeries = 0;
+               if(isSolved == true)
+               {
+                  PrintTools.info("isSolved isSolved isSolved");
+                  isGoodIKSolution = true;
+               }
+                  
+               if(isJointLimit == true || cnt == 100)
+               {
+                  PrintTools.info("isJointLimit "+isJointLimit + " cnt "+cnt +" "+getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit].getName());
+                  isGoodIKSolution = false;
+               }
+                  
+               
                isReceived = false;               
                isSendingPacket = false;
-               forceOut = false;               
+                 
+               setIsDone(true);
             }
          }
       }
@@ -461,27 +469,24 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
-
+      
       putHandMessage();
       putChestMessage();
-      putPelvisMessage();
+      putPelvisMessage(); 
    }
-   
-   public void forceOut()
-   {
-      if(Debug)
-         PrintTools.info("forceout ");      
-      forceOut = true;
-   }
-   
+      
    static int cntOfSeries = 0;
+   int indexOfLimit = 0;
    private boolean isJointLimit(KinematicsToolboxOutputStatus newestSolution)
    {      
       boolean isLimit = false;
       int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
-      int indexOfLimit = 0;
       
-      for(int i=0;i<numberOfJoints;i++)
+      int rightArmStart = 12;
+      int rightArmEnd = 19;
+      
+      //for(int i=0;i<numberOfJoints;i++)
+      for(int i=rightArmStart;i<rightArmEnd;i++)   
       {               
          OneDoFJoint aJoint = getFullHumanoidRobotModel().getOneDoFJoints()[i];
          double aJointValue = newestSolution.getJointAngles()[i];
@@ -495,16 +500,14 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          }
       }      
       
+      
       if(isLimit == true)
          cntOfSeries++;
       else
          cntOfSeries = 0;
       
       if(cntOfSeries > 20)
-      {
-//         OneDoFJoint oneDoFJoint = getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit];
-//         PrintTools.info("limit index is "+ oneDoFJoint.getName()+" " + oneDoFJoint.getJointLimitLower()+" " + oneDoFJoint.getJointLimitUpper() + " " +newestSolution.getJointAngles()[indexOfLimit]
-//               +" "+jointLimitThreshold.getDoubleValue());
+      {         
          return true;
       }
          
@@ -563,6 +566,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    public void setIsDone(boolean value)
    {
+      cnt = 0;
       isDone.set(value);
    }
    

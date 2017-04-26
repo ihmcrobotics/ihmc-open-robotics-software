@@ -22,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -30,7 +31,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.RRTExpandingStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomainTree;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
@@ -42,13 +43,12 @@ import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPos
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -170,111 +170,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
 
       setupKinematicsToolboxModule();
    }
-   
-   @Test
-   public void testAPose() throws SimulationExceededMaximumTimeException, IOException
-   {
-      ThreadTools.sleep(15000);
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      RobotSide robotSide = RobotSide.RIGHT;
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      drcBehaviorTestHelper.updateRobotModel();
       
-      
-      PrintTools.info("Initiate Behavior");
-      
-      setUpSolarPanel();
-      PrintTools.info("Solar Panel Built");
-      
-      SolarPanelPoseValidityTester tester = new SolarPanelPoseValidityTester(getRobotModel(), 
-                                                                           drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                           drcBehaviorTestHelper.getSDFFullRobotModel());
-      
-      tester.setSolarPanel(solarPanel);
-      PrintTools.info("Success to initiate Behavior");
-      
-      drcBehaviorTestHelper.dispatchBehavior(tester);
-      PrintTools.info("Set Yo Time "+ drcBehaviorTestHelper.getYoTime());
-            
-      ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-      FramePose desiredHandPose = new FramePose(handControlFrame);
-      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
-      desiredHandPose.setOrientation(new Quaternion());
-      
-      tester.holdCurrentChestOrientation();
-      tester.holdCurrentPelvisOrientation();
-      tester.holdCurrentPelvisHeight();
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
-      
-      PrintTools.info("Start Yo Time "+ drcBehaviorTestHelper.getYoTime());
-      PrintTools.info("");      
-      PrintTools.info("Final Result is "+tester.getIKResult());
-      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
-      PrintTools.info("");      
-      
-      
-      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-      desiredHandPose = new FramePose(handControlFrame);
-      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.setPosition(new Point3D(1.0, -0.05, 1.0));
-      desiredHandPose.setOrientation(new Quaternion());
-      
-      tester.holdCurrentChestOrientation();
-      tester.holdCurrentPelvisOrientation();
-      tester.holdCurrentPelvisHeight();
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
-      
-      PrintTools.info("");
-      PrintTools.info("Final Result is "+tester.getIKResult());
-      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
-      PrintTools.info("");
-      
-      
-      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-      desiredHandPose = new FramePose(handControlFrame);
-      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
-      desiredHandPose.setOrientation(new Quaternion());
-      
-      tester.holdCurrentChestOrientation();
-      tester.holdCurrentPelvisOrientation();
-      tester.holdCurrentPelvisHeight();
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
-      
-      PrintTools.info("");      
-      PrintTools.info("Final Result is "+tester.getIKResult());
-      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
-      PrintTools.info("");
-      
-      
-      
-      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-      desiredHandPose = new FramePose(handControlFrame);
-      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.setPosition(new Point3D(0.9, -0.4, 0.9));
-      desiredHandPose.setOrientation(new Quaternion());
-      
-      tester.holdCurrentChestOrientation();
-      tester.holdCurrentPelvisOrientation();
-      tester.holdCurrentPelvisHeight();
-      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
-      
-      PrintTools.info("");      
-      PrintTools.info("Final Result is "+tester.getIKResult());
-      PrintTools.info("IN "+ desiredHandPose.getPosition().getX() +" "+ desiredHandPose.getPosition().getY() +" "+ desiredHandPose.getPosition().getZ() +" ");
-      PrintTools.info("");
-      
-      
-      tester.onBehaviorExited();
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.4);
-   }
-   
-   
    //@Test
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -356,9 +252,10 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
      
    }
    
-   //@Test
+   @Test
    public void testRRTPlannerBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
+      ThreadTools.sleep(15000);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -368,12 +265,71 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       
-      TimeDomain1DNode rootNode = new TimeDomain1DNode();      
-            
-      TimeDomainTree rrtTree = new TimeDomainTree(rootNode);
       
-      RRTExpandingStateMachineBehavior treeExpandingBehavior = new RRTExpandingStateMachineBehavior(rootNode, rrtTree, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      
+      
+      
+      
+      
+      
+      
+      
+      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
+      
+      OneDoFJoint[] oneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
+
+      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
+      float[] privilegedJointAngles = new float[oneDoFJoints.length];
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
+         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+         PrintTools.info(""+i+" "+ oneDoFJoints[i].getName()+" "+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
+      }
+
+      FloatingInverseDynamicsJoint rootJoint = sdfFullRobotModel.getRootJoint();
+      Point3D privilegedRootJointPosition = new Point3D();
+      rootJoint.getTranslation(privilegedRootJointPosition);
+      Quaternion privilegedRootJointOrientation = new Quaternion();
+      rootJoint.getRotation(privilegedRootJointOrientation);
+
+      privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      drcBehaviorTestHelper.send(privilegedMessage);
+      
+      
+      
+      
+      
+      
+      
+      
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
+      
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      
+      TimeDomain1DNode.cleaningPath = cleaningPath;
+      TimeDomain1DNode rootNode = new TimeDomain1DNode();
+      TimeDomainTree rrtTree = new TimeDomainTree(rootNode);
+
+      ArrayList<SolarPanelLinearPath> linearPath = cleaningPath.getLinearPath();
+      double treeMaximumTime = linearPath.get(0).getMotionEndTime();
+      double treeTimeInterval = linearPath.get(0).getMotionEndTime() - linearPath.get(0).getMotionStartTime();
+      
+      TimeDomain1DNode nodeLowerBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime(), -Math.PI*0.4);
+      TimeDomain1DNode nodeUpperBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime()+treeTimeInterval*1.5, Math.PI*0.4);
+      rrtTree.setMaximumMotionTime(treeMaximumTime);
+      rrtTree.setUpperBound(nodeUpperBound);
+      rrtTree.setLowerBound(nodeLowerBound);
+      
+      ValidNodesStateMachineBehavior treeExpandingBehavior = new ValidNodesStateMachineBehavior(rootNode, rrtTree, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                     drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      treeExpandingBehavior.setSolarPanel(solarPanel);
       
       drcBehaviorTestHelper.dispatchBehavior(treeExpandingBehavior);
       
@@ -390,7 +346,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private void setupKinematicsToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
    }
    

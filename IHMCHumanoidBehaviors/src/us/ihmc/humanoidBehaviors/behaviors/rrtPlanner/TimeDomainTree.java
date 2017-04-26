@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
 
@@ -115,5 +116,59 @@ public class TimeDomainTree extends RRTTree
       }      
       
       return matric;
+   }
+   
+   @Override
+   public RRTNode getNewNode(RRTNode targetNode)
+   {
+      RRTNode newNode = nodeCreator.createNode();
+      
+      double timeGap = getTime(targetNode) - getTime(nearNode);
+      double displacement = getDisplacement(nearNode, targetNode); 
+      
+      double expandingTimeGap;
+      double expandingDisplacement;
+      
+      // timeGap Clamping
+      if(timeGap > maximumTimeGapOfStep)
+      {
+         expandingTimeGap = maximumTimeGapOfStep;
+      }
+      else
+      {
+         expandingTimeGap = timeGap;         
+      }      
+      expandingDisplacement = displacement*expandingTimeGap/timeGap;
+      
+      // displacement Clamping
+      if(expandingDisplacement > maximumDisplacementOfStep)
+      {
+         expandingDisplacement = maximumDisplacementOfStep;
+         expandingTimeGap = timeGap*maximumDisplacementOfStep/displacement;
+      }
+      
+      // set
+      newNode.setNodeData(0, getTime(nearNode)+expandingTimeGap);
+      for(int i=1;i<newNode.getDimensionOfNodeData();i++)
+      {
+         double iDisplacement = (targetNode.getNodeData(i) - nearNode.getNodeData(i))/displacement*expandingDisplacement;
+         newNode.setNodeData(i, nearNode.getNodeData(i) + iDisplacement);
+         //PrintTools.info("expandingDisplacement "+expandingTimeGap + " " + expandingDisplacement + " " + iDisplacement);
+      }     
+      
+      for (int i = 0; i < targetNode.getDimensionOfNodeData(); i++)
+      {
+         //PrintTools.info("targetNode "+targetNode.getNodeData(i) + " ");
+      }
+      for (int i = 0; i < nearNode.getDimensionOfNodeData(); i++)
+      {
+         //PrintTools.info("nearNode "+nearNode.getNodeData(i) + " ");
+      }
+      for (int i = 0; i < newNode.getDimensionOfNodeData(); i++)
+      {
+         //PrintTools.info("newNode "+newNode.getNodeData(i) + " ");
+      }
+      
+      return newNode;
    }
 }
