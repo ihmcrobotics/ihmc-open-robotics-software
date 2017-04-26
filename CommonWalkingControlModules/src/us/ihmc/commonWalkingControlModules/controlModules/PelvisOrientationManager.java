@@ -35,6 +35,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -85,6 +86,13 @@ public class PelvisOrientationManager
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameVector tempAngularAcceleration = new FrameVector();
+
+   private final FramePoint upcomingFootstepLocation = new FramePoint();
+   private final FrameOrientation upcomingFootstepOrientation = new FrameOrientation();
+
+   private final ReferenceFrame nextAnkleZUpFrame;
+   private final ReferenceFrame nextAnkleFrame;
+   private final ReferenceFrame nextSoleFrame;
 
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private final ReferenceFrame midFeetZUpFrame;
@@ -164,6 +172,25 @@ public class PelvisOrientationManager
             transformToParent.setRotation(rotationToParent);
          }
       };
+
+      nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, parentFrame);
+         }
+      };
+      nextAnkleFrame = new ReferenceFrame("ankleZUpFrame", nextSoleFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(nextFootstep.getRobotSide());
+            transformToParent.set(ankleToSole);
+         }
+      };
+      nextAnkleZUpFrame = new ZUpFrame(worldFrame, nextAnkleFrame, "nextAnkleZUp");
 
       boolean allowMultipleFrames = true;
       orientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", allowMultipleFrames,
@@ -619,13 +646,15 @@ public class PelvisOrientationManager
       initialize(supportAnkleZUp);
    }
 
-   private final FramePoint upcomingFootstepLocation = new FramePoint();
-   private final FrameOrientation upcomingFootstepOrientation = new FrameOrientation();
-
    public void setUpcomingFootstep(Footstep upcomingFootstep)
    {
       nextFootstep = upcomingFootstep;
       supportSide = upcomingFootstep.getRobotSide().getOppositeSide();
+
+      nextSoleFrame.update();
+      nextAnkleFrame.update();
+      nextAnkleZUpFrame.update();
+
       RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(upcomingFootstep.getRobotSide());
       upcomingFootstep.getAnkleOrientation(upcomingFootstepOrientation, ankleToSole);
       upcomingFootstep.getAnklePosition(upcomingFootstepLocation, ankleToSole);
@@ -786,7 +815,6 @@ public class PelvisOrientationManager
       desiredPelvisOffsetWhileWalking.setPitch(pelvisPitchAngleRatio.getDoubleValue() * interpolatedLegAngle);
    }
 
-   private final RigidBodyTransform soleToAnkle = new RigidBodyTransform();
    private void updatePelvisPitchOffsetInSwing(RobotSide supportSide)
    {
       stanceLine.setToZero(pelvisFrame);
@@ -800,10 +828,10 @@ public class PelvisOrientationManager
       if (percentInState > pelvisPitchPercentSwingToStopPitching.getDoubleValue())
       {
          otherStanceLine.setToZero(pelvisFrame);
-         otherStanceLine.changeFrame(nextFootstep.getSoleReferenceFrame());
-         // // FIXME: 4/25/17  this needs to be the ankle, not sole
-         //transformsFromAnkleToSole.get(nextFootstep.getRobotSide()).inverseTransform(soleToAnkle);
-         //otherStanceLine.applyTransform(soleToAnkle);
+         nextSoleFrame.update();
+         nextAnkleFrame.update();
+         nextAnkleZUpFrame.update();
+         otherStanceLine.changeFrame(nextAnkleZUpFrame);
          double distanceFromFootstep = otherStanceLine.getX();
          double heightFromFootstep = otherStanceLine.getZ();
          double upcomingStepAngle = Math.atan2(distanceFromFootstep, heightFromFootstep);
