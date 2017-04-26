@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -785,6 +786,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      if (bodyName.equals(jointMap.getChestName()))
+      {
+         return RigidBodyControlMode.TASKSPACE;
+      }
+      else if (bodyName.equals(jointMap.getHeadName()))
+      {
+         return RigidBodyControlMode.TASKSPACE;
+      }
+      else
+      {
+         return RigidBodyControlMode.JOINTSPACE;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       if (jointHomeConfiguration != null)
@@ -1357,6 +1376,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    /** {@inheritDoc} */
+   @Override
    public StraightLegWalkingParameters getStraightLegWalkingParameters()
    {
       return straightLegWalkingParameters;
