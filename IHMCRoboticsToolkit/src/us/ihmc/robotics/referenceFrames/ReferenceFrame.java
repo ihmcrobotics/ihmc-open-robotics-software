@@ -17,11 +17,16 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 
 /**
- * <p>ReferenceFrame </p>
+ * <p>
+ * ReferenceFrame
+ * </p>
  *
- * <p>Description: ReferenceFrame is used to represent a reference coordinate frame.  One constructor allows the creation
- * of a "root" frame with no parent.  The other creates a child frame that has a reference and transform
- * to a parent.  HumanoidReferenceFrames are used in classes like FramePoint to indicate which frame the point is defined in.</p>
+ * <p>
+ * Description: ReferenceFrame is used to represent a reference coordinate frame. One constructor
+ * allows the creation of a "root" frame with no parent. The other creates a child frame that has a
+ * reference and transform to a parent. HumanoidReferenceFrames are used in classes like FramePoint
+ * to indicate which frame the point is defined in.
+ * </p>
  *
  */
 public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeHolder
@@ -89,7 +94,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
       return constructFrameWithUnchangingTransformToParent(frameName, point.getReferenceFrame(), transformToParent);
    }
-   
+
    public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint point, Axis axisToAlign, FrameVector alignAxisWithThis)
    {
       point.checkReferenceFrameMatch(alignAxisWithThis.getReferenceFrame());
@@ -111,11 +116,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       default:
          break;
       }
-      
+
       AxisAngle rotationToDesired = new AxisAngle();
       alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
       EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
-      
+
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
 
       transformToDesired.setRotation(rotationToDesired);
@@ -135,14 +140,14 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public ReferenceFrame copyAndAimAxisAtPoint(Axis axisToAlign, FramePoint targetToAimAt)
    {
       ReferenceFrame initialFrame = targetToAimAt.getReferenceFrame();
-      
+
       targetToAimAt.changeFrame(this);
       FrameVector targetRelativeToCurrentFrame = new FrameVector(this, targetToAimAt.getX(), targetToAimAt.getY(), targetToAimAt.getZ());
       targetToAimAt.changeFrame(initialFrame);
-      
+
       return copyAndAlignAxisWithVector(axisToAlign, targetRelativeToCurrentFrame);
    }
-   
+
    public ReferenceFrame copyAndAlignAxisWithVector(Axis axisToAlign, FrameVector alignAxisWithThis)
    {
       FrameVector currentXYZAxis = new FrameVector();
@@ -162,22 +167,23 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       default:
          break;
       }
-      
+
       ReferenceFrame initialFrame = alignAxisWithThis.getReferenceFrame();
       alignAxisWithThis.changeFrame(currentXYZAxis.getReferenceFrame());
       AxisAngle rotationToDesired = new AxisAngle();
       EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
       alignAxisWithThis.changeFrame(initialFrame);
-      
+
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
       transformToDesired.setRotationAndZeroTranslation(rotationToDesired);
-      
+
       TransformReferenceFrame ret = new TransformReferenceFrame("desiredHandFrame", this, transformToDesired);
-      
+
       return ret;
    }
 
-   public static ReferenceFrame constructBodyZUpFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public static ReferenceFrame constructBodyZUpFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
+                                                                                     RigidBodyTransform transformToParent)
    {
       //      if (!RotationFunctions.isRotationProper(transformToParent))
       //         throw new RuntimeException("Rotation not normalized: " + transformToParent);
@@ -195,18 +201,18 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
       return ret;
    }
-   
+
    public static ReferenceFrame constructFrameWithUnchangingTransformFromParent(String frameName, ReferenceFrame parentFrame,
-         RigidBodyTransform transformFromParent)
+                                                                                RigidBodyTransform transformFromParent)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform(transformFromParent);
       transformToParent.invert();
-      
+
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
    public static ReferenceFrame constructBodyFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame,
-         Vector3D translationFromParent)
+                                                                                      Vector3D translationFromParent)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslation(translationFromParent);
@@ -214,18 +220,20 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
-   public static ReferenceFrame constructBodyFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public static ReferenceFrame constructBodyFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
+                                                                                  RigidBodyTransform transformToParent)
    {
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
-   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
+                                                                              RigidBodyTransform transformToParent)
    {
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
    }
 
-   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent,
-         boolean isWorldFrame, boolean isZupFrame)
+   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
+                                                                              RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
       //      if (!RotationFunctions.isRotationProper(transformToParent))
       //         throw new RuntimeException("Rotation not normalized: " + transformToParent);
@@ -244,7 +252,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return ret;
    }
 
-   /** Return the world reference frame that is a root reference frame. If located at (0, 0, 0) and its coordinate system is such as the z-axis is up, x-axis is forward, and y-axis points to the left. */
+   /**
+    * Return the world reference frame that is a root reference frame. If located at (0, 0, 0) and
+    * its coordinate system is such as the z-axis is up, x-axis is forward, and y-axis points to the
+    * left.
+    */
    public static ReferenceFrame getWorldFrame()
    {
       return worldFrame;
@@ -270,7 +282,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       ReferenceFrame parentFrame = thisFrame.parentFrame;
       if (parentFrame == null)
       {
-         return new ReferenceFrame[] { thisFrame };
+         return new ReferenceFrame[] {thisFrame};
       }
 
       int size = parentFrame.framesStartingWithRootEndingWithThis.length + 1;
@@ -287,8 +299,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * This constructor creates a "top level" reference frame with the specified name.
-    * The parent frame and transforms are null.
+    * This constructor creates a "top level" reference frame with the specified name. The parent
+    * frame and transforms are null.
     *
     * @param frameName String
     */
@@ -299,7 +311,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.parentFrame = null;
       this.transformToRootID = 0;
 
-      this.framesStartingWithRootEndingWithThis = new ReferenceFrame[] { this };
+      this.framesStartingWithRootEndingWithThis = new ReferenceFrame[] {this};
 
       this.transformToRoot = null;
       this.inverseTransformToRoot = null;
@@ -310,10 +322,10 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * This constructor creates a child reference frame with the specified name.
-    * The parent frame can be a "top level" frame or another child.
-    * The Transform defines how to convert a vector from the parent frame to the child frame.
-    * An inverse transform is created automatically based on the provided frame.
+    * This constructor creates a child reference frame with the specified name. The parent frame can
+    * be a "top level" frame or another child. The Transform defines how to convert a vector from
+    * the parent frame to the child frame. An inverse transform is created automatically based on
+    * the provided frame.
     *
     * @param frameName String
     * @param parentFrame Frame
@@ -348,8 +360,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
       this.transformToParent = new RigidBodyTransform();
-      
-      if(parentFrame != null)
+
+      if (parentFrame != null)
       {
          nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       }
@@ -370,8 +382,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * The user must call update each tick.
-    * It will then call updateTransformToParent.
+    * The user must call update each tick. It will then call updateTransformToParent.
     */
    public void update()
    {
@@ -379,33 +390,33 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          return;
       }
-       
+
       updateTransformToParent(transformToParent);
 
-//      transformToParent.normalize();
+      //      transformToParent.normalize();
       transformToRootID = Long.MIN_VALUE;
    }
-   
+
    private RigidBodyTransform preCorruptionTransform, postCorruptionTransform;
-   
+
    public void corruptTransformToParentPreMultiply(RigidBodyTransform preCorruptionTransform)
    {
       if (this.preCorruptionTransform == null)
       {
          this.preCorruptionTransform = new RigidBodyTransform();
       }
-      
+
       this.preCorruptionTransform.set(preCorruptionTransform);
       this.update();
    }
-   
+
    public void corruptTransformToParentPostMultiply(RigidBodyTransform postCorruptionTransform)
    {
       if (this.postCorruptionTransform == null)
       {
          this.postCorruptionTransform = new RigidBodyTransform();
       }
-      
+
       this.postCorruptionTransform.set(postCorruptionTransform);
       this.update();
    }
@@ -417,7 +428,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       this.transformToParent.set(transformToParent);
       this.transformToRootID = Long.MIN_VALUE;
-//      transformToParent.normalize();
+      //      transformToParent.normalize();
    }
 
    /**
@@ -440,8 +451,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * getTransformToParent
     *
-    * Returns a Transform3D that can be applied to a vector defined in this frame
-    * in order to obtain the equivalent vector in the parent frame
+    * Returns a Transform3D that can be applied to a vector defined in this frame in order to obtain
+    * the equivalent vector in the parent frame
     *
     * @return Transform3D
     */
@@ -459,7 +470,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       return frameName;
    }
-   
+
    /**
     * @deprecated Creates garbage without warning. - dcalvert
     */
@@ -470,7 +481,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
       return ret;
    }
-   
+
    /**
     * @deprecated Creates garbage without warning. - dcalvert
     */
@@ -484,7 +495,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    // JEP 10117: Temporary transform to save lots of memory generation.
    // Determined it was needed after running profiler.
    // JEP 101215: Made it a serializableTransform3D to make sure LittleDog planner RMI stuff still works.
-   
+
    public void getTransformToDesiredFrame(RigidBodyTransform transformToPack, ReferenceFrame desiredFrame)
    {
       verifySameRoots(desiredFrame);
@@ -585,14 +596,14 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
                {
                   referenceFrame.transformToRoot.multiply(referenceFrame.preCorruptionTransform);
                }
-     
+
                referenceFrame.transformToRoot.multiply(referenceFrame.transformToParent);
-               
+
                if (referenceFrame.postCorruptionTransform != null)
                {
                   referenceFrame.transformToRoot.multiply(referenceFrame.postCorruptionTransform);
                }
-               
+
                referenceFrame.transformToRoot.normalizeRotationPart();
                referenceFrame.inverseTransformToRoot.setAndInvert(referenceFrame.transformToRoot);
 
@@ -611,8 +622,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * Creates a transform that transforms to the given point and rotates to make the z axis align with the
-    * normal vector.
+    * Creates a transform that transforms to the given point and rotates to make the z axis align
+    * with the normal vector.
     */
    private static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint point, FrameVector zAxis)
    {
@@ -665,14 +676,12 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
          if (transformToParent != null)
          {
-            throw new RuntimeException(
-                  "Root frames don't have transformToParent or transformToRoot defined. This is so RMI still works with frames since Transform3D is not serializable.");
+            throw new RuntimeException("Root frames don't have transformToParent or transformToRoot defined. This is so RMI still works with frames since Transform3D is not serializable.");
          }
 
          if (transformToRoot != null)
          {
-            throw new RuntimeException(
-                  "Root frames don't have transformToParent or transformToRoot defined. This is so RMI still works with frames since Transform3D is not serializable.");
+            throw new RuntimeException("Root frames don't have transformToParent or transformToRoot defined. This is so RMI still works with frames since Transform3D is not serializable.");
          }
 
          if (this.transformToRootID != 0)
