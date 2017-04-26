@@ -329,8 +329,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
 
-      transformToParent.normalizeRotationPart();
-      this.transformToParent = transformToParent;
+      this.transformToParent = new RigidBodyTransform(transformToParent);
+      this.transformToParent.normalizeRotationPart();
 
       this.isWorldFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
