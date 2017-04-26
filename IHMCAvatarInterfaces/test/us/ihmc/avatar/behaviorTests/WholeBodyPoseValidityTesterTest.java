@@ -66,7 +66,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private boolean isKinematicsToolboxVisualizerEnabled = false;
+   private boolean isKinematicsToolboxVisualizerEnabled = true;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
@@ -274,28 +274,28 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       
       
-      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
-      
-      OneDoFJoint[] oneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
-
-      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
-      float[] privilegedJointAngles = new float[oneDoFJoints.length];
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
-         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-         PrintTools.info(""+i+" "+ oneDoFJoints[i].getName()+" "+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
-      }
-
-      FloatingInverseDynamicsJoint rootJoint = sdfFullRobotModel.getRootJoint();
-      Point3D privilegedRootJointPosition = new Point3D();
-      rootJoint.getTranslation(privilegedRootJointPosition);
-      Quaternion privilegedRootJointOrientation = new Quaternion();
-      rootJoint.getRotation(privilegedRootJointOrientation);
-
-      privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      drcBehaviorTestHelper.send(privilegedMessage);
+//      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
+//      
+//      OneDoFJoint[] oneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
+//
+//      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
+//      float[] privilegedJointAngles = new float[oneDoFJoints.length];
+//
+//      for (int i = 0; i < oneDoFJoints.length; i++)
+//      {
+//         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
+//         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+//         PrintTools.info(""+i+" "+ oneDoFJoints[i].getName()+" "+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
+//      }
+//
+//      FloatingInverseDynamicsJoint rootJoint = sdfFullRobotModel.getRootJoint();
+//      Point3D privilegedRootJointPosition = new Point3D();
+//      rootJoint.getTranslation(privilegedRootJointPosition);
+//      Quaternion privilegedRootJointOrientation = new Quaternion();
+//      rootJoint.getRotation(privilegedRootJointOrientation);
+//
+//      privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+//      drcBehaviorTestHelper.send(privilegedMessage);
       
       
       
@@ -308,30 +308,44 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
       
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
       TimeDomain1DNode.cleaningPath = cleaningPath;
       TimeDomain1DNode rootNode = new TimeDomain1DNode();
       TimeDomainTree rrtTree = new TimeDomainTree(rootNode);
 
-      ArrayList<SolarPanelLinearPath> linearPath = cleaningPath.getLinearPath();
-      double treeMaximumTime = linearPath.get(0).getMotionEndTime();
-      double treeTimeInterval = linearPath.get(0).getMotionEndTime() - linearPath.get(0).getMotionStartTime();
       
-      TimeDomain1DNode nodeLowerBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime(), -Math.PI*0.4);
-      TimeDomain1DNode nodeUpperBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime()+treeTimeInterval*1.5, Math.PI*0.4);
-      rrtTree.setMaximumMotionTime(treeMaximumTime);
-      rrtTree.setUpperBound(nodeUpperBound);
-      rrtTree.setLowerBound(nodeLowerBound);
+//      ArrayList<SolarPanelLinearPath> linearPath = cleaningPath.getLinearPath();
+//      double treeMaximumTime = linearPath.get(0).getMotionEndTime();
+//      double treeTimeInterval = linearPath.get(0).getMotionEndTime() - linearPath.get(0).getMotionStartTime();
+//      
+//      TimeDomain1DNode nodeLowerBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime(), -35/180*Math.PI);
+//      TimeDomain1DNode nodeUpperBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime()+treeTimeInterval*1.5, 35/180*Math.PI);
+//      rrtTree.setMaximumMotionTime(treeMaximumTime);
+//      rrtTree.setUpperBound(nodeUpperBound);
+//      rrtTree.setLowerBound(nodeLowerBound);
       
-      ValidNodesStateMachineBehavior treeExpandingBehavior = new ValidNodesStateMachineBehavior(rootNode, rrtTree, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+
+      
+      
+      ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
+      
+      nodes.add(new TimeDomain1DNode(0.0, 0.0));
+      nodes.add(new TimeDomain1DNode(0.0, 0.0));
+      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));
+      nodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.1));
+      nodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));
+      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.2));
+      nodes.add(new TimeDomain1DNode(0.0, 0.0));
+      
+      ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                     drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
-      treeExpandingBehavior.setSolarPanel(solarPanel);
+      testNodesBehavior.setSolarPanel(solarPanel);
       
-      drcBehaviorTestHelper.dispatchBehavior(treeExpandingBehavior);
+      drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
       
       
       
