@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
@@ -25,6 +26,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
@@ -285,6 +287,19 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoPositionPIDGainsInterface>();
+   }
+
+   /**
+    * Returns the default control mode for a rigid body. The modes are defined in {@link RigidBodyControlMode}
+    * and by default the mode should be {@link RigidBodyControlMode#JOINTSPACE}. In some cases (e.g. the chest)
+    * it makes more sense to use the default mode {@link RigidBodyControlMode#TASKSPACE}.
+    * 
+    * @param bodyName is the name of the {@link RigidBody}
+    * @return the default control mode of the body
+    */
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      return RigidBodyControlMode.JOINTSPACE;
    }
 
    /**
