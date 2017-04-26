@@ -277,27 +277,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.isZupFrame = false;
    }
 
-   private static ReferenceFrame[] constructFramesStartingWithRootEndingWithThis(ReferenceFrame thisFrame)
-   {
-      ReferenceFrame parentFrame = thisFrame.parentFrame;
-      if (parentFrame == null)
-      {
-         return new ReferenceFrame[] {thisFrame};
-      }
-
-      int size = parentFrame.framesStartingWithRootEndingWithThis.length + 1;
-      ReferenceFrame[] ret = new ReferenceFrame[size];
-
-      for (int i = 0; i < size - 1; i++)
-      {
-         ret[i] = parentFrame.framesStartingWithRootEndingWithThis[i];
-      }
-
-      ret[size - 1] = thisFrame;
-
-      return ret;
-   }
-
    /**
     * This constructor creates a "top level" reference frame with the specified name. The parent
     * frame and transforms are null.
@@ -369,6 +348,27 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
       }
+   }
+
+   private static ReferenceFrame[] constructFramesStartingWithRootEndingWithThis(ReferenceFrame thisFrame)
+   {
+      ReferenceFrame parentFrame = thisFrame.parentFrame;
+      if (parentFrame == null)
+      {
+         return new ReferenceFrame[] {thisFrame};
+      }
+
+      int size = parentFrame.framesStartingWithRootEndingWithThis.length + 1;
+      ReferenceFrame[] ret = new ReferenceFrame[size];
+
+      for (int i = 0; i < size - 1; i++)
+      {
+         ret[i] = parentFrame.framesStartingWithRootEndingWithThis[i];
+      }
+
+      ret[size - 1] = thisFrame;
+
+      return ret;
    }
 
    public boolean isWorldFrame()
