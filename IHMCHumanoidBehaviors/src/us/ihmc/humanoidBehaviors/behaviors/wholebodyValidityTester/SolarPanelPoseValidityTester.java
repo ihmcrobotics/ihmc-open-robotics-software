@@ -25,8 +25,6 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
                                        FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModelFactory, outgoingCommunicationBridge, fullRobotModel);
-      PrintTools.info("");
-      PrintTools.info(""+fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW).getQ());
    }
    
    public void setSolarPanel(SolarPanel solarPanel)
