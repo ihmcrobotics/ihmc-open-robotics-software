@@ -33,7 +33,6 @@ public class IHMCMocapClient extends MocapDataClient
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(-90), 0, 0);
-            setTransformToParent(transformToParent);
          }
       };
 
@@ -44,7 +43,7 @@ public class IHMCMocapClient extends MocapDataClient
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            setTransformToParent(rigidBodyInformationInMocapOrigin);
+            transformToParent.set(rigidBodyInformationInMocapOrigin);
          }
       };
 
@@ -54,7 +53,6 @@ public class IHMCMocapClient extends MocapDataClient
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(90), 0, 0);
-            setTransformToParent(transformToParent);
          }
       };
    }
