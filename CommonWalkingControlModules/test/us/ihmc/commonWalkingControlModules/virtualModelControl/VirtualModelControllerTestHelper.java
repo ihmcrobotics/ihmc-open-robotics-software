@@ -35,6 +35,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
@@ -1934,6 +1935,7 @@ public class VirtualModelControllerTestHelper
 
       private final SideDependentList<ArrayList<Point2D>> controllerFootGroundContactPoints = new SideDependentList<>();
       private final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
+      private final SideDependentList<LineSegment2d> controllerToeContactLines = new SideDependentList<>();
 
       private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
       private final SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
@@ -1959,17 +1961,21 @@ public class VirtualModelControllerTestHelper
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(-footLength / 2.0, footWidth / 2.0));
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(footLength / 2.0, toeWidth / 2.0));
+
             controllerToeContactPoints.put(robotSide, new Point2D(footLength / 2.0, 0.0));
+
+            controllerToeContactLines.put(robotSide, new LineSegment2d(new Point2D(footLength / 2.0, -toeWidth / 2.0), new Point2D(footLength / 2.0, toeWidth / 2.0)));
          }
 
-         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
 
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBody foot = feet.get(robotSide);
             ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
             List<Point2D> contactPointsInSoleFrame = controllerFootGroundContactPoints.get(robotSide);
-            ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, controllerToeContactPoints.get(robotSide));
+            ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame,
+                  controllerToeContactPoints.get(robotSide), controllerToeContactLines.get(robotSide));
             footContactableBodies.put(robotSide, footContactableBody);
          }
       }

@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootContactPoints
@@ -46,6 +47,17 @@ public interface FootContactPoints
     * @return
     */
    public SideDependentList<Tuple2DBasics> getToeOffContactPoints(double footLength, double footWidth, double toeWidth);
+
+   /**
+    * Creates the toe off contact line used by the controller for each robot side. The line is in 2d and expected
+    * in sole frame.
+    *
+    * @param footLength
+    * @param footWidth
+    * @param toeWidth
+    * @return
+    */
+   public SideDependentList<LineSegment2d> getToeOffContactLines(double footLength, double footWidth, double toeWidth);
 
    /**
     * Allows switching between different sets of ground parameters.

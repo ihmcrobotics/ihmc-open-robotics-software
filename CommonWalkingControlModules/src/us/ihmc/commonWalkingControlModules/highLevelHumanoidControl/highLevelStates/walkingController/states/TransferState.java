@@ -91,24 +91,25 @@ public abstract class TransferState extends WalkingState
    public void switchToToeOffIfPossible()
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
-      // the only case left for determining the contact state of the trailing foot
-      if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES)
+
+      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
+      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
+
+      if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
          balanceManager.getNextExitCMP(nextExitCMP);
 
-         boolean doToeOff = feetManager.checkIfToeOffSafeDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
+         feetManager.updateToeOffStatusDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
 
-         if (doToeOff)
-         {
-            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
 
-            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
-            feetManager.requestToeOff(trailingLeg);
-            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
-         }
+         if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
+            feetManager.requestPointToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
+         else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
+            feetManager.requestLineToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
       }
    }
 

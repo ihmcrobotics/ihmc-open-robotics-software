@@ -151,6 +151,40 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Whether or not to use a line contact during the swing state. If false, will use a point contact instead.
+    */
+   public boolean useToeOffLineContactInSwing()
+   {
+      return true;
+   }
+
+   /**
+    * Whether or not to use a line contact during the transfer state. If false, will use a point contact instead.
+    */
+   public boolean useToeOffLineContactInTransfer()
+   {
+      return false;
+   }
+
+   /**
+    * Whether or not to update the line contact points when performing toe off. If false, the line is only calculated
+    * when toe-off is first started using a line, and not updated.
+    */
+   public boolean updateLineContactDuringToeOff()
+   {
+      return false;
+   }
+
+   /**
+    * Whether or not to update the point contact points when performing toe off. If false, the point is only calculated
+    * when toe-off is first started using a point, and not updated.
+    */
+   public boolean updatePointContactDuringToeOff()
+   {
+      return false;
+   }
+
+   /**
     * To enable that feature, {@link WalkingControllerParameters#doToeOffIfPossible()} return true is required. John parameter
     */
    public abstract boolean doToeOffWhenHittingAnkleLimit();
