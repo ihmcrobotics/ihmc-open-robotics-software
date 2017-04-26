@@ -33,7 +33,7 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeHolder
 {
    private static final long serialVersionUID = 9129810880579453658L;
-   protected final String frameName;
+   private final String frameName;
    private final long nameBasedHashCode;
    private long additionalNameBasedHashCode;
    protected final ReferenceFrame parentFrame;
