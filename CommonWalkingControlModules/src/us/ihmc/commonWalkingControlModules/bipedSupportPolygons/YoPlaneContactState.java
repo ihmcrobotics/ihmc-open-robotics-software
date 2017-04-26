@@ -230,6 +230,20 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
+   public void getContactPointsInContact(List<YoContactPoint> contactPointListToPack)
+   {
+      contactPointListToPack.clear();
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+
+         if (!contactPoint.isInContact())
+            continue;
+
+         contactPointListToPack.add(contactPoint);
+      }
+   }
+
    public void getContactFramePoint2dsInContact(List<FramePoint2d> contactPointListToPack)
    {
       int counter = 0;

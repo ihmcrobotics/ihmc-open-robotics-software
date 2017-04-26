@@ -41,7 +41,6 @@ public class ViconFrames
 
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               setTransformToParent(transformToParent);
             }
          };
       }

@@ -267,7 +267,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getMinTimeToSpendOnExitCMPInSingleSupport()
                {
-                  return 0.2;
+                  return 0.1;
                }
 
                @Override

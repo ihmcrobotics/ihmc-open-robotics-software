@@ -56,7 +56,7 @@ public abstract class MassMatrixCalculatorTest
          successorTwist.changeFrame(elevatorFrame);
          twistWithRespectToWorld.add(successorTwist);
 
-         RigidBodyInertia inertia = joint.getSuccessor().getInertiaCopy();
+         RigidBodyInertia inertia = new RigidBodyInertia(joint.getSuccessor().getInertia());
          inertia.changeFrame(elevatorFrame);
 
          ret += inertia.computeKineticCoEnergy(twistWithRespectToWorld);
