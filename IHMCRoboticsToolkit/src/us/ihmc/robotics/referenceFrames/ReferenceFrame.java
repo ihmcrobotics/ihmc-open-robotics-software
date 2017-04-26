@@ -423,14 +423,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    protected abstract void updateTransformToParent(RigidBodyTransform transformToParent);
 
-   // TODO: Make this method private and don't use it anywhere else!
-   protected void setTransformToParent(RigidBodyTransform transformToParent)
-   {
-      this.transformToParent.set(transformToParent);
-      this.transformToRootID = Long.MIN_VALUE;
-      //      transformToParent.normalize();
-   }
-
    /**
     * getParent
     *
