@@ -76,7 +76,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
          }
 
          if (!wantToQueue || isEmpty())
-            trajectoryStartTime.set(yoTime.getDoubleValue());
+            setTrajectoryStartTimeToCurrentTime();
          else
             queueableCommand.addTimeOffset(getLastTrajectoryPointTime());
 
@@ -84,12 +84,17 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       }
       else
       {
-         trajectoryStartTime.set(yoTime.getDoubleValue());
+         setTrajectoryStartTimeToCurrentTime();
       }
 
       trajectoryStopped.set(false);
       trajectoryDone.set(false);
       return true;
+   }
+   
+   protected void setTrajectoryStartTimeToCurrentTime()
+   {
+      trajectoryStartTime.set(yoTime.getDoubleValue());
    }
 
    protected double getTimeInTrajectory()
