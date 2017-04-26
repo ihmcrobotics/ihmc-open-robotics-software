@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -51,7 +51,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       massMatrixCalculator.compute();
       DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
 
-      RigidBodyInertia inertia = floating.getInertiaCopy();
+      RigidBodyInertia inertia = new RigidBodyInertia(floating.getInertia());
       inertia.changeFrame(ReferenceFrame.getWorldFrame());
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(sixDoFJoint.getDegreesOfFreedom(), sixDoFJoint.getDegreesOfFreedom());
       inertia.getMatrix(inertiaMatrix);
