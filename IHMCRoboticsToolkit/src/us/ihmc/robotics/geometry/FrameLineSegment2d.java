@@ -107,16 +107,40 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       this.lineSegment.set(firstEndpoint, secondEndpoint);
    }
 
-   public void setFirstEndpoint(FramePoint2d firstEndpointToPack)
+   public void setFirstEndpoint(FramePoint2d firstEndpoint)
    {
-      firstEndpointToPack.checkReferenceFrameMatch(referenceFrame);
-      lineSegment.set(firstEndpointToPack.getPoint(), lineSegment.endpoints[1]);
+      firstEndpoint.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.set(firstEndpoint.getPoint(), lineSegment.endpoints[1]);
    }
 
-   public void setSecondEndpoint(FramePoint2d secondEndpointToPack)
+   public void setSecondEndpoint(FramePoint2d secondEndpoint)
    {
-      secondEndpointToPack.checkReferenceFrameMatch(referenceFrame);
-      lineSegment.set(lineSegment.endpoints[0], secondEndpointToPack.getPoint());
+      secondEndpoint.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.set(lineSegment.endpoints[0], secondEndpoint.getPoint());
+   }
+
+   public void setFirstEndpoint(ReferenceFrame referenceFrame, Point2DReadOnly firstEndPoint)
+   {
+      this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.set(firstEndPoint, lineSegment.endpoints[1]);
+   }
+
+   public void setSecondEndpoint(ReferenceFrame referenceFrame, Point2DReadOnly secondEndPoint)
+   {
+      this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.set(lineSegment.endpoints[0], secondEndPoint);
+   }
+
+   public void setFirstEndpoint(ReferenceFrame referenceFrame, double firstPointX, double firstPointY)
+   {
+      this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.endpoints[0].set(firstPointX, firstPointY);
+   }
+
+   public void setSecondEndpoint(ReferenceFrame referenceFrame, double secondPointX, double secondPointY)
+   {
+      this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
+      lineSegment.endpoints[1].set(secondPointX, secondPointY);
    }
 
    public FramePoint2d getFirstEndpointCopy()
@@ -147,6 +171,16 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
    public void getSecondEndpoint(Point2DBasics secondEndpointToPack)
    {
       secondEndpointToPack.set(lineSegment.endpoints[1]);
+   }
+
+   public Point2DReadOnly getFirstEndpoint()
+   {
+      return lineSegment.endpoints[0];
+   }
+
+   public Point2DReadOnly getSecondEndpoint()
+   {
+      return lineSegment.endpoints[1];
    }
 
    public void getFrameVector(FrameVector2d vectorToPack)
@@ -224,6 +258,12 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       double y = (lineSegment.endpoints[0].getY() + lineSegment.endpoints[1].getY()) / 2.0;
 
       return new FramePoint2d(referenceFrame, x, y);
+   }
+
+   public void midpoint(FramePoint2d midpointToPack)
+   {
+      midpointToPack.setToZero(referenceFrame);
+      midpointToPack.interpolate(lineSegment.endpoints[0], lineSegment.endpoints[1], 0.5);
    }
 
    public double dotProduct(FrameLineSegment2d frameLineSegment2d)
