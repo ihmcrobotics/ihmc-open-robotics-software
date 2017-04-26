@@ -354,6 +354,45 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trackingPosition.set(true);
    }
 
+   public void goToBodyPose(FramePose homePose, double trajectoryTime)
+   {
+      clear();
+      trajectoryFrame = baseFrame;
+      setControlFrameToBodyFrame();
+      queueInitialPoint();
+
+      homePose.changeFrame(trajectoryFrame);
+      FrameSE3TrajectoryPoint homePoint = pointQueue.addLast();
+      homePoint.setToZero(trajectoryFrame);
+      homePoint.setTime(trajectoryTime);
+      homePoint.setPosition(homePose.getPosition());
+      homePoint.setOrientation(homePose.getOrientation());
+
+      if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
+      {
+         selectionMatrix.resetSelection();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(true);
+      }
+      else if (hasOrientaionGains.getBooleanValue())
+      {
+         selectionMatrix.setToAngularSelectionOnly();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(false);
+      }
+   }
+
+   private void setControlFrameToBodyFrame()
+   {
+      controlFramePose.setToZero(bodyFrame);
+      this.controlFrame.setPoseAndUpdate(controlFramePose);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+   }
+
    private void setControlFrame(ReferenceFrame controlFrame)
    {
       controlFramePose.setToZero(controlFrame);
