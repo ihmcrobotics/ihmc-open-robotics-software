@@ -637,7 +637,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
-   protected void checkRepInvariants()
+   void checkRepInvariants()
    {
       if (framesStartingWithRootEndingWithThis[framesStartingWithRootEndingWithThis.length - 1] != this)
       {
