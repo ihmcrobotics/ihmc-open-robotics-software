@@ -52,6 +52,7 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
 
    public KinematicsToolboxConfigurationMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
