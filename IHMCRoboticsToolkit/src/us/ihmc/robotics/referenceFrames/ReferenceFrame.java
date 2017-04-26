@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 
@@ -90,7 +91,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       point.checkReferenceFrameMatch(zAxis.getReferenceFrame());
 
-      RigidBodyTransform transformToParent = createTransformFromPointAndZAxis(point, zAxis);
+      RigidBodyTransform transformToParent = TransformTools.createTransformFromPointAndZAxis(point, zAxis);
 
       return constructFrameWithUnchangingTransformToParent(frameName, point.getReferenceFrame(), transformToParent);
    }
@@ -611,22 +612,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public String toString()
    {
       return frameName; // + "\nTransform to Parent = " + this.transformToParent;
-   }
-
-   /**
-    * Creates a transform that transforms to the given point and rotates to make the z axis align
-    * with the normal vector.
-    */
-   private static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint point, FrameVector zAxis)
-   {
-      RigidBodyTransform ret = new RigidBodyTransform();
-
-      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVectorCopy()));
-      Vector3D translation = new Vector3D();
-      point.get(translation);
-      ret.setTranslation(translation);
-
-      return ret;
    }
 
    public void checkReferenceFrameMatch(AbstractReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
