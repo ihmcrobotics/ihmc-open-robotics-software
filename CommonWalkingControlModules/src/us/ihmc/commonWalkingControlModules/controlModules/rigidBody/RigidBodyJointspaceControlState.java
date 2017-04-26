@@ -489,6 +489,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       return jointTrajectoryGenerators.get(jointIdx).getVelocity();
    }
 
+   public void fillDefaultJointPositionsAndUpdate(OneDoFJoint[] joints)
+   {
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         joints[jointIdx].setQ(jointsHomeConfiguration[jointIdx]);
+      }
+      joints[numberOfJoints - 1].updateFramesRecursively();
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
