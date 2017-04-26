@@ -90,14 +90,14 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void holdCurrentPosition()
    {
-      taskspaceControlState.holdPose();
+      taskspaceControlState.holdCurrent();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       if (!taskspaceControlState.handlePoseTrajectoryCommand(command))
       {
-         taskspaceControlState.holdPose();
+         taskspaceControlState.holdCurrent();
       }
    }
 
@@ -157,7 +157,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void requestStopTrajectory()
    {
-      taskspaceControlState.holdPose();
+      taskspaceControlState.holdCurrent();
    }
 
    @Override
