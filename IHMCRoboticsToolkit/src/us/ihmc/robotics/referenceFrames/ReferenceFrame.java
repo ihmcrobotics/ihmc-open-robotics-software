@@ -33,12 +33,48 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeHolder
 {
    private static final long serialVersionUID = 9129810880579453658L;
+   /** The name of this reference frame. The name should preferably be unique. */
    private final String frameName;
+   /**
+    * A secondary unique hash code representing this reference frame that is computed based on
+    * {@link #frameName} and the parent frame name if any.
+    * <p>
+    * This hash code has the benefit of remaining the same when creating several instances of the
+    * same tree of reference frames, such that it can be used to serialize and deserialize frame
+    * information.
+    * </p>
+    */
    private final long nameBasedHashCode;
+   /**
+    * Additional custom hash code representing this frame.
+    * <p>
+    * Somewhat of a hack that allows to enforce two frames that are physically the same but with
+    * different names to have the same hash code or to enforce a common frame to have a specific
+    * hash code that can be known without holding on its actual instance.
+    * </p>
+    */
    private long additionalNameBasedHashCode;
+   /**
+    * The reference to which this frame is attached to.
+    * <p>
+    * The {@link #transformToParent} of this describes the pose of this reference frame with respect
+    * to {@link #parentFrame}.
+    * </p>
+    */
    protected final ReferenceFrame parentFrame;
+   /**
+    * Entire from the root frame to this used to efficiently compute the pose of this reference frame with respect to the root frame.
+    */
    private final ReferenceFrame[] framesStartingWithRootEndingWithThis;
 
+   /**
+    * The pose of this transform with respect to its parent.
+    * <p>
+    * Notes:
+    * <ul>The root frame has no parent such that {@code transformToParent == null}.
+    * <ul>The transform can be constant over time or can change depending on the final implementation of {@code ReferenceFrame}.
+    * </p>
+    */
    private final RigidBodyTransform transformToParent;
 
    // These need to be longs instead of integers or they'll role over too soon. With longs, you get at least 100 years of runtime.
