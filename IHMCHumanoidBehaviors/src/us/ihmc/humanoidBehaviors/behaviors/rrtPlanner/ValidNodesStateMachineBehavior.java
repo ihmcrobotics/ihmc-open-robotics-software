@@ -4,7 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.RRTExpandingStateMachineBehavior.RRTExpandingStates;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior.RRTExpandingStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -12,12 +12,15 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTExpandingStates>
+public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpandingStates>
 {      
    private FullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
@@ -27,20 +30,27 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
    private RRTNode rootNode;
    private RRTTree rrtTree;
    
+   private RRTNode newNode;
+   
    private GetRandomNodeBehavior getRandomNodeBehavior;
    private ExpandingTreeBehavior expandingBehavior;
    private SolarPanelPoseValidityTester testValidityBehavior;
+   private CloseBehavior closeBehavior;
+   
+   
    
    public enum RRTExpandingStates
    {
-      GET_RANDOMNODE, VALIDITY_TEST, EXPANDING_TREE
+      GET_RANDOMNODE, VALIDITY_TEST, EXPANDING_TREE, CLOSE
    }
    
-   public RRTExpandingStateMachineBehavior(RRTNode rootNode, RRTTree rrtTree, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
+   public ValidNodesStateMachineBehavior(RRTNode rootNode, RRTTree rrtTree, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel)
    {
       super("RRTExpandingStateMachineBehavior", RRTExpandingStates.class, yoTime, communicationBridge);
 
+      PrintTools.info("RRTExpandingStateMachineBehavior");
+      
       this.rootNode = rootNode;
       this.rrtTree = rrtTree;
       
@@ -50,12 +60,19 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
       testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel);
       
       
-      
+      getRandomNodeBehavior = new GetRandomNodeBehavior(communicationBridge);  
+      expandingBehavior = new ExpandingTreeBehavior(communicationBridge);  
+      closeBehavior = new CloseBehavior(communicationBridge);
       
       
       
       setUpStateMachine();
       PrintTools.info("SetUp State Machine Done");
+   }
+   
+   public void setSolarPanel(SolarPanel solarPanel)
+   {
+      testValidityBehavior.setSolarPanel(solarPanel); 
    }
    
    public RRTTree getRRTTree()
@@ -81,10 +98,12 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
          {
             PrintTools.info("testValidityAction");   
           
-            Pose aPose = new Pose(new Point3D(0.8, -0.35, 1.1), new Quaternion());
-            testValidityBehavior.setWholeBodyPose(aPose, Math.PI*0.2);
-            
-            PrintTools.info("Result is "+testValidityBehavior.isValid());
+            /*
+             * override suitable node data for node.
+             */            
+            testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, newNode.getNodeData(0), newNode.getNodeData(1));
+            testValidityBehavior.onBehaviorEntered();
+            testValidityBehavior.setUpHasBeenDone();
          }
       };
       
@@ -97,12 +116,48 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
          }
       };
       
+      BehaviorAction<RRTExpandingStates> closeAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.CLOSE, closeBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PrintTools.info("closeAction");            
+         }
+      };
+      
+      StateTransitionCondition closeExpanding = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            if(expandingBehavior.nextState == RRTExpandingStates.CLOSE)
+               return true;
+            else
+               return false;
+         }
+      };
+      StateTransitionCondition repeatExpanding = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            if(expandingBehavior.nextState == RRTExpandingStates.GET_RANDOMNODE)
+               return true;
+            else
+               return false;
+         }
+      };
       
       
       statemachine.addStateWithDoneTransition(getRandomNodeAction, RRTExpandingStates.VALIDITY_TEST);
       statemachine.addStateWithDoneTransition(testValidityAction, RRTExpandingStates.EXPANDING_TREE);
       statemachine.addState(expandingTreeAction);
       
+      expandingTreeAction.addStateTransition(RRTExpandingStates.CLOSE, closeExpanding);
+      expandingTreeAction.addStateTransition(RRTExpandingStates.GET_RANDOMNODE, repeatExpanding);
+      
+      
+      statemachine.addState(closeAction);
       statemachine.setStartState(RRTExpandingStates.GET_RANDOMNODE);
    }
    
@@ -133,6 +188,11 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
       public void onBehaviorEntered()
       {
          PrintTools.info("GetRandomNodeBehavior :: onBehaviorEntered");
+         RRTNode node = rrtTree.getRandomNode();
+         PrintTools.info("New Node is "+ node.getNodeData(0)+" "+ node.getNodeData(1));
+         rrtTree.updateNearNodeForTargetNode(node);
+         newNode = rrtTree.getNewNode(node);
+         PrintTools.info("New Node is "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
       }
 
       @Override
@@ -166,6 +226,8 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
    private class ExpandingTreeBehavior extends AbstractBehavior
    {
       private boolean isDone = false;
+      private int cnt = 0;
+      public RRTExpandingStates nextState;
       
       public ExpandingTreeBehavior(CommunicationBridgeInterface communicationBridge)
       {
@@ -176,7 +238,18 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
       public void doControl()
       {
          PrintTools.info("ExpandingTreeBehavior :: doControl");
-         isDone = true;
+         isDone = true;         
+         if(cnt < 3)
+         {
+            nextState = RRTExpandingStates.GET_RANDOMNODE;
+            PrintTools.info("ExpandingTreeBehavior :: NextState is "+nextState);
+         }
+         else
+         {
+            nextState = RRTExpandingStates.CLOSE;
+            PrintTools.info("ExpandingTreeBehavior :: NextState is "+nextState);
+         }
+         cnt++;
       }
 
       @Override
@@ -212,4 +285,55 @@ public class RRTExpandingStateMachineBehavior extends StateMachineBehavior<RRTEx
          return isDone;
       }
    }
+   
+   private class CloseBehavior extends AbstractBehavior
+   {
+      private boolean isDone = false;
+      
+      public CloseBehavior(CommunicationBridgeInterface communicationBridge)
+      {
+         super(communicationBridge);
+      }
+
+      @Override
+      public void doControl()
+      {
+//         PrintTools.info("CloseBehavior :: doControl");
+//         onBehaviorExited();
+      }
+
+      @Override
+      public void onBehaviorEntered()
+      {
+         PrintTools.info("CloseBehavior :: onBehaviorEntered");
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+         PrintTools.info("CloseBehavior :: onBehaviorExited");
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return isDone;
+      }
+   }
+   
 }

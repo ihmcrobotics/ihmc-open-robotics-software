@@ -57,7 +57,6 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       
-      isGoodIKSolution = getIKResult();
    }
    
    public void setWholeBodyPose(SolarPanelPath cleaningPath, double time, double pelvisYaw)
@@ -91,11 +90,12 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // Pelvis Height
       this.holdCurrentPelvisHeight();
       
-      isGoodIKSolution = getIKResult();
-      cnt++;
+      
+      
+      numOfTest++;
    }
 
-   public static int cnt = 0;
+   public static int numOfTest = 0;
    
    @Override
    public void addEnvironmentCollisionModel()

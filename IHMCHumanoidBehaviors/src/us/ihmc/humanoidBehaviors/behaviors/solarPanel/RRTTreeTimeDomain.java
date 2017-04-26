@@ -123,7 +123,7 @@ public class RRTTreeTimeDomain extends RRTTree
    {
       RRTNode node = getRandomNode();
       updateNearNodeForTargetNode(node);
-      this.newNode = getNewNodeTimeDomain(node);
+      this.newNode = getNewNode(node);
       return addNewNodeTimeDomain();
    }   
    
@@ -149,7 +149,8 @@ public class RRTTreeTimeDomain extends RRTTree
       return false;
    }
    
-   public RRTNode getNewNodeTimeDomain(RRTNode targetNode)
+   @Override
+   public RRTNode getNewNode(RRTNode targetNode)
    {
       RRTNode newNode = nodeCreator.createNode();
       
