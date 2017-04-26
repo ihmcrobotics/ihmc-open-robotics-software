@@ -295,8 +295,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
-   public static ReferenceFrame constructBodyFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame,
-                                                                                      Vector3D translationFromParent)
+   public static ReferenceFrame constructFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame, Vector3D translationFromParent)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslation(translationFromParent);
