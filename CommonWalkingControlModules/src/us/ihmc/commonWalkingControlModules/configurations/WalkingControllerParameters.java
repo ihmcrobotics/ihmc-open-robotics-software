@@ -683,4 +683,36 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return false;
    }
+
+   /**
+    * Whether or not to utilize pelvis orientation angle modifications when walking to create natural pelvis motion
+    */
+   public boolean addPelvisOrientationOffsetsFromWalkingMotion()
+   {
+      return false;
+   }
+
+   /**
+    * Multiplier of the step angle to determine the desired pelvis yaw magnitude when walking
+    */
+   public double pelvisYawRatioOfStepAngle()
+   {
+      return 0.2;
+   }
+
+   /**
+    * Step length in meters to add the pelvis yawing motion
+    */
+   public double stepLengthToAddYawingMotion()
+   {
+      return 0.03;
+   }
+
+   /**
+    * Multiplier of the leg angle to determine the desired pelvis pitch magnitude when walking
+    */
+   public double pelvisPitchRatioOfLegAngle()
+   {
+      return 0.2;
+   }
 }

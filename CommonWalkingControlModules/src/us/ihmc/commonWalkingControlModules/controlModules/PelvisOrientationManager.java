@@ -146,7 +146,8 @@ public class PelvisOrientationManager
          }
       };
 
-      offsetTrajectoryWhileWalking = new PelvisOffsetTrajectoryWhileWalking(yoTime, transformsFromAnkleToSole, ankleZUpFrames, pelvisFrame, registry);
+      offsetTrajectoryWhileWalking = new PelvisOffsetTrajectoryWhileWalking(yoTime, transformsFromAnkleToSole, ankleZUpFrames, pelvisFrame,
+            walkingControllerParameters, registry);
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
