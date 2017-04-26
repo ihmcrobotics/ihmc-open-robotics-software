@@ -326,32 +326,28 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       hideGraphics();
    }
 
-   public void holdOrientation()
+   public void holdCurrent()
    {
       clear();
       resetLastCommandId();
       queueInitialPoint();
 
-      selectionMatrix.setToAngularSelectionOnly();
-
-      trajectoryStopped.set(false);
-      trajectoryDone.set(false);
-      trackingOrientation.set(true);
-      trackingPosition.set(false);
-   }
-
-   public void holdPose()
-   {
-      clear();
-      resetLastCommandId();
-      queueInitialPoint();
-
-      selectionMatrix.resetSelection();
-
-      trajectoryStopped.set(false);
-      trajectoryDone.set(false);
-      trackingOrientation.set(true);
-      trackingPosition.set(true);
+      if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
+      {
+         selectionMatrix.resetSelection();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(true);
+      }
+      else if (hasOrientaionGains.getBooleanValue())
+      {
+         selectionMatrix.setToAngularSelectionOnly();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(false);
+      }
    }
 
    public void goToBodyPose(FramePose homePose, double trajectoryTime)
