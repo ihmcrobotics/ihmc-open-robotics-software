@@ -330,6 +330,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       clear();
       resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
       queueInitialPoint();
 
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
@@ -353,8 +354,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public void goToBodyPose(FramePose homePose, double trajectoryTime)
    {
       clear();
+      resetLastCommandId();
       trajectoryFrame = baseFrame;
       setControlFrameToBodyFrame();
+      setTrajectoryStartTimeToCurrentTime();
       queueInitialPoint();
 
       homePose.changeFrame(trajectoryFrame);
