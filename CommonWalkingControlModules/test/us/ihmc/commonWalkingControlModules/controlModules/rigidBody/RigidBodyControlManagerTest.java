@@ -92,6 +92,7 @@ public class RigidBodyControlManagerTest
 
       // compute
       setGainsAndWeights(manager);
+      manager.initialize();
       manager.compute();
       assertEquals(RigidBodyControlMode.JOINTSPACE, manager.getActiveControlMode());
 
