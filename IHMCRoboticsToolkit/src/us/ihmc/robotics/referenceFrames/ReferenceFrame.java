@@ -7,7 +7,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -104,10 +104,10 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private final RigidBodyTransform inverseTransformToRoot;
 
    /**
-    * Field initialized at construction time that specifies if this reference frame represents an
-    * inertial frame, i.e. a non-moving frame.
+    * Field initialized at construction time that specifies if this reference frame represents a
+    * stationary frame, i.e. a non-moving frame, with respect to the root reference frame.
     */
-   private final boolean isWorldFrame; // TODO when isWorldFrame == true, transformToParent should be immutable.
+   private final boolean isAStationaryFrame; // TODO when isAStationaryFrame == true, transformToParent should be immutable.
    /**
     * Field initialized at construction time that specifies if at all time the z-axis of this
     * reference frame remains aligned with the z-axis of the root frame.
@@ -115,7 +115,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private final boolean isZupFrame;
 
    /**
-    * {@code worldFrame} is a non-moving root frame with its axes aligned as follows:
+    * {@code worldFrame} is an inertial root reference frame with its axes aligned as follows:
     * <ul>
     * <li>The x-axis is usually referred to as the forward axis.
     * <li>With the x-axis referring forward, the y-axis points to the left.
@@ -128,8 +128,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * Construct a new inertial z-up root reference frame.
     * <p>
-    * Most of the time, {@link #isWorldFrame} is the only root frame from which children reference
-    * frames are added.
+    * Most of the time, {@link #worldFrame} is the only root frame from which children
+    * reference frames are added.
     * </p>
     * <p>
     * Note that frames added as children of this root frame belongs to a different reference frame
@@ -286,6 +286,19 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformFromParent(frameName, parentFrame, transformFromParent);
    }
 
+   /**
+    * Creates a reference frame with an immutable transform from its parent.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of the parent frame expressed in this
+    * frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param transformFromParent the transform that can be used to transform a geometry object from
+    *           the parent frame to this frame. Not modified.
+    * @return the new reference frame.
+    */
    public static ReferenceFrame constructFrameWithUnchangingTransformFromParent(String frameName, ReferenceFrame parentFrame,
                                                                                 RigidBodyTransform transformFromParent)
    {
@@ -295,14 +308,40 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
-   public static ReferenceFrame constructFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame, Vector3D translationFromParent)
+   /**
+    * Creates a reference frame with an immutable translation offset from its parent.
+    * <p>
+    * The new reference frame has the same orientation as its parent frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param translationOffsetFromParent describes the position of the new reference frame's origin
+    *           expressed in the parent frame. Not modified.
+    * @return the new reference frame.
+    */
+   public static ReferenceFrame constructFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame,
+                                                                                  Tuple3DReadOnly translationOffsetFromParent)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslation(translationFromParent);
+      transformToParent.setTranslation(translationOffsetFromParent);
 
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, parentFrame.isZupFrame);
    }
 
+   /**
+    * Creates a reference frame with an immutable transform from its parent.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of the parent frame expressed in this
+    * frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param transformFromParent the transform that can be used to transform a geometry object from
+    *           the parent frame to this frame. Not modified.
+    * @return the new reference frame.
+    */
    public static ReferenceFrame constructBodyFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                                   RigidBodyTransform transformToParent)
    {
@@ -356,7 +395,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.inverseTransformToRoot = new RigidBodyTransform();
       this.transformToParent = new RigidBodyTransform();
 
-      this.isWorldFrame = false;
+      this.isAStationaryFrame = false;
       this.isZupFrame = false;
    }
 
@@ -379,7 +418,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.inverseTransformToRoot = null;
       this.transformToParent = null;
 
-      this.isWorldFrame = isWorldFrame;
+      this.isAStationaryFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
    }
 
@@ -406,7 +445,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToParent = new RigidBodyTransform(transformToParent);
       this.transformToParent.normalizeRotationPart();
 
-      this.isWorldFrame = isWorldFrame;
+      this.isAStationaryFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
    }
 
@@ -416,7 +455,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
-      this.isWorldFrame = isWorldFrame;
+      this.isAStationaryFrame = isWorldFrame;
       this.isZupFrame = isZupFrame;
 
       this.transformToRoot = new RigidBodyTransform();
@@ -456,7 +495,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public boolean isWorldFrame()
    {
-      return isWorldFrame;
+      return isAStationaryFrame;
    }
 
    public boolean isZupFrame()
