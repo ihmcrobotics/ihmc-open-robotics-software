@@ -150,6 +150,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       overrideTrajectory();
       resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
       setWeightsToDefaults();
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -166,6 +167,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       overrideTrajectory();
       resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
       setWeightsToDefaults();
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -182,6 +184,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       overrideTrajectory();
       resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
       setWeightsToDefaults();
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
