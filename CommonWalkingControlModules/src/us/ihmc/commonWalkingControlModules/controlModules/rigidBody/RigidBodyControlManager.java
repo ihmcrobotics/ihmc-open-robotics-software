@@ -162,7 +162,7 @@ public class RigidBodyControlManager
       checkForDisabledJoints();
 
       if (stateMachine.getCurrentState().abortState())
-         holdInJointspace();
+         hold();
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
 
@@ -180,16 +180,10 @@ public class RigidBodyControlManager
       positionControlHelper.update();
    }
 
-   public void holdInJointspace()
-   {
-      jointspaceControlState.holdCurrent();
-      requestState(jointspaceControlState.getStateEnum());
-   }
-
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       if (command.isStopAllTrajectory())
-         holdInJointspace();
+         hold();
    }
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
@@ -202,7 +196,7 @@ public class RigidBodyControlManager
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
          taskspaceControlState.clear();
-         holdInJointspace();
+         hold();
       }
    }
 
@@ -216,7 +210,7 @@ public class RigidBodyControlManager
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          taskspaceControlState.clear();
-         holdInJointspace();
+         hold();
       }
    }
 
@@ -231,7 +225,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
-         holdInJointspace();
+         hold();
       }
    }
 
@@ -246,7 +240,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
-         holdInJointspace();
+         hold();
       }
    }
 
@@ -261,7 +255,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
-         holdInJointspace();
+         hold();
       }
    }
 
@@ -274,7 +268,37 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
+         hold();
+      }
+   }
+   
+   public void holdInJointspace()
+   {
+      jointspaceControlState.holdCurrent();
+      requestState(jointspaceControlState.getStateEnum());
+   }
+
+   public void holdInTaskspace()
+   {
+      jointspaceControlState.holdCurrent();
+      requestState(jointspaceControlState.getStateEnum());
+   }
+
+   public void hold()
+   {
+      switch (defaultControlMode.getEnumValue())
+      {
+      case JOINTSPACE:
          holdInJointspace();
+         break;
+      case TASKSPACE:
+         holdInTaskspace();
+         break;
+      default:
+         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
+         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
+         hold();
+         break;
       }
    }
 
@@ -335,7 +359,7 @@ public class RigidBodyControlManager
 
       if (!command.getLoad())
       {
-         holdInJointspace();
+         hold();
          return;
       }
 
