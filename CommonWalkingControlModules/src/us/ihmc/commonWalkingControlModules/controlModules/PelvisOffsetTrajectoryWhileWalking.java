@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.InterpolationTools;
@@ -17,12 +18,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PelvisOffsetTrajectoryWhileWalking
 {
-   private static final boolean addPelvisOffsetsWhileStepping = true;
-   private static final double pelvisYawRatio = 0.3;
-   private static final double pelvisPitchRatio = 0.3;
    private static final double pelvisPitchPercentToStopPitching = 0.8;
    private static final double offsetPhaseInDuration = 0.01;
-   private static final double yawStepForwardThreshold = 0.3;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -40,7 +37,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
    private final DoubleYoVariable pelvisYawAngleRatio = new DoubleYoVariable("pelvisYawAngleRatio", registry);
-   private final DoubleYoVariable pelvisYawStepForwardThreshold = new DoubleYoVariable("pelvisYawStepForwardThreshold", registry);
+   private final DoubleYoVariable pelvisYawStepLengthThreshold = new DoubleYoVariable("pelvisYawStepLengthThreshold", registry);
 
    private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
    private final DoubleYoVariable pelvisPitchPercentSwingToStopPitching = new DoubleYoVariable("pelvisPitchPercentSwingToStopPitching", registry);
@@ -72,7 +69,8 @@ public class PelvisOffsetTrajectoryWhileWalking
    private double initialYawOffset;
 
    public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame pelvisFrame, YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame pelvisFrame, WalkingControllerParameters walkingControllerParameters,
+         YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -97,12 +95,12 @@ public class PelvisOffsetTrajectoryWhileWalking
       };
       nextAnkleZUpFrame = new ZUpFrame(worldFrame, nextAnkleFrame, "nextAnkleZUp");
 
-      addPelvisOffsetsBasedOnStep.set(addPelvisOffsetsWhileStepping);
-      pelvisPitchAngleRatio.set(pelvisPitchRatio);
+      addPelvisOffsetsBasedOnStep.set(walkingControllerParameters.addPelvisOrientationOffsetsFromWalkingMotion());
+      pelvisPitchAngleRatio.set(walkingControllerParameters.pelvisPitchRatioOfLegAngle());
       pelvisPitchPercentSwingToStopPitching.set(pelvisPitchPercentToStopPitching);
-      pelvisYawAngleRatio.set(pelvisYawRatio);
+      pelvisYawAngleRatio.set(walkingControllerParameters.pelvisYawRatioOfStepAngle());
       phaseInDuration.set(offsetPhaseInDuration);
-      pelvisYawStepForwardThreshold.set(yawStepForwardThreshold);
+      pelvisYawStepLengthThreshold.set(walkingControllerParameters.stepLengthToAddYawingMotion());
 
       parentRegistry.addChild(registry);
    }
@@ -126,7 +124,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private double computeStepAngle(FramePoint footLocation, RobotSide supportSide)
    {
       double stepAngle = 0.0;
-      if (Math.abs(footLocation.getX()) > pelvisYawStepForwardThreshold.getDoubleValue())
+      if (Math.abs(footLocation.getX()) > pelvisYawStepLengthThreshold.getDoubleValue())
          stepAngle = Math.atan2(footLocation.getX(), Math.abs(footLocation.getY()));
 
       return supportSide.negateIfRightSide(stepAngle);
