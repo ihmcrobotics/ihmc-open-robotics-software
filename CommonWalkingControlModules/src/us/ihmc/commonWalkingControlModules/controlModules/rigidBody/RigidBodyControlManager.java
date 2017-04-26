@@ -58,7 +58,6 @@ public class RigidBodyControlManager
    private final OneDoFJoint[] jointsOriginal;
 
    private final BooleanYoVariable allJointsEnabled;
-   private final BooleanYoVariable hasBeenInitialized;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final BooleanYoVariable stateSwitched;
@@ -74,7 +73,6 @@ public class RigidBodyControlManager
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
-      hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
       stateSwitched = new BooleanYoVariable(namePrefix + "StateSwitched", registry);
 
       OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
@@ -142,17 +140,11 @@ public class RigidBodyControlManager
 
    public void initialize()
    {
-      if (!hasBeenInitialized.getBooleanValue())
-      {
-         goToHomeFromCurrent(INITIAL_GO_HOME_TIME);
-         hasBeenInitialized.set(true);
-      }
+      goToHomeFromCurrent(INITIAL_GO_HOME_TIME);
    }
 
    public void compute()
    {
-      initialize();
-
       checkForDisabledJoints();
 
       if (stateMachine.getCurrentState().abortState())
@@ -160,7 +152,7 @@ public class RigidBodyControlManager
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
 
-      //cleanup the state. Don't cleanup if switching to hybrid
+      // Cleanup the state. Don't cleanup if switching to hybrid.
       if (stateSwitched.getBooleanValue())
       {
          if (stateMachine.getCurrentStateEnum() != RigidBodyControlMode.HYBRID)
