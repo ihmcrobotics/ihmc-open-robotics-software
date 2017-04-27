@@ -291,25 +291,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, parentFrame.isZupFrame);
    }
 
-   /**
-    * Creates a reference frame with an immutable transform from its parent.
-    * <p>
-    * The {@code transformFromParent} should describe the pose of the parent frame expressed in this
-    * frame.
-    * </p>
-    * 
-    * @param frameName the name of the new frame.
-    * @param parentFrame the parent frame of the new reference frame.
-    * @param transformFromParent the transform that can be used to transform a geometry object from
-    *           the parent frame to this frame. Not modified.
-    * @return the new reference frame.
-    */
-   public static ReferenceFrame constructBodyFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
-                                                                                  RigidBodyTransform transformToParent)
-   {
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
-   }
-
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                               RigidBodyTransform transformToParent)
    {
