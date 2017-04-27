@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PelvisOffsetTrajectoryWhileWalking
 {
-   private static final double pelvisPitchPercentToStopPitching = 0.8;
    private static final double offsetPhaseInDuration = 0.01;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -30,9 +30,11 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
 
+   private final DoubleYoVariable previousSwingDuration = new DoubleYoVariable("pelvisPreviousSwingDuration", registry);
    private final DoubleYoVariable transferDuration = new DoubleYoVariable("pelvisTransferDuration", registry);
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("pelvisSwingDuration", registry);
    private final DoubleYoVariable nextTransferDuration = new DoubleYoVariable("pelvisNextTransferDuration", registry);
+   private final DoubleYoVariable nextSwingDuration = new DoubleYoVariable("pelvisNextSwingDuration", registry);
 
    private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
@@ -40,7 +42,8 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final DoubleYoVariable pelvisYawStepLengthThreshold = new DoubleYoVariable("pelvisYawStepLengthThreshold", registry);
 
    private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
-   private final DoubleYoVariable pelvisPitchPercentSwingToStopPitching = new DoubleYoVariable("pelvisPitchPercentSwingToStopPitching", registry);
+   private final DoubleYoVariable percentOfSwingPitchingFromUpcomingLeg = new DoubleYoVariable("pelvisPercentOfSwingPitchingFromUpcomingLeg", registry);
+   private final DoubleYoVariable percentOfSwingPitchingFromSwingLeg = new DoubleYoVariable("pelvisPercentOfSwingPitchingFromSwingLeg", registry);
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable timeInState = new DoubleYoVariable("pelvisOrientationTimeInState", registry);
@@ -95,12 +98,15 @@ public class PelvisOffsetTrajectoryWhileWalking
       };
       nextAnkleZUpFrame = new ZUpFrame(worldFrame, nextAnkleFrame, "nextAnkleZUp");
 
-      addPelvisOffsetsBasedOnStep.set(walkingControllerParameters.addPelvisOrientationOffsetsFromWalkingMotion());
-      pelvisPitchAngleRatio.set(walkingControllerParameters.pelvisPitchRatioOfLegAngle());
-      pelvisPitchPercentSwingToStopPitching.set(pelvisPitchPercentToStopPitching);
-      pelvisYawAngleRatio.set(walkingControllerParameters.pelvisYawRatioOfStepAngle());
+      PelvisOffsetWhileWalkingParameters parameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
+      addPelvisOffsetsBasedOnStep.set(parameters.addPelvisOrientationOffsetsFromWalkingMotion());
+      pelvisPitchAngleRatio.set(parameters.getPelvisPitchRatioOfLegAngle());
+      pelvisYawAngleRatio.set(parameters.getPelvisYawRatioOfStepAngle());
       phaseInDuration.set(offsetPhaseInDuration);
-      pelvisYawStepLengthThreshold.set(walkingControllerParameters.stepLengthToAddYawingMotion());
+      pelvisYawStepLengthThreshold.set(parameters.getStepLengthToAddYawingMotion());
+
+      percentOfSwingPitchingFromSwingLeg.set(parameters.getPercentOfSwingPitchingFromSwingLeg());
+      percentOfSwingPitchingFromUpcomingLeg.set(parameters.getPercentOfSwingPitchingFromUpcomingLeg());
 
       parentRegistry.addChild(registry);
    }
@@ -113,35 +119,22 @@ public class PelvisOffsetTrajectoryWhileWalking
       updateFrames();
    }
 
-   private void updateFrames()
-   {
-      nextSoleFrame.update();
-      nextAnkleFrame.update();
-      nextAnkleZUpFrame.update();
-   }
-
-
-   private double computeStepAngle(FramePoint footLocation, RobotSide supportSide)
-   {
-      double stepAngle = 0.0;
-      if (Math.abs(footLocation.getX()) > pelvisYawStepLengthThreshold.getDoubleValue())
-         stepAngle = Math.atan2(footLocation.getX(), Math.abs(footLocation.getY()));
-
-      return supportSide.negateIfRightSide(stepAngle);
-   }
 
    public void initializeStanding()
    {
       isStanding.set(true);
-      swingDuration.set(0.0);
       isInTransfer.set(false);
+
+      reset();
    }
 
    private final FramePoint tmpPoint = new FramePoint();
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration)
+   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
       supportSide = transferToSide;
       this.transferDuration.set(transferDuration);
+      this.previousSwingDuration.set(this.swingDuration.getDoubleValue());
+      this.swingDuration.set(swingDuration);
 
       initialTime = yoTime.getDoubleValue();
 
@@ -167,11 +160,12 @@ public class PelvisOffsetTrajectoryWhileWalking
       isInTransfer.set(true);
    }
 
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration)
+   public void initializeSwing(RobotSide supportSide, double currentSwingDuration, double nextTransferDuration, double nextSwingDuration)
    {
       this.supportSide = supportSide;
-      this.swingDuration.set(swingDuration);
+      this.swingDuration.set(currentSwingDuration);
       this.nextTransferDuration.set(nextTransferDuration);
+      this.nextSwingDuration.set(nextSwingDuration);
 
       initialTime = yoTime.getDoubleValue();
 
@@ -182,7 +176,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
 
       // compute pelvis frequency
-      double stepDuration = transferDuration.getDoubleValue() + swingDuration;
+      double stepDuration = transferDuration.getDoubleValue() + currentSwingDuration;
       double pelvisYawSineFrequency = 1.0 / (2.0 * stepDuration);
 
       this.pelvisYawSineMagnitude.set(pelvisYawSineMagnitude);
@@ -231,7 +225,28 @@ public class PelvisOffsetTrajectoryWhileWalking
       orientationToPack.setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
    }
 
-   // // TODO: 4/25/17  make the angle also a function of the height
+   private void updateFrames()
+   {
+      nextSoleFrame.update();
+      nextAnkleFrame.update();
+      nextAnkleZUpFrame.update();
+   }
+
+   private void reset()
+   {
+      swingDuration.set(0.0);
+      transferDuration.set(0.0);
+      nextTransferDuration.set(0.0);
+   }
+
+   private double computeStepAngle(FramePoint footLocation, RobotSide supportSide)
+   {
+      double stepAngle = 0.0;
+      if (Math.abs(footLocation.getX()) > pelvisYawStepLengthThreshold.getDoubleValue())
+         stepAngle = Math.atan2(footLocation.getX(), Math.abs(footLocation.getY()));
+
+      return supportSide.negateIfRightSide(stepAngle);
+   }
 
    private void updatePelvisPitchOffsetInTransfer(RobotSide transferToSide)
    {
@@ -241,9 +256,12 @@ public class PelvisOffsetTrajectoryWhileWalking
       double trailingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(transferToSide.getOppositeSide()));
       this.trailingLegAngle.set(trailingLegAngle);
 
-      double swingForInterpolation = (1.0 - pelvisPitchPercentSwingToStopPitching.getDoubleValue()) * swingDuration.getDoubleValue();
-      double timeInInterpolation = timeInState.getDoubleValue() + swingForInterpolation;
-      double percentInInterpolation = timeInInterpolation / (swingForInterpolation + transferDuration.getDoubleValue());
+      double timeSpentOnPreviousSwing = percentOfSwingPitchingFromUpcomingLeg.getDoubleValue() * previousSwingDuration.getDoubleValue();
+      double timeSpentOnNextSwing = percentOfSwingPitchingFromSwingLeg.getDoubleValue() * swingDuration.getDoubleValue();
+
+      double timeInInterpolation = timeInState.getDoubleValue() + timeSpentOnPreviousSwing;
+      double totalInterpolationTime = timeSpentOnPreviousSwing + transferDuration.getDoubleValue() + timeSpentOnNextSwing;
+      double percentInInterpolation = timeInInterpolation / totalInterpolationTime;
 
       double interpolatedLegAngle = InterpolationTools.hermiteInterpolate(trailingLegAngle, leadingLegAngle, percentInInterpolation);
       this.interpolatedLegAngle.set(interpolatedLegAngle);
@@ -262,31 +280,47 @@ public class PelvisOffsetTrajectoryWhileWalking
       this.trailingLegAngle.set(trailingLegAngle);
 
       double percentInState = timeInState.getDoubleValue() / swingDuration.getDoubleValue();
-      double leadingLegAngle = computeAngleFromAnkleToPelvis(nextAnkleZUpFrame);
-      this.leadingLegAngle.set(leadingLegAngle);
 
-      double desiredPitch;
-      if (percentInState > pelvisPitchPercentSwingToStopPitching.getDoubleValue())
+      double swingLegAngle, interpolatedLegAngle;
+      if (percentInState < percentOfSwingPitchingFromSwingLeg.getDoubleValue())
+      { // Interpolate against the swinging leg angle for the first phase of the swing cycle
+         double timeSpentOnPreviousSwing = percentOfSwingPitchingFromUpcomingLeg.getDoubleValue() * previousSwingDuration.getDoubleValue();
+         double timeSpentOnCurrentSwing = percentOfSwingPitchingFromSwingLeg.getDoubleValue() * swingDuration.getDoubleValue();
+
+         double timeInInterpolation = timeInState.getDoubleValue() + timeSpentOnPreviousSwing + transferDuration.getDoubleValue();
+         double totalInterpolationTime = timeSpentOnPreviousSwing + transferDuration.getDoubleValue() + timeSpentOnCurrentSwing;
+         double percentInInterpolation = timeInInterpolation / totalInterpolationTime;
+
+         swingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(supportSide.getOppositeSide()));
+
+         interpolatedLegAngle = InterpolationTools.hermiteInterpolate(swingLegAngle, trailingLegAngle, percentInInterpolation);
+
+      }
+      else if (percentInState > (1.0 - percentOfSwingPitchingFromUpcomingLeg.getDoubleValue()))
       {
+         double timeSpentOnCurrentSwing = percentOfSwingPitchingFromUpcomingLeg.getDoubleValue() * swingDuration.getDoubleValue();
+         double timeSpentOnNextSwing = percentOfSwingPitchingFromSwingLeg.getDoubleValue() * nextSwingDuration.getDoubleValue();
 
-         double swingForInterpolation = (1.0 - pelvisPitchPercentSwingToStopPitching.getDoubleValue()) * swingDuration.getDoubleValue();
-         double timeInInterpolation = timeInState.getDoubleValue() - (swingDuration.getDoubleValue() - swingForInterpolation);
-         double percentInInterpolation = timeInInterpolation / (swingForInterpolation + nextTransferDuration.getDoubleValue());
+         double timeInInterpolation = timeInState.getDoubleValue() - (swingDuration.getDoubleValue() - timeSpentOnCurrentSwing);
+         double totalInterpolationTime = timeSpentOnCurrentSwing + nextTransferDuration.getDoubleValue() + timeSpentOnNextSwing;
+         double percentInInterpolation = timeInInterpolation / totalInterpolationTime;
 
-         double interpolatedLegAngle = InterpolationTools.hermiteInterpolate(trailingLegAngle, leadingLegAngle, percentInInterpolation);
-         this.interpolatedLegAngle.set(interpolatedLegAngle);
+         swingLegAngle = computeAngleFromAnkleToPelvis(nextAnkleZUpFrame);
 
-         desiredPitch = pelvisPitchAngleRatio.getDoubleValue() * interpolatedLegAngle;
+         interpolatedLegAngle = InterpolationTools.hermiteInterpolate(trailingLegAngle, swingLegAngle, percentInInterpolation);
       }
       else
       {
-         this.interpolatedLegAngle.set(trailingLegAngle);
-         desiredPitch = pelvisPitchAngleRatio.getDoubleValue() * trailingLegAngle;
+         swingLegAngle = 0.0;
+         interpolatedLegAngle = trailingLegAngle;
       }
+
+      double desiredPitch = pelvisPitchAngleRatio.getDoubleValue() * interpolatedLegAngle;
+      this.interpolatedLegAngle.set(interpolatedLegAngle);
+      this.leadingLegAngle.set(swingLegAngle);
 
       // take care of the phase in period to avoid any discontinuities
       desiredPitch = computePhaseInBlending(initialPitchOffset, desiredPitch);
-
       desiredWalkingPelvisOffsetOrientation.setPitch(desiredPitch);
    }
 

@@ -12,6 +12,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -31,8 +32,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 {
    private StraightLegWalkingParameters straightLegWalkingParameters;
 
-   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   protected DynamicReachabilityParameters dynamicReachabilityParameters;
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private DynamicReachabilityParameters dynamicReachabilityParameters;
+   private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -685,34 +687,13 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Whether or not to utilize pelvis orientation angle modifications when walking to create natural pelvis motion
+    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
     */
-   public boolean addPelvisOrientationOffsetsFromWalkingMotion()
+   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
    {
-      return false;
-   }
+      if (pelvisOffsetWhileWalkingParameters == null)
+         pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
 
-   /**
-    * Multiplier of the step angle to determine the desired pelvis yaw magnitude when walking
-    */
-   public double pelvisYawRatioOfStepAngle()
-   {
-      return 0.2;
-   }
-
-   /**
-    * Step length in meters to add the pelvis yawing motion
-    */
-   public double stepLengthToAddYawingMotion()
-   {
-      return 0.03;
-   }
-
-   /**
-    * Multiplier of the leg angle to determine the desired pelvis pitch magnitude when walking
-    */
-   public double pelvisPitchRatioOfLegAngle()
-   {
-      return 0.2;
+      return pelvisOffsetWhileWalkingParameters;
    }
 }
