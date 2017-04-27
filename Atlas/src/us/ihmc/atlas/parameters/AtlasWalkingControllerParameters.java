@@ -32,6 +32,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -73,6 +74,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private Map<String, Pose> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
@@ -792,10 +794,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       {
          return RigidBodyControlMode.TASKSPACE;
       }
-      else if (bodyName.equals(jointMap.getHeadName()))
-      {
-         return RigidBodyControlMode.TASKSPACE;
-      }
       else
       {
          return RigidBodyControlMode.JOINTSPACE;
@@ -829,6 +827,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   {
+      if (bodyHomeConfiguration != null)
+         return bodyHomeConfiguration;
+
+      bodyHomeConfiguration = new HashMap<String, Pose>();
+
+      Pose homeChestPoseInPelvisZUpFrame = new Pose();
+      bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
+
+      return bodyHomeConfiguration;
    }
 
    /** {@inheritDoc} */
