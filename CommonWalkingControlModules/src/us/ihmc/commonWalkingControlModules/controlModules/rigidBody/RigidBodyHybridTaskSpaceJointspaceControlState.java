@@ -10,6 +10,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
 
 public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyControlState
 {
@@ -35,9 +36,9 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
       taskspaceControlState.doAction();
    }
 
-   public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand<?,?> se3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand<?,?> se3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions, FramePose initialPose)
    {
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(se3TaskspaceCommand))
+      if (!taskspaceControlState.handlePoseTrajectoryCommand(se3TaskspaceCommand, initialPose))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          taskspaceControlState.clear();
@@ -53,9 +54,9 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
 
    }
 
-   public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand<?,?> so3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand<?,?> so3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions, FramePose initialPose)
    {
-      if (!taskspaceControlState.handleOrientationTrajectoryCommand(so3TaskspaceCommand))
+      if (!taskspaceControlState.handleOrientationTrajectoryCommand(so3TaskspaceCommand, initialPose))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          taskspaceControlState.clear();
