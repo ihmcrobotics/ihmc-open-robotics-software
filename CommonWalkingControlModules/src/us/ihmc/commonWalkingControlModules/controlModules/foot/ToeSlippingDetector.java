@@ -89,7 +89,7 @@ public class ToeSlippingDetector
 
    public void initialize(FramePoint toeContactPointPosition)
    {
-      this.toeContactPointPosition.set(toeContactPointPosition);
+      this.toeContactPointPosition.setIncludingFrame(toeContactPointPosition);
       this.toeContactPointPosition.changeFrame(foot.getBodyFixedFrame());
       initialToePosition.setAndMatchFrame(toeContactPointPosition);
    }
