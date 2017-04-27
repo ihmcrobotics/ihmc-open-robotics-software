@@ -128,8 +128,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * Construct a new inertial z-up root reference frame.
     * <p>
-    * Most of the time, {@link #worldFrame} is the only root frame from which children
-    * reference frames are added.
+    * Most of the time, {@link #worldFrame} is the only root frame from which children reference
+    * frames are added.
     * </p>
     * <p>
     * Note that frames added as children of this root frame belongs to a different reference frame
@@ -252,7 +252,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * Creates a reference frame with an immutable transform from its parent.
     * <p>
     * The {@code transformFromParent} should describe the pose of the parent frame expressed in this
-    * frame.
+    * new frame.
     * </p>
     * 
     * @param frameName the name of the new frame.
@@ -291,13 +291,26 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, parentFrame.isZupFrame);
    }
 
+   /**
+    * Creates a reference frame with an immutable transform to its parent.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of the new frame expressed in its
+    * parent frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param transformToParent the transform that can be used to transform a geometry object the new
+    *           frame to its parent frame. Not modified.
+    * @return the new reference frame.
+    */
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                               RigidBodyTransform transformToParent)
    {
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, false, false);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, false);
    }
 
-   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
+   private static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                               RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
       //      if (!RotationFunctions.isRotationProper(transformToParent))
