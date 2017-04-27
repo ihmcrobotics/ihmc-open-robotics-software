@@ -35,7 +35,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
+   private static boolean DEBUG = false;
+   
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;
    private final DoubleYoVariable jointLimitThreshold;
@@ -63,11 +64,16 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(10);   
    
-   private final ReferenceFrame pelvisZUpFrame;
-   private final ReferenceFrame chestFrame;
-
+   private int numberOfCntForTimeExpire = 100;
+   private int cnt = 0;
    
-   private static boolean Debug = false;
+   private boolean isSendingPacket = false;   
+   private boolean isReceived = false;   
+   private boolean isSolved = false;   
+   private boolean isJointLimit = false;
+   
+   private KinematicsToolboxOutputStatus newestSolution;
+   
    
    protected FullHumanoidRobotModel ikFullRobotModel;
    protected RobotCollisionModel robotCollisionModel;
@@ -77,8 +83,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       super(null, outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.05);
@@ -237,14 +241,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
    }
    
-   private int cnt = 0;
-   
-   private boolean isSendingPacket = false;
-   
-   private boolean isReceived = false;
-   
-   private boolean isSolved = false;   
-   private boolean isJointLimit = false;
+
       
    public void setUpHasBeenDone()
    {  
@@ -359,7 +356,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                sendPacket(pelvisMessage);
             }
             
-            KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
+            newestSolution = kinematicsToolboxOutputQueue.poll();
             
             double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
             boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold.getDoubleValue());
@@ -381,7 +378,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             }
                         
             // break condition 2. joint limit            
-            isJointLimit = isJointLimit(newestSolution);
+            isJointLimit = isJointLimit();
             
             outputConverter.updateFullRobotModel(newestSolution);
             
@@ -391,31 +388,28 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             if(false)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
                                +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
-            if(false)
-               PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
-                               +" isReceived "+isReceived
-                               +" isGoodSolutionCur "+isGoodSolutionCur                            
-                               +" isSolved "+isSolved);
             
-            if(cnt == 100)
-            //if(isSolved == true || isJointLimit == true || cnt == 200)
+            if(isSolved == true || isJointLimit == true || cnt == numberOfCntForTimeExpire)
             {               
                cntOfSeries = 0;
                if(isSolved == true)
                {
-                  PrintTools.info("isSolved isSolved isSolved");
+                  if(DEBUG)
+                     PrintTools.info("isSolved isSolved isSolved");
                   isGoodIKSolution = true;
                }
                   
                if(isJointLimit == true)
                {
-                  PrintTools.info("isJointLimit "+isJointLimit+" "+getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit].getName());
+                  if(DEBUG)
+                     PrintTools.info("isJointLimit "+isJointLimit+" "+getFullHumanoidRobotModel().getOneDoFJoints()[indexOfLimit].getName());
                   isGoodIKSolution = false;
                }
                
-               if(cnt == 100)
+               if(cnt == numberOfCntForTimeExpire)
                {
-                  PrintTools.info("Time is over ");
+                  if(DEBUG)
+                     PrintTools.info("Time is over ");
                   isGoodIKSolution = false;
                }
                   
@@ -440,11 +434,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
-      
-//      putHandMessage();
-//      putChestMessage();
-//      putPelvisMessage(); 
-      
+            
       KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
       
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
@@ -456,7 +446,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       {
          jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
          privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-         //PrintTools.info(""+i+" "+ oneDoFJoints[i].getName()+" "+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
       }
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
@@ -473,13 +462,11 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
-      
-      
    }
       
    static int cntOfSeries = 0;
    int indexOfLimit = 0;
-   private boolean isJointLimit(KinematicsToolboxOutputStatus newestSolution)
+   private boolean isJointLimit()
    {      
       boolean isLimit = false;
       int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
@@ -587,6 +574,38 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       isCollisionFree = robotCollisionModel.getCollisionResult();
 
 //      isGoodIKSolution = true;
+   }
+   
+   public double getScroe()
+   {
+      double score = 0;
+      
+      int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
+      
+      int rightArmStart = 12;
+      int rightArmEnd = 18;
+            
+      for(int i=0;i<numberOfJoints;i++)   
+      {              
+         if(i<3 || (i>=rightArmStart && i<=rightArmEnd))
+         {
+            OneDoFJoint aJoint = getFullHumanoidRobotModel().getOneDoFJoints()[i];
+            double aJointValue = newestSolution.getJointAngles()[i];
+            double upperValue = aJoint.getJointLimitUpper();
+            double lowerValue = aJoint.getJointLimitLower();               
+            
+            double diffUpper = upperValue - aJointValue;
+            double diffLower = aJointValue - lowerValue;
+            
+            if(diffUpper > diffLower)
+               score = diffLower;
+            else
+               score = diffUpper;           
+         }
+      } 
+      
+      
+      return score;
    }
 
    public boolean isValid()
