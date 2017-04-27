@@ -7,7 +7,7 @@ public class PelvisOffsetWhileWalkingParameters
     */
    public boolean addPelvisOrientationOffsetsFromWalkingMotion()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -31,15 +31,25 @@ public class PelvisOffsetWhileWalkingParameters
     */
    public double getPelvisPitchRatioOfLegAngle()
    {
-      return 0.2;
+      return 0.5;
    }
 
-   public double getPercentOfSwingPitchingFromUpcomingLeg()
+   /**
+    * Fraction of the end part of the swing phase in which to interpolate the pelvis tilt between the stance leg
+    * and the upcoming stance leg. Effectively forces the pelvis to "turn over" sooner.
+    * Must be between 0.0 and 1.0.
+    */
+   public double getFractionOfSwingPitchingFromUpcomingLeg()
    {
-      return 0.2;
+      return 0.15;
    }
 
-   public double getPercentOfSwingPitchingFromSwingLeg()
+   /**
+    * Fraction of the first part of the swing phase in which to interpolate the pelvis tilt between the stance leg
+    * and the swing leg. Effectively delays the pelvis from "turning over".
+    * Must be between 0.0 and 1.0.
+    */
+   public double getFractionOfSwingPitchingFromSwingLeg()
    {
       return 0.2;
    }
