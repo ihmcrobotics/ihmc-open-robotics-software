@@ -123,7 +123,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * acceleration.
     * </ul>
     */
-   private static final ReferenceFrame worldFrame = constructAWorldFrame("World");
+   private static final ReferenceFrame worldFrame = constructARootFrame("World");
 
    /**
     * Construct a new inertial z-up root reference frame.
@@ -140,49 +140,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @param frameName the name of the new world frame.
     * @return the new non-moving z-up root reference frame.
     */
-   public static ReferenceFrame constructAWorldFrame(String frameName)
+   public static ReferenceFrame constructARootFrame(String frameName)
    {
       ReferenceFrame ret = new ReferenceFrame(frameName, true, true)
       {
          private static final long serialVersionUID = -8828178814213025690L;
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-         }
-      };
-
-      return ret;
-   }
-
-   /**
-    * Creates a new root frame that is not an inertial frame nor a z-up frame.
-    * <p>
-    * This is usually used for tests.
-    * </p>
-    * 
-    * @param frameName the name of the new root frame.
-    */
-   public static ReferenceFrame constructARootFrame(String frameName)
-   {
-      return constructARootFrame(frameName, true, true);
-   }
-
-   /**
-    * Creates a new root frame.
-    * <p>
-    * This is usually used for tests.
-    * </p>
-    * 
-    * @param frameName the name of the new root frame.
-    * @param isWorldFrame whether the new frame is an inertial frame or not.
-    * @param isZupFrame whether the new frame is assumed to have its z-axis pointing upward.
-    */
-   private static ReferenceFrame constructARootFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
-   {
-      ReferenceFrame ret = new ReferenceFrame(frameName, isWorldFrame, isZupFrame)
-      {
-         private static final long serialVersionUID = -6427490298776551499L;
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
