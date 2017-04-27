@@ -194,8 +194,9 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setNextFootstep(nextFootstep);
 
+      FootstepTiming nextFootstepTiming = walkingMessageHandler.peekTiming(0);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), walkingMessageHandler.peekTiming(0));
+      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), nextFootstepTiming);
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1), walkingMessageHandler.peekTiming(1));
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
@@ -210,7 +211,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       kneeAngleManager.startSwing(swingSide);
 
-      pelvisOrientationManager.initializeSwing(supportSide, swingTime, walkingMessageHandler.peekTiming(0).getTransferTime());
+      pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextFootstepTiming.getTransferTime(), nextFootstepTiming.getSwingTime());
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);

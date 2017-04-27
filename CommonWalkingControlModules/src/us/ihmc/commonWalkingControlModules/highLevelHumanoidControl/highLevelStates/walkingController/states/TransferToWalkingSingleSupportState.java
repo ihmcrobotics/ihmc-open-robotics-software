@@ -59,8 +59,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.initializeICPPlanForTransfer(walkingMessageHandler.peekTiming(0).getSwingTime(), walkingMessageHandler.peekTiming(0).getTransferTime(),
             finalTransferTime);
 
+      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
       pelvisOrientationManager.setUpcomingFootstep(walkingMessageHandler.peek(0));
-      pelvisOrientationManager.initializeTransfer(transferToSide, walkingMessageHandler.peekTiming(0).getTransferTime());
+      pelvisOrientationManager.initializeTransfer(transferToSide, footstepTiming.getTransferTime(), footstepTiming.getSwingTime());
 
       kneeAngleManager.beginStraightening(transferToSide);
    }

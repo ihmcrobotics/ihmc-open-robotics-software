@@ -631,14 +631,15 @@ public class PelvisOrientationManager
    {
       offsetTrajectoryWhileWalking.initializeStanding();
    }
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration)
+
+   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
-      offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration);
+      offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
    }
 
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration)
+   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
    {
-      offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration);
+      offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
