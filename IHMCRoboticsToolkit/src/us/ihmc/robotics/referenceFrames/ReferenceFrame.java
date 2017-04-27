@@ -165,7 +165,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public static ReferenceFrame constructARootFrame(String frameName)
    {
-      return constructARootFrame(frameName, false, false);
+      return constructARootFrame(frameName, true, true);
    }
 
    /**
