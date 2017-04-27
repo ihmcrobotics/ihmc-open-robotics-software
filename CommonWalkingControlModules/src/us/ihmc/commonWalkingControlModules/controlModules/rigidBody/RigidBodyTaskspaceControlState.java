@@ -80,6 +80,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
+   private final FramePose initialPose = new FramePose();
+
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame defaultControlFrame;
@@ -388,13 +390,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       resetLastCommandId();
       trajectoryFrame = baseFrame;
       setTrajectoryStartTimeToCurrentTime();
-
-      initialPose.changeFrame(trajectoryFrame);
-      FrameSE3TrajectoryPoint initialPoint = pointQueue.addLast();
-      initialPoint.setToZero(trajectoryFrame);
-      initialPoint.setTime(0.0);
-      initialPoint.setPosition(initialPose.getPosition());
-      initialPoint.setOrientation(initialPose.getOrientation());
+      queueInitialPoint(initialPose);
 
       desiredPose.changeFrame(trajectoryFrame);
       FrameSE3TrajectoryPoint homePoint = pointQueue.addLast();
@@ -441,7 +437,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return controlFrame;
    }
 
-   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
+   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
    {
       if (!checkOrientationGainsAndWeights())
          return false;
@@ -471,7 +467,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
-            queueInitialPoint();
+            queueInitialPoint(initialPose);
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
@@ -495,7 +491,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
+   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
    {
       if (!checkPoseGainsAndWeights())
          return false;
@@ -525,7 +521,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
-            queueInitialPoint();
+            queueInitialPoint(initialPose);
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
@@ -631,12 +627,20 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
+   private void queueInitialPoint(FramePose initialPose)
+   {
+      initialPose.changeFrame(trajectoryFrame);
+      FrameSE3TrajectoryPoint initialPoint = pointQueue.addLast();
+      initialPoint.setToZero(trajectoryFrame);
+      initialPoint.setTime(0.0);
+      initialPoint.setPosition(initialPose.getPosition());
+      initialPoint.setOrientation(initialPose.getOrientation());
+   }
+
    private void queueInitialPoint()
    {
-      FrameSE3TrajectoryPoint point = pointQueue.addLast();
-      point.setToZero(controlFrame);
-      point.setTime(0.0);
-      point.changeFrame(trajectoryFrame);
+      initialPose.setToZero(controlFrame);
+      queueInitialPoint(initialPose);
    }
 
    private boolean atCapacityLimit()
