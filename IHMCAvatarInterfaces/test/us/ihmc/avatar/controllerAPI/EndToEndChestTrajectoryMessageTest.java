@@ -1,7 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -688,8 +690,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05 + getRobotModel().getControllerDT());
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
-      assertNumberOfWaypoints(0, scs, chest);
+      RigidBodyControlMode defaultControlMode = getRobotModel().getWalkingControllerParameters().getDefaultControlModeForRigidBody(chest.getName());
+      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(1, scs, chest);
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 15.3)
@@ -750,8 +753,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       LookLeftMessageWithChangeTrajFrame.setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(LookLeftMessageWithChangeTrajFrame);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
-      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
-      assertNumberOfWaypoints(0, scs, chest); 
+      RigidBodyControlMode defaultControlMode = getRobotModel().getWalkingControllerParameters().getDefaultControlModeForRigidBody(chest.getName());
+      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(1, scs, chest); 
       
       drcSimulationTestHelper.send(lookRightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
@@ -760,8 +764,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       drcSimulationTestHelper.send(LookLeftMessageWithChangeTrajFrame);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
       
-      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
-      assertNumberOfWaypoints(0, scs, chest); 
+      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(1, scs, chest); 
       
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
@@ -1010,8 +1014,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientationAfterStop = findControllerDesiredOrientation(scs, chest);
 
-      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
-      assertNumberOfWaypoints(0, scs, chest);
+      RigidBodyControlMode defaultControlMode = getRobotModel().getWalkingControllerParameters().getDefaultControlModeForRigidBody(chest.getName());
+      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(1, scs, chest);
 
       EuclidCoreTestTools.assertQuaternionEquals(desiredOrientationBeforeStop, desiredOrientationAfterStop, 1.0e-3);
       assertControlErrorIsLow(scs, chest, 1.0e-2);
