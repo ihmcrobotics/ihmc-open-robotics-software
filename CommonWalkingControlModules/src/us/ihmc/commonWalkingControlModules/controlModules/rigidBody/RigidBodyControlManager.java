@@ -30,6 +30,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -56,10 +57,10 @@ public class RigidBodyControlManager
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final double[] initialJointPositions;
+   private final FramePose initialPose = new FramePose();
+   private final FramePose homePose;
 
    private final OneDoFJoint[] jointsToControl;
-   private final OneDoFJoint[] jointClones;
-   private final RigidBody bodyClone;
 
    private final BooleanYoVariable allJointsEnabled;
 
@@ -67,7 +68,7 @@ public class RigidBodyControlManager
    private final BooleanYoVariable stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-         List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
+         Pose homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
          DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -83,8 +84,6 @@ public class RigidBodyControlManager
       defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
 
       jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
-      jointClones = ScrewTools.cloneOneDoFJointPath(baseBody, bodyToControl);
-      bodyClone = jointClones[jointClones.length - 1].getSuccessor();
 
       initialJointPositions = new double[jointsToControl.length];
 
@@ -100,6 +99,11 @@ public class RigidBodyControlManager
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
       else
          loadBearingControlState = null;
+
+      if (homePose != null)
+         this.homePose = new FramePose(baseFrame, homePose);
+      else
+         this.homePose = null;
 
       allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -149,6 +153,16 @@ public class RigidBodyControlManager
 
    public void setDefaultControlMode(RigidBodyControlMode defaultControlMode)
    {
+      if (defaultControlMode == RigidBodyControlMode.TASKSPACE && homePose == null)
+      {
+         throw new RuntimeException("Need to define home pose if default control mode for body " + bodyName + " is set to TASKSPACE.");
+      }
+
+      if (defaultControlMode != RigidBodyControlMode.TASKSPACE && defaultControlMode != RigidBodyControlMode.JOINTSPACE)
+      {
+         throw new RuntimeException("Only JOINTSPACE or TASKSPACE control modes are allowed as default modes.");
+      }
+
       this.defaultControlMode.set(defaultControlMode);
    }
 
@@ -280,8 +294,8 @@ public class RigidBodyControlManager
 
    public void holdInTaskspace()
    {
-      jointspaceControlState.holdCurrent();
-      requestState(jointspaceControlState.getStateEnum());
+      taskspaceControlState.holdCurrent();
+      requestState(taskspaceControlState.getStateEnum());
    }
 
    public void hold()
@@ -311,10 +325,7 @@ public class RigidBodyControlManager
          requestState(jointspaceControlState.getStateEnum());
          break;
       case TASKSPACE:
-         jointspaceControlState.fillDefaultJointPositionsAndUpdate(jointClones);
-         RigidBody bodyClone = jointClones[jointClones.length - 1].getSuccessor();
-         FramePose desiredBodyPose = new FramePose(bodyClone.getBodyFixedFrame());
-         taskspaceControlState.goToBodyPose(desiredBodyPose, trajectoryTime);
+         taskspaceControlState.goToPoseFromCurrent(homePose, trajectoryTime);
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
@@ -335,10 +346,8 @@ public class RigidBodyControlManager
          requestState(jointspaceControlState.getStateEnum());
          break;
       case TASKSPACE:
-         jointspaceControlState.fillDefaultJointPositionsAndUpdate(jointClones);
-         RigidBody bodyClone = jointClones[jointClones.length - 1].getSuccessor();
-         FramePose desiredBodyPose = new FramePose(bodyClone.getBodyFixedFrame());
-         taskspaceControlState.goToBodyPose(desiredBodyPose, trajectoryTime);
+         computeDesiredPose(initialPose);
+         taskspaceControlState.goToPose(homePose, initialPose, trajectoryTime);
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
@@ -394,6 +403,18 @@ public class RigidBodyControlManager
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = jointsToControl[i].getQ();
+      }
+   }
+
+   private void computeDesiredPose(FramePose poseToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == taskspaceControlState.getStateEnum())
+      {
+         taskspaceControlState.getDesiredPose(poseToPack);
+      }
+      else
+      {
+         poseToPack.setToZero(taskspaceControlState.getControlFrame());
       }
    }
 

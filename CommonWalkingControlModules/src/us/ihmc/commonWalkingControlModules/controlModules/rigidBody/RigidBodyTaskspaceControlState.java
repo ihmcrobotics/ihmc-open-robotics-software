@@ -5,7 +5,6 @@ import java.util.Collection;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -46,7 +45,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private YoOrientationPIDGainsInterface orientationGains = null;
@@ -351,12 +349,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
    }
 
-   public void goToBodyPose(FramePose homePose, double trajectoryTime)
+   public void goToPoseFromCurrent(FramePose homePose, double trajectoryTime)
    {
       clear();
       resetLastCommandId();
       trajectoryFrame = baseFrame;
-      setControlFrameToBodyFrame();
       setTrajectoryStartTimeToCurrentTime();
       queueInitialPoint();
 
@@ -385,11 +382,43 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
    }
 
-   private void setControlFrameToBodyFrame()
+   public void goToPose(FramePose desiredPose, FramePose initialPose, double trajectoryTime)
    {
-      controlFramePose.setToZero(bodyFrame);
-      this.controlFrame.setPoseAndUpdate(controlFramePose);
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+      clear();
+      resetLastCommandId();
+      trajectoryFrame = baseFrame;
+      setTrajectoryStartTimeToCurrentTime();
+
+      initialPose.changeFrame(trajectoryFrame);
+      FrameSE3TrajectoryPoint initialPoint = pointQueue.addLast();
+      initialPoint.setToZero(trajectoryFrame);
+      initialPoint.setTime(0.0);
+      initialPoint.setPosition(initialPose.getPosition());
+      initialPoint.setOrientation(initialPose.getOrientation());
+
+      desiredPose.changeFrame(trajectoryFrame);
+      FrameSE3TrajectoryPoint homePoint = pointQueue.addLast();
+      homePoint.setToZero(trajectoryFrame);
+      homePoint.setTime(trajectoryTime);
+      homePoint.setPosition(desiredPose.getPosition());
+      homePoint.setOrientation(desiredPose.getOrientation());
+
+      if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
+      {
+         selectionMatrix.resetSelection();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(true);
+      }
+      else if (hasOrientaionGains.getBooleanValue())
+      {
+         selectionMatrix.setToAngularSelectionOnly();
+         trajectoryStopped.set(false);
+         trajectoryDone.set(false);
+         trackingOrientation.set(true);
+         trackingPosition.set(false);
+      }
    }
 
    private void setControlFrame(ReferenceFrame controlFrame)
@@ -405,6 +434,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       controlFramePose.setPoseIncludingFrame(bodyFrame, controlFrameTransform);
       this.controlFrame.setPoseAndUpdate(controlFramePose);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+   }
+
+   public ReferenceFrame getControlFrame()
+   {
+      return controlFrame;
    }
 
    public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
@@ -530,7 +564,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return privilegedConfigurationCommand;
+      return null;
    }
 
    @Override

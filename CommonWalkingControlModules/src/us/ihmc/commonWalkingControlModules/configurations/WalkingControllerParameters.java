@@ -24,6 +24,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -277,6 +278,23 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The map returned contains the default rigid body poses in their respective base frame. For example, if the base
+    * frame of the chest body is the pelvis z-up frame this should contain the home pose of the chest in that frame.
+    * If the particular body does not support full pose control but only orientation control the position part of the
+    * pose will be disregarded.
+    * <p>
+    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
+    * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
+    * supported for that body.
+    * 
+    * @return map containing home pose in base frame by body name
+    */
+   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   {
+      return new HashMap<String, Pose>();
    }
 
    /**
