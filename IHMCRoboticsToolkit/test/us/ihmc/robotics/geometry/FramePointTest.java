@@ -53,7 +53,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public final void testRunTestMain()
    {
       // create frames
-      ReferenceFrame A = ReferenceFrame.constructARootFrame("A", true, true);
+      ReferenceFrame A = ReferenceFrame.constructARootFrame("A");
 
       RigidBodyTransform transform = new RigidBodyTransform();
       Vector3D euler = new Vector3D(Math.PI / 2.0, 0.0, 0.0);
