@@ -240,7 +240,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
 
-      Random random = new Random();
+      Random random = new Random(73712L);
       double xDirection = 1.0 - 2.0 * random.nextDouble();
       double yDirection = 1.0 - 2.0 * random.nextDouble();
 

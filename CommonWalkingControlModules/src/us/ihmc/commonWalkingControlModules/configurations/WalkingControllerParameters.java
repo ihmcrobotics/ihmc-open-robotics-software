@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOffsetTrajectoryWhileWalking;
@@ -24,8 +25,10 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
@@ -290,6 +293,19 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the default control mode for a rigid body. The modes are defined in {@link RigidBodyControlMode}
+    * and by default the mode should be {@link RigidBodyControlMode#JOINTSPACE}. In some cases (e.g. the chest)
+    * it makes more sense to use the default mode {@link RigidBodyControlMode#TASKSPACE}.
+    * 
+    * @param bodyName is the name of the {@link RigidBody}
+    * @return the default control mode of the body
+    */
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      return RigidBodyControlMode.JOINTSPACE;
+   }
+
+   /**
     * The map returned contains the default home joint angles. The key of the map is the joint name
     * as defined in the robot joint map.
     *
@@ -298,6 +314,23 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The map returned contains the default rigid body poses in their respective base frame. For example, if the base
+    * frame of the chest body is the pelvis z-up frame this should contain the home pose of the chest in that frame.
+    * If the particular body does not support full pose control but only orientation control the position part of the
+    * pose will be disregarded.
+    * <p>
+    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
+    * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
+    * supported for that body.
+    * 
+    * @return map containing home pose in base frame by body name
+    */
+   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   {
+      return new HashMap<String, Pose>();
    }
 
    /**
