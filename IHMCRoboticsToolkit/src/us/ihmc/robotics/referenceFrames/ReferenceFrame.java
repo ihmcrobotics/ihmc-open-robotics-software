@@ -388,6 +388,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @param parentFrame Frame
     * @param transformToParent Transform3D
     */
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   {
+      this(frameName, parentFrame, transformToParent, false, false);
+   }
+
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
