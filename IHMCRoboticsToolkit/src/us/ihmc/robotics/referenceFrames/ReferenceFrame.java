@@ -178,7 +178,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @param isWorldFrame whether the new frame is an inertial frame or not.
     * @param isZupFrame whether the new frame is assumed to have its z-axis pointing upward.
     */
-   public static ReferenceFrame constructARootFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
+   private static ReferenceFrame constructARootFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
    {
       ReferenceFrame ret = new ReferenceFrame(frameName, isWorldFrame, isZupFrame)
       {

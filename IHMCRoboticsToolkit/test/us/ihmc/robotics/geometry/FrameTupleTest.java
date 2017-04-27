@@ -68,9 +68,9 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       return createFrameTuple(frameTuple.referenceFrame, frameTuple.tuple);
    }
 
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
 
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", true, true);
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
 
    protected RigidBodyTransform theFrameToChildFrame;
 

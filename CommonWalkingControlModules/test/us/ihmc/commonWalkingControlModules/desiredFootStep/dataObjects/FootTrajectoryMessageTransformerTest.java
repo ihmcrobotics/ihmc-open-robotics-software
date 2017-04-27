@@ -46,7 +46,7 @@ public class FootTrajectoryMessageTransformerTest
 
    private static double getDistanceBetweenPoints(Point3D startingPoint, RigidBodyTransform transform3D, Point3D endPoint)
    {
-      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", true, true);
+      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending");
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, true, true);
 
       FramePoint start = new FramePoint(starting, startingPoint);
@@ -59,7 +59,7 @@ public class FootTrajectoryMessageTransformerTest
 
    private static boolean areOrientationsEqualWithTransform(Quaternion orientationStart, RigidBodyTransform transform3D, Quaternion orientationEnd)
    {
-      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", true, true);
+      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending");
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, true, true);
 
       FrameOrientation start = new FrameOrientation(starting, orientationStart);
