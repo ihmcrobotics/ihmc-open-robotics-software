@@ -120,7 +120,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    public final void setUp() throws Exception
    {
       theFrameToChildFrame = new RigidBodyTransform();
-      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, true, true);
+      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
