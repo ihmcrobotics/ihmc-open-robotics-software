@@ -6,6 +6,7 @@ import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -120,6 +121,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                public boolean useOptimizationBasedICPController()
                {
                   return true; //false;
+               }
+
+               @Override
+               public boolean editStepTimingForReachability()
+               {
+                  return false; // // TODO: 4/27/17  
                }
 
                @Override
@@ -252,6 +259,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public double getRhoRateDefaultWeight()
                      {
                         return 0.005; //0.002;
+                     }
+                  };
+               }
+
+               @Override
+               public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+               {
+                  return new PelvisOffsetWhileWalkingParameters()
+                  {
+                     @Override
+                     public boolean addPelvisOrientationOffsetsFromWalkingMotion()
+                     {
+                        return true;
                      }
                   };
                }
