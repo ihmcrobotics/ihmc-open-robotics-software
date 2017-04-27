@@ -11,10 +11,11 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.RRTTree;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpandingStates>
@@ -23,15 +24,19 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    private WholeBodyControllerParameters wholeBodyControllerParameters;
          
    private WaitingResultBehavior waitingResultBehavior;
+   private TestDoneBehavior testDoneBehavior;
    
    private SolarPanelPoseValidityTester testValidityBehavior;
    
-   private int indexOfCurrentNode = -1;
+   private int indexOfCurrentNode = 0;
    private ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
+   
+   private double nodesScore = 0;
+   private boolean nodesValidity = true;
    
    public enum RRTExpandingStates
    {
-      ASK_AND_SAVERESULT, VALIDITY_TEST
+      INITIALIZE, VALIDITY_TEST, WAITING_RESULT, DONE
    }
    
    public ValidNodesStateMachineBehavior(ArrayList<RRTNode> nodes, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
@@ -41,15 +46,26 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
 
       this.nodes = nodes;
       
-      PrintTools.info("RRTExpandingStateMachineBehavior "+nodes+" test nodes");
+      PrintTools.info("RRTExpandingStateMachineBehavior "+nodes.size()+" test nodes");
       
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
       
       testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
+      testDoneBehavior = new TestDoneBehavior(communicationBridge);
       
       setUpStateMachine();
+   }
+   
+   public double getScore()
+   {
+      return nodesScore;
+   }
+   
+   public boolean getValdity()
+   {
+      return nodesValidity;
    }
    
    public void setNodes(ArrayList<RRTNode> nodes)
@@ -63,31 +79,68 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    }
    
    private void setUpStateMachine()
-   {      
-      BehaviorAction<RRTExpandingStates> waitingResultAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.ASK_AND_SAVERESULT, waitingResultBehavior);
+   {    
+      BehaviorAction<RRTExpandingStates> intializePrivilegedConfigurationAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.INITIALIZE, testValidityBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            /*
+             * override suitable node data for node.
+             */        
+            testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, 0, 0);            
+            testValidityBehavior.setUpHasBeenDone();
+         }
+      };
       
       BehaviorAction<RRTExpandingStates> testValidityAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.VALIDITY_TEST, testValidityBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            PrintTools.info("testValidityAction "+indexOfCurrentNode +" " + nodes.get(indexOfCurrentNode).getNodeData(0) +" " +nodes.get(indexOfCurrentNode).getNodeData(1));   
-          
             /*
              * override suitable node data for node.
-             */            
-            testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, nodes.get(indexOfCurrentNode).getNodeData(0), nodes.get(indexOfCurrentNode).getNodeData(1));
-            
+             */
+            testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, nodes.get(indexOfCurrentNode).getNodeData(0), nodes.get(indexOfCurrentNode).getNodeData(1));            
             testValidityBehavior.setUpHasBeenDone();
+            indexOfCurrentNode++; 
          }
       };
       
+      BehaviorAction<RRTExpandingStates> waitingResultAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.WAITING_RESULT, waitingResultBehavior);
       
+      BehaviorAction<RRTExpandingStates> testDoneAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.DONE, testDoneBehavior);
       
-      statemachine.addStateWithDoneTransition(waitingResultAction, RRTExpandingStates.VALIDITY_TEST);
-      statemachine.addStateWithDoneTransition(testValidityAction, RRTExpandingStates.ASK_AND_SAVERESULT);
+      StateTransitionCondition keepDoingCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {            
+            boolean b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size());
+            return b;
+         }
+      };
 
-      statemachine.setStartState(RRTExpandingStates.ASK_AND_SAVERESULT);
+      StateTransitionCondition doneCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            boolean b = waitingResultBehavior.isDone() && indexOfCurrentNode == nodes.size();
+            return b;
+         }
+      };
+
+      statemachine.addStateWithDoneTransition(intializePrivilegedConfigurationAction, RRTExpandingStates.VALIDITY_TEST);
+      statemachine.addStateWithDoneTransition(testValidityAction, RRTExpandingStates.WAITING_RESULT);
+      
+      statemachine.addState(waitingResultAction);
+      waitingResultAction.addStateTransition(RRTExpandingStates.VALIDITY_TEST, keepDoingCondition);
+
+      waitingResultAction.addStateTransition(RRTExpandingStates.DONE, doneCondition);
+      
+      statemachine.addState(testDoneAction);            
+      statemachine.setStartState(RRTExpandingStates.INITIALIZE);
    }
    
    @Override
@@ -107,23 +160,20 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
 
       @Override
       public void doControl()
-      {
-         //PrintTools.info("WaitingResultBehavior :: doControl");
-
-            
+      {            
          isDone = true;
       }
 
       @Override
       public void onBehaviorEntered()
       {
-         //PrintTools.info("WaitingResultBehavior :: onBehaviorEntered");
-         indexOfCurrentNode++;
-         if(indexOfCurrentNode > nodes.size())
+         double curScore = testValidityBehavior.getScroe();
+         nodesScore = nodesScore + curScore;
+         
+         PrintTools.info(""+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
+         if(testValidityBehavior.isValid() == false)
          {
-            PrintTools.info("all nodes are tested. ");
-            PrintTools.info("all nodes are tested. ");
-            PrintTools.info("all nodes are tested. ");
+            nodesValidity = false;
          }
       }
 
@@ -144,8 +194,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
 
       @Override
       public void onBehaviorExited()
-      {
-         //PrintTools.info("WaitingResultBehavior :: onBehaviorExited");         
+      {         
       }
 
       @Override
@@ -155,5 +204,50 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       }
    }
    
-   
+   private class TestDoneBehavior extends AbstractBehavior
+   {
+      private boolean isDone = false;
+      
+      public TestDoneBehavior(CommunicationBridgeInterface communicationBridge)
+      {
+         super(communicationBridge);
+      }
+
+      @Override
+      public void doControl()
+      {            
+         isDone = true;
+      }
+
+      @Override
+      public void onBehaviorEntered()
+      {   
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {         
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return isDone;
+      }
+   }
 }

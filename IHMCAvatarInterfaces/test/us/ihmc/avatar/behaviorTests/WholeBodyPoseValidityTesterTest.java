@@ -66,7 +66,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private boolean isKinematicsToolboxVisualizerEnabled = true;
+   private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
@@ -255,7 +255,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    @Test
    public void testRRTPlannerBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
-      ThreadTools.sleep(15000);
+//      ThreadTools.sleep(15000);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -334,7 +334,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
       
       nodes.add(new TimeDomain1DNode(0.0, 0.0));
-      nodes.add(new TimeDomain1DNode(0.0, 0.0));
       nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));
       nodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.1));
       nodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));
@@ -347,11 +346,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
       
-      
-      
-      
-      
-           
+      PrintTools.info("behavior Out " + testNodesBehavior.getValdity());
    }
    
    
