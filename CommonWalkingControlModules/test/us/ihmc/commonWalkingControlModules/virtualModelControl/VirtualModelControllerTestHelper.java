@@ -384,9 +384,9 @@ public class VirtualModelControllerTestHelper
             toFootCenterY, -ankleHeight);
       RigidBodyTransform rightSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
             -toFootCenterY, -ankleHeight);
-      ReferenceFrame leftSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Left_Sole",
+      ReferenceFrame leftSoleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("Left_Sole",
             leftFootBody.getBodyFixedFrame(), leftSoleToAnkleFrame);
-      ReferenceFrame rightSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Right_Sole",
+      ReferenceFrame rightSoleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("Right_Sole",
             rightFootBody.getBodyFixedFrame(), rightSoleToAnkleFrame);
 
       SideDependentList<RigidBody> feet = new SideDependentList<>();
@@ -537,7 +537,7 @@ public class VirtualModelControllerTestHelper
       ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslationAndIdentityRotation(offset);
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+      ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;
    }
