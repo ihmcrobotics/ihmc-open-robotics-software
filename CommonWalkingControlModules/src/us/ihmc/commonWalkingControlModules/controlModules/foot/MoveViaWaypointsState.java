@@ -15,6 +15,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -38,6 +39,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final YoFrameVector linearWeight;
    private final Vector3D tempAngularWeightVector = new Vector3D();
    private final Vector3D tempLinearWeightVector = new Vector3D();
+
+   private final FramePose initialPose = new FramePose();
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -90,14 +93,16 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void holdCurrentPosition()
    {
-      taskspaceControlState.holdPose();
+      taskspaceControlState.holdCurrent();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(command))
+      initialPose.setToZero(taskspaceControlState.getControlFrame());
+
+      if (!taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
-         taskspaceControlState.holdPose();
+         taskspaceControlState.holdCurrent();
       }
    }
 
@@ -157,7 +162,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void requestStopTrajectory()
    {
-      taskspaceControlState.holdPose();
+      taskspaceControlState.holdCurrent();
    }
 
    @Override
