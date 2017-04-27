@@ -25,6 +25,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -70,6 +71,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
+   
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    SolarPanel solarPanel;
    
@@ -130,8 +133,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
-      //if (simulationTestingParameters.getKeepSCSUp())
+      if (visualize)
       {
          ThreadTools.sleepForever();
       }
@@ -170,8 +172,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
 
       setupKinematicsToolboxModule();
    }
-      
-   //@Test
+    
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -226,24 +227,27 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
       scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode1DTimeDomain.cleaningPath));
-      
-      // ************************************* //
-      // show
-      // ************************************* //
-      JFrame frame;
-      DrawPanel drawPanel;
-      Dimension dim;
-      
 
-      frame = new JFrame("RRTTest");
-      drawPanel = new DrawPanel(solarPanelPlanner.rrtPlanner);
-      dim = new Dimension(1600, 800);
-      frame.setPreferredSize(dim);
-      frame.setLocation(200, 100);
+      if (visualize)
+      {
+         // ************************************* //
+         // show
+         // ************************************* //
+         JFrame frame;
+         DrawPanel drawPanel;
+         Dimension dim;
 
-      frame.add(drawPanel);
-      frame.pack();
-      frame.setVisible(true);
+
+         frame = new JFrame("RRTTest");
+         drawPanel = new DrawPanel(solarPanelPlanner.rrtPlanner);
+         dim = new Dimension(1600, 800);
+         frame.setPreferredSize(dim);
+         frame.setLocation(200, 100);
+
+         frame.add(drawPanel);
+         frame.pack();
+         frame.setVisible(true);
+      }
       
       // ************************************* //
       // show
@@ -360,6 +364,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          this.planner = plannerTimeDomain;
       }
 
+      @Override
       public void paint(Graphics g)
       {
          super.paint(g);

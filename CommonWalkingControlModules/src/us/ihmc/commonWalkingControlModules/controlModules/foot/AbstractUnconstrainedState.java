@@ -33,8 +33,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
-   protected boolean trajectoryWasReplanned;
-
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
 
@@ -206,7 +204,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       super.doTransitionOutOfAction();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
-      trajectoryWasReplanned = false;
    }
 
    @Override

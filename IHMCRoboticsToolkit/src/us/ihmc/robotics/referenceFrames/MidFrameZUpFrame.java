@@ -20,7 +20,7 @@ public class MidFrameZUpFrame extends ReferenceFrame
 
    public MidFrameZUpFrame(String name, ReferenceFrame parentZUpFrame, ReferenceFrame frameOne, ReferenceFrame frameTwo)
    {
-      super(name, parentZUpFrame, false, false, true);
+      super(name, parentZUpFrame, false, true);
 
       if (!parentZUpFrame.isZupFrame())
       {

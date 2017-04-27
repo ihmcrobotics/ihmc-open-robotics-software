@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -312,13 +312,13 @@ public class SimulatedIMURawSensorReaderTest
       public TestingRobotModel()
       {
          worldFrame = ReferenceFrame.getWorldFrame();
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
 
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
 
          rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
 
-         body = addRigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
+         body = ScrewTools.addRigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
 
          bodyFrame = rootJoint.getFrameAfterJoint();
       }
@@ -380,25 +380,6 @@ public class SimulatedIMURawSensorReaderTest
          frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
          FrameVector ret = new FrameVector(worldFrame, trans);
          return ret;
-      }
-
-      private RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass,
-                                     Vector3D centerOfMassOffset)
-      {
-         String comFrameName = name + "CoM";
-         ReferenceFrame comFrame = createOffsetFrame(parentJoint, centerOfMassOffset, comFrameName);
-         RigidBodyInertia inertia = new RigidBodyInertia(comFrame, Ixx, Iyy, Izz, mass);
-         RigidBody ret = new RigidBody(name, inertia, parentJoint);
-         return ret;
-      }
-
-      private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, Vector3D offset, String frameName)
-      {
-         ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
-         RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.setTranslationAndIdentityRotation(offset);
-         ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-         return beforeJointFrame;
       }
 
       private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, RigidBodyTransform transformToParent, String frameName)

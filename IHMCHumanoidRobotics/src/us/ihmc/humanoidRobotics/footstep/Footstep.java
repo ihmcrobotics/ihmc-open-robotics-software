@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +34,9 @@ public class Footstep
    private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
-   private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(FramePoint.class);
+   
+   private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
+   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(10, FrameSE3TrajectoryPoint.class);
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -113,6 +116,18 @@ public class Footstep
       this.customPositionWaypoints.clear();
       for (int i = 0; i < customPositionWaypoints.size(); i++)
          this.customPositionWaypoints.add().set(customPositionWaypoints.get(i));
+   }
+   
+   public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
+   {
+      return swingTrajectory;
+   }
+
+   public void setSwingTrajectory(RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory)
+   {
+      this.swingTrajectory.clear();
+      for (int i = 0; i < swingTrajectory.size(); i++)
+         this.swingTrajectory.add().set(swingTrajectory.get(i));
    }
 
    public double getSwingHeight()
@@ -330,6 +345,11 @@ public class Footstep
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
    }
+   
+   public ReferenceFrame getTrajectoryFrame()
+   {
+      return footstepPose.getReferenceFrame();
+   }
 
    public void setFootstepType(FootstepType footstepType)
    {
@@ -427,4 +447,5 @@ public class Footstep
       tempTransform.multiplyInvertOther(transformFromAnkleToSole);
       footstepPose.setPoseIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
+
 }

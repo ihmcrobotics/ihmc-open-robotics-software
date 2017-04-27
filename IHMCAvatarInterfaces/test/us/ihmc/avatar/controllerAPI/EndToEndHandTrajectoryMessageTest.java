@@ -179,21 +179,31 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
+      double scale = getLegLength() / 0.8;
 
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 1.0;
-      Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.2), 0.4);
+      Point3D position = new Point3D(0.5, robotSide.negateIfRightSide(0.5), 1.0);
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(robotSide.negateIfRightSide(-Math.PI / 2.0));
       orientation.appendRollRotation(-Math.PI / 4.0);
+      
+      position.scale(scale);
 
       {
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
          handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
          handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setControlFramePosition(new Point3D(0.0, 0.0, 0.0));
          handTrajectoryMessage.setUseCustomControlFrame(true);
          handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
 
+         Graphics3DObject sphere = new Graphics3DObject();
+         sphere.translate(position);
+         sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
+         drcSimulationTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(sphere);
+         
          drcSimulationTestHelper.send(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
@@ -202,6 +212,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
 
+      // This should not change the hand pose since the control frame change is compensated by a desireds change.
       {
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
          handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
@@ -209,7 +220,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          handTrajectoryMessage.setUseCustomControlFrame(true);
          Point3D framePosition = EuclidCoreRandomTools.generateRandomPoint3D(random, -0.1, 0.1);
-         Quaternion frameOrientation = new Quaternion(); //.generateRandomQuaternion(random, Math.toRadians(20.0));
+         Quaternion frameOrientation = EuclidCoreRandomTools.generateRandomQuaternion(random, Math.toRadians(20.0));
          handTrajectoryMessage.setControlFramePosition(framePosition);
          handTrajectoryMessage.setControlFrameOrientation(frameOrientation);
 
@@ -219,12 +230,18 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          position.add(frameFramePosition.getVector());
 
          handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
+         
+         Graphics3DObject sphere = new Graphics3DObject();
+         sphere.translate(position);
+         sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
+         drcSimulationTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(sphere);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
       }
-
+      
+      // TODO: add assert to make sure the hand did not move significantly.
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
