@@ -27,9 +27,9 @@ public class ToeSlippingDetector
    private final YoFramePoint initialToePosition;
    private final DoubleYoVariable toeSlippageDistance;
 
-   private DoubleYoVariable forceMagnitudeThreshold;
-   private DoubleYoVariable velocityThreshold;
-   private DoubleYoVariable slippageDistanceThreshold;
+   private final DoubleYoVariable forceMagnitudeThreshold;
+   private final DoubleYoVariable velocityThreshold;
+   private final DoubleYoVariable slippageDistanceThreshold;
 
    private final BooleanYoVariable isToeSlipping;
 
@@ -55,6 +55,10 @@ public class ToeSlippingDetector
       initialToePosition = new YoFramePoint(namePrefix + "ToeInitial", worldFrame, registry);
       toeSlippageDistance = new DoubleYoVariable(namePrefix + "ToeSlippageDistance", registry);
 
+      forceMagnitudeThreshold = new DoubleYoVariable(namePrefix + "ForceMagnitudeThreshold", registry);
+      velocityThreshold = new DoubleYoVariable(namePrefix + "VelocityThreshold", registry);
+      slippageDistanceThreshold = new DoubleYoVariable(namePrefix + "SlippageDistanceThreshold", registry);
+
       isToeSlipping = new BooleanYoVariable(namePrefix + "IsToeSlipping", registry);
 
       parentRegistry.addChild(registry);
@@ -76,12 +80,12 @@ public class ToeSlippingDetector
     *           detection: the amount of slipping has to be greater than this threshold.
     * @param filterBreakFrequency this the break frequency to use for the internal low-pass filters.
     */
-   public void configure(DoubleYoVariable forceMagnitudeThreshold, DoubleYoVariable velocityThreshold, DoubleYoVariable slippageDistanceThreshold,
+   public void configure(double forceMagnitudeThreshold, double velocityThreshold, double slippageDistanceThreshold,
                          double filterBreakFrequency)
    {
-      this.forceMagnitudeThreshold = forceMagnitudeThreshold;
-      this.velocityThreshold = velocityThreshold;
-      this.slippageDistanceThreshold = slippageDistanceThreshold;
+      this.forceMagnitudeThreshold.set(forceMagnitudeThreshold);
+      this.velocityThreshold.set(velocityThreshold);
+      this.slippageDistanceThreshold.set(slippageDistanceThreshold);
       alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency, dt));
    }
 
