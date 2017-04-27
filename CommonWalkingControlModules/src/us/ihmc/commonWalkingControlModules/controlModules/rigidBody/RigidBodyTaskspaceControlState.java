@@ -569,6 +569,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return spatialFeedbackControlCommand;
    }
 
+   public SpatialFeedbackControlCommand getSpatialFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
+   }
+
    @Override
    public double getLastTrajectoryPointTime()
    {
