@@ -202,7 +202,9 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
-      if (taskspaceControlState.handleOrientationTrajectoryCommand(command))
+      computeDesiredPose(initialPose);
+
+      if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialPose))
       {
          requestState(taskspaceControlState.getStateEnum());
       }
@@ -216,7 +218,9 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
-      if (taskspaceControlState.handlePoseTrajectoryCommand(command))
+      computeDesiredPose(initialPose);
+
+      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
          requestState(taskspaceControlState.getStateEnum());
       }
@@ -246,8 +250,9 @@ public class RigidBodyControlManager
    public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
+      computeDesiredPose(initialPose);
 
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions, initialPose))
       {
          requestState(hybridControlState.getStateEnum());
       }
@@ -261,8 +266,9 @@ public class RigidBodyControlManager
    public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
+      computeDesiredPose(initialPose);
 
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions))
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialPose))
       {
          requestState(hybridControlState.getStateEnum());
       }
