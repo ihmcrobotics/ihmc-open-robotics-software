@@ -324,7 +324,7 @@ public class RigidBodyControlManagerTest
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 
-      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, positionControlledJointNames,
+      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, positionControlledJointNames,
             integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, null, testRegistry);
    }
 
