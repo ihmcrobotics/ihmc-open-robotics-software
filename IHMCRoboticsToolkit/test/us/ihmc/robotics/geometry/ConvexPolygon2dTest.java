@@ -277,7 +277,7 @@ public class ConvexPolygon2dTest
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 2.0, 0.0 }, { 1.0, 0.1 } };
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
       assertEquals(3, polygon.getNumberOfVertices());
@@ -473,7 +473,7 @@ public class ConvexPolygon2dTest
    @Test(timeout = 30000)
    public void testExtremePointsSquare()
    {
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -.1;
       double xMax = 0.1;
       double yMin = -0.1;
@@ -527,7 +527,7 @@ public class ConvexPolygon2dTest
    public void testInsideWithSimpleSquare()
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
 
       double[][] pointsOutside = new double[][] { { 1.5, 0.5 }, { 1.1, 1.1 }, { 1.1, 0.5 }, { -0.1, -0.1 }, { -0.1, 0.5 } };
@@ -569,7 +569,7 @@ public class ConvexPolygon2dTest
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 }, { 1.7, 0.5 }, { -0.6, 1.2 }, { 1.8, 1.1 }, { 0.5, 0.5 },
             { 0.2, 1.56 } };
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       int numberOfTests = 100000;
 
@@ -621,7 +621,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       double xMin = -1.0, xMax = 1.0, yMin = -1.0, yMax = 1.0;
       int numberOfPoints = 1000;
@@ -681,7 +681,7 @@ public class ConvexPolygon2dTest
       Random random = new Random(1776L);
 
       // Create a polygon from 50 random points:
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -.1;
       double xMax = 0.1;
       double yMin = -0.1;
@@ -729,7 +729,7 @@ public class ConvexPolygon2dTest
    public void testOrthogonalProjectionOne()
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
       ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
@@ -794,7 +794,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
 
       ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 20);
@@ -873,7 +873,7 @@ public class ConvexPolygon2dTest
    public void testGetLineOfSightVerticesOne()
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
 
@@ -894,7 +894,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1092L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
 
       ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 200);
@@ -981,7 +981,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(2002L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       double xMin = 0.0, xMax = 1.0, yMin = 0.0, yMax = 1.0;
       double widthMax = 0.5, heightMax = 0.5;
@@ -1107,7 +1107,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1886L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       double xMin = 0.0, xMax = 1.0, yMin = 0.0, yMax = 1.0;
       double widthMax = 0.5, heightMax = 0.5;
@@ -1238,7 +1238,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
 
       ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 20);
@@ -1324,7 +1324,7 @@ public class ConvexPolygon2dTest
    public void testIntersectionWithLinesOne()
    {
       double[][] vertices = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } };
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
 
       FrameConvexPolygon2d polygon = ConvexPolygon2dTestHelpers.constructPolygon(zUpFrame, vertices);
       ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
@@ -1437,7 +1437,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1992L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMinA = -100.0, xMaxA = 100.0, yMinA = -100.0, yMaxA = 100.0;
       double xMinB = 100.0, xMaxB = 300.0, yMinB = 100.0, yMaxB = 300.0;
 
@@ -1709,7 +1709,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1888L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
 
       int numberOfPoints = 10000;
@@ -1742,7 +1742,7 @@ public class ConvexPolygon2dTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
       double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
 
       ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 100);

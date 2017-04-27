@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -13,6 +14,18 @@ import us.ihmc.robotics.Axis;
 
 public class TransformTools
 {
+   /**
+    * Creates a transform that transforms to the given point and rotates to make the z axis align
+    * with the normal vector.
+    */
+   public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint point, FrameVector zAxis)
+   {
+      RigidBodyTransform ret = new RigidBodyTransform();
+      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVectorCopy()));
+      ret.setTranslation(point.getPoint());
+      return ret;
+   }
+
    public static Quaternion getTransformedQuat(Quaternion quaternion, Transform transform)
    {
       Quaternion transformed = new Quaternion();

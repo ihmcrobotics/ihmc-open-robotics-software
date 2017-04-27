@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -21,9 +22,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,16 +74,16 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
-   private final ToeOffHelper toeOffHelper;
+   private final ToeOffCalculator toeOffCalculator;
 
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
 
-   public FootControlModule(RobotSide robotSide, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
-         YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
+   public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
+         YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this.toeOffHelper = toeOffHelper;
+      this.toeOffCalculator = toeOffCalculator;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -116,15 +117,20 @@ public class FootControlModule
 
       setupContactStatesMap();
 
-      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      touchdownVelocityProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
+      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
+      YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
+      yoTouchdownVelocity.set(touchdownVelocity);
 
-      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      touchdownAccelerationProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
+      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration());
+      YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
+      yoTouchdownAcceleration.set(touchdownAcceleration);
+
+      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(yoTouchdownVelocity);
+      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(yoTouchdownAcceleration);
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
-      onToesState = new OnToesState(footControlHelper, toeOffHelper, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       states.add(onToesState);
 
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
@@ -154,7 +160,7 @@ public class FootControlModule
             exploreFootPolygonState = null;
       }
 
-      swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
+      swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
 
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
@@ -381,6 +387,11 @@ public class FootControlModule
       return getCurrentConstraintType() == ConstraintType.TOES;
    }
 
+   public void setUsePointContactInToeOff(boolean usePointContact)
+   {
+      onToesState.setUsePointContact(usePointContact);
+   }
+
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
       FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
@@ -423,14 +434,6 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
-      // TODO Used to pass the desireds from the toe off state to swing state. Clean that up.
-      if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
-      {
-         FrameOrientation initialOrientation = new FrameOrientation();
-         FrameVector initialAngularVelocity = new FrameVector();
-         onToesState.getDesireds(initialOrientation, initialAngularVelocity);
-         swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
-      }
       swingState.setFootstep(footstep, swingTime);
    }
 

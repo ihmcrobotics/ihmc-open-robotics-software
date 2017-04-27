@@ -45,7 +45,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+   private final ReferenceFrame elevatorFrame;
    private FramePoint bodyPosition = new FramePoint();
 
    private final Vector3D jointAxesPinJoints = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
@@ -96,7 +96,8 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       super("Robot");
 
       /****************** ID ROBOT ***********************/
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      elevatorFrame = elevator.getBodyFixedFrame();
 
       bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);

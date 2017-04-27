@@ -13,8 +13,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -97,32 +99,26 @@ public class ScrewTools
       return joint;
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, Vector3D centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
    {
-      String comFrameName = name + "CoM";
-      ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), centerOfMassOffset, comFrameName);
-      RigidBodyInertia inertia = new RigidBodyInertia(comFrame, momentOfInertia, mass);
-      RigidBody ret = new RigidBody(name, inertia, parentJoint);
-
-      return ret;
+      Matrix3D momentOfInertia = new Matrix3D();
+      momentOfInertia.setIdentity();
+      momentOfInertia.setM00(Ixx);
+      momentOfInertia.setM11(Iyy);
+      momentOfInertia.setM22(Izz);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
-      String comFrameName = name + "CoM";
-      ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), inertiaPose, comFrameName);
-      RigidBodyInertia inertia = new RigidBodyInertia(comFrame, momentOfInertia, mass);
-      RigidBody ret = new RigidBody(name, inertia, parentJoint);
-
-      return ret;
+      RigidBodyTransform inertiaPose = new RigidBodyTransform();
+      inertiaPose.setTranslation(centerOfMassOffset);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
-   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3D offset, String frameName)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslationAndIdentityRotation(offset);
-
-      return createOffsetFrame(parentFrame, transformToParent, frameName);
+      return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
    public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)

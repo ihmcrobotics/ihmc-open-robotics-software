@@ -45,8 +45,8 @@ public class ScrewToolsTest
    private ArrayList<RevoluteJoint> joints;
 
    protected static final double epsilon = 1e-10;
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", false, true, true);
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", true, true);
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", true, true);
 
    @Before
    public void setUp()
@@ -165,7 +165,7 @@ public class ScrewToolsTest
    public void testAddRevoluteJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -181,7 +181,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Vector3d_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -196,7 +196,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 

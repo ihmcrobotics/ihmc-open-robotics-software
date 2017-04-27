@@ -29,7 +29,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
 
       RigidBody base = elevator;
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FrameVector desiredAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      FrameVector desiredAngularAcceleration = new FrameVector(elevator.getBodyFixedFrame(), random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertConsistencyWithSpatialAccelerationCalculator(random, joints, elevator, base, endEffector, desiredAngularAcceleration);
    }
 
@@ -45,7 +45,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
 
       RigidBody base = joints.get(joints.size() - 1).getSuccessor();
       RigidBody endEffector = elevator;
-      FrameVector desiredAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      FrameVector desiredAngularAcceleration = new FrameVector(elevator.getBodyFixedFrame(), random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertConsistencyWithSpatialAccelerationCalculator(random, joints, elevator, base, endEffector, desiredAngularAcceleration);
    }
 
@@ -64,7 +64,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
 
       controlModule.compute(desiredAngularAcceleration);
 
-      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
       twistCalculator.compute();
 
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);

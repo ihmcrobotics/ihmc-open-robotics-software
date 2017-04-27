@@ -37,8 +37,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    {
       this.robot = robot;
             
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
       ConcurrentLinkedQueue<Joint> jointQueue = new ConcurrentLinkedQueue<Joint>();
       jointQueue.addAll(robot.getRootJoints());
