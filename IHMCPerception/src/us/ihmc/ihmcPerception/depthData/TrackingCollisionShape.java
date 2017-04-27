@@ -49,7 +49,7 @@ public class TrackingCollisionShape
 
       private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape)
       {
-         this.frame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("CollissionFrame", frame, shape.getPose());
+         this.frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("CollissionFrame", frame, shape.getPose());
          this.shape = shape;
       }
 

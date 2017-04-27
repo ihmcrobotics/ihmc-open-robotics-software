@@ -205,7 +205,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 				headIMUBasisWhenLevel = new RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
 			}
-			headIMUFramesWhenLevel.put(target, ReferenceFrame .constructBodyFrameWithUnchangingTransformToParent(
+			headIMUFramesWhenLevel.put(target, ReferenceFrame .constructFrameWithUnchangingTransformToParent(
 							"head_imu", ReferenceFrame.getWorldFrame(),
 							new RigidBodyTransform(headIMUBasisWhenLevel, new Vector3D())));
 		}
