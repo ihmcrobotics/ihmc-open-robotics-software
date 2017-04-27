@@ -33,7 +33,6 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -197,24 +196,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean enableToeOffSlippingDetection()
    {
-      return false;
+      return true;
    }
-
-   private DoubleYoVariable forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold;
 
    /** {@inheritDoc} */
    @Override
-   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure, YoVariableRegistry registry)
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
    {
-      if (forceMagnitudeThreshold == null)
-      {
-         forceMagnitudeThreshold = new DoubleYoVariable("forceMagnitudeThreshold", registry);
-         velocityThreshold = new DoubleYoVariable("velocityThreshold", registry);
-         slippageDistanceThreshold = new DoubleYoVariable("slippageDistanceThreshold", registry);
-         forceMagnitudeThreshold.set(25.0);
-         velocityThreshold.set(0.4);
-         slippageDistanceThreshold.set(0.04);
-      }
+      double forceMagnitudeThreshold = 25.0;
+      double velocityThreshold = 0.4;
+      double slippageDistanceThreshold = 0.04;
       double filterBreakFrequency = 10.0;
       toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
    }

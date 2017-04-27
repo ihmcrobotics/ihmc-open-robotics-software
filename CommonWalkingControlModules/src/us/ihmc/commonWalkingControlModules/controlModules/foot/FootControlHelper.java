@@ -72,7 +72,7 @@ public class FootControlHelper
          TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
          FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
          toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, twistCalculator, footSwitch, registry);
-         walkingControllerParameters.configureToeSlippingDetector(toeSlippingDetector, registry);
+         walkingControllerParameters.configureToeSlippingDetector(toeSlippingDetector);
       }
       else
       {

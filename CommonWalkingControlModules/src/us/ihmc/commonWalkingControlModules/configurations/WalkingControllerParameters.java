@@ -126,16 +126,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return false;
    }
 
-   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure, YoVariableRegistry registry)
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
    {
       // Override this method to configure the parameters as follows:
-      //      DoubleYoVariable forceMagnitudeThreshold = new DoubleYoVariable("forceMagnitudeThreshold", registry);
-      //      DoubleYoVariable velocityThreshold = new DoubleYoVariable("velocityThreshold", registry);
-      //      DoubleYoVariable slippageDistanceThreshold = new DoubleYoVariable("slippageDistanceThreshold", registry);
-      //      forceMagnitudeThreshold.set(25.0);
-      //      velocityThreshold.set(0.4);
-      //      slippageDistanceThreshold.set(0.04);
-      //      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
+//      double forceMagnitudeThreshold = 25.0;
+//      double velocityThreshold = 0.4;
+//      double slippageDistanceThreshold = 0.04;
+//      double filterBreakFrequency = 10.0;
+//      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
    }
 
    /**
