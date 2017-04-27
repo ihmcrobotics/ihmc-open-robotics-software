@@ -763,4 +763,9 @@ public class ICPOptimizationController
    {
       return solutionHandler.wasFootstepAdjusted();
    }
+
+   public boolean useAngularMomentum()
+   {
+      return useAngularMomentum.getBooleanValue();
+   }
 }

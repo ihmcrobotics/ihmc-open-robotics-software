@@ -93,7 +93,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getAngularMomentumMinimizationWeight()
    {
-      return 250.00;
+      return 50.00;
    }
 
    /** {@inheritDoc} */
@@ -135,7 +135,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useAngularMomentum()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -170,28 +170,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDoubleSupportMaxCoPForwardExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDoubleSupportMaxCoPLateralExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCoPForwardExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCoPLateralExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
