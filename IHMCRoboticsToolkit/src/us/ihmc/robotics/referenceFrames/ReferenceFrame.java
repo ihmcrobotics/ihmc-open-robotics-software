@@ -288,7 +288,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslation(translationOffsetFromParent);
 
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, parentFrame.isZupFrame);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
    /**
@@ -307,15 +307,10 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                               RigidBodyTransform transformToParent)
    {
-      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame, false);
-   }
+      boolean isZupFrame = transformToParent.isRotation2D();
+      boolean isAStationaryFrame = parentFrame.isAStationaryFrame;
 
-   private static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
-                                                                              RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
-   {
-      //      if (!RotationFunctions.isRotationProper(transformToParent))
-      //         throw new RuntimeException("Rotation not normalized: " + transformToParent);
-      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, isWorldFrame, isZupFrame)
+      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, isAStationaryFrame, isZupFrame)
       {
          private static final long serialVersionUID = 4694374344134623529L;
 
