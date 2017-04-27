@@ -19,8 +19,6 @@ public class ConstraintToConvexRegion
    public final DenseMatrix64F Aineq;
    public final DenseMatrix64F bineq;
 
-   private int indexOfVariableToConstrain;
-
    private double deltaInside = 0.0;
 
    private final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
@@ -63,12 +61,6 @@ public class ConstraintToConvexRegion
       convexPolygon.update();
    }
 
-   public void setIndexOfVariableToConstrain(int index)
-   {
-      indexOfVariableToConstrain = index;
-   }
-
-
    public void setPositionOffset(DenseMatrix64F offset)
    {
       MatrixTools.setMatrixBlock(positionOffset, 0, 0, offset, 0, 0, 2, 1, 1.0);
@@ -97,10 +89,5 @@ public class ConstraintToConvexRegion
    public int getNumberOfVertices()
    {
       return convexPolygon.getNumberOfVertices();
-   }
-
-   public int getIndexOfVariableToConstrain()
-   {
-      return indexOfVariableToConstrain;
    }
 }

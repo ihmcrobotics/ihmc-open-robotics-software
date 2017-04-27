@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
@@ -29,21 +30,22 @@ public class ICPOptimizationSolver
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
 
-   protected final DenseMatrix64F solverInput_H;
-   protected final DenseMatrix64F solverInput_h;
-   protected final DenseMatrix64F solverInputResidualCost;
+   private final DenseMatrix64F solverInput_H;
+   private final DenseMatrix64F solverInput_h;
+   private final DenseMatrix64F solverInputResidualCost;
 
    private final ICPQPInput feedbackTaskInput;
    private final ICPQPInput dynamicRelaxationTask;
    private final ICPQPInput footstepTaskInput;
+   private final ICPQPInput angularMomentumMinimizationTask;
 
    private final DynamicsConstraintInput dynamicsConstraintInput;
-   private final ConstraintToConvexRegion cmpLocationConstraint;
+   private final ConstraintToConvexRegion copLocationConstraint;
    private final ConstraintToConvexRegion reachabilityConstraint;
 
-   protected final DenseMatrix64F solverInput_Aeq;
-   protected final DenseMatrix64F solverInput_AeqTrans;
-   protected final DenseMatrix64F solverInput_beq;
+   private final DenseMatrix64F solverInput_Aeq;
+   private final DenseMatrix64F solverInput_AeqTrans;
+   private final DenseMatrix64F solverInput_beq;
 
    protected final DenseMatrix64F solverInput_Aineq;
    protected final DenseMatrix64F solverInput_bineq;
@@ -65,6 +67,7 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
+   protected final DenseMatrix64F angularMomentumMinimizationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    private static final boolean useQuadProg = true;
@@ -76,6 +79,7 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F footstepLocationSolution;
    protected final DenseMatrix64F feedbackDeltaSolution;
    protected final DenseMatrix64F dynamicRelaxationSolution;
+   protected final DenseMatrix64F angularMomentumSolution;
 
    protected final DenseMatrix64F previousFeedbackDeltaSolution;
    protected final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
@@ -88,6 +92,7 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F footstepCostToGo;
    private final DenseMatrix64F feedbackCostToGo;
    private final DenseMatrix64F dynamicRelaxationCostToGo;
+   private final DenseMatrix64F angularMomentumMinimizationCostToGo;
 
    private final DenseMatrix64F referenceICPReconstruction = new DenseMatrix64F(2, 1);
 
@@ -128,9 +133,10 @@ public class ICPOptimizationSolver
       feedbackTaskInput = new ICPQPInput(2);
       footstepTaskInput = new ICPQPInput(2 * maximumNumberOfFootstepsToConsider);
       dynamicRelaxationTask = new ICPQPInput(2);
+      angularMomentumMinimizationTask = new ICPQPInput(2);
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
-      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
+      copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
@@ -159,6 +165,7 @@ public class ICPOptimizationSolver
       footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
       dynamicRelaxationSolution = new DenseMatrix64F(2, 1);
+      angularMomentumSolution = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
@@ -169,6 +176,7 @@ public class ICPOptimizationSolver
       footstepCostToGo = new DenseMatrix64F(1, 1);
       feedbackCostToGo = new DenseMatrix64F(1, 1);
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
+      angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
       if (!useQuadProg)
          activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
@@ -176,7 +184,7 @@ public class ICPOptimizationSolver
 
    public void resetSupportPolygonConstraint()
    {
-      cmpLocationConstraint.reset();
+      copLocationConstraint.reset();
    }
 
    private final FramePoint tmpPoint = new FramePoint();
@@ -197,7 +205,7 @@ public class ICPOptimizationSolver
 
       tmpPoint.changeFrame(worldFrame);
 
-      cmpLocationConstraint.addVertex(tmpPoint);
+      copLocationConstraint.addVertex(tmpPoint);
    }
 
    public void resetReachabilityConstraint()
@@ -231,8 +239,9 @@ public class ICPOptimizationSolver
       solverInput_bineq.zero();
 
       dynamicsConstraintInput.reset();
-      dynamicRelaxationTask.reset();
 
+      dynamicRelaxationTask.reset();
+      angularMomentumMinimizationTask.reset();
       footstepTaskInput.reset();
       feedbackTaskInput.reset();
 
@@ -247,6 +256,7 @@ public class ICPOptimizationSolver
       footstepLocationSolution.zero();
       feedbackDeltaSolution.zero();
       dynamicRelaxationSolution.zero();
+      angularMomentumSolution.zero();
 
       currentEqualityConstraintIndex = 0;
       currentInequalityConstraintIndex = 0;
@@ -259,15 +269,16 @@ public class ICPOptimizationSolver
       int numberOfFootstepsToConsider = indexHandler.getNumberOfFootstepsToConsider();
       int numberOfInequalityConstraints;
 
-      cmpLocationConstraint.setPolygon();
+      copLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
-      numberOfInequalityConstraints = cmpLocationConstraint.getNumberOfVertices() + reachabilityConstraint.getNumberOfVertices();
+      numberOfInequalityConstraints = copLocationConstraint.getNumberOfVertices() + reachabilityConstraint.getNumberOfVertices();
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
 
       feedbackTaskInput.reshape(2);
       dynamicRelaxationTask.reshape(2);
+      angularMomentumMinimizationTask.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
       solverInput_Aeq.reshape(problemSize, numberOfEqualityConstraints);
@@ -291,6 +302,12 @@ public class ICPOptimizationSolver
       dynamicRelaxationWeight.zero();
 
       hasFeedbackRegularizationTerm = false;
+   }
+
+   public void resetAngularMomentumConditions()
+   {
+      angularMomentumMinimizationWeight.zero();
+      indexHandler.setUseAngularMomentum(false);
    }
 
    public void resetFootstepConditions()
@@ -333,6 +350,14 @@ public class ICPOptimizationSolver
       referenceFootstepLocations.get(footstepIndex).set(1, 0, referenceFootstepLocation.getY());
 
       indexHandler.registerFootstep();
+   }
+
+   public void setAngularMomentumConditions(double angularMomentumMinimizationWeight, boolean useAngularMomentum)
+   {
+      CommonOps.setIdentity(identity);
+
+      MatrixTools.setMatrixBlock(this.angularMomentumMinimizationWeight, 0, 0, identity, 0, 0, 2, 2, angularMomentumMinimizationWeight);
+      indexHandler.setUseAngularMomentum(useAngularMomentum);
    }
 
    public void setFootstepRegularizationWeight(double regularizationWeight)
@@ -439,14 +464,17 @@ public class ICPOptimizationSolver
       addDynamicConstraint();
       addDynamicRelaxationTask();
 
-      if (cmpLocationConstraint.getNumberOfVertices() > 0)
-         addCMPLocationConstraint();
+      if (copLocationConstraint.getNumberOfVertices() > 0)
+         addCoPLocationConstraint();
 
       if (reachabilityConstraint.getNumberOfVertices() > 0)
          addReachabilityConstraint();
 
       if (indexHandler.useStepAdjustment())
          addStepAdjustmentTask();
+
+      if (indexHandler.useAngularMomentum())
+         addAngularMomentumMinimizationTask();
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -473,6 +501,7 @@ public class ICPOptimizationSolver
          setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
 
          extractDynamicRelaxationSolution(dynamicRelaxationSolution);
+         extractAngularMomentumSolution(angularMomentumSolution);
 
          if (computeCostToGo)
             computeCostToGo();
@@ -481,7 +510,7 @@ public class ICPOptimizationSolver
       }
    }
 
-   protected void addFeedbackTask()
+   private void addFeedbackTask()
    {
       inputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
@@ -491,29 +520,36 @@ public class ICPOptimizationSolver
       inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h);
    }
 
-   protected void addDynamicRelaxationTask()
+   private void addDynamicRelaxationTask()
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
       inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
    }
 
-   private void addCMPLocationConstraint()
+   private void addAngularMomentumMinimizationTask()
    {
-      cmpLocationConstraint.setPositionOffset(perfectCMP);
-      cmpLocationConstraint.setIndexOfVariableToConstrain(indexHandler.getFeedbackCMPIndex());
-      cmpLocationConstraint.setDeltaInside(deltaInside);
-      cmpLocationConstraint.formulateConstraint();
+      inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h);
+   }
 
-      int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+   private void addCoPLocationConstraint()
+   {
+      copLocationConstraint.setPositionOffset(perfectCMP);
+      copLocationConstraint.setDeltaInside(deltaInside);
+      copLocationConstraint.formulateConstraint();
 
-      currentInequalityConstraintIndex += cmpLocationConstraint.getNumberOfVertices();
+      int numberOfVertices = copLocationConstraint.getNumberOfVertices();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+
+      if (indexHandler.useAngularMomentum())
+         MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), copLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, -1.0);
+
+      currentInequalityConstraintIndex += copLocationConstraint.getNumberOfVertices();
    }
 
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setIndexOfVariableToConstrain(indexHandler.getFootstepStartIndex());
       reachabilityConstraint.setDeltaInside(deltaInside);
       reachabilityConstraint.formulateConstraint();
 
@@ -578,12 +614,18 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(dynamicRelaxationSolutionToPack, 0, 0, solution, indexHandler.getDynamicRelaxationIndex(), 0, 2, 1, 1.0);
    }
 
+   private void extractAngularMomentumSolution(DenseMatrix64F angularMomentumSolutionToPack)
+   {
+      if (indexHandler.useAngularMomentum())
+         MatrixTools.setMatrixBlock(angularMomentumSolutionToPack, 0, 0, solution, indexHandler.getAngularMomentumIndex(), 0, 2, 1, 1.0);
+   }
+
    private void extractFreeVariableSolution(DenseMatrix64F freeVariableSolution)
    {
       MatrixTools.setMatrixBlock(freeVariableSolution, 0, 0, solution, 0, 0, indexHandler.getNumberOfFreeVariables(), 1, 1.0);
    }
 
-   protected void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
+   private void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
    {
       for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
          MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);
@@ -601,6 +643,7 @@ public class ICPOptimizationSolver
       footstepCostToGo.zero();
       feedbackCostToGo.zero();
       dynamicRelaxationCostToGo.zero();
+      angularMomentumMinimizationCostToGo.zero();
 
       tmpCost.zero();
       tmpFootstepCost.zero();
@@ -623,6 +666,12 @@ public class ICPOptimizationSolver
       CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
       CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
 
+      if (indexHandler.useStepAdjustment())
+      {
+         CommonOps.mult(angularMomentumMinimizationTask.quadraticTerm, angularMomentumSolution, tmpFeedbackCost);
+         CommonOps.multTransA(angularMomentumSolution, tmpFeedbackCost, angularMomentumMinimizationCostToGo);
+      }
+
       // linear cost
       CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
       CommonOps.addEquals(costToGo, tmpCostScalar);
@@ -636,11 +685,15 @@ public class ICPOptimizationSolver
       CommonOps.multTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, tmpCostScalar);
       CommonOps.addEquals(dynamicRelaxationCostToGo, tmpCostScalar);
 
+      CommonOps.multTransA(-1.0, angularMomentumMinimizationTask.linearTerm, angularMomentumSolution, tmpCostScalar);
+      CommonOps.addEquals(angularMomentumMinimizationCostToGo, tmpCostScalar);
+
       // residual cost
       CommonOps.addEquals(costToGo, solverInputResidualCost);
       CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
       CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
+      CommonOps.addEquals(angularMomentumMinimizationCostToGo, angularMomentumMinimizationTask.residualCost);
    }
 
    private final DenseMatrix64F tmpVector = new DenseMatrix64F(2, 1);
@@ -704,6 +757,11 @@ public class ICPOptimizationSolver
    public double getDynamicRelaxationCostToGo()
    {
       return dynamicRelaxationCostToGo.get(0, 0);
+   }
+
+   public double getAngularMomentumMinimizationCostToGo()
+   {
+      return angularMomentumMinimizationCostToGo.get(0, 0);
    }
 
    public int getNumberOfIterations()
