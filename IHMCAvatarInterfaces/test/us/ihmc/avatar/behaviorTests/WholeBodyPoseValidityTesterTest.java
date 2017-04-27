@@ -253,7 +253,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    }
    
    @Test
-   public void testRRTPlannerBehavior() throws SimulationExceededMaximumTimeException, IOException
+   public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
 //      ThreadTools.sleep(15000);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -264,46 +264,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       drcBehaviorTestHelper.updateRobotModel();
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-//      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
-//      
-//      OneDoFJoint[] oneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
-//
-//      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
-//      float[] privilegedJointAngles = new float[oneDoFJoints.length];
-//
-//      for (int i = 0; i < oneDoFJoints.length; i++)
-//      {
-//         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
-//         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-//         PrintTools.info(""+i+" "+ oneDoFJoints[i].getName()+" "+jointNameBasedHashCodes[i]+" "+ privilegedJointAngles[i]);
-//      }
-//
-//      FloatingInverseDynamicsJoint rootJoint = sdfFullRobotModel.getRootJoint();
-//      Point3D privilegedRootJointPosition = new Point3D();
-//      rootJoint.getTranslation(privilegedRootJointPosition);
-//      Quaternion privilegedRootJointOrientation = new Quaternion();
-//      rootJoint.getRotation(privilegedRootJointOrientation);
-//
-//      privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-//      drcBehaviorTestHelper.send(privilegedMessage);
-      
-      
-      
-      
-      
-      
-      
-      
+            
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
       
@@ -349,7 +310,21 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " + testNodesBehavior.getValdity());
    }
    
-   
+   //@Test
+   public void controlPointOptimizationStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+//      ThreadTools.sleep(15000);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+            
+      
+   }
   
 
    private void setupKinematicsToolboxModule() throws IOException

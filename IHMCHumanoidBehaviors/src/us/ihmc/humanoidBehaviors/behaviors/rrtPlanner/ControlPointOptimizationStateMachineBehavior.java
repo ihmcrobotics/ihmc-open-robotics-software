@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior.ControlPointOptimizationStates;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
@@ -17,18 +16,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private FullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
          
+   private ValidNodesStateMachineBehavior validNodesStateMachineBehabior;
    
-   private SolarPanelPoseValidityTester testValidityBehavior;
-   
-   private int indexOfCurrentNode = 0;
-   private ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
-   
-   private double nodesScore = 0;
-   private boolean nodesValidity = true;
+   private int numberOfCandidates = 10;
+   private int numberOfWayPoints = 10;
    
    public enum ControlPointOptimizationStates
    {
-      INITIALIZE, VALIDITY_TEST, WAITING_RESULT, DONE
+      CANDIDATE_CONTROLPOINTS, GET_SCORE, WAITING_RESULT, DONE
    }
    
    public ControlPointOptimizationStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
@@ -41,8 +36,11 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
+            
+      validNodesStateMachineBehabior = new ValidNodesStateMachineBehavior(new ArrayList<RRTNode>(), communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel);
       
-      testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel);
+      
+      
       
       setUpStateMachine();
    }
