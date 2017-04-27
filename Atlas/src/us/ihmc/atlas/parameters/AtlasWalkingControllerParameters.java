@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -32,6 +33,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -189,6 +191,32 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(45.0);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean enableToeOffSlippingDetection()
+   {
+      return false;
+   }
+
+   private DoubleYoVariable forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold;
+
+   /** {@inheritDoc} */
+   @Override
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure, YoVariableRegistry registry)
+   {
+      if (forceMagnitudeThreshold == null)
+      {
+         forceMagnitudeThreshold = new DoubleYoVariable("forceMagnitudeThreshold", registry);
+         velocityThreshold = new DoubleYoVariable("velocityThreshold", registry);
+         slippageDistanceThreshold = new DoubleYoVariable("slippageDistanceThreshold", registry);
+         forceMagnitudeThreshold.set(25.0);
+         velocityThreshold.set(0.4);
+         slippageDistanceThreshold.set(0.04);
+      }
+      double filterBreakFrequency = 10.0;
+      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
    }
 
    @Override

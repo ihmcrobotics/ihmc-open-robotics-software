@@ -74,6 +74,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
    }
 
+   @Override
+   public boolean isDone()
+   {
+      return super.isDone() || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+   }
+
    /**
     * This method checks if the upcoming step has a desired absolute start time. If that is the case the transfer time is
     * adjusted such that the swing starts at the correct time.
