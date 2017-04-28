@@ -332,19 +332,21 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
       TimeDomain1DNode.cleaningPath = cleaningPath;
-      TimeDomain1DNode rootNode = new TimeDomain1DNode(0, 0);
-      
+      TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
+            
       ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
       = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
       
       drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
-      PrintTools.info("behavior Out ");
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10);
       
+      PrintTools.info("behavior Out " );
    }
   
 
