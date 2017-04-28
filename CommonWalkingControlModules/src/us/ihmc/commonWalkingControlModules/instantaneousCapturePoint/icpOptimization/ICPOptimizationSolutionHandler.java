@@ -119,6 +119,15 @@ public class ICPOptimizationSolutionHandler
 
       YoGraphicPosition actualEndingCornerPoint = new YoGraphicPosition(yoNamePrefix + "ActualEndingCornerPoint", this.actualEndingCornerPoint, 0.005, YoAppearance.Aquamarine(),
             GraphicType.SOLID_BALL);
+      YoGraphicPosition referenceICP = new YoGraphicPosition(yoNamePrefix + "ReferenceICP", this.referenceICP, 0.005, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition referenceCMP = new YoGraphicPosition(yoNamePrefix + "ReferenceCMP", this.referenceCMP, 0.005, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
+
+      artifactList.add(actualEndingCornerPoint.createArtifact());
+      artifactList.add(referenceICP.createArtifact());
+      artifactList.add(referenceCMP.createArtifact());
+      yoGraphicsList.add(actualEndingCornerPoint);
+      yoGraphicsList.add(referenceICP);
+      yoGraphicsList.add(referenceCMP);
 
       if (debug)
       {
@@ -126,26 +135,15 @@ public class ICPOptimizationSolutionHandler
                GraphicType.BALL);
          YoGraphicPosition nominalEndingCornerPoint = new YoGraphicPosition(yoNamePrefix + "NominalEndingCornerPoint", this.nominalEndingCornerPoint, 0.01, YoAppearance.Green(),
                GraphicType.SOLID_BALL);
+
          yoGraphicsList.add(nominalReferenceICP);
          yoGraphicsList.add(nominalEndingCornerPoint);
          artifactList.add(nominalReferenceICP.createArtifact());
          artifactList.add(nominalEndingCornerPoint.createArtifact());
       }
 
-      yoGraphicsList.add(actualEndingCornerPoint);
-      artifactList.add(actualEndingCornerPoint.createArtifact());
-
       yoGraphicsList.setVisible(visualize);
       artifactList.setVisible(visualize);
-
-      YoGraphicPosition referenceICP = new YoGraphicPosition(yoNamePrefix + "ReferenceICP", this.referenceICP, 0.005, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition referenceCMP = new YoGraphicPosition(yoNamePrefix + "ReferenceCMP", this.referenceCMP, 0.005, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
-
-      String name = "ICPOptimization";
-      yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
-      yoGraphicsListRegistry.registerArtifact(name, referenceCMP.createArtifact());
-      yoGraphicsListRegistry.registerYoGraphic(name, referenceICP);
-      yoGraphicsListRegistry.registerYoGraphic(name, referenceCMP);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
