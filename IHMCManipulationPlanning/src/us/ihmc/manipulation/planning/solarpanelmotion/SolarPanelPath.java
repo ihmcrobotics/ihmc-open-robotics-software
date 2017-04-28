@@ -26,6 +26,16 @@ public class SolarPanelPath
       arrivalTime.add(0.0);
    }
    
+   public SolarPanel getSolarPanel()
+   {
+      return wayPoses.get(0).getSolarPanel();
+   }
+   
+   public int getNumerOfWayPoints()
+   {
+      return arrivalTime.size();
+   }
+   
    public ArrayList<Double> getArrivalTime()
    {
       return arrivalTime;

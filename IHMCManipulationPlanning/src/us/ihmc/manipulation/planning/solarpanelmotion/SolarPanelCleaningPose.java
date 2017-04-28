@@ -58,6 +58,11 @@ public class SolarPanelCleaningPose
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    } 
    
+   public SolarPanel getSolarPanel()
+   {
+      return solarPanel;
+   }
+   
    public void setUcoordinate(double u)
    {
       this.uCoordinate = u;

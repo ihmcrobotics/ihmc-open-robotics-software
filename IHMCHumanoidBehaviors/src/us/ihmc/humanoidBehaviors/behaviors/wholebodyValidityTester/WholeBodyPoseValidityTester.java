@@ -82,8 +82,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    {
       super(null, outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-
+      
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.05);
       solutionStableThreshold = new DoubleYoVariable(behaviorName + "solutionStableThreshold", registry);
