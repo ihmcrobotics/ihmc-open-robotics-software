@@ -31,9 +31,9 @@ public class SolarPanelPath
       return wayPoses.get(0).getSolarPanel();
    }
    
-   public int getNumerOfWayPoints()
+   public int getNumerOfLinearPath()
    {
-      return arrivalTime.size();
+      return linearPath.size();
    }
    
    public ArrayList<Double> getArrivalTime()

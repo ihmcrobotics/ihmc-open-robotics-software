@@ -603,7 +603,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          }
       } 
       
-      
       return score;
    }
 
