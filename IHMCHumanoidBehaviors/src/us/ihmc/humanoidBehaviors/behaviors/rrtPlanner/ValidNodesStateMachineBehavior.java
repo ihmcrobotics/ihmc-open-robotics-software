@@ -33,6 +33,8 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    private double nodesScore = 0;
    private boolean nodesValidity = true;
    
+   private boolean DEBUG = false;
+   
    public enum RRTExpandingStates
    {
       INITIALIZE, VALIDITY_TEST, WAITING_RESULT, DONE
@@ -44,9 +46,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       super("RRTExpandingStateMachineBehavior", RRTExpandingStates.class, yoTime, communicationBridge);
 
       this.nodes = nodes;
-      
-      PrintTools.info("RRTExpandingStateMachineBehavior "+nodes.size()+" test nodes");
-      
+            
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
       
@@ -86,7 +86,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          {
             /*
              * override suitable node data for node.
-             */        
+             */
             testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, 0, 0);            
             testValidityBehavior.setUpHasBeenDone();
          }
@@ -100,22 +100,32 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             /*
              * override suitable node data for node.
              */
-            testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, nodes.get(indexOfCurrentNode).getNodeData(0), nodes.get(indexOfCurrentNode).getNodeData(1));            
-            testValidityBehavior.setUpHasBeenDone();
-            indexOfCurrentNode++; 
+            if(DEBUG)
+               PrintTools.info("Check :: Tester Set Behavior Input ");
+            
+            if(indexOfCurrentNode < nodes.size())
+            {
+               testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, nodes.get(indexOfCurrentNode).getNodeData(0), nodes.get(indexOfCurrentNode).getNodeData(1));            
+               testValidityBehavior.setUpHasBeenDone();
+               indexOfCurrentNode++;   
+            }
+            else
+            {
+               testValidityBehavior.setIsDone(true);
+            }             
          }
       };
       
       BehaviorAction<RRTExpandingStates> waitingResultAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.WAITING_RESULT, waitingResultBehavior);
-      
-      BehaviorAction<RRTExpandingStates> testDoneAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.DONE, testDoneBehavior);
-      
+            
       StateTransitionCondition keepDoingCondition = new StateTransitionCondition()
       {
          @Override
          public boolean checkCondition()
          {            
-            boolean b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size());
+            boolean b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size()) && nodesValidity == true;
+            if(DEBUG)
+               PrintTools.info("Check :: keepDoingCondition " + b);
             return b;
          }
       };
@@ -125,10 +135,14 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          @Override
          public boolean checkCondition()
          {
-            boolean b = waitingResultBehavior.isDone() && indexOfCurrentNode == nodes.size();
+            boolean b = (waitingResultBehavior.isDone() && indexOfCurrentNode == nodes.size()) || nodesValidity == false;
+            if(DEBUG)
+               PrintTools.info("Check :: doneCondition " + b);
             return b;
          }
       };
+      
+      BehaviorAction<RRTExpandingStates> testDoneAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.DONE, testDoneBehavior);
 
       statemachine.addStateWithDoneTransition(intializePrivilegedConfigurationAction, RRTExpandingStates.VALIDITY_TEST);
       statemachine.addStateWithDoneTransition(testValidityAction, RRTExpandingStates.WAITING_RESULT);
@@ -169,7 +183,10 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          double curScore = testValidityBehavior.getScroe();
          nodesScore = nodesScore + curScore;
          
-         PrintTools.info(""+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
+         if(DEBUG)
+            PrintTools.info("Check :: Waiting Behavior ");
+         if(DEBUG)
+            PrintTools.info(""+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
          if(testValidityBehavior.isValid() == false)
          {
             nodesValidity = false;
@@ -221,6 +238,8 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       @Override
       public void onBehaviorEntered()
       {   
+         if(DEBUG)
+            PrintTools.info("Check :: Done Behavior ");
       }
 
       @Override
