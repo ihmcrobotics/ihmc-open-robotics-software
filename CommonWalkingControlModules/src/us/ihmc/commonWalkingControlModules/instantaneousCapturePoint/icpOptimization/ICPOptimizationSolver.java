@@ -21,98 +21,172 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
+/**
+ * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
+ * designed to stabilize ICP based walking trajectories using both CMP feedback and step adjustment. Designed to
+ * work inside the {@link ICPOptimizationController}.
+ */
 public class ICPOptimizationSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private static final double deltaInside = 0.0001;
 
+   /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
+   /** Input calculator that formulates the different objectives and handles adding them to the full program. */
    private final ICPQPInputCalculator inputCalculator;
 
+   /**
+    * Has the form x<sup>T</sup> H x + h x
+    */
+   /** Total quadratic cost matrix for the quadratic program. */
    private final DenseMatrix64F solverInput_H;
+   /** Total linear cost vector for the quadratic program. */
    private final DenseMatrix64F solverInput_h;
+   /** Total scalar cost for the quadratic program. */
    private final DenseMatrix64F solverInputResidualCost;
 
-   private final ICPQPInput feedbackTaskInput;
-   private final ICPQPInput dynamicRelaxationTask;
-   private final ICPQPInput footstepTaskInput;
-   private final ICPQPInput angularMomentumMinimizationTask;
-
-   private final DynamicsConstraintInput dynamicsConstraintInput;
-   private final ConstraintToConvexRegion copLocationConstraint;
-   private final ConstraintToConvexRegion reachabilityConstraint;
-
+   /**
+    * Has the form A<sub>eq</sub> x = b<sub>eq</sub>
+    */
+   /** Total linear equality constraint matrix for the quadratic program. */
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_AeqTrans;
+   /** Total linear equality constraint objective vector for the quadratic program. */
    private final DenseMatrix64F solverInput_beq;
 
+   /**
+    * Has the form A<sub>ineq</sub> x >= b<sub>ineq</sub>
+    */
+   /** Total linear inequality constraint matrix for the quadratic program. */
    private final DenseMatrix64F solverInput_Aineq;
+   /** Total linear inequality constraint objective vector for the quadratic program. */
    private final DenseMatrix64F solverInput_bineq;
 
+   /** Lower bound on the free variables for the quadratic program. */
    private final DenseMatrix64F solverInput_Lb;
+   /** Upper bound on the free variables for the quadratic program. */
    private final DenseMatrix64F solverInput_Ub;
 
+
+   /** QP Objective to minimize the amount of feedback action. Also contains feedback regularization. */
+   private final ICPQPInput feedbackTaskInput;
+   /** QP Objective to minimize the dynamic relaxation magnitude. */
+   private final ICPQPInput dynamicRelaxationTask;
+   /** QP Objective to minimize the amount of step adjustment. Also contains step adjustment. */
+   private final ICPQPInput footstepTaskInput;
+   /** QP Objective to minimize the angular momentum magnitude. */
+   private final ICPQPInput angularMomentumMinimizationTask;
+
+   /** Constraint that encodes the recursive ICP dynamics. */
+   private final DynamicsConstraintInput dynamicsConstraintInput;
+   /** Constraint on the CoP location to the support polygon. */
+   private final ConstraintToConvexRegion copLocationConstraint;
+   /** Constraint on the footstep location to the reachable region. */
+   private final ConstraintToConvexRegion reachabilityConstraint;
+
+   /** List of recursion multipliers for the steps that encode the recursive ICP dynamics. */
    private final ArrayList<DenseMatrix64F> footstepRecursionMultipliers = new ArrayList<>();
+   /** Location of the desired footsteps from a high level footstep planner. */
    private final ArrayList<DenseMatrix64F> referenceFootstepLocations = new ArrayList<>();
 
+   /** Recursion of the final ICP location for the recursive ICP dynamics. */
    private final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
+   /** Effects of the CMP offsets in the upcoming feet and the stance CMP locations in the recursive ICP dynamics. */
    private final DenseMatrix64F cmpConstantEffect = new DenseMatrix64F(2, 1);
+   /** Current ICP location. */
    private final DenseMatrix64F currentICP = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F referenceICP = new DenseMatrix64F(2, 1);
+   /** Reference CMP from the ICP plan. */
    private final DenseMatrix64F perfectCMP = new DenseMatrix64F(2, 1);
 
+   /** List of weights for tracking the different footsteps. */
    private final ArrayList<DenseMatrix64F> footstepWeights = new ArrayList<>();
+   /** Weight for the footstep regularization task. */
    private final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
+   /** Weight minimizing the CMP feedback action. */
    private final DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
+   /** Weight regularizing the CMP feedback action. */
    private final DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
+   /** Weight minimizing the dynamic relaxation magnitude. */
    private final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
+   /** Weight minimizing the angular momentum magnitude. */
    private final DenseMatrix64F angularMomentumMinimizationWeight = new DenseMatrix64F(2, 2);
+   /** Proportional gain on the ICP feedback controller. */
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
+   /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
    private static final boolean useQuadProg = true;
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleDiagonalActiveSetQPSolver();
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
+   /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
+   /** Solution vector of the free variables to the quadratic program. */
    private final DenseMatrix64F freeVariableSolution;
+   /** Footstep location solution vector to the quadratic program. */
    private final DenseMatrix64F footstepLocationSolution;
+   /** Feedback action solution to the quadratic program. */
    private final DenseMatrix64F feedbackDeltaSolution;
+   /** Dynamic relaxation solution to the quadratic program. */
    private final DenseMatrix64F dynamicRelaxationSolution;
+   /** Angular momentum solution to the quadratic program. */
    private final DenseMatrix64F angularMomentumSolution;
 
+   /** Previous solution for the feedback action, used in the feedback regularization objective. */
    private final DenseMatrix64F previousFeedbackDeltaSolution;
    private final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
 
-   private final DenseMatrix64F tmpCost;
-   private final DenseMatrix64F tmpFootstepCost;
-   private final DenseMatrix64F tmpFeedbackCost;
-
+   /** Cost to go for the entire quadratic program. */
    private final DenseMatrix64F costToGo;
+   /** Cost to go for the step adjustment minimization objective. */
    private final DenseMatrix64F footstepCostToGo;
+   /** Cost to go for the feedback action minimization objective. */
    private final DenseMatrix64F feedbackCostToGo;
+   /** Cost to go for the dynamic reachability minimization objective. */
    private final DenseMatrix64F dynamicRelaxationCostToGo;
+   /** Cost to go for the angular momentum minimization objective. */
    private final DenseMatrix64F angularMomentumMinimizationCostToGo;
 
-   private final DenseMatrix64F identity = CommonOps.identity(2, 2);
-
+   /** Maximum number of footsteps that the quadratic program will ever consider. Used for clearing and storing data. */
    private final int maximumNumberOfFootstepsToConsider;
+   /** Maximum number of vertices in the reachability polygon that the quadratic program will ever consider. Used for clearing and storing data. */
    private static final int maximumNumberOfReachabilityVertices = 4;
 
+   /** Number of iterations required for the active set solver to find a solution. */
    private int numberOfIterations;
 
    private int currentEqualityConstraintIndex;
    private int currentInequalityConstraintIndex;
 
+   /** boolean to determine whether or not to compute the cost to go. specified at compile time. */
    private final boolean computeCostToGo;
 
+   /** boolean indicating whether or not the footstep regularization term has been added and can be used. */
    private boolean hasFootstepRegularizationTerm = false;
+   /** boolean indicating whether or not the feedback regularization term has been added and can be used. */
    private boolean hasFeedbackRegularizationTerm = false;
 
+   /** Minimum allowable weight on the step adjustment task. */
    private final double minimumFootstepWeight;
+   /** Minimum allowable weight on the feedback task. */
    private final double minimumFeedbackWeight;
 
    private final FramePoint tmpPoint = new FramePoint();
+   private final DenseMatrix64F tmpCost;
+   private final DenseMatrix64F tmpFootstepCost;
+   private final DenseMatrix64F tmpFeedbackCost;
 
+   private final DenseMatrix64F identity = CommonOps.identity(2, 2);
+
+
+   /**
+    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationSolver}.
+    *
+    * @param icpOptimizationParameters parameters to be used by in the optimization.
+    * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
+    * @param computeCostToGo whether or not to compute the cost to go.
+    */
    public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this.computeCostToGo = computeCostToGo;
@@ -272,7 +346,6 @@ public class ICPOptimizationSolver
       finalICPRecursion.zero();
       cmpConstantEffect.zero();
       currentICP.zero();
-      referenceICP.zero();
       perfectCMP.zero();
 
       solution.zero();
@@ -614,7 +687,6 @@ public class ICPOptimizationSolver
       catch (NoConvergenceException e)
       {
          noConvergenceException = e;
-         throw noConvergenceException;
       }
 
       if (noConvergenceException == null)
@@ -636,10 +708,15 @@ public class ICPOptimizationSolver
          if (computeCostToGo)
             computeCostToGo();
       }
+      else
+      {
+         throw noConvergenceException;
+      }
    }
 
    /**
-    * Adds the minimization of step adjustment task to the quadratic program.
+    * Adds the minimization of step adjustment task to the quadratic program.<br>
+    * Also adds the regularization of the footstep adjustment,  if enabled.
     */
    private void addStepAdjustmentTask()
    {
@@ -655,7 +732,8 @@ public class ICPOptimizationSolver
    }
 
    /**
-    * Adds the minimization of feedback task to the quadratic program's cost objectives.
+    * Adds the minimization of feedback task to the quadratic program's cost objectives.<br>
+    * Also adds the regularization of the feedback term, if enabled.
     */
    private void addFeedbackTask()
    {
