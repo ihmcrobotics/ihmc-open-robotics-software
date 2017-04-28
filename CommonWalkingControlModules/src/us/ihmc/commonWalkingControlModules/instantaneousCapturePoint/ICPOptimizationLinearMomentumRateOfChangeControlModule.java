@@ -118,7 +118,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
             areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
          }
 
-         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
+         if (!icpOptimizationController.useAngularMomentum())
+            cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
       }
    }
 

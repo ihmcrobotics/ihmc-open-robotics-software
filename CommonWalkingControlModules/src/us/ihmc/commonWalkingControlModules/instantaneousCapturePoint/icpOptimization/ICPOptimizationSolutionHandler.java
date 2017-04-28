@@ -48,6 +48,7 @@ public class ICPOptimizationSolutionHandler
    private final DoubleYoVariable footstepCostToGo;
    private final DoubleYoVariable feedbackCostToGo;
    private final DoubleYoVariable dynamicRelaxationCostToGo;
+   private final DoubleYoVariable angularMomentumMinimizationCostToGo;
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
 
@@ -82,6 +83,7 @@ public class ICPOptimizationSolutionHandler
          footstepCostToGo = new DoubleYoVariable(yoNamePrefix + "FootstepCostToGo", registry);
          feedbackCostToGo = new DoubleYoVariable(yoNamePrefix + "FeedbackCostToGo", registry);
          dynamicRelaxationCostToGo = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
+         angularMomentumMinimizationCostToGo = new DoubleYoVariable(yoNamePrefix + "AngularMomentumMinimizationCostToGo", registry);
       }
       else
       {
@@ -94,6 +96,7 @@ public class ICPOptimizationSolutionHandler
          footstepCostToGo = null;
          feedbackCostToGo = null;
          dynamicRelaxationCostToGo = null;
+         angularMomentumMinimizationCostToGo = null;
       }
 
       footstepDeadband = new DoubleYoVariable(yoNamePrefix + "FootstepDeadband", registry);
@@ -156,6 +159,7 @@ public class ICPOptimizationSolutionHandler
          footstepCostToGo.set(solver.getFootstepCostToGo());
          feedbackCostToGo.set(solver.getFeedbackCostToGo());
          dynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
+         angularMomentumMinimizationCostToGo.set(solver.getAngularMomentumMinimizationCostToGo());
       }
    }
 
