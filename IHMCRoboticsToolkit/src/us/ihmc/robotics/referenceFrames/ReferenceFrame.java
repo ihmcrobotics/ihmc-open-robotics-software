@@ -310,7 +310,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       boolean isZupFrame = transformToParent.isRotation2D();
       boolean isAStationaryFrame = parentFrame.isAStationaryFrame;
 
-      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, isAStationaryFrame, isZupFrame)
+      ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, transformToParent, isAStationaryFrame, isZupFrame)
       {
          private static final long serialVersionUID = 4694374344134623529L;
 
@@ -319,8 +319,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
          {
          }
       };
-
-      ret.transformToParent.set(transformToParent);
 
       return ret;
    }
