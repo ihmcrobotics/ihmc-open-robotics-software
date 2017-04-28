@@ -136,7 +136,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * tree than the tree starting off of {@link #worldFrame}. Transformation across two different
     * trees of reference frames is forbidden as the transformation between them is undefined.
     * </p>
-    * 
+    *
     * @param frameName the name of the new world frame.
     * @return the new non-moving z-up root reference frame.
     */
@@ -162,7 +162,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * Note that the parent frame is set to the reference frame the given {@code point} and
     * {@code zAxis} are expressed in.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param point location of the reference frame's origin. Not modified.
     * @param zAxis orientation the reference frame's z-axis. Not modified.
@@ -186,7 +186,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * Note that the parent frame is set to the reference frame the given {@code point} and
     * {@code alignAxisWithThis} are expressed in.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param point location of the reference frame's origin. Not modified.
     * @param axisToAlign defines which axis of the new reference frame is to be aligned with the
@@ -236,7 +236,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * <p>
     * This is usually used for test purposes.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param random the random generator to use.
     * @param parentFrame the parent frame of the new reference frame.
@@ -254,7 +254,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * The {@code transformFromParent} should describe the pose of the parent frame expressed in this
     * new frame.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param parentFrame the parent frame of the new reference frame.
     * @param transformFromParent the transform that can be used to transform a geometry object from
@@ -275,7 +275,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * <p>
     * The new reference frame has the same orientation as its parent frame.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param parentFrame the parent frame of the new reference frame.
     * @param translationOffsetFromParent describes the position of the new reference frame's origin
@@ -297,7 +297,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * The {@code transformFromParent} should describe the pose of the new frame expressed in its
     * parent frame.
     * </p>
-    * 
+    *
     * @param frameName the name of the new frame.
     * @param parentFrame the parent frame of the new reference frame.
     * @param transformToParent the transform that can be used to transform a geometry object the new
@@ -485,7 +485,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
 
       this.preCorruptionTransform.set(preCorruptionTransform);
-      this.update();
+      update();
    }
 
    public void corruptTransformToParentPostMultiply(RigidBodyTransform postCorruptionTransform)
@@ -496,7 +496,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
 
       this.postCorruptionTransform.set(postCorruptionTransform);
-      this.update();
+      update();
    }
 
    protected abstract void updateTransformToParent(RigidBodyTransform transformToParent);
@@ -544,6 +544,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * @deprecated Creates garbage without warning. - dcalvert
     */
+   @Deprecated
    public RigidBodyTransform getTransformToDesiredFrame(ReferenceFrame desiredFrame)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -555,6 +556,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * @deprecated Creates garbage without warning. - dcalvert
     */
+   @Deprecated
    public RigidBodyTransform getTransformToWorldFrame()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -570,15 +572,15 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       verifySameRoots(desiredFrame);
 
-      this.efficientComputeTransform();
+      efficientComputeTransform();
       desiredFrame.efficientComputeTransform();
 
       if (desiredFrame.inverseTransformToRoot != null)
       {
-         if (this.transformToRoot != null)
+         if (transformToRoot != null)
          {
             transformToPack.set(desiredFrame.inverseTransformToRoot);
-            transformToPack.multiply(this.transformToRoot);
+            transformToPack.multiply(transformToRoot);
          }
          else
          {
@@ -587,9 +589,9 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
       else
       {
-         if (this.transformToRoot != null)
+         if (transformToRoot != null)
          {
-            transformToPack.set(this.transformToRoot);
+            transformToPack.set(transformToRoot);
          }
          else
          {
@@ -610,7 +612,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public void verifySameRoots(ReferenceFrame referenceFrame)
    {
-      if (this.getRootFrame() != referenceFrame.getRootFrame())
+      if (getRootFrame() != referenceFrame.getRootFrame())
       {
          throw new RuntimeException("Frames do not have same roots. this = " + this + ", referenceFrame = " + referenceFrame);
       }
@@ -630,7 +632,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    private void efficientComputeTransform()
    {
-      int chainLength = this.framesStartingWithRootEndingWithThis.length;
+      int chainLength = framesStartingWithRootEndingWithThis.length;
 
       boolean updateFromHereOnOut = false;
       long previousUpdateId = 0;
@@ -738,7 +740,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
             throw new RuntimeException("Root frames don't have transformToParent or transformToRoot defined. This is so RMI still works with frames since Transform3D is not serializable.");
          }
 
-         if (this.transformToRootID != 0)
+         if (transformToRootID != 0)
          {
             System.err.println("this ReferenceFrame = " + this);
 
