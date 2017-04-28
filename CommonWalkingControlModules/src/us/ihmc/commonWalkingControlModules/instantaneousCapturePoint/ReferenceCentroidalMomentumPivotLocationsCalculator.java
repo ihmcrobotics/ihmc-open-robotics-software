@@ -131,7 +131,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
-      putExitCMPOnToes = new BooleanYoVariable(namePrefix + "ToeOffInSingleSupport", registry);
+      putExitCMPOnToes = new BooleanYoVariable(namePrefix + "PutExitCMPOnToes", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -596,19 +596,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       centroidOfFootstepToConsider.changeFrameAndProjectToXYPlane(soleFrame);
 
       boolean polygonIsAPoint = footSupportPolygon.getArea() == 0.0;
-      boolean putCMPOnToes = false;
+      boolean putCMPOnToesWalking = false;
+      boolean putCMPOnToesSteppingDown = false;
 
       if (!isUpcomingFootstepLast && centroidInSoleFrameOfUpcomingSupportFoot != null && !polygonIsAPoint)
       {
-         if (putExitCMPOnToes.getBooleanValue())
-         {
-            soleFrameOrigin.setToZero(centroidInSoleFrameOfUpcomingSupportFoot.getReferenceFrame());
-            soleFrameOrigin.changeFrame(soleFrame);
-            soleToSoleFrameVector.setIncludingFrame(soleFrameOrigin);
-
-            putCMPOnToes = soleToSoleFrameVector.getX() > footstepLengthThresholdToPutExitCMPOnToes.getDoubleValue();
-         }
-         else if (useExitCMPOnToesForSteppingDown)
+         if (useExitCMPOnToesForSteppingDown)
          {
             soleFrameOrigin.setToZero(centroidInSoleFrameOfUpcomingSupportFoot.getReferenceFrame());
             soleFrameOrigin.changeFrame(soleFrame);
@@ -617,7 +610,15 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
             soleToSoleFrameVector.changeFrame(worldFrame);
             boolean isSteppingDownEnough = soleToSoleFrameVector.getZ() < -footstepHeightThresholdToPutExitCMPOnToesSteppingDown.getDoubleValue();
 
-            putCMPOnToes = isSteppingForwardEnough && isSteppingDownEnough;
+            putCMPOnToesSteppingDown = isSteppingForwardEnough && isSteppingDownEnough;
+         }
+         else if (putExitCMPOnToes.getBooleanValue())
+         {
+            soleFrameOrigin.setToZero(centroidInSoleFrameOfUpcomingSupportFoot.getReferenceFrame());
+            soleFrameOrigin.changeFrame(soleFrame);
+            soleToSoleFrameVector.setIncludingFrame(soleFrameOrigin);
+
+            putCMPOnToesWalking = soleToSoleFrameVector.getX() > footstepLengthThresholdToPutExitCMPOnToes.getDoubleValue();
          }
       }
 
@@ -627,9 +628,13 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          cmp2d.setToZero(footSupportPolygon.getReferenceFrame());
          cmp2d.set(footSupportPolygon.getVertex(0));
       }
-      else if (putCMPOnToes)
+      else if (putCMPOnToesWalking)
       {
-         putExitCMPOnToes(footSupportPolygon, cmp2d);
+         putExitCMPOnToes(cmp2d, footSupportPolygon, exitCMPUserOffsets.get(robotSide).getY());
+      }
+      else if (putCMPOnToesSteppingDown)
+      {
+         putExitCMPOnToes(cmp2d, footSupportPolygon, 0.0);
       }
       else
       {
@@ -641,12 +646,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       exitCMPToPack.changeFrame(worldFrame);
    }
 
-   private void putExitCMPOnToes(FrameConvexPolygon2d footSupportPolygon, FramePoint2d exitCMPToPack)
+   private void putExitCMPOnToes(FramePoint2d exitCMPToPack, FrameConvexPolygon2d footSupportPolygon, double exitCMPInsideOffset)
    {
       // Set x to have the CMP slightly inside the support polygon
       exitCMPToPack.setToZero(footSupportPolygon.getReferenceFrame());
       exitCMPToPack.setX(footSupportPolygon.getMaxX() - 1.6e-2);
-      exitCMPToPack.setY(footSupportPolygon.getCentroid().getY());
+      exitCMPToPack.setY(footSupportPolygon.getCentroid().getY() + exitCMPInsideOffset);
 
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(footSupportPolygon);
