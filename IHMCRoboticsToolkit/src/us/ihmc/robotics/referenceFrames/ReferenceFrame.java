@@ -532,23 +532,45 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return ret;
    }
 
+   /**
+    * Tests if this reference frame is {@link #worldFrame}.
+    * 
+    * @return {@code true} if this is {@link #worldFrame}, {@code false} otherwise.
+    */
    public boolean isWorldFrame()
    {
       return this == worldFrame;
    }
 
+   /**
+    * Tests if this reference frame is to be considered as stationary frame, i.e. not moving with
+    * respect to its root frame.
+    * 
+    * @return {@code true} if this is a stationary frame, {@code false} other.
+    */
    public boolean isAStationaryFrame()
    {
       return isAStationaryFrame;
    }
 
+   /**
+    * Tests if this reference frame is considered to have its z-axis aligned with the root frame.
+    * 
+    * @return {@code true} if this is a z-up frame, {@code false} otherwise.
+    */
    public boolean isZupFrame()
    {
       return isZupFrame;
    }
 
    /**
-    * The user must call update each tick. It will then call updateTransformToParent.
+    * The user must call update each tick. It will then call
+    * {@link #updateTransformToParent(RigidBodyTransform)} which should be overridden to indicate
+    * how the transform to each frame's parent should be updated.
+    * <p>
+    * Note that it is not necessary to call update on reference frames with an unchanging transform
+    * to parent, even if the parent frame is moving.
+    * </p>
     */
    public void update()
    {
@@ -558,81 +580,102 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
 
       updateTransformToParent(transformToParent);
-
-      //      transformToParent.normalize();
       transformToRootID = Long.MIN_VALUE;
    }
 
-   private RigidBodyTransform preCorruptionTransform, postCorruptionTransform;
-
-   public void corruptTransformToParentPreMultiply(RigidBodyTransform preCorruptionTransform)
-   {
-      if (this.preCorruptionTransform == null)
-      {
-         this.preCorruptionTransform = new RigidBodyTransform();
-      }
-
-      this.preCorruptionTransform.set(preCorruptionTransform);
-      update();
-   }
-
-   public void corruptTransformToParentPostMultiply(RigidBodyTransform postCorruptionTransform)
-   {
-      if (this.postCorruptionTransform == null)
-      {
-         this.postCorruptionTransform = new RigidBodyTransform();
-      }
-
-      this.postCorruptionTransform.set(postCorruptionTransform);
-      update();
-   }
-
+   /**
+    * Override this method to define how this reference frame should be located with respect to its
+    * parent frame over time by setting the argument {@code transformToParent}.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of this frame expressed in its parent
+    * frame.
+    * </p>
+    * 
+    * @param transformToParent the transform to updated according to how this reference frame should
+    *           now positioned with respect to its parent frame. Modified.
+    */
    protected abstract void updateTransformToParent(RigidBodyTransform transformToParent);
 
    /**
-    * getParent
+    * Returns the parent frame of this reference frame.
+    * <p>
+    * Note that a root frame has no parent frame, such that this method returns {@code null} if this
+    * is a root frame.
+    * </p>
     *
-    * Returns the parent frame of this reference frame
-    *
-    * @return Frame
+    * @return the parent frame of this reference frame.
     */
    public ReferenceFrame getParent()
    {
       return parentFrame;
    }
 
+   /**
+    * Retrieves the root frame of the tree of reference frame that this frame belongs to.
+    * 
+    * @return the root frame.
+    */
    public ReferenceFrame getRootFrame()
    {
       return framesStartingWithRootEndingWithThis[0];
    }
 
    /**
-    * getTransformToParent
+    * Returns a copy of this reference frame's transform to parent.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * <p>
+    * This transform can be applied to a vector defined in this frame in order to obtain the
+    * equivalent vector in the parent frame.
+    * </p>
     *
-    * Returns a Transform3D that can be applied to a vector defined in this frame in order to obtain
-    * the equivalent vector in the parent frame
-    *
-    * @return Transform3D
+    * @return a copy of the transform to the parent frame.
     */
    public RigidBodyTransform getTransformToParent()
    {
       return new RigidBodyTransform(transformToParent);
    }
 
+   /**
+    * packs this reference frame's transform to parent into the given transform
+    * {@code transformToPack}.
+    * <p>
+    * This transform can be applied to a vector defined in this frame in order to obtain the
+    * equivalent vector in the parent frame.
+    * </p>
+    *
+    * @param transformToPack the transform in which this frame's transform to its parent frame is
+    *           stored. Modified.
+    */
    public void getTransformToParent(RigidBodyTransform transformToPack)
    {
       updateTransformToParent(transformToPack);
    }
 
+   /**
+    * Gets the name of this reference frame.
+    * <p>
+    * Reference frames usually have a unique name among the reference frames in the same tree but this is
+    * not guaranteed.
+    * </p>
+    * 
+    * @return this frame's name.
+    */
    public String getName()
    {
       return frameName;
    }
 
    /**
-    * @deprecated Creates garbage without warning. - dcalvert
+    * Returns the transform that can be used to transform a geometry object defined in this frame to obtain its equivalent expressed in the {@code desiredFrame}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param desiredFrame the goal frame.
+    * @return the transform from this frame to the {@code desiredFrame}.
     */
-   @Deprecated
    public RigidBodyTransform getTransformToDesiredFrame(ReferenceFrame desiredFrame)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -900,4 +943,62 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       this.additionalNameBasedHashCode = additionalNameBasedHashCode;
    }
+
+   //////////////////////////////////////////////////////////////////////
+   /////// This needs to be extract to a new type of reference frame ////
+   //////////////////////////////////////////////////////////////////////
+
+   private RigidBodyTransform preCorruptionTransform, postCorruptionTransform;
+
+   /**
+    * Please avoid using the corruption methods until we know where they should be moved.
+    * <p>
+    * The big problem is that it makes the pose any reference frame uncertain as from anywhere it
+    * can easily be modified. It was initially created to understand unmodeled offsets in the
+    * kinematics of Atlas. It will probably still be needed in the future for the same reason, so
+    * let's not remove it but avoid using unless it is strictly necessary.
+    * </p>
+    * 
+    * @param preCorruptionTransform the corruption transform to prepend to this frame's transform to
+    *           parent.
+    */
+   @Deprecated
+   public void corruptTransformToParentPreMultiply(RigidBodyTransform preCorruptionTransform)
+   {
+      if (this.preCorruptionTransform == null)
+      {
+         this.preCorruptionTransform = new RigidBodyTransform();
+      }
+
+      this.preCorruptionTransform.set(preCorruptionTransform);
+      update();
+   }
+
+   /**
+    * Please avoid using the corruption methods until we know where they should be moved.
+    * <p>
+    * The big problem is that it makes the pose any reference frame uncertain as from anywhere it
+    * can easily be modified. It was initially created to understand unmodeled offsets in the
+    * kinematics of Atlas. It will probably still be needed in the future for the same reason, so
+    * let's not remove it but avoid using unless it is strictly necessary.
+    * </p>
+    * 
+    * @param postCorruptionTransform the corruption transform to append to this frame's transform to
+    *           parent.
+    */
+   @Deprecated
+   public void corruptTransformToParentPostMultiply(RigidBodyTransform postCorruptionTransform)
+   {
+      if (this.postCorruptionTransform == null)
+      {
+         this.postCorruptionTransform = new RigidBodyTransform();
+      }
+
+      this.postCorruptionTransform.set(postCorruptionTransform);
+      update();
+   }
+
+   //////////////////////////////////////////////////////////////////////
+   ////////////////// End of things to be extracted /////////////////////
+   //////////////////////////////////////////////////////////////////////
 }
