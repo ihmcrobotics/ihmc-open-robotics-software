@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -87,10 +88,11 @@ public class ICPOptimizationController
    private final FrameVector2d desiredICPVelocity = new FrameVector2d();
    private final FramePoint2d referenceCMP = new FramePoint2d();
 
-   private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMP", worldFrame, registry);
-   private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
    private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
-   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxation", "", worldFrame, registry);
+   private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxationSolution", "", worldFrame, registry);
+   private final YoFramePoint2d angularMomentumSolution = new YoFramePoint2d(yoNamePrefix + "AngularMomentumSolution", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpConstantEffects = new FramePoint2d();
@@ -149,6 +151,9 @@ public class ICPOptimizationController
    private final double dynamicRelaxationDoubleSupportWeightModifier;
    private final int maximumNumberOfFootstepsToConsider;
 
+   private final double mass;
+   private final double gravityZ;
+
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
    
@@ -156,11 +161,13 @@ public class ICPOptimizationController
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
+      this.mass = mass;
+      this.gravityZ = gravityZ;
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -454,9 +461,8 @@ public class ICPOptimizationController
       doingBigAdjustment.set(false);
    }
 
-   private final FramePoint2d dynRelax = new FramePoint2d();
-   private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FrameVector2d desiredCMPDelta = new FrameVector2d();
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
@@ -542,17 +548,20 @@ public class ICPOptimizationController
       }
       solutionReadingTimer.stopMeasurement();
 
-      solutionHandler.getControllerReferenceCMP(desiredCMP);
-      solver.getDynamicRelaxation(dynRelax);
+      solver.getDynamicRelaxation(tempPoint2d);
+      dynamicRelaxation.set(tempPoint2d);
+
+      solver.getCMPDifferenceFromCoP(tempPoint2d);
+      CapturePointTools.computeAngularMomentum(mass, gravityZ, tempPoint2d, tempPoint2d);
+      angularMomentumSolution.set(tempPoint2d);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());
 
-      dynamicRelaxation.set(dynRelax);
-
-      desiredCMP.add(desiredCMPDelta);
+      solutionHandler.getControllerReferenceCMP(tempPoint2d);
+      controllerFeedbackCMP.set(tempPoint2d);
+      controllerFeedbackCMP.add(desiredCMPDelta);
       controllerFeedbackCMPDelta.set(desiredCMPDelta);
-      controllerFeedbackCMP.set(desiredCMP);
 
       controllerTimer.stopMeasurement();
    }

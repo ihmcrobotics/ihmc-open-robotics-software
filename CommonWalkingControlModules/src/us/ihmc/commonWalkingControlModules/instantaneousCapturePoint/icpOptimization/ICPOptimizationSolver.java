@@ -739,6 +739,12 @@ public class ICPOptimizationSolver
       dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
 
+   public void getCMPDifferenceFromCoP(FramePoint2d differenceToPack)
+   {
+      differenceToPack.setX(dynamicRelaxationSolution.get(0, 0));
+      differenceToPack.setY(dynamicRelaxationSolution.get(1, 0));
+   }
+
    public double getCostToGo()
    {
       return costToGo.get(0, 0);
