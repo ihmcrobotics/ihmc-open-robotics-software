@@ -123,7 +123,7 @@ public class ScrewTools
 
    public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)
    {
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+      ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;
    }

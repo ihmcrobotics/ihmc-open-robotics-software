@@ -12,9 +12,9 @@ public abstract class MetersReferenceFrame extends PlotterReferenceFrame
       super(frameName, parentFrame, PlotterFrameSpace.METERS, spaceConverter);
    }
 
-   public MetersReferenceFrame(String frameName, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)
+   public MetersReferenceFrame(String frameName, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, isWorldFrame, isZupFrame, PlotterFrameSpace.METERS, spaceConverter);
+      super(frameName, PlotterFrameSpace.METERS, spaceConverter);
    }
 
    public MetersReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)

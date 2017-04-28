@@ -9,9 +9,9 @@ public abstract class PlotterReferenceFrame extends ReferenceFrame
    private final PlotterFrameSpace frameSpace;
    protected final PlotterSpaceConverter spaceConverter;
 
-   public PlotterReferenceFrame(String frameName, boolean isWorldFrame, boolean isZupFrame, PlotterFrameSpace frameSpace, PlotterSpaceConverter spaceConverter)
+   public PlotterReferenceFrame(String frameName, PlotterFrameSpace frameSpace, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, isWorldFrame, isZupFrame);
+      super(frameName);
       this.frameSpace = frameSpace;
       this.spaceConverter = spaceConverter;
    }

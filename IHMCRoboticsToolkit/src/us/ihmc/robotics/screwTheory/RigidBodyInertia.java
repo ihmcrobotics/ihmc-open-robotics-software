@@ -59,7 +59,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       checkIsCrossPartZero();    // otherwise this operation would be a lot less efficient
 
       acceleration.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
-      acceleration.getBaseFrame().checkIsWorldFrame();
+      acceleration.getBaseFrame().checkIsAStationaryFrame();
       acceleration.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       twist.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
@@ -100,7 +100,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
    {
       this.expressedInframe.checkReferenceFrameMatch(twist.getExpressedInFrame());
       this.bodyFrame.checkReferenceFrameMatch(twist.getBodyFrame());
-      twist.getBaseFrame().checkIsWorldFrame();
+      twist.getBaseFrame().checkIsAStationaryFrame();
 
       double ret = 0.0;
 
