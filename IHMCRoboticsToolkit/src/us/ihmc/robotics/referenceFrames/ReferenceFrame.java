@@ -656,8 +656,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * Gets the name of this reference frame.
     * <p>
-    * Reference frames usually have a unique name among the reference frames in the same tree but this is
-    * not guaranteed.
+    * Reference frames usually have a unique name among the reference frames in the same tree but
+    * this is not guaranteed.
     * </p>
     * 
     * @return this frame's name.
@@ -668,7 +668,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * Returns the transform that can be used to transform a geometry object defined in this frame to obtain its equivalent expressed in the {@code desiredFrame}.
+    * Returns the transform that can be used to transform a geometry object defined in this frame to
+    * obtain its equivalent expressed in the {@code desiredFrame}.
     * <p>
     * WARNING: This method generates garbage.
     * </p>
@@ -685,9 +686,14 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * @deprecated Creates garbage without warning. - dcalvert
+    * Returns the transform that can be used to transform a geometry object defined in this frame to
+    * obtain its equivalent expressed in {@link #worldFrame}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the transform from this frame to the {@link #worldFrame}.
     */
-   @Deprecated
    public RigidBodyTransform getTransformToWorldFrame()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -695,10 +701,14 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return ret;
    }
 
-   // JEP 10117: Temporary transform to save lots of memory generation.
-   // Determined it was needed after running profiler.
-   // JEP 101215: Made it a serializableTransform3D to make sure LittleDog planner RMI stuff still works.
-
+   /**
+    * Packs the transform that can be used to transform a geometry object defined in this frame to
+    * obtain its equivalent expressed in the {@code desiredFrame} into {@code transformToPack}.
+    * 
+    * @param transformToPack the transform in which this frame's transform to the
+    *           {@code desiredFrame} is stored. Modified.
+    * @param desiredFrame the goal frame.
+    */
    public void getTransformToDesiredFrame(RigidBodyTransform transformToPack, ReferenceFrame desiredFrame)
    {
       verifySameRoots(desiredFrame);
@@ -731,16 +741,34 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Test whether the given frame is the parent of this frame.
+    * 
+    * @param frame the query.
+    * @return {@code true} if the query is the parent of this frame, {@code false} otherwise.
+    */
    public boolean isParentFrame(ReferenceFrame frame)
    {
       return frame == parentFrame;
    }
 
+   /**
+    * Test whether the given frame is a child of this frame.
+    * 
+    * @param frame the query.
+    * @return {@code true} if the query is a child of this frame, {@code false} otherwise.
+    */
    public boolean isChildFrame(ReferenceFrame frame)
    {
       return frame.isParentFrame(this);
    }
 
+   /**
+    * Asserts that this frame and {@code referenceFrame} share the same root frame.
+    * 
+    * @param referenceFrame the query.
+    * @throws RuntimeException if this frame and the query do not share the same root frame.
+    */
    public void verifySameRoots(ReferenceFrame referenceFrame)
    {
       if (getRootFrame() != referenceFrame.getRootFrame())
@@ -749,12 +777,30 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Returns the internal reference to this frame's transform to the root frame.
+    * <p>
+    * The transform can be used to transform a geometry object defined in this frame to obtain its
+    * equivalent expressed in the root frame.
+    * </p>
+    * 
+    * @return the internal reference to the transform from this frame to the root frame.
+    */
    public RigidBodyTransform getTransformToRoot()
    {
       efficientComputeTransform();
       return transformToRoot;
    }
 
+   /**
+    * Returns the internal reference to this frame's transform from the root frame to this frame.
+    * <p>
+    * The transform can be used to transform a geometry object defined in the root frame to obtain
+    * its equivalent expressed in this frame.
+    * </p>
+    * 
+    * @return the internal reference to the transform from the root frame to this frame.
+    */
    public RigidBodyTransform getInverseTransformToRoot()
    {
       efficientComputeTransform();
@@ -818,17 +864,37 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Overrides the {@link Object#toString()} method to print this reference frame's name.
+    * 
+    * @return this frame's name.
+    */
    @Override
    public String toString()
    {
       return frameName; // + "\nTransform to Parent = " + this.transformToParent;
    }
 
+   /**
+    * Checks if the query holds onto this reference frame.
+    * <p>
+    * This is usually used from verifying that a geometry is expressed in a specific frame.
+    * </p>
+    * 
+    * @param referenceFrameHolder the query holding a reference frame.
+    * @throws ReferenceFrameMismatchException if the query holds onto a different frame than this.
+    */
    public void checkReferenceFrameMatch(AbstractReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
    {
       checkReferenceFrameMatch(referenceFrameHolder.getReferenceFrame());
    }
 
+   /**
+    * Check if this frame and the query are the same.
+    * 
+    * @param referenceFrame the query.
+    * @throws ReferenceFrameMismatchException if the query and this are two different frame.
+    */
    public void checkReferenceFrameMatch(ReferenceFrame referenceFrame) throws ReferenceFrameMismatchException
    {
       if (this != referenceFrame)
@@ -839,6 +905,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Checks if this frame is equal to {@link #worldFrame}.
+    * 
+    * @throws RuntimeException if this is not {@link #worldFrame}.
+    */
    public void checkIsWorldFrame() throws RuntimeException
    {
       if (!isWorldFrame())
@@ -847,6 +918,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Checks if this is a stationary frame, i.e. not moving with respect to the root frame.
+    * 
+    * @throws RuntimeException if this is not a stationary frame.
+    */
    public void checkIsAStationaryFrame() throws RuntimeException
    {
       if (!isAStationaryFrame())
@@ -855,6 +931,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Checks if this is a z-up frame, i.e. its z-axis is aligned with the root frame's z-axis.
+    * 
+    * @throws RuntimeException if this is not a z-up frame.
+    */
    public void checkIsAZUpFrame() throws RuntimeException
    {
       if (!isZupFrame())
@@ -928,17 +1009,49 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   /**
+    * Gets the value of this frame's name based hash code.
+    * <p>
+    * This is a secondary unique hash code representing this reference frame that is computed based
+    * on {@link #frameName} and the parent frame name if any.
+    * </p>
+    * <p>
+    * This hash code has the benefit of remaining the same when creating several instances of the
+    * same tree of reference frames, such that it can be used to serialize and deserialize frame
+    * information.
+    * </p>
+    * 
+    * @return this frame's name based hash code.
+    */
    @Override
    public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
    }
 
+   /**
+    * Gets the value of this frame's custom hash code.
+    * <p>
+    * Somewhat of a hack that allows to enforce two frames that are physically the same but with
+    * different names to have the same hash code or to enforce a common frame to have a specific
+    * hash code that can be known without holding on its actual instance.
+    * </p>
+    */
    public long getAdditionalNameBasedHashCode()
    {
       return additionalNameBasedHashCode;
    }
 
+   /**
+    * Sets this frame's custom hash code's value.
+    * <p>
+    * Somewhat of a hack that allows to enforce two frames that are physically the same but with
+    * different names to have the same hash code or to enforce a common frame to have a specific
+    * hash code that can be known without holding on its actual instance.
+    * </p>
+    * 
+    * @param additionalNameBasedHashCode the new value of this frame's custom hash code.
+    */
    public void setAdditionalNameBasedHashCode(long additionalNameBasedHashCode)
    {
       this.additionalNameBasedHashCode = additionalNameBasedHashCode;
