@@ -522,7 +522,7 @@ public class PlanarRegionTest
          Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
          Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
-         ReferenceFrame localFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
+         ReferenceFrame localFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
          assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());

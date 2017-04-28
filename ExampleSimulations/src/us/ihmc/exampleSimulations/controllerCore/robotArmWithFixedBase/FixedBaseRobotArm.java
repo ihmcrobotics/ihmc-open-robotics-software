@@ -121,7 +121,7 @@ public class FixedBaseRobotArm extends Robot
 
       hand = ScrewTools.addRigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
-      handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
+      handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
       controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
                                                                            controlFrameTracker.getYoVelocity());
