@@ -534,6 +534,11 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public boolean isWorldFrame()
    {
+      return this == worldFrame;
+   }
+
+   public boolean isAStationaryFrame()
+   {
       return isAStationaryFrame;
    }
 
@@ -795,7 +800,23 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       if (!isWorldFrame())
       {
-         throw new RuntimeException("Frame " + this + " is not a world frame");
+         throw new RuntimeException("Frame " + this + " is not world frame.");
+      }
+   }
+
+   public void checkIsAStationaryFrame() throws RuntimeException
+   {
+      if (!isAStationaryFrame())
+      {
+         throw new RuntimeException("Frame " + this + " is not a stationary frame.");
+      }
+   }
+
+   public void checkIsAZUpFrame() throws RuntimeException
+   {
+      if (!isZupFrame())
+      {
+         throw new RuntimeException("Frame " + this + " is not a z-up frame.");
       }
    }
 
