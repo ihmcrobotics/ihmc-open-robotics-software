@@ -136,6 +136,9 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * tree than the tree starting off of {@link #worldFrame}. Transformation across two different
     * trees of reference frames is forbidden as the transformation between them is undefined.
     * </p>
+    * <p>
+    * The parent frame and transforms of a root frame are all {@code null}.
+    * </p>
     *
     * @param frameName the name of the new world frame.
     * @return the new non-moving z-up root reference frame.
@@ -334,41 +337,140 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * This constructor creates a "top level" reference frame with the specified name. The parent
-    * frame and transforms are null.
+    * Creates a new inertial z-up root reference frame.
+    * <p>
+    * Please use the method {@link #constructARootFrame(String)} instead. This is to use only when
+    * extending this class.
+    * </p>
+    * <p>
+    * Most of the time, {@link #worldFrame} is the only root frame from which children reference
+    * frames are added.
+    * </p>
+    * <p>
+    * Note that frames added as children of this root frame belongs to a different reference frame
+    * tree than the tree starting off of {@link #worldFrame}. Transformation across two different
+    * trees of reference frames is forbidden as the transformation between them is undefined.
+    * </p>
+    * <p>
+    * The parent frame and transforms of a root frame are all {@code null}.
+    * </p>
     *
-    * @param frameName String
+    * @param frameName the name of the new world frame.
     */
    public ReferenceFrame(String frameName)
    {
       this(frameName, null, null, true, true);
    }
 
+   /**
+    * Creates a new reference frame defined as being a child of the given {@code parentFrame}.
+    * <p>
+    * This new reference frame defined in the {@code parentFrame} and moves with it.
+    * </p>
+    * <p>
+    * Its pose with respect to the {@code parentFrame} can be modified at runtime by changing the
+    * transform in the method {@link #updateTransformToParent(RigidBodyTransform)} when overriding
+    * it.
+    * </p>
+    * <p>
+    * This new reference frame is not a stationary frame, i.e. it is assumed to be potentially
+    * moving with respect to the root frame. It is also not expected to have its z-axis aligned at
+    * all time with the z-axis of the root frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    */
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       this(frameName, parentFrame, null, false, false);
    }
 
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame)
+   /**
+    * Creates a new reference frame defined as being a child of the given {@code parentFrame}.
+    * <p>
+    * This new reference frame defined in the {@code parentFrame} and moves with it.
+    * </p>
+    * <p>
+    * Its pose with respect to the {@code parentFrame} can be modified at runtime by changing the
+    * transform in the method {@link #updateTransformToParent(RigidBodyTransform)} when overriding
+    * it.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param isAStationaryFrame refers to whether this new frame is stationary with respect to the
+    *           root frame or moving. If {@code true}, the {@code parentFrame} has to also be
+    *           stationary.
+    * @param isZupFrame refers to whether this new frame has its z-axis aligned with the root frame
+    *           at all time or not.
+    * @throws IllegalArgumentException if {@code isAStationaryFrame} is {@code true} and the
+    *            {@code parentFrame} is not a stationary frame.
+    */
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isAStationaryFrame, boolean isZupFrame)
    {
-      this(frameName, parentFrame, null, isWorldFrame, isZupFrame);
+      this(frameName, parentFrame, null, isAStationaryFrame, isZupFrame);
    }
 
    /**
-    * This constructor creates a child reference frame with the specified name. The parent frame can
-    * be a "top level" frame or another child. The Transform defines how to convert a vector from
-    * the parent frame to the child frame. An inverse transform is created automatically based on
-    * the provided frame.
-    *
-    * @param frameName String
-    * @param parentFrame Frame
-    * @param transformToParent Transform3D
+    * Creates a new reference frame defined as being a child of the given {@code parentFrame} and
+    * initializes the transform to its parent.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of the new frame expressed in its
+    * parent frame.
+    * </p>
+    * <p>
+    * This new reference frame defined in the {@code parentFrame} and moves with it.
+    * </p>
+    * <p>
+    * Its pose with respect to the {@code parentFrame} can be modified at runtime by changing the
+    * transform in the method {@link #updateTransformToParent(RigidBodyTransform)} when overriding
+    * it.
+    * </p>
+    * <p>
+    * This new reference frame is not a stationary frame, i.e. it is assumed to be potentially
+    * moving with respect to the root frame. It is also not expected to have its z-axis aligned at
+    * all time with the z-axis of the root frame.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param transformToParent the transform that can be used to transform a geometry object the new
+    *           frame to its parent frame. Not modified.
     */
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
       this(frameName, parentFrame, transformToParent, false, false);
    }
 
+   /**
+    * Creates a new reference frame defined as being a child of the given {@code parentFrame} and
+    * initializes the transform to its parent.
+    * <p>
+    * The {@code transformFromParent} should describe the pose of the new frame expressed in its
+    * parent frame.
+    * </p>
+    * <p>
+    * This new reference frame defined in the {@code parentFrame} and moves with it.
+    * </p>
+    * <p>
+    * Its pose with respect to the {@code parentFrame} can be modified at runtime by changing the
+    * transform in the method {@link #updateTransformToParent(RigidBodyTransform)} when overriding
+    * it.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent frame of the new reference frame.
+    * @param transformToParent the transform that can be used to transform a geometry object the new
+    *           frame to its parent frame. Not modified.
+    * @param isAStationaryFrame refers to whether this new frame is stationary with respect to the
+    *           root frame or moving. If {@code true}, the {@code parentFrame} has to also be
+    *           stationary.
+    * @param isZupFrame refers to whether this new frame has its z-axis aligned with the root frame
+    *           at all time or not.
+    * @throws IllegalArgumentException if {@code isAStationaryFrame} is {@code true} and the
+    *            {@code parentFrame} is not a stationary frame.
+    */
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
