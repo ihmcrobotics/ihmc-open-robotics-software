@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingPara
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -26,6 +27,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -56,6 +58,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private Map<String, Pose> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
@@ -811,6 +814,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      if (bodyName.equals(jointMap.getChestName()))
+      {
+         return RigidBodyControlMode.TASKSPACE;
+      }
+      else
+      {
+         return RigidBodyControlMode.JOINTSPACE;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       if (jointHomeConfiguration != null)
@@ -838,6 +855,21 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   {
+      if (bodyHomeConfiguration != null)
+         return bodyHomeConfiguration;
+
+      bodyHomeConfiguration = new HashMap<String, Pose>();
+
+      Pose homeChestPoseInPelvisZUpFrame = new Pose();
+      bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
+
+      return bodyHomeConfiguration;
    }
 
    /** {@inheritDoc} */
@@ -1301,6 +1333,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    /** {@inheritDoc} */
+   @Override
    public StraightLegWalkingParameters getStraightLegWalkingParameters()
    {
       return straightLegWalkingParameters;

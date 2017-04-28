@@ -1,9 +1,6 @@
 package us.ihmc.robotics.referenceFrames;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-//import us.ihmc.utilities.math.geometry.Transform3D;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,15 +12,12 @@ import org.junit.Test;
 import us.ihmc.commons.Assertions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameTest
@@ -106,7 +100,7 @@ public class ReferenceFrameTest
 
       public RandomlyChangingFrame(String frameName, ReferenceFrame parentFrame)
       {
-         super(frameName, parentFrame, false, false);
+         super(frameName, parentFrame);
       }
 
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
