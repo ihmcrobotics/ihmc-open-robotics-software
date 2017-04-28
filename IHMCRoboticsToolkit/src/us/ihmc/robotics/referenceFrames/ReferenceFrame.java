@@ -333,21 +333,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return worldFrame;
    }
 
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame)
-   {
-      this.frameName = frameName;
-      this.parentFrame = parentFrame;
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
-      this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
-
-      this.transformToRoot = new RigidBodyTransform();
-      this.inverseTransformToRoot = new RigidBodyTransform();
-      this.transformToParent = new RigidBodyTransform();
-
-      this.isAStationaryFrame = false;
-      this.isZupFrame = false;
-   }
-
    /**
     * This constructor creates a "top level" reference frame with the specified name. The parent
     * frame and transforms are null.
@@ -356,19 +341,17 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public ReferenceFrame(String frameName)
    {
-      this.frameName = frameName;
-      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
-      this.parentFrame = null;
-      this.transformToRootID = 0;
+      this(frameName, null, null, true, true);
+   }
 
-      this.framesStartingWithRootEndingWithThis = new ReferenceFrame[] {this};
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame)
+   {
+      this(frameName, parentFrame, null, false, false);
+   }
 
-      this.transformToRoot = null;
-      this.inverseTransformToRoot = null;
-      this.transformToParent = null;
-
-      this.isAStationaryFrame = true;
-      this.isZupFrame = true;
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame)
+   {
+      this(frameName, parentFrame, null, isWorldFrame, isZupFrame);
    }
 
    /**
@@ -388,41 +371,41 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.frameName = frameName;
       this.parentFrame = parentFrame;
-      this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
+      framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
-      this.transformToRoot = new RigidBodyTransform();
-      this.inverseTransformToRoot = new RigidBodyTransform();
+      if (parentFrame == null)
+      { // Setting up this ReferenceFrame as a root frame.
+         transformToRootID = 0;
+         nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
 
-      this.transformToParent = new RigidBodyTransform(transformToParent);
-      this.transformToParent.normalizeRotationPart();
+         transformToRoot = null;
+         inverseTransformToRoot = null;
+         this.transformToParent = null;
 
-      this.isAStationaryFrame = isWorldFrame;
-      this.isZupFrame = isZupFrame;
-   }
-
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame)
-   {
-      this.frameName = frameName;
-      this.parentFrame = parentFrame;
-      this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
-
-      this.isAStationaryFrame = isWorldFrame;
-      this.isZupFrame = isZupFrame;
-
-      this.transformToRoot = new RigidBodyTransform();
-      this.inverseTransformToRoot = new RigidBodyTransform();
-      this.transformToParent = new RigidBodyTransform();
-
-      if (parentFrame != null)
-      {
-         nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
+         isAStationaryFrame = true;
+         this.isZupFrame = true;
       }
       else
       {
-         nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
+         nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
+
+         transformToRoot = new RigidBodyTransform();
+         inverseTransformToRoot = new RigidBodyTransform();
+         this.transformToParent = new RigidBodyTransform();
+
+         if (transformToParent != null)
+         {
+            this.transformToParent.set(transformToParent);
+            this.transformToParent.normalizeRotationPart();
+         }
+
+         if (isWorldFrame && !parentFrame.isAStationaryFrame)
+            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
+
+         isAStationaryFrame = isWorldFrame;
+         this.isZupFrame = isZupFrame;
       }
    }
 
