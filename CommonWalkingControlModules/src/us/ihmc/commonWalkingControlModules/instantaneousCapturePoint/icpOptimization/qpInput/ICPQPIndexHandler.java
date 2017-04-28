@@ -11,8 +11,10 @@ public class ICPQPIndexHandler
    private final int footstepStartingIndex = 0;
    private int feedbackCMPIndex;
    private int dynamicRelaxationIndex;
+   private int angularMomentumIndex;
 
    private boolean useStepAdjustment;
+   private boolean useAngularMomentum = false;
 
    public void resetFootsteps()
    {
@@ -36,14 +38,27 @@ public class ICPQPIndexHandler
       return useStepAdjustment;
    }
 
+   public void setUseAngularMomentum(boolean useAngularMomentum)
+   {
+      this.useAngularMomentum = useAngularMomentum;
+   }
+
+   public boolean useAngularMomentum()
+   {
+      return useAngularMomentum;
+   }
+
    public void computeProblemSize()
    {
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
       numberOfFreeVariables = numberOfFootstepVariables + 4; // all the footstep locations, the CMP delta, and the dynamic relaxation
+      if (useAngularMomentum)
+         numberOfFreeVariables += 2;
 
       feedbackCMPIndex = footstepStartingIndex + numberOfFootstepVariables; // this variable is stored after the footsteps
 
       dynamicRelaxationIndex = feedbackCMPIndex + 2; // this variable is stored after the feedback value
+      angularMomentumIndex = dynamicRelaxationIndex + 2; // this variable is stored after the dynamic relaxation index
    }
 
    public int getNumberOfEqualityConstraints()
@@ -69,6 +84,11 @@ public class ICPQPIndexHandler
    public int getDynamicRelaxationIndex()
    {
       return dynamicRelaxationIndex;
+   }
+
+   public int getAngularMomentumIndex()
+   {
+      return angularMomentumIndex;
    }
 
    public int getNumberOfFootstepVariables()
