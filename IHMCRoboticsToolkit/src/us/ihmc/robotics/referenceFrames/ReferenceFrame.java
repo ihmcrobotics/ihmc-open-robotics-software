@@ -142,7 +142,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public static ReferenceFrame constructARootFrame(String frameName)
    {
-      ReferenceFrame ret = new ReferenceFrame(frameName, true, true)
+      ReferenceFrame ret = new ReferenceFrame(frameName)
       {
          private static final long serialVersionUID = -8828178814213025690L;
 
@@ -356,7 +356,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     *
     * @param frameName String
     */
-   public ReferenceFrame(String frameName, boolean isWorldFrame, boolean isZupFrame)
+   public ReferenceFrame(String frameName)
    {
       this.frameName = frameName;
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
@@ -369,8 +369,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.inverseTransformToRoot = null;
       this.transformToParent = null;
 
-      this.isAStationaryFrame = isWorldFrame;
-      this.isZupFrame = isZupFrame;
+      this.isAStationaryFrame = true;
+      this.isZupFrame = true;
    }
 
    /**
