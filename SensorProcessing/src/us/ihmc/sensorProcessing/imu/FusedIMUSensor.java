@@ -186,7 +186,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       fusedQuaternion.setYawPitchRoll(fusedYawPitchRoll);
 
       RigidBodyTransform fusedTransform = new RigidBodyTransform(fusedQuaternion, fusedOffset);
-      ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + "Frame",
+      ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensorName + "Frame",
                                                                                                               firstMeasurementFrame.getParent(),
                                                                                                               fusedTransform);
 

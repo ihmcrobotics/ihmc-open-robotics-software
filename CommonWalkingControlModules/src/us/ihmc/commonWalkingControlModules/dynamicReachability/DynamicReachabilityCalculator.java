@@ -233,7 +233,7 @@ public class DynamicReachabilityCalculator
       translationToCoM.sub(pelvis);
       translationToCoM.changeFrame(pelvisFrame);
 
-      predictedCoMFrame = new ReferenceFrame("Predicted CoM Position", worldFrame, false, false)
+      predictedCoMFrame = new ReferenceFrame("Predicted CoM Position", worldFrame)
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)

@@ -23,7 +23,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
    private static final Random random = new Random(1516351L);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final ReferenceFrame frameA = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameA", worldFrame,
+   private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
          EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
