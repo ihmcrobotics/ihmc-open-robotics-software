@@ -173,7 +173,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightKneeAngle()
                      {
-                        return 0.4;
+                        return 0.2;
+                     }
+
+                     @Override
+                     public double getHipPrivilegedWeight()
+                     {
+                        return 10.0;
                      }
 
                      @Override
@@ -191,7 +197,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getKneeStraightLegPrivilegedWeight()
                      {
-                        return 100.0;
+                        return 200.0;
                      }
 
                      @Override
@@ -294,6 +300,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                public boolean putExitCMPOnToes()
                {
                   return true;
+               }
+
+               @Override
+               public double getExitCMPInsideOffset()
+               {
+                  return 0.015;
                }
             };
          }
