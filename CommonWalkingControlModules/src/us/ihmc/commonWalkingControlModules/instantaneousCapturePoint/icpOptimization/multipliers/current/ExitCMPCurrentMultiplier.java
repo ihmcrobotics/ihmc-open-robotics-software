@@ -394,7 +394,7 @@ public class ExitCMPCurrentMultiplier
    }
 
    /**
-    * Computes the velocity multiplier in the swing phase.
+    * Computes the velocity multiplier in the third segment of the swing phase.
     *
     * @param omega0 natural frequency of the inverted pendulum.
     * @return velocity multiplier.
