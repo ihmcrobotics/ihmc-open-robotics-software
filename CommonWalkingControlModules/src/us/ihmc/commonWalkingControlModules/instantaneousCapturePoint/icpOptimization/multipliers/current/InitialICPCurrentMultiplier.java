@@ -27,9 +27,9 @@ public class InitialICPCurrentMultiplier
    /** whether or not the cubic derivative matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicDerivativeMatrix;
 
-   /** Boundary conditions matrix for the exit CMP when in transfer. */
+   /** Boundary conditions matrix for the initial ICP when in transfer. */
    private final TransferInitialICPMatrix transferInitialICPMatrix;
-   /** Boundary conditions matrix for the exit CMP when in swing. */
+   /** Boundary conditions matrix for the initial ICP when in swing. */
    private final SwingInitialICPMatrix swingInitialICPMatrix;
 
    /** time in swing state for the start of using the spline */
@@ -40,9 +40,9 @@ public class InitialICPCurrentMultiplier
    /** data holder for multiplied values */
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
-   /** multiplier of the exit CMP to compute the current ICP location. */
+   /** multiplier of the initial ICP to compute the current ICP location. */
    private final DoubleYoVariable positionMultiplier;
-   /** multiplier of the exit CMP to compute the current ICP velocity. */
+   /** multiplier of the initial ICP to compute the current ICP velocity. */
    private final DoubleYoVariable velocityMultiplier;
 
    public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, YoVariableRegistry registry)
@@ -190,7 +190,7 @@ public class InitialICPCurrentMultiplier
     * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a
     * cubic spline, so this is used to calculate the position multiplier.
     *
-    * @return position multiplier.
+    * @return velocity multiplier.
     */
    private double computeInTransferVelocity()
    {
