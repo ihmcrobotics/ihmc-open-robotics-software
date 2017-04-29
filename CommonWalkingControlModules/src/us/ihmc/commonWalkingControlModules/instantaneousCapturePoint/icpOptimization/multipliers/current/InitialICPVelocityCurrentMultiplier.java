@@ -10,19 +10,31 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.List;
 
+/**
+ * Multiplier of the initial ICP velocity value at the beginning of the current state. Used to compute the desired current
+ * ICP location from the recursively found end-of-state ICP corner point
+ */
 public class InitialICPVelocityCurrentMultiplier
 {
+   /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
    private final CubicMatrix cubicMatrix;
+   /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
    private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
+   /** whether or not the cubic matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicMatrix;
+   /** whether or not the cubic derivative matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicDerivativeMatrix;
 
+   /** Boundary conditions matrix for the initial ICP velocity when in transfer. */
    private final TransferInitialICPVelocityMatrix transferInitialICPVelocityMatrix;
 
+   /** data holder for multiplied values */
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
+   /** multiplier of the initial ICP to compute the current ICP location. */
    private final DoubleYoVariable positionMultiplier;
+   /** multiplier of the initial ICP to compute the current ICP velocity. */
    private final DoubleYoVariable velocityMultiplier;
 
    public InitialICPVelocityCurrentMultiplier(String yoNamePrefix, YoVariableRegistry registry)
@@ -60,22 +72,42 @@ public class InitialICPVelocityCurrentMultiplier
       transferInitialICPVelocityMatrix = new TransferInitialICPVelocityMatrix();
    }
 
+   /**
+    * Resets the multiplier values to NaN. Done at every tick.
+    */
    public void reset()
    {
       positionMultiplier.setToNaN();
       velocityMultiplier.setToNaN();
    }
 
+   /**
+    * Gets the value to multiply the initial ICP velocity location by to compute the current ICP location.
+    *
+    * @return position multiplier.
+    */
    public double getPositionMultiplier()
    {
       return positionMultiplier.getDoubleValue();
    }
 
+   /**
+    * Gets the value to multiply the initial ICP velocity location by to compute the current ICP velocity.
+    *
+    * @return velocity multiplier.
+    */
    public double getVelocityMultiplier()
    {
       return velocityMultiplier.getDoubleValue();
    }
 
+   /**
+    * Computes the initial ICP velocity multiplier. Must be called every control tick.
+    *
+    * @param doubleSupportDurations vector of double support durations.
+    * @param timeInState time in the current state.
+    * @param isInTransfer whether or not the robot is currently in the transfer phase.
+    */
    public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
       double positionMultiplier, velocityMultiplier;
@@ -93,6 +125,15 @@ public class InitialICPVelocityCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
+   /**
+    * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a cubic spline,
+    * so this is used to calculate the position multiplier. The initial ICP velocity directly sets one of the spline
+    * boundary conditions.
+    *
+    * @param doubleSupportDurations vector of double support durations
+    * @param timeInState time in the transfer state
+    * @return position multiplier.
+    */
    private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
@@ -116,6 +157,12 @@ public class InitialICPVelocityCurrentMultiplier
       return matrixOut.get(0, 0);
    }
 
+   /**
+    * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a
+    * cubic spline, so this is used to calculate the position multiplier.
+    *
+    * @return velocity multiplier.
+    */
    private double computeInTransferVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, transferInitialICPVelocityMatrix, matrixOut);
