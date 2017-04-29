@@ -6,10 +6,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
 
 /**
- * This class is used by the {@link ICPOptimizationSolver} to  convert weights and gains into the actual objects for the quadratic program.
+ * This class is used by the {@link ICPQPOptimizationSolver} to  convert weights and gains into the actual objects for the quadratic program.
  */
 public class ICPQPInputCalculator
 {

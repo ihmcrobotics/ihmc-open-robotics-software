@@ -35,7 +35,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    }
 
    private final FramePoint2d tempVertex = new FramePoint2d();
-   public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
+   public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
    {
       solver.resetReachabilityConstraint();
 
@@ -59,7 +59,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.addReachabilityVertex(tempVertex, supportSoleFrame);
    }
 
-   public void updateReachabilityConstraintForDoubleSupport(ICPOptimizationSolver solver)
+   public void updateReachabilityConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
    {
       solver.resetReachabilityConstraint();
    }

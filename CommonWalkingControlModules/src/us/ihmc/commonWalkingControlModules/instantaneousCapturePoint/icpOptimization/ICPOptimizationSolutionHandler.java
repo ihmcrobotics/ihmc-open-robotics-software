@@ -149,7 +149,7 @@ public class ICPOptimizationSolutionHandler
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void updateCostsToGo(ICPOptimizationSolver solver)
+   public void updateCostsToGo(ICPQPOptimizationSolver solver)
    {
       if (debug)
       {
@@ -167,7 +167,7 @@ public class ICPOptimizationSolutionHandler
 
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
          ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
-         ICPOptimizationSolver solver)
+         ICPQPOptimizationSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
