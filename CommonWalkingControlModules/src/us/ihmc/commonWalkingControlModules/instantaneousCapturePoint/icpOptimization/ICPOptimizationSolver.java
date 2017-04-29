@@ -5,11 +5,7 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.DynamicsConstraintInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
@@ -80,7 +76,7 @@ public class ICPOptimizationSolver
    private final ICPQPInput angularMomentumMinimizationTask;
 
    /** Constraint that encodes the recursive ICP dynamics. */
-   private final DynamicsConstraintInput dynamicsConstraintInput;
+   private final ICPEqualityConstraintInput dynamicsConstraintInput;
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
@@ -210,7 +206,7 @@ public class ICPOptimizationSolver
       dynamicRelaxationTask = new ICPQPInput(2);
       angularMomentumMinimizationTask = new ICPQPInput(2);
 
-      dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
+      dynamicsConstraintInput = new ICPEqualityConstraintInput(maximumNumberOfFreeVariables);
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
