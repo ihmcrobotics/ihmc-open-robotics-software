@@ -340,7 +340,7 @@ public class EntryCMPCurrentMultiplier
     * Computes the position multiplier when in the third segment in the swing phase. During this
     * segment, the ICP plan is on the exit CMP, so this value is 0.0.
     *
-    * @return velocity multiplier
+    * @return position multiplier
     */
    private double computeSwingThirdSegment()
    {
