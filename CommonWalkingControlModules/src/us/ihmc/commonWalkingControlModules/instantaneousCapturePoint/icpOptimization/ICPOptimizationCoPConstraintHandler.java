@@ -34,7 +34,7 @@ public class ICPOptimizationCoPConstraintHandler
    }
 
    private final FramePoint2d tempVertex = new FramePoint2d();
-   public void updateCoPConstraintForDoubleSupport(ICPOptimizationSolver solver)
+   public void updateCoPConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
@@ -51,7 +51,7 @@ public class ICPOptimizationCoPConstraintHandler
       }
    }
 
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
+   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
    {
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       solver.resetCoPLocationConstraint();

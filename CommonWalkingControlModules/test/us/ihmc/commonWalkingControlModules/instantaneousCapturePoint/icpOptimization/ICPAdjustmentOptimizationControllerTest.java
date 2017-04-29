@@ -40,7 +40,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
-public class ICPOptimizationControllerTest
+public class ICPAdjustmentOptimizationControllerTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("robert");
    private final DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
@@ -73,7 +73,7 @@ public class ICPOptimizationControllerTest
       omega.set(omega0);
 
       ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
-      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters,
+      ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
             walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.0, -9.81, 0.001, registry, null);
       icpPlanner.setOmega0(omega.getDoubleValue());
 

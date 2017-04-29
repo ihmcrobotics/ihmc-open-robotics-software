@@ -20,9 +20,9 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
  * designed to stabilize ICP based walking trajectories using both CMP feedback and step adjustment. Designed to
- * work inside the {@link ICPOptimizationController}.
+ * work inside the {@link ICPAdjustmentOptimizationController}.
  */
-public class ICPOptimizationSolver
+public class ICPQPOptimizationSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -177,13 +177,13 @@ public class ICPOptimizationSolver
 
 
    /**
-    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationSolver}.
+    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPQPOptimizationSolver}.
     *
     * @param icpOptimizationParameters parameters to be used by in the optimization.
     * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
     * @param computeCostToGo whether or not to compute the cost to go.
     */
-   public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public ICPQPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this.computeCostToGo = computeCostToGo;
       indexHandler = new ICPQPIndexHandler();
