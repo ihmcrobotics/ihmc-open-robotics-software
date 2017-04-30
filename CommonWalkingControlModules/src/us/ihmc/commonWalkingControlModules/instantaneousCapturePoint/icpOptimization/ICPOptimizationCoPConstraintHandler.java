@@ -13,7 +13,10 @@ public class ICPOptimizationCoPConstraintHandler
    private final DoubleYoVariable maxCoPDoubleSupportExitSideways;
    private final DoubleYoVariable maxCoPSingleSupportExitForward;
    private final DoubleYoVariable maxCoPSingleSupportExitSideways;
+
    private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
          String yoNamePrefix, YoVariableRegistry registry)
@@ -33,7 +36,6 @@ public class ICPOptimizationCoPConstraintHandler
       maxCoPSingleSupportExitSideways.set(icpOptimizationParameters.getSingleSupportMaxCoPLateralExit());
    }
 
-   private final FramePoint2d tempVertex = new FramePoint2d();
    public void updateCoPConstraintForDoubleSupport(ICPOptimizationSolver solver)
    {
       solver.resetCoPLocationConstraint();
@@ -41,27 +43,26 @@ public class ICPOptimizationCoPConstraintHandler
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInMidFeetZUp(robotSide);
-
-         for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
-         {
-            supportPolygon.getFrameVertex(i, tempVertex);
-            solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCoPDoubleSupportExitForward.getDoubleValue(),
-                  maxCoPDoubleSupportExitSideways.getDoubleValue());
-         }
+         addConvexPolygon(supportPolygon, solver);
       }
    }
 
    public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       solver.resetCoPLocationConstraint();
 
-      for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
-      {
-         supportPolygon.getFrameVertex(i, tempVertex);
-         solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCoPSingleSupportExitForward.getDoubleValue(),
-               maxCoPSingleSupportExitSideways.getDoubleValue());
-      }
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
+      addConvexPolygon(supportPolygon, solver);
    }
 
+   private void addConvexPolygon(FrameConvexPolygon2d convexPolygon, ICPOptimizationSolver solver)
+   {
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         convexPolygon.getFrameVertex(i, tempPoint2d);
+         solver.addSupportPolygonVertex(tempPoint2d, convexPolygon.getReferenceFrame(), maxCoPSingleSupportExitForward.getDoubleValue(),
+               maxCoPSingleSupportExitSideways.getDoubleValue());
+      }
+
+   }
 }

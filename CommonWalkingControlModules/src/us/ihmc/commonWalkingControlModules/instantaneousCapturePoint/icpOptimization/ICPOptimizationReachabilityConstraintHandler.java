@@ -16,6 +16,8 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
+
    public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
          String yoNamePrefix, YoVariableRegistry registry)
    {
@@ -34,7 +36,6 @@ public class ICPOptimizationReachabilityConstraintHandler
       backwardReachabilityLimit.set(icpOptimizationParameters.getBackwardReachabilityLimit());
    }
 
-   private final FramePoint2d tempVertex = new FramePoint2d();
    public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
       solver.resetReachabilityConstraint();
@@ -44,19 +45,19 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       ReferenceFrame supportSoleFrame = bipedSupportPolygons.getSoleZUpFrames().get(supportSide);
 
-      tempVertex.setToZero(supportSoleFrame);
+      tempPoint2d.setToZero(supportSoleFrame);
 
-      tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
-      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
+      tempPoint2d.set(forwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
+      solver.addReachabilityVertex(tempPoint2d, supportSoleFrame);
 
-      tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
-      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
+      tempPoint2d.set(forwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
+      solver.addReachabilityVertex(tempPoint2d, supportSoleFrame);
 
-      tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
-      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
+      tempPoint2d.set(backwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
+      solver.addReachabilityVertex(tempPoint2d, supportSoleFrame);
 
-      tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
-      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
+      tempPoint2d.set(backwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
+      solver.addReachabilityVertex(tempPoint2d, supportSoleFrame);
    }
 
    public void updateReachabilityConstraintForDoubleSupport(ICPOptimizationSolver solver)
