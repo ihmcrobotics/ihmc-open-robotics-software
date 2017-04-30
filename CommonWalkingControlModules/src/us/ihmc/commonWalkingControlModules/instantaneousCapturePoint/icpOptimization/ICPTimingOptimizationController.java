@@ -44,7 +44,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final double SWING_DURATION_VARIATION = 0.01;
    private static final double TIMING_ADJUSTMENT_COST = 100.0;
    private static final double QUADRATIC_COST_SCALE_FACTOR = 100.0;
-   private static final double GRADIENT_THRESHOLD = 10.0;
+   private static final double GRADIENT_THRESHOLD = 1.0;
    private static final double GRADIENT_GAIN = 0.5;
    private static final int NUMBER_OF_ITERATIONS = 30;
 
