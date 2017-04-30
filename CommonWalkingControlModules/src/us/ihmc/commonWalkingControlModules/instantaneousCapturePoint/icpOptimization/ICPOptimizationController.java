@@ -36,7 +36,6 @@ public class ICPOptimizationController
 {
    private static final boolean VISUALIZE = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
-   private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
    private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
 
@@ -136,11 +135,12 @@ public class ICPOptimizationController
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
    private final ExecutionTimer conditionSettingTimer = new ExecutionTimer("icpConditionSettingTimer", 0.5, registry);
    private final ExecutionTimer solutionReadingTimer = new ExecutionTimer("icpSolutionReadingTimer", 0.5, registry);
+
    private final ICPOptimizationSolver solver;
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
 
-   private final ICPOptimizationCoPConstraintHandler cmpConstraintHandler;
+   private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final ICPOptimizationSolutionHandler solutionHandler;
    private final ICPOptimizationInputHandler inputHandler;
@@ -158,6 +158,9 @@ public class ICPOptimizationController
    private boolean localScaleUpcomingStepWeights;
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
+
+   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
@@ -233,7 +236,7 @@ public class ICPOptimizationController
       stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
             swingSplitFractions, maximumNumberOfFootstepsToConsider, yoNamePrefix, registry);
 
-      cmpConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, transformsFromAnkleToSole, VISUALIZE, DEBUG,
                                                            yoNamePrefix, registry, yoGraphicsListRegistry);
@@ -282,24 +285,37 @@ public class ICPOptimizationController
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-
+   /**
+    * Sets the weight on tracking the reference footstep locations in the optimization.
+    *
+    * @param forwardWeight tracking weight in the forward direction.
+    * @param lateralWeight tracking weight in the lateral direction.
+    */
    public void setFootstepWeights(double forwardWeight, double lateralWeight)
    {
       forwardFootstepWeight.set(forwardWeight);
       lateralFootstepWeight.set(lateralWeight);
    }
 
+   /**
+    * Sets the weight on minimizing the feedback action for the optimization.
+    *
+    * @param forwardWeight feedback minimization weight in the forward direction.
+    * @param lateralWeight feedback minimization weight in the lateral direction.
+    */
    public void setFeedbackWeights(double forwardWeight, double lateralWeight)
    {
       feedbackForwardWeight.set(forwardWeight);
       feedbackLateralWeight.set(lateralWeight);
    }
 
-   public void setDynamicRelaxationWeight(double relaxationWeight)
-   {
-      dynamicRelaxationWeight.set(relaxationWeight);
-   }
-
+   /**
+    * Clear footstep and timing information making the ICP planner ready to be reinitialized with
+    * new footsteps.
+    * <p>
+    * Don't forget to call this method before registering a new set of footsteps.
+    * </p>
+    */
    public void clearPlan()
    {
       upcomingFootsteps.clear();
@@ -317,12 +333,31 @@ public class ICPOptimizationController
       }
    }
 
+   /**
+    * Changes the duration for the last transfer when going to standing state.
+    * <p>
+    * This method mostly affects {@link #initializeForStanding(double)}.
+    * </p>
+    *
+    * @param finalTransferDuration final transfer duration
+    */
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
    }
 
-   private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
+   /**
+    * Registers an additional footstep to consider in the controller.
+    * <p>
+    * Footsteps have to be registered before initializing the controller.
+    * </p>
+    * <p>
+    * The reference to {@code footstep} is saved internally.
+    * </p>
+    *
+    * @param footstep the new footstep to be queued to the current list of footsteps. Not modified.
+    * @param timing the timings to use when performing the footstep. Not modified.
+    */
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep != null)
@@ -331,12 +366,12 @@ public class ICPOptimizationController
          {
             upcomingFootsteps.add(footstep);
             RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstep.getRobotSide());
-            footstep.getAnklePosition2d(tmpFramePoint2d, ankleToSole);
-            upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            footstep.getAnklePosition2d(tempPoint2d, ankleToSole);
+            upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tempPoint2d); // // FIXME: 4/30/17 make this work with the sole frame
             inputHandler.addFootstepToPlan(footstep);
 
-            footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-            unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            footstepSolutions.get(upcomingFootsteps.size() - 1).set(tempPoint2d);
+            unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tempPoint2d); // // FIXME: 4/30/17 make this work with the sole frame
 
             int footstepIndex = upcomingFootsteps.size() - 1;
             swingDurations.get(footstepIndex).set(timing.getSwingTime());
@@ -361,15 +396,35 @@ public class ICPOptimizationController
    }
 
 
+   /**
+    * Initializes the controller to smoothly re-center the ICP in the support polygon preparing the
+    * robot for standing.
+    * <p>
+    * Does not use the recursive dynamics, but simply holds the current position.
+    * </p>
+    * <p>
+    * This method is typically useful when done with a walking sequence so the robot smoothly
+    * terminates its last transfer.
+    * </p>
+    * <p>
+    * Call {@link #setFinalTransferDuration(double)} beforehand to change the time taken to
+    * re-center the ICP.
+    * </p>
+    *
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
+    */
    public void initializeForStanding(double initialTime)
    {
       this.initialTime.set(initialTime);
       isStanding.set(true);
       isInTransfer.set(false);
 
-      setProblemBooleans();
+      localUseStepAdjustment = useStepAdjustment.getBooleanValue();
+      localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
+      doingBigAdjustment.set(false);
 
-      cmpConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       speedUpTime.set(0.0);
@@ -377,6 +432,16 @@ public class ICPOptimizationController
       transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
    }
 
+   /**
+    * Prepares the ICP controller for a transfer phase.
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} before calling this method.
+    * </p>
+    *
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
+    */
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
    {
       this.transferToSide.set(transferToSide);
@@ -393,16 +458,19 @@ public class ICPOptimizationController
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
-
-      cmpConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
    }
 
    /**
-    * Notifies the icp optimization controller that the robot is now in single support
-    * @param initialTime controller time at the start of the current single support phase
-    * @param supportSide sets the side of the support foot for the upcoming single support
-    * @param omega0 current inverted pendulum natural frequency
+    * Prepares the ICP controller for a single support phase.
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} before calling this method.
+    * </p>
+    *
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
     */
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
    {
@@ -419,14 +487,15 @@ public class ICPOptimizationController
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
-
-      cmpConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
+      copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
    }
 
    private int initializeOnContactChange(double initialTime)
    {
-      setProblemBooleans();
+      localUseStepAdjustment = useStepAdjustment.getBooleanValue();
+      localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
+      doingBigAdjustment.set(false);
 
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
@@ -453,16 +522,6 @@ public class ICPOptimizationController
       this.beginningOfStateICP.set(beginningOfStateICP);
       this.beginningOfStateICPVelocity.set(beginningOfStateICPVelocity);
    }
-
-   private void setProblemBooleans()
-   {
-      localUseStepAdjustment = useStepAdjustment.getBooleanValue();
-      localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
-      doingBigAdjustment.set(false);
-   }
-
-   private final FrameVector2d desiredCMPDelta = new FrameVector2d();
-   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
@@ -523,7 +582,7 @@ public class ICPOptimizationController
          if (localUseStepAdjustment)
             solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps, numberOfFootstepsToConsider, solver);
 
-         solver.getCMPFeedbackDifference(desiredCMPDelta);
+         solver.getCMPFeedbackDifference(tempVector2d);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
@@ -535,10 +594,7 @@ public class ICPOptimizationController
       }
       else
       {
-         if (RECONSTRUCT_CMP_FROM_UNCLIPPED)
-            solutionHandler.computeReferenceFromSolutions(unclippedFootstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
-         else
-            solutionHandler.yoComputeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
+         solutionHandler.computeReferenceFromSolutions(unclippedFootstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
 
          if (DEBUG)
             solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
@@ -560,8 +616,8 @@ public class ICPOptimizationController
 
       solutionHandler.getControllerReferenceCMP(tempPoint2d);
       controllerFeedbackCMP.set(tempPoint2d);
-      controllerFeedbackCMP.add(desiredCMPDelta);
-      controllerFeedbackCMPDelta.set(desiredCMPDelta);
+      controllerFeedbackCMP.add(tempVector2d);
+      controllerFeedbackCMPDelta.set(tempVector2d);
 
       controllerTimer.stopMeasurement();
    }
@@ -586,12 +642,12 @@ public class ICPOptimizationController
 
       if (isInTransfer.getBooleanValue())
       {
-         cmpConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+         copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
          reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
       }
       else
       {
-         cmpConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
          reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
       }
 
@@ -615,17 +671,16 @@ public class ICPOptimizationController
       return numberOfFootstepsToConsider;
    }
 
-   private final FrameVector2d feedbackGains = new FrameVector2d();
    private void setFeedbackConditions()
    {
-      ICPOptimizationControllerHelper.transformFeedbackGains(feedbackGains, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+      ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
       if (!localUseStepAdjustment)
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.resetFeedbackConditions();
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
    }
 
    private void setAngularMomentumConditions()
@@ -655,29 +710,16 @@ public class ICPOptimizationController
       return numberOfFootstepsToConsider;
    }
 
-   private final FrameVector2d footstepWeights = new FrameVector2d();
    private void submitFootstepConditionsToSolver(int footstepIndex)
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(footstepWeights, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
-      scaledFootstepWeights.set(footstepWeights);
+      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
+      scaledFootstepWeights.set(tempVector2d);
 
       if (localScaleUpcomingStepWeights)
          scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-      double footstepRecursionMultiplier;
-      if (useTwoCMPs)
-      {
-         double entryMutliplier = stateMultiplierCalculator.getEntryCMPRecursionMultiplier(footstepIndex);
-         double exitMutliplier = stateMultiplierCalculator.getExitCMPRecursionMultiplier(footstepIndex);
-
-         footstepRecursionMultiplier = entryMutliplier + exitMutliplier;
-      }
-      else
-      {
-         footstepRecursionMultiplier = stateMultiplierCalculator.getEntryCMPRecursionMultiplier(footstepIndex);
-      }
-      footstepRecursionMultiplier *= stateMultiplierCalculator.getStateEndCurrentMultiplier();
+      double footstepRecursionMultiplier = stateMultiplierCalculator.getFootstepRecursionMultiplier(useTwoCMPs, footstepIndex);
 
       solver.setFootstepAdjustmentConditions(footstepIndex, footstepRecursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(),
             upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
@@ -720,21 +762,17 @@ public class ICPOptimizationController
       }
    }
 
-   private final FrameVector2d feedbackWeights = new FrameVector2d();
    private void scaleFeedbackWeightWithGain()
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
 
-      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
-
-      scaledFeedbackWeight.set(feedbackWeights);
+      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+      scaledFeedbackWeight.set(tempVector2d);
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         ICPOptimizationControllerHelper.transformFeedbackGains(feedbackGains, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
-
-         double alpha = Math.sqrt(Math.pow(feedbackGains.getX(), 2) + Math.pow(feedbackGains.getY(), 2));
-         scaledFeedbackWeight.scale(1.0 / alpha);
+         ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+         scaledFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
    }
 

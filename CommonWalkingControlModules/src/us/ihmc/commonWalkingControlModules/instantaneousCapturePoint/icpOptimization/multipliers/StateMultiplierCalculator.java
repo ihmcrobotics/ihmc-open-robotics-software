@@ -122,6 +122,25 @@ public class StateMultiplierCalculator
       return recursionMultipliers.getEntryMultiplier(footstepIndex);
    }
 
+   public double getFootstepRecursionMultiplier(boolean useTwoCMPs, int footstepIndex)
+   {
+      double footstepRecursionMultiplier;
+      if (useTwoCMPs)
+      {
+         double entryMutliplier = getEntryCMPRecursionMultiplier(footstepIndex);
+         double exitMutliplier = getExitCMPRecursionMultiplier(footstepIndex);
+
+         footstepRecursionMultiplier = entryMutliplier + exitMutliplier;
+      }
+      else
+      {
+         footstepRecursionMultiplier = getEntryCMPRecursionMultiplier(footstepIndex);
+      }
+      footstepRecursionMultiplier *= getStateEndCurrentMultiplier();
+
+      return footstepRecursionMultiplier;
+   }
+
 
    public void resetCurrentMultipliers()
    {
