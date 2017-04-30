@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingStateEndMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferStateEndMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,8 +15,8 @@ import java.util.List;
 
 public class StateEndCurrentMultiplier
 {
-   private final CubicMatrix cubicMatrix;
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final NewCubicMatrix cubicMatrix;
+   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final boolean givenCubicMatrix;
    private final boolean givenCubicDerivativeMatrix;
@@ -42,7 +44,7 @@ public class StateEndCurrentMultiplier
    }
 
    public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, NewCubicMatrix cubicMatrix, NewCubicDerivativeMatrix cubicDerivativeMatrix,
          String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "StateEndCurrentMultiplier", registry);
@@ -58,7 +60,7 @@ public class StateEndCurrentMultiplier
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new CubicMatrix();
+         this.cubicMatrix = new NewCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -69,7 +71,7 @@ public class StateEndCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
