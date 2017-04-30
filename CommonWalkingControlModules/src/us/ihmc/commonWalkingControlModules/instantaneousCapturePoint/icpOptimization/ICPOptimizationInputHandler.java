@@ -24,13 +24,13 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ICPOptimizationInputHandler
 {
-   private static final String namePrefix = "icpOptimizationController";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoFramePoint finalICP;
@@ -45,12 +45,13 @@ public class ICPOptimizationInputHandler
    private final List<DoubleYoVariable> transferSplitFractions;
    private final List<DoubleYoVariable> swingSplitFractions;
 
-
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
 
    private final ArrayList<FrameVector2d> entryOffsets = new ArrayList<>();
    private final ArrayList<FrameVector2d> exitOffsets = new ArrayList<>();
+   private final ArrayList<YoFrameVector2d> yoEntryOffsets = new ArrayList<>();
+   private final ArrayList<YoFrameVector2d> yoExitOffsets = new ArrayList<>();
 
    private final FramePoint2d cmpOffsetRecursion = new FramePoint2d();
 
@@ -71,7 +72,7 @@ public class ICPOptimizationInputHandler
 
       this.yoNamePrefix = yoNamePrefix;
 
-      referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
+      referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(yoNamePrefix, bipedSupportPolygons, contactableFeet,
             maximumNumberOfFootstepsToConsider, registry);
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
@@ -94,6 +95,10 @@ public class ICPOptimizationInputHandler
       {
          entryOffsets.add(new FrameVector2d(worldFrame));
          exitOffsets.add(new FrameVector2d(worldFrame));
+         YoFrameVector2d entryOffset = new YoFrameVector2d("entryOffset" + i, worldFrame, registry);
+         YoFrameVector2d exitOffset = new YoFrameVector2d("exitOffset" + i, worldFrame, registry);
+         yoEntryOffsets.add(entryOffset);
+         yoExitOffsets.add(exitOffset);
       }
 
       if (yoGraphicsListRegistry != null)
@@ -331,6 +336,9 @@ public class ICPOptimizationInputHandler
 
          entryOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());
          exitOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());
+
+         yoEntryOffsets.get(i).set(entryOffset);
+         yoExitOffsets.get(i).set(exitOffset);
       }
    }
 
