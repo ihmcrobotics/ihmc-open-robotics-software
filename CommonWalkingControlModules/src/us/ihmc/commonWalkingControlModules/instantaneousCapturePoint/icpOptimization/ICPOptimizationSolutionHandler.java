@@ -192,8 +192,8 @@ public class ICPOptimizationSolutionHandler
 
          FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
          clippedLocationSolution.set(locationSolution);
-         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(), deadbandFrame,
-               footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
+         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(),
+               deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
          {
@@ -260,7 +260,7 @@ public class ICPOptimizationSolutionHandler
       return wasAdjusted;
    }
 
-   public void computeReferenceFromSolutions(ArrayList<FramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
+   public void computeReferenceValuesFromSolution(ArrayList<FramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
          YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
@@ -308,7 +308,7 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
-   public void setValuesForFeedbackOnly(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, double omega0)
+   public void setReferenceValues(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, double omega0)
    {
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, tempPoint2d);
 
