@@ -50,8 +50,6 @@ public class ICPOptimizationSolutionHandler
    private final DoubleYoVariable dynamicRelaxationCostToGo;
    private final DoubleYoVariable angularMomentumMinimizationCostToGo;
 
-   private final StateMultiplierCalculator stateMultiplierCalculator;
-
    private final boolean debug;
    private final String yoNamePrefix;
    
@@ -73,11 +71,9 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint2d tempPoint2d = new FramePoint2d();
    private final FrameVector2d tempVector2d = new FrameVector2d();
 
-   public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, StateMultiplierCalculator stateMultiplierCalculator,
-         SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, boolean visualize, boolean debug, String yoNamePrefix,
-         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
+         boolean visualize, boolean debug, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.stateMultiplierCalculator = stateMultiplierCalculator;
       this.debug = debug;
       this.yoNamePrefix = yoNamePrefix;
       this.transformsFromAnkleToSole = transformsFromAnkleToSole;
@@ -261,7 +257,8 @@ public class ICPOptimizationSolutionHandler
    }
 
    public void computeReferenceValuesFromSolution(ArrayList<FramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
-         YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
+         StateMultiplierCalculator stateMultiplierCalculator, YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity,
+         double omega0, int numberOfFootstepsToConsider)
    {
       ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
       ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
@@ -283,7 +280,8 @@ public class ICPOptimizationSolutionHandler
    }
 
    public void computeNominalValues(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ICPOptimizationInputHandler inputHandler,
-         YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
+         StateMultiplierCalculator stateMultiplierCalculator, YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity,
+         double omega0, int numberOfFootstepsToConsider)
    {
       if (debug)
       {

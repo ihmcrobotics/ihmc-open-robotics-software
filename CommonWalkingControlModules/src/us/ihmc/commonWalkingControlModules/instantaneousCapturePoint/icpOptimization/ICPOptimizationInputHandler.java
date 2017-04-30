@@ -28,6 +28,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 
 public class ICPOptimizationInputHandler
 {
@@ -38,7 +39,6 @@ public class ICPOptimizationInputHandler
    private final YoFramePoint2d stanceExitCMP;
 
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
-   private final StateMultiplierCalculator stateMultiplierCalculator;
 
    private final List<DoubleYoVariable> transferDurations;
    private final List<DoubleYoVariable> swingDurations;
@@ -59,12 +59,9 @@ public class ICPOptimizationInputHandler
 
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
-         StateMultiplierCalculator stateMultiplierCalculator, List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations,
-         List<DoubleYoVariable> transferSplitFractions, List<DoubleYoVariable> swingSplitFractions, boolean visualize, String yoNamePrefix,
-         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations, List<DoubleYoVariable> transferSplitFractions,
+         List<DoubleYoVariable> swingSplitFractions, boolean visualize, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.stateMultiplierCalculator = stateMultiplierCalculator;
-
       this.transferDurations = transferDurations;
       this.swingDurations = swingDurations;
       this.transferSplitFractions = transferSplitFractions;
@@ -137,8 +134,8 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.addUpcomingFootstep(footstep);
    }
 
-   public void initializeForDoubleSupport(int numberOfFootstepsToConsider, ArrayList<YoFramePoint2d> upcomingFootstepLocations, boolean isStanding,
-         boolean useTwoCMPs, RobotSide transferToSide, double omega0)
+   public void initializeForDoubleSupport(StateMultiplierCalculator stateMultiplierCalculator, int numberOfFootstepsToConsider,
+         ArrayList<YoFramePoint2d> upcomingFootstepLocations, boolean isStanding, boolean useTwoCMPs, RobotSide transferToSide, double omega0)
    {
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoCMPs);
       referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding, transferToSide);
@@ -146,14 +143,11 @@ public class ICPOptimizationInputHandler
 
       initializeCornerPointsDoubleSupport(useTwoCMPs, omega0);
       computeFinalICP(numberOfFootstepsToConsider);
-
-      stateMultiplierCalculator.initializeForDoubleSupport();
-
-      computeCMPOffsetRecursion(upcomingFootstepLocations, numberOfFootstepsToConsider);
+      computeCMPOffsetRecursion(stateMultiplierCalculator, upcomingFootstepLocations, numberOfFootstepsToConsider);
    }
 
-   public void initializeForSingleSupport(int numberOfFootstepsToConsider, ArrayList<YoFramePoint2d> upcomingFootstepLocations, boolean useTwoCMPs,
-         RobotSide supportSide, double omega0)
+   public void initializeForSingleSupport(StateMultiplierCalculator stateMultiplierCalculator, int numberOfFootstepsToConsider,
+         ArrayList<YoFramePoint2d> upcomingFootstepLocations, boolean useTwoCMPs, RobotSide supportSide, double omega0)
    {
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoCMPs);
       referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
@@ -161,10 +155,7 @@ public class ICPOptimizationInputHandler
 
       initializeCornerPointsSingleSupport(useTwoCMPs, omega0);
       computeFinalICP(numberOfFootstepsToConsider);
-
-      stateMultiplierCalculator.initializeForSingleSupport();
-
-      computeCMPOffsetRecursion(upcomingFootstepLocations, numberOfFootstepsToConsider);
+      computeCMPOffsetRecursion(stateMultiplierCalculator, upcomingFootstepLocations, numberOfFootstepsToConsider);
    }
 
    private void initializeCornerPointsDoubleSupport(boolean useTwoCMPs, double omega0)
@@ -197,7 +188,8 @@ public class ICPOptimizationInputHandler
    }
 
    private final FramePoint2d totalOffsetEffect = new FramePoint2d();
-   private void computeCMPOffsetRecursion(ArrayList<YoFramePoint2d> upcomingFootstepLocations, int numberOfFootstepsToConsider)
+   private void computeCMPOffsetRecursion(StateMultiplierCalculator stateMultiplierCalculator, ArrayList<YoFramePoint2d> upcomingFootstepLocations,
+         int numberOfFootstepsToConsider)
    {
       computeTwoCMPOffsets(upcomingFootstepLocations, numberOfFootstepsToConsider);
 
@@ -217,12 +209,7 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public void update(int numberOfFootstepsToConsider, double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
-   {
-      stateMultiplierCalculator.computeCurrentMultipliers(numberOfFootstepsToConsider, timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
-   }
-
-   public void computeFinalICPRecursion(FramePoint2d finalICPRecursionToPack)
+   public void computeFinalICPRecursion(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d finalICPRecursionToPack)
    {
       finalICPRecursionToPack.setByProjectionOntoXYPlane(finalICP.getFrameTuple());
 
@@ -243,12 +230,12 @@ public class ICPOptimizationInputHandler
    private final FrameVector2d beginningOfStateICPVelocityProjection = new FrameVector2d();
    private final FramePoint2d cmpOffsetRecursionProjection = new FramePoint2d();
 
-   public void computeCMPConstantEffects(FramePoint2d cmpConstantEffectsToPack, FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity,
-         boolean useTwoCMPs, boolean isInTransfer)
+   public void computeCMPConstantEffects(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d cmpConstantEffectsToPack,
+         FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity, boolean useTwoCMPs, boolean isInTransfer)
    {
-      computeStanceCMPProjection(stanceCMPProjection, useTwoCMPs, isInTransfer);
-      computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP);
-      computeBeginningOfStateICPVelocityProjection(beginningOfStateICPVelocityProjection, beginningOfStateICPVelocity);
+      computeStanceCMPProjection(stateMultiplierCalculator, stanceCMPProjection, useTwoCMPs, isInTransfer);
+      computeBeginningOfStateICPProjection(stateMultiplierCalculator, beginningOfStateICPProjection, beginningOfStateICP);
+      computeBeginningOfStateICPVelocityProjection(stateMultiplierCalculator, beginningOfStateICPVelocityProjection, beginningOfStateICPVelocity);
 
       cmpConstantEffectsToPack.setToZero();
       cmpConstantEffectsToPack.add(stanceCMPProjection);
@@ -267,7 +254,8 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d stanceEntryCMP2d = new FramePoint2d(worldFrame);
    private final FramePoint2d stanceExitCMP2d = new FramePoint2d(worldFrame);
 
-   private void computeStanceCMPProjection(FramePoint2d stanceCMPProjectionToPack, boolean useTwoCMPs, boolean isInTransfer)
+   private void computeStanceCMPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d stanceCMPProjectionToPack,
+         boolean useTwoCMPs, boolean isInTransfer)
    {
       int footstepIndex;
       if (isInTransfer)
@@ -309,13 +297,15 @@ public class ICPOptimizationInputHandler
       stanceCMPProjectionToPack.add(stanceExitCMP2d);
    }
 
-   private void computeBeginningOfStateICPProjection(FramePoint2d beginningOfStateICPProjectionToPack, FramePoint2d beginningOfStateICP)
+   private void computeBeginningOfStateICPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d beginningOfStateICPProjectionToPack,
+         FramePoint2d beginningOfStateICP)
    {
       beginningOfStateICPProjectionToPack.set(beginningOfStateICP);
       beginningOfStateICPProjectionToPack.scale(stateMultiplierCalculator.getInitialICPCurrentMultiplier());
    }
 
-   private void computeBeginningOfStateICPVelocityProjection(FrameVector2d beginningOfStateICPVelocityProjectionToPack, FrameVector2d beginningOfStateICPVelocity)
+   private void computeBeginningOfStateICPVelocityProjection(StateMultiplierCalculator stateMultiplierCalculator,
+         FrameVector2d beginningOfStateICPVelocityProjectionToPack, FrameVector2d beginningOfStateICPVelocity)
    {
       beginningOfStateICPVelocityProjectionToPack.set(beginningOfStateICPVelocity);
       beginningOfStateICPVelocityProjectionToPack.scale(stateMultiplierCalculator.getInitialICPVelocityCurrentMultiplier());
