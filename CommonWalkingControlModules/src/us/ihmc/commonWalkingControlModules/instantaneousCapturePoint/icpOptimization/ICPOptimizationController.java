@@ -454,7 +454,7 @@ public class ICPOptimizationController
 
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
 
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, useTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
@@ -483,7 +483,7 @@ public class ICPOptimizationController
 
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
 
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, useTwoCMPs, omega0);
 
       inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
@@ -810,7 +810,7 @@ public class ICPOptimizationController
       {
          doingBigAdjustment.set(true);
          transferSplitFractions.get(1).set(minimumDoubleSupportSplitFraction);
-         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, upcomingFootsteps.size(), isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, upcomingFootsteps.size(), useTwoCMPs, omega0);
       }
    }
 

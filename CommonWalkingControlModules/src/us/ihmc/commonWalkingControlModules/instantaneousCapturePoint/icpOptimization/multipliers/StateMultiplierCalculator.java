@@ -7,6 +7,8 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.*;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -39,8 +41,8 @@ public class StateMultiplierCalculator
    private final InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier;
    private final StateEndCurrentMultiplier stateEndCurrentMultiplier;
 
-   private final CubicMatrix cubicMatrix;
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final NewCubicMatrix cubicMatrix;
+   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final int maxNumberOfFootstepsToConsider;
 
@@ -71,8 +73,8 @@ public class StateMultiplierCalculator
       currentSwingSegment = new IntegerYoVariable(yoNamePrefix + "CurrentSegment", registry);
 
 
-      cubicMatrix = new CubicMatrix();
-      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+      cubicMatrix = new NewCubicMatrix();
+      cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
 
       boolean clipTime = true;
 
@@ -92,14 +94,9 @@ public class StateMultiplierCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void resetRecursionMultipliers()
+   public void computeRecursionMultipliers(int numberOfStepsToConsider, int numberOfStepsRegistered, boolean useTwoCMPs, double omega0)
    {
       recursionMultipliers.reset();
-   }
-
-   public void computeRecursionMultipliers(int numberOfStepsToConsider, int numberOfStepsRegistered, boolean isInTransfer, boolean useTwoCMPs, double omega0)
-   {
-      resetRecursionMultipliers();
 
       if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
          throw new RuntimeException("Requesting too many steps.");

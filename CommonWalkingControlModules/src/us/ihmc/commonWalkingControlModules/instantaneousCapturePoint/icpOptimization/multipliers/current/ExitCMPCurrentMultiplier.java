@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingExitCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferExitCMPMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -18,9 +20,9 @@ import java.util.List;
 public class ExitCMPCurrentMultiplier
 {
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
-   private final CubicMatrix cubicMatrix;
+   private final NewCubicMatrix cubicMatrix;
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
 
    /** Boundary conditions matrix for the exit CMP when in transfer. */
    private final TransferExitCMPMatrix transferExitCMPMatrix;
@@ -57,8 +59,8 @@ public class ExitCMPCurrentMultiplier
    }
 
    public ExitCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
-         CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, NewCubicMatrix cubicMatrix,
+         NewCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentVelocityMultiplier", registry);
@@ -72,7 +74,7 @@ public class ExitCMPCurrentMultiplier
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new CubicMatrix();
+         this.cubicMatrix = new NewCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -83,7 +85,7 @@ public class ExitCMPCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
