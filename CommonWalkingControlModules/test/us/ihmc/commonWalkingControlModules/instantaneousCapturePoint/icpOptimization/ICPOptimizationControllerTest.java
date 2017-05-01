@@ -73,8 +73,8 @@ public class ICPOptimizationControllerTest
       omega.set(omega0);
 
       ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
-      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-            contactableFeet, 0.001, registry, null);
+      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters,
+            walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.0, -9.81, 0.001, registry, null);
       icpPlanner.setOmega0(omega.getDoubleValue());
 
       icpPlanner.clearPlan();
@@ -231,6 +231,11 @@ public class ICPOptimizationControllerTest
          return 1.0;
       }
 
+      @Override public double getAngularMomentumMinimizationWeight()
+      {
+         return 0.5;
+      }
+
       @Override public boolean scaleStepRegularizationWeightWithTime()
       {
          return false;
@@ -256,6 +261,11 @@ public class ICPOptimizationControllerTest
          return true;
       }
 
+      @Override public boolean useAngularMomentum()
+      {
+         return true;
+      }
+
       @Override public boolean useFootstepRegularization()
       {
          return true;
@@ -277,22 +287,22 @@ public class ICPOptimizationControllerTest
          return 0.001;
       }
 
-      @Override public double getDoubleSupportMaxCMPForwardExit()
+      @Override public double getDoubleSupportMaxCoPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getDoubleSupportMaxCMPLateralExit()
+      @Override public double getDoubleSupportMaxCoPLateralExit()
       {
          return 0.03;
       }
 
-      @Override public double getSingleSupportMaxCMPForwardExit()
+      @Override public double getSingleSupportMaxCoPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getSingleSupportMaxCMPLateralExit()
+      @Override public double getSingleSupportMaxCoPLateralExit()
       {
          return 0.03;
       }
