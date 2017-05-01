@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
@@ -10,6 +11,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -293,6 +295,18 @@ public class ICPOptimizationSolver
    }
 
    /**
+    * Adds a convex polygon to the CoP location constraint. The CoP is constrained to the inside of the convex hull described
+    * by this polygon.
+    *
+    * @param polygon polygon to add.
+    */
+   public void addSupportPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      copLocationConstraint.addPolygon(polygon);
+   }
+
+   /**
     * Resets the reachability constraint on the upcoming footstep location. This constraint requires that the footstep lies in the convex hull of this polygon.
     */
    public void resetReachabilityConstraint()
@@ -314,6 +328,12 @@ public class ICPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);
+   }
+
+   public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      reachabilityConstraint.addPolygon(polygon);
    }
 
    /**
@@ -1027,10 +1047,11 @@ public class ICPOptimizationSolver
    /**
     * Gets the magnitude of the dynamic relaxation that is a slack variable in the recursive ICP dynamics.
     *
-    * @param dynamicRelaxationToPack magnitude of the slack variable. Modoified.
+    * @param dynamicRelaxationToPack magnitude of the slack variable. Modified.
     */
    public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
    {
+      dynamicRelaxationToPack.setToZero(worldFrame);
       dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
       dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
@@ -1043,8 +1064,9 @@ public class ICPOptimizationSolver
     */
    public void getCMPDifferenceFromCoP(FramePoint2d differenceToPack)
    {
-      differenceToPack.setX(dynamicRelaxationSolution.get(0, 0));
-      differenceToPack.setY(dynamicRelaxationSolution.get(1, 0));
+      differenceToPack.setToZero(worldFrame);
+      differenceToPack.setX(angularMomentumSolution.get(0, 0));
+      differenceToPack.setY(angularMomentumSolution.get(1, 0));
    }
 
    /**

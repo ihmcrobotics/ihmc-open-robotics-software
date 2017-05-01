@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingInitialICPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -18,9 +20,9 @@ import java.util.List;
 public class InitialICPCurrentMultiplier
 {
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
-   private final CubicMatrix cubicMatrix;
+   private final NewCubicMatrix cubicMatrix;
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
 
    /** whether or not the cubic matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicMatrix;
@@ -50,8 +52,8 @@ public class InitialICPCurrentMultiplier
       this(startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
-         CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
+   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, NewCubicMatrix cubicMatrix,
+         NewCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentVelocityMultiplier", registry);
@@ -61,7 +63,7 @@ public class InitialICPCurrentMultiplier
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new CubicMatrix();
+         this.cubicMatrix = new NewCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -72,7 +74,7 @@ public class InitialICPCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
@@ -125,33 +127,29 @@ public class InitialICPCurrentMultiplier
     */
    public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState);
+         computeInTransfer(doubleSupportDurations, timeInState);
       }
       else
       {
          if (useTwoCMPs)
-            positionMultiplier = computeSwingSegmented(timeInState, omega0);
+            computeSwingSegmented(timeInState, omega0);
          else
-            positionMultiplier = computeInSwingOneCMP();
+            computeInSwingOneCMP();
       }
-      this.positionMultiplier.set(positionMultiplier);
 
       if (isInTransfer)
       {
-         velocityMultiplier = computeInTransferVelocity();
+         computeInTransferVelocity();
       }
       else
       {
          if (useTwoCMPs)
-            velocityMultiplier = computeSwingSegmentedVelocity(timeInState, omega0);
+            computeSwingSegmentedVelocity(timeInState, omega0);
          else
-            velocityMultiplier = computeInSwingOneCMPVelocity();
+            computeInSwingOneCMPVelocity();
       }
-
-      this.velocityMultiplier.set(velocityMultiplier);
    }
 
 
@@ -162,9 +160,8 @@ public class InitialICPCurrentMultiplier
     *
     * @param doubleSupportDurations vector of double support durations
     * @param timeInState time in the transfer state
-    * @return position multiplier.
     */
-   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   public void computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPMatrix.compute();
 
@@ -183,20 +180,18 @@ public class InitialICPCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, transferInitialICPMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
    /**
     * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a
     * cubic spline, so this is used to calculate the position multiplier.
-    *
-    * @return velocity multiplier.
     */
-   private double computeInTransferVelocity()
+   public void computeInTransferVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, transferInitialICPMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
    }
 
 
@@ -206,23 +201,19 @@ public class InitialICPCurrentMultiplier
    /**
     * Computes the position multiplier in the swing phase when using one CMP in each foot. The desired
     * ICP position computed from the stance entry CMP and the next corner point, not the initial ICP location.
-    *
-    * @return position multiplier
     */
-   private double computeInSwingOneCMP()
+   public void computeInSwingOneCMP()
    {
-      return 0.0;
+      positionMultiplier.set(0.0);
    }
 
    /**
     * Computes the velocity multiplier in the swing phase when using one CMP in each foot. The desired
     * ICP position computed from the stance entry CMP and the next corner point, not the initial ICP location.
-    *
-    * @return velocity multiplier
     */
-   private double computeInSwingOneCMPVelocity()
+   public void computeInSwingOneCMPVelocity()
    {
-      return 0.0;
+      velocityMultiplier.set(0.0);
    }
 
 
@@ -233,16 +224,15 @@ public class InitialICPCurrentMultiplier
     *
     * @param timeInState time in the swing state.
     * @param omega0 natural frequency of the inverted pendulum
-    * @return position multiplier.
     */
-   private double computeSwingSegmented(double timeInState, double omega0)
+   public void computeSwingSegmented(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegment(timeInState, omega0);
+         computeSwingFirstSegment(timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
-         return computeSwingThirdSegment();
+         computeSwingThirdSegment();
       else
-         return computeSwingSecondSegment(timeInState, omega0);
+         computeSwingSecondSegment(timeInState, omega0);
    }
 
    /**
@@ -253,11 +243,10 @@ public class InitialICPCurrentMultiplier
     *
     * @param timeInState time in the swing state
     * @param omega0 natural frequency of the inverted pendulum.
-    * @return position multiplier.
     */
-   private double computeSwingFirstSegment(double timeInState, double omega0)
+   public void computeSwingFirstSegment(double timeInState, double omega0)
    {
-      return Math.exp(omega0 * timeInState);
+      positionMultiplier.set(Math.exp(omega0 * timeInState));
    }
 
    /**
@@ -267,9 +256,8 @@ public class InitialICPCurrentMultiplier
     *
     * @param timeInState time in the swing state.
     * @param omega0 natural frequency of the inverted pendulum.
-    * @return position multiplier.
     */
-   private double computeSwingSecondSegment(double timeInState, double omega0)
+   public void computeSwingSecondSegment(double timeInState, double omega0)
    {
       swingInitialICPMatrix.compute(omega0);
 
@@ -290,18 +278,16 @@ public class InitialICPCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, swingInitialICPMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
    /**
     * Computes the position multiplier in the swing phase when using two CMPs in each foot. The desired
     * ICP position computed from the stance exit CMP and the next corner point, not the initial ICP location.
-    *
-    * @return position multiplier
     */
-   private double computeSwingThirdSegment()
+   public void computeSwingThirdSegment()
    {
-      return 0.0;
+      positionMultiplier.set(0.0);
    }
 
 
@@ -312,51 +298,45 @@ public class InitialICPCurrentMultiplier
     *
     * @param timeInState time in the swing state.
     * @param omega0 natural frequency of the inverted pendulum
-    * @return velocity multiplier.
     */
-   private double computeSwingSegmentedVelocity(double timeInState, double omega0)
+   public void computeSwingSegmentedVelocity(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegmentVelocity(omega0);
+         computeSwingFirstSegmentVelocity(omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
-         return computeSwingThirdSegmentVelocity();
+         computeSwingThirdSegmentVelocity();
       else
-         return computeSwingSecondSegmentVelocity();
+         computeSwingSecondSegmentVelocity();
    }
 
    /**
     * Computes the velocity multiplier in the first segment of the swing phase.
     *
     * @param omega0 natural frequency of the inverted pendulum.
-    * @return velocity multiplier.
     */
-   private double computeSwingFirstSegmentVelocity(double omega0)
+   public void computeSwingFirstSegmentVelocity(double omega0)
    {
-      return omega0 * positionMultiplier.getDoubleValue();
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 
    /**
     * Computes the velocity multiplier when in the second segment in the swing phase. During this
     * segment, the trajectory is a cubic spline, so this is used to calculate the velocity
     * multiplier.
-    *
-    * @return velocity multiplier.
     */
-   private double computeSwingSecondSegmentVelocity()
+   public void computeSwingSecondSegmentVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, swingInitialICPMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
    }
 
    /**
     * Computes the position multiplier in the swing phase when using two CMPs in each foot. The desired
     * ICP position computed from the stance exit CMP and the next corner point, not the initial ICP location.
-    *
-    * @return velocity multiplier
     */
-   private double computeSwingThirdSegmentVelocity()
+   public void computeSwingThirdSegmentVelocity()
    {
-      return 0.0;
+      velocityMultiplier.set(0.0);
    }
 }
