@@ -44,7 +44,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final double TIMING_ADJUSTMENT_COST = 100.0;
    private static final double QUADRATIC_COST_SCALE_FACTOR = 100.0;
    private static final double GRADIENT_THRESHOLD = 1.0;
-   private static final double GRADIENT_GAIN = 0.5;
+   private static final double GRADIENT_GAIN = 0.1;
    private static final int NUMBER_OF_ITERATIONS = 30;
 
    private static final String yoNamePrefix = "controller";
@@ -761,7 +761,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
       double originalSwingDuration = swingDurations.get(0).getDoubleValue();
       NoConvergenceException noConvergenceException = solveQP();
-      double qpOriginalCostToGo = solver.getCostToGo();
+      double qpOriginalCostToGo = QUADRATIC_COST_SCALE_FACTOR * solver.getCostToGo();
       double variationSize = SWING_DURATION_VARIATION;
 
       if (noConvergenceException != null)
@@ -795,13 +795,14 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       while (costToGoGradient > GRADIENT_THRESHOLD)
       {
          iterationNumber++;
-         variationSize = GRADIENT_GAIN * costToGoGradient; // // FIXME: 4/29/17 do something fancy
+         //variationSize = -GRADIENT_GAIN / Math.pow(TIMING_ADJUSTMENT_COST, 2.0) * costToGoGradient; // // FIXME: 4/29/17 do something fancy
+         variationSize = -GRADIENT_GAIN * costToGoGradient; // // FIXME: 4/29/17 do something fancy
 
-         if (iterationNumber > NUMBER_OF_ITERATIONS)
+         if (iterationNumber >= NUMBER_OF_ITERATIONS)
             break;
 
          // modify current single support duration
-         swingDurations.get(0).sub(variationSize);
+         swingDurations.get(0).add(variationSize);
 
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
          noConvergenceException = solveQP();
