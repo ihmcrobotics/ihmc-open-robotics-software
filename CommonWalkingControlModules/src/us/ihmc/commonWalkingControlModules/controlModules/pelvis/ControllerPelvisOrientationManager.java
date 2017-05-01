@@ -1,21 +1,14 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
-
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -38,7 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class PelvisOrientationManager
+public class ControllerPelvisOrientationManager
 {
    private static final double defaultTrajectoryTime = 1.0;
 
@@ -85,7 +78,6 @@ public class PelvisOrientationManager
 
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisOrientationTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisOrientationTrajectoryCommand.class);
 
@@ -95,7 +87,7 @@ public class PelvisOrientationManager
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
-   public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
    {
       yoTime = controllerToolbox.getYoTime();
@@ -105,14 +97,11 @@ public class PelvisOrientationManager
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
-      double defaultStepTime = walkingControllerParameters.getDefaultSwingTime();
-      pelvisOrientationTrajectoryGenerator.setTrajectoryTime(defaultStepTime);
-
       pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
 
-      gains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      this.gains = gains;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -146,7 +135,6 @@ public class PelvisOrientationManager
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisOrientationTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       pelvisYawSineFrequence.set(1.0);
@@ -299,74 +287,6 @@ public class PelvisOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      isTrajectoryStopped.set(command.isStopAllTrajectory());
-   }
-
-   private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();
-
-   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
-   {
-      tempPelvisOrientationTrajectoryCommand.set(command);
-      handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
-   }
-
-   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
-   {
-      switch (command.getExecutionMode())
-      {
-      case OVERRIDE:
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getCommandId());
-         initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-         initializeOffsetTrajectoryGenerator(command, 0.0);
-         return;
-      case QUEUE:
-         boolean success = queuePelvisOrientationTrajectoryCommand(command);
-         if (!success)
-         {
-            isReadyToHandleQueuedCommands.set(false);
-            clearCommandQueue(INVALID_MESSAGE_ID);
-            setToHoldCurrent(pelvisOrientationTrajectoryGenerator.getCurrentTrajectoryFrame());
-         }
-         return;
-      default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-         break;
-      }
-   }
-
-   private boolean queuePelvisOrientationTrajectoryCommand(PelvisOrientationTrajectoryCommand command)
-   {
-      if (!isReadyToHandleQueuedCommands.getBooleanValue())
-      {
-         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
-         return false;
-      }
-
-      long previousCommandId = command.getPreviousCommandId();
-
-      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
-      {
-         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
-               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
-         return false;
-      }
-
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
-      {
-         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
-         return false;
-      }
-
-      commandQueue.add(command);
-      numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
-
-      return true;
-   }
-
    private void initializeOffsetTrajectoryGenerator(PelvisOrientationTrajectoryCommand command, double firstTrajectoryPointTime)
    {
       command.addTimeOffset(firstTrajectoryPointTime);
@@ -422,13 +342,6 @@ public class PelvisOrientationManager
       commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
-   }
-
-   private void clearCommandQueue(long lastCommandId)
-   {
-      commandQueue.clear();
-      numberOfQueuedCommands.set(0);
-      this.lastCommandId.set(lastCommandId);
    }
 
    public void resetOrientationOffset()
