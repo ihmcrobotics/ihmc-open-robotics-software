@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
@@ -327,6 +328,12 @@ public class ICPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);
+   }
+
+   public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      reachabilityConstraint.addPolygon(polygon);
    }
 
    /**
