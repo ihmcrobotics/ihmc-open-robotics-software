@@ -199,36 +199,89 @@ public class StateMultiplierCalculator
    {
       resetCurrentMultipliers();
 
-      if (useTwoCMPs && !isInTransfer)
-         updateSegmentedSingleSupportTrajectory(timeInState);
-
-      double timeInSpline;
       if (isInTransfer)
-         timeInSpline = timeInState;
-      else
-         timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
+      {
+         cubicMatrix.update(timeInState);
+         cubicDerivativeMatrix.update(timeInState);
 
-      cubicMatrix.update(timeInSpline);
-      cubicDerivativeMatrix.update(timeInSpline);
+         exitCMPCurrentMultiplier.computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, omega0);
+         entryCMPCurrentMultiplier.computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, omega0);
+         initialICPCurrentMultiplier.computeInTransfer(doubleSupportDurations, timeInState);
+         initialICPVelocityCurrentMultiplier.computeInTransfer(doubleSupportDurations, timeInState);
+         stateEndCurrentMultiplier.computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, omega0);
 
-      exitCMPCurrentMultiplier
-            .compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      entryCMPCurrentMultiplier
-            .compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      initialICPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInState, isInTransfer);
-      stateEndCurrentMultiplier
-            .compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-   }
+         exitCMPCurrentMultiplier.computeInTransferVelocity();
+         entryCMPCurrentMultiplier.computeInTransferVelocity();
+         initialICPCurrentMultiplier.computeInTransferVelocity();
+         initialICPVelocityCurrentMultiplier.computeInTransferVelocity();
+         stateEndCurrentMultiplier.computeInTransferVelocity();
+      }
+      else if (!useTwoCMPs)
+      {
+         exitCMPCurrentMultiplier.computeInSwingOneCMP();
+         entryCMPCurrentMultiplier.computeInSwingOneCMP(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
+         initialICPCurrentMultiplier.computeInSwingOneCMP();
+         initialICPVelocityCurrentMultiplier.computeInSwingOneCMP();
+         stateEndCurrentMultiplier.computeInSwingOneCMP(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
 
-   private void updateSegmentedSingleSupportTrajectory(double timeInState)
-   {
-      if (timeInState <= startOfSplineTime.getDoubleValue())
+         exitCMPCurrentMultiplier.computeInSwingOneCMPVelocity();
+         entryCMPCurrentMultiplier.computeInSwingOneCMPVelocity(omega0);
+         initialICPCurrentMultiplier.computeInSwingOneCMPVelocity();
+         initialICPVelocityCurrentMultiplier.computeInSwingOneCMPVelocity();
+         stateEndCurrentMultiplier.computeInSwingOneCMPVelocity(omega0);
+      }
+      else if (timeInState < startOfSplineTime.getDoubleValue())
+      {
          currentSwingSegment.set(1);
+
+         exitCMPCurrentMultiplier.computeSwingFirstSegment();
+         entryCMPCurrentMultiplier.computeSwingFirstSegment(timeInState, omega0);
+         initialICPCurrentMultiplier.computeSwingFirstSegment(timeInState, omega0);
+         initialICPVelocityCurrentMultiplier.computeSwingFirstSegment();
+         stateEndCurrentMultiplier.computeSwingFirstSegment();
+
+         exitCMPCurrentMultiplier.computeSwingFirstSegmentVelocity();
+         entryCMPCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
+         initialICPCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
+         initialICPVelocityCurrentMultiplier.computeSwingFirstSegmentVelocity();
+         stateEndCurrentMultiplier.computeSwingFirstSegmentVelocity();
+      }
       else if (timeInState >= endOfSplineTime.getDoubleValue())
+      {
          currentSwingSegment.set(3);
+
+         exitCMPCurrentMultiplier.computeSwingThirdSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
+         entryCMPCurrentMultiplier.computeSwingThirdSegment();
+         initialICPCurrentMultiplier.computeSwingThirdSegment();
+         initialICPVelocityCurrentMultiplier.computeSwingThirdSegment();
+         stateEndCurrentMultiplier.computeSwingThirdSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
+
+         exitCMPCurrentMultiplier.computeSwingThirdSegmentVelocity(omega0);
+         entryCMPCurrentMultiplier.computeSwingThirdSegmentVelocity();
+         initialICPCurrentMultiplier.computeSwingThirdSegmentVelocity();
+         initialICPVelocityCurrentMultiplier.computeSwingThirdSegmentVelocity();
+         stateEndCurrentMultiplier.computeSwingThirdSegmentVelocity(omega0);
+      }
       else
+      {
          currentSwingSegment.set(2);
+         double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
+
+         cubicMatrix.update(timeInSpline);
+         cubicDerivativeMatrix.update(timeInSpline);
+
+         exitCMPCurrentMultiplier.computeSwingSecondSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
+         entryCMPCurrentMultiplier.computeSwingSecondSegment(timeInState, omega0);
+         initialICPCurrentMultiplier.computeSwingSecondSegment(timeInState, omega0);
+         initialICPVelocityCurrentMultiplier.computeSwingSecondSegment();
+         stateEndCurrentMultiplier.computeSwingSecondSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
+
+         exitCMPCurrentMultiplier.computeSwingSecondSegmentVelocity();
+         entryCMPCurrentMultiplier.computeSwingSecondSegmentVelocity();
+         initialICPCurrentMultiplier.computeSwingSecondSegmentVelocity();
+         initialICPVelocityCurrentMultiplier.computeSwingSecondSegmentVelocity();
+         stateEndCurrentMultiplier.computeSwingSecondSegmentVelocity();
+      }
    }
 
    public double getExitCMPCurrentMultiplier()
