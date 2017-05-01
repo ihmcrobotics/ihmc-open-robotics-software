@@ -509,6 +509,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             bodyManager.initialize();
       }
 
+      pelvisOrientationManager.initialize();
       balanceManager.initialize();
       feetManager.initialize();
       //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.

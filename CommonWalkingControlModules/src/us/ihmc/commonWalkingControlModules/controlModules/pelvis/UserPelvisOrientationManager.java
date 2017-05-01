@@ -3,42 +3,53 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class UserPelvisOrientationManager
+public class UserPelvisOrientationManager extends PelvisOrientationControlState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final BooleanYoVariable pelvisIsFollowingUserTrajectory = new BooleanYoVariable("PelvisIsFollowingUserTrajectory", registry);
 
    private final FramePose tempPose = new FramePose();
    private final RigidBodyTaskspaceControlState taskspaceControlState;
+   private final FramePose homePose = new FramePose();
+   private final ReferenceFrame baseFrame;
+
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
    public UserPelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
+      super(PelvisOrientationControlMode.USER);
+
       RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFixedFrame = pelvis.getBodyFixedFrame();
-      ReferenceFrame baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
+      baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      
+
       taskspaceControlState = new RigidBodyTaskspaceControlState(pelvis, elevator, elevator, trajectoryFrames, pelvisFixedFrame, baseFrame, yoTime, graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains, null);
-      
+
+      orientationFeedbackControlCommand.set(elevator, pelvis);
+      orientationFeedbackControlCommand.setPrimaryBase(elevator);
+
       parentRegistry.addChild(registry);
    }
 
@@ -47,69 +58,61 @@ public class UserPelvisOrientationManager
       taskspaceControlState.setWeights(angularWeight, null);
    }
 
-   public void compute()
+   public void goHome(double trajectoryTime, FrameOrientation initialOrientation)
    {
-      checkIfPelvisInUserMode();
+      tempPose.setToNaN(initialOrientation.getReferenceFrame());
+      tempPose.setOrientation(initialOrientation);
+      homePose.setToZero(baseFrame);
+      taskspaceControlState.goToPose(homePose, tempPose, trajectoryTime);
+   }
+
+   @Override
+   public void doAction()
+   {
       taskspaceControlState.doAction();
    }
 
-   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
+   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameOrientation initialOrientation)
    {
-      computeInitialPose(tempPose);
+      tempPose.setToNaN(initialOrientation.getReferenceFrame());
+      tempPose.setOrientation(initialOrientation);
       taskspaceControlState.handleOrientationTrajectoryCommand(command, tempPose);
-      pelvisIsFollowingUserTrajectory.set(true);
    }
 
-   public boolean isFollowingUserTrajectory()
+   public ReferenceFrame getControlFrame()
    {
-      return pelvisIsFollowingUserTrajectory.getBooleanValue();
+      return taskspaceControlState.getControlFrame();
    }
 
-   public void disableUserTrajectory()
-   {
-      pelvisIsFollowingUserTrajectory.set(false);
-   }
-
+   @Override
    public void getCurrentDesiredOrientation(FrameOrientation desiredOrientation)
    {
-      if (pelvisIsFollowingUserTrajectory.getBooleanValue())
-      {
-         desiredOrientation.setToNaN();
-      }
-      else
-      {
-         taskspaceControlState.getDesiredPose(tempPose);
-         tempPose.getOrientationIncludingFrame(desiredOrientation);
-      }
+      taskspaceControlState.getDesiredPose(tempPose);
+      tempPose.getOrientationIncludingFrame(desiredOrientation);
    }
 
-   private void computeInitialPose(FramePose initialPose)
+   @Override
+   public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
-      if (pelvisIsFollowingUserTrajectory.getBooleanValue())
-      {
-         taskspaceControlState.getDesiredPose(initialPose);
-      }
-      else
-      {
-         initialPose.setToZero(taskspaceControlState.getControlFrame());
-      }
-   }
-   
-   private void checkIfPelvisInUserMode()
-   {
-      if (!pelvisIsFollowingUserTrajectory.getBooleanValue())
-      {
-         throw new RuntimeException(getClass().getSimpleName() + " is not active. Can not call compute before swintching to user mode.");
-      }
+      SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
+      orientationFeedbackControlCommand.setGains(spatialFeedbackControlCommand.getGains().getOrientationGains());
+      orientationFeedbackControlCommand.getSpatialAccelerationCommand().set(spatialFeedbackControlCommand.getSpatialAccelerationCommand());
+      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      return orientationFeedbackControlCommand;
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   @Override
+   public void doTransitionIntoAction()
    {
-      return taskspaceControlState.getInverseDynamicsCommand();
+      // TODO Auto-generated method stub
+
    }
 
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   @Override
+   public void doTransitionOutOfAction()
    {
-      return taskspaceControlState.getFeedbackControlCommand();
+      // TODO Auto-generated method stub
+
    }
 }

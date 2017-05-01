@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,7 +30,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ControllerPelvisOrientationManager
+public class ControllerPelvisOrientationManager extends PelvisOrientationControlState
 {
    private static final double defaultTrajectoryTime = 1.0;
 
@@ -90,6 +89,8 @@ public class ControllerPelvisOrientationManager
    public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
    {
+      super(PelvisOrientationControlMode.WALKING_CONTROLLER);
+
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
@@ -192,7 +193,8 @@ public class ControllerPelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
    }
 
-   public void compute()
+   @Override
+   public void doAction()
    {
       double deltaTime = yoTime.getDoubleValue() - initialPelvisOrientationTime.getDoubleValue();
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
@@ -503,13 +505,39 @@ public class ControllerPelvisOrientationManager
       initialize(worldFrame);
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return null;
-   }
-
+   @Override
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   public void setOffset(FrameOrientation offset)
+   {
+      tempOrientation.setIncludingFrame(offset);
+      tempOrientation.changeFrame(desiredPelvisFrame);
+      tempAngularVelocity.setToZero(desiredPelvisFrame);
+      orientationOffsetTrajectoryGenerator.clear();
+      orientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+      orientationOffsetTrajectoryGenerator.initialize();
+   }
+
+   @Override
+   public void getCurrentDesiredOrientation(FrameOrientation orientationToPack)
+   {
+      orientationToPack.setIncludingFrame(desiredPelvisOrientationWithOffset.getFrameOrientation());
    }
 }

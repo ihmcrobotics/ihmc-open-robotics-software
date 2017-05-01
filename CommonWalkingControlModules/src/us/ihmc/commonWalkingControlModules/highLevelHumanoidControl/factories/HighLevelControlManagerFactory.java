@@ -273,6 +273,8 @@ public class HighLevelControlManagerFactory
          centerOfMassHeightManager.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
+      if (pelvisOrientationManager != null)
+         pelvisOrientationManager.initialize();
 
       Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
       for (RigidBodyControlManager bodyManager : bodyManagers)
@@ -307,7 +309,7 @@ public class HighLevelControlManagerFactory
 
       if (pelvisOrientationManager != null)
       {
-         ret.addCommand(pelvisOrientationManager.getFeedbackControlCommand());
+         ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());
       }
 
       return ret;
