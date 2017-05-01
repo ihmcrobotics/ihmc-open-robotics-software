@@ -143,6 +143,48 @@ public class TwistCalculator
    }
 
    /**
+    * Updates if necessary and packs the twist of the given {@code movingFrame} if possible.
+    * <p>
+    * The result is the twist of the {@code movingFrame}, with respect to the {@code inertialFrame},
+    * expressed in the {@code movingFrame}.
+    * </p>
+    * <p>
+    * WARNINGS:
+    * <ul>
+    * <li>This method assumes that the internal memory of this {@code TwistCalculator} is
+    * up-to-date. The user has to notify this calculator every time the system state has changed,
+    * this is done through the method {@link #compute()}.
+    * <li>This method only handles specific implementations of {@code ReferenceFrame} allowing the
+    * twist calculator to determine their motions.
+    * </p>
+    * 
+    * @param movingFrame the reference frame to get the twist of.
+    * @param twistToPack the twist of the {@code movingFrame} to pack. Modified.
+    * @throws ScrewTheoryException if the type of the given {@code movingFrame} is not handled.
+    */
+   public void getTwistOfReferenceFrame(ReferenceFrame movingFrame, Twist twistToPack)
+   {
+      if (movingFrame.isAStationaryFrame())
+         getTwistOfStationaryFrame(movingFrame, twistToPack);
+      else if (movingFrame instanceof BodyFixedReferenceFrame)
+         getTwistOfBodyFixedReferenceFrame((BodyFixedReferenceFrame) movingFrame, twistToPack);
+      else
+         throw unhandledReferenceFrameTypeException(movingFrame);
+   }
+
+   private void getTwistOfStationaryFrame(ReferenceFrame stationaryFrame, Twist twistToPack)
+   {
+      twistToPack.setToZero(stationaryFrame, inertialFrame, stationaryFrame);
+   }
+
+   private void getTwistOfBodyFixedReferenceFrame(BodyFixedReferenceFrame bodyFixedReferenceFrame, Twist twistToPack)
+   {
+      twistToPack.set(computeOrGetTwistOfBody(bodyFixedReferenceFrame.getRigidBody()));
+      twistToPack.changeFrame(bodyFixedReferenceFrame);
+      twistToPack.changeBodyFrameNoRelativeTwist(bodyFixedReferenceFrame);
+   }
+
+   /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
     * {@link #getRelativeTwist(RigidBody, RigidBody, Twist)}.
     */
@@ -180,6 +222,36 @@ public class TwistCalculator
    }
 
    /**
+    * Computes and packs the twist of the given {@code movingFrame} relative to the given
+    * {@code baseFrame}.
+    * <p>
+    * The resulting twist is the twist of the {@code movingFrame}, with respect to
+    * {@code baseFrame}, expressed in {@code movingFrame}.
+    * </p>
+    * <p>
+    * WARNINGS:
+    * <ul>
+    * <li>This method assumes that the internal memory of this {@code TwistCalculator} is
+    * up-to-date. The user has to notify this calculator every time the system state has changed,
+    * this is done through the method {@link #compute()}.
+    * <li>This method only handles specific implementations of {@code ReferenceFrame} allowing the
+    * twist calculator to determine their motions.
+    * </p>
+    * 
+    * @param baseFrame the reference frame with respect to which the twist is to be computed.
+    * @param movingFrame the reference frame to compute the twist of.
+    * @param twistToPack the twist of the {@code movingFrame} relative to the {@code baseFrame}. Modified.
+    * @throws ScrewTheoryException if the type of {@code movingFrame} or {@code baseFrame} is not handled.
+    */
+   public void getRelativeTwist(ReferenceFrame baseFrame, ReferenceFrame movingFrame, Twist twistToPack)
+   {
+      getTwistOfReferenceFrame(movingFrame, twistToPack);
+      getTwistOfReferenceFrame(baseFrame, twistForGetRelativeTwist);
+      twistForGetRelativeTwist.changeFrame(twistToPack.getExpressedInFrame());
+      twistToPack.sub(twistForGetRelativeTwist);
+   }
+
+   /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
     * {@link #getAngularVelocityOfBody(RigidBody, FrameVector)}.
     */
@@ -203,14 +275,17 @@ public class TwistCalculator
    }
 
    /**
-    * Computes and packs the angular velocity of the given {@code body} with respect to the given {@code base}.
+    * Computes and packs the angular velocity of the given {@code body} with respect to the given
+    * {@code base}.
     * <p>
-    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to {@code base.getBodyFixedFrame()} expressed in {@code body.getBodyFixedFrame()}.
+    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to
+    * {@code base.getBodyFixedFrame()} expressed in {@code body.getBodyFixedFrame()}.
     * </p>
     * 
     * @param base the rigid-body with respect to which the angular velocity is to be computed.
     * @param body the rigid-body to compute the angular velocity of.
-    * @param angularVelocityToPack the angular velocity of {@code body} relative to the {@code base}. Modified.
+    * @param angularVelocityToPack the angular velocity of {@code body} relative to the
+    *           {@code base}. Modified.
     */
    public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector angularVelocityToPack)
    {
@@ -417,5 +492,11 @@ public class TwistCalculator
       rigidBodiesWithAssignedTwist.add(body);
       assignedTwists.add(newAssignedTwist);
       return newAssignedTwist;
+   }
+
+   private static ScrewTheoryException unhandledReferenceFrameTypeException(ReferenceFrame referenceFrame)
+   {
+      return new ScrewTheoryException("The reference frame type: " + referenceFrame.getClass().getSimpleName()
+            + " is currently not handled. Reference frame name: " + referenceFrame.getName());
    }
 }
