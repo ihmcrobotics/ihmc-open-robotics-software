@@ -470,10 +470,10 @@ public class PelvisOrientationManager
       initialize(worldFrame);
    }
 
-   public void setToHoldCurrentDesiredInWorldFrame()
-   {
-      setToHoldCurrentDesired(worldFrame);
-   }
+//   public void setToHoldCurrentDesiredInWorldFrame()
+//   {
+//      setToHoldCurrentDesired(worldFrame);
+//   }
 
    public void setToHoldCurrentDesiredInMidFeetZUpFrame()
    {
@@ -494,18 +494,18 @@ public class PelvisOrientationManager
       initialize(desiredTrajectoryFrame);
    }
 
-   /** Go instantly to zero, no smooth interpolation. */
-   public void setToZeroInSupportFoot(RobotSide supportSide)
-   {
-      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
-      tempOrientation.setToZero(supportAnkleZUp);
-      tempOrientation.changeFrame(worldFrame);
-      initialPelvisOrientation.set(tempOrientation);
-      finalPelvisOrientation.set(tempOrientation);
-      desiredPelvisOrientation.set(tempOrientation);
-
-      initialize(supportAnkleZUp);
-   }
+//   /** Go instantly to zero, no smooth interpolation. */
+//   public void setToZeroInSupportFoot(RobotSide supportSide)
+//   {
+//      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
+//      tempOrientation.setToZero(supportAnkleZUp);
+//      tempOrientation.changeFrame(worldFrame);
+//      initialPelvisOrientation.set(tempOrientation);
+//      finalPelvisOrientation.set(tempOrientation);
+//      desiredPelvisOrientation.set(tempOrientation);
+//
+//      initialize(supportAnkleZUp);
+//   }
 
    /** Go instantly to zero, no smooth interpolation. */
    public void setToZeroInMidFeetZUpFrame()
@@ -542,19 +542,19 @@ public class PelvisOrientationManager
       initialize(supportAnkleZUpFrame);
    }
 
-   /** Move towards zero smoothly within the given swing time */
-   public void moveToZeroInSupportFoot(RobotSide supportSide)
-   {
-      desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
-      initialPelvisOrientation.set(tempOrientation);
-
-      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
-      tempOrientation.setToZero(supportAnkleZUp);
-      tempOrientation.changeFrame(worldFrame);
-      finalPelvisOrientation.set(tempOrientation);
-
-      initialize(supportAnkleZUp);
-   }
+//   /** Move towards zero smoothly within the given swing time */
+//   public void moveToZeroInSupportFoot(RobotSide supportSide)
+//   {
+//      desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+//      initialPelvisOrientation.set(tempOrientation);
+//
+//      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
+//      tempOrientation.setToZero(supportAnkleZUp);
+//      tempOrientation.changeFrame(worldFrame);
+//      finalPelvisOrientation.set(tempOrientation);
+//
+//      initialize(supportAnkleZUp);
+//   }
 
    private final FramePoint upcomingFootstepLocation = new FramePoint();
    private final FrameOrientation upcomingFootstepOrientation = new FrameOrientation();
