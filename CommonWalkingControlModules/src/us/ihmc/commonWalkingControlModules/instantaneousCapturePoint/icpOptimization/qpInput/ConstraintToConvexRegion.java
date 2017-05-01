@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -73,6 +74,11 @@ public class ConstraintToConvexRegion
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       convexPolygon.addVertex(vertex.getPoint());
+   }
+
+   public void addPolygon(FrameConvexPolygon2d polygon)
+   {
+      convexPolygon.addVertices(polygon.getConvexPolygon2d());
    }
 
    /**

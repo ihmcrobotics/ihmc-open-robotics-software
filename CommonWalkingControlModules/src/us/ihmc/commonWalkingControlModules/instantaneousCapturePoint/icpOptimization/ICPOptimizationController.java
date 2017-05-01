@@ -135,6 +135,8 @@ public class ICPOptimizationController
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
    private final ExecutionTimer conditionSettingTimer = new ExecutionTimer("icpConditionSettingTimer", 0.5, registry);
    private final ExecutionTimer solutionReadingTimer = new ExecutionTimer("icpSolutionReadingTimer", 0.5, registry);
+   private final ExecutionTimer startingComputeTimer = new ExecutionTimer("icpStartingComputeTimer", 0.5, registry);
+   private final ExecutionTimer multiplierCalculatorTimer = new ExecutionTimer("icpMultiplierCalculatorTimer", 0.5, registry);
 
    private final ICPOptimizationSolver solver;
 
@@ -156,7 +158,7 @@ public class ICPOptimizationController
 
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
-   
+
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    private final FrameVector2d tempVector2d = new FrameVector2d();
@@ -236,7 +238,7 @@ public class ICPOptimizationController
       stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
             swingSplitFractions, maximumNumberOfFootstepsToConsider, yoNamePrefix, registry);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
             yoGraphicsListRegistry);
@@ -581,7 +583,7 @@ public class ICPOptimizationController
    private void submitSolverTaskConditionsForFeedbackOnlyControl()
    {
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       solver.resetFootstepConditions();
 
@@ -594,23 +596,26 @@ public class ICPOptimizationController
 
    private int submitSolverTaskConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
+      multiplierCalculatorTimer.startMeasurement();
       stateMultiplierCalculator.computeCurrentMultipliers(numberOfFootstepsToConsider, timeInCurrentState.getDoubleValue(), useTwoCMPs,
             isInTransfer.getBooleanValue(), omega0);
 
       inputHandler.computeFinalICPRecursion(stateMultiplierCalculator, finalICPRecursion);
       inputHandler.computeCMPConstantEffects(stateMultiplierCalculator, cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(),
             beginningOfStateICPVelocity.getFrameTuple2d(), useTwoCMPs, isInTransfer.getBooleanValue());
+      multiplierCalculatorTimer.stopMeasurement();
 
       if (isInTransfer.getBooleanValue())
       {
          copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-         reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+         //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
       }
       else
       {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
-         reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         //reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
       }
+
 
       solver.resetFootstepConditions();
 
@@ -632,7 +637,8 @@ public class ICPOptimizationController
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.resetFeedbackConditions();
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(),
+            dynamicRelaxationWeight);
 
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
@@ -676,11 +682,11 @@ public class ICPOptimizationController
 
 
 
-
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
+      startingComputeTimer.startMeasurement();
       desiredICP.changeFrame(worldFrame);
       desiredICPVelocity.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
@@ -698,6 +704,7 @@ public class ICPOptimizationController
 
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
+      startingComputeTimer.stopMeasurement();
 
       conditionSettingTimer.startMeasurement();
       if (isStanding.getBooleanValue())
