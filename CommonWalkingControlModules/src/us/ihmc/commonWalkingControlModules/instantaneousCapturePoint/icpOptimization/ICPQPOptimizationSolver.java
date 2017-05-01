@@ -719,6 +719,7 @@ public class ICPQPOptimizationSolver
          extractDynamicRelaxationSolution(dynamicRelaxationSolution);
          extractAngularMomentumSolution(angularMomentumSolution);
 
+         computeWholeCostToGo();
          if (computeCostToGo)
             computeCostToGo();
       }
@@ -958,9 +959,35 @@ public class ICPQPOptimizationSolver
    /**
     * Internal method to compute the cost to go of all the tasks.
     */
-   private void computeCostToGo()
+   private void computeWholeCostToGo()
    {
       costToGo.zero();
+
+      tmpCost.zero();
+      tmpFootstepCost.zero();
+      tmpFeedbackCost.zero();
+
+      tmpCost.reshape(indexHandler.getNumberOfFreeVariables(), 1);
+      tmpFootstepCost.reshape(indexHandler.getNumberOfFootstepVariables(), 1);
+      tmpFeedbackCost.reshape(2, 1);
+
+      // quadratic cost;
+      CommonOps.mult(solverInput_H, freeVariableSolution, tmpCost);
+      CommonOps.multTransA(freeVariableSolution, tmpCost, costToGo);
+
+      // linear cost
+      CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
+      CommonOps.addEquals(costToGo, tmpCostScalar);
+
+      // residual cost
+      CommonOps.addEquals(costToGo, solverInputResidualCost);
+   }
+
+   /**
+    * Internal method to compute the cost to go of all the tasks.
+    */
+   private void computeCostToGo()
+   {
       footstepCostToGo.zero();
       feedbackCostToGo.zero();
       dynamicRelaxationCostToGo.zero();
@@ -975,9 +1002,6 @@ public class ICPQPOptimizationSolver
       tmpFeedbackCost.reshape(2, 1);
 
       // quadratic cost;
-      CommonOps.mult(solverInput_H, freeVariableSolution, tmpCost);
-      CommonOps.multTransA(freeVariableSolution, tmpCost, costToGo);
-
       CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
       CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
 
@@ -994,9 +1018,6 @@ public class ICPQPOptimizationSolver
       }
 
       // linear cost
-      CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
-      CommonOps.addEquals(costToGo, tmpCostScalar);
-
       CommonOps.multTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepCostToGo, tmpCostScalar);
 
@@ -1010,7 +1031,6 @@ public class ICPQPOptimizationSolver
       CommonOps.addEquals(angularMomentumMinimizationCostToGo, tmpCostScalar);
 
       // residual cost
-      CommonOps.addEquals(costToGo, solverInputResidualCost);
       CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
       CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
