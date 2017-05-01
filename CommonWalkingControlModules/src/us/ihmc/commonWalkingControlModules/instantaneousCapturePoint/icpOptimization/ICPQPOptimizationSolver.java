@@ -157,6 +157,7 @@ public class ICPQPOptimizationSolver
 
    /** boolean to determine whether or not to compute the cost to go. specified at compile time. */
    private final boolean computeCostToGo;
+   private final boolean autoSetPreviousSolution;
 
    /** boolean indicating whether or not the footstep regularization term has been added and can be used. */
    private boolean hasFootstepRegularizationTerm = false;
@@ -185,7 +186,15 @@ public class ICPQPOptimizationSolver
     */
    public ICPQPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
+      this(icpOptimizationParameters, maximumNumberOfCMPVertices, computeCostToGo, true);
+   }
+
+   public ICPQPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+         boolean autoSetPreviousSolution)
+   {
       this.computeCostToGo = computeCostToGo;
+      this.autoSetPreviousSolution = autoSetPreviousSolution;
+
       indexHandler = new ICPQPIndexHandler();
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
@@ -710,11 +719,13 @@ public class ICPQPOptimizationSolver
          if (indexHandler.useStepAdjustment())
          {
             extractFootstepSolutions(footstepLocationSolution);
-            setPreviousFootstepSolution(footstepLocationSolution);
+            if (autoSetPreviousSolution)
+               setPreviousFootstepSolution(footstepLocationSolution);
          }
 
          extractFeedbackDeltaSolution(feedbackDeltaSolution);
-         setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
+         if (autoSetPreviousSolution)
+            setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
 
          extractDynamicRelaxationSolution(dynamicRelaxationSolution);
          extractAngularMomentumSolution(angularMomentumSolution);
