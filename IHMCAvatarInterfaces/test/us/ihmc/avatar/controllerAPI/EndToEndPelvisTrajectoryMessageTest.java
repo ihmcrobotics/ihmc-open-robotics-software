@@ -19,7 +19,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.ControllerPelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -208,7 +208,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       RigidBodyTransform fromWorldToDesiredPelvisOrientation = new RigidBodyTransform();
-      Quaternion walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
+      Quaternion walkingDesiredOrientation = findQuat4d(ControllerPelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
       walkingDesiredOrientation.conjugate();
       fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
 
@@ -338,7 +338,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       RigidBodyTransform fromWorldToDesiredPelvisOrientation = new RigidBodyTransform();
-      Quaternion walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
+      Quaternion walkingDesiredOrientation = findQuat4d(ControllerPelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
       walkingDesiredOrientation.conjugate();
       fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
 
@@ -403,7 +403,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          previousTimeInState = timeInState;
          if (!isDone)
          {
-            walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
+            walkingDesiredOrientation = findQuat4d(ControllerPelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
             walkingDesiredOrientation.conjugate();
             fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
 
@@ -565,7 +565,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static boolean findControllerStopBooleanForOrientation(SimulationConstructionSet scs)
    {
-      return ((BooleanYoVariable) scs.getVariable(PelvisOrientationManager.class.getSimpleName(), "isPelvisOrientationOffsetTrajectoryStopped")).getBooleanValue();
+      return ((BooleanYoVariable) scs.getVariable(ControllerPelvisOrientationManager.class.getSimpleName(), "isPelvisOrientationOffsetTrajectoryStopped")).getBooleanValue();
    }
 
    public static boolean findControllerStopBooleanForXY(SimulationConstructionSet scs)
