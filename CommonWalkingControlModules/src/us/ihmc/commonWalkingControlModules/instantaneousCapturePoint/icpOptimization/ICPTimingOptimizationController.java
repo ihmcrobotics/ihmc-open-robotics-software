@@ -44,7 +44,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final double TIMING_ADJUSTMENT_COST = 100.0;
    private static final double QUADRATIC_COST_SCALE_FACTOR = 100.0;
    private static final double GRADIENT_THRESHOLD = 1.0;
-   private static final double GRADIENT_GAIN = 0.1;
+   private static final double GRADIENT_GAIN = 0.02;
    private static final int NUMBER_OF_ITERATIONS = 30;
 
    private static final String yoNamePrefix = "controller";
@@ -757,6 +757,13 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
    private NoConvergenceException solveGradientDescent(int numberOfFootstepsToConsider, double omega0)
    {
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      {
+         costToGos.get(i).setToNaN();
+         costToGoGradients.get(i).setToNaN();
+         timingAdjustments.get(i).setToNaN();
+      }
+
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
 
       double originalSwingDuration = swingDurations.get(0).getDoubleValue();
@@ -770,14 +777,14 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       // modify current single support duration
       if (varyPositiveDirection)
       {
-         swingDurations.get(0).add(variationSize);
          varyPositiveDirection = false;
       }
       else
       {
-         swingDurations.get(0).sub(variationSize);
+         variationSize *= -1.0;
          varyPositiveDirection = true;
       }
+      swingDurations.get(0).add(variationSize);
 
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
       noConvergenceException = solveQP();
@@ -792,10 +799,9 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       qpOriginalCostToGo = totalCostToGo;
 
       int iterationNumber = 0;
-      while (costToGoGradient > GRADIENT_THRESHOLD)
+      while (Math.abs(costToGoGradient) > GRADIENT_THRESHOLD)
       {
          iterationNumber++;
-         //variationSize = -GRADIENT_GAIN / Math.pow(TIMING_ADJUSTMENT_COST, 2.0) * costToGoGradient; // // FIXME: 4/29/17 do something fancy
          variationSize = -GRADIENT_GAIN * costToGoGradient; // // FIXME: 4/29/17 do something fancy
 
          if (iterationNumber >= NUMBER_OF_ITERATIONS)
