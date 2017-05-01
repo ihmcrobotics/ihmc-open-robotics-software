@@ -1,21 +1,21 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+
+import java.util.ArrayList;
 
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
@@ -293,6 +293,18 @@ public class ICPQPOptimizationSolver
    }
 
    /**
+    * Adds a convex polygon to the CoP location constraint. The CoP is constrained to the inside of the convex hull described
+    * by this polygon.
+    *
+    * @param polygon polygon to add.
+    */
+   public void addSupportPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      copLocationConstraint.addPolygon(polygon);
+   }
+
+   /**
     * Resets the reachability constraint on the upcoming footstep location. This constraint requires that the footstep lies in the convex hull of this polygon.
     */
    public void resetReachabilityConstraint()
@@ -314,6 +326,12 @@ public class ICPQPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);
+   }
+
+   public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      reachabilityConstraint.addPolygon(polygon);
    }
 
    /**
@@ -1027,10 +1045,11 @@ public class ICPQPOptimizationSolver
    /**
     * Gets the magnitude of the dynamic relaxation that is a slack variable in the recursive ICP dynamics.
     *
-    * @param dynamicRelaxationToPack magnitude of the slack variable. Modoified.
+    * @param dynamicRelaxationToPack magnitude of the slack variable. Modified.
     */
    public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
    {
+      dynamicRelaxationToPack.setToZero(worldFrame);
       dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
       dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
@@ -1043,8 +1062,9 @@ public class ICPQPOptimizationSolver
     */
    public void getCMPDifferenceFromCoP(FramePoint2d differenceToPack)
    {
-      differenceToPack.setX(dynamicRelaxationSolution.get(0, 0));
-      differenceToPack.setY(dynamicRelaxationSolution.get(1, 0));
+      differenceToPack.setToZero(worldFrame);
+      differenceToPack.setX(angularMomentumSolution.get(0, 0));
+      differenceToPack.setY(angularMomentumSolution.get(1, 0));
    }
 
    /**
