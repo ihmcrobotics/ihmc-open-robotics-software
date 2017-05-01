@@ -133,10 +133,8 @@ public class ICPOptimizationController
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
-   private final ExecutionTimer conditionSettingTimer = new ExecutionTimer("icpConditionSettingTimer", 0.5, registry);
-   private final ExecutionTimer solutionReadingTimer = new ExecutionTimer("icpSolutionReadingTimer", 0.5, registry);
-   private final ExecutionTimer startingComputeTimer = new ExecutionTimer("icpStartingComputeTimer", 0.5, registry);
    private final ExecutionTimer multiplierCalculatorTimer = new ExecutionTimer("icpMultiplierCalculatorTimer", 0.5, registry);
+   private final ExecutionTimer referenceValueComputationTimer = new ExecutionTimer("icpReferenceValueComputationTimer", 0.5, registry);
 
    private final ICPOptimizationSolver solver;
 
@@ -686,7 +684,6 @@ public class ICPOptimizationController
    {
       controllerTimer.startMeasurement();
 
-      startingComputeTimer.startMeasurement();
       desiredICP.changeFrame(worldFrame);
       desiredICPVelocity.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
@@ -704,22 +701,17 @@ public class ICPOptimizationController
 
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
-      startingComputeTimer.stopMeasurement();
 
-      conditionSettingTimer.startMeasurement();
       if (isStanding.getBooleanValue())
          submitSolverTaskConditionsForFeedbackOnlyControl();
       else
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
-      conditionSettingTimer.stopMeasurement();
 
       qpSolverTimer.startMeasurement();
       NoConvergenceException noConvergenceException = solveQP();
       qpSolverTimer.stopMeasurement();
 
-      solutionReadingTimer.startMeasurement();
       extractSolutionsFromSolver(numberOfFootstepsToConsider, omega0, noConvergenceException);
-      solutionReadingTimer.stopMeasurement();
 
       controllerTimer.stopMeasurement();
    }
@@ -772,11 +764,13 @@ public class ICPOptimizationController
                   numberOfFootstepsToConsider, solver);
 
          solver.getCMPFeedbackDifference(tempVector2d);
+         controllerFeedbackCMPDelta.set(tempVector2d);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
       }
 
+      referenceValueComputationTimer.startMeasurement();
       if (isStanding.getBooleanValue())
       {
          solutionHandler.setReferenceValues(desiredICP, desiredICPVelocity, omega0);
@@ -793,6 +787,7 @@ public class ICPOptimizationController
          if (useDifferentSplitRatioForBigAdjustment && !isInTransfer.getBooleanValue())
             computeUpcomingDoubleSupportSplitFraction(numberOfFootstepsToConsider, omega0);
       }
+      referenceValueComputationTimer.stopMeasurement();
 
       solver.getDynamicRelaxation(tempPoint2d);
       dynamicRelaxation.set(tempPoint2d);
@@ -804,10 +799,10 @@ public class ICPOptimizationController
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());
 
+      controllerFeedbackCMPDelta.getFrameTuple2d(tempVector2d);
       solutionHandler.getControllerReferenceCMP(tempPoint2d);
       controllerFeedbackCMP.set(tempPoint2d);
       controllerFeedbackCMP.add(tempVector2d);
-      controllerFeedbackCMPDelta.set(tempVector2d);
    }
 
 

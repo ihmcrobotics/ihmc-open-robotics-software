@@ -1047,10 +1047,11 @@ public class ICPOptimizationSolver
    /**
     * Gets the magnitude of the dynamic relaxation that is a slack variable in the recursive ICP dynamics.
     *
-    * @param dynamicRelaxationToPack magnitude of the slack variable. Modoified.
+    * @param dynamicRelaxationToPack magnitude of the slack variable. Modified.
     */
    public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
    {
+      dynamicRelaxationToPack.setToZero(worldFrame);
       dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
       dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
@@ -1063,8 +1064,9 @@ public class ICPOptimizationSolver
     */
    public void getCMPDifferenceFromCoP(FramePoint2d differenceToPack)
    {
-      differenceToPack.setX(dynamicRelaxationSolution.get(0, 0));
-      differenceToPack.setY(dynamicRelaxationSolution.get(1, 0));
+      differenceToPack.setToZero(worldFrame);
+      differenceToPack.setX(angularMomentumSolution.get(0, 0));
+      differenceToPack.setY(angularMomentumSolution.get(1, 0));
    }
 
    /**
