@@ -10,6 +10,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -290,6 +291,18 @@ public class ICPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       copLocationConstraint.addVertex(tmpPoint);
+   }
+
+   /**
+    * Adds a convex polygon to the CoP location constraint. The CoP is constrained to the inside of the convex hull described
+    * by this polygon.
+    *
+    * @param polygon polygon to add.
+    */
+   public void addSupportPolygon(FrameConvexPolygon2d polygon)
+   {
+      polygon.changeFrame(worldFrame);
+      copLocationConstraint.addPolygon(polygon);
    }
 
    /**
