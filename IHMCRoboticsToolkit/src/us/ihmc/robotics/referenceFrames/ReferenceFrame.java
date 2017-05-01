@@ -471,7 +471,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @throws IllegalArgumentException if {@code isAStationaryFrame} is {@code true} and the
     *            {@code parentFrame} is not a stationary frame.
     */
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isAStationaryFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
@@ -486,7 +486,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
          inverseTransformToRoot = null;
          this.transformToParent = null;
 
-         isAStationaryFrame = true;
+         this.isAStationaryFrame = true;
          this.isZupFrame = true;
       }
       else
@@ -506,7 +506,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 //         if (isWorldFrame && !parentFrame.isAStationaryFrame)
 //            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
 
-         isAStationaryFrame = isWorldFrame;
+         this.isAStationaryFrame = isAStationaryFrame;
          this.isZupFrame = isZupFrame;
       }
    }
