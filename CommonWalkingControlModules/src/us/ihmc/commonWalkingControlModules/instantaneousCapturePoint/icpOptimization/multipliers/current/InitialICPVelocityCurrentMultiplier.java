@@ -113,19 +113,15 @@ public class InitialICPVelocityCurrentMultiplier
     */
    public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
-      double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState);
+         computeInTransfer(doubleSupportDurations, timeInState);
       else
-         positionMultiplier = 0.0;
-      this.positionMultiplier.set(positionMultiplier);
+         positionMultiplier.set(0.0);
 
       if (isInTransfer)
-         velocityMultiplier = computeInTransferVelocity();
+         computeInTransferVelocity();
       else
-         velocityMultiplier = 0.0;
-
-      this.velocityMultiplier.set(velocityMultiplier);
+         velocityMultiplier.set(0.0);
    }
 
    /**
@@ -135,9 +131,8 @@ public class InitialICPVelocityCurrentMultiplier
     *
     * @param doubleSupportDurations vector of double support durations
     * @param timeInState time in the transfer state
-    * @return position multiplier.
     */
-   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   public void computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 
@@ -157,19 +152,57 @@ public class InitialICPVelocityCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, transferInitialICPVelocityMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
    /**
     * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a
     * cubic spline, so this is used to calculate the position multiplier.
-    *
-    * @return velocity multiplier.
     */
-   private double computeInTransferVelocity()
+   public void computeInTransferVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, transferInitialICPVelocityMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
+   }
+
+   public void computeInSwingOneCMP()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeInSwingOneCMPVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingFirstSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingSecondSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingThirdSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingFirstSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingSecondSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingThirdSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
    }
 }
