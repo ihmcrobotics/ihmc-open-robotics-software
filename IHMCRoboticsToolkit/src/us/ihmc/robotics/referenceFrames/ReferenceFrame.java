@@ -503,8 +503,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
             this.transformToParent.normalizeRotationPart();
          }
 
-//         if (isWorldFrame && !parentFrame.isAStationaryFrame)
-//            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
+         if (isAStationaryFrame && !parentFrame.isAStationaryFrame)
+            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
 
          this.isAStationaryFrame = isAStationaryFrame;
          this.isZupFrame = isZupFrame;
