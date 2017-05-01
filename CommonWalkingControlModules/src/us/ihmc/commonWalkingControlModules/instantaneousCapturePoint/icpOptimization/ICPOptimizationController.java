@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,6 +28,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ICPOptimizationController
 {
@@ -581,7 +581,6 @@ public class ICPOptimizationController
    private void submitSolverTaskConditionsForFeedbackOnlyControl()
    {
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       solver.resetFootstepConditions();
 
@@ -604,15 +603,9 @@ public class ICPOptimizationController
       multiplierCalculatorTimer.stopMeasurement();
 
       if (isInTransfer.getBooleanValue())
-      {
          copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-         //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
-      }
       else
-      {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
-         //reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
-      }
 
 
       solver.resetFootstepConditions();

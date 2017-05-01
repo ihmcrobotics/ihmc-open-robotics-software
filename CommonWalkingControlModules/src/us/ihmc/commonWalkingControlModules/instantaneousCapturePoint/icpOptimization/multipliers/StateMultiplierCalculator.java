@@ -1,21 +1,19 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.*;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.RecursionMultipliers;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StateMultiplierCalculator
 {
@@ -41,8 +39,8 @@ public class StateMultiplierCalculator
    private final InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier;
    private final StateEndCurrentMultiplier stateEndCurrentMultiplier;
 
-   private final NewCubicMatrix cubicMatrix;
-   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
+   private final EfficientCubicMatrix cubicMatrix;
+   private final EfficientCubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final int maxNumberOfFootstepsToConsider;
 
@@ -73,8 +71,8 @@ public class StateMultiplierCalculator
       currentSwingSegment = new IntegerYoVariable(yoNamePrefix + "CurrentSegment", registry);
 
 
-      cubicMatrix = new NewCubicMatrix();
-      cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
+      cubicMatrix = new EfficientCubicMatrix();
+      cubicDerivativeMatrix = new EfficientCubicDerivativeMatrix();
 
       boolean clipTime = true;
 
