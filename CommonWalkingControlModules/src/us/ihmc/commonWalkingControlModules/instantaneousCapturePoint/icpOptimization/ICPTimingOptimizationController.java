@@ -202,7 +202,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
-      solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO);
+      solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, false);
 
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
