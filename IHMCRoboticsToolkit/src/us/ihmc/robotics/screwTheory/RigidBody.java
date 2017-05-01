@@ -94,7 +94,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     */
    public RigidBody(String bodyName, ReferenceFrame parentInertialFrame)
    {
-      this(bodyName, new RigidBodyTransform(), parentInertialFrame, true);
+      this(bodyName, new RigidBodyTransform(), parentInertialFrame);
    }
 
    /**
@@ -113,18 +113,16 @@ public class RigidBody implements NameBasedHashCodeHolder
     */
    public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame)
    {
-      this(bodyName, transformToParent, parentInertialFrame, false);
-   }
-
-   private RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame, boolean isZUpFrame)
-   {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
 
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       name = bodyName;
       inertia = null;
-      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, parentInertialFrame.isAStationaryFrame(), isZUpFrame);
+      boolean isParentStationary = parentInertialFrame.isAStationaryFrame();
+      boolean isZUpFrame = isParentStationary && transformToParent.isRotation2D();
+      
+      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, isParentStationary, isZUpFrame);
       parentJoint = null;
    }
 
