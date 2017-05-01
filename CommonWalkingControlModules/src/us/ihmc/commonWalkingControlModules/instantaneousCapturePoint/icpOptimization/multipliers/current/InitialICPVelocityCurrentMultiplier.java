@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -17,9 +19,9 @@ import java.util.List;
 public class InitialICPVelocityCurrentMultiplier
 {
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
-   private final CubicMatrix cubicMatrix;
+   private final NewCubicMatrix cubicMatrix;
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
 
    /** whether or not the cubic matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicMatrix;
@@ -42,14 +44,15 @@ public class InitialICPVelocityCurrentMultiplier
       this(null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
+   public InitialICPVelocityCurrentMultiplier(NewCubicMatrix cubicMatrix, NewCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix,
+         YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new CubicMatrix();
+         this.cubicMatrix = new NewCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -60,7 +63,7 @@ public class InitialICPVelocityCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
@@ -110,19 +113,15 @@ public class InitialICPVelocityCurrentMultiplier
     */
    public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
-      double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState);
+         computeInTransfer(doubleSupportDurations, timeInState);
       else
-         positionMultiplier = 0.0;
-      this.positionMultiplier.set(positionMultiplier);
+         positionMultiplier.set(0.0);
 
       if (isInTransfer)
-         velocityMultiplier = computeInTransferVelocity();
+         computeInTransferVelocity();
       else
-         velocityMultiplier = 0.0;
-
-      this.velocityMultiplier.set(velocityMultiplier);
+         velocityMultiplier.set(0.0);
    }
 
    /**
@@ -132,9 +131,8 @@ public class InitialICPVelocityCurrentMultiplier
     *
     * @param doubleSupportDurations vector of double support durations
     * @param timeInState time in the transfer state
-    * @return position multiplier.
     */
-   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   public void computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 
@@ -154,19 +152,57 @@ public class InitialICPVelocityCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, transferInitialICPVelocityMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
    /**
     * Computes the position multiplier when in the transfer phase. During this phase, the trajectory is a
     * cubic spline, so this is used to calculate the position multiplier.
-    *
-    * @return velocity multiplier.
     */
-   private double computeInTransferVelocity()
+   public void computeInTransferVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, transferInitialICPVelocityMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
+   }
+
+   public void computeInSwingOneCMP()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeInSwingOneCMPVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingFirstSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingSecondSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingThirdSegment()
+   {
+      positionMultiplier.set(0.0);
+   }
+
+   public void computeSwingFirstSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingSecondSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
+   }
+
+   public void computeSwingThirdSegmentVelocity()
+   {
+      velocityMultiplier.set(0.0);
    }
 }
