@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.MathTools;
 
-public class NewCubicMatrix extends DenseMatrix64F
+public class EfficientCubicMatrix extends DenseMatrix64F
 {
    private double duration;
    private double duration2;
    private double duration3;
 
-   public NewCubicMatrix()
+   public EfficientCubicMatrix()
    {
       super(1, 4);
    }
