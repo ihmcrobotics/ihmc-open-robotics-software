@@ -124,7 +124,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       name = bodyName;
       inertia = null;
-      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, true, isZUpFrame);
+      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, parentInertialFrame.isAStationaryFrame(), isZUpFrame);
       parentJoint = null;
    }
 
