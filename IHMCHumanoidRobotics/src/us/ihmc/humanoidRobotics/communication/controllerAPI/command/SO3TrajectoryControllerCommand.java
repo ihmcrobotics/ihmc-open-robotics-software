@@ -71,6 +71,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
     */
    public void set(SE3TrajectoryControllerCommand<?, ?> command)
    {
+      clear(command.getDataFrame());
+      trajectoryFrame = command.getTrajectoryFrame();
       getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
       setQueueqableCommandVariables(command);
    }
