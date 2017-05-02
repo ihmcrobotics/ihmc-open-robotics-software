@@ -140,12 +140,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new AtlasStraightLegWalkingParameters(false)
                   {
                      @Override
-                     public boolean includeHipPitchPrivilegedConfiguration()
-                     {
-                        return true;
-                     }
-
-                     @Override
                      public double getSpeedForSupportKneeStraightening()
                      {
                         return 1.0;
