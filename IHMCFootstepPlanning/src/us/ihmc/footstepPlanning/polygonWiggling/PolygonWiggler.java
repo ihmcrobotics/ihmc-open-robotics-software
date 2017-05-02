@@ -219,18 +219,24 @@ public class PolygonWiggler
 
    public static void convertToInequalityConstraintsPoint(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b)
    {
-      A.reshape(2, 2);
-      b.reshape(2, 1);
+      A.reshape(4, 2);
+      b.reshape(4, 1);
 
       A.set(0, 0, 1.0);
-      A.set(0, 1, 1.0);
-      A.set(1, 0, -1.0);
-      A.set(1, 1, -1.0);
+      A.set(0, 1, 0.0);
+      A.set(1, 0, 0.0);
+      A.set(1, 1, 1.0);
+      A.set(2, 0, -1.0);
+      A.set(2, 1, 0.0);
+      A.set(3, 0, 0.0);
+      A.set(3, 1, -1.0);
 
       Point2DReadOnly point = polygon.getVertex(0);
 
-      b.set(0, 0, point.getX() + point.getY());
-      b.set(1, 0, -point.getX() - point.getY());
+      b.set(0, 0, point.getX());
+      b.set(1, 0, point.getY());
+      b.set(2, 0, -point.getX());
+      b.set(3, 0, -point.getY());
    }
 
    public static void convertToInequalityConstraintsLine(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
