@@ -164,7 +164,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       elevator = new RigidBody("elevator", worldFrame);
       elevatorFrame = elevator.getBodyFixedFrame();
 
-      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
+      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator);
       bodyRigidBody = createBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)

@@ -614,7 +614,7 @@ public class ScrewTestTools
       {
          elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
-         rootJoint = new SixDoFJoint("rootJoint", elevator, elevator.getBodyFixedFrame());
+         rootJoint = new SixDoFJoint("rootJoint", elevator);
          RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
          revoluteJoints = new ArrayList<RevoluteJoint>();

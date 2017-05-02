@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -57,11 +58,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    private boolean isOnline = true;
 
-   public OneDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame)
+   public OneDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
-      super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = afterJointFrame;
+      super(name, predecessor, transformToParent);
+      this.afterJointFrame = createAfterJointFrame(beforeJointFrame);
    }
+
+   protected abstract OneDoFJointReferenceFrame createAfterJointFrame(ReferenceFrame beforeJointFrame);
 
    @Override
    public ReferenceFrame getFrameAfterJoint()

@@ -32,9 +32,14 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public PlanarJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public PlanarJoint(String name, RigidBody predecessor)
    {
-      super(name, predecessor, beforeJointFrame);
+      this(name, predecessor, null);
+   }
+
+   public PlanarJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   {
+      super(name, predecessor, transformToParent);
 
       afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);

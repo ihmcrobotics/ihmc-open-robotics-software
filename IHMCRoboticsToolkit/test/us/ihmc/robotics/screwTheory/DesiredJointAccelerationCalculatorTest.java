@@ -31,7 +31,7 @@ public class DesiredJointAccelerationCalculatorTest
                                         new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevatorFrame);
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
       RigidBody floatingBase = ScrewTestTools.addRandomRigidBody("floatingBase", random, sixDoFJoint);
 
       ArrayList<RevoluteJoint> jointsList = new ArrayList<RevoluteJoint>();

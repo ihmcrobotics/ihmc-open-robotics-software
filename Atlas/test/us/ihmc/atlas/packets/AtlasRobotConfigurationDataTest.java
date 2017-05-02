@@ -14,9 +14,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -49,7 +49,7 @@ public class AtlasRobotConfigurationDataTest
       RigidBody body = new RigidBody("aap", ReferenceFrame.getWorldFrame());
       for (int i = 0; i < joints.length; i++)
       {
-         joints[i] = new RevoluteJoint("noot", body, ReferenceFrame.getWorldFrame(), new FrameVector(ReferenceFrame.getWorldFrame(), 1, 0, 0));
+         joints[i] = new RevoluteJoint("noot", body, new RigidBodyTransform(), new Vector3D(1, 0, 0));
       }
       
       RigidBody body2 = ScrewTools.addRigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());

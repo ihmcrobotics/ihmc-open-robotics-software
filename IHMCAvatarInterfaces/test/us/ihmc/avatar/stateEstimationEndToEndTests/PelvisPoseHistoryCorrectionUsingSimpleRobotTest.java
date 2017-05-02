@@ -272,7 +272,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          }
       };
       RigidBody rigidBody = new RigidBody("pelvis", refFrame);
-      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody, refFrame);
+      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
    private void setupSim()

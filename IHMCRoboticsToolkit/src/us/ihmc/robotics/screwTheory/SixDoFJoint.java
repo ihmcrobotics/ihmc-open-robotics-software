@@ -33,9 +33,14 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public SixDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public SixDoFJoint(String name, RigidBody predecessor)
    {
-      super(name, predecessor, beforeJointFrame);
+      this(name, predecessor, null);
+   }
+
+   public SixDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   {
+      super(name, predecessor, transformToParent);
       afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);

@@ -316,7 +316,7 @@ public class SimulatedIMURawSensorReaderTest
          elevator = new RigidBody("elevator", worldFrame);
          elevatorFrame = elevator.getBodyFixedFrame();
 
-         rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+         rootJoint = new SixDoFJoint("rootJoint", elevator);
 
          body = ScrewTools.addRigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
 

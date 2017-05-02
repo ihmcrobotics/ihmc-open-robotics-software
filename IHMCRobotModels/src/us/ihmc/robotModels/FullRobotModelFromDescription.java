@@ -99,8 +99,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
        * Create root object
        */
       elevator = new RigidBody("elevator", worldFrame);
-      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
-      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator, elevatorFrame);
+      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator);
       if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");
