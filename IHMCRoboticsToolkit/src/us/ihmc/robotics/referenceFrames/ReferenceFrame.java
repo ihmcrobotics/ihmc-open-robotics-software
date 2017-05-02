@@ -115,18 +115,22 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private final boolean isZupFrame;
 
    /**
-    * {@code worldFrame} is an inertial root reference frame with its axes aligned as follows:
+    * {@code worldFrame} is a root reference frame and is most of time the only root reference
+    * frame.
+    * <p>
+    * It is commonly assumed that its axes are aligned as follows:
     * <ul>
     * <li>The x-axis is usually referred to as the forward axis.
     * <li>With the x-axis referring forward, the y-axis points to the left.
     * <li>The z-axis points upward and usually points to the opposite direction to the gravitational
     * acceleration.
     * </ul>
+    * </p>
     */
    private static final ReferenceFrame worldFrame = constructARootFrame("World");
 
    /**
-    * Construct a new inertial z-up root reference frame.
+    * Construct a new z-up root reference frame.
     * <p>
     * Most of the time, {@link #worldFrame} is the only root frame from which children reference
     * frames are added.
@@ -337,7 +341,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    /**
-    * Creates a new inertial z-up root reference frame.
+    * Creates a new root reference frame.
     * <p>
     * Please use the method {@link #constructARootFrame(String)} instead. This is to use only when
     * extending this class.
@@ -471,7 +475,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @throws IllegalArgumentException if {@code isAStationaryFrame} is {@code true} and the
     *            {@code parentFrame} is not a stationary frame.
     */
-   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame, boolean isZupFrame)
+   public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isAStationaryFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
@@ -486,7 +490,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
          inverseTransformToRoot = null;
          this.transformToParent = null;
 
-         isAStationaryFrame = true;
+         this.isAStationaryFrame = true;
          this.isZupFrame = true;
       }
       else
@@ -503,10 +507,10 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
             this.transformToParent.normalizeRotationPart();
          }
 
-//         if (isWorldFrame && !parentFrame.isAStationaryFrame)
-//            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
+         if (isAStationaryFrame && !parentFrame.isAStationaryFrame)
+            throw new IllegalArgumentException("The child of a non-stationary frame cannot be stationary.");
 
-         isAStationaryFrame = isWorldFrame;
+         this.isAStationaryFrame = isAStationaryFrame;
          this.isZupFrame = isZupFrame;
       }
    }

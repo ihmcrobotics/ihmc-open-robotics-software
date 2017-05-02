@@ -453,6 +453,80 @@ public class TwistCalculatorTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.03)
+   @Test(timeout = 30000)
+   public void testGetTwistOfBodyFixedReferenceFrame() throws Exception
+   {
+      Random random = new Random(234234L);
+
+      int numberOfJoints = 100;
+      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
+
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+
+      Twist actualTwist = new Twist();
+      Twist expectedTwist = new Twist();
+      Twist actualRelativeTwist = new Twist();
+      Twist expectedRelativeTwist = new Twist();
+
+      for (int i = 0; i < 100; i++)
+      {
+         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
+         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
+
+         joints.get(0).updateFramesRecursively();
+
+         twistCalculator.compute();
+
+         for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
+         {
+            OneDoFJoint joint = joints.get(jointIndex);
+            RigidBody body = joint.getSuccessor();
+            ReferenceFrame bodyFrame = body.getBodyFixedFrame();
+            twistCalculator.getTwistOfReferenceFrame(bodyFrame, actualTwist);
+            twistCalculator.getTwistOfBody(body, expectedTwist);
+
+            assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+
+            // Assert relative twist
+            for (int baseJointIndex = 0; baseJointIndex < joints.size(); baseJointIndex++)
+            {
+               RigidBody base = joints.get(baseJointIndex).getSuccessor();
+               ReferenceFrame baseFrame = base.getBodyFixedFrame();
+               twistCalculator.getRelativeTwist(baseFrame, bodyFrame, actualRelativeTwist);
+               twistCalculator.getRelativeTwist(base, body, expectedRelativeTwist);
+
+               assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-12);
+            }
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.03)
+   @Test(timeout = 30000)
+   public void testUnhandledReferenceFrameExceptions() throws Exception
+   {
+      Random random = new Random(234234L);
+
+      int numberOfJoints = 100;
+      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
+
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+      Twist twist = new Twist();
+
+      try
+      {
+         twistCalculator.getTwistOfReferenceFrame(ReferenceFrame.constructARootFrame("blop"), twist);
+      }
+      catch (ScrewTheoryException e)
+      {
+         // good
+      }
+
+      // The twist calculator can handle 
+      twistCalculator.getTwistOfReferenceFrame(ReferenceFrame.constructARootFrame("blop"), twist);
+   }
+
    public static void assertTwistEquals(Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
    {
       try
