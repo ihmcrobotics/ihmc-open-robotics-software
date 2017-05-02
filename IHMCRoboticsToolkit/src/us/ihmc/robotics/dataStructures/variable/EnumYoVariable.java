@@ -23,6 +23,11 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       return new EnumYoVariable<>(name, registry, enumType);
    }
 
+   public static <T extends Enum<T>> EnumYoVariable<T> create(String name, Class<T> enumType, YoVariableRegistry registry, boolean allowNullValue)
+   {
+      return new EnumYoVariable<>(name, registry, enumType, allowNullValue);
+   }
+
    /**
     * shortcut construction method; infers the type parameter from the declared type
     */
@@ -30,6 +35,8 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
    {
       return new EnumYoVariable<>(name, description, registry, enumType, allowNullValue);
    }
+
+
 
    /**
     * Creates a new YoVariable with the given name and type and adds it to the specified registry.  This
