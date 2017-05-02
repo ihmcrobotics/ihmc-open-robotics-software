@@ -47,6 +47,14 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test
+   public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingWithUserControl();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

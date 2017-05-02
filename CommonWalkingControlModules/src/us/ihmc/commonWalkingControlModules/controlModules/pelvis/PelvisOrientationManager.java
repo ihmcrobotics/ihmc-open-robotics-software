@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -26,6 +27,7 @@ public class PelvisOrientationManager
 
    private final GenericStateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
    private final EnumYoVariable<PelvisOrientationControlMode> requestedState;
+   private final BooleanYoVariable enableUserPelvisControlDuringWalking = new BooleanYoVariable("EnableUserPelvisControlDuringWalking", registry);
 
    private final ControllerPelvisOrientationManager walkingManager;
    private final UserPelvisOrientationManager userManager;
@@ -44,6 +46,8 @@ public class PelvisOrientationManager
       walkingManager = new ControllerPelvisOrientationManager(gains, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
       setupStateMachine();
+
+      enableUserPelvisControlDuringWalking.set(false);
    }
 
    private void setupStateMachine()
@@ -92,6 +96,9 @@ public class PelvisOrientationManager
 
    public void prepareForLocomotion()
    {
+      if (enableUserPelvisControlDuringWalking.getBooleanValue())
+         return;
+
       updateOffsetInWalkingManager();
       requestState(walkingManager.getStateEnum());
    }
@@ -164,6 +171,7 @@ public class PelvisOrientationManager
 
    public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
+      enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
       stateMachine.getCurrentState().getCurrentDesiredOrientation(tempOrientation);
       userManager.handlePelvisOrientationTrajectoryCommands(command, tempOrientation);
       requestState(userManager.getStateEnum());

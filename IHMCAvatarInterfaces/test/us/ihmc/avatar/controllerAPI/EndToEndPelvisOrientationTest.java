@@ -191,6 +191,29 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs);
    }
 
+   public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
+   {
+      double trajectoryTime = 0.5;
+      Quaternion desiredOrientation = new Quaternion();
+      ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
+
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredOrientation);
+      message.setTrajectoryReferenceFrameId(midFootZUpGroundFrame);
+      message.setDataReferenceFrameId(midFootZUpGroundFrame);
+      message.setEnableUserPelvisControlDuringWalking(true);
+
+      assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
+      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
+      assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+      double walkingTime = createWalkingMessage(4, footsteps);
+      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime / 2.0);
+      assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+   }
+
    @SuppressWarnings("unchecked")
    private PelvisOrientationControlMode findCurrentControlMode()
    {
