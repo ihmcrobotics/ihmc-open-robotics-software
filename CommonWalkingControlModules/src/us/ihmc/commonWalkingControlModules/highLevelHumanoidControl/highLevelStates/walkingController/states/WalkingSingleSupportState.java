@@ -68,7 +68,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager = managerFactory.getOrCreateFeetManager();
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
-      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getPercentOfSwingToStraightenLeg());
+      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
