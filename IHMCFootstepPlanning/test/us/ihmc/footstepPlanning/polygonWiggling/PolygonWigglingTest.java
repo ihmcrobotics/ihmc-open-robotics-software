@@ -771,10 +771,11 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testConvexConstraintOfPoint()
    {
-      DenseMatrix64F A = new DenseMatrix64F(2, 2);
-      DenseMatrix64F b = new DenseMatrix64F(2);
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
 
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       Point2D point = new Point2D();
@@ -788,19 +789,19 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX());
       x.set(1, 0, point.getY());
 
-      CommonOps.mult(A, x, x);
-      for (int i = 0; i < 2; i++)
-         assertTrue(x.get(i, 0) <= b.get(i, 0));
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
 
       // test if slightly both greater the actual point satisfies constraint
       double offset = 0.05 * random.nextDouble();
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       boolean allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x slightly less the actual point satisfies constraint
@@ -808,10 +809,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY());
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if y slightly less the actual point satisfies constraint
@@ -819,10 +820,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX());
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x slightly both the actual point satisfies constraint
@@ -830,10 +831,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY());
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if y slightly both the actual point satisfies constraint
@@ -841,10 +842,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX());
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if both slightly less the actual point satisfies constraint
@@ -852,10 +853,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x slightly greater y slightly less the actual point satisfies constraint
@@ -863,10 +864,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x slightly less y slightly greater the actual point satisfies constraint
@@ -874,10 +875,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if a lot off the actual point satisfies constraint
@@ -885,10 +886,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x a lot less the actual point satisfies constraint
@@ -896,10 +897,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY());
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if y a lot less the actual point satisfies constraint
@@ -907,10 +908,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX());
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x a lot both the actual point satisfies constraint
@@ -918,10 +919,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY());
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if y a lot both the actual point satisfies constraint
@@ -929,10 +930,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX());
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if both a lot less the actual point satisfies constraint
@@ -940,10 +941,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x a lot greater y a lot less the actual point satisfies constraint
@@ -951,10 +952,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() + offset);
       x.set(1, 0, point.getY() - offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
 
       // test if x a lot less y a lot greater the actual point satisfies constraint
@@ -962,10 +963,10 @@ public class PolygonWigglingTest
       x.set(0, 0, point.getX() - offset);
       x.set(1, 0, point.getY() + offset);
 
-      CommonOps.mult(A, x, x);
+      CommonOps.mult(A, x, solution);
       allLessThan = true;
-      for (int i = 0; i < 2; i++)
-         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
       assertFalse(allLessThan);
    }
 
