@@ -92,9 +92,9 @@ public class TransferToStandingState extends WalkingState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       // Just standing in double support, do nothing
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
+      pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.initializeICPPlanForStanding(finalTransferTime);
    }
 

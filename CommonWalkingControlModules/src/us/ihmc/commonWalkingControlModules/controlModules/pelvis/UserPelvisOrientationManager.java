@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -24,7 +25,6 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
 
    private final FramePose tempPose = new FramePose();
    private final RigidBodyTaskspaceControlState taskspaceControlState;
-   private final FramePose homePose = new FramePose();
    private final ReferenceFrame baseFrame;
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
@@ -58,14 +58,6 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       taskspaceControlState.setWeights(angularWeight, null);
    }
 
-   public void goHome(double trajectoryTime, FrameOrientation initialOrientation)
-   {
-      tempPose.setToNaN(initialOrientation.getReferenceFrame());
-      tempPose.setOrientation(initialOrientation);
-      homePose.setToZero(baseFrame);
-      taskspaceControlState.goToPose(homePose, tempPose, trajectoryTime);
-   }
-
    @Override
    public void doAction()
    {
@@ -92,7 +84,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    }
 
    @Override
-   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
       orientationFeedbackControlCommand.setGains(spatialFeedbackControlCommand.getGains().getOrientationGains());

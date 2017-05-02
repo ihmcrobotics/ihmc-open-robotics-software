@@ -116,8 +116,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
-
    private final BooleanYoVariable hasICPPlannerBeenInitializedAtStart = new BooleanYoVariable("hasICPPlannerBeenInitializedAtStart", registry);
 
    private final BooleanYoVariable enablePushRecoveryOnFailure = new BooleanYoVariable("enablePushRecoveryOnFailure", registry);
@@ -208,8 +206,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       this.statusOutputManager = statusOutputManager;
 
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
-
-      hasWalkingControllerBeenInitialized.set(false);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
@@ -490,16 +486,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double stepTime = walkingMessageHandler.getDefaultStepTime();
       pelvisOrientationManager.setTrajectoryTime(stepTime);
 
-      if (!hasWalkingControllerBeenInitialized.getBooleanValue())
-      {
-         pelvisOrientationManager.setToZeroInMidFeetZUpFrame();
-         hasWalkingControllerBeenInitialized.set(true);
-      }
-      else
-      {
-         pelvisOrientationManager.setToHoldCurrentInWorldFrame();
-      }
-
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
@@ -515,8 +501,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
       hasICPPlannerBeenInitializedAtStart.set(false);
       stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
-
-      hasWalkingControllerBeenInitialized.set(true);
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
@@ -748,7 +732,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void reinitializePelvisOrientation(boolean reinitialize)
    {
-      hasWalkingControllerBeenInitialized.set(!reinitialize);
+      pelvisOrientationManager.initialize();
    }
 
    @Override
