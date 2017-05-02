@@ -207,6 +207,35 @@ public class PolygonWiggler
    public static void convertToInequalityConstraints(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
+
+      if (constraints > 2)
+         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside);
+      else if (constraints > 1)
+         convertToInequalityConstraintsLine(polygon, A, b, deltaInside);
+      else
+         convertToInequalityConstraintsPoint(polygon, A, b);
+
+   }
+
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b)
+   {
+      A.reshape(2, 2);
+      b.reshape(2, 1);
+
+      A.set(0, 0, 1.0);
+      A.set(0, 1, 1.0);
+      A.set(1, 0, -1.0);
+      A.set(1, 1, -1.0);
+
+      Point2DReadOnly point = polygon.getVertex(0);
+
+      b.set(0, 0, point.getX() + point.getY());
+      b.set(1, 0, -point.getX() - point.getY());
+   }
+
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
 
@@ -226,9 +255,37 @@ public class PolygonWiggler
          A.set(i, 1, tempVector.getX());
          b.set(i, -deltaInside + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
 
-//         A.set(i, 0, firstPoint.y - secondPoint.y);
-//         A.set(i, 1, -firstPoint.x + secondPoint.x);
-//         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+         //         A.set(i, 0, firstPoint.y - secondPoint.y);
+         //         A.set(i, 1, -firstPoint.x + secondPoint.x);
+         //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+      }
+   }
+
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      int constraints = polygon.getNumberOfVertices();
+      A.reshape(constraints, 2);
+      b.reshape(constraints, 1);
+
+      Vector2D tempVector = new Vector2D();
+
+      for (int i = 0; i < constraints; i++)
+      {
+         Point2DReadOnly firstPoint = polygon.getVertex(i);
+         Point2DReadOnly secondPoint = polygon.getNextVertex(i);
+
+         tempVector.set(secondPoint);
+         tempVector.sub(firstPoint);
+
+         tempVector.normalize();
+
+         A.set(i, 0, -tempVector.getY());
+         A.set(i, 1, tempVector.getX());
+         b.set(i, -deltaInside + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
+
+         //         A.set(i, 0, firstPoint.y - secondPoint.y);
+         //         A.set(i, 1, -firstPoint.x + secondPoint.x);
+         //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
       }
    }
 

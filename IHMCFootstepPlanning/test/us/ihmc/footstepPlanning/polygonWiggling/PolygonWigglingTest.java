@@ -11,6 +11,9 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
+import org.apache.commons.math3.random.RandomAdaptor;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -28,6 +31,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.MatrixYoVariableConversionTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.thread.ThreadTools;
@@ -761,6 +766,209 @@ public class PolygonWigglingTest
       ConvexPolygon2d hullOfRegion = new ConvexPolygon2d(plane1, plane2);
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, hullOfRegion));
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConvexConstraintOfPoint()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(2, 2);
+      DenseMatrix64F b = new DenseMatrix64F(2);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D point = new Point2D();
+      Random random = new Random();
+      point.set(random.nextDouble(), random.nextDouble());
+      polygon.addVertex(point);
+      polygon.update();
+      PolygonWiggler.convertToInequalityConstraints(polygon, A, b, 0.0);
+
+      // test actual point satisfies constraint
+      x.set(0, 0, point.getX());
+      x.set(1, 0, point.getY());
+
+      CommonOps.mult(A, x, x);
+      for (int i = 0; i < 2; i++)
+         assertTrue(x.get(i, 0) <= b.get(i, 0));
+
+      // test if slightly both greater the actual point satisfies constraint
+      double offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      boolean allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x slightly less the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY());
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if y slightly less the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX());
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x slightly both the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY());
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if y slightly both the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX());
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if both slightly less the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x slightly greater y slightly less the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x slightly less y slightly greater the actual point satisfies constraint
+      offset = 0.05 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if a lot off the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x a lot less the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY());
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if y a lot less the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX());
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x a lot both the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY());
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if y a lot both the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX());
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if both a lot less the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x a lot greater y a lot less the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() + offset);
+      x.set(1, 0, point.getY() - offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test if x a lot less y a lot greater the actual point satisfies constraint
+      offset = 1.5 * random.nextDouble();
+      x.set(0, 0, point.getX() - offset);
+      x.set(1, 0, point.getY() + offset);
+
+      CommonOps.mult(A, x, x);
+      allLessThan = true;
+      for (int i = 0; i < 2; i++)
+         allLessThan &= x.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+   }
+
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
    {
