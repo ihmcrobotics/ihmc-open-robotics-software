@@ -80,6 +80,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
