@@ -60,9 +60,11 @@ public class ICPQPInputCalculator
       tmpObjective.zero();
       tmpObjective.set(objective);
       CommonOps.mult(regularizationWeight, tmpObjective, tmpObjective);
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
 
       MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 0, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+
+      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
+      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
    }
 
    /**
@@ -112,9 +114,11 @@ public class ICPQPInputCalculator
       tmpObjective.zero();
       tmpObjective.set(objective);
       CommonOps.mult(footstepWeight, tmpObjective, tmpObjective);
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost); // // FIXME: 1/31/17
 
       MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 2 * footstepNumber, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+
+      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
+      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
    }
 
    /**
@@ -136,9 +140,11 @@ public class ICPQPInputCalculator
       tmpObjective.zero();
       tmpObjective.set(objective);
       CommonOps.mult(regularizationWeight, tmpObjective, tmpObjective);
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost); // // FIXME: 1/31/17
 
       MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 2 * footstepNumber, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+
+      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
+      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
    }
 
    /**
@@ -191,12 +197,15 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term. Modified.
     * @param solverInput_h_ToPack full problem linear cost term. Modified.
+    * @param solverInputResidualCost full problem residual cost term.
     */
-   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack)
+   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+         DenseMatrix64F solverInputResidualCost)
    {
       int feedbackCMPIndex = indexHandler.getFeedbackCMPIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
    /**
@@ -205,12 +214,15 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
+    * @param solverInputResidualCost full problem residual cost term.
     */
-   public void submitDynamicRelaxationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack)
+   public void submitDynamicRelaxationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+         DenseMatrix64F solverInputResidualCost)
    {
       int dynamicRelaxationIndex = indexHandler.getDynamicRelaxationIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, dynamicRelaxationIndex, dynamicRelaxationIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, dynamicRelaxationIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
    /**
@@ -219,12 +231,15 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
+    * @param solverInputResidualCost full problem residual cost term.
     */
-   public void submitAngularMomentumMinimizationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack)
+   public void submitAngularMomentumMinimizationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+         DenseMatrix64F solverInputResidualCost)
    {
       int angularMomentumIndex = indexHandler.getAngularMomentumIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, angularMomentumIndex, angularMomentumIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, angularMomentumIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
    /**
@@ -233,13 +248,16 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
+    * @param solverInputResidualCost full problem residual cost term.
     */
-   public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack)
+   public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+         DenseMatrix64F solverInputResidualCost)
    {
       int numberOfFootstepVariables = indexHandler.getNumberOfFootstepVariables();
 
       int footstepStartIndex = indexHandler.getFootstepStartIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, footstepStartIndex, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, 0, 0, icpQPInput.linearTerm, footstepStartIndex, 0, numberOfFootstepVariables, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 }
