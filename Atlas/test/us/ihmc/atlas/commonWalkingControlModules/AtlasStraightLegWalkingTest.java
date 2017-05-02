@@ -297,6 +297,17 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
+               public double getExitCMPForwardSafetyMarginOnToes()
+               {
+                  return 0.0;
+               }
+
+               public double getExitCMPInsideOffset()
+               {
+                  return 0.015;
+               }
+
+               @Override
                public boolean putExitCMPOnToes()
                {
                   return true;

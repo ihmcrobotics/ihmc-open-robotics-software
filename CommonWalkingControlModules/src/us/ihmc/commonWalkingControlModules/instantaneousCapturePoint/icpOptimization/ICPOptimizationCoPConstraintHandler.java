@@ -9,59 +9,29 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ICPOptimizationCoPConstraintHandler
 {
-   private final DoubleYoVariable maxCoPDoubleSupportExitForward;
-   private final DoubleYoVariable maxCoPDoubleSupportExitSideways;
-   private final DoubleYoVariable maxCoPSingleSupportExitForward;
-   private final DoubleYoVariable maxCoPSingleSupportExitSideways;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
-         String yoNamePrefix, YoVariableRegistry registry)
+   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
-
-      maxCoPDoubleSupportExitForward = new DoubleYoVariable(yoNamePrefix + "MaxCoPDoubleSupportForwardExit", registry);
-      maxCoPDoubleSupportExitSideways = new DoubleYoVariable(yoNamePrefix + "MaxCoPDoubleSupportLateralExit", registry);
-
-      maxCoPDoubleSupportExitForward.set(icpOptimizationParameters.getDoubleSupportMaxCoPForwardExit());
-      maxCoPDoubleSupportExitSideways.set(icpOptimizationParameters.getDoubleSupportMaxCoPLateralExit());
-
-      maxCoPSingleSupportExitForward = new DoubleYoVariable(yoNamePrefix + "MaxCoPSingleSupportForwardExit", registry);
-      maxCoPSingleSupportExitSideways = new DoubleYoVariable(yoNamePrefix + "MaxCoPSingleSupportLateralExit", registry);
-
-      maxCoPSingleSupportExitForward.set(icpOptimizationParameters.getSingleSupportMaxCoPForwardExit());
-      maxCoPSingleSupportExitSideways.set(icpOptimizationParameters.getSingleSupportMaxCoPLateralExit());
    }
 
-   private final FramePoint2d tempVertex = new FramePoint2d();
    public void updateCoPConstraintForDoubleSupport(ICPOptimizationSolver solver)
    {
-      solver.resetSupportPolygonConstraint();
+      solver.resetCoPLocationConstraint();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInMidFeetZUp(robotSide);
-
-         for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
-         {
-            supportPolygon.getFrameVertex(i, tempVertex);
-            solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCoPDoubleSupportExitForward.getDoubleValue(),
-                  maxCoPDoubleSupportExitSideways.getDoubleValue());
-         }
+         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
+         solver.addSupportPolygon(supportPolygon);
       }
    }
 
    public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
-      solver.resetSupportPolygonConstraint();
+      solver.resetCoPLocationConstraint();
 
-      for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
-      {
-         supportPolygon.getFrameVertex(i, tempVertex);
-         solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCoPSingleSupportExitForward.getDoubleValue(),
-               maxCoPSingleSupportExitSideways.getDoubleValue());
-      }
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
+      solver.addSupportPolygon(supportPolygon);
    }
-
 }
