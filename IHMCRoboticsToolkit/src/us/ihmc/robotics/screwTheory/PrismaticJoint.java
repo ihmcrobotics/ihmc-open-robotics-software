@@ -1,6 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -8,11 +10,35 @@ public class PrismaticJoint extends OneDoFJoint
 {
    private final FrameVector jointAxis;
 
-   public PrismaticJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis)
+   public PrismaticJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
    {
-      super(name, predecessor, beforeJointFrame, new PrismaticJointReferenceFrame(name, beforeJointFrame, jointAxis));
-      this.jointAxis = new FrameVector(jointAxis);
-      this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
+      super(name, predecessor, transformToParent);
+      this.jointAxis = new FrameVector(beforeJointFrame, jointAxis);
+      this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis, new Vector3D());
+   }
+
+   @Override
+   protected OneDoFJointReferenceFrame createAfterJointFrame(ReferenceFrame beforeJointFrame)
+   {
+      return new OneDoFJointReferenceFrame("after" + name, beforeJointFrame)
+      {
+         private static final long serialVersionUID = -1996797371808482690L;
+         private final Vector3D translation = new Vector3D();
+         
+         @Override
+         public void setAndUpdate(double jointPosition)
+         {
+            jointAxis.get(translation);
+            translation.scale(jointPosition);
+            update();
+         }
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.setTranslationAndIdentityRotation(translation);
+         }
+      };
    }
 
    @Override

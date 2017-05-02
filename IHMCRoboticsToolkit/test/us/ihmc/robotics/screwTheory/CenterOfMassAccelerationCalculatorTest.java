@@ -31,7 +31,7 @@ public class CenterOfMassAccelerationCalculatorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       RigidBody elevator = new RigidBody("elevator", worldFrame);
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevatorFrame);
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
       ScrewTools.addRigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
       TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);

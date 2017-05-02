@@ -81,7 +81,7 @@ public class InverseDynamicsCalculatorSCSTest
       FloatingJoint rootJoint = new FloatingJoint("root", new Vector3D(0.1, 0.2, 0.3), robot);
       robot.addRootJoint(rootJoint);
 
-      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
+      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator);
 
       Link link = createRandomLink("link", false);
       rootJoint.setLink(link);

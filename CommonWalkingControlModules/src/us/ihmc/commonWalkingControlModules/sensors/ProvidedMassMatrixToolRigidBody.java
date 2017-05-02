@@ -69,7 +69,7 @@ public class ProvidedMassMatrixToolRigidBody
 
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
 
-      this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
+      this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator());
       this.toolBody = new RigidBody(name + "Body", toolJoint, new Matrix3D(), 0.0, new RigidBodyTransform());
 
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);

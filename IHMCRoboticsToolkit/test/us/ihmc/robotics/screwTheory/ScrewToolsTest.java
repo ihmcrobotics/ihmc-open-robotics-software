@@ -1,9 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -212,7 +209,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
@@ -228,7 +225,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();

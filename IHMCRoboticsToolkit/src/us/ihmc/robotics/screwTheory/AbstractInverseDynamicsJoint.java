@@ -1,5 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,14 +16,42 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
 
    private final long nameBasedHashCode;
 
-   public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public AbstractInverseDynamicsJoint(String name, RigidBody predecessor)
+   {
+      this(name, predecessor, null);
+   }
+
+   public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, predecessor);
 
       this.name = name;
       this.predecessor = predecessor;
-      this.beforeJointFrame = beforeJointFrame;
+      this.beforeJointFrame = createBeforeJointFrame(name, predecessor, transformToParent);
       predecessor.addChildJoint(this);
+   }
+
+   public static ReferenceFrame createBeforeJointFrame(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent)
+   {
+      String beforeJointName = "before" + StringUtils.capitalize(jointName);
+
+      ReferenceFrame parentFrame;
+      if (parentBody.isRootBody())
+      {
+         parentFrame = parentBody.getBodyFixedFrame();
+
+         /*
+          * TODO Special case to keep the beforeJointFrame of the SixDoFJoint to be the
+          * elevatorFrame. This should probably removed, might cause reference frame exceptions
+          * though.
+          */
+         if (transformToParent == null)
+            return parentFrame;
+      }
+      else
+         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
+
+      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(beforeJointName, parentFrame, transformToParent);
    }
 
    @Override

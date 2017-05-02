@@ -235,7 +235,7 @@ public class VirtualModelControllerTestHelper
 
       FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3D(), robotLeg);
       robotLeg.addRootJoint(floatingJoint);
-      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator, elevatorFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator);
       jointMap.put(rootJoint, floatingJoint);
 
       Link pelvisLink = pelvis();

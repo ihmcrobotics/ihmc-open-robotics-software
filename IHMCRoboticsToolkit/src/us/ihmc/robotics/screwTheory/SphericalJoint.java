@@ -27,9 +27,9 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    private List<Twist> unitTwists;
 
-   public SphericalJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public SphericalJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
-      super(name, predecessor, beforeJointFrame);
+      super(name, predecessor, transformToParent);
       this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
       this.jointAngularVelocity = new FrameVector(afterJointFrame);
       this.jointAngularAcceleration = new FrameVector(afterJointFrame);
