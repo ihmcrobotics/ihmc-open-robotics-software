@@ -14,7 +14,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -34,9 +33,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final YoFrameQuaternion desiredPelvisOrientation = new YoFrameQuaternion("desiredPelvis", worldFrame, registry);
    private final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
    private final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-
-   private final DoubleYoVariable swingPelvisYaw = new DoubleYoVariable("swingPelvisYaw", registry);
-   private final DoubleYoVariable swingPelvisYawScale = new DoubleYoVariable("swingPelvisYawScale", registry);
 
    private final DoubleYoVariable initialPelvisOrientationTime = new DoubleYoVariable("initialPelvisOrientationTime", registry);
    private final YoFrameQuaternion initialPelvisOrientation = new YoFrameQuaternion("initialPelvis", worldFrame, registry);
@@ -59,6 +55,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final FrameVector tempAngularAcceleration = new FrameVector();
 
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleFrames;
    private final ReferenceFrame midFeetZUpFrame;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
@@ -71,7 +68,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final DoubleYoVariable pelvisYawSineFrequence = new DoubleYoVariable("pelvisYawSineFrequence", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
 
-   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
+   private final FrameOrientation upcomingFootstepOrientation = new FrameOrientation();
 
    public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
@@ -82,6 +79,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      soleFrames = referenceFrames.getSoleFrames();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
@@ -118,16 +116,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       pelvisYawSineFrequence.set(1.0);
       parentRegistry.addChild(registry);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
-         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         RigidBodyTransform ankleToSole = new RigidBodyTransform();
-         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
-         transformsFromAnkleToSole.put(robotSide, ankleToSole);
-      }
    }
 
    public void setWeight(double weight)
@@ -341,9 +329,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       initialize(supportAnkleZUpFrame);
    }
 
-   private final FramePoint upcomingFootstepLocation = new FramePoint();
-   private final FrameOrientation upcomingFootstepOrientation = new FrameOrientation();
-
    public void setWithUpcomingFootstep(Footstep upcomingFootstep)
    {
       RobotSide upcomingFootstepSide = upcomingFootstep.getRobotSide();
@@ -351,26 +336,13 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
       initialPelvisOrientation.set(tempOrientation);
 
-      RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(upcomingFootstepSide);
-      upcomingFootstep.getAnkleOrientation(upcomingFootstepOrientation, ankleToSole);
+      upcomingFootstep.getOrientation(upcomingFootstepOrientation);
       upcomingFootstepOrientation.changeFrame(worldFrame);
-      tempOrientation.setToZero(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
+      tempOrientation.setToZero(soleFrames.get(upcomingFootstepSide.getOppositeSide()));
       tempOrientation.changeFrame(worldFrame);
 
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(upcomingFootstepOrientation.getYaw(), tempOrientation.getYaw());
-
-      upcomingFootstep.getAnklePosition(upcomingFootstepLocation, ankleToSole);
-      upcomingFootstepLocation.changeFrame(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
-
-      double desiredSwingPelvisYawAngle = 0.0;
-      if (Math.abs(upcomingFootstepLocation.getX()) > 0.1)
-      {
-         desiredSwingPelvisYawAngle = Math.atan2(upcomingFootstepLocation.getY(), upcomingFootstepLocation.getX());
-         desiredSwingPelvisYawAngle -= upcomingFootstepSide.negateIfRightSide(Math.PI / 2.0);
-      }
-      swingPelvisYaw.set(desiredSwingPelvisYawAngle);
-
-      finalPelvisOrientation.set(finalDesiredPelvisYawAngle + swingPelvisYawScale.getDoubleValue() * desiredSwingPelvisYawAngle, 0.0, 0.0);
+      finalPelvisOrientation.set(finalDesiredPelvisYawAngle, 0.0, 0.0);
 
       initialize(worldFrame);
    }

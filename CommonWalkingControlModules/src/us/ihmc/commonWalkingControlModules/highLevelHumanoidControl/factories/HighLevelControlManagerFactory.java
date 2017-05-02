@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.ControllerPelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -213,11 +212,11 @@ public class HighLevelControlManagerFactory
       if (pelvisOrientationManager != null)
          return pelvisOrientationManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(ControllerPelvisOrientationManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(PelvisOrientationManager.class))
          return null;
-      if (!hasWalkingControllerParameters(ControllerPelvisOrientationManager.class))
+      if (!hasWalkingControllerParameters(PelvisOrientationManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(ControllerPelvisOrientationManager.class))
+      if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
       YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
