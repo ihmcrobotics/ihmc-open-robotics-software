@@ -34,7 +34,7 @@ public class ICPQPOptimizationSolver
    private final ICPQPInputCalculator inputCalculator;
 
    /**
-    * Has the form x<sup>T</sup> H x + h x
+    * Has the form 0.5 x<sup>T</sup> H x + h x
     */
    /** Total quadratic cost matrix for the quadratic program. */
    private final DenseMatrix64F solverInput_H;
@@ -118,8 +118,6 @@ public class ICPQPOptimizationSolver
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
-   /** Solution vector of the free variables to the quadratic program. */
-   private final DenseMatrix64F freeVariableSolution;
    /** Footstep location solution vector to the quadratic program. */
    private final DenseMatrix64F footstepLocationSolution;
    /** Feedback action solution to the quadratic program. */
@@ -241,7 +239,6 @@ public class ICPQPOptimizationSolver
       }
 
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      freeVariableSolution = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
       dynamicRelaxationSolution = new DenseMatrix64F(2, 1);
@@ -372,7 +369,6 @@ public class ICPQPOptimizationSolver
       perfectCMP.zero();
 
       solution.zero();
-      freeVariableSolution.zero();
       footstepLocationSolution.zero();
       feedbackDeltaSolution.zero();
       dynamicRelaxationSolution.zero();
@@ -415,7 +411,6 @@ public class ICPQPOptimizationSolver
       dynamicsConstraintInput.reshape(problemSize);
 
       solution.reshape(problemSize, 1);
-      freeVariableSolution.reshape(problemSize, 1);
       footstepLocationSolution.reshape(2 * numberOfFootstepsToConsider, 1);
    }
 
@@ -714,8 +709,6 @@ public class ICPQPOptimizationSolver
 
       if (noConvergenceException == null)
       {
-         extractFreeVariableSolution(freeVariableSolution);
-
          if (indexHandler.useStepAdjustment())
          {
             extractFootstepSolutions(footstepLocationSolution);
@@ -754,7 +747,7 @@ public class ICPQPOptimizationSolver
             inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
       }
 
-      inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h);
+      inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -768,7 +761,7 @@ public class ICPQPOptimizationSolver
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
 
-      inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h);
+      inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -777,7 +770,7 @@ public class ICPQPOptimizationSolver
    private void addDynamicRelaxationTask()
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
-      inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
+      inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -786,7 +779,7 @@ public class ICPQPOptimizationSolver
    private void addAngularMomentumMinimizationTask()
    {
       inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
-      inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h);
+      inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -876,7 +869,7 @@ public class ICPQPOptimizationSolver
       if (!useQuadProg)
       {
          activeSetSolver.clear();
-         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
+         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
          activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);
          activeSetSolver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
@@ -936,16 +929,6 @@ public class ICPQPOptimizationSolver
    }
 
    /**
-    * Extracts all the free variables from the solution vector.
-    *
-    * @param freeVariableSolution free variable solution vector. Modified.
-    */
-   private void extractFreeVariableSolution(DenseMatrix64F freeVariableSolution)
-   {
-      MatrixTools.setMatrixBlock(freeVariableSolution, 0, 0, solution, 0, 0, indexHandler.getNumberOfFreeVariables(), 1, 1.0);
-   }
-
-   /**
     * Sets the location of the previous footstep location for the footstep regularization task.
     *
     * @param footstepLocationSolution location of the footstep solution.
@@ -966,31 +949,21 @@ public class ICPQPOptimizationSolver
       previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
    }
 
-   private final DenseMatrix64F tmpCostScalar = new DenseMatrix64F(1, 1);
    /**
     * Internal method to compute the cost to go of all the tasks.
     */
    private void computeWholeCostToGo()
    {
+      tmpCost.zero();
+      tmpCost.reshape(indexHandler.getNumberOfFreeVariables(), 1);
+
       costToGo.zero();
 
-      tmpCost.zero();
-      tmpFootstepCost.zero();
-      tmpFeedbackCost.zero();
+      CommonOps.mult(solverInput_H, solution, tmpCost);
+      CommonOps.multTransA(solution, tmpCost, costToGo);
+      CommonOps.scale(0.5, costToGo);
 
-      tmpCost.reshape(indexHandler.getNumberOfFreeVariables(), 1);
-      tmpFootstepCost.reshape(indexHandler.getNumberOfFootstepVariables(), 1);
-      tmpFeedbackCost.reshape(2, 1);
-
-      // quadratic cost;
-      CommonOps.mult(solverInput_H, freeVariableSolution, tmpCost);
-      CommonOps.multTransA(freeVariableSolution, tmpCost, costToGo);
-
-      // linear cost
-      CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
-      CommonOps.addEquals(costToGo, tmpCostScalar);
-
-      // residual cost
+      CommonOps.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
       CommonOps.addEquals(costToGo, solverInputResidualCost);
    }
 
@@ -999,53 +972,52 @@ public class ICPQPOptimizationSolver
     */
    private void computeCostToGo()
    {
+      tmpFootstepCost.zero();
+      tmpFeedbackCost.zero();
+
+      tmpFootstepCost.reshape(indexHandler.getNumberOfFootstepVariables(), 1);
+      tmpFeedbackCost.reshape(2, 1);
+
       footstepCostToGo.zero();
       feedbackCostToGo.zero();
       dynamicRelaxationCostToGo.zero();
       angularMomentumMinimizationCostToGo.zero();
 
-      tmpCost.zero();
-      tmpFootstepCost.zero();
-      tmpFeedbackCost.zero();
-
-      tmpCost.reshape(indexHandler.getNumberOfFreeVariables(), 1);
-      tmpFootstepCost.reshape(indexHandler.getNumberOfFootstepVariables(), 1);
-      tmpFeedbackCost.reshape(2, 1);
-
-      // quadratic cost;
-      CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
-      CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
-
+      // feedback cost:
       CommonOps.mult(feedbackTaskInput.quadraticTerm, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackCostToGo);
+      CommonOps.scale(0.5, feedbackCostToGo);
 
+      CommonOps.multAddTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, feedbackCostToGo);
+      CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
+
+      // dynamic relaxation cost:
       CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
       CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
+      CommonOps.scale(0.5, dynamicRelaxationCostToGo);
+
+      CommonOps.multAddTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, dynamicRelaxationCostToGo);
+      CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
 
       if (indexHandler.useStepAdjustment())
-      {
-         CommonOps.mult(angularMomentumMinimizationTask.quadraticTerm, angularMomentumSolution, tmpFeedbackCost);
-         CommonOps.multTransA(angularMomentumSolution, tmpFeedbackCost, angularMomentumMinimizationCostToGo);
+      { // footstep cost:
+         CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
+         CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
+         CommonOps.scale(0.5, footstepCostToGo);
+
+         CommonOps.multAddTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, footstepCostToGo);
+         CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       }
 
-      // linear cost
-      CommonOps.multTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, tmpCostScalar);
-      CommonOps.addEquals(footstepCostToGo, tmpCostScalar);
+      if (indexHandler.useAngularMomentum())
+      { // angular momentum cost:
+         CommonOps.mult(angularMomentumMinimizationTask.quadraticTerm, angularMomentumSolution, tmpFeedbackCost);
+         CommonOps.multTransA(angularMomentumSolution, tmpFeedbackCost, angularMomentumMinimizationCostToGo);
+         CommonOps.scale(0.5, angularMomentumMinimizationCostToGo);
 
-      CommonOps.multTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, tmpCostScalar);
-      CommonOps.addEquals(feedbackCostToGo, tmpCostScalar);
-
-      CommonOps.multTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, tmpCostScalar);
-      CommonOps.addEquals(dynamicRelaxationCostToGo, tmpCostScalar);
-
-      CommonOps.multTransA(-1.0, angularMomentumMinimizationTask.linearTerm, angularMomentumSolution, tmpCostScalar);
-      CommonOps.addEquals(angularMomentumMinimizationCostToGo, tmpCostScalar);
-
-      // residual cost
-      CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
-      CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
-      CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
-      CommonOps.addEquals(angularMomentumMinimizationCostToGo, angularMomentumMinimizationTask.residualCost);
+         CommonOps.multAddTransA(-1.0, angularMomentumMinimizationTask.linearTerm, angularMomentumSolution, angularMomentumMinimizationCostToGo);
+         CommonOps.addEquals(angularMomentumMinimizationCostToGo, angularMomentumMinimizationTask.residualCost);
+      }
    }
 
    /**
@@ -1096,6 +1068,15 @@ public class ICPQPOptimizationSolver
       differenceToPack.setToZero(worldFrame);
       differenceToPack.setX(angularMomentumSolution.get(0, 0));
       differenceToPack.setY(angularMomentumSolution.get(1, 0));
+   }
+
+   /**
+    * Gets residual cost to go of the optimization problem. This value is included in the return of {@link #getCostToGo()}
+    * return cost to go
+    */
+   public double getResidualCostToGo()
+   {
+      return solverInputResidualCost.get(0, 0);
    }
 
    /**

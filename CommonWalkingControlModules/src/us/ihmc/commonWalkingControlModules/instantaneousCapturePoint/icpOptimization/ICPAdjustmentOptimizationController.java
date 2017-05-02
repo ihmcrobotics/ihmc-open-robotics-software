@@ -35,7 +35,7 @@ import java.util.List;
 public class ICPAdjustmentOptimizationController implements ICPOptimizationController
 {
    private static final boolean VISUALIZE = false;
-   private static final boolean COMPUTE_COST_TO_GO = false;
+   private static final boolean COMPUTE_COST_TO_GO = true;
    private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
 
