@@ -7,12 +7,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {
-   protected final OneDoFJointReferenceFrame afterJointFrame;
-
    protected Twist unitJointTwist;
    protected Twist unitSuccessorTwist;
    protected Twist unitPredecessorTwist;
@@ -61,15 +58,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public OneDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
-      this.afterJointFrame = createAfterJointFrame(beforeJointFrame);
-   }
-
-   protected abstract OneDoFJointReferenceFrame createAfterJointFrame(ReferenceFrame beforeJointFrame);
-
-   @Override
-   public ReferenceFrame getFrameAfterJoint()
-   {
-      return afterJointFrame;
    }
 
    @Override
@@ -204,7 +192,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       if (Double.isNaN(q))
          throw new RuntimeException("q is NaN! this = " + this);
       this.q = q;
-      afterJointFrame.setAndUpdate(q);
+      getFrameAfterJoint().update();
    }
 
    public double getQd()

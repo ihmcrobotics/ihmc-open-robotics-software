@@ -9,6 +9,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class PrismaticJoint extends OneDoFJoint
 {
    private final FrameVector jointAxis;
+   private final Vector3D translation = new Vector3D();
 
    public PrismaticJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
    {
@@ -18,27 +19,11 @@ public class PrismaticJoint extends OneDoFJoint
    }
 
    @Override
-   protected OneDoFJointReferenceFrame createAfterJointFrame(ReferenceFrame beforeJointFrame)
+   protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      return new OneDoFJointReferenceFrame("after" + name, beforeJointFrame)
-      {
-         private static final long serialVersionUID = -1996797371808482690L;
-         private final Vector3D translation = new Vector3D();
-         
-         @Override
-         public void setAndUpdate(double jointPosition)
-         {
-            jointAxis.get(translation);
-            translation.scale(jointPosition);
-            update();
-         }
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.setTranslationAndIdentityRotation(translation);
-         }
-      };
+      jointAxis.get(translation);
+      translation.scale(getQ());
+      jointTransform.setTranslationAndIdentityRotation(translation);
    }
 
    @Override

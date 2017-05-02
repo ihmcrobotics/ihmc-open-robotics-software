@@ -10,6 +10,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class RevoluteJoint extends OneDoFJoint
 {
    private final FrameVector jointAxis;
+   private final AxisAngle axisAngle = new AxisAngle();
 
    public RevoluteJoint(String name, RigidBody predecessor, Vector3DReadOnly jointAxis)
    {
@@ -24,26 +25,10 @@ public class RevoluteJoint extends OneDoFJoint
    }
 
    @Override
-   protected OneDoFJointReferenceFrame createAfterJointFrame(ReferenceFrame beforeJointFrame)
+   protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      return new OneDoFJointReferenceFrame("after" + name, beforeJointFrame)
-      {
-         private static final long serialVersionUID = -1996797371808482690L;
-         private final AxisAngle axisAngle = new AxisAngle();
-
-         @Override
-         public void setAndUpdate(double jointPosition)
-         {
-            update();
-         }
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            axisAngle.set(jointAxis.getVector(), getQ());
-            transformToParent.setRotationAndZeroTranslation(axisAngle);
-         }
-      };
+      axisAngle.set(jointAxis.getVector(), getQ());
+      jointTransform.setRotationAndZeroTranslation(axisAngle);
    }
 
    @Override

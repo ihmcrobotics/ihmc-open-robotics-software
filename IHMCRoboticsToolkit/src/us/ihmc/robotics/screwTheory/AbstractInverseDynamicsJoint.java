@@ -12,6 +12,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    protected final RigidBody predecessor;
    protected RigidBody successor;
    protected final ReferenceFrame beforeJointFrame;
+   protected final ReferenceFrame afterJointFrame;
    protected GeometricJacobian motionSubspace;
 
    private final long nameBasedHashCode;
@@ -27,7 +28,8 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
 
       this.name = name;
       this.predecessor = predecessor;
-      this.beforeJointFrame = createBeforeJointFrame(name, predecessor, transformToParent);
+      beforeJointFrame = createBeforeJointFrame(name, predecessor, transformToParent);
+      afterJointFrame = createAfterJointFrame(name, beforeJointFrame);
       predecessor.addChildJoint(this);
    }
 
@@ -54,10 +56,32 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(beforeJointName, parentFrame, transformToParent);
    }
 
+   private ReferenceFrame createAfterJointFrame(String name, ReferenceFrame beforeJointFrame)
+   {
+      return new ReferenceFrame("after" + StringUtils.capitalize(name), beforeJointFrame)
+      {
+         private static final long serialVersionUID = 4779423307372501426L;
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            updateJointTransform(transformToParent);
+         }
+      };
+   }
+
+   protected abstract void updateJointTransform(RigidBodyTransform jointTransform);
+
    @Override
    public final ReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
+   }
+
+   @Override
+   public final ReferenceFrame getFrameAfterJoint()
+   {
+      return afterJointFrame;
    }
 
    @Override
@@ -87,7 +111,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    @Override
    public final void updateFramesRecursively()
    {
-      getFrameAfterJoint().update();
+      afterJointFrame.update();
 
       if (successor != null)
       {
