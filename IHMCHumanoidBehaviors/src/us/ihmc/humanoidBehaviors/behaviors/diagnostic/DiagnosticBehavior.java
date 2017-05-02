@@ -1985,7 +1985,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
-      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
       desiredPelvisPosition.setZ(offsetHeight);
       desiredPelvisPosition.changeFrame(worldFrame);
@@ -2057,7 +2057,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
    {
-      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPose = new FramePose(frameAfterRootJoint);
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);

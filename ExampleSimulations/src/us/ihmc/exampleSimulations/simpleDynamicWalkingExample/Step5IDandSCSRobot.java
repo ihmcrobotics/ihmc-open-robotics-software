@@ -402,7 +402,7 @@ public class Step5IDandSCSRobot extends Robot
 
    public void getBodyPitch(Quaternion rotationToPack)
    {
-      bodyJointID.getFrameAfterJoint().getRotation(rotationToPack);
+      bodyJointID.getRotation(rotationToPack);
    }
 
    public void getBodyLinearVel(Vector3D linearVelocityToPack)
