@@ -68,6 +68,7 @@ public class ICPOptimizationController
 
    private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
    private final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+   private final DoubleYoVariable finalTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "FinalTransferSplitFraction", registry);
    private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
    private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
@@ -333,6 +334,43 @@ public class ICPOptimizationController
       }
    }
 
+   public void setTransferDuration(int stepNumber, double duration)
+   {
+      int numberOfFootstepsRegistered = upcomingFootsteps.size();
+      if (stepNumber < numberOfFootstepsRegistered + 1)
+         transferDurations.get(stepNumber).set(duration);
+   }
+
+
+   public void setSwingDuration(int stepNumber, double duration)
+   {
+      int numberOfFootstepsRegistered = upcomingFootsteps.size();
+      if (stepNumber < numberOfFootstepsRegistered)
+         swingDurations.get(stepNumber).set(duration);
+   }
+
+   /**
+    * Allows setting of the transfer duration split fraction (see {@link #transferSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step transfer duration split fraction to modify.
+    * @param splitFraction new transfer duration split fraction value.
+    */
+   public void setTransferSplitFraction(int stepNumber, double splitFraction)
+   {
+      transferSplitFractions.get(stepNumber).set(splitFraction);
+   }
+
+   /**
+    * Allows setting of the swing duration split fraction (see {@link #swingSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step swing duration split fraction to modify.
+    * @param splitFraction new swing duration split fraction value.
+    */
+   public void setSwingSplitFraction(int stepNumber, double splitFraction)
+   {
+      transferSplitFractions.get(stepNumber).set(splitFraction);
+   }
+
    /**
     * Changes the duration for the last transfer when going to standing state.
     * <p>
@@ -344,6 +382,19 @@ public class ICPOptimizationController
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
+   }
+
+   /**
+    * Changes the split fraction for the last transfer when going to standing state.
+    * <p>
+    * This method mostly affects {@link #initializeForStanding(double)}.
+    * </p>
+    *
+    * @param splitFraction final transfer duration
+    */
+   public void setFinalTransferSplitFraction(double splitFraction)
+   {
+      this.finalTransferSplitFraction.set(splitFraction);
    }
 
    /**

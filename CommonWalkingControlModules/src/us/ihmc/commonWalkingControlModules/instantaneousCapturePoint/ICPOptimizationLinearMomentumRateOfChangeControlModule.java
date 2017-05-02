@@ -147,4 +147,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    {
       icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
    }
+
+   @Override
+   public ICPOptimizationController getICPOptimizationController()
+   {
+      return icpOptimizationController;
+   }
 }
