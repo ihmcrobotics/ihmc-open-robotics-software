@@ -28,6 +28,19 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
       super.set(message);
    }
 
+   /**
+    * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command
+    * from a pelvis pose {@link #SE3TrajectoryControllerCommand} trajectory command.
+    */
+   public void set(PelvisTrajectoryCommand command)
+   {
+      clear(command.getDataFrame());
+      setTrajectoryFrame(command.getTrajectoryFrame());
+      getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
+      setEnableUserPelvisControlDuringWalking(command.isEnableUserPelvisControlDuringWalking());
+      setQueueqableCommandVariables(command);
+   }
+
    public boolean isEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;

@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
@@ -18,6 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 
@@ -82,7 +83,7 @@ public class PelvisOrientationManager
    {
       walkingManager.resetOrientationOffset();
       requestState(walkingManager.getStateEnum());
-      walkingManager.setToHoldCurrentInWorldFrame();
+      walkingManager.setToZeroInMidFeetZUpFrame();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -111,7 +112,7 @@ public class PelvisOrientationManager
       walkingManager.setOffset(tempOrientation);
    }
 
-   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
    }
@@ -187,6 +188,11 @@ public class PelvisOrientationManager
       {
          requestedState.set(state);
       }
+   }
+
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
+   {
+      walkingManager.setSelectionMatrix(selectionMatrix);
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

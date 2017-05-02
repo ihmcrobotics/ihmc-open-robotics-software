@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ControllerPelvisOrientationManager extends PelvisOrientationControlState
@@ -46,12 +48,12 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final YoFrameVector yoPelvisAngularWeight = new YoFrameVector("pelvisWeight", null, registry);
    private final Vector3D pelvisAngularWeight = new Vector3D();
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameVector tempAngularAcceleration = new FrameVector();
 
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
    private final ReferenceFrame midFeetZUpFrame;
    private final ReferenceFrame pelvisFrame;
@@ -66,7 +68,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
       pelvisFrame = referenceFrames.getPelvisFrame();
@@ -74,7 +75,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
       pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
-         pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
+         pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
 
       this.gains = gains;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -85,6 +86,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
+      selectionMatrix.resetSelection();
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
@@ -173,6 +175,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       yoPelvisAngularWeight.get(pelvisAngularWeight);
       orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
+      orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
@@ -241,7 +244,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    public void setToHoldCurrentDesiredInSupportFoot(RobotSide supportSide)
    {
-      setToHoldCurrentDesired(ankleZUpFrames.get(supportSide));
+      setToHoldCurrentDesired(soleZUpFrames.get(supportSide));
    }
 
    public void setToHoldCurrentDesired(ReferenceFrame desiredTrajectoryFrame)
@@ -267,8 +270,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    {
       initialPelvisOrientation.setIncludingFrame(desiredPelvisOrientation);
 
-      ReferenceFrame otherAnkleZUpFrame = ankleZUpFrames.get(supportSide.getOppositeSide());
-      ReferenceFrame supportAnkleZUpFrame = ankleZUpFrames.get(supportSide);
+      ReferenceFrame otherAnkleZUpFrame = soleZUpFrames.get(supportSide.getOppositeSide());
+      ReferenceFrame supportAnkleZUpFrame = soleZUpFrames.get(supportSide);
 
       tempOrientation.setToZero(otherAnkleZUpFrame);
       tempOrientation.changeFrame(worldFrame);
@@ -305,8 +308,13 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       initialize(worldFrame);
    }
 
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
    @Override
-   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
    }
