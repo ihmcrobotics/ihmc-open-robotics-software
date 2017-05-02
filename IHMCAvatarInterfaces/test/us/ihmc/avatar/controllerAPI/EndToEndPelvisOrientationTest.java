@@ -87,13 +87,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      double walkingTime = createWalkingMessage(steps, footsteps);
+      double walkingTime = createWalkingMessage(steps, footsteps, true);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 0.5);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       humanoidReferenceFrames.updateFrames();
-      ReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
+      ReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       FrameOrientation midFeetOrientation = new FrameOrientation(midFeetZUpFrame);
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
@@ -115,16 +115,16 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
 
       humanoidReferenceFrames.updateFrames();
-      ReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
+      ReferenceFrame midFeetZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       Quaternion currentDesired = EndToEndTestTools.findControllerDesiredOrientation(pelvisName, scs);
       FrameOrientation desiredAfterTrajectory = new FrameOrientation(worldFrame, currentDesired);
-      desiredAfterTrajectory.changeFrame(midFeetZUpFrame);
+      desiredAfterTrajectory.changeFrame(midFeetZUpGroundFrame);
 
       int steps = 2;
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      double walkingTime = createWalkingMessage(steps, footsteps);
+      double walkingTime = createWalkingMessage(steps, footsteps, false);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 0.5);
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
@@ -215,7 +215,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      double walkingTime = createWalkingMessage(4, footsteps);
+      double walkingTime = createWalkingMessage(4, footsteps, true);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime / 2.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
@@ -267,13 +267,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       return ((EnumYoVariable<PelvisOrientationControlMode>) variable).getEnumValue();
    }
 
-   private double createWalkingMessage(int steps, FootstepDataListMessage messageToPack)
+   private double createWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)
    {
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
-      double stepLength = walkingControllerParameters.getDefaultStepLength();
-      double stepWidth = stepLength / 3.0;
+      double stepLength = 0.6 * walkingControllerParameters.getDefaultStepLength();
+      double stepWidth = stepLength / 2.0;
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -283,7 +283,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       for (int step = 0; step < steps; step++)
       {
          FramePoint location = new FramePoint(midFootZUpGroundFrame);
-         if (step == steps - 1)
+         if (squareUp && step == steps - 1)
             location.setX(stepLength * step);
          else
             location.setX(stepLength * (step + 1));

@@ -55,7 +55,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final FrameVector tempAngularAcceleration = new FrameVector();
 
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
-   private final ReferenceFrame midFeetZUpFrame;
+   private final ReferenceFrame midFeetZUpGroundFrame;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
 
@@ -68,12 +68,12 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      midFeetZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
-      pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
+      pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpGroundFrame);
       for (RobotSide robotSide : RobotSide.values)
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
 
@@ -232,14 +232,14 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    public void centerInMidFeetZUpFrame(double trajectoryTime)
    {
       initialPelvisOrientation.setIncludingFrame(desiredPelvisOrientation);
-      finalPelvisOrientation.setToZero(midFeetZUpFrame);
+      finalPelvisOrientation.setToZero(midFeetZUpGroundFrame);
       setTrajectoryTime(trajectoryTime);
-      initialize(midFeetZUpFrame);
+      initialize(midFeetZUpGroundFrame);
    }
 
    public void setToHoldCurrentDesiredInMidFeetZUpFrame()
    {
-      setToHoldCurrentDesired(midFeetZUpFrame);
+      setToHoldCurrentDesired(midFeetZUpGroundFrame);
    }
 
    public void setToHoldCurrentDesiredInSupportFoot(RobotSide supportSide)
@@ -257,13 +257,13 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    /** Go instantly to zero, no smooth interpolation. */
    public void setToZeroInMidFeetZUpFrame()
    {
-      tempOrientation.setToZero(midFeetZUpFrame);
+      tempOrientation.setToZero(midFeetZUpGroundFrame);
       tempOrientation.changeFrame(worldFrame);
       initialPelvisOrientation.setIncludingFrame(tempOrientation);
       finalPelvisOrientation.setIncludingFrame(tempOrientation);
       desiredPelvisOrientation.setIncludingFrame(tempOrientation);
 
-      initialize(midFeetZUpFrame);
+      initialize(midFeetZUpGroundFrame);
    }
 
    public void moveToAverageInSupportFoot(RobotSide supportSide)
