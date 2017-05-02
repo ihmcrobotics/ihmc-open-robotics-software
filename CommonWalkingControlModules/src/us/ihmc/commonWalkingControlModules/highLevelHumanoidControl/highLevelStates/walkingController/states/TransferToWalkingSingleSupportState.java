@@ -16,7 +16,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final DoubleYoVariable minimumTransferTime = new DoubleYoVariable("minimumTransferTime", registry);
 
    private final KneeAngleManager kneeAngleManager;
-   private final DoubleYoVariable percentOfTransferToCollapseLeg = new DoubleYoVariable("percentOfTransferToCollapseLeg", registry);
+   private final DoubleYoVariable fractionOfTransferToCollapseLeg = new DoubleYoVariable("fractionOfTransferToCollapseLeg", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -30,7 +30,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
-      percentOfTransferToCollapseLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getPercentOfTransferToCollapseLeg());
+      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfTransferToCollapseLeg());
    }
 
    @Override
@@ -68,7 +68,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
 
-      if (getTimeInCurrentState() > percentOfTransferToCollapseLeg.getDoubleValue() * transferDuration)
+      if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration)
       {
          kneeAngleManager.collapseLegDuringTransfer(transferToSide);
       }
