@@ -1149,6 +1149,85 @@ public class PolygonWigglingTest
       assertFalse(allLessThan);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConvexConstraintOfSimpleLine()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D point1 = new Point2D();
+      Point2D point2 = new Point2D();
+
+      point1.set(0.0, 0.0);
+      point2.set(1.0, 0.0);
+      polygon.addVertex(point1);
+      polygon.addVertex(point2);
+      polygon.update();
+      PolygonWiggler.convertToInequalityConstraints(polygon, A, b, 0.0);
+
+      solution.reshape(b.getNumRows(), b.getNumCols());
+
+      // test point1 satisfies constraint
+      x.set(0, 0, point1.getX());
+      x.set(1, 0, point1.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test point 2 satisfies constraint
+      x.set(0, 0, point2.getX());
+      x.set(1, 0, point2.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test midpoint satisfies constraint
+      x.set(0, 0, 0.5);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+
+
+
+      x.set(0, 0, -1.0);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      boolean allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+
+
+
+
+      x.set(0, 0, 2.0);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+   }
+
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
    {
