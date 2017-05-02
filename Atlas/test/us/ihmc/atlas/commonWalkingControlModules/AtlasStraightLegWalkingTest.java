@@ -308,11 +308,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return 0.0;
                }
 
-               public double getExitCMPInsideOffset()
-               {
-                  return 0.015;
-               }
-
                @Override
                public boolean putExitCMPOnToes()
                {
