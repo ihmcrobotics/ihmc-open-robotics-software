@@ -970,6 +970,185 @@ public class PolygonWigglingTest
       assertFalse(allLessThan);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConvexConstraintOfLine()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D point1 = new Point2D();
+      Point2D point2 = new Point2D();
+
+      Random random = new Random();
+      point1.set(random.nextDouble(), random.nextDouble());
+      point2.set(random.nextDouble(), random.nextDouble());
+      polygon.addVertex(point1);
+      polygon.addVertex(point2);
+      polygon.update();
+      PolygonWiggler.convertToInequalityConstraints(polygon, A, b, 0.0);
+
+      solution.reshape(b.getNumRows(), b.getNumCols());
+
+      Point2D point3 = new Point2D();
+
+      // test point1 satisfies constraint
+      x.set(0, 0, point1.getX());
+      x.set(1, 0, point1.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test point2 satisfies constraint
+      x.set(0, 0, point2.getX());
+      x.set(1, 0, point2.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test midpoint satisfies constraint
+      point3.interpolate(point1, point2, 0.5);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test slightly past point 1 satisfies constraint
+      point3.interpolate(point1, point2, 0.1);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test slightly before point 2 satisfies constraint
+      point3.interpolate(point1, point2, 0.9);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test random interior point satisfies constraint
+      point3.interpolate(point1, point2, random.nextDouble());
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      for (int i = 0; i < solution.getNumRows(); i++)
+         assertTrue(solution.get(i, 0) <= b.get(i, 0));
+
+      // test slightly less than point 1 fails constraint
+      point3.interpolate(point1, point2, -0.1);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      boolean allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test slightly less than point 2 fails constraint
+      point3.interpolate(point1, point2, 1.1);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test slightly way less than point 1 fails constraint
+      point3.interpolate(point1, point2, -1.0);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test slightly way past point 2 fails constraint
+      point3.interpolate(point1, point2, 2.0);
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test randomly less than point 1 fails constraint
+      point3.interpolate(point1, point2, -random.nextDouble());
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test randomly past point 2 fails constraint
+      point3.interpolate(point1, point2, 1.0 + random.nextDouble());
+      x.set(0, 0, point3.getX());
+      x.set(1, 0, point3.getY());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+
+
+
+      // test perpendicular point1 fails constraint
+      x.set(0, 0, point1.getY());
+      x.set(1, 0, point1.getX());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test perpendicular point2 fails constraint
+      x.set(0, 0, point2.getY());
+      x.set(1, 0, point2.getX());
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+
+      // test slightly off midpoint fails constraint
+      point3.interpolate(point1, point2, 0.5);
+      x.set(0, 0, point3.getX() + (0.5 - random.nextDouble()));
+      x.set(1, 0, point3.getY() + (0.5 - random.nextDouble()));
+
+      CommonOps.mult(A, x, solution);
+      allLessThan = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allLessThan &= solution.get(i, 0) <= b.get(i, 0);
+      assertFalse(allLessThan);
+   }
+
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
    {
