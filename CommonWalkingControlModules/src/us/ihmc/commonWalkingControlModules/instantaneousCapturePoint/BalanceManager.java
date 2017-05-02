@@ -493,7 +493,7 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
+      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInSwing();
          
@@ -527,7 +527,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
+      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInTransfer();
          
