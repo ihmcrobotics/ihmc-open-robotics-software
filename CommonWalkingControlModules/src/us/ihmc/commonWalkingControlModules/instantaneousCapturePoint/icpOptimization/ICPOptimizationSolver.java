@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
@@ -50,7 +49,6 @@ public class ICPOptimizationSolver
     */
    /** Total linear equality constraint matrix for the quadratic program. */
    private final DenseMatrix64F solverInput_Aeq;
-   private final DenseMatrix64F solverInput_AeqTrans;
    /** Total linear equality constraint objective vector for the quadratic program. */
    private final DenseMatrix64F solverInput_beq;
 
@@ -212,8 +210,7 @@ public class ICPOptimizationSolver
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
-      solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
-      solverInput_AeqTrans = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
+      solverInput_Aeq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
       solverInput_beq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, 1);
 
       solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
@@ -346,7 +343,6 @@ public class ICPOptimizationSolver
       solverInputResidualCost.zero();
 
       solverInput_Aeq.zero();
-      solverInput_AeqTrans.zero();
       solverInput_beq.zero();
 
       solverInput_Aineq.zero();
@@ -398,8 +394,7 @@ public class ICPOptimizationSolver
       angularMomentumMinimizationTask.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
-      solverInput_Aeq.reshape(problemSize, numberOfEqualityConstraints);
-      solverInput_AeqTrans.reshape(numberOfEqualityConstraints, problemSize);
+      solverInput_Aeq.reshape(numberOfEqualityConstraints, problemSize);
       solverInput_beq.reshape(numberOfEqualityConstraints, 1);
 
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
@@ -845,7 +840,7 @@ public class ICPOptimizationSolver
       inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, cmpConstantEffect, feedbackGain,
             footstepRecursionMultipliers);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, dynamicsConstraintInput.Aeq, 0, 0, indexHandler.getNumberOfFreeVariables(), 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.Aeq, 0, 0, 2, indexHandler.getNumberOfFreeVariables(), 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);
 
       currentEqualityConstraintIndex += 2;
@@ -861,20 +856,18 @@ public class ICPOptimizationSolver
    {
       CommonOps.scale(-1.0, solverInput_h);
 
-      CommonOps.transpose(solverInput_Aeq, solverInput_AeqTrans);
-
       if (!useQuadProg)
       {
          activeSetSolver.clear();
          activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
-         activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);
+         activeSetSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
          activeSetSolver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
          numberOfIterations = activeSetSolver.solve(solutionToPack);
       }
       else
       {
-         qpSolver.solve(solverInput_H, solverInput_h, solverInput_AeqTrans, solverInput_beq, solverInput_Aineq, solverInput_bineq, solverInput_Lb, solverInput_Ub,
+         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Aineq, solverInput_bineq, solverInput_Lb, solverInput_Ub,
                solutionToPack, false);
          numberOfIterations = 1;
       }
