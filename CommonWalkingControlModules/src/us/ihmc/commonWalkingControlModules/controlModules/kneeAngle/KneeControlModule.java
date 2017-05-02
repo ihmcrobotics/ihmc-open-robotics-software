@@ -39,9 +39,9 @@ public class KneeControlModule
 
    private final BooleanYoVariable includeHipPitchPrivilegedConfiguration;
 
-   private final DoubleYoVariable hipPrivilegedWeight;
-   private final DoubleYoVariable hipPrivilegedPositionGain;
-   private final DoubleYoVariable hipPrivilegedVelocityGain;
+   private final DoubleYoVariable legPitchPrivilegedWeight;
+   private final DoubleYoVariable legPitchPrivilegedPositionGain;
+   private final DoubleYoVariable legPitchPrivilegedVelocityGain;
 
    private final DoubleYoVariable kneeStraightPrivilegedWeight;
    private final DoubleYoVariable kneeStraightPrivilegedPositionGain;
@@ -83,9 +83,9 @@ public class KneeControlModule
       jointspaceGains.setKp(40.0);
       jointspaceGains.setKd(6.0);
 
-      hipPrivilegedWeight = new DoubleYoVariable(sidePrefix + "HipPrivilegedWeight", registry);
-      hipPrivilegedPositionGain = new DoubleYoVariable(sidePrefix + "HipPrivilegedKp", registry);
-      hipPrivilegedVelocityGain = new DoubleYoVariable(sidePrefix + "HipPrivilegedKv", registry);
+      legPitchPrivilegedWeight = new DoubleYoVariable(sidePrefix + "LegPitchPrivilegedWeight", registry);
+      legPitchPrivilegedPositionGain = new DoubleYoVariable(sidePrefix + "LegPitchPrivilegedKp", registry);
+      legPitchPrivilegedVelocityGain = new DoubleYoVariable(sidePrefix + "LegPitchPrivilegedKv", registry);
 
       kneeStraightPrivilegedWeight = new DoubleYoVariable(sidePrefix + "KneeStraightPrivilegedWeight", registry);
       kneeStraightPrivilegedPositionGain = new DoubleYoVariable(sidePrefix + "KneeStraightPrivilegedKp", registry);
@@ -97,9 +97,9 @@ public class KneeControlModule
 
       privilegedMaxAcceleration = new DoubleYoVariable(namePrefix + "PrivilegedMaxAcceleration", registry);
 
-      hipPrivilegedWeight.set(straightLegWalkingParameters.getHipPrivilegedWeight());
-      hipPrivilegedPositionGain.set(straightLegWalkingParameters.getHipPrivilegedConfigurationGain());
-      hipPrivilegedVelocityGain.set(straightLegWalkingParameters.getHipPrivilegedVelocityGain());
+      legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
+      legPitchPrivilegedPositionGain.set(straightLegWalkingParameters.getLegPitchPrivilegedConfigurationGain());
+      legPitchPrivilegedVelocityGain.set(straightLegWalkingParameters.getLegPitchPrivilegedVelocityGain());
 
       kneeStraightPrivilegedWeight.set(straightLegWalkingParameters.getKneeStraightLegPrivilegedWeight());
       kneeStraightPrivilegedPositionGain.set(straightLegWalkingParameters.getKneeStraightLegPrivilegedConfigurationGain());
@@ -117,8 +117,8 @@ public class KneeControlModule
       desiredAngleWhenStraight = new DoubleYoVariable(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
 
-      straighteningSpeed = new DoubleYoVariable(namePrefix + "StraighteningSpeed", registry);
-      straighteningSpeed.set(straightLegWalkingParameters.getSpeedForStanceLegStraightening());
+      straighteningSpeed = new DoubleYoVariable(namePrefix + "SupportKneeStraighteningSpeed", registry);
+      straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
 
       // set up states and state machine
       DoubleYoVariable time = controllerToolbox.getYoTime();
@@ -303,9 +303,9 @@ public class KneeControlModule
          {
             int hipJointIndex = 0;
             privilegedConfigurationCommand.addJoint(hipJoint, PrivilegedConfigurationOption.AT_ZERO);
-            privilegedConfigurationCommand.setWeight(hipJointIndex, hipPrivilegedWeight.getDoubleValue());
-            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, gainModifier * hipPrivilegedPositionGain.getDoubleValue());
-            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, hipPrivilegedVelocityGain.getDoubleValue());
+            privilegedConfigurationCommand.setWeight(hipJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, gainModifier * legPitchPrivilegedPositionGain.getDoubleValue());
+            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
             privilegedConfigurationCommand.setMaxAcceleration(hipJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
             kneeJointIndex++;
@@ -393,9 +393,9 @@ public class KneeControlModule
          {
             int hipJointIndex = 0;
             privilegedConfigurationCommand.addJoint(hipJoint, PrivilegedConfigurationOption.AT_ZERO);
-            privilegedConfigurationCommand.setWeight(hipJointIndex, hipPrivilegedWeight.getDoubleValue());
-            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, gainModifier * hipPrivilegedPositionGain.getDoubleValue());
-            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, hipPrivilegedVelocityGain.getDoubleValue());
+            privilegedConfigurationCommand.setWeight(hipJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, gainModifier * legPitchPrivilegedPositionGain.getDoubleValue());
+            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
             privilegedConfigurationCommand.setMaxAcceleration(hipJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
             kneeJointIndex++;
@@ -461,9 +461,9 @@ public class KneeControlModule
          {
             int hipJointIndex = 0;
             privilegedConfigurationCommand.addJoint(hipJoint, PrivilegedConfigurationOption.AT_ZERO);
-            privilegedConfigurationCommand.setWeight(hipJointIndex, hipPrivilegedWeight.getDoubleValue());
-            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, hipPrivilegedPositionGain.getDoubleValue());
-            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, hipPrivilegedVelocityGain.getDoubleValue());
+            privilegedConfigurationCommand.setWeight(hipJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, legPitchPrivilegedPositionGain.getDoubleValue());
+            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
             privilegedConfigurationCommand.setMaxAcceleration(hipJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
             kneeJointIndex++;
@@ -516,9 +516,9 @@ public class KneeControlModule
          {
             int hipJointIndex = 0;
             privilegedConfigurationCommand.addJoint(hipJoint, PrivilegedConfigurationOption.AT_ZERO);
-            privilegedConfigurationCommand.setWeight(hipJointIndex, hipPrivilegedWeight.getDoubleValue());
-            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, hipPrivilegedPositionGain.getDoubleValue());
-            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, hipPrivilegedVelocityGain.getDoubleValue());
+            privilegedConfigurationCommand.setWeight(hipJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+            privilegedConfigurationCommand.setConfigurationGain(hipJointIndex, legPitchPrivilegedPositionGain.getDoubleValue());
+            privilegedConfigurationCommand.setVelocityGain(hipJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
             privilegedConfigurationCommand.setMaxAcceleration(hipJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
             kneeJointIndex++;
