@@ -269,12 +269,18 @@ public abstract class CapturePointPlannerParameters
 
    /**
     * Sets the exit CMP on the toes. If doing toe-off in single support, this is necessary.
-    * 
-    * @return
     */
    public boolean putExitCMPOnToes()
    {
       return false;
+   }
+
+   /**
+    * Sets the distance inside from the front edge the exit CMP is located when putting the exit CMP on the toes.
+    */
+   public double getExitCMPForwardSafetyMarginOnToes()
+   {
+      return modelScale * 1.6e-2;
    }
 
    /**
