@@ -600,6 +600,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints.
+    */
+   public double[] getSwingWaypointProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
     * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
     * (new feature to be tested with Atlas)
     */
