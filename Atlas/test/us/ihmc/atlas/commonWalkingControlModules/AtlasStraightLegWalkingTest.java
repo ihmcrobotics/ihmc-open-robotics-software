@@ -129,6 +129,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
+               public double[] getSwingWaypointProportions()
+               {
+                  return new double[] {0.15, 0.80};
+               }
+
+               @Override
                public AtlasStraightLegWalkingParameters getStraightLegWalkingParameters()
                {
                   return new AtlasStraightLegWalkingParameters(false)
