@@ -397,6 +397,11 @@ public class ICPOptimizationController
       this.finalTransferSplitFraction.set(splitFraction);
    }
 
+   public void setFinalTransferSplitFractionToDefault()
+   {
+      this.finalTransferSplitFraction.set(defaultTransferSplitFraction.getDoubleValue());
+   }
+
    /**
     * Registers an additional footstep to consider in the controller.
     * <p>
