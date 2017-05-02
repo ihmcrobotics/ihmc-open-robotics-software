@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,7 +23,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
    private static final int maxTimeIterations = -1; // setting this negative activates continuous updating
    private static final int numberWaypoints = 2;
-   private static final double[] waypointProportions = new double[] {0.15, 0.85};
+   private static final double[] defaultWaypointProportions = new double[] {0.15, 0.85};
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -34,6 +35,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final DoubleYoVariable swingHeight;
    private final DoubleYoVariable maxSwingHeight;
    private final DoubleYoVariable minSwingHeight;
+
+   private final List<DoubleYoVariable> waypointProportions = new ArrayList<>();
 
    private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
@@ -51,7 +54,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final BagOfBalls waypointViz;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double minSwingHeight,
+         double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -67,6 +71,16 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       this.minSwingHeight = new DoubleYoVariable(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
+
+      if (waypointProportions == null)
+         waypointProportions = defaultWaypointProportions;
+
+      for (int i = 0; i < numberWaypoints; i++)
+      {
+         DoubleYoVariable waypointProportion = new DoubleYoVariable(namePrefix + "WaypointProportion" + i, registry);
+         waypointProportion.set(waypointProportions[i]);
+         this.waypointProportions.add(waypointProportion);
+      }
 
       trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints);
 
@@ -165,14 +179,14 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       case OBSTACLE_CLEARANCE:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getDoubleValue());
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
          }
          break;
       case DEFAULT:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getDoubleValue());
             waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
          }
          break;
@@ -278,7 +292,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    public static double[] getDefaultWaypointProportions()
    {
-      return waypointProportions;
+      return defaultWaypointProportions;
    }
    
    public int getNumberOfWaypoints()
