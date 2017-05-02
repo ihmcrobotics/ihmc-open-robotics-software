@@ -4,11 +4,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 
 public class StraightLegWalkingParameters
 {
-   public boolean includeHipPitchPrivilegedConfiguration()
-   {
-      return false;
-   }
-
    /**
     * This is the speed used to straighten the desire privileged configuration of the support leg's knee.
     * This is used whenever a leg is first loaded to straighten from the current configuration to the
