@@ -54,6 +54,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final BagOfBalls waypointViz;
 
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(namePrefix, null, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
+   }
+
    public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double minSwingHeight,
          double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
