@@ -80,6 +80,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
@@ -146,5 +147,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
       icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
+   }
+
+   @Override
+   public ICPOptimizationController getICPOptimizationController()
+   {
+      return icpOptimizationController;
    }
 }
