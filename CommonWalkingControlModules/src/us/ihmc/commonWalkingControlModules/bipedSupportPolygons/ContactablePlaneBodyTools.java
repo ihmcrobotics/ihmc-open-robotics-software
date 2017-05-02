@@ -16,7 +16,7 @@ public class ContactablePlaneBodyTools
       transform3D.setTranslation(0.1, 0.2, -0.5);
       transform3D.setRotationPitchAndZeroTranslation(Math.PI / 2.0);
 
-      ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
+      ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
             transform3D);
 
       double forward = 0.2;
@@ -35,7 +35,7 @@ public class ContactablePlaneBodyTools
 
       RigidBodyTransform transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
+      ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
             transform3D);
 
       double forward = 0.2;

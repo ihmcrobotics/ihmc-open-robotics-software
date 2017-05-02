@@ -7,9 +7,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 @SuppressWarnings("serial")
 public abstract class PixelsReferenceFrame extends PlotterReferenceFrame
 {
-   public PixelsReferenceFrame(String frameName, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)
+   public PixelsReferenceFrame(String frameName, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
+      super(frameName, PlotterFrameSpace.PIXELS, spaceConverter);
    }
 
    public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)

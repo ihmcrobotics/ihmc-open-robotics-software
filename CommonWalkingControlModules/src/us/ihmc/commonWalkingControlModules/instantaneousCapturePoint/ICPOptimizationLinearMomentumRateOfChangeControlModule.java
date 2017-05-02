@@ -61,7 +61,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
 
       icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            bipedSupportPolygons, contactableFeet, totalMass, gravityZ, controlDT, registry, yoGraphicsListRegistry);
    }
 
    @Override
