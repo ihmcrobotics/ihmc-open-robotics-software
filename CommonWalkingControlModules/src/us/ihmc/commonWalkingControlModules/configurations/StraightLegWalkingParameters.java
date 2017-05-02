@@ -70,14 +70,13 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * <p>
     * This is the configuration gain used to control the privileged joint accelerations or privileged joint velocities
     * for the other leg pitch joints. For a typical humanoid, these joints are the hip pitch and ankle pitch.
     * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
     * to stand and walk with straight legs.
     * This is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
     * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
-    * </p>
+    *
     * @return privileged configuration gain.
     */
    public double getLegPitchPrivilegedConfigurationGain()
@@ -86,7 +85,6 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * <p>
     * This is the velocity gain used to damp the privileged joint accelerations for the other leg pitch joints.
     * For a typical humanoid, these joints are the hip pitch and ankle pitch.
     * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
@@ -95,7 +93,7 @@ public class StraightLegWalkingParameters
     * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
     * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
     * joint accelerations.
-    * </p>
+    *
     * @return privileged velocity gain.
     */
    public double getLegPitchPrivilegedVelocityGain()
@@ -104,12 +102,11 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * <p>
-    * This is the weight placed on the privileged joint accelerations for the other leg pitch joints in the
-    * optimization. For a typical humanoid, these joints are the hip pitch and ankle pitch.
+    * This is the weight placed on the privileged joint accelerations or velocities for the other leg pitch
+    * joints in the optimization. For a typical humanoid, these joints are the hip pitch and ankle pitch.
     * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
     * to stand and walk with straight legs.
-    * </p>
+    *
     * @return privileged configuration weight.
     */
    public double getLegPitchPrivilegedWeight()
@@ -117,41 +114,107 @@ public class StraightLegWalkingParameters
       return 5.0;
    }
 
+   /**
+    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
+    * when the leg is in the straight leg state or straightening state.
+    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
+    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
+    *
+    * @return privileged configuration gain.
+    */
    public double getKneeStraightLegPrivilegedConfigurationGain()
    {
       return 40.0;
    }
 
+   /**
+    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the straight
+    * leg state.
+    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
+    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
+    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
+    * joint accelerations.
+    *
+    * @return privileged velocity gain.
+    */
    public double getKneeStraightLegPrivilegedVelocityGain()
    {
       return 6.0;
    }
 
+   /**
+    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
+    * the straight leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
+    * ankle pitch.
+    *
+    * @return privileged configuration weight.
+    */
    public double getKneeStraightLegPrivilegedWeight()
    {
       return 5.0;
    }
 
+   /**
+    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
+    * when the leg is in the bent leg state.
+    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
+    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
+    *
+    * @return privileged configuration gain.
+    */
    public double getKneeBentLegPrivilegedConfigurationGain()
    {
       return 40.0;
    }
 
+   /**
+    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the bent
+    * leg state.
+    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
+    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
+    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
+    * joint accelerations.
+    *
+    * @return privileged velocity gain.
+    */
    public double getKneeBentLegPrivilegedVelocityGain()
    {
       return 6.0;
    }
 
+   /**
+    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
+    * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
+    * ankle pitch.
+    *
+    * @return privileged configuration weight.
+    */
    public double getKneeBentLegPrivilegedWeight()
    {
       return 5.0;
    }
 
+   /**
+    * The maximum privileged velocity to be allowed after feedback as an objective in the optimization, as calculated
+    * by the {@link JointPrivilegedConfigurationHandler}.
+    * This value is used for all the leg pitch joints, which, for a standard humanoid, is the hip pitch, knee pitch
+    * and ankle pitch.
+    *
+    * @return max privileged velocity in radians per second.
+    */
    public double getPrivilegedMaxVelocity()
    {
-      return 2.0;
+      return Double.POSITIVE_INFINITY;
    }
 
+   /**
+    * The maximum privileged acceleration to be allowed after feedback as an objective in the optimization, as
+    * calculated by the {@link JointPrivilegedConfigurationHandler}.
+    * This value is used for all the leg pitch joints, which, for a standard humanoid, is the hip pitch, knee pitch
+    * and ankle pitch.
+    *
+    * @return max privileged acceleration in radians per second.
+    */
    public double getPrivilegedMaxAcceleration()
    {
       return Double.POSITIVE_INFINITY;
