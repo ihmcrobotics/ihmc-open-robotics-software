@@ -41,9 +41,10 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       super(stateEnum);
       this.yoTime = yoTime;
 
-      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
       warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
-      registry = new YoVariableRegistry(prefix + "ControlModule");
+      registry = new YoVariableRegistry(createRegistryName(bodyName, stateEnum));
+
+      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
       lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
@@ -91,7 +92,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       trajectoryDone.set(false);
       return true;
    }
-   
+
    protected void setTrajectoryStartTimeToCurrentTime()
    {
       trajectoryStartTime.set(yoTime.getDoubleValue());
@@ -119,7 +120,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    public abstract boolean isEmpty();
 
    public abstract double getLastTrajectoryPointTime();
-   
+
    public abstract void clear();
 
    @Override
@@ -155,5 +156,11 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
          else
             throw new RuntimeException("Implement hiding this.");
       }
+   }
+
+   public static String createRegistryName(String bodyName, RigidBodyControlMode stateEnum)
+   {
+      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      return prefix + "ControlModule";
    }
 }
