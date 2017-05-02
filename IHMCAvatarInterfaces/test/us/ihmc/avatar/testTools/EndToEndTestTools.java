@@ -24,7 +24,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class EndToEndTestTools
 {
-   public static final double DESIREDS_EPSILON = 1.0E-4;
    public static final String FORMAT = EuclidCoreIOTools.getStringFormat(6, 4);
 
    /**
@@ -37,26 +36,26 @@ public class EndToEndTestTools
       assertEquals("Unexpected number of waypoints:", points, findControllerNumberOfWaypoints(bodyName, scs));
    }
 
-   public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs)
+   public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
    {
-      assertCurrentDesiredsMatch(bodyName, waypoint.orientation, waypoint.angularVelocity, scs);
+      assertCurrentDesiredsMatch(bodyName, waypoint.orientation, waypoint.angularVelocity, scs, epsilon);
    }
 
-   public static void assertCurrentDesiredsMatch(String bodyName, Quaternion expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs)
+   public static void assertCurrentDesiredsMatch(String bodyName, Quaternion expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs, double epsilon)
    {
       Quaternion desiredOrientation = EndToEndTestTools.findControllerDesiredOrientation(bodyName, scs);
       Vector3D desiredAngularVelocity = EndToEndTestTools.findControllerDesiredAngularVelocity(bodyName, scs);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", expectedOrientation, desiredOrientation, DESIREDS_EPSILON, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, DESIREDS_EPSILON, FORMAT);
+      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
-   public static void assertWaypointInGeneratorMatches(String bodyName, int index, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs)
+   public static void assertWaypointInGeneratorMatches(String bodyName, int index, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
    {
       assertTrue("Index too high: " + index, index < RigidBodyTaskspaceControlState.maxPointsInGenerator);
       SimpleSO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
-      assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), DESIREDS_EPSILON);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), DESIREDS_EPSILON, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, actualWaypoint.getAngularVelocityCopy(), DESIREDS_EPSILON, FORMAT);
+      assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), epsilon);
+      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
    }
 
    public static SimpleSO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, SimulationConstructionSet scs)

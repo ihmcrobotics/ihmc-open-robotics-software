@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
@@ -52,6 +53,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
+      double epsilon = 1.0e-10;
       double yaw = Math.toRadians(5.0);
       double pitch = Math.toRadians(-10.0);
       double roll = Math.toRadians(-5.0);
@@ -73,15 +75,17 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertNumberOfPoints(pelvisName, 2, scs);
-      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, scs);
+      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, scs, epsilon);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
-      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs);
+      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
    }
 
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
+      double epsilon = 1.0e-4;
       int steps = 4;
+
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps);
       drcSimulationTestHelper.send(footsteps);
@@ -93,11 +97,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FrameOrientation midFeetOrientation = new FrameOrientation(midFeetZUpFrame);
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
-      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation.getQuaternion(), zeroVector, scs);
+      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation.getQuaternion(), zeroVector, scs, epsilon);
    }
 
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
+      double epsilon = 1.0e-4;
+
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       if (!walkingControllerParameters.doPreparePelvisForLocomotion())
       {
@@ -125,11 +131,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       humanoidReferenceFrames.updateFrames();
       desiredAfterTrajectory.changeFrame(worldFrame);
-      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory.getQuaternion(), zeroVector, scs);
+      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory.getQuaternion(), zeroVector, scs, epsilon);
    }
 
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
+      double epsilon = 1.0e-10;
       int numberOfPoints = 23;
       double yawMagnitude = Math.toRadians(5.0);
       double pitchMagnitude = Math.toRadians(-10.0);
@@ -182,13 +189,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       for (int point = 1; point < RigidBodyTaskspaceControlState.maxPointsInGenerator; point++)
       {
          SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(point - 1);
-         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, point, waypoint, scs);
+         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, point, waypoint, scs, epsilon);
       }
 
       double simulationTime = timePerPoint * numberOfPoints + 0.5;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(numberOfPoints - 1);
-      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs);
+      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
    }
 
    public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
@@ -212,6 +219,44 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime / 2.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+   }
+
+   public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
+   {
+      double pitch = Math.toRadians(20.0);
+      double chestTrajectoryTime = 1.0;
+      double epsilon = 1.0E-3;
+      Quaternion desiredOrientation = new Quaternion();
+      humanoidReferenceFrames.updateFrames();
+      ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
+
+      // first hold the chest in world to avoid feedback effects
+      FrameOrientation chestOrientation = new FrameOrientation(chestFrame);
+      chestOrientation.changeFrame(worldFrame);
+      ChestTrajectoryMessage holdChestInWorldMessage = new ChestTrajectoryMessage(0.0, chestOrientation.getQuaternion(), worldFrame, worldFrame);
+      drcSimulationTestHelper.send(holdChestInWorldMessage);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+
+      // now hold the pelvis in chest frame
+      PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredOrientation);
+      holdPelvisInChestMessage.setTrajectoryReferenceFrameId(chestFrame);
+      holdPelvisInChestMessage.setDataReferenceFrameId(chestFrame);
+      drcSimulationTestHelper.send(holdPelvisInChestMessage);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+
+      // finally pitch the chest forward and assert that the pelvis follows
+      humanoidReferenceFrames.updateFrames();
+      Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendPitchRotation(pitch);
+      FrameOrientation frameChestOrientation = new FrameOrientation(chestFrame, desiredChestOrientation);
+      frameChestOrientation.changeFrame(worldFrame);
+      frameChestOrientation.get(desiredChestOrientation);
+      ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(chestTrajectoryTime, desiredChestOrientation, worldFrame, worldFrame);
+      drcSimulationTestHelper.send(chestMessage);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(chestTrajectoryTime + 0.5);
+
+      String pelvisName = fullRobotModel.getPelvis().getName();
+      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, scs, epsilon);
    }
 
    @SuppressWarnings("unchecked")
