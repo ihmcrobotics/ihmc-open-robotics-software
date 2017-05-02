@@ -137,6 +137,11 @@ public class PelvisOrientationManager
       walkingManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
    }
 
+   public void centerInMidFeetZUpFrame(double trajectoryTime)
+   {
+      walkingManager.centerInMidFeetZUpFrame(trajectoryTime);
+   }
+
    public void setToHoldCurrentDesiredInSupportFoot(RobotSide supportSide)
    {
       walkingManager.setToHoldCurrentDesiredInSupportFoot(supportSide);

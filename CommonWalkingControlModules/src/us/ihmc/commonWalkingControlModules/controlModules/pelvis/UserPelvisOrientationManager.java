@@ -101,18 +101,4 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       return orientationFeedbackControlCommand;
    }
-
-   @Override
-   public void doTransitionIntoAction()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      // TODO Auto-generated method stub
-
-   }
 }

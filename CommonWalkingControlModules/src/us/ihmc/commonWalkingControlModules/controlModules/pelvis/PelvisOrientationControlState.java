@@ -24,6 +24,16 @@ public abstract class PelvisOrientationControlState extends FinishableState<Pelv
       return null;
    }
 
+   @Override
+   public void doTransitionIntoAction()
+   {
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+   }
+
    public abstract OrientationFeedbackControlCommand getFeedbackControlCommand();
 
    public abstract void getCurrentDesiredOrientation(FrameOrientation orientationToPack);
