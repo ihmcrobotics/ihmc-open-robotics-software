@@ -80,12 +80,9 @@ public class PelvisOrientationManager
 
    public void initialize()
    {
+      walkingManager.resetOrientationOffset();
       requestState(walkingManager.getStateEnum());
       walkingManager.setToHoldCurrentInWorldFrame();
-
-//      tempOrientation.setToZero(userManager.getControlFrame());
-//      userManager.goHome(1.0, tempOrientation);
-//      requestState(userManager.getStateEnum());
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)

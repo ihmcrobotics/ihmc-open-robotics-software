@@ -492,13 +492,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())
       {
-         pelvisOrientationManager.resetOrientationOffset();
          pelvisOrientationManager.setToZeroInMidFeetZUpFrame();
          hasWalkingControllerBeenInitialized.set(true);
       }
       else
       {
-         pelvisOrientationManager.resetOrientationOffset();
          pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       }
 
@@ -519,7 +517,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
 
       hasWalkingControllerBeenInitialized.set(true);
-      
+
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
@@ -788,42 +786,42 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       return registry;
    }
-   
+
    /**
     * Get defined states for the walking high level humanoid controller
-    * 
+    *
     * Inefficient, use only in construction
-    * 
+    *
     * @param states return list of walking states
     */
    public void getOrderedWalkingStatesForWarmup(List<WalkingStateEnum> states)
    {
-      
+
       states.add(WalkingStateEnum.TO_STANDING);
       states.add(WalkingStateEnum.STANDING);
-      
+
       states.add(WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
       states.add(WalkingStateEnum.WALKING_LEFT_SUPPORT);
-      
+
 //      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
 //      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
-      
+
       states.add(WalkingStateEnum.TO_FLAMINGO_LEFT_SUPPORT);
       states.add(WalkingStateEnum.FLAMINGO_LEFT_SUPPORT);
-      
+
 //      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
 //      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
-      
+
    }
-   
+
    /**
     * Run one set of doTransitionIntoAction, doAction and doTransitionOutOfAction for a given state.
-    * 
+    *
     * The balance manager is updated, but no commands are consumed.
-    * 
+    *
     * This can be used to warmup the JIT compiler.
-    * 
-    * 
+    *
+    *
     * @param state
     */
    public void warmupStateIteration(WalkingStateEnum state)
@@ -849,13 +847,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
          footStepCommand.setSwingHeight(0);
          cmd.addFootstep(footStepCommand);
-         
+
          walkingMessageHandler.handleFootstepDataListCommand(cmd);
          break;
-         
+
       case FLAMINGO_LEFT_SUPPORT:
       case FLAMINGO_RIGHT_SUPPORT:
-         
+
          ArrayList<FootTrajectoryCommand> commands = new ArrayList<>();
          FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
          trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
@@ -867,18 +865,18 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       default:
          break;
       }
-      
+
       currentState.doTransitionIntoAction();
-      
+
       currentState.doAction();
-      
+
       updateManagers(currentState);
 
       submitControllerCoreCommands();
-      
+
       currentState.doTransitionOutOfAction();
-      
+
       walkingMessageHandler.clearFootsteps();
-      
+
    }
 }

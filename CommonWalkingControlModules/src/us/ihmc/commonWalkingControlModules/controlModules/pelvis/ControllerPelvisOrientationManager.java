@@ -237,6 +237,16 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       isTrajectoryStopped.set(false);
    }
 
+   public void setOffset(FrameOrientation offset)
+   {
+      tempOrientation.setIncludingFrame(offset);
+      tempOrientation.changeFrame(desiredPelvisFrame);
+      pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
+      pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
+      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(0.0);
+      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+   }
+
    public void resetOrientationOffset()
    {
       tempOrientation.setToZero(desiredPelvisFrame);
@@ -351,16 +361,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
-   }
-
-   public void setOffset(FrameOrientation offset)
-   {
-      tempOrientation.setIncludingFrame(offset);
-      tempOrientation.changeFrame(desiredPelvisFrame);
-      pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
-      pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
-      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(0.0);
-      pelvisOrientationOffsetTrajectoryGenerator.initialize();
    }
 
    @Override
