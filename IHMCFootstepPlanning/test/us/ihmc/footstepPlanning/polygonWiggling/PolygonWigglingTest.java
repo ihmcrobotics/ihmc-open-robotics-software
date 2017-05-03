@@ -1285,7 +1285,8 @@ public class PolygonWigglingTest
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   // TODO: 05/03/2017 moved to development
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testConvexConstraintOfQuadrangle()
    {
@@ -1301,7 +1302,7 @@ public class PolygonWigglingTest
       Point2D thirdQuadrantPoint = new Point2D();
       Point2D fourthQuadrantPoint = new Point2D();
 
-      Random random = new Random();
+      Random random = new Random(3167568458681184485L);
 
       for (int iters = 0; iters < 1000; iters++)
       {
