@@ -131,21 +131,23 @@ public class ConstraintToConvexRegion
     */
    public void formulateConstraint()
    {
-      int numberOfVertices = convexPolygon.getNumberOfVertices();
-      Aineq.reshape(numberOfVertices, numberOfVertices);
-      bineq.reshape(numberOfVertices, 1);
-
       PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, deltaInside);
       CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 
    /**
-    * Gets the total number of vertices for the convex constraint region.
+    * Gets the total size of the required inequality constraint.
     *
     * @return number of vertices.
     */
-   public int getNumberOfVertices()
+   public int getInequalityConstraintSize()
    {
-      return convexPolygon.getNumberOfVertices();
+      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      if (numberOfVertices > 2)
+         return numberOfVertices;
+      else if (numberOfVertices > 0)
+         return 4;
+      else
+         return 0;
    }
 }

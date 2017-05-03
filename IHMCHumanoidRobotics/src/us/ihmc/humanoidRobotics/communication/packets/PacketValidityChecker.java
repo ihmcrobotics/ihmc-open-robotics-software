@@ -95,7 +95,7 @@ public abstract class PacketValidityChecker
          String errorMessage = messageClassName + "'s swingHeight field " + packetFieldErrorType.getMessage();
          return errorMessage;
       }
-      
+
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
          SE3TrajectoryPointMessage[] swingTrajectory = packetToCheck.getSwingTrajectory();
@@ -632,12 +632,12 @@ public abstract class PacketValidityChecker
 
       if(pelvisOrientationTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+         return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
       if(pelvisOrientationTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+         return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
