@@ -494,6 +494,15 @@ public class FootControlModule
          holdPositionState.doFootholdAdjustments(allow);
    }
 
+   public boolean isFootToeingOffSlipping()
+   {
+      if (getCurrentConstraintType() != ConstraintType.TOES)
+         return false;
+      if (footControlHelper.getToeSlippingDetector() == null)
+         return false;
+      return footControlHelper.getToeSlippingDetector().isToeSlipping();
+   }
+
    private void requestExploration()
    {
       if (!isInFlatSupportState()) return;
