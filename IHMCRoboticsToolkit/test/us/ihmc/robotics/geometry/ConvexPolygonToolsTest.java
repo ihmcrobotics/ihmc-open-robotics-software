@@ -29,7 +29,7 @@ public class ConvexPolygonToolsTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
       ArrayList<FramePoint2d> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
 

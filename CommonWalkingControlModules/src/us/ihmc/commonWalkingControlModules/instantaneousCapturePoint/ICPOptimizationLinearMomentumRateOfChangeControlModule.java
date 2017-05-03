@@ -61,7 +61,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
 
       icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            bipedSupportPolygons, contactableFeet, totalMass, gravityZ, controlDT, registry, yoGraphicsListRegistry);
    }
 
    @Override
@@ -80,6 +80,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
@@ -118,7 +119,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
             areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
          }
 
-         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
+         if (!icpOptimizationController.useAngularMomentum())
+            cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
       }
    }
 
@@ -145,5 +147,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
       icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
+   }
+
+   @Override
+   public ICPOptimizationController getICPOptimizationController()
+   {
+      return icpOptimizationController;
    }
 }

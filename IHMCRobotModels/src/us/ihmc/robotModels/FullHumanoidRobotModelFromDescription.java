@@ -66,14 +66,14 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       {
          RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+         ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame);
 
          RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
 
          if (handAttachmentPlaeToWristTransform != null)
          {
-            ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM),
+            ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM),
                   handAttachmentPlaeToWristTransform);
             attachmentPlateFrames.put(robotSide, attachmentPlateFrame);
          }

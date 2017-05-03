@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -68,7 +68,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager = managerFactory.getOrCreateFeetManager();
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
-      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getPercentOfSwingToStraightenLeg());
+      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());

@@ -83,7 +83,7 @@ public class HumanEvaluationLine2dTest
       double yMin = -1.0;
       double yMax = 1.0;
 
-      ReferenceFrame someFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
+      ReferenceFrame someFrame = ReferenceFrame.constructARootFrame("someFrame");
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
 
@@ -143,7 +143,7 @@ public class HumanEvaluationLine2dTest
       double yMin = -1.0;
       double yMax = 1.0;
 
-      ReferenceFrame someFrame = ReferenceFrame.constructARootFrame("someFrame", false, true);
+      ReferenceFrame someFrame = ReferenceFrame.constructARootFrame("someFrame");
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
 

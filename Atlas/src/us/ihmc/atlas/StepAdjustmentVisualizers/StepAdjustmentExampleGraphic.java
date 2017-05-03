@@ -169,7 +169,7 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
       icpOptimizationController = new ICPOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            contactableFeet, 0.0, -9.81, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfFootstepsToCreate; i++)
@@ -1469,6 +1469,11 @@ public class StepAdjustmentExampleGraphic
             return 5.0;
          }
 
+         @Override public double getAngularMomentumMinimizationWeight()
+         {
+            return 500.0;
+         }
+
          @Override public boolean useFeedbackRegularization()
          {
             return true;
@@ -1477,6 +1482,11 @@ public class StepAdjustmentExampleGraphic
          @Override public boolean useStepAdjustment()
          {
             return true;
+         }
+
+         @Override public boolean useAngularMomentum()
+         {
+            return false;
          }
 
          @Override public boolean useFootstepRegularization()
@@ -1515,25 +1525,25 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getDoubleSupportMaxCMPForwardExit()
+         public double getDoubleSupportMaxCoPForwardExit()
          {
             return 0;
          }
 
          @Override
-         public double getDoubleSupportMaxCMPLateralExit()
+         public double getDoubleSupportMaxCoPLateralExit()
          {
             return 0;
          }
 
          @Override
-         public double getSingleSupportMaxCMPForwardExit()
+         public double getSingleSupportMaxCoPForwardExit()
          {
             return 0;
          }
 
          @Override
-         public double getSingleSupportMaxCMPLateralExit()
+         public double getSingleSupportMaxCoPLateralExit()
          {
             return 0;
          }
