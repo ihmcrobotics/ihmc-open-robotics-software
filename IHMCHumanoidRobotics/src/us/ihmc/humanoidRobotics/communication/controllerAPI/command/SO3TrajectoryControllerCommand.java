@@ -95,6 +95,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       return selectionMatrix;
    }
+   
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
+   }
 
    public FrameSO3TrajectoryPointList getTrajectoryPointList()
    {

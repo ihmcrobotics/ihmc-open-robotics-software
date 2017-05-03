@@ -234,7 +234,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
-      selectionMatrixToPack.clearSelection();
+      selectionMatrixToPack.resetSelection();
       if (selectionMatrix != null)
          selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
    }
