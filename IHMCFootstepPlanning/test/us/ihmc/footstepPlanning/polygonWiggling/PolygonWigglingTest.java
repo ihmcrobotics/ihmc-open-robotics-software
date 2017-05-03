@@ -1207,7 +1207,6 @@ public class PolygonWigglingTest
 
 
 
-
       // on line but before segment
       x.set(0, 0, -1.0);
       x.set(1, 0, 0.0);
@@ -1217,7 +1216,6 @@ public class PolygonWigglingTest
       for (int i = 0; i < solution.getNumRows(); i++)
          allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
       assertFalse(allLessThan);
-
 
 
 
@@ -1287,6 +1285,297 @@ public class PolygonWigglingTest
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConvexConstraintOfQuadrangle()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D firstQuadrantPoint = new Point2D();
+      Point2D secondQuadrantPoint = new Point2D();
+      Point2D thirdQuadrantPoint = new Point2D();
+      Point2D fourthQuadrantPoint = new Point2D();
+
+      Random random = new Random();
+
+      for (int iters = 0; iters < 1000; iters++)
+      {
+
+         firstQuadrantPoint.set(1.0 + random.nextDouble(), 1.0 + random.nextDouble());
+         secondQuadrantPoint.set(1.0 + random.nextDouble(), -1.0 - random.nextDouble());
+         thirdQuadrantPoint.set(-1.0 - random.nextDouble(), -1.0 - random.nextDouble());
+         fourthQuadrantPoint.set(-1.0 - random.nextDouble(), 1.0 + random.nextDouble());
+
+         polygon.clear();
+         polygon.addVertex(firstQuadrantPoint);
+         polygon.addVertex(secondQuadrantPoint);
+         polygon.addVertex(thirdQuadrantPoint);
+         polygon.addVertex(fourthQuadrantPoint);
+         polygon.update();
+
+         PolygonWiggler.convertToInequalityConstraints(polygon, A, b, 0.0);
+
+         solution.reshape(b.getNumRows(), b.getNumCols());
+
+         // test firstQuadrantPoint satisfies constraint
+         x.set(0, 0, firstQuadrantPoint.getX());
+         x.set(1, 0, firstQuadrantPoint.getY());
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test secondQuadrantPoint satisfies constraint
+         x.set(0, 0, secondQuadrantPoint.getX());
+         x.set(1, 0, secondQuadrantPoint.getY());
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test thirdQuadrantPoint satisfies constraint
+         x.set(0, 0, thirdQuadrantPoint.getX());
+         x.set(1, 0, thirdQuadrantPoint.getY());
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test fourthQuadrantPoint satisfies constraint
+         x.set(0, 0, fourthQuadrantPoint.getX());
+         x.set(1, 0, fourthQuadrantPoint.getY());
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test firstQuadrantPoint slightly inside satisfies constraint
+         double slightOffset = 0.01 * random.nextDouble();
+         x.set(0, 0, firstQuadrantPoint.getX() - slightOffset);
+         x.set(1, 0, firstQuadrantPoint.getY() - slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test secondQuadrantPoint satisfies constraint
+         x.set(0, 0, secondQuadrantPoint.getX() - slightOffset);
+         x.set(1, 0, secondQuadrantPoint.getY() + slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test thirdQuadrantPoint satisfies constraint
+         x.set(0, 0, thirdQuadrantPoint.getX() + slightOffset);
+         x.set(1, 0, thirdQuadrantPoint.getY() + slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test fourthQuadrantPoint satisfies constraint
+         x.set(0, 0, fourthQuadrantPoint.getX() + slightOffset);
+         x.set(1, 0, fourthQuadrantPoint.getY() - slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test firstQuadrantPoint big inside satisfies constraint
+         double offset = random.nextDouble();
+         x.set(0, 0, firstQuadrantPoint.getX() - offset);
+         x.set(1, 0, firstQuadrantPoint.getY() - offset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test secondQuadrantPoint satisfies constraint
+         x.set(0, 0, secondQuadrantPoint.getX() - offset);
+         x.set(1, 0, secondQuadrantPoint.getY() + offset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test thirdQuadrantPoint satisfies constraint
+         x.set(0, 0, thirdQuadrantPoint.getX() + offset);
+         x.set(1, 0, thirdQuadrantPoint.getY() + offset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test fourthQuadrantPoint satisfies constraint
+         x.set(0, 0, fourthQuadrantPoint.getX() + offset);
+         x.set(1, 0, fourthQuadrantPoint.getY() - offset);
+
+         CommonOps.mult(A, x, solution);
+         for (int i = 0; i < solution.getNumRows(); i++)
+            assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
+
+         // test firstQuadrantPoint slight outside violates constraint
+         x.set(0, 0, firstQuadrantPoint.getX() + slightOffset);
+         x.set(1, 0, firstQuadrantPoint.getY() + slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         boolean allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test secondQuadrantPoint satisfies constraint
+         x.set(0, 0, secondQuadrantPoint.getX() + slightOffset);
+         x.set(1, 0, secondQuadrantPoint.getY() - slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test thirdQuadrantPoint satisfies constraint
+         x.set(0, 0, thirdQuadrantPoint.getX() - slightOffset);
+         x.set(1, 0, thirdQuadrantPoint.getY() - slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test fourthQuadrantPoint satisfies constraint
+         x.set(0, 0, fourthQuadrantPoint.getX() - slightOffset);
+         x.set(1, 0, fourthQuadrantPoint.getY() + slightOffset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test firstQuadrantPoint big outside violates constraint
+         x.set(0, 0, firstQuadrantPoint.getX() + offset);
+         x.set(1, 0, firstQuadrantPoint.getY() + offset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test secondQuadrantPoint satisfies constraint
+         x.set(0, 0, secondQuadrantPoint.getX() + offset);
+         x.set(1, 0, secondQuadrantPoint.getY() - offset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test thirdQuadrantPoint satisfies constraint
+         x.set(0, 0, thirdQuadrantPoint.getX() - offset);
+         x.set(1, 0, thirdQuadrantPoint.getY() - offset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+
+         // test fourthQuadrantPoint satisfies constraint
+         x.set(0, 0, fourthQuadrantPoint.getX() - offset);
+         x.set(1, 0, fourthQuadrantPoint.getY() + offset);
+
+         CommonOps.mult(A, x, solution);
+         allConditions = true;
+         for (int i = 0; i < solution.getNumRows(); i++)
+            allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+         assertFalse(allConditions);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConvexConstraintOfQuadrangleDeltaInside()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2D firstQuadrantPoint = new Point2D();
+      Point2D secondQuadrantPoint = new Point2D();
+      Point2D thirdQuadrantPoint = new Point2D();
+      Point2D fourthQuadrantPoint = new Point2D();
+
+      Random random = new Random();
+
+      firstQuadrantPoint.set(1.0 + random.nextDouble(), 1.0 + random.nextDouble());
+      secondQuadrantPoint.set(1.0 + random.nextDouble(), -1.0 - random.nextDouble());
+      thirdQuadrantPoint.set(-1.0 - random.nextDouble(), -1.0 - random.nextDouble());
+      fourthQuadrantPoint.set(-1.0 - random.nextDouble(), 1.0 + random.nextDouble());
+
+      polygon.clear();
+      polygon.addVertex(firstQuadrantPoint);
+      polygon.addVertex(secondQuadrantPoint);
+      polygon.addVertex(thirdQuadrantPoint);
+      polygon.addVertex(fourthQuadrantPoint);
+      polygon.update();
+
+      PolygonWiggler.convertToInequalityConstraints(polygon, A, b, 0.1 * random.nextDouble());
+
+      solution.reshape(b.getNumRows(), b.getNumCols());
+
+      // test firstQuadrantPoint violates constraint
+      x.set(0, 0, firstQuadrantPoint.getX());
+      x.set(1, 0, firstQuadrantPoint.getY());
+
+      CommonOps.mult(A, x, solution);
+      boolean allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test secondQuadrantPoint violates constraint
+      x.set(0, 0, secondQuadrantPoint.getX());
+      x.set(1, 0, secondQuadrantPoint.getY());
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test thirdQuadrantPoint violates constraint
+      x.set(0, 0, thirdQuadrantPoint.getX());
+      x.set(1, 0, thirdQuadrantPoint.getY());
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test fourthQuadrantPoint violates constraint
+      x.set(0, 0, fourthQuadrantPoint.getX());
+      x.set(1, 0, fourthQuadrantPoint.getY());
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+   }
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
    {
