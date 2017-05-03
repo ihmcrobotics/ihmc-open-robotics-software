@@ -183,7 +183,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       tempAngularAcceleration.changeFrame(worldFrame);
 
       offsetTrajectoryWhileWalking.update();
-      offsetTrajectoryWhileWalking.getAngularData(tempOrientation);
+      offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
