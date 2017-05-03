@@ -303,6 +303,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       if(this.target == RobotTarget.REAL_ROBOT)
          return ValkyrieConfigurationRoot.REAL_ROBOT_SDF_FILE;
+      else if(this.target == RobotTarget.GAZEBO)
+         return ValkyrieConfigurationRoot.GAZEBO_SDF_FILE;
       else
          return ValkyrieConfigurationRoot.SIM_SDF_FILE;
    }
@@ -474,6 +476,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
             return LogSettings.VALKYRIE_JSC;
          else
             return LogSettings.VALKYRIE_NO_CAMERAS;
+      }
+      else if(target == RobotTarget.GAZEBO)
+      {
+         return LogSettings.VALKYRIE_NO_CAMERAS;
       }
       else
       {
