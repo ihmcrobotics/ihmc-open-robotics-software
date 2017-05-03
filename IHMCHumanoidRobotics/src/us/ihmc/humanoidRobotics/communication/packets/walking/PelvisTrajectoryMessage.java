@@ -24,6 +24,8 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
 {
    private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
+   public boolean enableUserPelvisControlDuringWalking = false;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -86,6 +88,16 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
+   public boolean isEnableUserPelvisControlDuringWalking()
+   {
+      return enableUserPelvisControlDuringWalking;
+   }
+
+   public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
+   {
+      this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
    @Override
    public boolean epsilonEquals(PelvisTrajectoryMessage other, double epsilon)
    {
@@ -107,7 +119,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    {
       return PacketValidityChecker.validatePelvisTrajectoryMessage(this);
    }
-   
+
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
    {
       super.setTrajectoryPoint(trajectoryPointIndex, time, position, orientation, linearVelocity, angularVelocity, WORLD_FRAME_HASH_CODE);
