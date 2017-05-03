@@ -1355,7 +1355,7 @@ public class PolygonWigglingTest
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
          // test firstQuadrantPoint slightly inside satisfies constraint
-         double slightOffset = 0.01 * random.nextDouble();
+         double slightOffset = 0.1 * random.nextDouble();
          x.set(0, 0, firstQuadrantPoint.getX() - slightOffset);
          x.set(1, 0, firstQuadrantPoint.getY() - slightOffset);
 
