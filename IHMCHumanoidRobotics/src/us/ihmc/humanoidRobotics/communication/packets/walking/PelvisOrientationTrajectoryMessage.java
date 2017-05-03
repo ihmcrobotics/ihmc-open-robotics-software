@@ -21,6 +21,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
                   topic = "/control/pelvis_orientation_trajectory")
 public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMessage<PelvisOrientationTrajectoryMessage>  implements VisualizablePacket
 {
+   public boolean enableUserPelvisControlDuringWalking = false;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -70,6 +72,16 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public boolean isEnableUserPelvisControlDuringWalking()
+   {
+      return enableUserPelvisControlDuringWalking;
+   }
+
+   public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
+   {
+      this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
    }
 
    @Override

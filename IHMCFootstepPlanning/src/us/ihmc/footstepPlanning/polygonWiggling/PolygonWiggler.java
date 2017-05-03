@@ -207,6 +207,77 @@ public class PolygonWiggler
    public static void convertToInequalityConstraints(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
+
+      if (constraints > 2)
+         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside);
+      else if (constraints > 1)
+         convertToInequalityConstraintsLine(polygon, A, b, deltaInside);
+      else
+         convertToInequalityConstraintsPoint(polygon, A, b);
+   }
+
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b)
+   {
+      A.reshape(4, 2);
+      b.reshape(4, 1);
+
+      A.set(0, 0, 1.0);
+      A.set(0, 1, 0.0);
+      A.set(1, 0, 0.0);
+      A.set(1, 1, 1.0);
+      A.set(2, 0, -1.0);
+      A.set(2, 1, 0.0);
+      A.set(3, 0, 0.0);
+      A.set(3, 1, -1.0);
+
+      Point2DReadOnly point = polygon.getVertex(0);
+
+      b.set(0, 0, point.getX());
+      b.set(1, 0, point.getY());
+      b.set(2, 0, -point.getX());
+      b.set(3, 0, -point.getY());
+   }
+
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      A.reshape(4, 2);
+      b.reshape(4, 1);
+
+      Vector2D tempVector = new Vector2D();
+
+      // constrain to lying on 2d line
+      Point2DReadOnly firstPoint = polygon.getVertex(0);
+      Point2DReadOnly secondPoint = polygon.getNextVertex(0);
+
+      tempVector.set(secondPoint);
+      tempVector.sub(firstPoint);
+
+      tempVector.normalize();
+
+      // set regular line
+      A.set(0, 0, -tempVector.getY());
+      A.set(0, 1, tempVector.getX());
+      b.set(0, firstPoint.getY() * tempVector.getX() - firstPoint.getX() * tempVector.getY());
+
+      A.set(1, 0, tempVector.getY());
+      A.set(1, 1, -tempVector.getX());
+      b.set(1, -b.get(0));
+
+
+      // set first point boundary line // // TODO: 5/2/17 add in deltaInside 
+      A.set(2, 0, -tempVector.getX());
+      A.set(2, 1, -tempVector.getY());
+      b.set(2, -deltaInside - firstPoint.getX() * tempVector.getX() - firstPoint.getY() * tempVector.getY());
+
+      // set second point boundary line
+      A.set(3, 0, tempVector.getX());
+      A.set(3, 1, tempVector.getY());
+      b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
+   }
+
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
 
@@ -226,9 +297,9 @@ public class PolygonWiggler
          A.set(i, 1, tempVector.getX());
          b.set(i, -deltaInside + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
 
-//         A.set(i, 0, firstPoint.y - secondPoint.y);
-//         A.set(i, 1, -firstPoint.x + secondPoint.x);
-//         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+         //         A.set(i, 0, firstPoint.y - secondPoint.y);
+         //         A.set(i, 1, -firstPoint.x + secondPoint.x);
+         //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
       }
    }
 
