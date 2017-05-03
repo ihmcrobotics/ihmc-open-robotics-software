@@ -272,7 +272,7 @@ public class PolygonWiggler
       // set second point boundary line
       A.set(3, 0, tempVector.getX());
       A.set(3, 1, tempVector.getY());
-      b.set(3, deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
+      b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
    }
 
    public static void convertToInequalityConstraintsPolygon(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
