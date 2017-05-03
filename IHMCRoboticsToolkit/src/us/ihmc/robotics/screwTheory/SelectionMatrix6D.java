@@ -587,6 +587,24 @@ public class SelectionMatrix6D
    {
       return linearPart;
    }
+   
+   /**
+    * Returns true if any of the angular axis are enabled
+    * @return
+    */
+   public boolean isAngularPartActive()
+   {
+      return isAngularXSelected() || isAngularYSelected() || isAngularZSelected();
+   }
+   
+   /**
+    * Returns true if any of the linear axis are enabled
+    * @return
+    */
+   public boolean isLinearPartActive()
+   {
+      return isLinearXSelected() || isLinearYSelected() || isLinearZSelected();
+   }
 
    @Override
    public String toString()
