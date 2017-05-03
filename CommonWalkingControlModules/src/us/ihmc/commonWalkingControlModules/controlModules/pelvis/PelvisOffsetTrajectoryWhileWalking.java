@@ -1,7 +1,6 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -57,10 +56,9 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final YoFrameOrientation desiredWalkingPelvisOffsetOrientation = new YoFrameOrientation("desiredWalkingPelvisOffset", worldFrame, registry);
    private final RateLimitedYoFrameOrientation limitedDesiredWalkingPelvisOffsetOrientation;
 
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
-   private final ReferenceFrame nextAnkleZUpFrame;
-   private final ReferenceFrame nextAnkleFrame;
+   private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
 
    private final ReferenceFrame pelvisFrame;
@@ -70,57 +68,44 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private double initialTime;
 
-   public PelvisOffsetTrajectoryWhileWalking(HighLevelHumanoidControllerToolbox controllerToolbox,
-         SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, WalkingControllerParameters walkingControllerParameters,
+   public PelvisOffsetTrajectoryWhileWalking(HighLevelHumanoidControllerToolbox controllerToolbox, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
          YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox.getYoTime(), transformsFromAnkleToSole, controllerToolbox.getReferenceFrames(), walkingControllerParameters,
-            controllerToolbox.getControlDT(), parentRegistry);
+      this(controllerToolbox.getYoTime(), controllerToolbox.getReferenceFrames(), pelvisOffsetWhileWalkingParameters, controllerToolbox.getControlDT(), parentRegistry);
    }
 
-   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
-         CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-         double controlDT, YoVariableRegistry parentRegistry)
+   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, CommonHumanoidReferenceFrames referenceFrames,
+         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this(yoTime, transformsFromAnkleToSole, referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getPelvisFrame(), walkingControllerParameters,
-            controlDT, parentRegistry);
+      this(yoTime, referenceFrames.getSoleZUpFrames(), referenceFrames.getPelvisFrame(), pelvisOffsetWhileWalkingParameters, controlDT, parentRegistry);
    }
 
-   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame pelvisFrame, WalkingControllerParameters walkingControllerParameters,
-         double controlDT, YoVariableRegistry parentRegistry)
+   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
+         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;
-      this.ankleZUpFrames = ankleZUpFrames;
+      this.soleZUpFrames = soleZUpFrames;
       this.pelvisFrame = pelvisFrame;
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
+         private static final long serialVersionUID = 8082360349132384241L;
+
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, parentFrame);
          }
       };
-      nextAnkleFrame = new ReferenceFrame("ankleZUpFrame", nextSoleFrame)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(nextFootstep.getRobotSide());
-            transformToParent.set(ankleToSole);
-         }
-      };
-      nextAnkleZUpFrame = new ZUpFrame(worldFrame, nextAnkleFrame, "nextAnkleZUp");
+      nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
-      PelvisOffsetWhileWalkingParameters parameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
-      addPelvisOffsetsBasedOnStep.set(parameters.addPelvisOrientationOffsetsFromWalkingMotion());
-      pelvisPitchAngleRatio.set(parameters.getPelvisPitchRatioOfLegAngle());
-      pelvisYawAngleRatio.set(parameters.getPelvisYawRatioOfStepAngle());
-      pelvisYawStepLengthThreshold.set(parameters.getStepLengthToAddYawingMotion());
+      addPelvisOffsetsBasedOnStep.set(pelvisOffsetWhileWalkingParameters.addPelvisOrientationOffsetsFromWalkingMotion());
+      pelvisPitchAngleRatio.set(pelvisOffsetWhileWalkingParameters.getPelvisPitchRatioOfLegAngle());
+      pelvisYawAngleRatio.set(pelvisOffsetWhileWalkingParameters.getPelvisYawRatioOfStepAngle());
+      pelvisYawStepLengthThreshold.set(pelvisOffsetWhileWalkingParameters.getStepLengthToAddYawingMotion());
 
-      fractionOfSwingPitchingFromSwingLeg.set(parameters.getFractionOfSwingPitchingFromSwingLeg());
-      fractionOfSwingPitchingFromUpcomingLeg.set(parameters.getFractionOfSwingPitchingFromUpcomingLeg());
+      fractionOfSwingPitchingFromSwingLeg.set(pelvisOffsetWhileWalkingParameters.getFractionOfSwingPitchingFromSwingLeg());
+      fractionOfSwingPitchingFromUpcomingLeg.set(pelvisOffsetWhileWalkingParameters.getFractionOfSwingPitchingFromUpcomingLeg());
 
       DoubleYoVariable maxPelvisOrientationRate = new DoubleYoVariable("pelvisMaxOrientationRate", registry);
       maxPelvisOrientationRate.set(maxOrientationRate);
@@ -158,8 +143,8 @@ public class PelvisOffsetTrajectoryWhileWalking
       initialTime = yoTime.getDoubleValue();
 
       // compute pelvis transfer magnitude
-      tmpPoint.setToZero(ankleZUpFrames.get(transferToSide));
-      tmpPoint.changeFrame(ankleZUpFrames.get(transferToSide.getOppositeSide()));
+      tmpPoint.setToZero(soleZUpFrames.get(transferToSide));
+      tmpPoint.changeFrame(soleZUpFrames.get(transferToSide.getOppositeSide()));
       double stepAngle = computeStepAngle(tmpPoint, transferToSide);
       double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
 
@@ -186,8 +171,8 @@ public class PelvisOffsetTrajectoryWhileWalking
       initialTime = yoTime.getDoubleValue();
 
       // compute pelvis swing magnitude
-      tmpPoint.setToZero(nextAnkleFrame);
-      tmpPoint.changeFrame(ankleZUpFrames.get(supportSide));
+      tmpPoint.setToZero(nextSoleFrame);
+      tmpPoint.changeFrame(soleZUpFrames.get(supportSide));
       double stepAngle = computeStepAngle(tmpPoint, supportSide);
       double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
 
@@ -244,8 +229,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private void updateFrames()
    {
       nextSoleFrame.update();
-      nextAnkleFrame.update();
-      nextAnkleZUpFrame.update();
+      nextSoleZUpFrame.update();
    }
 
    private void reset()
@@ -266,10 +250,10 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private void updatePelvisPitchOffsetInTransfer(RobotSide transferToSide)
    {
-      double leadingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(transferToSide));
+      double leadingLegAngle = computeAngleFromSoleToPelvis(soleZUpFrames.get(transferToSide));
       this.leadingLegAngle.set(leadingLegAngle);
 
-      double trailingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(transferToSide.getOppositeSide()));
+      double trailingLegAngle = computeAngleFromSoleToPelvis(soleZUpFrames.get(transferToSide.getOppositeSide()));
       this.trailingLegAngle.set(trailingLegAngle);
 
       double timeSpentOnPreviousSwing = fractionOfSwingPitchingFromUpcomingLeg.getDoubleValue() * previousSwingDuration.getDoubleValue();
@@ -289,7 +273,7 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private void updatePelvisPitchOffsetInSwing(RobotSide supportSide)
    {
-      double trailingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(supportSide));
+      double trailingLegAngle = computeAngleFromSoleToPelvis(soleZUpFrames.get(supportSide));
       this.trailingLegAngle.set(trailingLegAngle);
 
       double ratioInState = timeInState.getDoubleValue() / swingDuration.getDoubleValue();
@@ -304,7 +288,7 @@ public class PelvisOffsetTrajectoryWhileWalking
          double totalInterpolationTime = timeSpentOnPreviousSwing + transferDuration.getDoubleValue() + timeSpentOnCurrentSwing;
          double ratioInInterpolation = timeInInterpolation / totalInterpolationTime;
 
-         swingLegAngle = computeAngleFromAnkleToPelvis(ankleZUpFrames.get(supportSide.getOppositeSide()));
+         swingLegAngle = computeAngleFromSoleToPelvis(soleZUpFrames.get(supportSide.getOppositeSide()));
 
          interpolatedLegAngle = InterpolationTools.hermiteInterpolate(swingLegAngle, trailingLegAngle, ratioInInterpolation);
 
@@ -318,7 +302,7 @@ public class PelvisOffsetTrajectoryWhileWalking
          double totalInterpolationTime = timeSpentOnCurrentSwing + nextTransferDuration.getDoubleValue() + timeSpentOnNextSwing;
          double ratioInInterpolation = timeInInterpolation / totalInterpolationTime;
 
-         swingLegAngle = computeAngleFromAnkleToPelvis(nextAnkleZUpFrame);
+         swingLegAngle = computeAngleFromSoleToPelvis(nextSoleZUpFrame);
 
          interpolatedLegAngle = InterpolationTools.hermiteInterpolate(trailingLegAngle, swingLegAngle, ratioInInterpolation);
       }
@@ -336,10 +320,10 @@ public class PelvisOffsetTrajectoryWhileWalking
    }
 
    private final FramePoint tempPoint = new FramePoint();
-   private double computeAngleFromAnkleToPelvis(ReferenceFrame ankleFrame)
+   private double computeAngleFromSoleToPelvis(ReferenceFrame soleFrame)
    {
       tempPoint.setToZero(pelvisFrame);
-      tempPoint.changeFrame(ankleFrame);
+      tempPoint.changeFrame(soleFrame);
 
       double distanceFromSupportFoot = tempPoint.getX();
       double heightFromSupportFoot = tempPoint.getZ();
