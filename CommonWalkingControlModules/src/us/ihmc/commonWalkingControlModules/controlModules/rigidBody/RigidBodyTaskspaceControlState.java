@@ -485,6 +485,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
 
       selectionMatrix.setToAngularSelectionOnly();
+      selectionMatrix.setAngularPart(command.getSelectionMatrix());
 
       trackingOrientation.set(true);
       trackingPosition.set(false);
@@ -538,10 +539,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             return false;
       }
 
-      selectionMatrix.resetSelection();
+      selectionMatrix.set(command.getSelectionMatrix());
 
-      trackingOrientation.set(true);
-      trackingPosition.set(true);
+      trackingOrientation.set(selectionMatrix.isAngularPartActive());
+      trackingPosition.set(selectionMatrix.isLinearPartActive());
       return true;
    }
 
