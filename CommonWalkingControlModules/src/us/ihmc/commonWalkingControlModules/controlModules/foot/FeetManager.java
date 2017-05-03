@@ -501,4 +501,9 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(robotSideToExplore);
       footControlModule.initializeFootExploration();
    }
+
+   public boolean isFootToeingOffSlipping(RobotSide robotSideToCheck)
+   {
+      return footControlModules.get(robotSideToCheck).isFootToeingOffSlipping();
+   }
 }

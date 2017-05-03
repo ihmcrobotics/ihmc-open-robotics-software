@@ -384,7 +384,7 @@ public class ICPOptimizationSolver
 
       copLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
-      numberOfInequalityConstraints = copLocationConstraint.getNumberOfVertices() + reachabilityConstraint.getNumberOfVertices();
+      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
@@ -678,10 +678,10 @@ public class ICPOptimizationSolver
       addDynamicConstraint();
       addDynamicRelaxationTask();
 
-      if (copLocationConstraint.getNumberOfVertices() > 0)
+      if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
-      if (reachabilityConstraint.getNumberOfVertices() > 0)
+      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
       if (indexHandler.useStepAdjustment())
@@ -787,14 +787,14 @@ public class ICPOptimizationSolver
       copLocationConstraint.setDeltaInside(deltaInside);
       copLocationConstraint.formulateConstraint();
 
-      int numberOfVertices = copLocationConstraint.getNumberOfVertices();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      int constraintSize = copLocationConstraint.getInequalityConstraintSize();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), copLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, -1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, -1.0);
 
-      currentInequalityConstraintIndex += copLocationConstraint.getNumberOfVertices();
+      currentInequalityConstraintIndex += constraintSize;
    }
 
    /**
@@ -809,11 +809,11 @@ public class ICPOptimizationSolver
       reachabilityConstraint.setDeltaInside(deltaInside);
       reachabilityConstraint.formulateConstraint();
 
-      int numberOfVertices = reachabilityConstraint.getNumberOfVertices();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
-      currentInequalityConstraintIndex += reachabilityConstraint.getNumberOfVertices();
+      currentInequalityConstraintIndex += constraintSize;
    }
 
    /**

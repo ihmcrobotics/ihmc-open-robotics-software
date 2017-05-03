@@ -149,20 +149,17 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    {
       initialPelvisOrientationTime.set(yoTime.getDoubleValue());
 
+      initialPelvisOrientation.changeFrame(desiredTrajectoryFrame);
+      finalPelvisOrientation.changeFrame(desiredTrajectoryFrame);
+
       pelvisOrientationTrajectoryGenerator.switchTrajectoryFrame(desiredTrajectoryFrame);
       pelvisOrientationTrajectoryGenerator.setInitialOrientation(initialPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.setFinalOrientation(finalPelvisOrientation);
-
       pelvisOrientationTrajectoryGenerator.initialize();
-      pelvisOrientationTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
 
-      tempOrientation.changeFrame(worldFrame);
-      tempAngularVelocity.changeFrame(worldFrame);
-      tempAngularAcceleration.changeFrame(worldFrame);
-
-      desiredPelvisOrientation.setIncludingFrame(tempOrientation);
-      desiredPelvisAngularVelocity.setIncludingFrame(tempAngularVelocity);
-      desiredPelvisAngularAcceleration.setIncludingFrame(tempAngularAcceleration);
+      desiredPelvisOrientation.setIncludingFrame(initialPelvisOrientation);
+      desiredPelvisOrientation.changeFrame(worldFrame);
+      desiredPelvisFrame.update();
    }
 
    @Override
@@ -170,15 +167,11 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    {
       double deltaTime = yoTime.getDoubleValue() - initialPelvisOrientationTime.getDoubleValue();
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
-      pelvisOrientationTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+      pelvisOrientationTrajectoryGenerator.getAngularData(desiredPelvisOrientation, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
 
-      tempOrientation.changeFrame(worldFrame);
-      tempAngularVelocity.changeFrame(worldFrame);
-      tempAngularAcceleration.changeFrame(worldFrame);
-
-      desiredPelvisOrientation.setIncludingFrame(tempOrientation);
-      desiredPelvisAngularVelocity.setIncludingFrame(tempAngularVelocity);
-      desiredPelvisAngularAcceleration.setIncludingFrame(tempAngularAcceleration);
+      desiredPelvisOrientation.changeFrame(worldFrame);
+      desiredPelvisAngularVelocity.changeFrame(worldFrame);
+      desiredPelvisAngularAcceleration.changeFrame(worldFrame);
       desiredPelvisFrame.update();
 
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
