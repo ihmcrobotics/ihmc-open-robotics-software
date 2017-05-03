@@ -6,6 +6,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
+import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -19,6 +20,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.WeightMatrix3D;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends QueueableMessage<T>
       implements Transformable, FrameBasedMessage
@@ -29,6 +31,9 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public SelectionMatrix3DMessage angularSelectionMatrix;
    @RosIgnoredField
    public SelectionMatrix3DMessage linearSelectionMatrix;
+   
+   @RosIgnoredField
+   public WeightMatrix3DMessage weightMatrix;
 
    @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
@@ -219,6 +224,29 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       else
          linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
+   
+   /**
+    * Sets the weight matrix to use for executing this message.
+    * <p>
+    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the end-effector. 
+    * When it is not provided, or when the weights are set to Double.NaN, the controller will use the default QP Weights 
+    * set for each axis.
+    * </p>
+    * <p>
+    * The selection frame coming along with the given weight matrix is used to determine to what
+    * reference frame the weights are referring to.
+    * </p>
+    * 
+    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not 
+    *           modified.
+    */
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      if (this.weightMatrix == null)
+         this.weightMatrix = new WeightMatrix3DMessage(weightMatrix);
+      else
+         this.weightMatrix.set(weightMatrix);
+   }
 
    public final int getNumberOfTrajectoryPoints()
    {
@@ -246,6 +274,11 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       return getLastTrajectoryPoint().time;
    }
 
+   public boolean hasWeightMatrix()
+   {
+      return weightMatrix != null;
+   }
+   
    public boolean hasSelectionMatrix()
    {
       return angularSelectionMatrix != null && linearSelectionMatrix != null;
@@ -258,6 +291,13 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
       if (linearSelectionMatrix != null)
          linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
+   }
+   
+   public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
+   {
+      weightMatrixToPack.clearSelection();
+      if (weightMatrix != null)
+         weightMatrix.getWeightMatrix(weightMatrixToPack);
    }
 
    /**
@@ -292,6 +332,24 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    {
       if (linearSelectionMatrix != null)
          return linearSelectionMatrix.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+   
+   /**
+    * Returns the unique ID referring to the weight selection frame to use with the weight matrix of
+    * this message.
+    * <p>
+    * If this message does not have a weight matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the selection frame ID for the selection matrix.
+    */
+   public long getWeightMatrixFrameId()
+   {
+      if (weightMatrix != null)
+         return weightMatrix.getSelectionFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
