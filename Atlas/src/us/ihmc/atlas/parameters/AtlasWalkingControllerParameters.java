@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -189,6 +190,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(45.0);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean enableToeOffSlippingDetection()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   {
+      double forceMagnitudeThreshold = 25.0;
+      double velocityThreshold = 0.4;
+      double slippageDistanceThreshold = 0.04;
+      double filterBreakFrequency = 10.0;
+      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
    }
 
    @Override
