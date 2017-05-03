@@ -213,17 +213,9 @@ public class PelvisOffsetTrajectoryWhileWalking
       limitedDesiredWalkingPelvisOffsetOrientation.update();
    }
 
-   public void getAngularData(FrameOrientation orientationToPack)
+   public void addAngularOffset(FrameOrientation orientationToPack)
    {
-      double desiredYaw = orientationToPack.getYaw();
-      double desiredPitch = orientationToPack.getPitch();
-      double desiredRoll = orientationToPack.getRoll();
-
-      desiredYaw += limitedDesiredWalkingPelvisOffsetOrientation.getYaw().getDoubleValue();
-      desiredPitch += limitedDesiredWalkingPelvisOffsetOrientation.getPitch().getDoubleValue();
-      desiredRoll += limitedDesiredWalkingPelvisOffsetOrientation.getRoll().getDoubleValue();
-
-      orientationToPack.setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
+      orientationToPack.preMultiply(limitedDesiredWalkingPelvisOffsetOrientation.getFrameOrientation());
    }
 
    private void updateFrames()
