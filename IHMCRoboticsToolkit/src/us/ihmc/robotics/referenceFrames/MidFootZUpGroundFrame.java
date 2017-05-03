@@ -2,7 +2,6 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RotationTools;
 
 /**
  * This is a common reference frame for humanoids with parent frame world. It is created with
@@ -39,8 +38,9 @@ public class MidFootZUpGroundFrame extends ReferenceFrame
       poseTwo.changeFrame(worldFrame);
 
       framePose.interpolate(poseOne, poseTwo, 0.5);
-      framePose.setZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
-      framePose.getPose(transformToParent);
-      RotationTools.removePitchAndRollFromTransform(transformToParent);
+      transformToParent.setIdentity();
+      transformToParent.setRotationYawAndZeroTranslation(framePose.getYaw());
+      transformToParent.setTranslation(framePose.getPosition());
+      transformToParent.setTranslationZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
    }
 }
