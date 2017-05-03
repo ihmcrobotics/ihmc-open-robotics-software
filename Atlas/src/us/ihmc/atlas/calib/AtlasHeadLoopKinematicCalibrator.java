@@ -200,7 +200,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //update camera pose display
       RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
-            constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
+            constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
       FramePose poseLeftCamera = new FramePose(cameraImageFrame);
       poseLeftCamera.changeFrame(CalibUtil.world);
       yposeLeftCamera.set(poseLeftCamera);
@@ -271,7 +271,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
 
       ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
 
 //      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);

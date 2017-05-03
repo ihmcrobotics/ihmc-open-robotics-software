@@ -34,6 +34,24 @@ public class DiagonalMatrixTools
    }
 
    /**
+    * Finds the inverse of a diagonal matrix
+    * @param matrixToInvertAndPack matrix to compute inverse of
+    */
+   public static void invertDiagonalMatrix(RowD1Matrix64F matrixToInvertAndPack)
+   {
+      if(matrixToInvertAndPack.numRows != matrixToInvertAndPack.numCols)
+      {
+         throw new MatrixDimensionException( "Diagonal matrix to invert is not square. Number of rows in matrix: " + matrixToInvertAndPack.getNumRows() + ", number of"
+               + " cols in matrix: " + matrixToInvertAndPack.getNumCols() + ".");
+      }
+
+      int size = matrixToInvertAndPack.getNumRows();
+
+      for (int index = 0; index < size; index++)
+         matrixToInvertAndPack.unsafe_set(index, index,  1.0 / matrixToInvertAndPack.unsafe_get(index, index));
+   }
+
+   /**
     * <p>Performs the following operation:<br>
     * <br>
     * c = a * b <br>

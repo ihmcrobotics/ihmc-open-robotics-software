@@ -25,15 +25,13 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
 public class MoveViaWaypointsState extends AbstractFootControlState
 {
-   private final ReferenceFrame footFrame;
-
    private final BooleanYoVariable isPerformingTouchdown;
    private final SettableDoubleProvider touchdownInitialTimeProvider = new SettableDoubleProvider(0.0);
    private final SettablePositionProvider currentDesiredFootPosition = new SettablePositionProvider();
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
    private final RigidBodyTaskspaceControlState taskspaceControlState;
-   private final SpatialFeedbackControlCommand spatialFeedbackControlCommandForTouchdown = new SpatialFeedbackControlCommand();
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
@@ -41,6 +39,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final Vector3D tempLinearWeightVector = new Vector3D();
 
    private final FramePose initialPose = new FramePose();
+
+   private final ReferenceFrame controlFrame;
+   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -57,20 +58,21 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
 
-      footFrame = foot.getBodyFixedFrame();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-      ReferenceFrame controlFrame = foot.getParentJoint().getFrameAfterJoint();
+      controlFrame = foot.getParentJoint().getFrameAfterJoint();
 
       taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
             graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
 
-      spatialFeedbackControlCommandForTouchdown.set(rootBody, foot);
-      spatialFeedbackControlCommandForTouchdown.setPrimaryBase(pelvis);
-      spatialFeedbackControlCommandForTouchdown.setGains(gains);
+      spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
+      spatialFeedbackControlCommand.setGains(gains);
+
+      legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
    }
 
    public void setWeight(double weight)
@@ -111,6 +113,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    {
       taskspaceControlState.doTransitionIntoAction();
       isPerformingTouchdown.set(false);
+      legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
    }
 
    @Override
@@ -128,19 +131,22 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       else
       {
          taskspaceControlState.doAction();
+         spatialFeedbackControlCommand.set(taskspaceControlState.getSpatialFeedbackControlCommand());
 
          if (taskspaceControlState.abortState())
             requestTouchdownForDisturbanceRecovery();
       }
+
+      doSingularityAvoidance(spatialFeedbackControlCommand);
    }
 
    private void packCommandForTouchdown()
    {
-      spatialFeedbackControlCommandForTouchdown.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      spatialFeedbackControlCommandForTouchdown.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       angularWeight.get(tempAngularWeightVector);
       linearWeight.get(tempLinearWeightVector);
-      spatialFeedbackControlCommandForTouchdown.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
+      spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
@@ -148,8 +154,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       if (isPerformingTouchdown.getBooleanValue())
          return;
 
-      desiredPosition.setToZero(footFrame);
-      desiredOrientation.setToZero(footFrame);
+      desiredPosition.setToZero(controlFrame);
+      desiredOrientation.setToZero(controlFrame);
       desiredPosition.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
 
@@ -158,6 +164,13 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       positionTrajectoryForDisturbanceRecovery.initialize();
 
       isPerformingTouchdown.set(true);
+   }
+
+   private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
+   {
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
    }
 
    public void requestStopTrajectory()
@@ -174,10 +187,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      if (isPerformingTouchdown.getBooleanValue())
-         return spatialFeedbackControlCommandForTouchdown;
-
-      return taskspaceControlState.getFeedbackControlCommand();
+      return spatialFeedbackControlCommand;
    }
 
    @Override

@@ -32,7 +32,7 @@ public class SpatialMotionVectorTest
    @Before
    public void setUp() throws Exception
    {
-      frameA = ReferenceFrame.constructAWorldFrame("A");
+      frameA = ReferenceFrame.constructARootFrame("A");
       frameB = new ReferenceFrame("B", frameA)
       {
          private static final long serialVersionUID = 1L;
@@ -61,7 +61,7 @@ public class SpatialMotionVectorTest
          }
       };
 
-      frameD = ReferenceFrame.constructAWorldFrame("D");
+      frameD = ReferenceFrame.constructARootFrame("D");
 
       frameB.update();
       frameC.update();
@@ -191,8 +191,6 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
                                         Vector3D angularPart)
       {
-         this.angularPart = new Vector3D();
-         this.linearPart = new Vector3D();
          set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
       }
 
@@ -202,8 +200,6 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F twistMatrix)
       {
          MatrixTools.checkMatrixDimensions(twistMatrix, SIZE, 1);
-         this.angularPart = new Vector3D();
-         this.linearPart = new Vector3D();
          set(bodyFrame, baseFrame, expressedInFrame, twistMatrix, 0);
       }
    }

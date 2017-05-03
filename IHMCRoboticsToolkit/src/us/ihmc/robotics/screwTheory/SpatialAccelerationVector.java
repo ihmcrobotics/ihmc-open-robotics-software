@@ -92,9 +92,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     */
    public SpatialAccelerationVector(SpatialAccelerationVector other)
    {
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
-      set(other);
+      super(other);
    }
 
    /**
@@ -103,10 +101,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     */
    public void checkAndSet(SpatialAccelerationVector other)
    {
-      this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
-      this.baseFrame.checkReferenceFrameMatch(other.baseFrame);
-      this.expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
-      set(other);
+      super.checkAndSet(other);
    }
 
    /**
@@ -252,12 +247,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
 
    public void set(SpatialAccelerationVector other)
    {
-      this.bodyFrame = other.bodyFrame;
-      this.baseFrame = other.baseFrame;
-      this.expressedInFrame = other.expressedInFrame;
-
-      this.linearPart.set(other.linearPart);
-      this.angularPart.set(other.angularPart);
+      super.set(other);
    }
 
    /**
@@ -339,8 +329,6 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      linearPart = new Vector3D();
-
       linearPart.cross(offsetDot, axisOfRotation);
       tempVector.cross(offset, axisOfRotationDot);
       linearPart.add(tempVector);
@@ -358,7 +346,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       tempVector.scale(angularAccelerationMagnitude);
       linearPart.add(tempVector);
 
-      angularPart = new Vector3D(axisOfRotation);
+      angularPart.set(axisOfRotation);
       angularPart.scale(angularAccelerationMagnitude);
       tempVector.set(axisOfRotationDot);
       tempVector.scale(angularVelocityMagnitude);
