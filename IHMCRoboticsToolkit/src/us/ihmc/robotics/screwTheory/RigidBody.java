@@ -45,7 +45,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * This is a reference rigidly attached this rigid-body. It's usually centered at the
     * rigid-body's center of mass.
     */
-   private final BodyFixedReferenceFrame bodyFixedFrame;
+   private final MovingReferenceFrame bodyFixedFrame;
    /**
     * The parent joint is the joint directly connected to a rigid-body and located between the
     * rigid-body and the robot's root.
@@ -119,10 +119,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       name = bodyName;
       inertia = null;
-      boolean isParentStationary = parentStationaryFrame.isAStationaryFrame();
-      boolean isZUpFrame = isParentStationary && transformToParent.isRotation2D();
-
-      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentStationaryFrame, transformToParent, isParentStationary, isZUpFrame);
+      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "Frame", parentStationaryFrame, transformToParent);
       parentJoint = null;
    }
 
@@ -150,7 +147,7 @@ public class RigidBody implements NameBasedHashCodeHolder
 
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
-      bodyFixedFrame = new BodyFixedReferenceFrame("CoM", this, frameAfterJoint, inertiaPose, false);
+      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
       inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
       inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
       parentJoint.setSuccessor(this);
@@ -187,7 +184,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @return the reference frame attached to this rigid-body.
     */
-   public ReferenceFrame getBodyFixedFrame()
+   public MovingReferenceFrame getBodyFixedFrame()
    {
       return bodyFixedFrame;
    }

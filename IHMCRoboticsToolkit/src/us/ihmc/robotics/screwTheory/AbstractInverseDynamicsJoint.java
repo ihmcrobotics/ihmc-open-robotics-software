@@ -11,8 +11,8 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    protected final String name;
    protected final RigidBody predecessor;
    protected RigidBody successor;
-   protected final ReferenceFrame beforeJointFrame;
-   protected final ReferenceFrame afterJointFrame;
+   protected final MovingReferenceFrame beforeJointFrame;
+   protected final MovingReferenceFrame afterJointFrame;
    protected GeometricJacobian motionSubspace;
 
    private final long nameBasedHashCode;
@@ -33,11 +33,11 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       predecessor.addChildJoint(this);
    }
 
-   public static ReferenceFrame createBeforeJointFrame(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent)
+   public static MovingReferenceFrame createBeforeJointFrame(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent)
    {
       String beforeJointName = "before" + StringUtils.capitalize(jointName);
 
-      ReferenceFrame parentFrame;
+      MovingReferenceFrame parentFrame;
       if (parentBody.isRootBody())
       {
          parentFrame = parentBody.getBodyFixedFrame();
@@ -53,12 +53,12 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       else
          parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
 
-      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(beforeJointName, parentFrame, transformToParent);
+      return MovingReferenceFrame.constructFrameFixedInParent(beforeJointName, parentFrame, transformToParent);
    }
 
-   private ReferenceFrame createAfterJointFrame(String name, ReferenceFrame beforeJointFrame)
+   private MovingReferenceFrame createAfterJointFrame(String name, ReferenceFrame beforeJointFrame)
    {
-      return new ReferenceFrame("after" + StringUtils.capitalize(name), beforeJointFrame)
+      return new MovingReferenceFrame("after" + StringUtils.capitalize(name), beforeJointFrame)
       {
          private static final long serialVersionUID = 4779423307372501426L;
 
@@ -67,19 +67,25 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
          {
             updateJointTransform(transformToParent);
          }
+
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            getJointTwist(twistRelativeToParentToPack);
+         }
       };
    }
 
    protected abstract void updateJointTransform(RigidBodyTransform jointTransform);
 
    @Override
-   public final ReferenceFrame getFrameBeforeJoint()
+   public final MovingReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
    @Override
-   public final ReferenceFrame getFrameAfterJoint()
+   public final MovingReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
@@ -111,6 +117,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    @Override
    public final void updateFramesRecursively()
    {
+      beforeJointFrame.update();
       afterJointFrame.update();
 
       if (successor != null)

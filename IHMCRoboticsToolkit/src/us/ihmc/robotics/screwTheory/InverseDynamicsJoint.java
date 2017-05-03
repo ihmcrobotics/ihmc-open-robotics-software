@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Base interface that describes the basic API for the joints composing a kinematic chain/tree
@@ -36,7 +35,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * 
     * @return the {@code ReferenceFrame} located right before this joint.
     */
-   public abstract ReferenceFrame getFrameBeforeJoint();
+   public abstract MovingReferenceFrame getFrameBeforeJoint();
 
    /**
     * Returns the the {@code ReferenceFrame} that is attached to the successor of this joint, namely
@@ -45,7 +44,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * 
     * @return the {@code ReferenceFrame} located right after this joint.
     */
-   public abstract ReferenceFrame getFrameAfterJoint();
+   public abstract MovingReferenceFrame getFrameAfterJoint();
 
    /**
     * Packs the actual, not desired, velocity of this joint in a {@code Twist} (the 3D angular and
