@@ -10,7 +10,6 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 
 public class FullRobotModelRootJointRewinder implements RewoundListener
 {
@@ -31,10 +30,9 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    public void recordCurrentState()
    {
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      FloatingInverseDynamicsJointReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       
-      rootJointFrame.getTranslation(rootJointTranslation);
-      rootJointFrame.getRotation(rootJointRotation);
+      rootJoint.getTranslation(rootJointTranslation);
+      rootJoint.getRotation(rootJointRotation);
 
       yoRootJointTranslation.set(rootJointTranslation);
       yoRootJointRotation.set(rootJointRotation);
