@@ -168,6 +168,10 @@ public class OnToesState extends AbstractFootControlState
       }
 
       toeOffDesiredPitchAcceleration.set(0.0);
+
+      ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
+      if (toeSlippingDetector != null)
+         toeSlippingDetector.update();
    }
 
    public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
@@ -247,6 +251,10 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredYawToHold = desiredOrientation.getYaw();
       desiredRollToHold = desiredOrientation.getRoll();
+
+      ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
+      if (toeSlippingDetector != null)
+         toeSlippingDetector.initialize(contactPointPosition);
    }
 
    @Override
@@ -262,6 +270,10 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
       toeOffCalculator.clear();
+
+      ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
+      if (toeSlippingDetector != null)
+         toeSlippingDetector.clear();
    }
 
    @Override
