@@ -1,7 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MovingZUpFrame extends MovingReferenceFrame
@@ -13,7 +12,7 @@ public class MovingZUpFrame extends MovingReferenceFrame
 
    private final double[] yawPitchRoll = new double[3];
 
-   public MovingZUpFrame(MovingReferenceFrame nonZUpFrame, String name, YoVariableRegistry registry)
+   public MovingZUpFrame(MovingReferenceFrame nonZUpFrame, String name)
    {
       super(name, nonZUpFrame.getRootFrame(), true);
       this.rootFrame = nonZUpFrame.getRootFrame();
