@@ -1425,6 +1425,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.18;
+      return 0.05; // JCarff ToeOff
    }
 }
