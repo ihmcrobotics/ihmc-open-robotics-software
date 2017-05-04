@@ -620,7 +620,7 @@ public class ToeOffManager
          }
 
          toeOffPoint.setToZero(footDefaultPolygon.getReferenceFrame());
-         toeOffPoint.set(toeOffLine.midpoint());
+         toeOffLine.midpoint(toeOffPoint);
       }
 
       public FramePoint2d getToeOffPoint()
@@ -647,6 +647,8 @@ public class ToeOffManager
          onToesSupportPolygon.addVertexChangeFrameAndProjectToXYPlane(tmpPoint2d);
 
          onToesSupportPolygon.update();
+
+         toeOffLine.midpoint(toeOffPoint);
       }
 
       public void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
