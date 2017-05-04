@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -35,8 +36,8 @@ public class PelvisOrientationManager
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
-   public PelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                   YoVariableRegistry parentRegistry)
+   public PelvisOrientationManager(YoOrientationPIDGainsInterface gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+                                   HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
@@ -44,7 +45,7 @@ public class PelvisOrientationManager
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisOrientationControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
-      walkingManager = new ControllerPelvisOrientationManager(gains, controllerToolbox, registry);
+      walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
       setupStateMachine();
 
@@ -162,9 +163,29 @@ public class PelvisOrientationManager
       walkingManager.setToZeroInMidFeetZUpFrame();
    }
 
-   public void setWithUpcomingFootstep(Footstep upcomingFootstep)
+   public void initializeStanding()
    {
-      walkingManager.setWithUpcomingFootstep(upcomingFootstep);
+      walkingManager.initializeStanding();
+   }
+
+   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
+   {
+      walkingManager.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+   }
+
+   public void setUpcomingFootstep(Footstep upcomingFootstep)
+   {
+      walkingManager.setUpcomingFootstep(upcomingFootstep);
+   }
+
+   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
+   {
+      walkingManager.initializeTransfer(transferToSide, transferDuration, swingDuration);
+   }
+
+   public void setTrajectoryFromFootstep()
+   {
+      walkingManager.setTrajectoryFromFootstep();
    }
 
    public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
