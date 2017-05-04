@@ -82,13 +82,6 @@ public class ScrewTools
       return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
-   public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)
-   {
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-
-      return beforeJointFrame;
-   }
-
    public static RigidBody[] computeSuccessors(InverseDynamicsJoint... joints)
    {
       RigidBody[] ret = new RigidBody[joints.length];
