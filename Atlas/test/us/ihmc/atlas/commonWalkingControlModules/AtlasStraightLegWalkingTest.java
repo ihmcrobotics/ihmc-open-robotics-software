@@ -8,13 +8,10 @@ import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -29,40 +26,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          {
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
-               @Override
-               public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
-               {
-                  YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
-
-                  double kpXY = 150.0;
-                  double kpZ = 200.0; //200.0;
-                  double zetaXYZ = 0.7;
-
-                  double kpXYOrientation = 200.0; // 200.0;
-                  double kpZOrientation = 200.0; // 200.0;
-                  double zetaOrientation = 0.7;
-
-                  double maxPositionAcceleration = Double.POSITIVE_INFINITY;
-                  double maxPositionJerk = Double.POSITIVE_INFINITY;
-                  double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
-                  double maxOrientationJerk = Double.POSITIVE_INFINITY;
-
-                  double kdReductionRatio = 1.0;
-                  double parallelDampingDeadband = 100.0;
-                  double positionErrorForMinimumKd = 10000.0;
-
-                  gains.setPositionProportionalGains(kpXY, kpZ);
-                  gains.setPositionDampingRatio(zetaXYZ);
-                  gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
-                  gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-                  gains.setOrientationDampingRatio(zetaOrientation);
-                  gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-                  gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
-                  gains.createDerivativeGainUpdater(true);
-
-                  return gains;
-               }
-
                @Override
                public double getMaxICPErrorBeforeSingleSupportX()
                {
@@ -155,13 +118,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 0.8;
+                        return 1.0;//0.75;
                      }
 
                      @Override
                      public double getFractionOfTransferToCollapseLeg()
                      {
-                        return 0.8;
+                        return 0.6;
+                     }
+
+                     @Override
+                     public double getFractionOfSwingToCollapseStanceLeg()
+                     {
+                        return 1.0;
                      }
 
                      @Override
@@ -177,7 +146,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getHipPrivilegedWeight()
+                     public double getLegPitchPrivilegedWeight()
                      {
                         return 10.0;
                      }

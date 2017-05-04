@@ -52,6 +52,16 @@ public class StraightLegWalkingParameters
    }
 
    /**
+    * Returns a fraction of the swing state to switch the knee privileged configuration to bent.
+    *
+    * @return fraction of swing state (0.0 to 1.0)
+    */
+   public double getFractionOfSwingToCollapseStanceLeg()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * Determines whether or not to attempt to use straight legs when indirectly controlling the center of mass
     * height using the nullspace in the full task Jacobian.
     * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()}

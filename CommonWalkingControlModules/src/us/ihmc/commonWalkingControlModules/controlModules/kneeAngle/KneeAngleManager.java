@@ -62,6 +62,14 @@ public class KneeAngleManager
       }
    }
 
+   public void collapseStanceLegDuringSwing(RobotSide supportSide)
+   {
+      if (attemptToStraightenLegs.getBooleanValue())
+      {
+         kneeControlModules.get(supportSide).setKneeAngleState(KneeControlType.BENT);
+      }
+   }
+
    public void straightenLegDuringSwing(RobotSide swingSide)
    {
       if (kneeControlModules.get(swingSide).getCurrentKneeControlState() != KneeControlType.STRAIGHTEN_TO_STRAIGHT &&
