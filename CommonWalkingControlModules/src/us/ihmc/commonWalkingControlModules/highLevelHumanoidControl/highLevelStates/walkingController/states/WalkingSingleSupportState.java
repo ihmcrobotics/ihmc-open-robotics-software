@@ -44,7 +44,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FeetManager feetManager;
    private final KneeAngleManager kneeAngleManager;
 
-   private final DoubleYoVariable percentOfSwingToStraightenLeg = new DoubleYoVariable("percentOfSwingToStraightenLeg", registry);
+   private final DoubleYoVariable fractionOfSwingToStraightenSwingLeg = new DoubleYoVariable("fractionOfSwingToStraightenSwingLeg", registry);
+   private final DoubleYoVariable fractionOfSwingToCollapseStanceLeg = new DoubleYoVariable("fractionOfSwingToCollapseStanceLeg", registry);
 
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
@@ -68,7 +69,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager = managerFactory.getOrCreateFeetManager();
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
-      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
+      fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
+      fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToCollapseStanceLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
@@ -144,9 +146,13 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
-      if (getTimeInCurrentState() > percentOfSwingToStraightenLeg.getDoubleValue() * swingTime)
+      if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
       {
          kneeAngleManager.straightenLegDuringSwing(swingSide);
+      }
+      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime)
+      {
+         kneeAngleManager.collapseStanceLegDuringSwing(swingSide.getOppositeSide());
       }
 
       walkingMessageHandler.clearFootTrajectory();
