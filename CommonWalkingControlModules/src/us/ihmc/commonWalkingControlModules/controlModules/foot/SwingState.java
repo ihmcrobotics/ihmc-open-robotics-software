@@ -93,6 +93,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable doToeTouchdownIfPossible;
    private final DoubleYoVariable toeTouchdownAngle;
    private final DoubleYoVariable stepDownHeightForToeTouchdown;
+   private final DoubleYoVariable toeTouchdownDepthRatio;
 
 
    private final DoubleYoVariable finalSwingHeightOffset;
@@ -162,11 +163,13 @@ public class SwingState extends AbstractUnconstrainedState
       heelTouchdownLengthRatio.set(walkingControllerParameters.getHeelTouchdownLengthRatio());
 
       doToeTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoToeTouchdownIfPossible", registry);
-      toeTouchdownAngle = new DoubleYoVariable(namePrefix + "toeTouchdownAngle", registry);
+      toeTouchdownAngle = new DoubleYoVariable(namePrefix + "ToeTouchdownAngle", registry);
       stepDownHeightForToeTouchdown = new DoubleYoVariable(namePrefix + "StepDownHeightForToeTouchdown", registry);
+      toeTouchdownDepthRatio = new DoubleYoVariable(namePrefix + "ToeTouchdownDepthRatio", registry);
       doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       toeTouchdownAngle.set(walkingControllerParameters.getToeTouchdownAngle());
       stepDownHeightForToeTouchdown.set(walkingControllerParameters.getStepDownHeightForToeTouchdown());
+      toeTouchdownDepthRatio.set(walkingControllerParameters.getToeTouchdownDepthRatio());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -316,7 +319,8 @@ public class SwingState extends AbstractUnconstrainedState
       { // stepping down
          if (doToeTouchdownIfPossible.getBooleanValue())
          { // do toe touchdown
-            double toeTouchdownAngle = this.toeTouchdownAngle.getDoubleValue();
+            double toeTouchdownAngle = MathTools.clamp(-toeTouchdownDepthRatio.getDoubleValue() * (stepHeight - stepDownHeightForToeTouchdown.getDoubleValue()),
+                  this.toeTouchdownAngle.getDoubleValue());
             footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
             footstepPitchModification -= initialFootstepPitch;
          }
@@ -328,8 +332,7 @@ public class SwingState extends AbstractUnconstrainedState
       else if (stepHeight <= maximumHeightForHeelTouchdown.getDoubleValue() && doHeelTouchdownIfPossible.getBooleanValue())
       { // not stepping down too far, and not stepping up too far, so do heel strike
          double stepLength = finalPosition.getX() - stanceFootPosition.getX();
-         double heelTouchdownAngle = Math.max(-stepLength * heelTouchdownLengthRatio.getDoubleValue(), this.heelTouchdownAngle.getDoubleValue());
-         heelTouchdownAngle = Math.min(heelTouchdownAngle, -this.heelTouchdownAngle.getDoubleValue());
+         double heelTouchdownAngle = MathTools.clamp(-stepLength * heelTouchdownLengthRatio.getDoubleValue(), -this.heelTouchdownAngle.getDoubleValue());
          // use the footstep pitch if its greater than the heel strike angle
          footstepPitchModification = Math.max(initialFootstepPitch, heelTouchdownAngle);
          // decrease the foot pitch modification if next step pitches down
