@@ -27,15 +27,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
-               public double getMaxICPErrorBeforeSingleSupportX()
+               public boolean doHeelTouchdownIfPossible()
                {
-                  return 0.05;
+                  return true;
                }
 
                @Override
-               public double getMaxICPErrorBeforeSingleSupportY()
+               public double getHeelTouchdownLengthRatio()
                {
-                  return 0.03;
+                  return 0.5;
                }
 
                @Override
@@ -77,13 +77,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getECMPProximityForToeOff()
                {
-                  return 0.03;
+                  return 0.02;
                }
 
                @Override
                public boolean useOptimizationBasedICPController()
                {
-                  return true; //false;
+                  return true;
                }
 
                @Override
@@ -118,20 +118,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 0.8;
+                        return 0.7;
                      }
 
                      @Override
                      public double getFractionOfTransferToCollapseLeg()
                      {
-                        //return 0.8;
-                        return 0.5;
+                        return 0.7;
                      }
 
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 1.05;
+                        return 1.1;
                      }
 
                      @Override
@@ -202,13 +201,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new AtlasMomentumOptimizationSettings(getJointMap(), getContactPointParameters().getNumberOfContactableBodies())
                   {
                      @Override
-                     public Vector3D getDefaultAngularFootWeight()
-                     {
-                        return new Vector3D(0.1, 0.1, 0.1);
-                        //return new Vector3D(0.5, 0.5, 0.5);
-                     }
-
-                     @Override
                      public double getJointAccelerationWeight()
                      {
                         //return 0.005;
@@ -247,7 +239,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getExitCMPForwardSafetyMarginOnToes()
                {
-                  return 0.0;
+                  return 0.002;
                }
 
                @Override
