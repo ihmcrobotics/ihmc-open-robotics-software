@@ -9,10 +9,15 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
+
 public class MovingZUpFrameTest
 {
    @Test
-   public void testWithChainRobot()
+   public void testAgainstFiniteDifferenceWithChainRobot()
    {
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
@@ -57,6 +62,46 @@ public class MovingZUpFrameTest
             expectedTwist.changeFrame(entry.getValue());
 
             TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+         }
+      }
+   }
+
+   @Test
+   public void testConsistencyWithZUpFrameWithChainRobot()
+   {
+      Random random = new Random(3452345L);
+      int numberOfJoints = 20;
+
+      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+
+      Map<ZUpFrame, MovingZUpFrame> zUpFramesToMovingZUpFrames = new HashMap<>();
+      for (OneDoFJoint joint : joints)
+      {
+         MovingReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
+
+         ZUpFrame zUpFrameAfterJoint = new ZUpFrame(frameAfterJoint.getRootFrame(), frameAfterJoint, frameAfterJoint.getName() + "ZUp");
+         MovingZUpFrame movingZUpFrameAfterJoint = new MovingZUpFrame(frameAfterJoint, frameAfterJoint.getName() + "ZUp");
+
+         zUpFramesToMovingZUpFrames.put(zUpFrameAfterJoint, movingZUpFrameAfterJoint);
+      }
+
+      RigidBodyTransform actualTransform = new RigidBodyTransform();
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+
+      for (int i = 0; i < 100; i++)
+      {
+         ScrewTestTools.setRandomPositions(joints, random);
+         joints.get(0).getPredecessor().updateFramesRecursively();
+         zUpFramesToMovingZUpFrames.keySet().forEach(ReferenceFrame::update);
+         zUpFramesToMovingZUpFrames.values().forEach(ReferenceFrame::update);
+
+         Set<Entry<ZUpFrame, MovingZUpFrame>> entrySet = zUpFramesToMovingZUpFrames.entrySet();
+         for (Entry<ZUpFrame, MovingZUpFrame> entry : entrySet)
+         {
+            expectedTransform.set(entry.getKey().getTransformToRoot());
+            actualTransform.set(entry.getValue().getTransformToRoot());
+
+            EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, actualTransform, 1.0e-12);
          }
       }
    }

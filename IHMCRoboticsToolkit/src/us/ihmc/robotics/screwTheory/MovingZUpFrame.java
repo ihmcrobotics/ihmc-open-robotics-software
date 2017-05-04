@@ -15,6 +15,7 @@ public class MovingZUpFrame extends MovingReferenceFrame
    public MovingZUpFrame(MovingReferenceFrame nonZUpFrame, String name)
    {
       super(name, nonZUpFrame.getRootFrame(), true);
+
       this.rootFrame = nonZUpFrame.getRootFrame();
       this.nonZUpFrame = nonZUpFrame;
    }
