@@ -86,11 +86,11 @@ public class ToeOffManager
    private final FrameConvexPolygon2d leadingFootSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d onToesSupportPolygon = new FrameConvexPolygon2d();
 
-   private final FramePoint tempLeadingFootPosition = new FramePoint();
-   private final FramePoint tempTrailingFootPosition = new FramePoint();
+   private final FramePoint2d tempLeadingFootPosition = new FramePoint2d();
+   private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
    private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
-   private final FrameVector toLeadingFoot = new FrameVector();
+   private final FrameVector2d toLeadingFoot = new FrameVector2d();
 
    private final HashMap<ToeContact, AbstractToeContact> toeContacts = new HashMap<>();
 
@@ -433,8 +433,8 @@ public class ToeOffManager
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempLeadingFootPosition.setToZero(nextSoleFrame);
+      tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
-      tempLeadingFootPosition.changeFrame(trailingFootFrame);
 
       toLeadingFoot.setToZero(trailingFootFrame);
       toLeadingFoot.set(tempLeadingFootPosition);
@@ -459,9 +459,9 @@ public class ToeOffManager
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
-      tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
-      tempLeadingFootPosition.changeFrame(trailingFootFrame);
+      tempLeadingFootPosition.setToZero(frontFootFrame);
+      tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
 
       if (Math.abs(tempLeadingFootPosition.getY()) > inPlaceWidth)
          tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
