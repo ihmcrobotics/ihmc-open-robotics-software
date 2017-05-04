@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -92,9 +92,9 @@ public class TransferToStandingState extends WalkingState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       // Just standing in double support, do nothing
-      pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
-      balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
+      balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForStanding(finalTransferTime);
    }
 

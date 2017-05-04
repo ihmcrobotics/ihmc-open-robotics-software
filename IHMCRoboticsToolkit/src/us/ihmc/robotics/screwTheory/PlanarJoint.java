@@ -43,7 +43,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint()
+   public ReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }

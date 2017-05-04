@@ -15,7 +15,7 @@ public class ICPEqualityConstraintInput
 
    public ICPEqualityConstraintInput(int maximumNumberOfFreeVariables)
    {
-      Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, 2);
+      Aeq = new DenseMatrix64F(2, maximumNumberOfFreeVariables);
       beq = new DenseMatrix64F(2, 1);
    }
 
@@ -33,6 +33,6 @@ public class ICPEqualityConstraintInput
     */
    public void reshape(int size)
    {
-      Aeq.reshape(size, 2);
+      Aeq.reshape(2, size);
    }
 }

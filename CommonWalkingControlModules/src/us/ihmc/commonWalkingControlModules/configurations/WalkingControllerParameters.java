@@ -10,10 +10,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -121,6 +122,21 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
+
+   public boolean enableToeOffSlippingDetection()
+   {
+      return false;
+   }
+
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   {
+      // Override this method to configure the parameters as follows:
+//      double forceMagnitudeThreshold = 25.0;
+//      double velocityThreshold = 0.4;
+//      double slippageDistanceThreshold = 0.04;
+//      double filterBreakFrequency = 10.0;
+//      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
+   }
 
    /**
     * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.

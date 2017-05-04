@@ -341,6 +341,17 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
       this.quaternion.multiply(quaternion);
    }
 
+   public void preMultiply(FrameOrientation frameOrientation)
+   {
+      checkReferenceFrameMatch(frameOrientation);
+      preMultiply(frameOrientation.quaternion);
+   }
+
+   public void preMultiply(QuaternionReadOnly quaternion)
+   {
+      this.quaternion.preMultiply(quaternion);
+   }
+
    /**
     * Sets this {@code FrameOrientation} to the difference of {@code q1} and {@code q2}.
     * <p>
