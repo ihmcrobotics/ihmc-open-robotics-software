@@ -29,12 +29,12 @@ public class MovingZUpFrame extends MovingReferenceFrame
    }
 
    /**
-    * As the frame is rotating according to the yaw part of the nonZUpFrame yaw-pitch-roll, this
-    * frame angular velocity is around z only with a magnitude equal to the derivative of the yaw
-    * angle.
+    * As this frame is rotating according to the yaw part of the {@code nonZUpFrame} yaw-pitch-roll
+    * angles, this frame angular velocity is around z only with a magnitude equal to the derivative
+    * of the yaw angle.
     * <p>
     * To compute the yaw rate, we need to transform each of the three yaw-pitch-roll velocities into
-    * the nonZUpFrame to obtain the corresponding angular velocity in terms of d(yaw)/dt,
+    * the {@code nonZUpFrame} to obtain the corresponding angular velocity in terms of d(yaw)/dt,
     * d(pitch)/dt, and d(roll)/dt:
     * 
     * <pre>
@@ -44,9 +44,10 @@ public class MovingZUpFrame extends MovingReferenceFrame
     * </pre>
     * 
     * where &omega; is the angular velocity of the nonZUpFrame. The equality gives three equations
-    * for the unknowns that are the rate of the yaw, pitch, and roll, from which the yaw rate can be
-    * found:<br>
-    * d(yaw)/dt = (sin(roll) * &omega;<sub>y</sub> + cos(roll) * &omega;<sub>z</sub>) / cos(pitch)<br>
+    * for the unknowns that are the rate of the yaw, pitch, and roll angles of the
+    * {@code nonZUpFrame}, from which the yaw rate can be found:<br>
+    * d(yaw)/dt = (sin(roll) * &omega;<sub>y</sub> + cos(roll) * &omega;<sub>z</sub>) /
+    * cos(pitch)<br>
     * which is the z component of this frame angular velocity.
     * </p>
     */
