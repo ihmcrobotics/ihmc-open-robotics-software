@@ -194,8 +194,9 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setNextFootstep(nextFootstep);
 
+      FootstepTiming nextFootstepTiming = walkingMessageHandler.peekTiming(0);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), walkingMessageHandler.peekTiming(0));
+      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), nextFootstepTiming);
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1), walkingMessageHandler.peekTiming(1));
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
@@ -209,6 +210,12 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager.requestSwing(swingSide, nextFootstep, swingTime);
 
       kneeAngleManager.startSwing(swingSide);
+
+      if (nextFootstepTiming != null)
+         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextFootstepTiming.getTransferTime(), nextFootstepTiming.getSwingTime());
+      else
+         pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
+
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
@@ -283,7 +290,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private void updateFootstepParameters()
    {
       pelvisOrientationManager.setTrajectoryTime(swingTime);
-      pelvisOrientationManager.setWithUpcomingFootstep(nextFootstep);
+      pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
+      pelvisOrientationManager.setTrajectoryFromFootstep();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
@@ -292,7 +300,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
-      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
+      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
    }
