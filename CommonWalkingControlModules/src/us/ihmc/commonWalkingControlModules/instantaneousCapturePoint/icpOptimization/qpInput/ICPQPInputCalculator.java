@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolver;
 
@@ -166,16 +167,16 @@ public class ICPQPInputCalculator
    public void computeDynamicsConstraint(ICPEqualityConstraintInput icpEqualityInputToPack, DenseMatrix64F currentICP, DenseMatrix64F finalICPRecursion,
          DenseMatrix64F cmpConstantEffect, DenseMatrix64F feedbackGain, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
    {
-      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, 0, indexHandler.getDynamicRelaxationIndex(), identity, 0, 0, 2, 2, 1.0);
 
-      CommonOps.invert(feedbackGain);
-      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, indexHandler.getFeedbackCMPIndex(), 0, feedbackGain, 0, 0, 2, 2, 1.0);
+      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain);
+      MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useStepAdjustment())
       {
          for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
          {
-            MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, 2 * i, 0, footstepRecursionMultipliers.get(i), 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(icpEqualityInputToPack.Aeq, 0, 2 * i, footstepRecursionMultipliers.get(i), 0, 0, 2, 2, 1.0);
          }
       }
 

@@ -34,7 +34,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class ICPOptimizationController
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
@@ -92,7 +92,7 @@ public class ICPOptimizationController
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
    private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxationSolution", "", worldFrame, registry);
-   private final YoFramePoint2d angularMomentumSolution = new YoFramePoint2d(yoNamePrefix + "AngularMomentumSolution", "", worldFrame, registry);
+   private final YoFramePoint2d cmpCoPDifferenceSolution = new YoFramePoint2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpConstantEffects = new FramePoint2d();
@@ -849,8 +849,7 @@ public class ICPOptimizationController
       dynamicRelaxation.set(tempPoint2d);
 
       solver.getCMPDifferenceFromCoP(tempPoint2d);
-      CapturePointTools.computeAngularMomentum(mass, gravityZ, tempPoint2d, tempPoint2d);
-      angularMomentumSolution.set(tempPoint2d);
+      cmpCoPDifferenceSolution.set(tempPoint2d);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());

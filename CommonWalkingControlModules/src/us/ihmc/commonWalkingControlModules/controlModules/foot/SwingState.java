@@ -170,7 +170,7 @@ public class SwingState extends AbstractUnconstrainedState
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
-      swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", 10, registry);
+      swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", 12, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame, foot, twistCalculator);
       

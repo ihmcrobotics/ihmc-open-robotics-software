@@ -411,7 +411,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
    public void getBodyPitch(Quaternion rotationToPack)
    {
-      bodyJointID.getFrameAfterJoint().getRotation(rotationToPack);
+      bodyJointID.getRotation(rotationToPack);
    }
 
    public void getBodyLinearVel(Vector3D linearVelocityToPack)

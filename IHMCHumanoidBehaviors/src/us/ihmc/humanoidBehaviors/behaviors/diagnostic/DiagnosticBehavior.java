@@ -83,7 +83,6 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -1985,7 +1984,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
-      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
       desiredPelvisPosition.setZ(offsetHeight);
       desiredPelvisPosition.changeFrame(worldFrame);
@@ -2057,7 +2056,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
    {
-      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPose = new FramePose(frameAfterRootJoint);
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);
