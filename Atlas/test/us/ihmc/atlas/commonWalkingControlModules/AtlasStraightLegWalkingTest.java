@@ -65,7 +65,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  //return 0.15;
                   return 0.10;
                }
 
@@ -132,7 +131,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 1.02;
+                        return 1.05;
                      }
 
                      @Override
@@ -210,16 +209,10 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public Vector3D getDefaultLinearFootWeight()
-                     {
-                        return new Vector3D(10.0, 10.0, 10.0);
-                        //return new Vector3D(30.0, 30.0, 30.0);
-                     }
-
-                     @Override
                      public double getJointAccelerationWeight()
                      {
-                        return 0.05; //0.005;
+                        //return 0.005;
+                        return 0.05;
                      }
                   };
                }
