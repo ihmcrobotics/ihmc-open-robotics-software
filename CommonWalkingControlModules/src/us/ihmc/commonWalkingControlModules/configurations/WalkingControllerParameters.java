@@ -229,9 +229,27 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getToeTouchdownAngle();
 
+   /**
+    * Returns the minimum distance stepping down that will be used to do toe touchdown if {@link #doToeTouchdownIfPossible()} is enabled.
+    * @return minimum step down height (m).
+    */
+   public double getStepDownHeightForToeTouchdown()
+   {
+      return -0.05;
+   }
+
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
+
+   /**
+    * Returns the maximum height that heel touchdown will be used if {@link #doHeelTouchdownIfPossible()} is enabled.
+    * @return maximum height (m).
+    */
+   public double getMaximumHeightForHeelTouchdown()
+   {
+      return 0.10;
+   }
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
