@@ -29,20 +29,20 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
    public static int maxDoF = 6;
 
    /**
-    * Returns the the {@code ReferenceFrame} that is attached to the predecessor of this joint,
+    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this joint,
     * namely the {@code RigidBody} before this joint, and has its origin centered at the joint
     * origin. The pose of the {@code frameBeforeJoint} is independent from this joint motion.
     * 
-    * @return the {@code ReferenceFrame} located right before this joint.
+    * @return the {@code MovingReferenceFrame} located right before this joint.
     */
    public abstract MovingReferenceFrame getFrameBeforeJoint();
 
    /**
-    * Returns the the {@code ReferenceFrame} that is attached to the successor of this joint, namely
+    * Returns the the {@code MovingReferenceFrame} that is attached to the successor of this joint, namely
     * the {@code RigidBody} after this joint, and has its origin centered at the joint origin. The
     * pose of the {@code frameAfterJoint} will change as this joint moves.
     * 
-    * @return the {@code ReferenceFrame} located right after this joint.
+    * @return the {@code MovingReferenceFrame} located right after this joint.
     */
    public abstract MovingReferenceFrame getFrameAfterJoint();
 
