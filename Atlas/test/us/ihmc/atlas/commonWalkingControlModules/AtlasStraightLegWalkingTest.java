@@ -219,6 +219,18 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      {
                         return true;
                      }
+
+                     public double getPelvisPitchRatioOfLegAngle()
+                     {
+                        return 0.7;
+                     }
+
+                     public double getPelvisYawRatioOfStepAngle()
+                     {
+                        //return 0.2;
+                        return 0.4;
+                     }
+
                   };
                }
 

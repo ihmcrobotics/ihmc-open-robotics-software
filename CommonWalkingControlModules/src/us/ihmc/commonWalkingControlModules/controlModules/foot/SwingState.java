@@ -45,7 +45,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable replanTrajectory;
    private final BooleanYoVariable doContinuousReplanning;
 
-   private static final double maxScalingFactor = 1.0;
+   private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
