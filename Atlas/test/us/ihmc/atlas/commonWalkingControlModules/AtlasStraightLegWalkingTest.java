@@ -47,7 +47,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getAnkleLowerLimitToTriggerToeOff()
                {
-                  return -0.45;
+                  return -0.60;
                }
 
                @Override
@@ -65,7 +65,8 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.15;
+                  //return 0.15;
+                  return 0.10;
                }
 
                @Override
@@ -118,19 +119,20 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 1.0;//0.75;
+                        return 0.8;
                      }
 
                      @Override
                      public double getFractionOfTransferToCollapseLeg()
                      {
-                        return 0.6;
+                        //return 0.8;
+                        return 0.5;
                      }
 
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 1.0;
+                        return 1.02;
                      }
 
                      @Override
@@ -201,39 +203,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new AtlasMomentumOptimizationSettings(getJointMap(), getContactPointParameters().getNumberOfContactableBodies())
                   {
                      @Override
-                     public Vector3D getHighAngularFootWeight()
-                     {
-                        return new Vector3D(5.0, 5.0, 5.0);
-                     }
-
-                     @Override
                      public Vector3D getDefaultAngularFootWeight()
                      {
-                        return new Vector3D(0.1, 0.1, 0.1);// Vector3D(0.5, 0.5, 0.5);
+                        return new Vector3D(0.1, 0.1, 0.1);
+                        //return new Vector3D(0.5, 0.5, 0.5);
                      }
 
                      @Override
                      public Vector3D getDefaultLinearFootWeight()
                      {
-                        return new Vector3D(10.0, 10.0, 10.0);// Vector3D(30.0, 30.0, 30.0);
+                        return new Vector3D(10.0, 10.0, 10.0);
+                        //return new Vector3D(30.0, 30.0, 30.0);
                      }
 
                      @Override
                      public double getJointAccelerationWeight()
                      {
                         return 0.05; //0.005;
-                     }
-
-                     @Override
-                     public double getJointJerkWeight()
-                     {
-                        return 0.5; //0.1;
-                     }
-
-                     @Override
-                     public double getRhoRateDefaultWeight()
-                     {
-                        return 0.005; //0.002;
                      }
                   };
                }
