@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
@@ -35,8 +36,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 {
    private StraightLegWalkingParameters straightLegWalkingParameters;
 
-   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   protected DynamicReachabilityParameters dynamicReachabilityParameters;
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private DynamicReachabilityParameters dynamicReachabilityParameters;
+   private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -739,5 +741,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
+   }
+
+   /**
+    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
+    */
+   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+   {
+      if (pelvisOffsetWhileWalkingParameters == null)
+         pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
+
+      return pelvisOffsetWhileWalkingParameters;
    }
 }
