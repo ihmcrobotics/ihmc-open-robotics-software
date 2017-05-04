@@ -339,7 +339,7 @@ public class ToeOffManager
 
       toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, leadingFootSupportPolygon);
 
-      ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getFrameAfterParentJoint();
+      ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
       double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), leadingFootSupportPolygon, soleFrame, percentProximity);
       icpProximityForDSToeOff.set(requiredProximity);
 
