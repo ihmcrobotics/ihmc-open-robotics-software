@@ -238,19 +238,6 @@ public class ScrewToolsTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testCreateOffsetFrame_ReferenceFrame_Transform3D_String()
-   {
-      ReferenceFrame parentFrame = theFrame;
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      String frameName = "woof";
-      ReferenceFrame frame = ScrewTools.createOffsetFrame(parentFrame, transformToParent, frameName);
-
-      parentFrame.checkReferenceFrameMatch(frame.getRootFrame());
-      assertEquals("Should be equal", frameName, frame.getName());
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testComputeSuccessors()
    {  
       int numJoints = 3;
