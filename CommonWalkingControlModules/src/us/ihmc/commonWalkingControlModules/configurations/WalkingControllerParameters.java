@@ -242,6 +242,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getHeelTouchdownAngle();
 
+   public double getHeelTouchdownLengthRatio()
+   {
+      return 0.35;
+   }
+
    /**
     * Returns the maximum height that heel touchdown will be used if {@link #doHeelTouchdownIfPossible()} is enabled.
     * @return maximum height (m).

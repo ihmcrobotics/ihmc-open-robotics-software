@@ -88,6 +88,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable doHeelTouchdownIfPossible;
    private final DoubleYoVariable heelTouchdownAngle;
    private final DoubleYoVariable maximumHeightForHeelTouchdown;
+   private final DoubleYoVariable heelTouchdownLengthRatio;
 
    private final BooleanYoVariable doToeTouchdownIfPossible;
    private final DoubleYoVariable toeTouchdownAngle;
@@ -154,9 +155,11 @@ public class SwingState extends AbstractUnconstrainedState
       doHeelTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoHeelTouchdownIfPossible", registry);
       heelTouchdownAngle = new DoubleYoVariable(namePrefix + "HeelTouchdownAngle", registry);
       maximumHeightForHeelTouchdown = new DoubleYoVariable(namePrefix + "MaximumHeightForHeelTouchdown", registry);
+      heelTouchdownLengthRatio = new DoubleYoVariable(namePrefix + "HeelTouchdownLengthRatio", registry);
       doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
       heelTouchdownAngle.set(walkingControllerParameters.getHeelTouchdownAngle());
       maximumHeightForHeelTouchdown.set(walkingControllerParameters.getMaximumHeightForHeelTouchdown());
+      heelTouchdownLengthRatio.set(walkingControllerParameters.getHeelTouchdownLengthRatio());
 
       doToeTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoToeTouchdownIfPossible", registry);
       toeTouchdownAngle = new DoubleYoVariable(namePrefix + "toeTouchdownAngle", registry);
@@ -304,7 +307,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private void modifyFinalOrientationForTouchdown(FrameOrientation finalOrientationToPack)
    {
-      stanceFootPosition.changeFrame(finalPosition.getReferenceFrame());
+      finalPosition.changeFrame(stanceFootPosition.getReferenceFrame());
       double stepHeight = finalPosition.getZ() - stanceFootPosition.getZ();
       double initialFootstepPitch = finalOrientationToPack.getPitch();
 
@@ -324,7 +327,9 @@ public class SwingState extends AbstractUnconstrainedState
       }
       else if (stepHeight <= maximumHeightForHeelTouchdown.getDoubleValue() && doHeelTouchdownIfPossible.getBooleanValue())
       { // not stepping down too far, and not stepping up too far, so do heel strike
-         double heelTouchdownAngle = this.heelTouchdownAngle.getDoubleValue();
+         double stepLength = finalPosition.getX() - stanceFootPosition.getX();
+         double heelTouchdownAngle = Math.max(-stepLength * heelTouchdownLengthRatio.getDoubleValue(), this.heelTouchdownAngle.getDoubleValue());
+         heelTouchdownAngle = Math.min(heelTouchdownAngle, -this.heelTouchdownAngle.getDoubleValue());
          // use the footstep pitch if its greater than the heel strike angle
          footstepPitchModification = Math.max(initialFootstepPitch, heelTouchdownAngle);
          // decrease the foot pitch modification if next step pitches down
