@@ -126,10 +126,24 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    {
       quaternion.setYawPitchRoll(yaw, pitch, roll);
    }
-
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+   }
+
+   public void appendYawRotation(double yawToAppend)
+   {
+      quaternion.appendYawRotation(yawToAppend);
+   }
+
+   public void appendPitchRotation(double pitchToAppend)
+   {
+      quaternion.appendPitchRotation(pitchToAppend);
+   }
+
+   public void appendRollRotation(double rollToAppend)
+   {
+      quaternion.appendRollRotation(rollToAppend);
    }
 
    @Override
