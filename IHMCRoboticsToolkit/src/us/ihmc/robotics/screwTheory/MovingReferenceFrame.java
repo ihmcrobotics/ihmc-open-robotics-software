@@ -115,6 +115,32 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
    }
 
    /**
+    * Creates a new moving reference frame as a child of the given {@code parentFrame} .
+    * <p>
+    * This new reference frame defined in the {@code parentFrame} and moves with it.
+    * </p>
+    * <p>
+    * Its pose and velocity with respect to the {@code parentFrame} can be modified at runtime by
+    * changing the transform and twist in the methods
+    * {@link #updateTransformToParent(RigidBodyTransform)} and
+    * {@link #updateTwistRelativeToParent(Twist)} when overriding them.
+    * </p>
+    * 
+    * @param frameName the name of the new frame.
+    * @param parentFrame the parent of the new frame. It has to be either another
+    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
+    *           with respect to its root frame.
+    * @param isZupFrame refers to whether this new frame has its z-axis aligned with the root frame
+    *           at all time or not.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
+    *            a stationary {@code ReferenceFrame}.
+    */
+   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isZUpFrame)
+   {
+      this(frameName, parentFrame, new RigidBodyTransform(), isZUpFrame, false);
+   }
+
+   /**
     * Creates a new moving reference frame as a child of the given {@code parentFrame} and
     * initializes the transform to its parent.
     * <p>
@@ -195,7 +221,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       if (isFixedInParent)
          twistRelativeToParent = null;
       else
-         twistRelativeToParent = new Twist();
+         twistRelativeToParent = new Twist(this, parentFrame, this);
    }
 
    /**
