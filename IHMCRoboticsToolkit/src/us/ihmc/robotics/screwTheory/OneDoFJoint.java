@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -251,9 +249,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    protected void setMotionSubspace()
    {
-      ArrayList<Twist> unitTwists = new ArrayList<Twist>();
-      unitTwists.add(unitSuccessorTwist);
-
       this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getExpressedInFrame());
       this.motionSubspace.compute();
    }
