@@ -16,6 +16,16 @@ public class StraightLegWalkingParameters
       return 0.25;
    }
 
+   public double getSpeedForSupportKneeCollapsing()
+   {
+      return 0.5;
+   }
+
+   public double getSupportKneeCollapsingDuration()
+   {
+      return 0.5;
+   }
+
    /**
     * Angle used to what it means to set the knee privileged configuration to straight.
     * This is used in the straight leg state by the support legs when the robot is attempting to walk with
@@ -37,6 +47,16 @@ public class StraightLegWalkingParameters
    public double getFractionOfSwingToStraightenLeg()
    {
       return 0.8;
+   }
+
+   /**
+    * Returns a fraction of the swing state to switch the knee privileged configuration to collapse.
+    *
+    * @return fraction of transfer state (0.0 to 1.0)
+    */
+   public double getFractionOfSwingToCollapseStanceLeg()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 
    /**
