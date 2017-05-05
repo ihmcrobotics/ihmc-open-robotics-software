@@ -40,6 +40,16 @@ public class StraightLegWalkingParameters
    }
 
    /**
+    * Returns a fraction of the swing state to switch the knee privileged configuration to collapse.
+    *
+    * @return fraction of transfer state (0.0 to 1.0)
+    */
+   public double getFractionOfSwingToCollapseStanceLeg()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * Returns a fraction of the transfer state to switch the knee privileged configuration to bent.
     * This is important to start collapsing the leg to avoid being stuck in the singularity, allowing the
     * upcoming swing leg to start the swing motion naturally.
