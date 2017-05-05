@@ -1191,7 +1191,7 @@ public class QuadrupedSupportPolygonTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testPackYoFrameConvexPolygon2d()
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
