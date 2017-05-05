@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MovingZUpFrame extends MovingReferenceFrame
@@ -56,19 +57,39 @@ public class MovingZUpFrame extends MovingReferenceFrame
    {
       nonZUpFrame.getTwistOfFrame(twistRelativeToParentToPack);
 
-      double wy = twistRelativeToParentToPack.getAngularPartY();
-      double wz = twistRelativeToParentToPack.getAngularPartZ();
-
-      double roll = yawPitchRoll[2];
-      double pitch = yawPitchRoll[1];
-
-      double yawDot = Math.sin(roll) * wy + Math.cos(roll) * wz;
-      yawDot /= Math.cos(pitch);
+      double yawDot = computeYawRate(yawPitchRoll, twistRelativeToParentToPack.getAngularPart(), true);
 
       twistRelativeToParentToPack.changeFrame(this);
       twistRelativeToParentToPack.changeBodyFrameNoRelativeTwist(this);
       twistRelativeToParentToPack.changeBaseFrameNoRelativeTwist(rootFrame);
 
       twistRelativeToParentToPack.setAngularPart(0.0, 0.0, yawDot);
+   }
+
+   /**
+    * Computes the yaw angle rate of the yaw-pitch-roll representation of a orientation given the
+    * angular velocity.
+    * 
+    * @param yawPitchRoll the Euler angles describing a 3D rotation. Not modified.
+    * @param angularVelocity the angular velocity. Not modified.
+    * @param isVelocityInLocalCoordinates whether the angular velocity is expressed in the
+    *           coordinates described by the yaw-pitch-roll angles or in the base coordinates of the
+    *           yaw-pitch-roll angles.
+    * @return the value of the rate of change of the yaw angle.
+    */
+   public static double computeYawRate(double[] yawPitchRoll, Vector3DReadOnly angularVelocity, boolean isVelocityInLocalCoordinates)
+   {
+      double wx = angularVelocity.getX();
+      double wy = angularVelocity.getY();
+      double wz = angularVelocity.getZ();
+
+      double yaw = yawPitchRoll[0];
+      double pitch = yawPitchRoll[1];
+      double roll = yawPitchRoll[2];
+
+      if (isVelocityInLocalCoordinates)
+         return (Math.sin(roll) * wy + Math.cos(roll) * wz) / Math.cos(pitch);
+      else
+         return wz + Math.tan(pitch) * (Math.sin(yaw) * wy + Math.cos(yaw) * wx);
    }
 }
