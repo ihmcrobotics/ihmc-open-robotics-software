@@ -151,7 +151,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 1.1;
+                        return 0.95;
                      }
 
                      @Override
