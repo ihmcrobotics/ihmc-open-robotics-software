@@ -152,7 +152,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
       if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime)
       {
-         kneeAngleManager.collapseStanceLegDuringSwing(swingSide.getOppositeSide());
+         kneeAngleManager.collapseLegDuringSwing(swingSide.getOppositeSide());
       }
 
       walkingMessageHandler.clearFootTrajectory();
