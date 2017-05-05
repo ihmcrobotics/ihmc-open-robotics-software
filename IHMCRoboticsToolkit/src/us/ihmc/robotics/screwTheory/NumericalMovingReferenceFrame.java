@@ -38,7 +38,12 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
 
    public NumericalMovingReferenceFrame(ReferenceFrame originalFrame, double updateDT)
    {
-      super(originalFrame.getName(), originalFrame.getRootFrame());
+      this("", originalFrame, updateDT);
+   }
+
+   public NumericalMovingReferenceFrame(String nameSuffix, ReferenceFrame originalFrame, double updateDT)
+   {
+      super(originalFrame.getName() + nameSuffix, originalFrame.getRootFrame());
       this.originalFrame = originalFrame;
       this.updateDT = updateDT;
 
