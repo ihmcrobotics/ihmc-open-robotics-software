@@ -8,10 +8,12 @@ import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -26,6 +28,25 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          {
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
+               @Override
+               public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+               {
+                  YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
+
+                  double kpXY = 80.0;
+                  double kpZ = 80.0;
+                  double zeta = 0.8;
+                  double maxAccel = 36.0;
+                  double maxJerk = 540.0;
+
+                  gains.setProportionalGains(kpXY, kpZ);
+                  gains.setDampingRatio(zeta);
+                  gains.setMaximumFeedback(maxAccel);
+                  gains.setMaximumFeedbackRate(maxJerk);
+                  gains.createDerivativeGainUpdater(true);
+
+                  return gains;
+               }
                @Override
                public boolean doHeelTouchdownIfPossible()
                {
@@ -142,7 +163,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightKneeAngle()
                      {
-                        return 0.2;
+                        return 0.1;
                      }
 
                      @Override
