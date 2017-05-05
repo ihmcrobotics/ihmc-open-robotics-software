@@ -29,9 +29,6 @@ public class KneeControlModule
       STRAIGHTEN_TO_STRAIGHT, STRAIGHT, STRAIGHTEN_TO_CONTROLLABLE, COLLAPSE, BENT, CONTROLLABLE
    }
 
-   private static final double kneeCollapseSpeed = 0.5;
-   private static final double kneeCollapseDuration = 0.5;
-
    private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = true;
    private static final boolean SCALE_STRAIGHT_GAIN_WITH_ERROR = false;
 
@@ -58,6 +55,8 @@ public class KneeControlModule
    private final DoubleYoVariable desiredAngleWhenStraight;
 
    private final DoubleYoVariable straighteningSpeed;
+   private final DoubleYoVariable collapsingSpeed;
+   private final DoubleYoVariable collapsingDuration;
 
    private final BooleanYoVariable activelyControl;
 
@@ -117,6 +116,11 @@ public class KneeControlModule
 
       straighteningSpeed = new DoubleYoVariable(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
+
+      collapsingSpeed = new DoubleYoVariable(namePrefix + "SupportKneeCollapsingSpeed", registry);
+      collapsingSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeCollapsing());
+      collapsingDuration = new DoubleYoVariable(namePrefix + "SupportKneeCollapsingDuration", registry);
+      collapsingDuration.set(straightLegWalkingParameters.getSupportKneeCollapsingDuration());
 
       // set up states and state machine
       DoubleYoVariable time = controllerToolbox.getYoTime();
@@ -506,7 +510,7 @@ public class KneeControlModule
       @Override
       public boolean isDone()
       {
-         return getTimeInCurrentState() > kneeCollapseDuration;
+         return getTimeInCurrentState() > collapsingDuration.getDoubleValue();
       }
 
       @Override
@@ -517,7 +521,7 @@ public class KneeControlModule
          privilegedConfigurationCommand.setVelocityGain(hipPitchJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
          privilegedConfigurationCommand.setMaxAcceleration(hipPitchJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
-         double desiredKneePosition = getTimeInCurrentState() * kneeCollapseSpeed + desiredAngleWhenStraight.getDoubleValue();
+         double desiredKneePosition = getTimeInCurrentState() * collapsingSpeed.getDoubleValue() + desiredAngleWhenStraight.getDoubleValue();
          privilegedConfigurationCommand.setOneDoFJoint(kneePitchJointIndex, desiredKneePosition);
          privilegedConfigurationCommand.setWeight(kneePitchJointIndex, kneeBentPrivilegedWeight.getDoubleValue());
          privilegedConfigurationCommand.setConfigurationGain(kneePitchJointIndex, kneeBentPrivilegedPositionGain.getDoubleValue());
