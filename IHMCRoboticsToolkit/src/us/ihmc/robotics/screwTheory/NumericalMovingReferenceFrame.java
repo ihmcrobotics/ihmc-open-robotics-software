@@ -5,6 +5,20 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+/**
+ * {@code NumericalMovingReferenceFrame} can be used to extend a simple {@code ReferenceFrame} to a
+ * {@code MovingReferenceFrame} by computing the frame velocity by using finite difference on its
+ * transform.
+ * <p>
+ * For this to work properly, the update method has to be called at a constant rate consistent with
+ * the {@code updateDT} given at construction time.
+ * </p>
+ * <p>
+ * Note that it is preferable to use this class only for test purposes or environment for which the
+ * noise on the frame transform is really small. The resulting velocity is not filtered, so any
+ * noise in the transform will result in important peaks in the computed velocity.
+ * </p>
+ */
 public class NumericalMovingReferenceFrame extends MovingReferenceFrame
 {
    private static final long serialVersionUID = 1792258730231152017L;
