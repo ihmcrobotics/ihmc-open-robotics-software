@@ -125,7 +125,7 @@ public class Line2d implements GeometryObject<Line2d>
    public void set(Point2DReadOnly[] endpoints)
    {
       if (endpoints.length != 2)
-         throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
+         throw new IllegalArgumentException("Length of input array is not correct. Length = " + endpoints.length + ", expected an array of two elements");
       set(endpoints[0], endpoints[1]);
    }
 
@@ -293,13 +293,13 @@ public class Line2d implements GeometryObject<Line2d>
    {
       checkHasBeenInitialized();
       double vXOld = direction.getX();
-      @SuppressWarnings("unused")
       double vYOld = direction.getY();
 
-      double vXNew = Math.cos(radians) * vXOld - Math.sin(radians) * direction.getY();
-      double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * direction.getY();
+      double vXNew = Math.cos(radians) * vXOld - Math.sin(radians) * vYOld;
+      double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * vYOld;
 
       direction.set(vXNew, vYNew);
+
    }
 
    public void translate(double x, double y)
