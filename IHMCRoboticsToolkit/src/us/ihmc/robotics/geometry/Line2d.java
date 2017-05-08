@@ -53,6 +53,26 @@ public class Line2d implements GeometryObject<Line2d>
       set(pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
+   @Override
+   public void setToZero()
+   {
+      point.setToZero();
+      direction.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      point.setToNaN();
+      direction.setToNaN();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return point.containsNaN() || direction.containsNaN();
+   }
+
    public void setPoint(double pointOnLineX, double pointOnLineY)
    {
       point.set(pointOnLineX, pointOnLineY);
@@ -509,27 +529,13 @@ public class Line2d implements GeometryObject<Line2d>
     */
    public boolean isPointInFrontOfLine(Vector2DReadOnly frontDirection, Point2DReadOnly point)
    {
-      checkHasBeenInitialized();
-      double lineAngle = AngleTools.angleFromZeroToTwoPi(direction.getX(), direction.getY());
-      double frontAngle = AngleTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
-      double pointAngle = AngleTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
-
-      double lineToFront = frontAngle - lineAngle;
-      double lineToPoint = pointAngle - lineAngle;
-
-      if (Math.abs(lineToFront) > Math.PI)
-         lineToFront = -(lineToFront % Math.PI);
-      if (Math.abs(lineToPoint) > Math.PI)
-         lineToPoint = -(lineToPoint % Math.PI);
-
-      if (lineToFront > 0.0 == lineToPoint > 0.0)
-      {
-         return true;
-      }
+      double crossProduct = frontDirection.cross(direction);
+      if (crossProduct > 0.0)
+         return isPointOnRightSideOfLine(point);
+      else if (crossProduct < 0.0)
+         return isPointOnLeftSideOfLine(point);
       else
-      {
-         return false;
-      }
+         throw new RuntimeException("Not defined when line is pointing exactly along the front direction");
    }
 
    /**
@@ -563,21 +569,6 @@ public class Line2d implements GeometryObject<Line2d>
    public void setParallelLineThroughPoint(Point2DReadOnly point)
    {
       this.point.set(point);
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      if (Double.isNaN(point.getX()))
-         return true;
-      if (Double.isNaN(point.getY()))
-         return true;
-      if (Double.isNaN(direction.getX()))
-         return true;
-      if (Double.isNaN(direction.getY()))
-         return true;
-
-      return false;
    }
 
    /**
@@ -639,20 +630,6 @@ public class Line2d implements GeometryObject<Line2d>
          throw new RuntimeException("The point of this line has not been initialized.");
       if (!hasDirectionBeenSet)
          throw new RuntimeException("The direction of this line has not been initialized.");
-   }
-
-   @Override
-   public void setToZero()
-   {
-      point.setToZero();
-      direction.setToZero();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      point.setToNaN();
-      direction.setToNaN();
    }
 
    @Override
