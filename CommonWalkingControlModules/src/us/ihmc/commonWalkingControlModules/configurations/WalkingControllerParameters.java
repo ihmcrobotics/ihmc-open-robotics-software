@@ -10,6 +10,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
@@ -34,8 +36,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 {
    private StraightLegWalkingParameters straightLegWalkingParameters;
 
-   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   protected DynamicReachabilityParameters dynamicReachabilityParameters;
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private DynamicReachabilityParameters dynamicReachabilityParameters;
+   private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -119,6 +122,21 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
+
+   public boolean enableToeOffSlippingDetection()
+   {
+      return false;
+   }
+
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   {
+      // Override this method to configure the parameters as follows:
+//      double forceMagnitudeThreshold = 25.0;
+//      double velocityThreshold = 0.4;
+//      double slippageDistanceThreshold = 0.04;
+//      double filterBreakFrequency = 10.0;
+//      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
+   }
 
    /**
     * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
@@ -600,6 +618,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints.
+    */
+   public double[] getSwingWaypointProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
     * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
     * (new feature to be tested with Atlas)
     */
@@ -715,5 +741,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
+   }
+
+   /**
+    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
+    */
+   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+   {
+      if (pelvisOffsetWhileWalkingParameters == null)
+         pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
+
+      return pelvisOffsetWhileWalkingParameters;
    }
 }

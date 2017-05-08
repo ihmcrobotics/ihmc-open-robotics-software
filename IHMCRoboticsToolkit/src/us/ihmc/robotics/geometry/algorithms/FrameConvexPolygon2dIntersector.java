@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -236,7 +235,7 @@ public class FrameConvexPolygon2dIntersector
     */
    public static void getClosestPoint(Point2D point, ConvexPolygon2d polygon, Point2D closestPointToPack)
    {
-      if (ConvexPolygon2dCalculator.isPointInside(point, polygon))
+      if (polygon.isPointInside(point))
       {
          closestPointToPack.set(point);
          return;

@@ -26,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructAWorldFrame("constructionFrame");
+   private final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructARootFrame("constructionFrame");
 
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();

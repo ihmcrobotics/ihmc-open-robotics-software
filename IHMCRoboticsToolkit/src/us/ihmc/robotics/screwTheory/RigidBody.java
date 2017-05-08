@@ -88,13 +88,13 @@ public class RigidBody implements NameBasedHashCodeHolder
     * </p>
     *
     * @param bodyName the name for this rigid-body.
-    * @param parentInertialFrame the parent inertial, i.e. non-moving, frame to which this
-    *           rigid-body will create and attach its body fixed frame. Most of the time
-    *           {@code parentInertialFrame == ReferenceFrame.getWorldFrame()}.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world
+    *           frame, frame to which this rigid-body will create and attach its body fixed frame.
+    *           Most of the time {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
     */
-   public RigidBody(String bodyName, ReferenceFrame parentInertialFrame)
+   public RigidBody(String bodyName, ReferenceFrame parentStationaryFrame)
    {
-      this(bodyName, new RigidBodyTransform(), parentInertialFrame, true);
+      this(bodyName, new RigidBodyTransform(), parentStationaryFrame);
    }
 
    /**
@@ -106,17 +106,12 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @param bodyName the name for this rigid-body.
     * @param transformToParent provides the pose of this rigid-body's body-fixed-frame with respect
-    *           to the {@code parentInertialFrame}. Not modified.
-    * @param parentInertialFrame the parent inertial, i.e. non-moving, frame to which this
-    *           rigid-body will create and attach its body fixed frame. Most of the time
-    *           {@code parentInertialFrame == ReferenceFrame.getWorldFrame()}.
+    *           to the {@code parentStationaryFrame}. Not modified.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world
+    *           frame, frame to which this rigid-body will create and attach its body fixed frame.
+    *           Most of the time {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
     */
-   public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame)
-   {
-      this(bodyName, transformToParent, parentInertialFrame, false);
-   }
-
-   private RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentInertialFrame, boolean isZUpFrame)
+   public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
@@ -124,7 +119,10 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       name = bodyName;
       inertia = null;
-      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentInertialFrame, transformToParent, true, isZUpFrame);
+      boolean isParentStationary = parentStationaryFrame.isAStationaryFrame();
+      boolean isZUpFrame = isParentStationary && transformToParent.isRotation2D();
+
+      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentStationaryFrame, transformToParent, isParentStationary, isZUpFrame);
       parentJoint = null;
    }
 

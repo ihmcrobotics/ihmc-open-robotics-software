@@ -54,7 +54,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
 
       for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
@@ -81,7 +81,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
       FramePoint point1 = new FramePoint(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
       FramePoint point2 = new FramePoint(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
       FramePoint point3 = new FramePoint(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
