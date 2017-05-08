@@ -9,30 +9,20 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * @author Twan Koolen
+ * Represents an infinitely-long 2D line defined by a 2D point and a 2D unit-vector.
  */
 public class Line2d implements GeometryObject<Line2d>
 {
-   // TODO: think about usage of epsilons in the methods.
+   private final static double minAllowableVectorPart = Math.sqrt(Double.MIN_NORMAL);
 
+   /** Coordinates of a point located on this line. */
    protected final Point2D point = new Point2D();
+   /** Normalized direction of this line. */
    protected final Vector2D normalizedVector = new Vector2D();
-   private final static double doubleMinNormal; // Double.MIN_NORMAL is not available in JRE 1.5
-
-   private final Point2D tempPoint2d = new Point2D();
-
-   static
-   {
-      // From the JRE 1.6 Documentation; this value is equivalent to Double.MIN_NORMAL
-      doubleMinNormal = Double.longBitsToDouble(0x0010000000000000L);
-   }
-
-   private final static double minAllowableVectorPart = Math.sqrt(doubleMinNormal);
 
    public Line2d()
    {
@@ -231,13 +221,9 @@ public class Line2d implements GeometryObject<Line2d>
 
    public void set(double pointX, double pointY, double vectorX, double vectorY)
    {
-      if ((Math.abs(vectorX) < minAllowableVectorPart) && (Math.abs(vectorY) < minAllowableVectorPart))
-      {
-         throw new RuntimeException("Line length must be greater than zero");
-      }
-
       point.set(pointX, pointY);
       normalizedVector.set(vectorX, vectorY);
+      checkReasonableVector(normalizedVector);
       normalizedVector.normalize();
    }
 
@@ -369,10 +355,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    public double distance(Point2DReadOnly point)
    {
-      tempPoint2d.set(this.point);
-      tempPoint2d.add(normalizedVector);
-
-      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, tempPoint2d);
+      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, normalizedVector);
    }
 
    public double distanceSquared(Point2DReadOnly point)
