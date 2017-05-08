@@ -143,7 +143,7 @@ public class ConvexPolygon2dCalculator
       if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, EuclidGeometryTools.ONE_TEN_MILLIONTH))
             return false;
       else
-         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.direction, edgeStart, edgeEnd);
+         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.getPoint(), line.direction, edgeStart, edgeEnd);
    }
 
    // --- Methods that generate garbage ---

@@ -20,7 +20,7 @@ public class Line2d implements GeometryObject<Line2d>
    private final static double minAllowableVectorPart = Math.sqrt(Double.MIN_NORMAL);
 
    /** Coordinates of a point located on this line. */
-   protected final Point2D point = new Point2D();
+   private final Point2D point = new Point2D();
    /** Normalized direction of this line. */
    protected final Vector2D direction = new Vector2D();
 
@@ -80,6 +80,16 @@ public class Line2d implements GeometryObject<Line2d>
    public Point2D getPoint()
    {
       return point;
+   }
+
+   public double getPointX()
+   {
+      return point.getX();
+   }
+
+   public double getPointY()
+   {
+      return point.getY();
    }
 
    public void getNormalizedVector(Vector2DBasics normalizedVectorToPack)
@@ -251,6 +261,11 @@ public class Line2d implements GeometryObject<Line2d>
       double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * direction.getY();
 
       direction.set(vXNew, vYNew);
+   }
+
+   public void translate(double x, double y)
+   {
+      point.add(x, y);
    }
 
    public void shiftToLeft(double distanceToShift)
