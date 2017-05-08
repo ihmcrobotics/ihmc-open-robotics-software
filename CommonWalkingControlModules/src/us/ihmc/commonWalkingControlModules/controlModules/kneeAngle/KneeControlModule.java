@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -55,7 +56,6 @@ public class KneeControlModule
    private final DoubleYoVariable desiredAngleWhenStraight;
 
    private final DoubleYoVariable straighteningSpeed;
-   private final DoubleYoVariable collapsingSpeed;
    private final DoubleYoVariable collapsingDuration;
 
    private final BooleanYoVariable activelyControl;
@@ -117,8 +117,6 @@ public class KneeControlModule
       straighteningSpeed = new DoubleYoVariable(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
 
-      collapsingSpeed = new DoubleYoVariable(namePrefix + "SupportKneeCollapsingSpeed", registry);
-      collapsingSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeCollapsing());
       collapsingDuration = new DoubleYoVariable(namePrefix + "SupportKneeCollapsingDuration", registry);
       collapsingDuration.set(straightLegWalkingParameters.getSupportKneeCollapsingDuration());
 
@@ -498,6 +496,8 @@ public class KneeControlModule
       private static final int kneePitchJointIndex = 1;
       private static final int anklePitchJointIndex = 2;
 
+      private final double kneePitchMidrange;
+
       public CollapseKneeControlState(OneDoFJoint hipPitchJoint, OneDoFJoint kneePitchJoint, OneDoFJoint anklePitchJoint)
       {
          super(KneeControlType.COLLAPSE);
@@ -505,6 +505,14 @@ public class KneeControlModule
          privilegedConfigurationCommand.addJoint(hipPitchJoint, PrivilegedConfigurationOption.AT_ZERO);
          privilegedConfigurationCommand.addJoint(kneePitchJoint, Double.NaN);
          privilegedConfigurationCommand.addJoint(anklePitchJoint, PrivilegedConfigurationOption.AT_ZERO);
+
+         double kneePitchLimitUpper = kneePitchJoint.getJointLimitUpper();
+         if (Double.isNaN(kneePitchLimitUpper) || Double.isInfinite(kneePitchLimitUpper))
+            kneePitchLimitUpper = Math.PI;
+         double kneePitchLimitLower = kneePitchJoint.getJointLimitLower();
+         if (Double.isNaN(kneePitchLimitLower) || Double.isInfinite(kneePitchLimitLower))
+            kneePitchLimitLower = -Math.PI;
+         kneePitchMidrange = 0.5 * (kneePitchLimitUpper - kneePitchLimitLower);
       }
 
       @Override
@@ -521,7 +529,9 @@ public class KneeControlModule
          privilegedConfigurationCommand.setVelocityGain(hipPitchJointIndex, legPitchPrivilegedVelocityGain.getDoubleValue());
          privilegedConfigurationCommand.setMaxAcceleration(hipPitchJointIndex, privilegedMaxAcceleration.getDoubleValue());
 
-         double desiredKneePosition = getTimeInCurrentState() * collapsingSpeed.getDoubleValue() + desiredAngleWhenStraight.getDoubleValue();
+         double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngleWhenStraight.getDoubleValue(), kneePitchMidrange,
+               getTimeInCurrentState() / collapsingDuration.getDoubleValue());
+
          privilegedConfigurationCommand.setOneDoFJoint(kneePitchJointIndex, desiredKneePosition);
          privilegedConfigurationCommand.setWeight(kneePitchJointIndex, kneeBentPrivilegedWeight.getDoubleValue());
          privilegedConfigurationCommand.setConfigurationGain(kneePitchJointIndex, kneeBentPrivilegedPositionGain.getDoubleValue());

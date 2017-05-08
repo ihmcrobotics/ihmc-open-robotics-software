@@ -221,10 +221,10 @@ public class QuickHull3DWrapperTest
       assertTrue(vertices.get(2).epsilonEquals(new Point3D(-2, 2, 0), tolerance));
       assertTrue(vertices.get(3).epsilonEquals(new Point3D(-2, -2, 0), tolerance));
 
-      assertTrue(currentPolygon.getVertex(0).epsilonEquals(new Point2D(sideLength, 0.0), tolerance));
-      assertTrue(currentPolygon.getVertex(1).epsilonEquals(new Point2D(0.0, -sideLength), tolerance));
-      assertTrue(currentPolygon.getVertex(2).epsilonEquals(new Point2D(-sideLength, 0.0), tolerance));
-      assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2D(0.0, sideLength), tolerance));
+      assertTrue(currentPolygon.getVertex(0).epsilonEquals(new Point2D(-sideLength, 0.0), tolerance));
+      assertTrue(currentPolygon.getVertex(1).epsilonEquals(new Point2D(0.0, sideLength), tolerance));
+      assertTrue(currentPolygon.getVertex(2).epsilonEquals(new Point2D(sideLength, 0.0), tolerance));
+      assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2D(0.0, -sideLength), tolerance));
 
       assertTrue(polygonPose.getPoint().epsilonEquals(new Point3D(), tolerance));
       Assert.assertEquals(polygonPose.getOrientation().getYaw(), -Math.PI / 4, tolerance);
