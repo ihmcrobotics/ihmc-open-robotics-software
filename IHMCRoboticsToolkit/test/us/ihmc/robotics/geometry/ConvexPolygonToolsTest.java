@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -345,6 +346,7 @@ public class ConvexPolygonToolsTest
       assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {3, 2, 2, 3, 2, 4, 4, 2}, new double[] {1, 2, 2, 3}, .001);
    }
 
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTwoVisiblePoints()
@@ -373,7 +375,8 @@ public class ConvexPolygonToolsTest
       assertPolygons(new double[] {0, 1, 1, 0, 2, 0}, new double[] {0, 3, 4, 3, 1, 2}, new double[] {.4, .8, 1, 2}, .001);
    }
 
-   // @Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+    @Test(timeout=300000)
    public void testDistanceBetweenPolygonsSharedPoint()
    {
       assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, 1, 2}, new double[] {1, 2, 1, 2}, .001);
