@@ -17,6 +17,8 @@ public class ICPTimingCostFunctionEstimator
    private final DenseMatrix64F A_new = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F b_new = new DenseMatrix64F(3, 1);
 
+   private int numberOfPoints = 0;
+
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    public void addPoint(double costToGo, double costToGoGradient, double time)
@@ -59,18 +61,59 @@ public class ICPTimingCostFunctionEstimator
 
       CommonOps.addEquals(A, A_new);
       CommonOps.addEquals(b, b_new);
+
+      numberOfPoints++;
    }
 
-   public double estimateCost(double time)
+   public void addPoint(double costToGo, double time)
    {
-      solver.setA(A);
-      solver.solve(b, quadraticCoefficients);
+      double time4 = Math.pow(time, 4.0);
+      double time3 = Math.pow(time, 3.0);
+      double time2 = Math.pow(time, 2.0);
 
-      return quadraticCoefficients.get(0) * Math.pow(time, 2.0) + quadraticCoefficients.get(1) * time + quadraticCoefficients.get(2);
+      double a00 = 2.0 * positionCost * time4;
+      double a01 = 2.0 * positionCost * time3;
+      double a02 = 2.0 * positionCost * time2;
+
+      double a10 = 2.0 * positionCost * time3;
+      double a11 = 2.0 * positionCost * time2;
+      double a12 = 2.0 * positionCost * time;
+
+      double a20 = 2.0 * positionCost * time2;
+      double a21 = 2.0 * positionCost * time;
+      double a22 = 2.0 * positionCost;
+
+      A_new.set(0, 0, a00);
+      A_new.set(0, 1, a01);
+      A_new.set(0, 2, a02);
+
+      A_new.set(1, 0, a10);
+      A_new.set(1, 1, a11);
+      A_new.set(1, 2, a12);
+
+      A_new.set(2, 0, a20);
+      A_new.set(2, 1, a21);
+      A_new.set(2, 2, a22);
+
+      double b0 = 2.0 * positionCost * costToGo * time2;
+      double b1 = 2.0 * positionCost * costToGo * time;
+      double b2 = 2.0 * positionCost * costToGo;
+
+      b_new.set(0, 0, b0);
+      b_new.set(1, 0, b1);
+      b_new.set(2, 0, b2);
+
+      CommonOps.addEquals(A, A_new);
+      CommonOps.addEquals(b, b_new);
+
+      numberOfPoints++;
    }
 
    public double getEstimatedCostFunctionSolution()
    {
+      if (numberOfPoints < 3)
+         return 0.0;
+
       solver.setA(A);
       solver.solve(b, quadraticCoefficients);
 
@@ -82,5 +125,7 @@ public class ICPTimingCostFunctionEstimator
       A.zero();
       b.zero();
       quadraticCoefficients.zero();
+
+      numberOfPoints = 0;
    }
 }
