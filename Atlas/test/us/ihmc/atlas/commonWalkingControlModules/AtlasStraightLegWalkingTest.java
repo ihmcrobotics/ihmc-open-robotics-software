@@ -86,7 +86,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.10;
+                  return 0.1;
                }
 
                @Override
@@ -254,8 +254,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                      public double getPelvisYawRatioOfStepAngle()
                      {
-                        //return 0.2;
-                        return 0.4;
+                        return 0.25;
                      }
 
                   };
