@@ -24,7 +24,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
-   private static final boolean USE_TIMING_OPTIMIZATION = false;
+   private static final boolean USE_TIMING_OPTIMIZATION = true;
 
    private final ICPOptimizationController icpOptimizationController;
    private final DoubleYoVariable yoTime;
