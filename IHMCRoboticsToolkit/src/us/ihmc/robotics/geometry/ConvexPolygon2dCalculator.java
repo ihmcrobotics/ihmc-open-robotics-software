@@ -135,15 +135,15 @@ public class ConvexPolygon2dCalculator
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
       Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
 
-      double lineDirectionX = line.normalizedVector.getX();
-      double lineDirectionY = line.normalizedVector.getY();
+      double lineDirectionX = line.direction.getX();
+      double lineDirectionY = line.direction.getY();
       double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
       double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
 
       if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, EuclidGeometryTools.ONE_TEN_MILLIONTH))
             return false;
       else
-         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.normalizedVector, edgeStart, edgeEnd);
+         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.direction, edgeStart, edgeEnd);
    }
 
    // --- Methods that generate garbage ---
