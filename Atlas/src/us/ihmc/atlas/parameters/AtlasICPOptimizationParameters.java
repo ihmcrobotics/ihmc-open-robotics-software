@@ -91,6 +91,13 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
+   public double getAngularMomentumMinimizationWeight()
+   {
+      return 50.00;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean scaleStepRegularizationWeightWithTime()
    {
       return false;
@@ -126,6 +133,13 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
+   public boolean useAngularMomentum()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useFootstepRegularization()
    {
       return true;
@@ -154,30 +168,30 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportMaxCMPForwardExit()
+   public double getDoubleSupportMaxCoPForwardExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportMaxCMPLateralExit()
+   public double getDoubleSupportMaxCoPLateralExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getSingleSupportMaxCMPForwardExit()
+   public double getSingleSupportMaxCoPForwardExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getSingleSupportMaxCMPLateralExit()
+   public double getSingleSupportMaxCoPLateralExit()
    {
-      return 0.005;
+      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */

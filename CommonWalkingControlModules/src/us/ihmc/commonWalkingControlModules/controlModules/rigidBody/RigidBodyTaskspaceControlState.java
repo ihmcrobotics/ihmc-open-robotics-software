@@ -468,10 +468,21 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
             queueInitialPoint(initialPose);
+         
+         selectionMatrix.setToAngularSelectionOnly();
+         selectionMatrix.setAngularPart(command.getSelectionMatrix());
+
+         trackingOrientation.set(true);
+         trackingPosition.set(false);
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
          PrintTools.warn(warningPrefix + "Was executing in " + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         return false;
+      }
+      else if(!selectionMatrix.getAngularPart().equals(command.getSelectionMatrix()))
+      {
+         PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override");
          return false;
       }
 
@@ -483,11 +494,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          if (!queuePoint(command.getTrajectoryPoint(i)))
             return false;
       }
-
-      selectionMatrix.setToAngularSelectionOnly();
-
-      trackingOrientation.set(true);
-      trackingPosition.set(false);
+      
       return true;
    }
 
@@ -522,10 +529,23 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
+         
+         selectionMatrix.set(command.getSelectionMatrix());
+
+         trackingOrientation.set(selectionMatrix.isAngularPartActive());
+         trackingPosition.set(selectionMatrix.isLinearPartActive());
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
          PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         return false;
+      }
+      else if(!selectionMatrix.equals(command.getSelectionMatrix()))
+      {
+         PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override");
+         System.out.println("rbm:\n" + selectionMatrix);
+         System.out.println("command:\n" + command.getSelectionMatrix());
+         
          return false;
       }
 
@@ -538,10 +558,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             return false;
       }
 
-      selectionMatrix.resetSelection();
-
-      trackingOrientation.set(true);
-      trackingPosition.set(true);
       return true;
    }
 

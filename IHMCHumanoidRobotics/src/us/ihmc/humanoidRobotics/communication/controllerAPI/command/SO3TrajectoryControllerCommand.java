@@ -66,18 +66,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command
-    * from a pose {@link #SE3TrajectoryControllerCommand} trajectory command.
-    */
-   public void set(SE3TrajectoryControllerCommand<?, ?> command)
-   {
-      getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
-      setQueueqableCommandVariables(command);
-   }
-
-   /**
     * Same as {@link #set(T)} but does not change the trajectory points.
-    * 
+    *
     * @param other
     */
    public void setPropertiesOnly(T other)
@@ -104,6 +94,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public SelectionMatrix3D getSelectionMatrix()
    {
       return selectionMatrix;
+   }
+   
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public FrameSO3TrajectoryPointList getTrajectoryPointList()

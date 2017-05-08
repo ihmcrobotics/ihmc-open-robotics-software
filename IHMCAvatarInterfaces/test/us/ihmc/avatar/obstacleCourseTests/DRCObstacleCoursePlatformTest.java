@@ -171,7 +171,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FloatingInverseDynamicsJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      ReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
