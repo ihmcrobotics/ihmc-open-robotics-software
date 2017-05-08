@@ -315,21 +315,7 @@ public class SwingState extends AbstractUnconstrainedState
       double initialFootstepPitch = finalOrientationToPack.getPitch();
 
       double footstepPitchModification;
-      if (stepHeight < stepDownHeightForToeTouchdown.getDoubleValue())
-      { // stepping down
-         if (doToeTouchdownIfPossible.getBooleanValue())
-         { // do toe touchdown
-            double toeTouchdownAngle = MathTools.clamp(-toeTouchdownDepthRatio.getDoubleValue() * (stepHeight - stepDownHeightForToeTouchdown.getDoubleValue()),
-                  this.toeTouchdownAngle.getDoubleValue());
-            footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
-            footstepPitchModification -= initialFootstepPitch;
-         }
-         else
-         {
-            footstepPitchModification = 0.0;
-         }
-      }
-      else if (stepHeight <= maximumHeightForHeelTouchdown.getDoubleValue() && doHeelTouchdownIfPossible.getBooleanValue())
+      if (MathTools.intervalContains(stepHeight, stepDownHeightForToeTouchdown.getDoubleValue(), maximumHeightForHeelTouchdown.getDoubleValue()) && doHeelTouchdownIfPossible.getBooleanValue())
       { // not stepping down too far, and not stepping up too far, so do heel strike
          double stepLength = finalPosition.getX() - stanceFootPosition.getX();
          double heelTouchdownAngle = MathTools.clamp(-stepLength * heelTouchdownLengthRatio.getDoubleValue(), -this.heelTouchdownAngle.getDoubleValue());
@@ -339,10 +325,18 @@ public class SwingState extends AbstractUnconstrainedState
          footstepPitchModification = Math.min(footstepPitchModification, heelTouchdownAngle + initialFootstepPitch);
          footstepPitchModification -= initialFootstepPitch;
       }
+      else if (stepHeight < stepDownHeightForToeTouchdown.getDoubleValue() && doToeTouchdownIfPossible.getBooleanValue())
+      { // stepping down and do toe touchdown
+         double toeTouchdownAngle = MathTools.clamp(-toeTouchdownDepthRatio.getDoubleValue() * (stepHeight - stepDownHeightForToeTouchdown.getDoubleValue()),
+               this.toeTouchdownAngle.getDoubleValue());
+         footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
+         footstepPitchModification -= initialFootstepPitch;
+      }
       else
       {
          footstepPitchModification = 0.0;
       }
+
       finalOrientationToPack.appendPitchRotation(footstepPitchModification);
    }
 
