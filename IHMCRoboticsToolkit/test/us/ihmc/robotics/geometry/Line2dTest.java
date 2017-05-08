@@ -467,7 +467,7 @@ public class Line2dTest
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
       Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
       Point2D newPoint = new Point2D(11.0, 9.0);
-      line2d.setPoint2d(newPoint);
+      line2d.setPoint(newPoint);
 
       assertEquals(newPoint, line2d.getPoint());
       assertFalse(newPoint == line2d.getPoint());
@@ -602,7 +602,7 @@ public class Line2dTest
       assertEquals(line2d.getDirection().getY(), interiorBisector.getDirection().getY(), delta);
 
       Line2d parallelLine2d = new Line2d(line2d);
-      parallelLine2d.setPoint2d(new Point2D(5.5, 18));
+      parallelLine2d.setPoint(new Point2D(5.5, 18));
       assertNull(line2d.interiorBisector(parallelLine2d));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -805,7 +805,7 @@ public class Line2dTest
          Point2D intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
          assertEquals(firstPoint.getX(), intersection.getX(), delta);
          assertEquals(firstPoint.getY(), intersection.getY(), delta);
-         lineThroughEndPoint.setPoint2d(secondPoint);
+         lineThroughEndPoint.setPoint(secondPoint);
          intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
 
          // TODO intersection is null, which is unexpected.
@@ -1288,11 +1288,11 @@ public class Line2dTest
       Point2D[] intersections = line2d.intersectionWith(triangle);
       assertEquals(1, intersections.length);
 
-      line2d.setPoint2d(new Point2D(-0.5, 0));
+      line2d.setPoint(new Point2D(-0.5, 0));
       intersections = line2d.intersectionWith(triangle);
       assertEquals(2, intersections.length);
 
-      line2d.setPoint2d(new Point2D(0.5, 0));
+      line2d.setPoint(new Point2D(0.5, 0));
       intersections = line2d.intersectionWith(triangle);
       assertNull(intersections);
 

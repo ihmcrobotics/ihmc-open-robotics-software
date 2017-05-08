@@ -26,77 +26,85 @@ public class Line2d implements GeometryObject<Line2d>
 
    public Line2d()
    {
-      point.set(0.0, 0.0);
-      direction.set(0.0, 1.0);
    }
 
-   public Line2d(Line2d line2d)
+   public Line2d(Line2d other)
    {
-      point.set(line2d.getPoint());
-      direction.set(line2d.getDirection());
+      set(other);
    }
 
-   public Line2d(Point2DReadOnly point, Vector2DReadOnly vector)
+   public Line2d(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
    {
-      this.point.set(point);
-      direction.set(vector);
-      checkReasonableVector(direction);
-      direction.normalize();
+      set(pointOnLine, lineDirection);
    }
 
    public Line2d(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
+      set(firstPointOnLine, secondPointOnLine);
+   }
+
+   public Line2d(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
+   {
+      set(pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
+   }
+
+   public void setPoint(double pointOnLineX, double pointOnLineY)
+   {
+      point.set(pointOnLineX, pointOnLineY);
+   }
+
+   public void setPoint(Point2DReadOnly pointOnLine)
+   {
+      setPoint(pointOnLine.getX(), pointOnLine.getY());
+   }
+
+   public void setDirection(double lineDirectionX, double lineDirectionY)
+   {
+      direction.set(lineDirectionX, lineDirectionY);
+      checkReasonableVector(direction);
+      direction.normalize();
+   }
+
+   public void setDirection(Vector2DReadOnly lineDirection)
+   {
+      setDirection(lineDirection.getX(), lineDirection.getY());
+   }
+
+   @Override
+   public void set(Line2d other)
+   {
+      set(other.point, other.direction);
+   }
+
+   public void set(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
+   {
+      setPoint(pointOnLine);
+      setDirection(lineDirection);
+   }
+
+   public void set(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
+   {
       checkDistinctPoints(firstPointOnLine, secondPointOnLine);
-
-      point.set(firstPointOnLine);
-      direction.set(secondPointOnLine);
-      direction.sub(firstPointOnLine);
-      checkReasonableVector(direction);
-      direction.normalize();
+      setPoint(firstPointOnLine);
+      setDirection(secondPointOnLine.getX() - firstPointOnLine.getX(), secondPointOnLine.getY() - firstPointOnLine.getY());
    }
 
-   public Line2d(double x0, double y0, double x1, double y1)
+   public void set(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
    {
-      point.set(x0, y0);
-      direction.set(x1, y1);
-      direction.sub(point);
-      checkReasonableVector(direction);
-      direction.normalize();
+      setPoint(pointOnLineX, pointOnLineY);
+      setDirection(lineDirectionX, lineDirectionY);
    }
 
-   public void setPoint(Point2DReadOnly point)
+   public void set(Point2DReadOnly[] endpoints)
    {
-      setPoint(point.getX(), point.getY());
+      if (endpoints.length != 2)
+         throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
+      set(endpoints[0], endpoints[1]);
    }
 
-   public void setPoint(double x, double y)
+   public void getPoint(Point2DBasics pointOnLineToPack)
    {
-      point.set(x, y);
-   }
-
-   public void setDirection(Vector2DReadOnly direction)
-   {
-      setPoint(direction.getX(), direction.getY());
-   }
-
-   public void setDirection(double x, double y)
-   {
-      direction.set(x, y);
-      checkReasonableVector(direction);
-      direction.normalize();
-   }
-
-   public void set(Point2DReadOnly pointOnLine, Vector2DReadOnly vectorAlongLine)
-   {
-      point.set(pointOnLine);
-      direction.set(vectorAlongLine);
-      checkReasonableVector(direction);
-      direction.normalize();
-   }
-
-   public void getPoint(Point2DBasics pointToPack)
-   {
-      pointToPack.set(point);
+      pointOnLineToPack.set(point);
    }
 
    public Point2DReadOnly getPoint()
@@ -241,46 +249,6 @@ public class Line2d implements GeometryObject<Line2d>
       ret.direction.negate();
 
       return ret;
-   }
-
-   public void setPoint2d(Point2DReadOnly point2d)
-   {
-      point.set(point2d);
-   }
-
-   public void set(Point2DReadOnly endpoint0, Point2DReadOnly endpoint1)
-   {
-      if ((endpoint0.getX() == endpoint1.getX()) && (endpoint0.getY() == endpoint1.getY()))
-      {
-         throw new RuntimeException("Tried to set a line from two coincidal points.");
-      }
-
-      point.set(endpoint0);
-      direction.set(endpoint1);
-      direction.sub(endpoint0);
-      direction.normalize();
-   }
-
-   public void set(double pointX, double pointY, double vectorX, double vectorY)
-   {
-      point.set(pointX, pointY);
-      direction.set(vectorX, vectorY);
-      checkReasonableVector(direction);
-      direction.normalize();
-   }
-
-   public void set(Point2DReadOnly[] endpoints)
-   {
-      if (endpoints.length != 2)
-         throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
-      this.set(endpoints[0], endpoints[1]);
-   }
-
-   @Override
-   public void set(Line2d line2d)
-   {
-      point.set(line2d.point);
-      direction.set(line2d.direction);
    }
 
    public void rotate(double radians)
@@ -576,7 +544,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    /**
     * Computes the orthogonal projection of the given 2D point on this 2D line.
-    * 
+    *
     * @param point2d the point to project on this line. Modified.
     */
    public void orthogonalProjection(Point2DBasics point2d)
@@ -589,7 +557,7 @@ public class Line2d implements GeometryObject<Line2d>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param point2d the point to compute the projection of. Not modified.
     * @return the projection of the point onto the line or {@code null} if the method failed.
     */
@@ -628,23 +596,23 @@ public class Line2d implements GeometryObject<Line2d>
    @Override
    public void setToZero()
    {
-      this.point.setToZero();
-      this.direction.setToZero();
+      point.setToZero();
+      direction.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
-      this.point.setToNaN();
-      this.direction.setToNaN();
+      point.setToNaN();
+      direction.setToNaN();
    }
 
    @Override
    public boolean epsilonEquals(Line2d other, double epsilon)
    {
-      if (!this.point.epsilonEquals(other.point, epsilon))
+      if (!point.epsilonEquals(other.point, epsilon))
          return false;
-      if (!this.direction.epsilonEquals(other.direction, epsilon))
+      if (!direction.epsilonEquals(other.direction, epsilon))
          return false;
 
       return true;
