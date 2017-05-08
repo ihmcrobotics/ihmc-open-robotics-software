@@ -1422,8 +1422,8 @@ public class Line2dTest
       line.applyTransform(transform);
       assertEquals("pure translation failed", point.getX() + translation.getX(), line.getPointX(), delta);
       assertEquals("pure translation failed", point.getY() + translation.getY(), line.getPointY(), delta);
-      assertEquals("pure translation failed", vector.getX(), line.direction.getX(), delta);
-      assertEquals("pure translation failed", vector.getY(), line.direction.getY(), delta);
+      assertEquals("pure translation failed", vector.getX(), line.getDirectionX(), delta);
+      assertEquals("pure translation failed", vector.getY(), line.getDirectionY(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
@@ -1483,8 +1483,8 @@ public class Line2dTest
 
       assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina, line.getPointX(), delta);
       assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa, line.getPointY(), delta);
-      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.direction.getX(), delta);
-      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.direction.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.getDirectionX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.getDirectionY(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1561,8 +1561,8 @@ public class Line2dTest
 
       assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina + translation.getX(), line.getPointX(), delta);
       assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa + translation.getY(), line.getPointY(), delta);
-      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.direction.getX(), delta);
-      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.direction.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.getDirectionX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.getDirectionY(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1593,11 +1593,11 @@ public class Line2dTest
       line.applyTransform(transform);
       assertNotSame(transformedCopy, line);
       assertNotSame(transformedCopy.getPoint(), line.getPoint());
-      assertNotSame(transformedCopy.direction, line.direction);
+      assertNotSame(transformedCopy.getDirection(), line.getDirection());
       assertEquals(line.getPointX(), transformedCopy.getPointX(), delta);
       assertEquals(line.getPointY(), transformedCopy.getPointY(), delta);
-      assertEquals(line.direction.getX(), transformedCopy.direction.getX(), delta);
-      assertEquals(line.direction.getY(), transformedCopy.direction.getY(), delta);
+      assertEquals(line.getDirectionX(), transformedCopy.getDirectionX(), delta);
+      assertEquals(line.getDirectionY(), transformedCopy.getDirectionY(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
