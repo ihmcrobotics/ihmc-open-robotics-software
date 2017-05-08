@@ -30,6 +30,12 @@ public class Line2d implements GeometryObject<Line2d>
       direction.set(0.0, 1.0);
    }
 
+   public Line2d(Line2d line2d)
+   {
+      point.set(line2d.getPoint());
+      direction.set(line2d.getDirection());
+   }
+
    public Line2d(Point2DReadOnly point, Vector2DReadOnly vector)
    {
       this.point.set(point);
@@ -86,12 +92,6 @@ public class Line2d implements GeometryObject<Line2d>
       direction.set(vectorAlongLine);
       checkReasonableVector(direction);
       direction.normalize();
-   }
-
-   public Line2d(Line2d line2d)
-   {
-      point.set(line2d.getPoint());
-      direction.set(line2d.getDirection());
    }
 
    public void getPoint(Point2DBasics pointToPack)
