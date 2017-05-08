@@ -32,6 +32,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -426,5 +427,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          poseCommunicator.stop();
       }
+   }
+
+   /**
+    * used primarily for unit tests, but could be useful. 
+    */
+   public void addRobotController(RobotController controller)
+   {
+      estimatorController.addRobotController(controller);
    }
 }
