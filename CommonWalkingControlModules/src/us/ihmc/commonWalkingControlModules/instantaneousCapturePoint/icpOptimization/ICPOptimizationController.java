@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -28,9 +30,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public interface ICPOptimizationController
 {
@@ -60,6 +59,26 @@ public interface ICPOptimizationController
     */
    public void clearPlan();
 
+   public void setTransferDuration(int stepNumber, double duration);
+
+   public void setSwingDuration(int stepNumber, double duration);
+
+   /**
+    * Allows setting of the transfer duration split fraction (see {@link #transferSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step transfer duration split fraction to modify.
+    * @param splitFraction new transfer duration split fraction value.
+    */
+   public void setTransferSplitFraction(int stepNumber, double splitFraction);
+
+   /**
+    * Allows setting of the swing duration split fraction (see {@link #swingSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step swing duration split fraction to modify.
+    * @param splitFraction new swing duration split fraction value.
+    */
+   public void setSwingSplitFraction(int stepNumber, double splitFraction);
+
    /**
     * Changes the duration for the last transfer when going to standing state.
     * <p>
@@ -69,6 +88,18 @@ public interface ICPOptimizationController
     * @param finalTransferDuration final transfer duration
     */
    public void setFinalTransferDuration(double finalTransferDuration);
+
+   /**
+    * Changes the split fraction for the last transfer when going to standing state.
+    * <p>
+    * This method mostly affects {@link #initializeForStanding(double)}.
+    * </p>
+    *
+    * @param splitFraction final transfer duration
+    */
+   public void setFinalTransferSplitFraction(double splitFraction);
+
+   public void setFinalTransferSplitFractionToDefault();
 
    /**
     * Registers an additional footstep to consider in the controller.
@@ -131,6 +162,12 @@ public interface ICPOptimizationController
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0);
 
    public void setBeginningOfStateICP(FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity);
+
+
+
+
+
+
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
 

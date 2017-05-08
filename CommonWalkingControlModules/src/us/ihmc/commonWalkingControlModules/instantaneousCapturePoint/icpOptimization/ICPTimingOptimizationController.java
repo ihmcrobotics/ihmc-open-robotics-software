@@ -357,6 +357,30 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       }
    }
 
+   @Override
+   public void setTransferDuration(int stepNumber, double duration)
+   {
+      //// TODO: 5/8/17  
+   }
+
+   @Override
+   public void setSwingDuration(int stepNumber, double duration)
+   {
+      //// TODO: 5/8/17  
+   }
+
+   @Override
+   public void setTransferSplitFraction(int stepNumber, double splitFraction)
+   {
+      //// TODO: 5/8/17
+   }
+
+   @Override
+   public void setSwingSplitFraction(int stepNumber, double splitFraction)
+   {
+      //// TODO: 5/8/17
+   }
+
    /**
     * Changes the duration for the last transfer when going to standing state.
     * <p>
@@ -368,6 +392,20 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
+   }
+
+   @Override
+   public void setFinalTransferSplitFraction(double splitFraction)
+   {
+      //// TODO: 5/8/17  
+
+   }
+
+   @Override
+   public void setFinalTransferSplitFractionToDefault()
+   {
+      //// TODO: 5/8/17  
+
    }
 
    /**

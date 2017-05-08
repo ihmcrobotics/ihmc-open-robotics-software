@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -34,8 +33,8 @@ import java.util.List;
 
 public class ICPAdjustmentOptimizationController implements ICPOptimizationController
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean COMPUTE_COST_TO_GO = true;
+   private static final boolean VISUALIZE = true;
+   private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
 
@@ -68,6 +67,7 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
 
    private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
    private final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+   private final DoubleYoVariable finalTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "FinalTransferSplitFraction", registry);
    private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
    private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
@@ -91,7 +91,7 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
    private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxationSolution", "", worldFrame, registry);
-   private final YoFramePoint2d angularMomentumSolution = new YoFramePoint2d(yoNamePrefix + "AngularMomentumSolution", "", worldFrame, registry);
+   private final YoFramePoint2d cmpCoPDifferenceSolution = new YoFramePoint2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpConstantEffects = new FramePoint2d();
@@ -333,6 +333,43 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
       }
    }
 
+   public void setTransferDuration(int stepNumber, double duration)
+   {
+      int numberOfFootstepsRegistered = upcomingFootsteps.size();
+      if (stepNumber < numberOfFootstepsRegistered + 1)
+         transferDurations.get(stepNumber).set(duration);
+   }
+
+
+   public void setSwingDuration(int stepNumber, double duration)
+   {
+      int numberOfFootstepsRegistered = upcomingFootsteps.size();
+      if (stepNumber < numberOfFootstepsRegistered)
+         swingDurations.get(stepNumber).set(duration);
+   }
+
+   /**
+    * Allows setting of the transfer duration split fraction (see {@link #transferSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step transfer duration split fraction to modify.
+    * @param splitFraction new transfer duration split fraction value.
+    */
+   public void setTransferSplitFraction(int stepNumber, double splitFraction)
+   {
+      transferSplitFractions.get(stepNumber).set(splitFraction);
+   }
+
+   /**
+    * Allows setting of the swing duration split fraction (see {@link #swingSplitFractions}) for the specified step number.
+    *
+    * @param stepNumber step swing duration split fraction to modify.
+    * @param splitFraction new swing duration split fraction value.
+    */
+   public void setSwingSplitFraction(int stepNumber, double splitFraction)
+   {
+      transferSplitFractions.get(stepNumber).set(splitFraction);
+   }
+
    /**
     * Changes the duration for the last transfer when going to standing state.
     * <p>
@@ -344,6 +381,24 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
+   }
+
+   /**
+    * Changes the split fraction for the last transfer when going to standing state.
+    * <p>
+    * This method mostly affects {@link #initializeForStanding(double)}.
+    * </p>
+    *
+    * @param splitFraction final transfer duration
+    */
+   public void setFinalTransferSplitFraction(double splitFraction)
+   {
+      this.finalTransferSplitFraction.set(splitFraction);
+   }
+
+   public void setFinalTransferSplitFractionToDefault()
+   {
+      this.finalTransferSplitFraction.set(defaultTransferSplitFraction.getDoubleValue());
    }
 
    /**
@@ -581,6 +636,7 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
    private void submitSolverTaskConditionsForFeedbackOnlyControl()
    {
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       solver.resetFootstepConditions();
 
@@ -603,9 +659,15 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
       multiplierCalculatorTimer.stopMeasurement();
 
       if (isInTransfer.getBooleanValue())
+      {
          copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+         //reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      }
       else
+      {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         //reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+      }
 
 
       solver.resetFootstepConditions();
@@ -786,8 +848,7 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
       dynamicRelaxation.set(tempPoint2d);
 
       solver.getCMPDifferenceFromCoP(tempPoint2d);
-      CapturePointTools.computeAngularMomentum(mass, gravityZ, tempPoint2d, tempPoint2d);
-      angularMomentumSolution.set(tempPoint2d);
+      cmpCoPDifferenceSolution.set(tempPoint2d);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());

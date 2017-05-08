@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -84,6 +84,9 @@ public class StandingState extends WalkingState
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       walkingMessageHandler.reportWalkingComplete();
+
+      if (pelvisOrientationManager != null)
+         pelvisOrientationManager.initializeStanding();
 
       failureDetectionControlModule.setNextFootstep(null);
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
