@@ -58,6 +58,28 @@ public class Line2d implements GeometryObject<Line2d>
       direction.normalize();
    }
 
+   public void setPoint(Point2DReadOnly point)
+   {
+      setPoint(point.getX(), point.getY());
+   }
+
+   public void setPoint(double x, double y)
+   {
+      point.set(x, y);
+   }
+
+   public void setDirection(Vector2DReadOnly direction)
+   {
+      setPoint(direction.getX(), direction.getY());
+   }
+
+   public void setDirection(double x, double y)
+   {
+      direction.set(x, y);
+      checkReasonableVector(direction);
+      direction.normalize();
+   }
+
    public void set(Point2DReadOnly pointOnLine, Vector2DReadOnly vectorAlongLine)
    {
       point.set(pointOnLine);
@@ -77,7 +99,7 @@ public class Line2d implements GeometryObject<Line2d>
       pointToPack.set(point);
    }
 
-   public Point2D getPoint()
+   public Point2DReadOnly getPoint()
    {
       return point;
    }

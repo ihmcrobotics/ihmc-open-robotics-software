@@ -21,6 +21,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -504,7 +505,7 @@ public class Line2dTest
       Line2d shiftedLine = new Line2d(line);
       shiftedLine.shiftToRight(distanceToShift);
 
-      Point2D shiftedLineOrigin = shiftedLine.getPoint();
+      Point2DReadOnly shiftedLineOrigin = shiftedLine.getPoint();
       Vector2D lineVector = line.getDirection();
       Vector2D shiftedLineVector = shiftedLine.getDirection();
 
@@ -795,7 +796,7 @@ public class Line2dTest
 
          Line2d parallelLine2d = new Line2d(colinearLine2d);
          double distance = randomDouble(random, 10.0);
-         parallelLine2d.getPoint().scaleAdd(distance, parallelLine2d.perpendicularVector(), parallelLine2d.getPoint());
+         parallelLine2d.shiftToLeft(distance);
          assertNull(parallelLine2d.intersectionWith(lineSegment2d));
 
          Vector2D direction = new Vector2D(randomDouble(random, 10.0), randomDouble(random, 10.0));
@@ -1307,68 +1308,22 @@ public class Line2dTest
    public void testcontainsNaN()
    {
       Random random = new Random(1776L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D firstPointOnLine = randomPoint(random);
-         Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Point2D firstPointOnLine = randomPoint(random);
+      Point2D secondPointOnLine = randomPoint(random);
+      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
 
-         assertFalse(line2d.containsNaN());
+      assertFalse(line2d.containsNaN());
 
-         Point2D point = line2d.getPoint();
-         point.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         point.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         Vector2D vector = line2d.getDirection();
-         Vector2D vectorCopy = new Vector2D();
-         line2d.getDirection(vectorCopy);
-         vector.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(vectorCopy.getX());
-         vector.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(vectorCopy.getX());
-         point.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         point.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setY(vectorCopy.getY());
-         vector.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         point.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(vectorCopy.getX());
-         point.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(vectorCopy.getX());
-         vector.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         vector.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         point.setY(Double.NaN);
-         assertTrue(line2d.containsNaN());
-
-         point.setX(Double.NaN);
-         assertTrue(line2d.containsNaN());
-      }
+      line2d.set(0.0, 0.0, 0.0, 1.0);
+      assertFalse(line2d.containsNaN());
+      line2d.set(Double.NaN, 0.0, 0.0, 1.0);
+      assertTrue(line2d.containsNaN());
+      line2d.set(0.0, Double.NaN, 0.0, 1.0);
+      assertTrue(line2d.containsNaN());
+      line2d.set(0.0, 0.0, Double.NaN, 1.0);
+      assertTrue(line2d.containsNaN());
+      line2d.set(0.0, 0.0, 0.0, Double.NaN);
+      assertTrue(line2d.containsNaN());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
