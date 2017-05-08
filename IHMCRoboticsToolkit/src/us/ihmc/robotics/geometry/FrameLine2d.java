@@ -92,13 +92,13 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
 
    public void getNormalizedFrameVector(Vector2DBasics vector2dToPack)
    {
-      vector2dToPack.set(line.normalizedVector);
+      vector2dToPack.set(line.direction);
    }
 
    public void getNormalizedFrameVector(FrameVector2d frameVector2dToPack)
    {
       frameVector2dToPack.setToZero(referenceFrame);
-      frameVector2dToPack.set(line.normalizedVector);
+      frameVector2dToPack.set(line.direction);
    }
 
    public FramePoint2d getFramePoint2dGivenParameter(double t)
