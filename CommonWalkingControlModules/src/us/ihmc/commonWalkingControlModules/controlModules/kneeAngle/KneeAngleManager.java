@@ -55,8 +55,15 @@ public class KneeAngleManager
       }
    }
 
+   public boolean isLegCollapsed(RobotSide robotSide)
+   {
+      KneeControlType kneeControlState = kneeControlModules.get(robotSide).getCurrentKneeControlState();
+      return (kneeControlState.equals(KneeControlType.BENT) || kneeControlState.equals(KneeControlType.COLLAPSE));
+   }
+
    public void collapseLegDuringTransfer(RobotSide transferSide)
    {
+
       if (attemptToStraightenLegs.getBooleanValue())
       {
          kneeControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(KneeControlType.BENT);
