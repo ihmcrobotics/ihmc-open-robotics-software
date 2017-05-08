@@ -314,7 +314,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(String frameName, ReferenceFrame parentFrame,
                                                                               RigidBodyTransform transformToParent)
    {
-      boolean isZupFrame = transformToParent.isRotation2D();
+      boolean isZupFrame = parentFrame.isZupFrame && transformToParent.isRotation2D();
       boolean isAStationaryFrame = parentFrame.isAStationaryFrame;
 
       ReferenceFrame ret = new ReferenceFrame(frameName, parentFrame, transformToParent, isAStationaryFrame, isZupFrame)

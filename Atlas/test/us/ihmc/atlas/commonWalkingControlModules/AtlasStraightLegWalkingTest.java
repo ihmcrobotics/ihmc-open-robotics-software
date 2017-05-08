@@ -129,30 +129,30 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
+               public double[] getSwingWaypointProportions()
+               {
+                  return new double[] {0.15, 0.80};
+               }
+
+               @Override
                public AtlasStraightLegWalkingParameters getStraightLegWalkingParameters()
                {
                   return new AtlasStraightLegWalkingParameters(false)
                   {
                      @Override
-                     public boolean includeHipPitchPrivilegedConfiguration()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public double getSpeedForStanceLegStraightening()
+                     public double getSpeedForSupportKneeStraightening()
                      {
                         return 1.0;
                      }
 
                      @Override
-                     public double getPercentOfSwingToStraightenLeg()
+                     public double getFractionOfSwingToStraightenLeg()
                      {
                         return 0.8;
                      }
 
                      @Override
-                     public double getPercentOfTransferToCollapseLeg()
+                     public double getFractionOfTransferToCollapseLeg()
                      {
                         return 0.8;
                      }
@@ -268,6 +268,17 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                public double getMinTimeToSpendOnExitCMPInSingleSupport()
                {
                   return 0.1;
+               }
+
+               @Override
+               public double getExitCMPForwardSafetyMarginOnToes()
+               {
+                  return 0.0;
+               }
+
+               public double getExitCMPInsideOffset()
+               {
+                  return 0.015;
                }
 
                @Override
