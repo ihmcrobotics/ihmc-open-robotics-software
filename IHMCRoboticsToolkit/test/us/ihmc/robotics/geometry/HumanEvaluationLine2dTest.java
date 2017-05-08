@@ -40,19 +40,19 @@ public class HumanEvaluationLine2dTest
    public void setUp() throws Exception
    {
       double epsilon = 1E-6;
-      assertTrue("Normalized vector not normalized", Math.abs(line2dPointVector.direction.length() - 1.0) < epsilon);
-      assertTrue("Normalized vector not normalized", Math.abs(line2dPointPoint.direction.length() - 1.0) < epsilon);
-      assertTrue("Normalized vector not normalized", Math.abs(line2dLine2d.direction.length() - 1.0) < epsilon);
+      assertTrue("Normalized vector not normalized", Math.abs(line2dPointVector.getDirection().length() - 1.0) < epsilon);
+      assertTrue("Normalized vector not normalized", Math.abs(line2dPointPoint.getDirection().length() - 1.0) < epsilon);
+      assertTrue("Normalized vector not normalized", Math.abs(line2dLine2d.getDirection().length() - 1.0) < epsilon);
 
       assertEquals("Creating line from other line failed", line2dPointPoint.getPointX(), line2dLine2d.getPointX(), EPSILON_FOR_EQUALS);
       assertEquals("Creating line from other line failed", line2dPointPoint.getPointY(), line2dLine2d.getPointY(), EPSILON_FOR_EQUALS);
-      assertEquals("Creating line from other line failed", line2dPointPoint.direction.getX(), line2dLine2d.direction.getX(), EPSILON_FOR_EQUALS);
-      assertEquals("Creating line from other line failed", line2dPointPoint.direction.getY(), line2dLine2d.direction.getY(), EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.getDirectionX(), line2dLine2d.getDirectionX(), EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.getDirectionY(), line2dLine2d.getDirectionY(), EPSILON_FOR_EQUALS);
 
       assertNotSame("Line fields not copied", point1, line2dPointVector.getPoint());
-      assertNotSame("Line fields not copied", vector, line2dPointVector.direction);    // this would be really weird, but test anyway
+      assertNotSame("Line fields not copied", vector, line2dPointVector.getDirection());    // this would be really weird, but test anyway
       assertNotSame("Line fields not copied", point1, line2dPointPoint.getPoint());
-      assertNotSame("Line fields not copied", line2dPointPoint.direction, line2dLine2d.direction);
+      assertNotSame("Line fields not copied", line2dPointPoint.getDirection(), line2dLine2d.getDirection());
       assertNotSame("Line fields not copied", line2dPointPoint.getPoint(), line2dLine2d.getPoint());
 
       boolean lineCreatedFromCoincidalPoints = true;
@@ -198,8 +198,8 @@ public class HumanEvaluationLine2dTest
       line.applyTransform(transform);
       assertEquals("pure translation failed", point.getX() + translation.getX(), line.getPointX(), EPSILON_FOR_EQUALS);
       assertEquals("pure translation failed", point.getY() + translation.getY(), line.getPointY(), EPSILON_FOR_EQUALS);
-      assertEquals("pure translation failed", vector.getX(), line.direction.getX(), EPSILON_FOR_EQUALS);
-      assertEquals("pure translation failed", vector.getY(), line.direction.getY(), EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", vector.getX(), line.getDirectionX(), EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", vector.getY(), line.getDirectionY(), EPSILON_FOR_EQUALS);
 
       // TODO: test rotation
    }
@@ -240,11 +240,11 @@ public class HumanEvaluationLine2dTest
    {
       Vector2D vector = new Vector2D();
       line2dPointPoint.getDirection(vector);
-      assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.direction,
+      assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.getDirection(),
             vector);
-      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.direction.getX(),
+      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.getDirectionX(),
             vector.getX(), EPSILON_FOR_EQUALS);
-      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.direction.getY(),
+      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.getDirectionY(),
             vector.getY(), EPSILON_FOR_EQUALS);
    }
 
@@ -279,8 +279,8 @@ public class HumanEvaluationLine2dTest
       assertEquals("Bisector point on line not correct", bisector.getPointY(), somePoint.getY(), EPSILON_FOR_EQUALS);
 
 
-      assertTrue("Bisector direction not correct", Math.abs(bisector.direction.getX() - Math.sqrt(2.0) / 2.0) < epsilon);
-      assertTrue("Bisector direction not correct", Math.abs(bisector.direction.getX() - Math.sqrt(2.0) / 2.0) < epsilon);
+      assertTrue("Bisector direction not correct", Math.abs(bisector.getDirectionX() - Math.sqrt(2.0) / 2.0) < epsilon);
+      assertTrue("Bisector direction not correct", Math.abs(bisector.getDirectionX() - Math.sqrt(2.0) / 2.0) < epsilon);
 
       Line2d parallelLine = new Line2d(firstLine);
       parallelLine.translate(0.0, 5.0);
@@ -304,8 +304,8 @@ public class HumanEvaluationLine2dTest
          {
             assertEquals("Bisector point on line not correct", intersection.getX(), bisector.getPointX(), EPSILON_FOR_EQUALS);
             assertEquals("Bisector point on line not correct", intersection.getY(), bisector.getPointY(), EPSILON_FOR_EQUALS);
-            double angleBetweenRandomLines = randomLine1.direction.angle(randomLine2.direction);
-            double angleBetweenRandomLineAndBisector = randomLine1.direction.angle(bisector.direction);
+            double angleBetweenRandomLines = randomLine1.getDirection().angle(randomLine2.getDirection());
+            double angleBetweenRandomLineAndBisector = randomLine1.getDirection().angle(bisector.getDirection());
             assertTrue("Angle not correct", Math.abs(angleBetweenRandomLines - 2.0 * angleBetweenRandomLineAndBisector) < epsilon);
          }
       }
@@ -317,15 +317,15 @@ public class HumanEvaluationLine2dTest
    {
       Line2d someLine = new Line2d(line2dPointPoint);
 
-      Vector2D directionVectorBefore = someLine.direction;
-      double directionBeforeX = someLine.direction.getX();
-      double directionBeforeY = someLine.direction.getY();
+      Vector2D directionVectorBefore = someLine.getDirection();
+      double directionBeforeX = someLine.getDirectionX();
+      double directionBeforeY = someLine.getDirectionY();
 
       someLine.negateDirection();
 
-      assertEquals(-directionBeforeX, someLine.direction.getX(), EPSILON_FOR_EQUALS);
-      assertEquals(-directionBeforeY, someLine.direction.getY(), EPSILON_FOR_EQUALS);
-      assertEquals(directionVectorBefore, someLine.direction);
+      assertEquals(-directionBeforeX, someLine.getDirectionX(), EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeY, someLine.getDirectionY(), EPSILON_FOR_EQUALS);
+      assertEquals(directionVectorBefore, someLine.getDirection());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -334,16 +334,16 @@ public class HumanEvaluationLine2dTest
    {
       Line2d someLine = new Line2d(line2dPointPoint);
 
-      Vector2D directionVectorBefore = someLine.direction;
+      Vector2D directionVectorBefore = someLine.getDirection();
       Point2D pointBefore = someLine.getPoint();
-      double directionBeforeX = someLine.direction.getX();
-      double directionBeforeY = someLine.direction.getY();
+      double directionBeforeX = someLine.getDirectionX();
+      double directionBeforeY = someLine.getDirectionY();
 
       Line2d copy = someLine.negateDirectionCopy();
 
-      assertEquals(-directionBeforeX, copy.direction.getX(), EPSILON_FOR_EQUALS);
-      assertEquals(-directionBeforeY, copy.direction.getY(), EPSILON_FOR_EQUALS);
-      assertNotSame(directionVectorBefore, copy.direction);
+      assertEquals(-directionBeforeX, copy.getDirectionX(), EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeY, copy.getDirectionY(), EPSILON_FOR_EQUALS);
+      assertNotSame(directionVectorBefore, copy.getDirection());
       assertNotSame(pointBefore, copy.getPoint());
       assertNotSame(someLine, copy);
    }

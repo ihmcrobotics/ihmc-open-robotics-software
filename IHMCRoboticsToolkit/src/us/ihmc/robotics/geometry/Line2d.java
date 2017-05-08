@@ -22,7 +22,7 @@ public class Line2d implements GeometryObject<Line2d>
    /** Coordinates of a point located on this line. */
    private final Point2D point = new Point2D();
    /** Normalized direction of this line. */
-   protected final Vector2D direction = new Vector2D();
+   private final Vector2D direction = new Vector2D();
 
    public Line2d()
    {
@@ -100,6 +100,16 @@ public class Line2d implements GeometryObject<Line2d>
    public Vector2D getDirection()
    {
       return direction;
+   }
+
+   public double getDirectionX()
+   {
+      return direction.getX();
+   }
+
+   public double getDirectionY()
+   {
+      return direction.getY();
    }
 
    public void getPointAndDirection(Point2DBasics pointToPack, Vector2DBasics directionToPack)
