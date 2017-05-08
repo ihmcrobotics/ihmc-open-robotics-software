@@ -334,6 +334,14 @@ public class FrameConvexPolygon2dIntersector
          return new Line2d();
       }
    };
+   private static final ThreadLocal<Point2D> tempLine2DIntersection = new ThreadLocal<Point2D>()
+   {
+      @Override
+      public Point2D initialValue()
+      {
+         return new Point2D();
+      }
+   };
    private static final ThreadLocal<Quaternion> tempQuaternion = new ThreadLocal<Quaternion>()
    {
       @Override
@@ -382,7 +390,9 @@ public class FrameConvexPolygon2dIntersector
          tempIntersectFrameLineOne.get().projectOntoXYPlane(tempIntersectLine2dOne.get());
          tempIntersectFrameLineTwo.get().projectOntoXYPlane(tempIntersectLine2dTwo.get());
 
-         tempIntersectLine2dOne.get().intersectionWith(tempIntersectLine2dTwo.get(), intersectionToPack.getPoint());
+         tempIntersectLine2dOne.get().intersectionWith(tempIntersectLine2dTwo.get(), tempLine2DIntersection.get());
+         intersectionToPack.getPoint().setX(tempLine2DIntersection.get().getX());
+         intersectionToPack.getPoint().setY(tempLine2DIntersection.get().getY());
       }
 
       planeTwo.changeFrame(previousPlaneTwoReferenceFrame);
