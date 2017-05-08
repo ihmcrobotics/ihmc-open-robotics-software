@@ -155,6 +155,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
+                     public double getSupportKneeCollapsingDuration()
+                     {
+                        return 0.2;
+                     }
+
+                     @Override
                      public boolean attemptToStraightenLegs()
                      {
                         return true;
