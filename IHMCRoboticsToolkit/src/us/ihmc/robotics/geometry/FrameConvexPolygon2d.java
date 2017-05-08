@@ -826,13 +826,13 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
          return null;
 
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>();
-      int index = lineOfSightStartIndex;
+      int index = lineOfSightEndIndex;
 
       while (true)
       {
          ret.add(getFrameVertexCopy(index));
          index = convexPolygon.getPreviousVertexIndex(index);
-         if (index == lineOfSightEndIndex)
+         if (index == lineOfSightStartIndex)
          {
             ret.add(getFrameVertexCopy(index));
             break;
