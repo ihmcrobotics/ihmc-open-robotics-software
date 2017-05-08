@@ -100,7 +100,7 @@ public class Line2d implements GeometryObject<Line2d>
    @Override
    public void set(Line2d other)
    {
-      set(other.point, other.direction);
+      set(other.getPoint(), other.getDirection());
    }
 
    public void set(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
@@ -136,16 +136,19 @@ public class Line2d implements GeometryObject<Line2d>
 
    public Point2DReadOnly getPoint()
    {
+      checkHasBeenInitialized();
       return point;
    }
 
    public double getPointX()
    {
+      checkHasBeenInitialized();
       return point.getX();
    }
 
    public double getPointY()
    {
+      checkHasBeenInitialized();
       return point.getY();
    }
 
@@ -187,12 +190,12 @@ public class Line2d implements GeometryObject<Line2d>
 
    public double getSlope()
    {
-      if ((direction.getX() == 0.0) && (direction.getY() > 0.0))
+      if (direction.getX() == 0.0 && direction.getY() > 0.0)
       {
          return Double.POSITIVE_INFINITY;
       }
 
-      if ((direction.getX() == 0.0) && (direction.getY() < 0.0))
+      if (direction.getX() == 0.0 && direction.getY() < 0.0)
       {
          return Double.NEGATIVE_INFINITY;
       }
@@ -224,10 +227,11 @@ public class Line2d implements GeometryObject<Line2d>
       }
       else
       {
-         Vector2D difference = new Vector2D(point);
-         difference.sub(this.point);
-
-         return Math.signum(difference.dot(direction)) * difference.length();
+         double x0 = this.point.getX();
+         double y0 = this.point.getY();
+         double x1 = x0 + direction.getX();
+         double y1 = y0 + direction.getY();
+         return EuclidGeometryTools.percentageAlongLineSegment2D(point.getX(), point.getY(), x0, y0, x1, y1);
       }
    }
 
@@ -251,27 +255,7 @@ public class Line2d implements GeometryObject<Line2d>
    public boolean containsEpsilon(Point2DReadOnly point, double epsilon)
    {
       checkHasBeenInitialized();
-      // TODO: possibility to reduce code duplication by calling Geometry2dCalculator.distanceSquared
-      // TODO: Refactor such that it is clear that this checks wether the point is within distance epsilon^2 from the line
-      double vx1 = direction.getX();
-      double vy1 = direction.getY();
-
-      double vx2 = point.getX() - this.point.getX();
-      double vy2 = point.getY() - this.point.getY();
-
-      double dotProduct = vx1 * vx2 + vy1 * vy2;
-
-      double length1Squared = (vx1 * vx1 + vy1 * vy1);
-      double length2Squared = (vx2 * vx2 + vy2 * vy2);
-
-      if (Math.abs(dotProduct * dotProduct - length1Squared * length2Squared) > epsilon)
-      {
-         return false;
-      }
-      else
-      {
-         return true;
-      }
+      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction) < epsilon;
    }
 
    public void negateDirection()
@@ -284,7 +268,7 @@ public class Line2d implements GeometryObject<Line2d>
    {
       checkHasBeenInitialized();
       Line2d ret = new Line2d(this);
-      ret.direction.negate();
+      ret.negateDirection();
 
       return ret;
    }
@@ -299,7 +283,6 @@ public class Line2d implements GeometryObject<Line2d>
       double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * vYOld;
 
       direction.set(vXNew, vYNew);
-
    }
 
    public void translate(double x, double y)
@@ -610,7 +593,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    private void checkReasonableVector(Vector2DReadOnly localVector)
    {
-      if ((Math.abs(localVector.getX()) < minAllowableVectorPart) && (Math.abs(localVector.getY()) < minAllowableVectorPart))
+      if (Math.abs(localVector.getX()) < minAllowableVectorPart && Math.abs(localVector.getY()) < minAllowableVectorPart)
       {
          throw new RuntimeException("Line length must be greater than zero");
       }
@@ -618,7 +601,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    private void checkDistinctPoints(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
-      if ((firstPointOnLine.getX() == secondPointOnLine.getX()) && (firstPointOnLine.getY() == secondPointOnLine.getY()))
+      if (firstPointOnLine.getX() == secondPointOnLine.getX() && firstPointOnLine.getY() == secondPointOnLine.getY())
       {
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
