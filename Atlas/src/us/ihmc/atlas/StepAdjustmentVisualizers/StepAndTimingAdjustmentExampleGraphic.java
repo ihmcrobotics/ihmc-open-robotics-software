@@ -63,6 +63,8 @@ public class StepAndTimingAdjustmentExampleGraphic
    private static final double pointFootDuration = 2.0;
    private static final double icpError = 0.05;
 
+   private static final double defaultSingleSupportDuration = 0.75;
+
    private static final double footLengthForControl = 0.22;
    private static final double footWidthForControl = 0.11;
    private static final double toeWidthForControl = 0.0825;
@@ -151,7 +153,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
       omega0 = new DoubleYoVariable("omega0", registry);
       doubleSupportDuration.set(0.25);
-      singleSupportDuration.set(0.75);
+      singleSupportDuration.set(defaultSingleSupportDuration);
       omega0.set(3.0);
 
       yoTime = robot.getYoTime();
@@ -456,6 +458,8 @@ public class StepAndTimingAdjustmentExampleGraphic
       if (firstTick)
       {
          initialize();
+         singleSupportDuration.set(defaultSingleSupportDuration);
+         icpOptimizationController.setSwingDuration(0, singleSupportDuration.getDoubleValue());
          firstTick = false;
       }
 

@@ -371,7 +371,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    @Override
    public void setSwingDuration(int stepNumber, double duration)
    {
-      //// TODO: 5/8/17  
+      swingDurations.get(stepNumber).set(duration);
    }
 
    @Override
@@ -865,9 +865,9 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          int reductionNumber = 0;
          while (costToGoUnvaried >= averageCostToGo + percentCostRequiredDecrease * Math.signum(averageCostToGo) * averageCostToGo)
          {
-            if (reductionNumber > 5) // // FIXME: 5/8/17 
+            if (reductionNumber > 5) // // FIXME: 5/8/17
                break;
-            //costFunctionEstimator.addPoint(costToGoUnvaried, costToGoGradient, swingDurations.get(0).getDoubleValue());
+            costFunctionEstimator.addPoint(costToGoUnvaried, swingDurations.get(0).getDoubleValue());
 
             timeAdjustment = 0.3 * timeAdjustment;
             timingAdjustments.get(iterationNumber - 1).set(timeAdjustment);
@@ -899,7 +899,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDurations.get(0).getDoubleValue());
       }
 
-      estimatedMinimumCostSwingTime.set(costFunctionEstimator.getEstimatedCostFunctionSolution());
+      //estimatedMinimumCostSwingTime.set(costFunctionEstimator.getEstimatedCostFunctionSolution());
 
       numberOfGradientIterations.set(iterationNumber + 1);
 
