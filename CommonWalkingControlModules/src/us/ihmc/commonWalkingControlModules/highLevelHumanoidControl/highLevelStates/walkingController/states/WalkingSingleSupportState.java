@@ -150,7 +150,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          kneeAngleManager.straightenLegDuringSwing(swingSide);
       }
-      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime)
+      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !kneeAngleManager.isLegCollapsed(supportSide))
       {
          kneeAngleManager.collapseLegDuringSwing(swingSide.getOppositeSide());
       }
