@@ -19,6 +19,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -335,7 +336,7 @@ public class HumanEvaluationLine2dTest
       Line2d someLine = new Line2d(line2dPointPoint);
 
       Vector2D directionVectorBefore = someLine.getDirection();
-      Point2D pointBefore = someLine.getPoint();
+      Point2DReadOnly pointBefore = someLine.getPoint();
       double directionBeforeX = someLine.getDirectionX();
       double directionBeforeY = someLine.getDirectionY();
 
