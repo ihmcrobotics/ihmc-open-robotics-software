@@ -61,7 +61,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector yoTouchdownVelocity;
    
    private final ReferenceFrame oppositeSoleFrame;
-   
+   private final ReferenceFrame oppositeSoleZUpFrame;
+
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialLinearVelocity = new FrameVector();
    private final FrameOrientation initialOrientation = new FrameOrientation();
@@ -185,6 +186,7 @@ public class SwingState extends AbstractUnconstrainedState
       RigidBody foot = contactableFoot.getRigidBody();
 
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
+      oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
 
       double[] waypointProportions = null;
       double maxSwingHeightFromStanceFoot = 0.0;
@@ -310,7 +312,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private void modifyFinalOrientationForTouchdown(FrameOrientation finalOrientationToPack)
    {
-      finalPosition.changeFrame(stanceFootPosition.getReferenceFrame());
+      finalPosition.changeFrame(oppositeSoleZUpFrame);
+      stanceFootPosition.changeFrame(oppositeSoleZUpFrame);
       double stepHeight = finalPosition.getZ() - stanceFootPosition.getZ();
       double initialFootstepPitch = finalOrientationToPack.getPitch();
 
