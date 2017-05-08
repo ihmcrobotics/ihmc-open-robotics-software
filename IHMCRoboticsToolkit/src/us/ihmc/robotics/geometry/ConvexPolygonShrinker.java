@@ -105,7 +105,7 @@ public class ConvexPolygonShrinker
          edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
          LinePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
          LinePerpendicularToEdgeOnQ.getPointGivenParameter(distance, referencePoint);
-         edgeOnQ.getNormalizedVector(normalizedVector);
+         edgeOnQ.getDirection(normalizedVector);
          
          
          Line2d newEdge = getARay(rays.size());

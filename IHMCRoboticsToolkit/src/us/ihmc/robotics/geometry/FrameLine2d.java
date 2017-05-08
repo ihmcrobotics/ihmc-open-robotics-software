@@ -146,7 +146,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
    {
       checkReferenceFrameMatch(frameVector2d);
       
-      line.getNormalizedVector().set(frameVector2d.getVector());
+      line.getDirection().set(frameVector2d.getVector());
    }
 
    @Deprecated
@@ -161,7 +161,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
       checkReferenceFrameMatch(endPoint);
       
       line.getPoint().set(startPoint.getX(), startPoint.getY());
-      line.getNormalizedVector().set(endPoint.getX() - startPoint.getX(), endPoint.getY() - startPoint.getY());
+      line.getDirection().set(endPoint.getX() - startPoint.getX(), endPoint.getY() - startPoint.getY());
    }
    
    public void set(FramePoint2d endpoint0, FramePoint2d endpoint1)

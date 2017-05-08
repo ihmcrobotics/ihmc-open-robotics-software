@@ -235,7 +235,7 @@ public class Plotter2DAdapter
       PlotterPoint2d start = pointBin[0];
       PlotterVector2d direction = vectorBin[0];
       start.setIncludingFrame(frame, line.getPoint());
-      direction.setIncludingFrame(frame, line.getNormalizedVector());
+      direction.setIncludingFrame(frame, line.getDirection());
       start.changeFrame(screenFrame);
       direction.changeFrame(screenFrame);
       direction.normalize();

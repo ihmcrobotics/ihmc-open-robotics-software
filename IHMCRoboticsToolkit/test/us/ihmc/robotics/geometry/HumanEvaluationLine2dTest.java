@@ -193,7 +193,7 @@ public class HumanEvaluationLine2dTest
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
-      line.getNormalizedVector(vector);
+      line.getDirection(vector);
 
       line.applyTransform(transform);
       assertEquals("pure translation failed", point.getX() + translation.getX(), line.getPointX(), EPSILON_FOR_EQUALS);
@@ -239,7 +239,7 @@ public class HumanEvaluationLine2dTest
    public void testGetNormalizedVectorCopy()
    {
       Vector2D vector = new Vector2D();
-      line2dPointPoint.getNormalizedVector(vector);
+      line2dPointPoint.getDirection(vector);
       assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.direction,
             vector);
       assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.direction.getX(),
@@ -359,7 +359,7 @@ public class HumanEvaluationLine2dTest
       {
          line = new Line2d(new Point2D(random.nextDouble(), random.nextDouble()), new Vector2D(random.nextDouble(), random.nextDouble()));
          vector = new Vector2D();
-         line.getNormalizedVector(vector);
+         line.getDirection(vector);
          vectorPerp = line.perpendicularVector();
          assertEquals("Dot product of perpendicular vectors not equal to zero", 0.0, vector.dot(vectorPerp), EPSILON_FOR_EQUALS);
       }

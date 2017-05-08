@@ -69,7 +69,7 @@ public class Line2d implements GeometryObject<Line2d>
    public Line2d(Line2d line2d)
    {
       point.set(line2d.getPoint());
-      direction.set(line2d.getNormalizedVector());
+      direction.set(line2d.getDirection());
    }
 
    public void getPoint(Point2DBasics pointToPack)
@@ -92,20 +92,20 @@ public class Line2d implements GeometryObject<Line2d>
       return point.getY();
    }
 
-   public void getNormalizedVector(Vector2DBasics normalizedVectorToPack)
+   public void getDirection(Vector2DBasics directionToPack)
    {
-      normalizedVectorToPack.set(direction);
+      directionToPack.set(direction);
    }
 
-   public Vector2D getNormalizedVector()
+   public Vector2D getDirection()
    {
       return direction;
    }
 
-   public void getPointAndNormalizedVector(Point2DBasics pointToPack, Vector2DBasics normalizedVectorToPack)
+   public void getPointAndDirection(Point2DBasics pointToPack, Vector2DBasics directionToPack)
    {
       getPoint(pointToPack);
-      getNormalizedVector(normalizedVectorToPack);
+      getDirection(directionToPack);
    }
 
    public void getTwoPointsOnLine(Point2DBasics point1, Point2DBasics point2)
@@ -350,7 +350,7 @@ public class Line2d implements GeometryObject<Line2d>
    public boolean areLinesPerpendicular(Line2d line)
    {
       // Dot product of two vectors is zero if the vectors are perpendicular
-      return direction.dot(line.getNormalizedVector()) < 1e-7;
+      return direction.dot(line.getDirection()) < 1e-7;
    }
 
    public Point2D intersectionWith(Line2d secondLine)
