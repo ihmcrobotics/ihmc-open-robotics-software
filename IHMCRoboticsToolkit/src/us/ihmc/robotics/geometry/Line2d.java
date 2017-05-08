@@ -119,7 +119,7 @@ public class Line2d implements GeometryObject<Line2d>
       directionToPack.set(direction);
    }
 
-   public Vector2D getDirection()
+   public Vector2DReadOnly getDirection()
    {
       return direction;
    }
