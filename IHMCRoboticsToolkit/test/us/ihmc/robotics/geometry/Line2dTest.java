@@ -22,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -506,8 +507,8 @@ public class Line2dTest
       shiftedLine.shiftToRight(distanceToShift);
 
       Point2DReadOnly shiftedLineOrigin = shiftedLine.getPoint();
-      Vector2D lineVector = line.getDirection();
-      Vector2D shiftedLineVector = shiftedLine.getDirection();
+      Vector2DReadOnly lineVector = line.getDirection();
+      Vector2DReadOnly shiftedLineVector = shiftedLine.getDirection();
 
       assertEquals(distanceToShift, shiftedLineOrigin.getX(), epsilon);
       assertEquals(0.0, shiftedLineOrigin.getY(), epsilon);
@@ -621,7 +622,7 @@ public class Line2dTest
          assertEquals(intersectX, interiorBisector.getPoint().getX(), delta);
          assertEquals(intersectY, interiorBisector.getPoint().getY(), delta);
 
-         Vector2D interiorNormalizedVector = line2d.getDirection();
+         Vector2D interiorNormalizedVector = new Vector2D(line2d.getDirection());
          Vector2D vector = new Vector2D();
          secondLine2d.getDirection(vector);
          interiorNormalizedVector.add(vector);
@@ -725,7 +726,7 @@ public class Line2dTest
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
-         Vector2D normalizedVector = line2d.getDirection();
+         Vector2DReadOnly normalizedVector = line2d.getDirection();
          Vector2D perpendicular = line2d.perpendicularVector();
 
          Point2D pointOnLine = new Point2D(firstPointOnLine);
@@ -755,7 +756,7 @@ public class Line2dTest
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
-         Vector2D normalizedVector = line2d.getDirection();
+         Vector2DReadOnly normalizedVector = line2d.getDirection();
          Vector2D perpendicular = line2d.perpendicularVector();
 
          Point2D pointOnLine = new Point2D(firstPointOnLine);
