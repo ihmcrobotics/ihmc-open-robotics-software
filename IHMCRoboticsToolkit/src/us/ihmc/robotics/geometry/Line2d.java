@@ -485,7 +485,7 @@ public class Line2d implements GeometryObject<Line2d>
     */
    public double getParameterGivenPointEpsilon(Point2DReadOnly pointOnLine, double epsilon)
    {
-      if (!containsEpsilon(pointOnLine, epsilon))
+      if (!isPointOnLine(pointOnLine, epsilon))
       {
          throw new RuntimeException("getParameterGivenPoint: point not part of line");
       }
@@ -529,7 +529,7 @@ public class Line2d implements GeometryObject<Line2d>
       return parameterAtIntercept * direction.getY() + point.getY();
    }
 
-   public boolean containsEpsilon(Point2DReadOnly point, double epsilon)
+   public boolean isPointOnLine(Point2DReadOnly point, double epsilon)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction) < epsilon;

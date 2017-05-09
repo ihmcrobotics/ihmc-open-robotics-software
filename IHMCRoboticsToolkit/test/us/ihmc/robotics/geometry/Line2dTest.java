@@ -662,35 +662,35 @@ public class Line2dTest
       Vector2D perpendicular = line2d.perpendicularVector();
       System.out.println(perpendicular);
 
-      assertTrue(line2d.containsEpsilon(secondPointOnLine, epsilon));
-      assertTrue(line2d.containsEpsilon(firstPointOnLine, epsilon));
+      assertTrue(line2d.isPointOnLine(secondPointOnLine, epsilon));
+      assertTrue(line2d.isPointOnLine(firstPointOnLine, epsilon));
 
       Point2D pointNearLine = new Point2D(secondPointOnLine);
       pointNearLine.scaleAdd(epsilon / 2.0, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
-      assertTrue(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertTrue(line2d.isPointOnLine(pointNearLine, epsilon));
 
       pointNearLine.scaleAdd(epsilon, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
-      assertTrue(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertTrue(line2d.isPointOnLine(pointNearLine, epsilon));
 
       // TODO: This test fails; seems a Math.sqrt is missing, or epsilon should be renamed epsilonSquared
       pointNearLine.scaleAdd(epsilon * 2.0, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
       System.out.println(pointNearLine.distance(secondPointOnLine));
-      assertFalse(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertFalse(line2d.isPointOnLine(pointNearLine, epsilon));
 
       pointNearLine.scaleAdd(-epsilon / 2.0, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
-      assertTrue(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertTrue(line2d.isPointOnLine(pointNearLine, epsilon));
 
       pointNearLine.scaleAdd(-epsilon, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
-      assertTrue(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertTrue(line2d.isPointOnLine(pointNearLine, epsilon));
 
       pointNearLine.scaleAdd(-epsilon * 2.0, perpendicular, secondPointOnLine);
       System.out.println(pointNearLine);
-      assertFalse(line2d.containsEpsilon(pointNearLine, epsilon));
+      assertFalse(line2d.isPointOnLine(pointNearLine, epsilon));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -708,7 +708,7 @@ public class Line2dTest
          Point2D pointOnPerpendicularLine = randomPoint(random);
          Line2d perpendicularLine = line2d.perpendicularLineThroughPoint(pointOnPerpendicularLine);
 
-         assertTrue(perpendicularLine.containsEpsilon(pointOnPerpendicularLine, delta));
+         assertTrue(perpendicularLine.isPointOnLine(pointOnPerpendicularLine, delta));
          assertEquals(0.0,
                       perpendicularLine.getDirection().getX() * line2d.getDirection().getX()
                       + perpendicularLine.getDirection().getY() * line2d.getDirection().getY(), delta);
@@ -1347,7 +1347,7 @@ public class Line2dTest
          assertEquals(line2d.getDirection().getX(), parallelLine.getDirection().getX(), delta);
          assertEquals(line2d.getDirection().getY(), parallelLine.getDirection().getY(), delta);
 
-         assertTrue(parallelLine.containsEpsilon(checkPoint, delta));
+         assertTrue(parallelLine.isPointOnLine(checkPoint, delta));
       }
    }
 
