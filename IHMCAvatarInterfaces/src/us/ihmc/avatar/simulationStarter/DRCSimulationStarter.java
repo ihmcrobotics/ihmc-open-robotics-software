@@ -48,14 +48,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.SCSPlaybackListener;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.wholeBodyController.DRCOutputWriterBuilder;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -86,6 +87,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
+
+   private DRCOutputWriterBuilder customOutputWriterBuilder;
 
    /**
     * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
@@ -320,6 +323,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    //   }
 
    /**
+    * Provides a builder to create a custom output writer to use for this simulation.
+    * 
+    * @param builder used to create a custom output writer.
+    */
+   public void setCustomOutputWriterBuilder(DRCOutputWriterBuilder builder)
+   {
+      customOutputWriterBuilder = builder;
+   }
+
+   /**
     * Creates a default output PacketCommunicator for the network processor.
     * This PacketCommunicator is also set to be used as input for the controller.
     * @param networkParameters
@@ -443,6 +456,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
+      if (customOutputWriterBuilder != null)
+         avatarSimulationFactory.setCustomOutputWriterBuilder(customOutputWriterBuilder);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
