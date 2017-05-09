@@ -74,7 +74,7 @@ public class ICPAdjustmentOptimizationControllerTest
 
       ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
       ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
-            walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.0, -9.81, 0.001, registry, null);
+            walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.001, registry, null);
       icpPlanner.setOmega0(omega.getDoubleValue());
 
       icpPlanner.clearPlan();

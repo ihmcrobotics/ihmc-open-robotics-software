@@ -31,45 +31,15 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ICPAdjustmentOptimizationController implements ICPOptimizationController
+public class ICPAdjustmentOptimizationController extends ICPOptimizationController
 {
-   private static final boolean VISUALIZE = true;
-   private static final boolean COMPUTE_COST_TO_GO = false;
-   private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   private static final boolean DEBUG = false;
-
-   private static final String yoNamePrefix = "controller";
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final IntegerYoVariable numberOfFootstepsToConsider = new IntegerYoVariable(yoNamePrefix + "NumberOfFootstepsToConsider", registry);
-
-   private final boolean useTwoCMPs;
-   private final boolean useFootstepRegularization;
-   private final boolean useFeedbackRegularization;
-
-   private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
-   private final BooleanYoVariable useAngularMomentum = new BooleanYoVariable(yoNamePrefix + "UseAngularMomentum", registry);
-
-   private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
-   private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
-   private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
+   protected final boolean useTwoCMPs;
+   protected final boolean useFootstepRegularization;
+   protected final boolean useFeedbackRegularization;
 
    private final BooleanYoVariable swingSpeedUpEnabled = new BooleanYoVariable(yoNamePrefix + "SwingSpeedUpEnabled", registry);
 
-   private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
-   private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
-
-   private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
-   private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(yoNamePrefix + "FinalTransferDuration", registry);
-
-   private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-   private final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
    private final DoubleYoVariable finalTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "FinalTransferSplitFraction", registry);
-   private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
-   private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
    private final DoubleYoVariable transferSplitFractionUnderDisturbance;
 
@@ -151,9 +121,6 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
    private final double dynamicRelaxationDoubleSupportWeightModifier;
    private final int maximumNumberOfFootstepsToConsider;
 
-   private final double mass;
-   private final double gravityZ;
-
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
 
@@ -164,13 +131,11 @@ public class ICPAdjustmentOptimizationController implements ICPOptimizationContr
 
    public ICPAdjustmentOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
-      this.mass = mass;
-      this.gravityZ = gravityZ;
 
       for (RobotSide robotSide : RobotSide.values)
       {
