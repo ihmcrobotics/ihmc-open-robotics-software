@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 /**
  * @author Twan Koolen
  */
-public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, LineSegment2d>
+public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, LineSegment2d>
 {
    protected final LineSegment2d lineSegment;
 
@@ -287,13 +287,11 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return lineSegment.percentageAlongLineSegment(point2d.getPoint());
    }
 
-   @Override
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       lineSegment.applyTransformAndProjectToXYPlane(transform);
    }
 
-   @Override
    public FrameLineSegment2d applyTransformCopy(Transform transform)
    {
       FrameLineSegment2d copy = new FrameLineSegment2d(this);
@@ -301,7 +299,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return copy;
    }
 
-   @Override
    public FrameLineSegment2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       FrameLineSegment2d copy = new FrameLineSegment2d(this);
@@ -311,7 +308,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
 
    private RigidBodyTransform temporaryTransformToDesiredFrame;
 
-   @Override
    public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -327,7 +323,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       referenceFrame = desiredFrame;
    }
 
-   @Override
    public FrameLineSegment2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
    {
       FrameLineSegment2d copy = new FrameLineSegment2d(this);
@@ -341,7 +336,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return "" + lineSegment;
    }
 
-   @Override
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -355,7 +349,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack.getPoint());
    }
 
-   @Override
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -364,7 +357,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
 
-   @Override
    public FramePoint2d intersectionWith(FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
@@ -395,7 +387,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return true;
    }
 
-   @Override
    public FramePoint2d intersectionWith(FrameLineSegment2d secondLineSegment)
    {
       checkReferenceFrameMatch(secondLineSegment);
@@ -407,7 +398,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return new FramePoint2d(secondLineSegment.getReferenceFrame(), intersection);
    }
 
-   @Override
    public FramePoint2d[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
@@ -421,7 +411,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return ret;
    }
 
-   @Override
    public double distance(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -429,7 +418,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return this.lineSegment.distance(point.getPoint());
    }
 
-   @Override
    public double distance(FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
@@ -437,7 +425,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return this.lineSegment.distance(line.line);
    }
 
-   @Override
    public double distance(FrameLineSegment2d secondLineSegment)
    {
       checkReferenceFrameMatch(secondLineSegment);
@@ -445,7 +432,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return this.lineSegment.distance(secondLineSegment.lineSegment);
    }
 
-   @Override
    public double distance(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
