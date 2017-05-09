@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -22,6 +20,7 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.WeightMatrix6D;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -585,7 +584,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
-   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   public void setWeightsForSolver(WeightMatrix6D weightVector)
    {
       spatialAccelerationCommand.setWeights(weightVector);
    }

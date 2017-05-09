@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,7 +8,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -20,6 +17,7 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.WeightMatrix6D;
 
 /**
  * {@link KinematicsToolboxRigidBodyMessage} is part of the API of the
@@ -85,7 +83,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * {@code endEffector.getBodyFixedFrame()}.
     * </ul>
     */
-   public float[] weights;
+   public WeightMatrix3DMessage angularWeights;
+   public WeightMatrix3DMessage linearWeights;
 
    /**
     * Do not use this constructor, it is needed only for efficient serialization/deserialization.
@@ -322,8 +321,17 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    /** Ensures that the array for the weights is initialized. */
    private void initializeWeight()
    {
-      if (weights == null)
-         weights = new float[6];
+      if (linearWeights == null)
+      {
+         linearWeights = new WeightMatrix3DMessage();
+      }
+      
+      if (angularWeights == null)
+      {
+         angularWeights = new WeightMatrix3DMessage();
+      }
+      
+      
    }
 
    /**
@@ -338,8 +346,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void setWeight(double weight)
    {
       initializeWeight();
-      for (int i = 0; i < 6; i++)
-         weights[i] = (float) weight;
+      linearWeights.setWeights(weight, weight, weight);
+      angularWeights.setWeights(weight, weight, weight);
    }
 
    /**
@@ -355,11 +363,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void setWeight(double angular, double linear)
    {
       initializeWeight();
-      for (int i = 0; i < 3; i++)
-      {
-         weights[i] = (float) angular;
-         weights[i + 3] = (float) linear;
-      }
+      linearWeights.setWeights(linear, linear, linear);
+      angularWeights.setWeights(angular, angular, angular);
    }
 
    /**
@@ -557,6 +562,15 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
          linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
    }
 
+   public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
+   {
+      weightMatrixToPack.clear();
+      if (angularWeights!= null)
+         angularWeights.getWeightMatrix(weightMatrixToPack.getAngularPart());
+      if (linearWeights != null)
+         linearWeights.getWeightMatrix(weightMatrixToPack.getLinearPart());
+   }
+
    /**
     * Returns the unique ID referring to the selection frame to use with the angular part of the
     * selection matrix of this message.
@@ -592,19 +606,41 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
-
-   public void getWeightVector(DenseMatrix64F weightVectorToPack)
+   
+   /**
+    * Returns the unique ID referring to the frame to use with the linear part of the
+    * weight matrix of this message.
+    * <p>
+    * If this message does not have a linear weight matrix or the frame has not been set, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the frame ID for the linear part of the weight matrix.
+    */
+   public long getLinearWeightFrameId()
    {
-      weightVectorToPack.reshape(6, 1);
-      if (weights == null)
-      {
-         weightVectorToPack.zero();
-      }
+      if (linearWeights != null)
+         return linearWeights.getSelectionFrameId();
       else
-      {
-         for (int i = 0; i < 6; i++)
-            weightVectorToPack.set(i, 0, weights[i]);
-      }
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+
+   /**
+    * Returns the unique ID referring to the frame to use with the angular part of the
+    * weight matrix of this message.
+    * <p>
+    * If this message does not have a angular weight matrix or the frame has not been set, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    * 
+    * @return the frame ID for the linear part of the weight matrix.
+    */
+   public long getAngularWeightFrameId()
+   {
+      if (angularWeights != null)
+         return angularWeights.getSelectionFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
    /**
@@ -633,18 +669,26 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
          return false;
 
       // TODO Add the selection matrix back in here
-
-      if (weights == null && other.weights == null)
-         return true;
-      if (weights == null && other.weights != null)
-         return false;
-      if (weights != null && other.weights == null)
-         return false;
-      for (int i = 0; i < 6; i++)
+      if(linearWeights == null ^ other.linearWeights == null)//bit wise or
       {
-         if (!MathTools.epsilonEquals(weights[i], other.weights[i], epsilon))
-            return false;
+         return false;
       }
+      if(angularWeights == null ^ other.angularWeights == null)//bit wise or
+      {
+         return false;
+      }
+      
+      if(linearWeights != null && !linearWeights.epsilonEquals(linearWeights, epsilon))
+      {
+         return false;
+      }
+
+      if(angularWeights != null && !angularWeights.epsilonEquals(angularWeights, epsilon))
+      {
+         return false;
+      }
+      
+
       return true;
    }
 
