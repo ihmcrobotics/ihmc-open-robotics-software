@@ -169,7 +169,7 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
       icpOptimizationController = new ICPAdjustmentOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-            contactableFeet, 0.0, -9.81, controlDT, registry, yoGraphicsListRegistry);
+            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfFootstepsToCreate; i++)

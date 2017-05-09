@@ -33,23 +33,11 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ICPTimingOptimizationController implements ICPOptimizationController
+public class ICPTimingOptimizationController extends ICPOptimizationController
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean COMPUTE_COST_TO_GO = false;
-   private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   private static final boolean DEBUG = false;
-
-   private static final String yoNamePrefix = "controller";
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final IntegerYoVariable numberOfFootstepsToConsider = new IntegerYoVariable(yoNamePrefix + "NumberOfFootstepsToConsider", registry);
-
-   private final boolean useTwoCMPs;
-   private final boolean useFootstepRegularization;
-   private final boolean useFeedbackRegularization;
+   protected final boolean useTwoCMPs;
+   protected final boolean useFootstepRegularization;
+   protected final boolean useFeedbackRegularization;
 
    /** gradient descent variables */
    private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentWeight", registry);
@@ -71,25 +59,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
 
    /** other controller variables */
-   private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
-   private final BooleanYoVariable useAngularMomentum = new BooleanYoVariable(yoNamePrefix + "UseAngularMomentum", registry);
-
-   private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
-   private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
-   private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
-
-   private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
-   private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
-
    private final DoubleYoVariable referenceSwingDuration = new DoubleYoVariable(yoNamePrefix + "ReferenceSwingDuration", registry);
-   private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
-   private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(yoNamePrefix + "FinalTransferDuration", registry);
-
-   private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-   private final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-   private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
-   private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
    private final DoubleYoVariable transferSplitFractionUnderDisturbance;
 
