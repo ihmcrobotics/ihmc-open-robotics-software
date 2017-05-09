@@ -55,7 +55,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterBuilder;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -78,7 +77,6 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> doSmoothJointTorquesAtControllerStateChanges = new OptionalFactoryField<>("doSmoothJointTorquesAtControllerStateChanges");
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
-   private final OptionalFactoryField<DRCOutputWriterBuilder> customOutputWriterBuilder = new OptionalFactoryField<>("customOutputWriterBuilder");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -177,11 +175,6 @@ public class AvatarSimulationFactory
          DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(simulationOutputWriter,
                                                                                                                robotModel.get().getControllerDT());
          simulationOutputWriter = outputWriterWithTorqueOffsets;
-      }
-
-      if (customOutputWriterBuilder.hasValue())
-      {
-         simulationOutputWriter = customOutputWriterBuilder.get().newInstance(simulationOutputWriter);
       }
    }
 
@@ -500,10 +493,5 @@ public class AvatarSimulationFactory
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
-   }
-
-   public void setCustomOutputWriterBuilder(DRCOutputWriterBuilder builder)
-   {
-      this.customOutputWriterBuilder.set(builder);
    }
 }
