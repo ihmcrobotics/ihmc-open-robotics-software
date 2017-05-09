@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
@@ -43,8 +42,8 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final double SWING_DURATION_VARIATION = 0.001;
    private static final double TIMING_ADJUSTMENT_COST = 1.0;
    private static final double GRADIENT_THRESHOLD = 0.1;
-   private static final double GRADIENT_GAIN = 0.001;
-   private static final int NUMBER_OF_ITERATIONS = 10;
+   private static final double GRADIENT_GAIN = 0.035;
+   private static final int NUMBER_OF_ITERATIONS = 15;
 
    private static final double minimumSwingDuration = 0.2;
 
@@ -63,6 +62,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
    private final DoubleYoVariable timingAdjustmentCost = new DoubleYoVariable("timingAdjustmentCost", registry);
    private final DoubleYoVariable gradientThreshold = new DoubleYoVariable("gradientThreshold", registry);
+   private final DoubleYoVariable gradientGain = new DoubleYoVariable("gradientGain", registry);
    private final DoubleYoVariable solverCostToGo = new DoubleYoVariable("solverCostToGo", registry);
    private final DoubleYoVariable timingCostToGo = new DoubleYoVariable("timingCostToGo", registry);
 
@@ -157,6 +157,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final List<DoubleYoVariable> costToGos = new ArrayList<>();
    private final List<DoubleYoVariable> costToGoGradients = new ArrayList<>();
    private final IntegerYoVariable numberOfGradientIterations = new IntegerYoVariable("numberOfGradientIterations", registry);
+   private final IntegerYoVariable numberOfGradientReductionIterations = new IntegerYoVariable("numberOfGradientReductionIterations", registry);
    private final DoubleYoVariable estimatedMinimumCostSwingTime = new DoubleYoVariable("estimatedMinimumCostSwingTime", registry);
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
@@ -260,7 +261,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
-
+      gradientGain.set(GRADIENT_GAIN);
       timingAdjustmentCost.set(TIMING_ADJUSTMENT_COST);
       gradientThreshold.set(GRADIENT_THRESHOLD);
 
@@ -773,6 +774,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFootstepSolutionFromCurrent();
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
+         numberOfGradientReductionIterations.set(0);
       }
       else if (isInTransfer.getBooleanValue())
       {
@@ -781,6 +783,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFootstepSolutionFromCurrent();
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
+         numberOfGradientReductionIterations.set(0);
          costToGos.get(0).set(solver.getCostToGo());
       }
       else
@@ -871,7 +874,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
             break;
 
          // estimate time adjustment using gradient based methods
-         double timeAdjustmentFromGradient = -GRADIENT_GAIN * costToGoGradient;
+         double timeAdjustmentFromGradient = -gradientGain.getDoubleValue() * costToGoGradient;
          // estimate time adjustment using the current built model of the cost function
          double timeAdjustmentFromEstimator = costFunctionEstimator.getEstimatedCostFunctionSolution() - swingDurations.get(0).getDoubleValue(); // // TODO: 5/9/17  figure out how to use this
 
@@ -905,7 +908,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
                timingUpperBound = swingDurations.get(0).getDoubleValue();
                */
 
-            if (reductionNumber > 5) // // FIXME: 5/8/17
+            if (reductionNumber >= 5 || iterationNumber >= NUMBER_OF_ITERATIONS) // // FIXME: 5/8/17
                break;
             costFunctionEstimator.addPoint(costToGoUnvaried, swingDurations.get(0).getDoubleValue());
 
@@ -924,11 +927,17 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
             submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
             noConvergenceException = solveQP();
-
             costToGoUnvaried = computeTotalCostToGo();
-            PrintTools.info("Reducing time adjustment number " + reductionNumber + " at on iteration " + iterationNumber + ".");
+
+            swingTimings.get(iterationNumber).set(swingDurations.get(0).getDoubleValue());
+            costToGos.get(iterationNumber).set(costToGoUnvaried);
+            costToGoGradients.get(iterationNumber).setToNaN();
+
+            iterationNumber++;
             reductionNumber++;
          }
+
+         numberOfGradientReductionIterations.set(reductionNumber);
 
          // compute gradient at new point
          swingDurations.get(0).add(variationSize);
