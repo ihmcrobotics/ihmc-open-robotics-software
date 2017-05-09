@@ -413,12 +413,6 @@ public class Line2d implements GeometryObject<Line2d>
       return distance * distance;
    }
 
-   public double distance(Line2d line)
-   {
-      checkHasBeenInitialized();
-      throw new RuntimeException("Not yet implemented");
-   }
-
    public double distance(LineSegment2d lineSegment)
    {
       checkHasBeenInitialized();
