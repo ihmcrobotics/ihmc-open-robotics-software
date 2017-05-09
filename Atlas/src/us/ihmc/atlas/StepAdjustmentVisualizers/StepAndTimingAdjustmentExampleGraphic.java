@@ -445,6 +445,8 @@ public class StepAndTimingAdjustmentExampleGraphic
    }
 
    private boolean firstTick = true;
+   private boolean secondTick = true;
+   private boolean thirdTick = true;
 
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
@@ -455,11 +457,15 @@ public class StepAndTimingAdjustmentExampleGraphic
 
    public void updateGraphic()
    {
-      if (firstTick)
+      if (firstTick || secondTick || thirdTick)
       {
          initialize();
          singleSupportDuration.set(defaultSingleSupportDuration);
-         icpOptimizationController.setSwingDuration(0, singleSupportDuration.getDoubleValue());
+         icpOptimizationController.setSwingDuration(0, defaultSingleSupportDuration);
+         if (!secondTick)
+            thirdTick = false;
+         if (!firstTick)
+            secondTick = false;
          firstTick = false;
       }
 
@@ -1378,22 +1384,22 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getFootstepRegularizationWeight()
          {
-            return 0.01;
+            return 0.005;
          }
 
          @Override public double getFeedbackRegularizationWeight()
          {
-            return 0.0001;
+            return 0.00005;
          }
 
          @Override public double getForwardFootstepWeight()
          {
-            return 100.0;
+            return 15.0;
          }
 
          @Override public double getLateralFootstepWeight()
          {
-            return 100.0;
+            return 15.0;
          }
 
          @Override public double getFeedbackForwardWeight()
@@ -1403,7 +1409,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getFeedbackLateralWeight()
          {
-            return 0.1;
+            return 0.5;
          }
 
          @Override
@@ -1420,18 +1426,12 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getFeedbackParallelGain()
          {
-            return 2.5;
+            return 3.0;
          }
 
          @Override public double getFeedbackOrthogonalGain()
          {
-            return 3.0;
-         }
-
-         @Override
-         public double getFootstepSolutionResolution()
-         {
-            return 0.0;
+            return 2.5;
          }
 
          @Override
@@ -1460,7 +1460,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getDynamicRelaxationWeight()
          {
-            return 10000.0;
+            return 1000.0;
          }
 
          @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
@@ -1470,7 +1470,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getAngularMomentumMinimizationWeight()
          {
-            return 500.0;
+            return 50.0;
          }
 
          @Override public boolean useFeedbackRegularization()
@@ -1495,7 +1495,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public boolean scaleStepRegularizationWeightWithTime()
          {
-            return true;
+            return false;
          }
 
          @Override public boolean scaleUpcomingStepWeights()
@@ -1549,7 +1549,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override public double getAdjustmentDeadband()
          {
-            return 0.02;
+            return 0.03;
          }
       };
    }
