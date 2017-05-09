@@ -162,13 +162,6 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
       return frameLine.distance(point);
    }
 
-   public double distance(FrameLine2d line)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(line);
-   }
-
    public double distance(FrameLineSegment2d secondLineSegment)
    {
       putYoValuesIntoFrameLine();

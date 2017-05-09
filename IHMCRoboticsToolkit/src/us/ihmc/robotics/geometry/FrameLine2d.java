@@ -389,13 +389,6 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
       return this.line.distance(point.getPoint());
    }
 
-   public double distance(FrameLine2d secondLine)
-   {
-      checkReferenceFrameMatch(secondLine);
-
-      return this.line.distance(secondLine.line);
-   }
-
    public double distance(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
