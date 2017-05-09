@@ -46,6 +46,8 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final double GRADIENT_GAIN = 10.0;
    private static final int NUMBER_OF_ITERATIONS = 10;
 
+   private static final double minimumSwingDuration = 0.2;
+
    private static final double percentCostRequiredDecrease = 0.05;
 
    private static final String yoNamePrefix = "controller";
@@ -772,12 +774,16 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       {
          submitSolverTaskConditionsForFeedbackOnlyControl();
          noConvergenceException = solveQP();
+         solver.setPreviousFootstepSolutionFromCurrent();
+         solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
       }
       else if (isInTransfer.getBooleanValue())
       {
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
          noConvergenceException = solveQP();
+         solver.setPreviousFootstepSolutionFromCurrent();
+         solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
          costToGos.get(0).set(solver.getCostToGo());
       }
@@ -856,6 +862,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
          // modify current single support duration
          swingDurations.get(0).add(timeAdjustment);
+         swingDurations.get(0).set(Math.max(swingDurations.get(0).getDoubleValue(), minimumSwingDuration));
 
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
          noConvergenceException = solveQP();
@@ -872,6 +879,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
             timeAdjustment = 0.3 * timeAdjustment;
             timingAdjustments.get(iterationNumber - 1).set(timeAdjustment);
             swingDurations.get(0).sub(timeAdjustment);
+            swingDurations.get(0).set(Math.max(swingDurations.get(0).getDoubleValue(), minimumSwingDuration));
 
             submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
             noConvergenceException = solveQP();
@@ -899,7 +907,10 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDurations.get(0).getDoubleValue());
       }
 
-      //estimatedMinimumCostSwingTime.set(costFunctionEstimator.getEstimatedCostFunctionSolution());
+      solver.setPreviousFeedbackDeltaSolutionFromCurrent();
+      solver.setPreviousFootstepSolutionFromCurrent();
+
+      estimatedMinimumCostSwingTime.set(costFunctionEstimator.getEstimatedCostFunctionSolution());
 
       numberOfGradientIterations.set(iterationNumber + 1);
 
