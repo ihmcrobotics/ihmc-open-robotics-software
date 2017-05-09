@@ -312,7 +312,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
       
-      PrintTools.info("behavior Out " + testNodesBehavior.getValdity());
+      PrintTools.info("behavior Out " + testNodesBehavior.getNodesValdity());
    }
    
    @Test
@@ -332,9 +332,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      //cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
       TimeDomain1DNode.cleaningPath = cleaningPath;
       TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
@@ -344,9 +344,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
       
-      PrintTools.info("behavior Out " );
+      PrintTools.info("behavior Out " );      
    }
   
 

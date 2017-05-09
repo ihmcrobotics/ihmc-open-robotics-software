@@ -74,7 +74,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       nodesValidity = true;;
    }
    
-   public boolean getValdity()
+   public boolean getNodesValdity()
    {
       return nodesValidity;
    }
@@ -196,12 +196,13 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          double curScore = testValidityBehavior.getScroe();
          
          nodesScore = nodesScore + curScore;
-         PrintTools.info(" "+ nodesScore +" "+curScore);
+         //PrintTools.info(" "+ nodesScore +" "+curScore +" "+testValidityBehavior.isValid());
          
          if(DEBUG)
             PrintTools.info("Check :: Waiting Behavior ");
          if(DEBUG)
             PrintTools.info(""+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
+         
          if(testValidityBehavior.isValid() == false)
          {
             nodesValidity = false;
