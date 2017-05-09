@@ -61,65 +61,6 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    /** other controller variables */
    private final DoubleYoVariable referenceSwingDuration = new DoubleYoVariable(yoNamePrefix + "ReferenceSwingDuration", registry);
 
-   private final DoubleYoVariable transferSplitFractionUnderDisturbance;
-
-   private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
-   private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
-
-   private final DoubleYoVariable initialTime = new DoubleYoVariable(yoNamePrefix + "InitialTime", registry);
-   private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(yoNamePrefix + "TimeInCurrentState", registry);
-   private final DoubleYoVariable timeRemainingInState = new DoubleYoVariable(yoNamePrefix + "TimeRemainingInState", registry);
-   private final DoubleYoVariable minimumTimeRemaining = new DoubleYoVariable(yoNamePrefix + "MinimumTimeRemaining", registry);
-
-   private final FramePoint2d currentICP = new FramePoint2d();
-   private final FramePoint2d desiredICP = new FramePoint2d();
-   private final FrameVector2d desiredICPVelocity = new FrameVector2d();
-   private final FramePoint2d referenceCMP = new FramePoint2d();
-
-   private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
-   private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-   private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
-   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d(yoNamePrefix + "DynamicRelaxationSolution", "", worldFrame, registry);
-   private final YoFramePoint2d angularMomentumSolution = new YoFramePoint2d(yoNamePrefix + "AngularMomentumSolution", "", worldFrame, registry);
-
-   private final FramePoint2d finalICPRecursion = new FramePoint2d();
-   private final FramePoint2d cmpConstantEffects = new FramePoint2d();
-
-   private final YoFramePoint2d beginningOfStateICP = new YoFramePoint2d(yoNamePrefix + "BeginningOfStateICP", worldFrame, registry);
-   private final YoFrameVector2d beginningOfStateICPVelocity = new YoFrameVector2d(yoNamePrefix + "BeginningOfStateICPVelocity", worldFrame, registry);
-
-   private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
-   private final ArrayList<FramePoint2d> unclippedFootstepSolutions = new ArrayList<>();
-
-   private final DoubleYoVariable forwardFootstepWeight = new DoubleYoVariable(yoNamePrefix + "ForwardFootstepWeight", registry);
-   private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
-   private final YoFramePoint2d scaledFootstepWeights = new YoFramePoint2d(yoNamePrefix + "ScaledFootstepWeights", worldFrame, registry);
-
-   private final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
-   private final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
-   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
-
-   private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
-   private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackRegularizationWeight", registry);
-   private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
-   private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationWeight", registry);
-   private final DoubleYoVariable angularMomentumMinimizationWeight = new DoubleYoVariable(yoNamePrefix + "AngularMomentumMinimizationWeight", registry);
-
-   private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
-   private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable(yoNamePrefix + "FeedbackParallelGain", registry);
-
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable(yoNamePrefix + "NumberOfIterations", registry);
-   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
-   private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable(yoNamePrefix + "HasNotConvergedCounts", registry);
-
-   private final BooleanYoVariable doingBigAdjustment = new BooleanYoVariable(yoNamePrefix + "DoingBigAdjustment", registry);
-
-   private final DoubleYoVariable magnitudeForBigAdjustment;
-   private final boolean useDifferentSplitRatioForBigAdjustment;
-   private final double minimumTimeOnInitialCMPForBigAdjustment;
-
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
    private final ExecutionTimer multiplierCalculatorTimer = new ExecutionTimer("icpMultiplierCalculatorTimer", 0.5, registry);
@@ -135,53 +76,15 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final IntegerYoVariable numberOfGradientReductionIterations = new IntegerYoVariable("numberOfGradientReductionIterations", registry);
    private final DoubleYoVariable estimatedMinimumCostSwingTime = new DoubleYoVariable("estimatedMinimumCostSwingTime", registry);
 
-   private final StateMultiplierCalculator stateMultiplierCalculator;
-
-   private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
-   private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
-   private final ICPOptimizationSolutionHandler solutionHandler;
-   private final ICPOptimizationInputHandler inputHandler;
-
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();
-
-   private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
-
-   private final double controlDT;
-   private final double dynamicRelaxationDoubleSupportWeightModifier;
-   private final int maximumNumberOfFootstepsToConsider;
-
-   private final double mass;
-   private final double gravityZ;
-
-   private boolean localUseStepAdjustment;
-   private boolean localScaleUpcomingStepWeights;
-
-   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
-
-   private final FrameVector2d tempVector2d = new FrameVector2d();
-   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ,
-         double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.contactableFeet = contactableFeet;
-      this.controlDT = controlDT;
-      this.mass = mass;
-      this.gravityZ = gravityZ;
+      super(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getRigidBody().getParentJoint().getFrameAfterJoint();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         RigidBodyTransform ankleToSole = new RigidBodyTransform();
-         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
-         transformsFromAnkleToSole.put(robotSide, ankleToSole);
-      }
-
-      maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
       int totalVertices = 0;
@@ -214,28 +117,12 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
-      dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
-
       defaultSwingSplitFraction.set(icpPlannerParameters.getSwingDurationAlpha());
       defaultTransferSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
 
-      transferSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
-      magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
       transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
-      useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
-      minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
-
-      stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
-            swingSplitFractions, maximumNumberOfFootstepsToConsider, yoNamePrefix, registry);
-
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
-      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
-            yoGraphicsListRegistry);
-      inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
-            transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       timingAdjustmentWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentWeight());
       gradientThresholdForAdjustment.set(icpOptimizationParameters.getGradientThresholdForTimingAdjustment());
@@ -1047,8 +934,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       dynamicRelaxation.set(tempPoint2d);
 
       solver.getCMPDifferenceFromCoP(tempPoint2d);
-      CapturePointTools.computeAngularMomentum(mass, gravityZ, tempPoint2d, tempPoint2d);
-      angularMomentumSolution.set(tempPoint2d);
+      cmpCoPDifferenceSolution.set(tempPoint2d);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());
