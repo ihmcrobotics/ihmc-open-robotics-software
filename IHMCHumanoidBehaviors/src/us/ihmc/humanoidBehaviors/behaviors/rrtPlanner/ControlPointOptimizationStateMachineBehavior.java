@@ -34,10 +34,12 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    
    private RRTNode rootNode;
    private RRTNode currentControlPoint;
-   private RRTNode optimalControlPoint;
+   private RRTNode optimalControlPointCurrent;
+   private RRTNode optimalControlPointNext;
+   private double optimalScoreOfControlPoint;
    private ArrayList<RRTNode> optimalControlPointNodePath = new ArrayList<RRTNode>();
    
-   private int numberOfCandidates = 2;
+   private int numberOfCandidates = 6;
    private int numberOfLinearPath;
    private int numberOfWayPoints = 8;
    
@@ -78,8 +80,12 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       currentIndexOfCandidate = 0;
       currentIndexOfLinearPath = 0;
       
-      optimalControlPointNodePath.add(rootNode);
+      optimalScoreOfControlPoint = Double.MAX_VALUE;
       
+      
+      
+      optimalControlPointCurrent = rootNode;
+      optimalControlPointNodePath.add(optimalControlPointCurrent);
        
       
       setUpStateMachine();
@@ -105,8 +111,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          retNodes.add(aNode);
       }
       
-      for(int i=0;i<numberOfWayPoints;i++)
-         PrintTools.info("data "+i+" "+ retNodes.get(i).getNodeData(0)+" "+ retNodes.get(i).getNodeData(1));
+//      for(int i=0;i<numberOfWayPoints;i++)
+//         PrintTools.info("data "+i+" "+ retNodes.get(i).getNodeData(0)+" "+ retNodes.get(i).getNodeData(1));
 
       return retNodes;
    }
@@ -134,7 +140,10 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             PrintTools.info("getScoreAction "+currentIndexOfCandidate + " "+currentIndexOfLinearPath);
             RRTNode randomControlPoint = getRandomControlPoint();
             currentControlPoint = randomControlPoint;
-            validNodesStateMachineBehavior.setNodes(getWayPointsNodes(rootNode, randomControlPoint));            
+            
+            // rootNode should be substituted with optimal control point among previous candidates.                     
+            validNodesStateMachineBehavior.setNodes(getWayPointsNodes(optimalControlPointCurrent, randomControlPoint));   
+            
             validNodesStateMachineBehavior.setSolarPanel(TimeDomain1DNode.cleaningPath.getSolarPanel());
             
             
@@ -142,7 +151,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             if(currentIndexOfCandidate == numberOfCandidates)
             {               
                currentIndexOfCandidate = 0;
-               currentIndexOfLinearPath++;            
+               currentIndexOfLinearPath++;     
+               optimalControlPointCurrent = optimalControlPointNext;
+               optimalControlPointNodePath.add(optimalControlPointCurrent);
+               
+               optimalScoreOfControlPoint = Double.MAX_VALUE;
+               
+               PrintTools.info("optimalControlPointCurrent "+optimalControlPointCurrent.getNodeData(0)+" "+ optimalControlPointCurrent.getNodeData(1));
+               PrintTools.info("");
             }
          }
       };
@@ -214,6 +230,17 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       public void onBehaviorEntered()
       {         
          PrintTools.info("CandidateBehavior");
+         PrintTools.info(""+currentIndexOfCandidate+" nodesValidity is " + validNodesStateMachineBehavior.getNodesValdity() +" score is "+ validNodesStateMachineBehavior.getScore());
+         if(validNodesStateMachineBehavior.getNodesValdity() == true)
+         {
+            if(optimalScoreOfControlPoint > validNodesStateMachineBehavior.getScore())
+            {
+               PrintTools.info("New Control Point updated ! ");
+               optimalScoreOfControlPoint = validNodesStateMachineBehavior.getScore();
+               optimalControlPointNext = currentControlPoint;
+            }
+         }
+         
       }
 
       @Override
@@ -261,6 +288,9 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       @Override
       public void onBehaviorEntered()
       {   
+         PrintTools.info("TestDoneBehavior");
+         for(int i =0;i<optimalControlPointNodePath.size();i++)
+            PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
       }
 
       @Override
