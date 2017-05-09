@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -56,6 +57,7 @@ public class RigidBodyControlManager
    private final RigidBodyHybridTaskSpaceJointspaceControlState hybridControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
+   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final double[] initialJointPositions;
    private final FramePose initialPose = new FramePose();
    private final FramePose homePose;
@@ -202,6 +204,16 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
+      if (command.useCustomControlFrame())
+      {
+         command.getControlFramePose(controlFrameTransform);
+         taskspaceControlState.setControlFramePose(controlFrameTransform);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+
       computeDesiredPose(initialPose);
 
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialPose))
@@ -218,6 +230,16 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
+      if (command.useCustomControlFrame())
+      {
+         command.getControlFramePose(controlFrameTransform);
+         taskspaceControlState.setControlFramePose(controlFrameTransform);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+
       computeDesiredPose(initialPose);
 
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
@@ -249,6 +271,16 @@ public class RigidBodyControlManager
 
    public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
    {
+      if (taskspaceCommand.useCustomControlFrame())
+      {
+         taskspaceCommand.getControlFramePose(controlFrameTransform);
+         taskspaceControlState.setControlFramePose(controlFrameTransform);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+
       computeDesiredJointPositions(initialJointPositions);
       computeDesiredPose(initialPose);
 
@@ -265,6 +297,16 @@ public class RigidBodyControlManager
 
    public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
+      if (taskspaceCommand.useCustomControlFrame())
+      {
+         taskspaceCommand.getControlFramePose(controlFrameTransform);
+         taskspaceControlState.setControlFramePose(controlFrameTransform);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+
       computeDesiredJointPositions(initialJointPositions);
       computeDesiredPose(initialPose);
 
@@ -291,7 +333,7 @@ public class RigidBodyControlManager
          hold();
       }
    }
-   
+
    public void holdInJointspace()
    {
       jointspaceControlState.holdCurrent();
@@ -352,6 +394,7 @@ public class RigidBodyControlManager
          requestState(jointspaceControlState.getStateEnum());
          break;
       case TASKSPACE:
+         taskspaceControlState.setDefaultControlFrame();
          computeDesiredPose(initialPose);
          taskspaceControlState.goToPose(homePose, initialPose, trajectoryTime);
          requestState(taskspaceControlState.getStateEnum());
