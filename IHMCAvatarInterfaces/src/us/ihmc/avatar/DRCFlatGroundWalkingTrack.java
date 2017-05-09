@@ -20,7 +20,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCOutputWriterBuilder;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCFlatGroundWalkingTrack
@@ -28,7 +27,6 @@ public class DRCFlatGroundWalkingTrack
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final AvatarSimulation avatarSimulation;
-   private AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
@@ -73,6 +71,7 @@ public class DRCFlatGroundWalkingTrack
 
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
 
+      AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
       avatarSimulationFactory.setMomentumBasedControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(null);
@@ -81,7 +80,6 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-      avatarSimulationFactory = null; // Destroy the factory once the simulation has been created.
       initialize();
       avatarSimulation.start();
    }
@@ -97,16 +95,6 @@ public class DRCFlatGroundWalkingTrack
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
       avatarSimulation.getMomentumBasedControllerFactory().attachControllerFailureListener(listener);
-   }
-
-   /**
-    * Provides a builder to create a custom output writer to use for this simulation.
-    * 
-    * @param builder used to create a custom output writer.
-    */
-   public void setCustomOutputWriterBuilder(DRCOutputWriterBuilder builder)
-   {
-      avatarSimulationFactory.setCustomOutputWriterBuilder(builder);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
