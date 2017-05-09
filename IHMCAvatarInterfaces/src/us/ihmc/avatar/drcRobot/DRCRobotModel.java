@@ -100,11 +100,14 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 
    /**
     * Override this method to create a custom output writer to be used with this robot.
+    * <p>
+    * <b> This output writer is meant to be used in simulation only.
+    * </p>
     * 
     * @param parentOutputWriter the default output writer that should be wrapped in the custom output writer.
     * @return the custom output writer.
     */
-   public default DRCOutputWriter getCustomOutputWriter(DRCOutputWriter parentOutputWriter)
+   public default DRCOutputWriter getCustomSimulationOutputWriter(DRCOutputWriter parentOutputWriter)
    {
       return null;
    }
