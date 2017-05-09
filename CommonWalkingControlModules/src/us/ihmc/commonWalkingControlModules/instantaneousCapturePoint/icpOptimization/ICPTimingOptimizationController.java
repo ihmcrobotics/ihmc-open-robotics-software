@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
@@ -39,23 +40,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = false;
 
-   private static final double SWING_DURATION_VARIATION = 0.001;
-   private static final double TIMING_ADJUSTMENT_WEIGHT = 1.0;
-   private static final double GRADIENT_THRESHOLD = 0.1;
-   private static final double GRADIENT_GAIN = 0.035;
-   private static final double TIMING_ADJUSTMENT_ATTENUATION = 0.5;
-   private static final int NUMBER_OF_GRADIENT_ITERATIONS = 15;
-   private static final int NUMBER_OF_GRADIENT_REDUCTIONS = 5;
-
-   private static final double MAX_TIME_FOR_CONTROLLER = 0.0008;
-
-   private static final double minimumSwingDuration = 0.2;
-   private static final double percentCostRequiredDecrease = 0.05;
-
-
-
-
-
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -67,17 +51,26 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final boolean useFootstepRegularization;
    private final boolean useFeedbackRegularization;
 
-   private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable("timingAdjustmentWeight", registry);
-   private final DoubleYoVariable gradientThreshold = new DoubleYoVariable("gradientThreshold", registry);
-   private final DoubleYoVariable gradientGain = new DoubleYoVariable("gradientGain", registry);
-   private final DoubleYoVariable timingAdjustmentAttenuation = new DoubleYoVariable("timingAdjustmentAttenuation", registry);
-   private final DoubleYoVariable timingSolutionLowerBound = new DoubleYoVariable("timingSolutionLowerBound", registry);
-   private final DoubleYoVariable timingSolutionUpperBound = new DoubleYoVariable("timingSolutionUpperBound", registry);
+   /** gradient descent variables */
+   private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentWeight", registry);
+   private final DoubleYoVariable gradientThresholdForAdjustment = new DoubleYoVariable(yoNamePrefix + "GradientThresholdForAdjustment", registry);
+   private final DoubleYoVariable gradientDescentGain = new DoubleYoVariable(yoNamePrefix + "GradientDescentGain", registry);
 
-   private final DoubleYoVariable controllerTimingDeadline = new DoubleYoVariable("controllerTimingDeadline", registry);
-   private final BooleanYoVariable controllerFinishedOnTime = new BooleanYoVariable("controllerFinishedOnTime", registry);
+   private final DoubleYoVariable timingAdjustmentAttenuation = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentAttenuation", registry);
+   private final DoubleYoVariable timingSolutionLowerBound = new DoubleYoVariable(yoNamePrefix + "TimingSolutionLowerBound", registry);
+   private final DoubleYoVariable timingSolutionUpperBound = new DoubleYoVariable(yoNamePrefix + "TimingSolutionUpperBound", registry);
+
+   private final DoubleYoVariable timingDeadline = new DoubleYoVariable(yoNamePrefix + "TimingDeadline", registry);
+   private final BooleanYoVariable finishedOnTime = new BooleanYoVariable(yoNamePrefix + "FinishedOnTime", registry);
+
+   private final double variationSizeToComputeTimingGradient;
+   private final int maxNumberOfGradientIterations;
+   private final int numberOfGradientReductions;
+   private final double minimumSwingDuration;
+   private static final double percentCostRequiredDecrease = 0.05;
 
 
+   /** other controller variables */
    private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
    private final BooleanYoVariable useAngularMomentum = new BooleanYoVariable(yoNamePrefix + "UseAngularMomentum", registry);
 
@@ -199,7 +192,8 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ,
+         WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ,
          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
@@ -273,11 +267,16 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
-      gradientGain.set(GRADIENT_GAIN);
-      timingAdjustmentAttenuation.set(TIMING_ADJUSTMENT_ATTENUATION);
-      timingAdjustmentWeight.set(TIMING_ADJUSTMENT_WEIGHT);
-      gradientThreshold.set(GRADIENT_THRESHOLD);
-      controllerTimingDeadline.set(MAX_TIME_FOR_CONTROLLER);
+      timingAdjustmentWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentWeight());
+      gradientThresholdForAdjustment.set(icpOptimizationParameters.getGradientThresholdForTimingAdjustment());
+      gradientDescentGain.set(icpOptimizationParameters.getGradientDescentGain());
+      timingAdjustmentAttenuation.set(icpOptimizationParameters.getTimingAdjustmentAttenuation());
+      timingDeadline.set(icpOptimizationParameters.getMaximumDurationForOptimization());
+
+      variationSizeToComputeTimingGradient = icpOptimizationParameters.getVariationSizeToComputeTimingGradient();
+      maxNumberOfGradientIterations = icpOptimizationParameters.getMaximumNumberOfGradientIterations();
+      numberOfGradientReductions = icpOptimizationParameters.getMaximumNumberOfGradientReductions();
+      minimumSwingDuration = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
@@ -302,7 +301,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          swingSplitFractions.add(swingSplitFraction);
       }
 
-      for (int i = 0; i < NUMBER_OF_GRADIENT_ITERATIONS; i++)
+      for (int i = 0; i < maxNumberOfGradientIterations; i++)
       {
          DoubleYoVariable swingTiming = new DoubleYoVariable(yoNamePrefix + "SwingTiming" + i, registry);
          DoubleYoVariable timingAdjustment = new DoubleYoVariable(yoNamePrefix + "TimingAdjustment" + i, registry);
@@ -789,7 +788,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
          numberOfGradientReductionIterations.set(0);
-         controllerFinishedOnTime.set(true);
+         finishedOnTime.set(true);
          costToGos.get(0).set(solver.getCostToGo());
       }
       else if (isInTransfer.getBooleanValue())
@@ -800,7 +799,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
          numberOfGradientReductionIterations.set(0);
-         controllerFinishedOnTime.set(true);
+         finishedOnTime.set(true);
          costToGos.get(0).set(solver.getCostToGo());
       }
       else
@@ -828,7 +827,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
    private NoConvergenceException solveGradientDescent(int numberOfFootstepsToConsider, double omega0)
    {
-      for (int i = 0; i < NUMBER_OF_GRADIENT_ITERATIONS; i++)
+      for (int i = 0; i < maxNumberOfGradientIterations; i++)
       {
          costToGos.get(i).setToNaN();
          costToGoGradients.get(i).setToNaN();
@@ -839,13 +838,13 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       costFunctionEstimator.reset();
       double timingLowerBound = minimumSwingDuration;
       double timingUpperBound = Double.POSITIVE_INFINITY;
-      boolean controllerFinishedOnTime = true;
+      boolean finishedOnTime = true;
 
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
 
       NoConvergenceException noConvergenceException = solveQP();
       double costToGoUnvaried = computeTotalCostToGo();
-      double variationSize = SWING_DURATION_VARIATION;
+      double variationSize = variationSizeToComputeTimingGradient;
 
       if (noConvergenceException != null)
          return noConvergenceException;
@@ -871,7 +870,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDuration.getDoubleValue());
 
       int iterationNumber = 0;
-      while (Math.abs(costToGoGradient) > gradientThreshold.getDoubleValue())
+      while (Math.abs(costToGoGradient) > gradientThresholdForAdjustment.getDoubleValue())
       {
          // update bounds on the gradient descent
          if (costToGoGradient > 0) // the current gradient is positive, which means that the timing solution must be less
@@ -885,16 +884,16 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
             break;
 
          // estimate time adjustment using gradient based methods
-         double timeAdjustment = -gradientGain.getDoubleValue() * costToGoGradient;
+         double timeAdjustment = -gradientDescentGain.getDoubleValue() * costToGoGradient;
 
          iterationNumber++;
          // exit loop if we've gone too many ticks
-         if (iterationNumber >= NUMBER_OF_GRADIENT_ITERATIONS)
+         if (iterationNumber >= maxNumberOfGradientIterations)
             break;
 
-         if (controllerTimer.getCurrentTime().getDoubleValue() > controllerTimingDeadline.getDoubleValue())
+         if (controllerTimer.getCurrentTime().getDoubleValue() > timingDeadline.getDoubleValue())
          { // if the controller has taken too long, notify us and break the loop
-            controllerFinishedOnTime = false;
+            finishedOnTime = false;
             break;
          }
 
@@ -924,12 +923,12 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
                timingUpperBound = Math.min(swingDuration.getDoubleValue(), timingUpperBound);
 
             // exit loop if we've gone too many ticks
-            if (reductionNumber >= NUMBER_OF_GRADIENT_REDUCTIONS || iterationNumber >= NUMBER_OF_GRADIENT_ITERATIONS)
+            if (reductionNumber >= numberOfGradientReductions || iterationNumber >= maxNumberOfGradientIterations)
                break;
 
-            if (controllerTimer.getCurrentTime().getDoubleValue() > controllerTimingDeadline.getDoubleValue())
+            if (controllerTimer.getCurrentTime().getDoubleValue() > timingDeadline.getDoubleValue())
             { // if the controller has taken too long, notify us and break the loop
-               controllerFinishedOnTime = false;
+               finishedOnTime = false;
                break;
             }
 
@@ -992,7 +991,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
       timingSolutionLowerBound.set(timingLowerBound);
       timingSolutionUpperBound.set(timingUpperBound);
-      this.controllerFinishedOnTime.set(controllerFinishedOnTime);
+      this.finishedOnTime.set(finishedOnTime);
 
       solver.setPreviousFeedbackDeltaSolutionFromCurrent();
       solver.setPreviousFootstepSolutionFromCurrent();
