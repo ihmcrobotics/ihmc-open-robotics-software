@@ -51,12 +51,17 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.initializeICPPlanForTransfer(walkingMessageHandler.peekTiming(0).getSwingTime(), walkingMessageHandler.peekTiming(0).getTransferTime(),
             finalTransferTime);
+
+      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
+      pelvisOrientationManager.setUpcomingFootstep(walkingMessageHandler.peek(0));
+      pelvisOrientationManager.initializeTransfer(transferToSide, footstepTiming.getTransferTime(), footstepTiming.getSwingTime());
 
       kneeAngleManager.beginStraightening(transferToSide);
    }
@@ -68,7 +73,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
 
-      if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration)
+      if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration &&
+            !kneeAngleManager.isLegCollapsed(transferToSide.getOppositeSide()))
       {
          kneeAngleManager.collapseLegDuringTransfer(transferToSide);
       }

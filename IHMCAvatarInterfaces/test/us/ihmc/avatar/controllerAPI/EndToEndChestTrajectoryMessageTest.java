@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +22,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -38,6 +42,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -151,7 +156,167 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 22.8)
+   @Test (timeout = 110000)
+   public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      
+      Random random = new Random(564574L);
+      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+      humanoidReferenceFrames.updateFrames();
+      
+      double trajectoryTime = 1.0;
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+      
+//      OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+//      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+//      RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+//      FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+//      desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame,Math.PI / 8.0, Math.PI / 8.0, Math.PI / 16.0);
+      
+      Quaternion desiredOrientation = new Quaternion();
+      desiredChestOrientation.getQuaternion(desiredOrientation);
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
+      SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
+      selectionMatrix3D.selectZAxis(false);
+      selectionMatrix3D.selectYAxis(false);
+      selectionMatrix3D.selectXAxis(false);
+      selectionMatrix3D.setSelectionFrame(pelvisZUpFrame);
+      chestTrajectoryMessage.setSelectionMatrix(selectionMatrix3D);
+      drcSimulationTestHelper.send(chestTrajectoryMessage);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
+      humanoidReferenceFrames.updateFrames();
+//      desiredRandomChestOrientation.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      
+      Vector3D rotationVector = new Vector3D();
+      desiredChestOrientation.getRotationVector(rotationVector);
+      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      rotationVector.get(rotationVectorMatrix);
+      
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
 
+      DenseMatrix64F result = new DenseMatrix64F(3, 1);
+      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      rotationVector.set(result);
+      desiredChestOrientation.setRotationVector(rotationVector);
+      
+      System.out.println(desiredChestOrientation);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0));
+      humanoidReferenceFrames.updateFrames();
+      desiredChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+//      assertControlErrorIsLow(scs, chest, 1.0e-2);
+      
+      assertNumberOfWaypoints(2, scs, chest);
+      humanoidReferenceFrames.updateFrames();
+      FrameOrientation achievedChestOrientation = new FrameOrientation();
+      achievedChestOrientation.setToZero(chest.getBodyFixedFrame());
+      achievedChestOrientation.changeFrame(pelvisZUpFrame);
+      desiredChestOrientation.changeFrame(pelvisZUpFrame);
+      EuclidCoreTestTools.assertQuaternionEquals(desiredChestOrientation.getQuaternion(), achievedChestOrientation.getQuaternion(), 1e-2);
+//      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 22.8)
+   @Test (timeout = 110000)
+   public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      
+      Random random = new Random(56457L);
+      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+      humanoidReferenceFrames.updateFrames();
+      
+      double trajectoryTime = 1.0;
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+      
+//      OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+//      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+//      RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+//      FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+//      desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame,Math.PI / 16.0, Math.PI / 20.0, Math.PI / 24.0);
+      
+      Quaternion desiredOrientation = new Quaternion();
+      desiredChestOrientation.getQuaternion(desiredOrientation);
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
+      SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
+      selectionMatrix3D.selectZAxis(random.nextBoolean());
+      selectionMatrix3D.selectYAxis(random.nextBoolean());
+      selectionMatrix3D.selectXAxis(random.nextBoolean());
+      selectionMatrix3D.setSelectionFrame(pelvisZUpFrame);
+      chestTrajectoryMessage.setSelectionMatrix(selectionMatrix3D);
+      drcSimulationTestHelper.send(chestTrajectoryMessage);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
+      humanoidReferenceFrames.updateFrames();
+//      desiredRandomChestOrientation.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      
+      Vector3D rotationVector = new Vector3D();
+      desiredChestOrientation.getRotationVector(rotationVector);
+      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      rotationVector.get(rotationVectorMatrix);
+      
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
+      
+      DenseMatrix64F result = new DenseMatrix64F(3, 1);
+      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      rotationVector.set(result);
+      desiredChestOrientation.setRotationVector(rotationVector);
+      
+      System.out.println(desiredChestOrientation);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0));
+      humanoidReferenceFrames.updateFrames();
+      desiredChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+//      assertControlErrorIsLow(scs, chest, 1.0e-2);
+      
+      assertNumberOfWaypoints(2, scs, chest);
+      humanoidReferenceFrames.updateFrames();
+      FrameOrientation achievedChestOrientation = new FrameOrientation();
+      achievedChestOrientation.setToZero(chest.getBodyFixedFrame());
+      achievedChestOrientation.changeFrame(pelvisZUpFrame);
+      desiredChestOrientation.changeFrame(pelvisZUpFrame);
+      EuclidCoreTestTools.assertQuaternionEquals(desiredChestOrientation.getQuaternion(), achievedChestOrientation.getQuaternion(), 0.04);
+//      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
+   }
+   
    @ContinuousIntegrationTest(estimatedDuration = 19.0)
    @Test(timeout = 95000)
    public void testMultipleTrajectoryPoints() throws Exception
@@ -1127,5 +1292,29 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   public static void main(String[] args)
+   {
+      RigidBodyTransform t1 = new RigidBodyTransform();
+      Vector3D rotationVector = new Vector3D();
+      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+
+      t1.appendYawRotation(Math.PI / 8.0);
+      t1.getRotation(rotationVector);
+      rotationVector.get(rotationVectorMatrix);
+      
+      SelectionMatrix3D selectionMatrix3d = new SelectionMatrix3D();
+      selectionMatrix3d.selectZAxis(false);
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      selectionMatrix3d.getFullSelectionMatrixInFrame(null, selectionMatrix);
+      
+      DenseMatrix64F result = new DenseMatrix64F(3, 1);
+      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      
+      System.out.println(result);
+      rotationVector.set(result);
+      RotationMatrix rm = new RotationMatrix(rotationVector);
+      System.out.println(rm);
    }
 }

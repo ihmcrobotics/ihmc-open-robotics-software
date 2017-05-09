@@ -124,6 +124,11 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       return weightMatrix;
    }
 
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
    public FrameSE3TrajectoryPointList getTrajectoryPointList()
    {
       return trajectoryPointList;

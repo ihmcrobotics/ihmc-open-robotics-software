@@ -451,4 +451,43 @@ public class SelectionMatrix3D
    {
       return "(" + xSelected + ", " + ySelected + ", " + zSelected + ") " + selectionFrame;
    }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((selectionFrame == null) ? 0 : selectionFrame.hashCode());
+      result = prime * result + (xSelected ? 1231 : 1237);
+      result = prime * result + (ySelected ? 1231 : 1237);
+      result = prime * result + (zSelected ? 1231 : 1237);
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      SelectionMatrix3D other = (SelectionMatrix3D) obj;
+      if (selectionFrame == null)
+      {
+         if (other.selectionFrame != null)
+            return false;
+      }
+      else if (selectionFrame.getNameBasedHashCode() != other.selectionFrame.getNameBasedHashCode())
+         return false;
+      if (xSelected != other.xSelected)
+         return false;
+      if (ySelected != other.ySelected)
+         return false;
+      if (zSelected != other.zSelected)
+         return false;
+      return true;
+   }
+   
 }

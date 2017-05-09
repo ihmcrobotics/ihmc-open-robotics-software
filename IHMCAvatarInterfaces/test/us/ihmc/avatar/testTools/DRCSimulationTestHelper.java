@@ -268,6 +268,16 @@ public class DRCSimulationTestHelper
       avatarSimulation.addRobotControllerOnControllerThread(controller);
    }
 
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
+   public void addRobotControllerOnEstimatorThread(RobotController controller)
+   {
+      avatarSimulation.addRobotControllerOnEstimatorThread(controller);
+   }
+
    public CommonAvatarEnvironmentInterface getTestEnviroment()
    {
       return testEnvironment;
