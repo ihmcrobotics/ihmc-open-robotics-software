@@ -37,6 +37,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.WeightMatrix3D;
+import us.ihmc.robotics.screwTheory.WeightMatrix6D;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
@@ -52,6 +54,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
+   private final YoFrameVector yoDefaultAngularWeight;
+   private final YoFrameVector yoDefaultLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
@@ -125,6 +129,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
+      yoDefaultAngularWeight = new YoFrameVector(prefix + "DefaultAngularWeight", null, registry);
+      yoDefaultLinearWeight = new YoFrameVector(prefix + "DefaultLinearWeight", null, registry);
       yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
       yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);
       yoDesiredPoint = new YoFramePoint(prefix + "DesiredPoint", worldFrame, registry);
@@ -180,33 +186,42 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       if (angularWeight != null)
       {
-         yoAngularWeight.set(angularWeight);
+         yoDefaultAngularWeight.set(angularWeight);
          hasAngularWeight.set(true);
       }
       else
       {
-         yoAngularWeight.setToZero();
+         yoDefaultAngularWeight.setToZero();
          hasAngularWeight.set(false);
       }
 
       if (linearWeight != null)
       {
-         yoLinearWeight.set(linearWeight);
+         yoDefaultLinearWeight.set(linearWeight);
          hasLinearWeight.set(true);
       }
       else
       {
-         yoLinearWeight.setToZero();
+         yoDefaultLinearWeight.setToZero();
          hasLinearWeight.set(false);
       }
+      yoDefaultAngularWeight.get(angularWeight);
+      yoAngularWeight.set(angularWeight);
+      yoDefaultLinearWeight.get(this.linearWeight);
+      yoLinearWeight.set(this.linearWeight);
    }
 
    public void setWeight(double weight)
    {
       hasAngularWeight.set(true);
-      yoAngularWeight.set(weight, weight, weight);
+      yoDefaultAngularWeight.set(weight, weight, weight);
       hasLinearWeight.set(true);
-      yoLinearWeight.set(weight, weight, weight);
+      yoDefaultLinearWeight.set(weight, weight, weight);
+      
+      yoDefaultAngularWeight.get(angularWeight);
+      yoAngularWeight.set(angularWeight);
+      yoDefaultLinearWeight.get(this.linearWeight);
+      yoLinearWeight.set(this.linearWeight);
    }
 
    public void setGains(YoOrientationPIDGainsInterface orientationGains, YoPositionPIDGainsInterface positionGains)
@@ -465,6 +480,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
          selectionMatrix.setToAngularSelectionOnly();
          selectionMatrix.setAngularPart(command.getSelectionMatrix());
+         
+         WeightMatrix3D weightMatrix = command.getWeightMatrix();
+         double xAxisWeight = Double.isNaN(weightMatrix.getXAxisWeight()) ? yoDefaultAngularWeight.getX() : weightMatrix.getXAxisWeight();
+         double yAxisWeight = Double.isNaN(weightMatrix.getYAxisWeight()) ? yoDefaultAngularWeight.getY() : weightMatrix.getYAxisWeight();
+         double zAxisWeight = Double.isNaN(weightMatrix.getZAxisWeight()) ? yoDefaultAngularWeight.getZ() : weightMatrix.getZAxisWeight();
+         
+         yoAngularWeight.set(xAxisWeight, yAxisWeight, zAxisWeight);
 
          trackingOrientation.set(true);
          trackingPosition.set(false);
@@ -515,6 +537,21 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             queueInitialPoint(initialPose);
 
          selectionMatrix.set(command.getSelectionMatrix());
+         
+         WeightMatrix6D weightMatrix = command.getWeightMatrix();
+         WeightMatrix3D linearPart = weightMatrix.getLinearPart();
+         double linearXAxisWeight = Double.isNaN(linearPart.getXAxisWeight()) ? yoDefaultLinearWeight.getX() : linearPart.getXAxisWeight();
+         double linearYAxisWeight = Double.isNaN(linearPart.getYAxisWeight()) ? yoDefaultLinearWeight.getY() : linearPart.getYAxisWeight();
+         double linearZAxisWeight = Double.isNaN(linearPart.getZAxisWeight()) ? yoDefaultLinearWeight.getZ() : linearPart.getZAxisWeight();
+         
+         yoLinearWeight.set(linearXAxisWeight, linearYAxisWeight, linearZAxisWeight);
+         
+         WeightMatrix3D angularPart = weightMatrix.getAngularPart();
+         double angularXAxisWeight = Double.isNaN(angularPart.getXAxisWeight()) ? yoDefaultAngularWeight.getX() : angularPart.getXAxisWeight();
+         double angularYAxisWeight = Double.isNaN(angularPart.getYAxisWeight()) ? yoDefaultAngularWeight.getY() : angularPart.getYAxisWeight();
+         double angularZAxisWeight = Double.isNaN(angularPart.getZAxisWeight()) ? yoDefaultAngularWeight.getZ() : angularPart.getZAxisWeight();
+         
+         yoAngularWeight.set(angularXAxisWeight, angularYAxisWeight, angularZAxisWeight);
 
          trackingOrientation.set(selectionMatrix.isAngularPartActive());
          trackingPosition.set(selectionMatrix.isLinearPartActive());
