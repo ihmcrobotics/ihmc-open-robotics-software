@@ -188,14 +188,20 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
       spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
       desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
       desiredPose.getPositionIncludingFrame(desiredAnklePosition);
+
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+
       desiredPose.setPosition(desiredAnklePosition);
       changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
       desiredPose.getPositionIncludingFrame(desiredPosition);
+
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 
    private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();
