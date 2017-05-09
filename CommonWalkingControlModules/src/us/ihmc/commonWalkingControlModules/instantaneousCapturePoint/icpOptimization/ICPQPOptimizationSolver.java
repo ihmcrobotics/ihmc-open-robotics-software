@@ -860,6 +860,12 @@ public class ICPQPOptimizationSolver
    {
       CommonOps.scale(-1.0, solverInput_h);
 
+      for (int i = 0; i < solverInput_H.numCols; i++)
+      {
+         if (solverInput_H.get(i, i) < 0.0)
+            throw new RuntimeException("Hey this is bad.");
+      }
+
       if (!useQuadProg)
       {
          activeSetSolver.clear();
@@ -933,12 +939,26 @@ public class ICPQPOptimizationSolver
          MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);
    }
 
+   public void setPreviousFootstepSolutionFromCurrent()
+   {
+      if (indexHandler.useStepAdjustment())
+      {
+         for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
+            MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);
+      }
+   }
+
    /**
     * Sets the location of the previous CMP feedback for the feedback regularization task.
     *
     * @param feedbackDeltaSolution amount of CMP feedback.
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F feedbackDeltaSolution)
+   {
+      previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
+   }
+
+   public void setPreviousFeedbackDeltaSolutionFromCurrent()
    {
       previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
    }
