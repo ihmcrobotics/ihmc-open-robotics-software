@@ -65,7 +65,7 @@ public class Point2dInConvexPolygon2d extends Point2D
       if (x==0 && y==0)
          x=1; //as eccentricity=0
       Line2d ray = new Line2d(new Point2D(0,0), new Vector2D(x,y));
-      Point2D[] edgePoints = polygon.intersectionWithRayCopy(ray);
+      Point2D[] edgePoints = polygon.intersectionWithRay(ray);
       if(edgePoints.length!=1)
          throw new RuntimeException("intersecting points should be 1, but we get" + edgePoints.length);
       return edgePoints[0];

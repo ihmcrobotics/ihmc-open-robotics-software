@@ -95,7 +95,7 @@ public class PlanarRegionTerrainObjectTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 4.0)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
       Random random = new Random(1776L);

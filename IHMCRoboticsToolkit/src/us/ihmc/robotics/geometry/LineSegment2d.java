@@ -369,7 +369,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
    {
-      return ConvexPolygonTools.intersection(this, convexPolygon);
+      return convexPolygon.intersectionWith(this);
    }
 
    public double distance(Line2d line)

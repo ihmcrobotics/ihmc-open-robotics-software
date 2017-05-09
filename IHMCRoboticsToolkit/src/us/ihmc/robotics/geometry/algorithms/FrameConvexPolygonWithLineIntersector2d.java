@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.algorithms;
 
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -29,8 +28,8 @@ public class FrameConvexPolygonWithLineIntersector2d
    public void intersectWithLine(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2d frameLine2d)
    {
       checkAndSetFrames(frameConvexPolygon2d, frameLine2d);
-      int intersectionTypeInt = ConvexPolygon2dCalculator.intersectionWithLine(frameLine2d.getLine2d(), intersectionPointOne.getPoint(),
-                                                                               intersectionPointTwo.getPoint(), frameConvexPolygon2d.getConvexPolygon2d());
+      int intersectionTypeInt = frameConvexPolygon2d.getConvexPolygon2d().intersectionWith(frameLine2d.getLine2d(), intersectionPointOne.getPoint(),
+                                                                                           intersectionPointTwo.getPoint());
 
       packIntersectionType(intersectionTypeInt);
    }
@@ -43,8 +42,8 @@ public class FrameConvexPolygonWithLineIntersector2d
    public void intersectWithRay(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2d frameRay2d)
    {
       checkAndSetFrames(frameConvexPolygon2d, frameRay2d);
-      int intersectionTypeInt = ConvexPolygon2dCalculator.intersectionWithRay(frameRay2d.getLine2d(), intersectionPointOne.getPoint(),
-                                                                               intersectionPointTwo.getPoint(), frameConvexPolygon2d.getConvexPolygon2d());
+      int intersectionTypeInt = frameConvexPolygon2d.getConvexPolygon2d().intersectionWithRay(frameRay2d.getLine2d(), intersectionPointOne.getPoint(),
+                                                                                              intersectionPointTwo.getPoint());
 
       packIntersectionType(intersectionTypeInt);
    }
