@@ -73,8 +73,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
    private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
 
-   private final BooleanYoVariable swingSpeedUpEnabled = new BooleanYoVariable(yoNamePrefix + "SwingSpeedUpEnabled", registry);
-
    private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
 
@@ -96,7 +94,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final DoubleYoVariable initialTime = new DoubleYoVariable(yoNamePrefix + "InitialTime", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(yoNamePrefix + "TimeInCurrentState", registry);
    private final DoubleYoVariable timeRemainingInState = new DoubleYoVariable(yoNamePrefix + "TimeRemainingInState", registry);
-   private final DoubleYoVariable speedUpTime = new DoubleYoVariable(yoNamePrefix + "SpeedUpTime", registry);
    private final DoubleYoVariable minimumTimeRemaining = new DoubleYoVariable(yoNamePrefix + "MinimumTimeRemaining", registry);
 
    private final FramePoint2d currentICP = new FramePoint2d();
@@ -189,9 +186,8 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double mass, double gravityZ,
+         double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
@@ -240,11 +236,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
-
-      if (walkingControllerParameters != null)
-         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-      else
-         swingSpeedUpEnabled.set(false);
 
       dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
@@ -469,11 +460,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
-      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
-      {
-         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         this.speedUpTime.add(speedUpTime);
-      }
    }
 
    /**
@@ -507,7 +493,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
-      speedUpTime.set(0.0);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
    }
@@ -587,7 +572,6 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
       this.initialTime.set(initialTime);
-      speedUpTime.set(0.0);
 
       setBeginningOfStateICP(solutionHandler.getControllerReferenceICP(), solutionHandler.getControllerReferenceICPVelocity());
 
@@ -614,7 +598,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
    private void computeTimeInCurrentState(double currentTime)
    {
-      timeInCurrentState.set(currentTime - initialTime.getDoubleValue() + speedUpTime.getDoubleValue());
+      timeInCurrentState.set(currentTime - initialTime.getDoubleValue());
    }
 
    private void computeTimeRemainingInState()
