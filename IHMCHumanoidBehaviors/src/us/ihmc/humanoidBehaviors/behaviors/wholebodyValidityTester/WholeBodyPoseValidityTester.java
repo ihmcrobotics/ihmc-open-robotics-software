@@ -13,7 +13,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -64,7 +63,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(10);   
    
-   private int numberOfCntForTimeExpire = 100;
+   private int numberOfCntForTimeExpire = 50;
    private int cnt = 0;
    
    private boolean isSendingPacket = false;   
@@ -78,9 +77,12 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    protected FullHumanoidRobotModel ikFullRobotModel;
    protected RobotCollisionModel robotCollisionModel;
    
+   public static int numberOfTest = 0;
+   
    public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       super(null, outgoingCommunicationBridge);
+      
       this.fullRobotModel = fullRobotModel;
       
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
@@ -415,7 +417,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                
                isReceived = false;               
                isSendingPacket = false;
-                 
+                               
                setIsDone(true);
             }
          }
@@ -425,6 +427,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      numberOfTest++;
+      
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);
@@ -609,7 +613,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public boolean isValid()
    {
       getCollisionResult();
-      
+            
       if (isCollisionFree == false || isGoodIKSolution == false)
       {
          if(false)
