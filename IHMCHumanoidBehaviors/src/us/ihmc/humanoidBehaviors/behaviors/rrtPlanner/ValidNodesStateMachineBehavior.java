@@ -18,10 +18,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpandingStates>
-{      
-   private FullHumanoidRobotModel fullRobotModel;
-   private WholeBodyControllerParameters wholeBodyControllerParameters;
-         
+{               
    private WaitingResultBehavior waitingResultBehavior;
    private TestDoneBehavior testDoneBehavior;
    
@@ -48,10 +45,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       if(DEBUG)
          PrintTools.info("number Of nodes "+nodes.size());
       this.nodes = nodes;
-            
-      this.fullRobotModel = fullRobotModel;
-      this.wholeBodyControllerParameters = wholeBodyControllerParameters;
-      
+                  
       testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
       testDoneBehavior = new TestDoneBehavior(communicationBridge);
