@@ -10,7 +10,7 @@ import us.ihmc.communication.util.NetworkPorts;
 
 public class DRCNetworkModuleParameters
 {
-   private boolean useNetworkProcessor;
+   private boolean useNetworkProcessor = true;
    private boolean useController;
    private boolean useSensorModule;
    private boolean useSimulatedSensors;
