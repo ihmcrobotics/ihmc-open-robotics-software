@@ -274,7 +274,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
    {
-      weightMatrixToPack.clearSelection();
+      weightMatrixToPack.clear();
       if (weightMatrix != null)
          weightMatrix.getWeightMatrix(weightMatrixToPack);
    }

@@ -187,17 +187,69 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
       this.zWeight = zWeight;
    }
    
+   
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (int) (selectionFrameId ^ (selectionFrameId >>> 32));
+      long temp;
+      temp = Double.doubleToLongBits(xWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(yWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(zWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      WeightMatrix3DMessage other = (WeightMatrix3DMessage) obj;
+      return epsilonEquals(other, 1e-4);
+   }
+
    @Override
    public boolean epsilonEquals(WeightMatrix3DMessage other, double epsilon)
    {
       if (selectionFrameId != other.selectionFrameId)
          return false;
-      if (xWeight != other.xWeight)
+      
+      if(Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct
+      {
          return false;
-      if (yWeight != other.yWeight)
+      }
+
+      if(Double.isNaN(yWeight) ^ Double.isNaN(other.yWeight)) // xor is correct
+      {
          return false;
-      if (zWeight != other.zWeight)
+      }
+      
+      if(Double.isNaN(zWeight) ^ Double.isNaN(other.zWeight)) // xor is correct
+      {
          return false;
+      }
+      
+      if (!Double.isNaN(xWeight) && !Double.isNaN(other.xWeight) && xWeight != other.xWeight)
+      {
+         return false;
+      }
+      if (!Double.isNaN(yWeight) && !Double.isNaN(other.yWeight) && yWeight != other.yWeight)
+      {
+         return false;
+      }
+      if (!Double.isNaN(zWeight) && !Double.isNaN(other.zWeight) && zWeight != other.zWeight)
+      {
+         return false;
+      }
 
       return true;
    }
