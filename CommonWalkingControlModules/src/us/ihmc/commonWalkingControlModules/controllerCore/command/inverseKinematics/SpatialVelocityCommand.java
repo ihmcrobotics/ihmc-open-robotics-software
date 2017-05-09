@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -24,6 +23,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.WeightMatrix3D;
+import us.ihmc.robotics.screwTheory.WeightMatrix6D;
 
 /**
  * {@link SpatialVelocityCommand} is a command meant to be submitted to the
@@ -60,7 +61,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * Weights on a per component basis to use in the optimization function. A higher weight means
     * higher priority of this task.
     */
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(Twist.SIZE, 1);
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
     * that are to be controlled. It is initialized such that the controller will by default control
@@ -143,7 +144,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
-      setWeights(command.getWeightVector());
+      setWeights(command.getWeightMatrix());
 
       command.getSelectionMatrix(selectionMatrix);
       base = command.getBase();
@@ -523,8 +524,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double weight)
    {
-      for (int i = 0; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, weight);
+      weightMatrix.setLinearWeights(weight, weight, weight);
+      weightMatrix.setAngularWeights(weight, weight, weight);
    }
 
    /**
@@ -540,10 +541,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double angular, double linear)
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, angular);
-      for (int i = 3; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, linear);
+      weightMatrix.setLinearWeights(linear, linear, linear);
+      weightMatrix.setAngularWeights(angular, angular, angular);
    }
 
    /**
@@ -559,13 +558,11 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
-   public void setWeights(DenseMatrix64F weightVector)
+   public void setWeights(WeightMatrix6D weightMartrix)
    {
-      for (int i = 0; i < Twist.SIZE; i++)
-      {
-         this.weightVector.set(i, 0, weightVector.get(i, 0));
-      }
+      this.weightMatrix.set(weightMartrix);
    }
+
 
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom.
@@ -579,9 +576,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAngularWeights(Tuple3DReadOnly angular)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
+      weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
 
    /**
@@ -596,9 +591,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
    /**
@@ -614,12 +607,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
+      weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
 
    /**
@@ -633,8 +622,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAngularWeightsToZero()
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -648,8 +636,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -664,42 +651,32 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public boolean isHardConstraint()
    {
-      for (int i = 0; i < Twist.SIZE; i++)
+      WeightMatrix3D angularPart = weightMatrix.getAngularPart();
+      if(angularPart.getXAxisWeight() == HARD_CONSTRAINT || angularPart.getYAxisWeight() == HARD_CONSTRAINT || angularPart.getZAxisWeight() == HARD_CONSTRAINT)
       {
-         if (weightVector.get(i, 0) == HARD_CONSTRAINT)
-            return true;
+         return true;
       }
+      
+      WeightMatrix3D linearPart = weightMatrix.getLinearPart();
+      if(linearPart.getXAxisWeight() == HARD_CONSTRAINT || linearPart.getYAxisWeight() == HARD_CONSTRAINT || linearPart.getZAxisWeight() == HARD_CONSTRAINT)
+      {
+         return true;
+      }
+      
       return false;
    }
-
    /**
-    * Packs the weights to use for this command in {@code weightMatrixToPack} as follows:
+    * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
+    * this command.
     * 
-    * <pre>
-    *     / w0 0  0  0  0  0  \
-    *     | 0  w1 0  0  0  0  |
-    * W = | 0  0  w2 0  0  0  |
-    *     | 0  0  0  w3 0  0  |
-    *     | 0  0  0  0  w4 0  |
-    *     \ 0  0  0  0  0  w5 /
-    * </pre>
-    * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
-    * </p>
-    * <p>
-    * The packed matrix is a 6-by-6 matrix independently from the selection matrix.
-    * </p>
-    * 
-    * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
-    *           reshaped to ensure proper size. Modified.
+    * @param destinationFrame the reference frame in which the weight matrix should be expressed
+    *           in.
+    * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is
+    *           stored in. Modified.
     */
-   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
    {
-      weightMatrixToPack.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(weightMatrixToPack);
-      for (int i = 0; i < Twist.SIZE; i++)
-         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
+      weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
 
    /**
@@ -720,9 +697,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * 
     * @return the reference to the weights to use with this command.
     */
-   public DenseMatrix64F getWeightVector()
+   public WeightMatrix6D getWeightVector()
    {
-      return weightVector;
+      return weightMatrix;
    }
 
    /**
