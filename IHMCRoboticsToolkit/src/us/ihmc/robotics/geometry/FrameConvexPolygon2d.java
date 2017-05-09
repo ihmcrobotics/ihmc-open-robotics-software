@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author IHMC Biped Team
  * @version 1.0
  */
-public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
+public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon2d, ConvexPolygon2d>
 {
    protected final ConvexPolygon2d convexPolygon;
 
@@ -906,13 +906,11 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return new FramePoint2d(referenceFrame, closestVertexCopy);
    }
 
-   @Override
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       convexPolygon.applyTransformAndProjectToXYPlane(transform);
    }
 
-   @Override
    public FrameConvexPolygon2d applyTransformCopy(Transform transform)
    {
       FrameConvexPolygon2d copy = new FrameConvexPolygon2d(this);
@@ -920,7 +918,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return copy;
    }
 
-   @Override
    public FrameConvexPolygon2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       FrameConvexPolygon2d copy = new FrameConvexPolygon2d(this);
@@ -928,7 +925,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return copy;
    }
 
-   @Override
    public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -940,7 +936,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       applyTransformAndProjectToXYPlane(temporaryTransformToDesiredFrame);
    }
 
-   @Override
    public FrameConvexPolygon2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
    {
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(this);
@@ -963,14 +958,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   @Override
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
       convexPolygon.orthogonalProjection(point.getPoint());
    }
 
-   @Override
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -996,7 +989,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    /**
     * @deprecated Creates garbage. Use an instance of FrameConvexPolygonWithLineIntersector.
     */
-   @Override
    public FramePoint2d[] intersectionWith(FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
@@ -1062,7 +1054,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   @Override
    public FramePoint2d[] intersectionWith(FrameLineSegment2d lineSegment)
    {
       //TODO: Memory inefficient. Don't create new objects...
@@ -1080,7 +1071,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   @Override
    public FrameConvexPolygon2d intersectionWith(FrameConvexPolygon2d secondConvexPolygon)
    {
       checkReferenceFrameMatch(secondConvexPolygon);
@@ -1100,7 +1090,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return success;
    }
 
-   @Override
    public double distance(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -1123,21 +1112,18 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       convexPolygon.getClosestEdge(closestEdgeToPack.lineSegment, point.getPoint());
    }
 
-   @Override
    public double distance(FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
       return convexPolygon.distance(line.line);
    }
 
-   @Override
    public double distance(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
       return convexPolygon.distance(lineSegment.lineSegment);
    }
 
-   @Override
    public double distance(FrameConvexPolygon2d secondConvexPolygon)
    {
       checkReferenceFrameMatch(secondConvexPolygon);

@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /**
  * @author Twan Koolen
  */
-public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
+public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
 {
    private RigidBodyTransform temporaryTransformToDesiredFrame;
    protected final Line2d line;
@@ -256,13 +256,11 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return new FrameLine2d(referenceFrame, perpLine2d);
    }
 
-   @Override
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       line.applyTransformAndProjectToXYPlane(temporaryTransformToDesiredFrame);
    }
 
-   @Override
    public FrameLine2d applyTransformCopy(Transform transform)
    {
       FrameLine2d copy = new FrameLine2d(this);
@@ -270,7 +268,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return copy;
    }
 
-   @Override
    public FrameLine2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       FrameLine2d copy = new FrameLine2d(this);
@@ -278,7 +275,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return copy;
    }
 
-   @Override
    public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
    {
       if (desiredFrame == referenceFrame)
@@ -292,7 +288,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       referenceFrame = desiredFrame;
    }
 
-   @Override
    public FrameLine2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
    {
       FrameLine2d copy = new FrameLine2d(this);
@@ -327,7 +322,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return "" + this.line;
    }
 
-   @Override
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -335,7 +329,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       point.set(projected.getX(), projected.getY());
    }
 
-   @Override
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -352,7 +345,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       this.line.intersectionWith(line.getLine2d(), intersectionToPack.getPoint());
    }
 
-   @Override
    public FramePoint2d intersectionWith(FrameLine2d secondLine)
    {
       checkReferenceFrameMatch(secondLine);
@@ -361,7 +353,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return new FramePoint2d(secondLine.getReferenceFrame(), intersection);
    }
 
-   @Override
    public FramePoint2d intersectionWith(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
@@ -370,7 +361,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return new FramePoint2d(lineSegment.getReferenceFrame(), intersection);
    }
 
-   @Override
    public FramePoint2d[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
@@ -389,7 +379,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return ret;
    }
 
-   @Override
    public double distance(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
@@ -397,7 +386,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return this.line.distance(point.getPoint());
    }
 
-   @Override
    public double distance(FrameLine2d secondLine)
    {
       checkReferenceFrameMatch(secondLine);
@@ -405,7 +393,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return this.line.distance(secondLine.line);
    }
 
-   @Override
    public double distance(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
@@ -413,7 +400,6 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return this.line.distance(lineSegment.lineSegment);
    }
 
-   @Override
    public double distance(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
