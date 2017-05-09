@@ -35,7 +35,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
-      weightMatrix.clearSelection();
+      weightMatrix.clear();
    }
 
    public void clear(ReferenceFrame referenceFrame)
@@ -43,7 +43,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       clearQueuableCommandVariables();
       trajectoryPointList.clear(referenceFrame);
       selectionMatrix.resetSelection();
-      weightMatrix.clearSelection();
+      weightMatrix.clear();
    }
 
    @Override
@@ -112,6 +112,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public WeightMatrix3D getWeightMatrix()
    {
       return weightMatrix;
+   }
+   
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      this.weightMatrix.set(weightMatrix);
    }
 
    public FrameSO3TrajectoryPointList getTrajectoryPointList()

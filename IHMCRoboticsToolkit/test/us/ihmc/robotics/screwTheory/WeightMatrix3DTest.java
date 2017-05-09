@@ -32,53 +32,53 @@ public class WeightMatrix3DTest
    {
       Random random = new Random(123423L);
 
-      WeightMatrix3D WeightMatrix3D = new WeightMatrix3D();
-      assertNull(WeightMatrix3D.getSelectionFrame());
-      assertTrue(Double.isNaN(WeightMatrix3D.getXAxisWeight()));
-      assertTrue(Double.isNaN(WeightMatrix3D.getYAxisWeight()));
-      assertTrue(Double.isNaN(WeightMatrix3D.getZAxisWeight()));
+      WeightMatrix3D weightMatrix3D = new WeightMatrix3D();
+      assertNull(weightMatrix3D.getSelectionFrame());
+      assertTrue(Double.isNaN(weightMatrix3D.getXAxisWeight()));
+      assertTrue(Double.isNaN(weightMatrix3D.getYAxisWeight()));
+      assertTrue(Double.isNaN(weightMatrix3D.getZAxisWeight()));
 
       for (int i = 0; i < ITERATIONS; i++)
       {
          double xWeight = random.nextDouble();
          double yWeight = random.nextDouble();
          double zWeight = random.nextDouble();
-         WeightMatrix3D.setWeights(xWeight, yWeight, zWeight);
-         assertEquals(xWeight, WeightMatrix3D.getXAxisWeight(), 1e-8);
-         assertEquals(yWeight, WeightMatrix3D.getYAxisWeight(), 1e-8);
-         assertEquals(zWeight, WeightMatrix3D.getZAxisWeight(), 1e-8);
+         weightMatrix3D.setWeights(xWeight, yWeight, zWeight);
+         assertEquals(xWeight, weightMatrix3D.getXAxisWeight(), 1e-8);
+         assertEquals(yWeight, weightMatrix3D.getYAxisWeight(), 1e-8);
+         assertEquals(zWeight, weightMatrix3D.getZAxisWeight(), 1e-8);
 
          xWeight = random.nextDouble();
          yWeight = random.nextDouble();
          zWeight = random.nextDouble();
 
-         WeightMatrix3D.setXAxisWeight(xWeight);
-         WeightMatrix3D.setYAxisWeight(yWeight);
-         WeightMatrix3D.setZAxisWeight(zWeight);
-         assertEquals(xWeight, WeightMatrix3D.getXAxisWeight(), 1e-8);
-         assertEquals(yWeight, WeightMatrix3D.getYAxisWeight(), 1e-8);
-         assertEquals(zWeight, WeightMatrix3D.getZAxisWeight(), 1e-8);
+         weightMatrix3D.setXAxisWeight(xWeight);
+         weightMatrix3D.setYAxisWeight(yWeight);
+         weightMatrix3D.setZAxisWeight(zWeight);
+         assertEquals(xWeight, weightMatrix3D.getXAxisWeight(), 1e-8);
+         assertEquals(yWeight, weightMatrix3D.getYAxisWeight(), 1e-8);
+         assertEquals(zWeight, weightMatrix3D.getZAxisWeight(), 1e-8);
 
-         WeightMatrix3D.clearSelection();
-         assertNull(WeightMatrix3D.getSelectionFrame());
-         assertTrue(Double.isNaN(WeightMatrix3D.getXAxisWeight()));
-         assertTrue(Double.isNaN(WeightMatrix3D.getYAxisWeight()));
-         assertTrue(Double.isNaN(WeightMatrix3D.getZAxisWeight()));
+         weightMatrix3D.clear();
+         assertNull(weightMatrix3D.getSelectionFrame());
+         assertTrue(Double.isNaN(weightMatrix3D.getXAxisWeight()));
+         assertTrue(Double.isNaN(weightMatrix3D.getYAxisWeight()));
+         assertTrue(Double.isNaN(weightMatrix3D.getZAxisWeight()));
 
          ReferenceFrame randomFrame = ReferenceFrame.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
-         WeightMatrix3D.setSelectionFrame(randomFrame);
-         assertTrue(randomFrame == WeightMatrix3D.getSelectionFrame());
+         weightMatrix3D.setSelectionFrame(randomFrame);
+         assertTrue(randomFrame == weightMatrix3D.getSelectionFrame());
 
-         WeightMatrix3D.clearSelectionFrame();
-         assertNull(WeightMatrix3D.getSelectionFrame());
+         weightMatrix3D.clearSelectionFrame();
+         assertNull(weightMatrix3D.getSelectionFrame());
 
-         WeightMatrix3D.setSelectionFrame(randomFrame);
-         WeightMatrix3D.clearSelection();
-         assertNull(WeightMatrix3D.getSelectionFrame());
+         weightMatrix3D.setSelectionFrame(randomFrame);
+         weightMatrix3D.clear();
+         assertNull(weightMatrix3D.getSelectionFrame());
 
-         WeightMatrix3D.setSelectionFrame(randomFrame);
-         WeightMatrix3D.clearSelection();
-         assertNull(WeightMatrix3D.getSelectionFrame());
+         weightMatrix3D.setSelectionFrame(randomFrame);
+         weightMatrix3D.clear();
+         assertNull(weightMatrix3D.getSelectionFrame());
       }
    }
 

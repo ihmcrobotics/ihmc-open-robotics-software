@@ -12,6 +12,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.WeightMatrix3D;
+import us.ihmc.robotics.screwTheory.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryControllerCommand<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
@@ -19,7 +20,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
 {
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-   private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;
@@ -41,7 +42,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
-      weightMatrix.clearSelection();
+      weightMatrix.clear();
    }
 
    public void clear(ReferenceFrame referenceFrame)
@@ -49,7 +50,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       trajectoryPointList.clear(referenceFrame);
       clearQueuableCommandVariables();
       selectionMatrix.resetSelection();
-      weightMatrix.clearSelection();
+      weightMatrix.clear();
    }
 
    @Override
@@ -74,8 +75,10 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
       ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrixFrameId());
-      weightMatrix.setSelectionFrame(weightSelectionFrame);
+      
+      ReferenceFrame angularWeightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrixFrameId());
+      ReferenceFrame linearWeightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrixFrameId());
+      weightMatrix.setSelectionFrames(angularWeightSelectionFrame, linearWeightSelectionFrame);
    }
    
    @Override
@@ -119,7 +122,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       return selectionMatrix;
    }
    
-   public WeightMatrix3D getWeightMatrix()
+   public WeightMatrix6D getWeightMatrix()
    {
       return weightMatrix;
    }

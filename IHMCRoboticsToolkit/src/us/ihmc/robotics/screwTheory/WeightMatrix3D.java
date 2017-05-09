@@ -95,7 +95,7 @@ public class WeightMatrix3D
     * Until the selection is changed, this selection matrix is independent from its selection frame.
     * </p>
     */
-   public void clearSelection()
+   public void clear()
    {
       selectionFrame = null;
       xWeight = Double.NaN;
@@ -390,5 +390,78 @@ public class WeightMatrix3D
    public String toString()
    {
       return "(" + xWeight + ", " + yWeight + ", " + zWeight + ") " + selectionFrame;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((frameMatrix == null) ? 0 : frameMatrix.hashCode());
+      result = prime * result + ((selectionFrame == null) ? 0 : selectionFrame.hashCode());
+      long temp;
+      temp = Double.doubleToLongBits(xWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(yWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(zWeight);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      WeightMatrix3D other = (WeightMatrix3D) obj;
+      if (frameMatrix == null)
+      {
+         if (other.frameMatrix != null)
+            return false;
+      }
+      else if (!frameMatrix.equals(other.frameMatrix))
+         return false;
+      if (selectionFrame == null)
+      {
+         if (other.selectionFrame != null)
+            return false;
+      }
+      else if (!selectionFrame.equals(other.selectionFrame))
+         return false;
+
+      if(Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct
+      {
+         return false;
+      }
+
+      if(Double.isNaN(yWeight) ^ Double.isNaN(other.yWeight)) // xor is correct
+      {
+         return false;
+      }
+      
+      if(Double.isNaN(zWeight) ^ Double.isNaN(other.zWeight)) // xor is correct
+      {
+         return false;
+      }
+      
+      if (!Double.isNaN(xWeight) && !Double.isNaN(other.xWeight) && xWeight != other.xWeight)
+      {
+         return false;
+      }
+      if (!Double.isNaN(yWeight) && !Double.isNaN(other.yWeight) && yWeight != other.yWeight)
+      {
+         return false;
+      }
+      if (!Double.isNaN(zWeight) && !Double.isNaN(other.zWeight) && zWeight != other.zWeight)
+      {
+         return false;
+      }
+
+      return true;
    }
 }
