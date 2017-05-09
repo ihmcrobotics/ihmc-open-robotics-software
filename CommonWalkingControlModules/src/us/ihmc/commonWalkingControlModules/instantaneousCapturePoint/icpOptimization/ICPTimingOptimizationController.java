@@ -40,14 +40,21 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private static final boolean DEBUG = false;
 
    private static final double SWING_DURATION_VARIATION = 0.001;
-   private static final double TIMING_ADJUSTMENT_COST = 1.0;
+   private static final double TIMING_ADJUSTMENT_WEIGHT = 1.0;
    private static final double GRADIENT_THRESHOLD = 0.1;
    private static final double GRADIENT_GAIN = 0.035;
-   private static final int NUMBER_OF_ITERATIONS = 15;
+   private static final double TIMING_ADJUSTMENT_ATTENUATION = 0.5;
+   private static final int NUMBER_OF_GRADIENT_ITERATIONS = 15;
+   private static final int NUMBER_OF_GRADIENT_REDUCTIONS = 5;
+
+   private static final double MAX_TIME_FOR_CONTROLLER = 0.0008;
 
    private static final double minimumSwingDuration = 0.2;
-
    private static final double percentCostRequiredDecrease = 0.05;
+
+
+
+
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -60,11 +67,16 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
    private final boolean useFootstepRegularization;
    private final boolean useFeedbackRegularization;
 
-   private final DoubleYoVariable timingAdjustmentCost = new DoubleYoVariable("timingAdjustmentCost", registry);
+   private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable("timingAdjustmentWeight", registry);
    private final DoubleYoVariable gradientThreshold = new DoubleYoVariable("gradientThreshold", registry);
    private final DoubleYoVariable gradientGain = new DoubleYoVariable("gradientGain", registry);
-   private final DoubleYoVariable solverCostToGo = new DoubleYoVariable("solverCostToGo", registry);
-   private final DoubleYoVariable timingCostToGo = new DoubleYoVariable("timingCostToGo", registry);
+   private final DoubleYoVariable timingAdjustmentAttenuation = new DoubleYoVariable("timingAdjustmentAttenuation", registry);
+   private final DoubleYoVariable timingSolutionLowerBound = new DoubleYoVariable("timingSolutionLowerBound", registry);
+   private final DoubleYoVariable timingSolutionUpperBound = new DoubleYoVariable("timingSolutionUpperBound", registry);
+
+   private final DoubleYoVariable controllerTimingDeadline = new DoubleYoVariable("controllerTimingDeadline", registry);
+   private final BooleanYoVariable controllerFinishedOnTime = new BooleanYoVariable("controllerFinishedOnTime", registry);
+
 
    private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
    private final BooleanYoVariable useAngularMomentum = new BooleanYoVariable(yoNamePrefix + "UseAngularMomentum", registry);
@@ -262,8 +274,10 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
             transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       gradientGain.set(GRADIENT_GAIN);
-      timingAdjustmentCost.set(TIMING_ADJUSTMENT_COST);
+      timingAdjustmentAttenuation.set(TIMING_ADJUSTMENT_ATTENUATION);
+      timingAdjustmentWeight.set(TIMING_ADJUSTMENT_WEIGHT);
       gradientThreshold.set(GRADIENT_THRESHOLD);
+      controllerTimingDeadline.set(MAX_TIME_FOR_CONTROLLER);
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
@@ -288,7 +302,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          swingSplitFractions.add(swingSplitFraction);
       }
 
-      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      for (int i = 0; i < NUMBER_OF_GRADIENT_ITERATIONS; i++)
       {
          DoubleYoVariable swingTiming = new DoubleYoVariable(yoNamePrefix + "SwingTiming" + i, registry);
          DoubleYoVariable timingAdjustment = new DoubleYoVariable(yoNamePrefix + "TimingAdjustment" + i, registry);
@@ -667,7 +681,7 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       stateMultiplierCalculator.computeCurrentMultipliers(numberOfFootstepsToConsider, timeInCurrentState.getDoubleValue(), useTwoCMPs,
             isInTransfer.getBooleanValue(), omega0);
 
-      // // TODO: 5/1/17 do these change from problem to problem. 
+      // // TODO: 5/1/17 do these change from problem to problem?
       inputHandler.computeFinalICPRecursion(stateMultiplierCalculator, finalICPRecursion);
       inputHandler.computeCMPConstantEffects(stateMultiplierCalculator, cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(),
             beginningOfStateICPVelocity.getFrameTuple2d(), useTwoCMPs, isInTransfer.getBooleanValue());
@@ -775,6 +789,8 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
          numberOfGradientReductionIterations.set(0);
+         controllerFinishedOnTime.set(true);
+         costToGos.get(0).set(solver.getCostToGo());
       }
       else if (isInTransfer.getBooleanValue())
       {
@@ -784,17 +800,12 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          solver.setPreviousFeedbackDeltaSolutionFromCurrent();
          numberOfGradientIterations.set(0);
          numberOfGradientReductionIterations.set(0);
+         controllerFinishedOnTime.set(true);
          costToGos.get(0).set(solver.getCostToGo());
       }
       else
       {
          noConvergenceException = solveGradientDescent(numberOfFootstepsToConsider, omega0);
-         /*
-         submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
-         noConvergenceException = solveQP();
-         numberOfGradientIterations.set(0);
-         costToGos.get(0).set(solver.getCostToGo());
-         */
       }
       qpSolverTimer.stopMeasurement();
 
@@ -814,11 +825,10 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       return numberOfFootstepsToConsider;
    }
 
-   double timingLowerBound;
-   double timingUpperBound;
+
    private NoConvergenceException solveGradientDescent(int numberOfFootstepsToConsider, double omega0)
    {
-      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      for (int i = 0; i < NUMBER_OF_GRADIENT_ITERATIONS; i++)
       {
          costToGos.get(i).setToNaN();
          costToGoGradients.get(i).setToNaN();
@@ -827,9 +837,9 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       }
 
       costFunctionEstimator.reset();
-      timingLowerBound = minimumSwingDuration;
-      timingUpperBound = Double.POSITIVE_INFINITY;
-
+      double timingLowerBound = minimumSwingDuration;
+      double timingUpperBound = Double.POSITIVE_INFINITY;
+      boolean controllerFinishedOnTime = true;
 
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
 
@@ -840,60 +850,67 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
       if (noConvergenceException != null)
          return noConvergenceException;
 
-      swingDurations.get(0).add(variationSize);
+      DoubleYoVariable swingDuration = swingDurations.get(0);
+      swingDuration.add(variationSize);
 
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
       noConvergenceException = solveQP();
 
+      if (noConvergenceException != null)
+         return noConvergenceException;
+
       double costToGoWithVariation = computeTotalCostToGo();
       double averageCostToGo = 0.5 * (costToGoWithVariation + costToGoUnvaried);
       double costToGoGradient = (costToGoWithVariation - costToGoUnvaried) / variationSize;
-      swingDurations.get(0).sub(variationSize);
+      swingDuration.sub(variationSize);
 
       costToGos.get(0).set(averageCostToGo);
       costToGoGradients.get(0).set(costToGoGradient);
-      swingTimings.get(0).set(swingDurations.get(0).getDoubleValue());
+      swingTimings.get(0).set(swingDuration.getDoubleValue());
 
-      costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDurations.get(0).getDoubleValue());
+      costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDuration.getDoubleValue());
 
       int iterationNumber = 0;
       while (Math.abs(costToGoGradient) > gradientThreshold.getDoubleValue())
       {
          // update bounds on the gradient descent
-         /*
-         if (costToGoGradient > 0)
-            timingUpperBound = swingDurations.get(0).getDoubleValue();
-         else
-            timingLowerBound = Math.max(swingDurations.get(0).getDoubleValue(), minimumSwingDuration);
-            */
+         if (costToGoGradient > 0) // the current gradient is positive, which means that the timing solution must be less
+            timingUpperBound = Math.min(swingDuration.getDoubleValue(), timingUpperBound);
+         else // the current gradient is negative, which means that the timing solution must be more
+            timingLowerBound = Math.max(swingDuration.getDoubleValue(), timingLowerBound);
 
          // if the cost reduction adjustment requires moving outside the bounds, exit
-         if (MathTools.epsilonEquals(swingDurations.get(0).getDoubleValue(), timingLowerBound, 0.0001) && costToGoGradient > 0)
-            break;
-         else if (MathTools.epsilonEquals(swingDurations.get(0).getDoubleValue(), timingUpperBound, 0.0001) && costToGoGradient < 0)
+         if ((MathTools.epsilonEquals(swingDuration.getDoubleValue(), timingLowerBound, 0.0001) && costToGoGradient > 0) ||
+               (MathTools.epsilonEquals(swingDuration.getDoubleValue(), timingUpperBound, 0.0001) && costToGoGradient < 0))
             break;
 
          // estimate time adjustment using gradient based methods
-         double timeAdjustmentFromGradient = -gradientGain.getDoubleValue() * costToGoGradient;
-         // estimate time adjustment using the current built model of the cost function
-         double timeAdjustmentFromEstimator = costFunctionEstimator.getEstimatedCostFunctionSolution() - swingDurations.get(0).getDoubleValue(); // // TODO: 5/9/17  figure out how to use this
+         double timeAdjustment = -gradientGain.getDoubleValue() * costToGoGradient;
 
-         double timeAdjustment = timeAdjustmentFromGradient;
-
-         // make sure it doesn't modify below the minimum swing duration
-         //timeAdjustment = Math.max(minimumSwingDuration - swingDurations.get(0).getDoubleValue(), timeAdjustment);
-         timeAdjustment = MathTools.clamp(timeAdjustment, timingLowerBound - swingDurations.get(0).getDoubleValue(), timingUpperBound - swingDurations.get(0).getDoubleValue());
-         timingAdjustments.get(iterationNumber).set(timeAdjustment);
          iterationNumber++;
-
-         if (iterationNumber >= NUMBER_OF_ITERATIONS)
+         // exit loop if we've gone too many ticks
+         if (iterationNumber >= NUMBER_OF_GRADIENT_ITERATIONS)
             break;
 
+         if (controllerTimer.getCurrentTime().getDoubleValue() > controllerTimingDeadline.getDoubleValue())
+         { // if the controller has taken too long, notify us and break the loop
+            controllerFinishedOnTime = false;
+            break;
+         }
+
+         // make sure it doesn't modify the duration outside the bounds
+         timeAdjustment = MathTools.clamp(timeAdjustment, timingLowerBound - swingDuration.getDoubleValue(), timingUpperBound - swingDuration.getDoubleValue());
+         timingAdjustments.get(iterationNumber).set(timeAdjustment);
+
+
          // modify current single support duration
-         swingDurations.get(0).add(timeAdjustment);
+         swingDuration.add(timeAdjustment);
 
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
+
          noConvergenceException = solveQP();
+         if (noConvergenceException != null)
+            return noConvergenceException;
 
          costToGoUnvaried = computeTotalCostToGo();
 
@@ -901,35 +918,47 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          while (costToGoUnvaried >= averageCostToGo + percentCostRequiredDecrease * Math.signum(averageCostToGo) * averageCostToGo)
          {
             // update the bounds
-            /*
             if (costToGoGradient > 0) // we just decreased the duration, and it caused an increase in cost
-               timingLowerBound = swingDurations.get(0).getDoubleValue();
+               timingLowerBound = Math.max(swingDuration.getDoubleValue(), timingLowerBound);
             else // we just increased the duration, and it caused an increase in cost
-               timingUpperBound = swingDurations.get(0).getDoubleValue();
-               */
+               timingUpperBound = Math.min(swingDuration.getDoubleValue(), timingUpperBound);
 
-            if (reductionNumber >= 5 || iterationNumber >= NUMBER_OF_ITERATIONS) // // FIXME: 5/8/17
+            // exit loop if we've gone too many ticks
+            if (reductionNumber >= NUMBER_OF_GRADIENT_REDUCTIONS || iterationNumber >= NUMBER_OF_GRADIENT_ITERATIONS)
                break;
-            costFunctionEstimator.addPoint(costToGoUnvaried, swingDurations.get(0).getDoubleValue());
+
+            if (controllerTimer.getCurrentTime().getDoubleValue() > controllerTimingDeadline.getDoubleValue())
+            { // if the controller has taken too long, notify us and break the loop
+               controllerFinishedOnTime = false;
+               break;
+            }
+
+            // add the current point to the estimator
+            costFunctionEstimator.addPoint(costToGoUnvaried, swingDuration.getDoubleValue());
 
             // the current adjustment causes an increase in cost, so reduce the adjustment
-            timeAdjustment = 0.5 * timeAdjustment;
+            timeAdjustment = timingAdjustmentAttenuation.getDoubleValue() * timeAdjustment;
+
+            // make sure it doesn't modify the duration outside the bounds
+            timeAdjustment = MathTools.clamp(timeAdjustment, swingDuration.getDoubleValue() - timingUpperBound, swingDuration.getDoubleValue() - timingLowerBound);
             timingAdjustments.get(iterationNumber - 1).set(timeAdjustment);
-            swingDurations.get(0).sub(timeAdjustment);
-            double clampedAdjustment = MathTools.clamp(swingDurations.get(0).getDoubleValue(), timingLowerBound, timingUpperBound);
-            swingDurations.get(0).set(clampedAdjustment); // // TODO: 5/9/17  cleanup
+            swingDuration.sub(timeAdjustment);
 
             // if the cost reduction adjustment requires moving outside the bounds, exit
-            if (MathTools.epsilonEquals(swingDurations.get(0).getDoubleValue(), timingLowerBound, 0.0001) && costToGoGradient > 0)
-               break;
-            else if (MathTools.epsilonEquals(swingDurations.get(0).getDoubleValue(), timingUpperBound, 0.0001) && costToGoGradient < 0)
+            if ((MathTools.epsilonEquals(swingDuration.getDoubleValue(), timingLowerBound, 0.0001) && costToGoGradient > 0) ||
+                  (MathTools.epsilonEquals(swingDuration.getDoubleValue(), timingUpperBound, 0.0001) && costToGoGradient < 0))
                break;
 
+            // compute new cost at the current time
             submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
+
             noConvergenceException = solveQP();
+            if (noConvergenceException != null)
+               return noConvergenceException;
+
             costToGoUnvaried = computeTotalCostToGo();
 
-            swingTimings.get(iterationNumber).set(swingDurations.get(0).getDoubleValue());
+            swingTimings.get(iterationNumber).set(swingDuration.getDoubleValue());
             costToGos.get(iterationNumber).set(costToGoUnvaried);
             costToGoGradients.get(iterationNumber).setToNaN();
 
@@ -940,23 +969,30 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
          numberOfGradientReductionIterations.set(reductionNumber);
 
          // compute gradient at new point
-         swingDurations.get(0).add(variationSize);
+         swingDuration.add(variationSize);
 
          submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
+
          noConvergenceException = solveQP();
+         if (noConvergenceException != null)
+            return noConvergenceException;
 
          costToGoWithVariation = computeTotalCostToGo();
 
          averageCostToGo = 0.5 * (costToGoWithVariation + costToGoUnvaried);
          costToGoGradient = (costToGoWithVariation - costToGoUnvaried) / variationSize;
-         swingDurations.get(0).sub(variationSize);
+         swingDuration.sub(variationSize);
 
-         swingTimings.get(iterationNumber).set(swingDurations.get(0).getDoubleValue());
+         swingTimings.get(iterationNumber).set(swingDuration.getDoubleValue());
          costToGos.get(iterationNumber).set(averageCostToGo);
          costToGoGradients.get(iterationNumber).set(costToGoGradient);
 
-         costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDurations.get(0).getDoubleValue());
+         costFunctionEstimator.addPoint(averageCostToGo, costToGoGradient, swingDuration.getDoubleValue());
       }
+
+      timingSolutionLowerBound.set(timingLowerBound);
+      timingSolutionUpperBound.set(timingUpperBound);
+      this.controllerFinishedOnTime.set(controllerFinishedOnTime);
 
       solver.setPreviousFeedbackDeltaSolutionFromCurrent();
       solver.setPreviousFootstepSolutionFromCurrent();
@@ -965,15 +1001,13 @@ public class ICPTimingOptimizationController implements ICPOptimizationControlle
 
       numberOfGradientIterations.set(iterationNumber + 1);
 
-      return noConvergenceException;
+      return null;
    }
 
    public double computeTotalCostToGo()
    {
       double solverCostToGo = solver.getCostToGo();
-      double timingCostToGo = timingAdjustmentCost.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
-      this.solverCostToGo.set(solverCostToGo);
-      this.timingCostToGo.set(timingCostToGo);
+      double timingCostToGo = timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
 
       return solverCostToGo + timingCostToGo;
    }
