@@ -88,7 +88,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final PoseReferenceFrame controlFrame;
    private ReferenceFrame trajectoryFrame;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final FramePose controlFramePose = new FramePose();
 
    private final FramePoint controlPoint = new FramePoint();
@@ -425,11 +424,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
 
-   private void setControlFramePose(RigidBodyTransform controlFrameTransform)
+   public void setControlFramePose(RigidBodyTransform controlFrameTransform)
    {
       controlFramePose.setPoseIncludingFrame(bodyFrame, controlFrameTransform);
       this.controlFrame.setPoseAndUpdate(controlFramePose);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+   }
+
+   public void setDefaultControlFrame()
+   {
+      setControlFrame(defaultControlFrame);
    }
 
    public ReferenceFrame getControlFrame()
@@ -452,23 +456,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          return false;
       }
 
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         setControlFrame(defaultControlFrame);
-      }
-
       if (override || isEmpty())
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
             queueInitialPoint(initialPose);
-         
+
          selectionMatrix.setToAngularSelectionOnly();
          selectionMatrix.setAngularPart(command.getSelectionMatrix());
 
@@ -494,7 +488,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          if (!queuePoint(command.getTrajectoryPoint(i)))
             return false;
       }
-      
+
       return true;
    }
 
@@ -513,23 +507,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          return false;
       }
 
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         setControlFrame(defaultControlFrame);
-      }
-
       if (override || isEmpty())
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
-         
+
          selectionMatrix.set(command.getSelectionMatrix());
 
          trackingOrientation.set(selectionMatrix.isAngularPartActive());
@@ -545,7 +529,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override");
          System.out.println("rbm:\n" + selectionMatrix);
          System.out.println("command:\n" + command.getSelectionMatrix());
-         
+
          return false;
       }
 

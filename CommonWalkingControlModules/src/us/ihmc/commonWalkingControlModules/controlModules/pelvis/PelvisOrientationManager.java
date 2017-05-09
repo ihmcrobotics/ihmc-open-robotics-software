@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalki
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -188,19 +189,28 @@ public class PelvisOrientationManager
       walkingManager.setTrajectoryFromFootstep();
    }
 
-   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
+   public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
+      if (command.useCustomControlFrame())
+      {
+         PrintTools.warn("Can not use custom control frame with pelvis orientation.");
+         return false;
+      }
       enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
       stateMachine.getCurrentState().getCurrentDesiredOrientation(tempOrientation);
-      userManager.handlePelvisOrientationTrajectoryCommands(command, tempOrientation);
-      requestState(userManager.getStateEnum());
+      if (userManager.handlePelvisOrientationTrajectoryCommands(command, tempOrientation))
+      {
+         requestState(userManager.getStateEnum());
+         return true;
+      }
+      return false;
    }
 
    private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();
-   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
+   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
       tempPelvisOrientationTrajectoryCommand.set(command);
-      handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
+      return handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
    }
 
    private void requestState(PelvisOrientationControlMode state)
