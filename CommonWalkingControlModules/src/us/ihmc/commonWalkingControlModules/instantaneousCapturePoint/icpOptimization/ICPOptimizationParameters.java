@@ -274,4 +274,49 @@ public abstract class ICPOptimizationParameters
    {
       return false;
    }
+
+
+
+
+
+
+   public double getVariationSizeToComputeTimingGradient()
+   {
+      return 0.001;
+   }
+
+   public double getTimingAdjustmentGradientDescentWeight()
+   {
+      return 1.0;
+   }
+
+   public double getGradientThresholdForTimingAdjustment()
+   {
+      return 0.1;
+   }
+
+   public double getGradientDescentGain()
+   {
+      return 0.035;
+   }
+
+   public double getTimingAdjustmentAttenuation()
+   {
+      return 0.5;
+   }
+
+   public double getMaximumDurationForOptimization()
+   {
+      return 0.0008;
+   }
+
+   public int getMaximumNumberOfGradientIterations()
+   {
+      return 15;
+   }
+
+   public int getMaximumNumberOfGradientReductions()
+   {
+      return 5;
+   }
 }
