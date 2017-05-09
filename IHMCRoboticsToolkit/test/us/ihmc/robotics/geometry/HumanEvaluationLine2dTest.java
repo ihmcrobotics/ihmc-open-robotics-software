@@ -213,8 +213,8 @@ public class HumanEvaluationLine2dTest
       // Test will fail if you change epsilon too much.
 
       double epsilon = 1E-12;
-      assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.containsEpsilon(point1, epsilon));
-      assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.containsEpsilon(point2, epsilon));
+      assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.isPointOnLine(point1, epsilon));
+      assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.isPointOnLine(point2, epsilon));
 
       Point2D randomPointOnLine = new Point2D();
       Point2D randomPointNotOnLine = new Point2D();
@@ -223,7 +223,7 @@ public class HumanEvaluationLine2dTest
       {
          double scaleFactor = 10.0 * random.nextDouble() - 5.0;
          randomPointOnLine.set(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
-         assertTrue("Random point on line not handled correctly", line2dPointPoint.containsEpsilon(randomPointOnLine, epsilon));
+         assertTrue("Random point on line not handled correctly", line2dPointPoint.isPointOnLine(randomPointOnLine, epsilon));
 
          double deviation = random.nextDouble() - 0.5;
          perp = line2dPointPoint.perpendicularVector();
@@ -231,7 +231,7 @@ public class HumanEvaluationLine2dTest
 
          if (deviation != 0.0)
          {
-            assertFalse("Random point not on line not handled correctly", line2dPointPoint.containsEpsilon(randomPointNotOnLine, epsilon));
+            assertFalse("Random point not on line not handled correctly", line2dPointPoint.isPointOnLine(randomPointNotOnLine, epsilon));
          }
       }
    }
@@ -259,8 +259,8 @@ public class HumanEvaluationLine2dTest
       Point2D shouldBeOnLine = new Point2D(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
       Point2D shouldBeOnLineToo = new Point2D(point1.getX() + scaleFactor, point1.getY() + scaleFactor * slope);
       double epsilon = 1E-12;
-      assertTrue("You didn't even get this right", line2dPointPoint.containsEpsilon(shouldBeOnLine, epsilon));
-      assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
+      assertTrue("You didn't even get this right", line2dPointPoint.isPointOnLine(shouldBeOnLine, epsilon));
+      assertTrue("Point should have been on the line", line2dPointPoint.isPointOnLine(shouldBeOnLineToo, epsilon));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.2)

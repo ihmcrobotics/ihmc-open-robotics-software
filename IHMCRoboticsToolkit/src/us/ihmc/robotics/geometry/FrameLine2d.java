@@ -115,7 +115,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
    {
       framePoint.checkReferenceFrameMatch(referenceFrame);
 
-      return line.containsEpsilon(framePoint.getPointCopy(), epsilon);
+      return line.isPointOnLine(framePoint.getPointCopy(), epsilon);
    }
 
    public void negateDirection()
