@@ -27,63 +27,94 @@ public class Line2d implements GeometryObject<Line2d>
    private boolean hasPointBeenSet = false;
    private boolean hasDirectionBeenSet = false;
 
+   /**
+    * Default constructor that initializes both {@link #point} and {@link #direction} to zero. This
+    * point and vector have to be set to valid values to make this line usable.
+    */
    public Line2d()
    {
       hasPointBeenSet = false;
       hasDirectionBeenSet = false;
    }
 
+   /**
+    * Creates a new line 2D and initializes it to {@code other}.
+    * 
+    * @param other the other line used to initialize this line. Not modified.
+    */
    public Line2d(Line2d other)
    {
       set(other);
    }
 
+   /**
+    * Initializes this line to be passing through the given point, with the vector as the direction.
+    * 
+    * @param pointOnLine point on this line. Not modified.
+    * @param lineDirection direction of this line. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
    public Line2d(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
    {
       set(pointOnLine, lineDirection);
    }
 
+   /**
+    * Initializes this line to be passing through the two given points.
+    * 
+    * @param firstPointOnLine first point on this line. Not modified.
+    * @param secondPointOnLine second point on this line. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    * @throws RuntimeException if the two given points are exactly equal.
+    */
    public Line2d(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
       set(firstPointOnLine, secondPointOnLine);
    }
 
+   /**
+    * Initializes this line to be passing through the given point, with the vector as the direction.
+    * 
+    * @param pointOnLineX the x-coordinate of a point on this line.
+    * @param pointOnLineY the y-coordinate of a point on this line.
+    * @param lineDirectionX the x-component of the direction of this line.
+    * @param lineDirectionY the y-component of the direction of this line.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
    public Line2d(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
    {
       set(pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
-   @Override
-   public void setToZero()
-   {
-      point.setToZero();
-      direction.setToZero();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      point.setToNaN();
-      direction.setToNaN();
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return point.containsNaN() || direction.containsNaN();
-   }
-
+   /**
+    * Changes the point through which this line has to go.
+    * 
+    * @param pointX the new x-coordinate of the point on this line.
+    * @param pointY the new y-coordinate of the point on this line.
+    */
    public void setPoint(double pointOnLineX, double pointOnLineY)
    {
       point.set(pointOnLineX, pointOnLineY);
       hasPointBeenSet = true;
    }
 
+   /**
+    * Changes the point through which this line has to go.
+    * 
+    * @param pointOnLine new point on this line. Not modified.
+    */
    public void setPoint(Point2DReadOnly pointOnLine)
    {
       setPoint(pointOnLine.getX(), pointOnLine.getY());
    }
 
+   /**
+    * Changes the direction of this line by setting it to the normalized value of the given vector.
+    * 
+    * @param directionX the new x-component of the direction of this line.
+    * @param directionY the new y-component of the direction of this line.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
    public void setDirection(double lineDirectionX, double lineDirectionY)
    {
       direction.set(lineDirectionX, lineDirectionY);
@@ -92,23 +123,53 @@ public class Line2d implements GeometryObject<Line2d>
       hasDirectionBeenSet = true;
    }
 
+   /**
+    * Changes the direction of this line by setting it to the normalized value of the given vector.
+    * 
+    * @param lineDirection new direction of this line. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
    public void setDirection(Vector2DReadOnly lineDirection)
    {
       setDirection(lineDirection.getX(), lineDirection.getY());
    }
 
-   @Override
-   public void set(Line2d other)
-   {
-      set(other.getPoint(), other.getDirection());
-   }
-
+   /**
+    * Redefines this line with a new point and a new direction vector.
+    * 
+    * @param pointOnLine new point on this line. Not modified.
+    * @param lineDirection new direction of this line. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
    public void set(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
    {
       setPoint(pointOnLine);
       setDirection(lineDirection);
    }
 
+   /**
+    * Redefines this line with a new point and a new direction vector.
+    * 
+    * @param pointOnLineX the new x-coordinate of the point on this line.
+    * @param pointOnLineY the new y-coordinate of the point on this line.
+    * @param lineDirectionX the new x-component of the direction of this line.
+    * @param lineDirectionY the new y-component of the direction of this line.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    */
+   public void set(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
+   {
+      setPoint(pointOnLineX, pointOnLineY);
+      setDirection(lineDirectionX, lineDirectionY);
+   }
+
+   /**
+    * Redefines this line such that it goes through the two given points.
+    * 
+    * @param firstPointOnLine first point on this line. Not modified.
+    * @param secondPointOnLine second point on this line. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    * @throws RuntimeException if the two given points are exactly equal.
+    */
    public void set(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
       checkDistinctPoints(firstPointOnLine, secondPointOnLine);
@@ -116,80 +177,234 @@ public class Line2d implements GeometryObject<Line2d>
       setDirection(secondPointOnLine.getX() - firstPointOnLine.getX(), secondPointOnLine.getY() - firstPointOnLine.getY());
    }
 
-   public void set(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
+   /**
+    * Redefines this line such that it goes through the two given points.
+    * 
+    * @param twoPointsOnLine a two-element array containing in order the first point and second
+    *           point this line line is to go through. Not modified.
+    * @throws RuntimeException if the new direction is unreasonably small.
+    * @throws RuntimeException if the two given points are exactly equal.
+    * @throws IllegalArgumentException if the given array has a length different than 2.
+    */
+   public void set(Point2DReadOnly[] twoPointsOnLine)
    {
-      setPoint(pointOnLineX, pointOnLineY);
-      setDirection(lineDirectionX, lineDirectionY);
+      if (twoPointsOnLine.length != 2)
+         throw new IllegalArgumentException("Length of input array is not correct. Length = " + twoPointsOnLine.length + ", expected an array of two elements");
+      set(twoPointsOnLine[0], twoPointsOnLine[1]);
    }
 
-   public void set(Point2DReadOnly[] endpoints)
+   /**
+    * Sets this line to be the same as the given line.
+    * 
+    * @param other the other line to copy. Not modified.
+    */
+   @Override
+   public void set(Line2d other)
    {
-      if (endpoints.length != 2)
-         throw new IllegalArgumentException("Length of input array is not correct. Length = " + endpoints.length + ", expected an array of two elements");
-      set(endpoints[0], endpoints[1]);
+      set(other.getPoint(), other.getDirection());
    }
 
-   public void getPoint(Point2DBasics pointOnLineToPack)
+   /**
+    * Sets the point and vector of this line to zero. After calling this method, this line becomes
+    * invalid. A new valid point and valid vector will have to be set so this line is again usable.
+    */
+   @Override
+   public void setToZero()
    {
-      pointOnLineToPack.set(point);
+      point.setToZero();
+      direction.setToZero();
+      hasPointBeenSet = false;
+      hasDirectionBeenSet = false;
    }
 
+   /**
+    * Sets the point and vector of this line to {@link Double#NaN}. After calling this method, this
+    * line becomes invalid. A new valid point and valid vector will have to be set so this line is
+    * again usable.
+    */
+   @Override
+   public void setToNaN()
+   {
+      point.setToNaN();
+      direction.setToNaN();
+   }
+
+   /**
+    * Tests if this line contains {@link Double#NaN}.
+    * 
+    * @return {@code true} if {@link #point} and/or {@link #direction} contains {@link Double#NaN},
+    *         {@code false} otherwise.
+    */
+   @Override
+   public boolean containsNaN()
+   {
+      return point.containsNaN() || direction.containsNaN();
+   }
+
+   /**
+    * Computes the minimum distance the given 3D point and this line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if {@code direction.length() < Epsilons.ONE_TRILLIONTH}, this method returns the distance
+    * between {@code point} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 2D point to compute the distance from the line. Not modified.
+    * @return the minimum distance between the 3D point and this 3D line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public double distance(Point2DReadOnly point)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction);
+   }
+
+   /**
+    * Gets the read-only reference to the point through which this line is going.
+    * 
+    * @return the reference to the point.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Point2DReadOnly getPoint()
    {
       checkHasBeenInitialized();
       return point;
    }
 
-   public double getPointX()
-   {
-      checkHasBeenInitialized();
-      return point.getX();
-   }
-
-   public double getPointY()
-   {
-      checkHasBeenInitialized();
-      return point.getY();
-   }
-
-   public void getDirection(Vector2DBasics directionToPack)
-   {
-      checkHasBeenInitialized();
-      directionToPack.set(direction);
-   }
-
+   /**
+    * Gets the read-only reference to the direction of this line.
+    * 
+    * @return the reference to the direction.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Vector2DReadOnly getDirection()
    {
       checkHasBeenInitialized();
       return direction;
    }
 
-   public double getDirectionX()
+   /**
+    * Gets the point defining this line by storing its coordinates in the given argument
+    * {@code pointToPack}.
+    * 
+    * @param pointToPack point in which the coordinates of this line's point are stored. Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void getPoint(Point2DBasics pointOnLineToPack)
    {
-      checkHasBeenInitialized();
-      return direction.getX();
+      pointOnLineToPack.set(point);
    }
 
-   public double getDirectionY()
+   /**
+    * Gets the direction defining this line by storing its components in the given argument
+    * {@code directionToPack}.
+    * 
+    * @param directionToPack vector in which the components of this line's direction are stored.
+    *           Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void getDirection(Vector2DBasics directionToPack)
    {
       checkHasBeenInitialized();
-      return direction.getY();
+      directionToPack.set(direction);
    }
 
+   /**
+    * Gets the point and direction defining this line by storing their components in the given
+    * arguments {@code pointToPack} and {@code directionToPack}.
+    * 
+    * @param pointToPack point in which the coordinates of this line's point are stored. Modified.
+    * @param directionToPack vector in which the components of this line's direction are stored.
+    *           Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void getPointAndDirection(Point2DBasics pointToPack, Vector2DBasics directionToPack)
    {
       getPoint(pointToPack);
       getDirection(directionToPack);
    }
 
-   public void getTwoPointsOnLine(Point2DBasics point1, Point2DBasics point2)
+   /**
+    * Gets the coordinates of two distinct points this line goes through.
+    * 
+    * @param firstPointOnLineToPack the coordinates of a first point located on this line. Modified.
+    * @param secondPointOnLineToPack the coordinates of a second point located on this line.
+    *           Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void getTwoPointsOnLine(Point2DBasics firstPointOnLineToPack, Point2DBasics secondPointOnLineToPack)
    {
-      point1.set(point);
-      point2.add(point, direction);
+      checkHasBeenInitialized();
+      firstPointOnLineToPack.set(point);
+      secondPointOnLineToPack.add(point, direction);
    }
 
+   /**
+    * Gets the x-coordinate of a point this line goes through.
+    * 
+    * @return the x-coordinate of this line's point.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public double getPointX()
+   {
+      checkHasBeenInitialized();
+      return point.getX();
+   }
+
+   /**
+    * Gets the y-coordinate of a point this line goes through.
+    * 
+    * @return the y-coordinate of this line's point.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public double getPointY()
+   {
+      checkHasBeenInitialized();
+      return point.getY();
+   }
+
+   /**
+    * Gets the x-component of this line's direction.
+    * 
+    * @return the x-component of this line's direction.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public double getDirectionX()
+   {
+      checkHasBeenInitialized();
+      return direction.getX();
+   }
+
+   /**
+    * Gets the y-component of this line's direction.
+    * 
+    * @return the y-component of this line's direction.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public double getDirectionY()
+   {
+      checkHasBeenInitialized();
+      return direction.getY();
+   }
+
+   /**
+    * Calculates the slope value of this line.
+    * <p>
+    * The slope 's' can be used to calculate the y-coordinate of a point located on the line given
+    * its x-coordinate:<br>
+    * y = s * x + y<sub>0</sub><br>
+    * where y<sub>0</sub> is the y-coordinate at which this line intercepts the y-axis and which can
+    * be obtained with {@link #getYIntercept()}.
+    * </p>
+    * 
+    * @return the value of the slope of this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public double getSlope()
    {
+      checkHasBeenInitialized();
       if (direction.getX() == 0.0 && direction.getY() > 0.0)
       {
          return Double.POSITIVE_INFINITY;
@@ -203,15 +418,43 @@ public class Line2d implements GeometryObject<Line2d>
       return direction.getY() / direction.getX();
    }
 
+   /**
+    * Calculates the coordinates of the point 'p' given the parameter 't' as follows:<br>
+    * p = t * n + p<sub>0</sub><br>
+    * where n is the unit-vector defining the direction of this line and p<sub>0</sub> is the point
+    * defining this line which also corresponds to the point for which t=0.
+    * <p>
+    * Note that the absolute value of 't' is equal to the distance between the point 'p' and the
+    * point p<sub>0</sub> defining this line.
+    * </p>
+    * 
+    * @param t the parameter used to calculate the point coordinates.
+    * @param pointToPack the point in which the coordinates of 'p' are stored. Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void getPointGivenParameter(double t, Point2DBasics pointToPack)
    {
       checkHasBeenInitialized();
-      pointToPack.set(point);
-
-      pointToPack.setX(pointToPack.getX() + t * direction.getX());
-      pointToPack.setY(pointToPack.getY() + t * direction.getY());
+      pointToPack.scaleAdd(t, direction, point);
    }
 
+   /**
+    * Calculates the coordinates of the point 'p' given the parameter 't' as follows:<br>
+    * p = t * n + p<sub>0</sub><br>
+    * where n is the unit-vector defining the direction of this line and p<sub>0</sub> is the point
+    * defining this line which also corresponds to the point for which t=0.
+    * <p>
+    * Note that the absolute value of 't' is equal to the distance between the point 'p' and the
+    * point p<sub>0</sub> defining this line.
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param t the parameter used to calculate the point coordinates.
+    * @return the coordinates of the point 'p'.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Point2D getPointGivenParameter(double t)
    {
       Point2D pointToReturn = new Point2D();
@@ -219,9 +462,30 @@ public class Line2d implements GeometryObject<Line2d>
       return pointToReturn;
    }
 
-   public double getParameterGivenPointEpsilon(Point2DReadOnly point, double epsilon)
+   /**
+    * Calculates the parameter 't' corresponding to the coordinates of the given {@code pointOnLine}
+    * 'p' by solving the line equation:<br>
+    * p = t * n + p<sub>0</sub><br>
+    * where n is the unit-vector defining the direction of this line and p<sub>0</sub> is the point
+    * defining this line which also corresponds to the point for which t=0.
+    * <p>
+    * Note that the absolute value of 't' is equal to the distance between the point 'p' and the
+    * point p<sub>0</sub> defining this line.
+    * </p>
+    * 
+    * @param pointOnLine the coordinates of the 'p' from which the parameter 't' is to be
+    *           calculated. The point has to be on the line. Not modified.
+    * @param epsilon the maximum distance allowed between the given point and this line. If the
+    *           given point is at a distance less than {@code epsilon} from this line, it is
+    *           considered as being located on this line.
+    * @return the value of the parameter 't' corresponding to the given point.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws RuntimeException if the given point is located at a distance greater than
+    *            {@code epsilon} from this line.
+    */
+   public double getParameterGivenPointEpsilon(Point2DReadOnly pointOnLine, double epsilon)
    {
-      if (!containsEpsilon(point, epsilon))
+      if (!containsEpsilon(pointOnLine, epsilon))
       {
          throw new RuntimeException("getParameterGivenPoint: point not part of line");
       }
@@ -231,25 +495,38 @@ public class Line2d implements GeometryObject<Line2d>
          double y0 = this.point.getY();
          double x1 = x0 + direction.getX();
          double y1 = y0 + direction.getY();
-         return EuclidGeometryTools.percentageAlongLineSegment2D(point.getX(), point.getY(), x0, y0, x1, y1);
+         return EuclidGeometryTools.percentageAlongLineSegment2D(pointOnLine.getX(), pointOnLine.getY(), x0, y0, x1, y1);
       }
    }
 
+   /**
+    * The x-coordinate at which this line intercept the x-axis, i.e. the line defined by
+    * {@code y=0}.
+    * 
+    * @return the x-coordinate of the intersection between this line and the x-axis.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public double getXIntercept()
    {
       checkHasBeenInitialized();
 
       double parameterAtIntercept = -point.getY() / direction.getY();
 
-      return getPointGivenParameter(parameterAtIntercept).getX();
+      return parameterAtIntercept * direction.getX() + point.getX();
    }
 
+   /**
+    * The y-coordinate at which this line intercept the y-axis, i.e. the line defined by
+    * {@code x=0}.
+    * 
+    * @return the y-coordinate of the intersection between this line and the y-axis.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public double getYIntercept()
    {
       checkHasBeenInitialized();
       double parameterAtIntercept = -point.getX() / direction.getX();
-
-      return getPointGivenParameter(parameterAtIntercept).getY();
+      return parameterAtIntercept * direction.getY() + point.getY();
    }
 
    public boolean containsEpsilon(Point2DReadOnly point, double epsilon)
@@ -397,12 +674,6 @@ public class Line2d implements GeometryObject<Line2d>
    {
       checkHasBeenInitialized();
       return convexPolygon.intersectionWith(this);
-   }
-
-   public double distance(Point2DReadOnly point)
-   {
-      checkHasBeenInitialized();
-      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction);
    }
 
    public double distanceSquared(Point2DReadOnly point)
@@ -595,7 +866,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    private void checkDistinctPoints(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
-      if (firstPointOnLine.getX() == secondPointOnLine.getX() && firstPointOnLine.getY() == secondPointOnLine.getY())
+      if (firstPointOnLine.equals(secondPointOnLine))
       {
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
