@@ -1331,30 +1331,6 @@ public class Line2dTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testSetParallelThroughPoint()
-   {
-      Random random = new Random(1776L);
-      double delta = 1.0e-5;
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D firstPointOnLine = randomPoint(random);
-         Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
-
-         Line2d parallelLine = new Line2d(line2d);
-         Point2D checkPoint = randomPoint(random);
-         parallelLine.setParallelLineThroughPoint(checkPoint);
-
-         assertEquals(line2d.getDirection().getX(), parallelLine.getDirection().getX(), delta);
-         assertEquals(line2d.getDirection().getY(), parallelLine.getDirection().getY(), delta);
-
-         assertTrue(parallelLine.isPointOnLine(checkPoint, delta));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testApplyTransformTranslation()
    {
       Random random = new Random(1776L);
