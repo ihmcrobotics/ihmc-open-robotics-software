@@ -819,7 +819,7 @@ public class ConvexPolygonTools
          while (index < polygonToCut.getNumberOfVertices())
          {
             Point2D vertex = polygonToCut.getVertexUnsafe(index);
-            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut))
+            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
             {
                polygonToCut.removeVertex(index);
                numberOfVerticesRemoved++;
