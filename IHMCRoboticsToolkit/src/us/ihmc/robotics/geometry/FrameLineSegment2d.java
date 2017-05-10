@@ -476,19 +476,19 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
 
    public FramePoint2d pointBetweenEndPointsGivenParameter(double parameter)
    {
-      return new FramePoint2d(referenceFrame, lineSegment.pointBetweenEndPointsGivenParameter(parameter));
+      return new FramePoint2d(referenceFrame, lineSegment.pointBetweenEndpointsGivenPercentage(parameter));
    }
 
    public void pointBetweenEndPointsGivenParameter(FramePoint2d framePoint2dToPack, double parameter)
    {
-      framePoint2dToPack.setIncludingFrame(referenceFrame, lineSegment.pointBetweenEndPointsGivenParameter(parameter));
+      framePoint2dToPack.setIncludingFrame(referenceFrame, lineSegment.pointBetweenEndpointsGivenPercentage(parameter));
    }
    
    public void getClosestPointOnLineSegment(FramePoint2d framePoint2dToPack, FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
       
-      lineSegment.getClosestPointOnLineSegment(tempPoint2d, point.getPoint());
+      lineSegment.orthogonalProjection(tempPoint2d, point.getPoint());
       framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
    }
    
