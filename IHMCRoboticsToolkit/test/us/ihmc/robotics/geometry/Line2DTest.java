@@ -197,17 +197,17 @@ public class Line2DTest
          Point2D secondPointOnLine = randomPoint(random);
          Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double slope = (secondPointOnLine.getY() - firstPointOnLine.getY()) / (secondPointOnLine.getX() - firstPointOnLine.getX());
-         assertEquals(slope, line2d.getSlope(), delta);
+         assertEquals(slope, line2d.slope(), delta);
       }
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(0.0, 5.0);
       Line2D verticalLine = new Line2D(firstPointOnLine, secondPointOnLine);
-      assertEquals(Double.POSITIVE_INFINITY, verticalLine.getSlope(), delta);
+      assertEquals(Double.POSITIVE_INFINITY, verticalLine.slope(), delta);
 
       secondPointOnLine = new Point2D(0.0, -5.0);
       Line2D horizontalLine = new Line2D(firstPointOnLine, secondPointOnLine);
-      assertEquals(Double.NEGATIVE_INFINITY, horizontalLine.getSlope(), delta);
+      assertEquals(Double.NEGATIVE_INFINITY, horizontalLine.slope(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -611,9 +611,9 @@ public class Line2DTest
          secondLine2d.set(randomDouble(random, 10.0), randomDouble(random, 10.0), randomDouble(random, 10.0), randomDouble(random, 10.0));
          interiorBisector = line2d.interiorBisector(secondLine2d);
 
-         double tangent1 = line2d.getSlope();
+         double tangent1 = line2d.slope();
          double additive1 = line2d.getPoint().getY() - tangent1 * line2d.getPoint().getX();
-         double tangent2 = secondLine2d.getSlope();
+         double tangent2 = secondLine2d.slope();
          double additive2 = secondLine2d.getPoint().getY() - tangent2 * secondLine2d.getPoint().getX();
 
          double intersectX = (additive2 - additive1) / (tangent1 - tangent2);

@@ -404,7 +404,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @return the value of the slope of this line.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public double getSlope()
+   public double slope()
    {
       checkHasBeenInitialized();
       if (direction.getX() == 0.0 && direction.getY() > 0.0)
