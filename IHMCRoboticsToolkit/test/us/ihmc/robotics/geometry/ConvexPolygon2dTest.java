@@ -419,7 +419,7 @@ public class ConvexPolygon2dTest
    public void testGetClosestPointToRay2()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
-      assertTrue(polygon.getClosestPointWithRay(new Line2D()) == null);
+      assertTrue(polygon.getClosestPointWithRay(new Line2D(0.0, 0.0, 1.0, 0.0)) == null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
