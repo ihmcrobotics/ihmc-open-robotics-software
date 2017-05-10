@@ -663,6 +663,72 @@ public class Line2d implements GeometryObject<Line2d>
    }
 
    /**
+    * Returns a boolean value, stating whether the query point is in front of this line or not.
+    * <p>
+    * The idea of 'front' refers to the side of the line toward which the x-axis is pointing.
+    * </p>
+    *
+    * @param point the coordinates of the query. Not modified.
+    * @return {@code true} if the point is in front of this line, {@code false} if the point is
+    *         behind the line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws RuntimeException if the given point is located exactly on this line.
+    */
+   public boolean isPointInFrontOfLine(Point2DReadOnly point)
+   {
+      checkHasBeenInitialized();
+      if (direction.getY() > 0.0)
+         return isPointOnRightSideOfLine(point);
+      else if (direction.getY() < 0.0)
+         return isPointOnLeftSideOfLine(point);
+      else
+         throw new RuntimeException("Not defined when line is pointing exactly along the x-axis");
+   }
+
+   /**
+    * Returns a boolean value, stating whether the query point is in front of this line or not.
+    * <p>
+    * The idea of 'front' refers to the side of the line toward which the given vector
+    * {@code frontDirection} is pointing.
+    * </p>
+    *
+    * @param frontDirection the vector used to define the side of the line which is to be considered
+    *           as the front. Not modified.
+    * @param point the coordinates of the query. Not modified.
+    * @return {@code true} if the point is in front of this line, {@code false} if the point is
+    *         behind the line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws RuntimeException if the given point is located exactly on this line.
+    */
+   public boolean isPointInFrontOfLine(Vector2DReadOnly frontDirection, Point2DReadOnly point)
+   {
+      double crossProduct = frontDirection.cross(direction);
+      if (crossProduct > 0.0)
+         return isPointOnRightSideOfLine(point);
+      else if (crossProduct < 0.0)
+         return isPointOnLeftSideOfLine(point);
+      else
+         throw new RuntimeException("Not defined when line is pointing exactly along the front direction");
+   }
+
+   /**
+    * Returns a boolean value, stating whether the query point is in behind of this line or not.
+    * <p>
+    * The idea of 'behind' refers to the side of the line the x-axis is pointing away.
+    * </p>
+    *
+    * @param point the coordinates of the query. Not modified.
+    * @return {@code true} if the point is in behind of this line, {@code false} if the point is
+    *         front the line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws RuntimeException if the given point is located exactly on this line.
+    */
+   public boolean isPointBehindLine(Point2DReadOnly point)
+   {
+      return !isPointInFrontOfLine(point);
+   }
+
+   /**
     * Flips this line's direction.
     * 
     * @throws RuntimeException if this line has not been initialized yet.
@@ -1186,48 +1252,6 @@ public class Line2d implements GeometryObject<Line2d>
       ret = ret + point + ", " + direction;
 
       return ret;
-   }
-
-   /**
-    * This method could be improved but must be tested better first.
-    */
-   public boolean isPointInFrontOfLine(Vector2DReadOnly frontDirection, Point2DReadOnly point)
-   {
-      double crossProduct = frontDirection.cross(direction);
-      if (crossProduct > 0.0)
-         return isPointOnRightSideOfLine(point);
-      else if (crossProduct < 0.0)
-         return isPointOnLeftSideOfLine(point);
-      else
-         throw new RuntimeException("Not defined when line is pointing exactly along the front direction");
-   }
-
-   /**
-    * isPointInFrontOfLine returns whether the point is in front of the line or not. The front
-    * direction is defined as the positive x-direction
-    *
-    * @param point Point2d
-    * @return boolean
-    */
-   public boolean isPointInFrontOfLine(Point2DReadOnly point)
-   {
-      return isPointInFrontOfLine(point.getX(), point.getY());
-   }
-
-   private boolean isPointInFrontOfLine(double x, double y)
-   {
-      if (direction.getY() > 0.0)
-         return isPointOnSideOfLine(x, y, false);
-      else if (direction.getY() < 0.0)
-         return isPointOnSideOfLine(x, y, true);
-      else
-         throw new RuntimeException("Not defined when line is pointing exactly along the x-axis");
-   }
-
-   // TODO: Inconsistency in strictness.
-   public boolean isPointBehindLine(Point2DReadOnly point)
-   {
-      return !isPointInFrontOfLine(point);
    }
 
    /**
