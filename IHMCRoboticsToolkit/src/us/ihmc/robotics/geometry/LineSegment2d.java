@@ -19,92 +19,57 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    /** The second endpoint defining this line segment. */
    private final Point2D secondEndpoint = new Point2D();
 
+   /**
+    * Default constructor that initializes both endpoints of this line segment to zero.
+    */
    public LineSegment2d()
    {
    }
 
-   public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
+   /**
+    * Creates a new line segment 2D and initializes it to {@code other}.
+    * 
+    * @param other the other line segment used to initialize this line segment. Not modified.
+    */
+   public LineSegment2d(LineSegment2d other)
    {
-      set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
+      set(other);
    }
 
-   public LineSegment2d(Point2DReadOnly[] endpoints)
-   {
-      set(endpoints);
-   }
-
+   /**
+    * Initializes this line segment to have the given endpoints.
+    * 
+    * @param firstEndpoint the first endpoint of this line segment. Not modified.
+    * @param secondEndpoint the second endpoint of this line segment. Not modified.
+    */
    public LineSegment2d(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
    {
       set(firstEndpoint, secondEndpoint);
    }
 
-   public LineSegment2d(LineSegment2d lineSegment2d)
+   /**
+    * Initializes this line segment to have the given endpoints.
+    * 
+    * @param firstEndpointX x-coordinate of the first endpoint of this line segment.
+    * @param firstEndpointY y-coordinate of the first endpoint of this line segment.
+    * @param secondEndpointX x-coordinate of the second endpoint of this line segment.
+    * @param secondEndpointY y-coordinate of the second endpoint of this line segment.
+    */
+   public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      set(lineSegment2d);
+      set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
 
-   public Point2D[] getEndpointsCopy()
+   /**
+    * Initializes this line segment to have the given endpoints.
+    * 
+    * @param endpoints a two-element array containing in order the first and second endpoints for
+    *           this line segment. Not modified.
+    * @throws IllegalArgumentException if the given array has a length different than 2.
+    */
+   public LineSegment2d(Point2DReadOnly[] endpoints)
    {
-      return new Point2D[] {new Point2D(firstEndpoint), new Point2D(secondEndpoint)};
-   }
-
-   public void getEndpoints(Point2DBasics firstEndpointToPack, Point2DBasics secondEndpointToPack)
-   {
-      firstEndpointToPack.set(firstEndpoint);
-      secondEndpointToPack.set(secondEndpoint);
-   }
-
-   public Point2DReadOnly getFirstEndpoint()
-   {
-      return firstEndpoint;
-   }
-
-   public Point2DReadOnly getSecondEndpoint()
-   {
-      return secondEndpoint;
-   }
-
-   public Point2DReadOnly getEndpoint(int index)
-   {
-      switch (index)
-      {
-      case 0:
-         return firstEndpoint;
-      case 1:
-         return secondEndpoint;
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
-      }
-   }
-
-   public Point2D getFirstEndpointCopy()
-   {
-      return new Point2D(firstEndpoint);
-   }
-
-   public Point2D getSecondEndpointCopy()
-   {
-      return new Point2D(secondEndpoint);
-   }
-
-   public double getFirstEndpointX()
-   {
-      return firstEndpoint.getX();
-   }
-
-   public double getFirstEndpointY()
-   {
-      return firstEndpoint.getY();
-   }
-
-   public double getSecondEndpointX()
-   {
-      return secondEndpoint.getX();
-   }
-
-   public double getSecondEndpointY()
-   {
-      return secondEndpoint.getY();
+      set(endpoints);
    }
 
    /**
@@ -112,7 +77,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * 
     * @param firstEndpointX x-coordinate of the new first endpoint.
     * @param firstEndpointY y-coordinate of the new first endpoint.
-    * @param firstEndpointZ z-coordinate of the new first endpoint.
     */
    public void setFirstEndpoint(double firstEndpointX, double firstEndpointY)
    {
@@ -134,7 +98,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * 
     * @param secondEndpointX x-coordinate of the new second endpoint.
     * @param secondEndpointY y-coordinate of the new second endpoint.
-    * @param secondEndpointZ z-coordinate of the new second endpoint.
     */
    public void setSecondEndpoint(double secondEndpointX, double secondEndpointY)
    {
@@ -151,36 +114,135 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       this.secondEndpoint.set(secondEndpoint);
    }
 
-   public void set(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
-   {
-      setFirstEndpoint(firstEndpoint);
-      setSecondEndpoint(secondEndpoint);
-   }
-
-   public void set(Point2DReadOnly firstEndpoint, Vector2DReadOnly fromFirstToSecondEndpoint)
-   {
-      this.firstEndpoint.set(firstEndpoint);
-      secondEndpoint.add(firstEndpoint, fromFirstToSecondEndpoint);
-   }
-
+   /**
+    * Redefines this line segments with new endpoints.
+    * 
+    * @param firstEndpointX x-coordinate of the new first endpoint.
+    * @param firstEndpointY y-coordinate of the new first endpoint.
+    * @param secondEndpointX x-coordinate of the new second endpoint.
+    * @param secondEndpointY y-coordinate of the new second endpoint.
+    */
    public void set(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
       firstEndpoint.set(firstEndpointX, firstEndpointY);
       secondEndpoint.set(secondEndpointX, secondEndpointY);
    }
 
+   /**
+    * Redefines this line segment with new endpoints.
+    * 
+    * @param firstEndpoint new endpoint of this line segment. Not modified
+    * @param secondEndpoint new second endpoint of this line segment. Not modified.
+    */
+   public void set(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
+   {
+      setFirstEndpoint(firstEndpoint);
+      setSecondEndpoint(secondEndpoint);
+   }
+
+   /**
+    * Redefines this line segment with a new first endpoint and a vector going from the first to the
+    * second endpoint.
+    * 
+    * @param firstEndpoint new first endpoint. Not modified.
+    * @param fromFirstToSecondEndpoint vector going from the first to the second endpoint. Not
+    *           modified.
+    */
+   public void set(Point2DReadOnly firstEndpoint, Vector2DReadOnly fromFirstToSecondEndpoint)
+   {
+      this.firstEndpoint.set(firstEndpoint);
+      secondEndpoint.add(firstEndpoint, fromFirstToSecondEndpoint);
+   }
+
+   /**
+    * Redefines this line segment with new endpoints.
+    * 
+    * @param endpoints a two-element array containing in order the first and second endpoints for
+    *           this line segment. Not modified.
+    * @throws IllegalArgumentException if the given array has a length different than 2.
+    */
    public void set(Point2DReadOnly[] endpoints)
    {
       if (endpoints.length != 2)
-         throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
-      set(firstEndpoint, secondEndpoint);
-
+         throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length + ", expected an array of two elements");
+      set(endpoints[0], endpoints[1]);
    }
 
+   /**
+    * Sets this line segment to be same as the given line segment.
+    * 
+    * @param other the other line segment to copy. Not modified.
+    */
    @Override
-   public void set(LineSegment2d lineSegment)
+   public void set(LineSegment2d other)
    {
-      set(lineSegment.firstEndpoint, lineSegment.secondEndpoint);
+      set(other.firstEndpoint, other.secondEndpoint);
+   }
+
+   /**
+    * Sets both endpoints of this line segment to zero.
+    */
+   @Override
+   public void setToZero()
+   {
+      firstEndpoint.setToZero();
+      secondEndpoint.setToZero();
+   }
+
+   /**
+    * Sets both endpoints of this line segment to {@link Double#NaN}. After calling this method,
+    * this line segment becomes invalid. A new pair of valid endpoints will have to be set so this
+    * line segment is again usable.
+    */
+   @Override
+   public void setToNaN()
+   {
+      firstEndpoint.setToNaN();
+      secondEndpoint.setToNaN();
+   }
+
+   /**
+    * Tests if this line segment contains {@link Double#NaN}.
+    * 
+    * @return {@code true} if {@link #firstEndpoint} and/or {@link #secondEndpoint} contains
+    *         {@link Double#NaN}, {@code false} otherwise.
+    */
+   @Override
+   public boolean containsNaN()
+   {
+      return firstEndpoint.containsNaN() || secondEndpoint.containsNaN();
+   }
+
+   /**
+    * Test if the first endpoint of this line segment contains {@link Double#NaN}.
+    * 
+    * @return {@code true} if {@link #firstEndpoint} contains {@link Double#NaN}, {@code false}
+    *         otherwise.
+    */
+   public boolean firstEndpointContainsNaN()
+   {
+      return firstEndpoint.containsNaN();
+   }
+
+   /**
+    * Test if the second endpoint of this line segment contains {@link Double#NaN}.
+    * 
+    * @return {@code true} if {@link #secondEndpoint} contains {@link Double#NaN}, {@code false}
+    *         otherwise.
+    */
+   public boolean secondEndpointContainsNaN()
+   {
+      return secondEndpoint.containsNaN();
+   }
+
+   /**
+    * Computes the length of this line segment.
+    * 
+    * @return the length of this line segment.
+    */
+   public double length()
+   {
+      return firstEndpoint.distance(secondEndpoint);
    }
 
    public void flipDirection()
@@ -194,21 +256,14 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public Point2D midpoint()
    {
-      Point2D point2d = new Point2D();
-
-      getMidpoint(point2d);
-
-      return point2d;
+      Point2D midpoint = new Point2D();
+      getMidpoint(midpoint);
+      return midpoint;
    }
 
    public void getMidpoint(Point2DBasics midpointToPack)
    {
       midpointToPack.interpolate(firstEndpoint, secondEndpoint, 0.5);
-   }
-
-   public double length()
-   {
-      return firstEndpoint.distance(secondEndpoint);
    }
 
    public double dotProduct(LineSegment2d lineSegment2d)
@@ -439,6 +494,70 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return firstEndpoint + "-" + secondEndpoint;
    }
 
+   public Point2D[] getEndpointsCopy()
+   {
+      return new Point2D[] {new Point2D(firstEndpoint), new Point2D(secondEndpoint)};
+   }
+
+   public void getEndpoints(Point2DBasics firstEndpointToPack, Point2DBasics secondEndpointToPack)
+   {
+      firstEndpointToPack.set(firstEndpoint);
+      secondEndpointToPack.set(secondEndpoint);
+   }
+
+   public Point2DReadOnly getFirstEndpoint()
+   {
+      return firstEndpoint;
+   }
+
+   public Point2DReadOnly getSecondEndpoint()
+   {
+      return secondEndpoint;
+   }
+
+   public Point2DReadOnly getEndpoint(int index)
+   {
+      switch (index)
+      {
+      case 0:
+         return firstEndpoint;
+      case 1:
+         return secondEndpoint;
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(index));
+      }
+   }
+
+   public Point2D getFirstEndpointCopy()
+   {
+      return new Point2D(firstEndpoint);
+   }
+
+   public Point2D getSecondEndpointCopy()
+   {
+      return new Point2D(secondEndpoint);
+   }
+
+   public double getFirstEndpointX()
+   {
+      return firstEndpoint.getX();
+   }
+
+   public double getFirstEndpointY()
+   {
+      return firstEndpoint.getY();
+   }
+
+   public double getSecondEndpointX()
+   {
+      return secondEndpoint.getX();
+   }
+
+   public double getSecondEndpointY()
+   {
+      return secondEndpoint.getY();
+   }
+
    @Override
    public void applyTransform(Transform transform)
    {
@@ -638,31 +757,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       perpendicularBisectorToPack.set(-y, x);
       perpendicularBisectorToPack.normalize();
       perpendicularBisectorToPack.scale(bisectorLengthDesired);
-   }
-
-   @Override
-   public void setToZero()
-   {
-      firstEndpoint.setToZero();
-      secondEndpoint.setToZero();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      firstEndpoint.setToNaN();
-      secondEndpoint.setToNaN();
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      if (firstEndpoint.containsNaN())
-         return true;
-      if (secondEndpoint.containsNaN())
-         return true;
-
-      return false;
    }
 
    @Override
