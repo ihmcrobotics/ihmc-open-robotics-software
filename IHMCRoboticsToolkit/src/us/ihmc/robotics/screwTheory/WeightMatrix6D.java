@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -320,8 +321,8 @@ public class WeightMatrix6D
       weightMatrixToPack.reshape(6, 6);
       weightMatrixToPack.zero();
 
-      angularWeights.getFullSelectionMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
-      linearWeights.getFullSelectionMatrixInFrame(destinationFrame, 3, 3, weightMatrixToPack);
+      angularWeights.getFullWeightMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
+      linearWeights.getFullWeightMatrixInFrame(destinationFrame, 3, 3, weightMatrixToPack);
    }
 
    /**
@@ -440,5 +441,15 @@ public class WeightMatrix6D
       else if (!linearWeights.equals(other.linearWeights))
          return false;
       return true;
+   }
+
+   public void setLinearWeights(Vector3D linearWeight)
+   {
+      linearWeights.setWeights(linearWeight.getX(), linearWeight.getY(), linearWeight.getZ());
+   }
+
+   public void setAngularWeights(Vector3D angularWeight)
+   {
+      angularWeights.setWeights(angularWeight.getX(), angularWeight.getY(), angularWeight.getZ());
    }
 }
