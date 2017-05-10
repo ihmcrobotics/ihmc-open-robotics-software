@@ -254,7 +254,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
-      double slope = line2dPointPoint.getSlope();
+      double slope = line2dPointPoint.slope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
       Point2D shouldBeOnLine = new Point2D(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
       Point2D shouldBeOnLineToo = new Point2D(point1.getX() + scaleFactor, point1.getY() + scaleFactor * slope);

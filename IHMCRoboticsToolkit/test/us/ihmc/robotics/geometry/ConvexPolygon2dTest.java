@@ -2397,9 +2397,9 @@ public class ConvexPolygon2dTest
 
          // getIntersectingEdges
          LineSegment2d[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);
-         boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope()
+         boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.slope()
                + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
-         boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope()
+         boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.slope()
                + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
          boolean lineCrossesThroughPolygon = isLineAbovePoint0 ^ isLineAbovePoint1;
 
