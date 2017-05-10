@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class LineSegment2dTest
+public class LineSegment2DTest
 {
    private static Random ran = new Random(100L);
    private static LineSegment2D testSegment1;
