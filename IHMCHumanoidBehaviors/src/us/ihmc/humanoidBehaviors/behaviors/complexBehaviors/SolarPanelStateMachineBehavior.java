@@ -238,7 +238,7 @@ public class SolarPanelStateMachineBehavior extends StateMachineBehavior<SolarPa
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
       
-      solarPanel = new SolarPanel(poseSolarPanel, SolarPanel.defaultSizeX, SolarPanel.defaultSizeY);
+      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
    }
    
    public void setUpSolarPanel(Pose extractedPose, double sizeX, double sizeY)
