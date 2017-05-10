@@ -10,9 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
 /**
- * A line segment must have two distinct endpoints by definition.
- *
- * @author Twan Koolen
+ * Represents a finite-length 2D line segment defined by its two 2D endpoints.
  */
 public class LineSegment2d implements GeometryObject<LineSegment2d>
 {
