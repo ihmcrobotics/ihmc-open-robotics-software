@@ -3112,7 +3112,7 @@ public class ConvexPolygon2dTest
 
    private static void assertEdgesEqual(LineSegment2d expected, LineSegment2d actual)
    {
-      assertTrue("Edge did not match expected.", expected.epsilonEquals(actual, epsilon));
+      assertTrue("Edge did not match expected.", expected.epsilonEquals(actual, epsilon) || expected.epsilonEquals(actual.flipDirectionCopy(), epsilon));
    }
 
    private static void assertPointsEqual(Point2D[] expected, Point2D[] actual, boolean enforceOrder)

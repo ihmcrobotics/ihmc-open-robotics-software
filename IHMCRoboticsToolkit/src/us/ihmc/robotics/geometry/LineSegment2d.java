@@ -297,6 +297,14 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    }
 
    /**
+    * Returns a copy of this line segment with the endpoints swapped.
+    */
+   public LineSegment2d flipDirectionCopy()
+   {
+      return new LineSegment2d(secondEndpoint, firstEndpoint);
+   }
+
+   /**
     * Gets the endpoints defining this line segment by storing their coordinates in the given
     * arguments.
     * 
