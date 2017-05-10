@@ -450,12 +450,6 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
       return this.line.isPointBehindLine(point.getPointCopy());
    }
 
-   public void setParallelLineThroughPoint(FramePoint2d point)
-   {
-      checkReferenceFrameMatch(point);
-      this.line.setParallelLineThroughPoint(point.getPointCopy());
-   }
-
    public void shiftToLeft(double distanceToShift)
    {
       this.line.shiftToLeft(distanceToShift);

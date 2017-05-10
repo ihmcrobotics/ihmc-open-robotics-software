@@ -1230,11 +1230,6 @@ public class Line2d implements GeometryObject<Line2d>
       return !isPointInFrontOfLine(point);
    }
 
-   public void setParallelLineThroughPoint(Point2DReadOnly point)
-   {
-      this.point.set(point);
-   }
-
    /**
     * Computes the orthogonal projection of the given 2D point on this 2D line.
     *
