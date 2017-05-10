@@ -209,8 +209,18 @@ public class PelvisOrientationManager
    private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();
    public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      tempPelvisOrientationTrajectoryCommand.set(command);
-      return handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
+      SelectionMatrix3D angularSelectionMatrix = command.getSelectionMatrix().getAngularPart();
+
+      if (angularSelectionMatrix.isXSelected() || angularSelectionMatrix.isYSelected() || angularSelectionMatrix.isZSelected())
+      { // At least one axis is to be controlled, process the command.
+         tempPelvisOrientationTrajectoryCommand.set(command);
+         return handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
+      }
+      else
+      { // The user does not want to control the pelvis orientation, do nothing.
+         // TODO Has to return true otherwise the command won't get to the height and XY managers.
+         return true;
+      }
    }
 
    private void requestState(PelvisOrientationControlMode state)
