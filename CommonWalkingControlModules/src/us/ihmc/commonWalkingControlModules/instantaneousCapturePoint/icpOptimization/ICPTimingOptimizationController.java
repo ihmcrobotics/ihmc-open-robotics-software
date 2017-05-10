@@ -21,7 +21,6 @@ import java.util.List;
 
 public class ICPTimingOptimizationController extends ICPOptimizationController
 {
-   /** gradient descent variables */
    private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentWeight", registry);
    private final DoubleYoVariable gradientThresholdForAdjustment = new DoubleYoVariable(yoNamePrefix + "GradientThresholdForAdjustment", registry);
    private final DoubleYoVariable gradientDescentGain = new DoubleYoVariable(yoNamePrefix + "GradientDescentGain", registry);
@@ -195,8 +194,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
 
 
-
-   private NoConvergenceException solveGradientDescent(int numberOfFootstepsToConsider, double omega0)
+   private void resetGradientDescentValues()
    {
       for (int i = 0; i < maxNumberOfGradientIterations; i++)
       {
@@ -207,6 +205,12 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       }
 
       costFunctionEstimator.reset();
+   }
+
+   private NoConvergenceException solveGradientDescent(int numberOfFootstepsToConsider, double omega0)
+   {
+      resetGradientDescentValues();
+
       double timingLowerBound = minimumSwingDuration;
       double timingUpperBound = Double.POSITIVE_INFINITY;
       boolean finishedOnTime = true;
@@ -381,7 +385,4 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
       return solverCostToGo + timingCostToGo;
    }
-
-
-
 }

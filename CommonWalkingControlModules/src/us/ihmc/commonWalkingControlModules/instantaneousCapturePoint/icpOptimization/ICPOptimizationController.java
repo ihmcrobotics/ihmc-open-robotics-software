@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +32,7 @@ import java.util.List;
 
 public abstract class ICPOptimizationController
 {
-   protected static final boolean VISUALIZE = true;
+   protected static final boolean VISUALIZE = false;
    protected static final boolean COMPUTE_COST_TO_GO = false;
    protected static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    protected static final boolean DEBUG = false;
