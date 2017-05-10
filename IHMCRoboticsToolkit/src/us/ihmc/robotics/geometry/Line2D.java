@@ -1147,7 +1147,10 @@ public class Line2D implements GeometryObject<Line2D>
    @Override
    public void set(Line2D other)
    {
-      set(other.getPoint(), other.getDirection());
+      point.set(other.getPoint());
+      direction.set(other.getDirection());
+      hasPointBeenSet = true;
+      hasDirectionBeenSet = true;
    }
 
    /**
