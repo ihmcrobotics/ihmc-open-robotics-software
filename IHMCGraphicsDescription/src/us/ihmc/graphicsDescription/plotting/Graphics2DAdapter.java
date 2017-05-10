@@ -7,7 +7,7 @@ import java.awt.Font;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
 /**
@@ -98,7 +98,7 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawString(plotter2dAdapter.getMetersFrame(), string, start);
    }
 
-   public void drawLine(Line2d line)
+   public void drawLine(Line2D line)
    {
       plotter2dAdapter.drawLine(plotter2dAdapter.getMetersFrame(), line);
    }

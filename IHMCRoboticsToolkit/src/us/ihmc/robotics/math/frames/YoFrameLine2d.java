@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -100,7 +100,7 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
 
       frameLine2d.checkReferenceFrameMatch(referenceFrame);
 
-      Line2d line = frameLine2d.getLine2d();
+      Line2D line = frameLine2d.getLine2d();
 
       pointX.set(line.getPoint().getX());
       pointY.set(line.getPoint().getY());

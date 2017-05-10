@@ -34,9 +34,9 @@ public class HumanEvaluationLine2dTest
    private Point2D point1 = new Point2D(random.nextDouble(), random.nextDouble());
    private Point2D point2 = new Point2D(random.nextDouble(), random.nextDouble());
    private Vector2D vector = new Vector2D(random.nextDouble() + 1.0, random.nextDouble());    // to ensure that the vector is not vertical (for the slope test)
-   private Line2d line2dPointVector = new Line2d(point1, vector);
-   private Line2d line2dPointPoint = new Line2d(point1, point2);
-   private Line2d line2dLine2d = new Line2d(line2dPointPoint);
+   private Line2D line2dPointVector = new Line2D(point1, vector);
+   private Line2D line2dPointPoint = new Line2D(point1, point2);
+   private Line2D line2dLine2d = new Line2D(line2dPointPoint);
 
    @Before
    public void setUp() throws Exception
@@ -61,7 +61,7 @@ public class HumanEvaluationLine2dTest
       try
       {
          // Try creating a line from two coincidal points.
-         new Line2d(point1, new Point2D(point1));
+         new Line2D(point1, new Point2D(point1));
       }
       catch (RuntimeException runtimeException)
       {
@@ -91,7 +91,7 @@ public class HumanEvaluationLine2dTest
 
       Point2D randomPoint = new Point2D(xMin + (xMax - xMin) * random.nextDouble(), yMin + (yMax - yMin) * random.nextDouble());
       Vector2D randomVector = new Vector2D(random.nextDouble(), random.nextDouble());    // both are positive, so vector is always in upper right hand quadrant
-      Line2d randomLine = new Line2d(randomPoint, randomVector);
+      Line2D randomLine = new Line2D(randomPoint, randomVector);
       plotter.addFrameLine2d(new FrameLine2d(someFrame, randomLine));
       plotter.addFrameLine2d(new FrameLine2d(someFrame, randomLine.negateDirectionCopy()));
 
@@ -125,7 +125,7 @@ public class HumanEvaluationLine2dTest
    public void testIsInFrontOfLine()
    {
       // illegal method call:
-      Line2d line = new Line2d(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
+      Line2D line = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
 
       boolean exceptionThrown = false;
       try
@@ -152,8 +152,8 @@ public class HumanEvaluationLine2dTest
       Point2D pointOnLine = new Point2D(0.0, 0.0);
       Vector2D directionVector1 = new Vector2D(1.0, 1.0);
       Vector2D directionVector2 = new Vector2D(1.0, -1.0);
-      Line2d line1 = new Line2d(pointOnLine, directionVector1);
-      Line2d line2 = new Line2d(pointOnLine, directionVector2);
+      Line2D line1 = new Line2D(pointOnLine, directionVector1);
+      Line2D line2 = new Line2D(pointOnLine, directionVector2);
       plotter.addFrameLine2d(new FrameLine2d(someFrame, line1));
       plotter.addFrameLine2d(new FrameLine2d(someFrame, line2));
 
@@ -191,7 +191,7 @@ public class HumanEvaluationLine2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(line2dPointPoint);
+      Line2D line = new Line2D(line2dPointPoint);
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
@@ -273,9 +273,9 @@ public class HumanEvaluationLine2dTest
 
       double epsilon = 1.0E-8;
 
-      Line2d firstLine = new Line2d(somePoint, vector1);
-      Line2d secondLine = new Line2d(somePoint, vector2);
-      Line2d bisector = firstLine.interiorBisector(secondLine);
+      Line2D firstLine = new Line2D(somePoint, vector1);
+      Line2D secondLine = new Line2D(somePoint, vector2);
+      Line2D bisector = firstLine.interiorBisector(secondLine);
 
       assertEquals("Bisector point on line not correct", bisector.getPointX(), somePoint.getX(), EPSILON_FOR_EQUALS);
       assertEquals("Bisector point on line not correct", bisector.getPointY(), somePoint.getY(), EPSILON_FOR_EQUALS);
@@ -284,16 +284,16 @@ public class HumanEvaluationLine2dTest
       assertTrue("Bisector direction not correct", Math.abs(bisector.getDirectionX() - Math.sqrt(2.0) / 2.0) < epsilon);
       assertTrue("Bisector direction not correct", Math.abs(bisector.getDirectionX() - Math.sqrt(2.0) / 2.0) < epsilon);
 
-      Line2d parallelLine = new Line2d(firstLine);
+      Line2D parallelLine = new Line2D(firstLine);
       parallelLine.translate(0.0, 5.0);
       bisector = firstLine.interiorBisector(parallelLine);
       assertNull(bisector);
 
       for (int i = 0; i < 100000; i++)
       {
-         Line2d randomLine1 = new Line2d(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
+         Line2D randomLine1 = new Line2D(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
                                          new Vector2D(random.nextDouble(), random.nextDouble()));
-         Line2d randomLine2 = new Line2d(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
+         Line2D randomLine2 = new Line2D(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
                                          new Vector2D(random.nextDouble(), random.nextDouble()));
          bisector = randomLine1.interiorBisector(randomLine2);
          Point2D intersection = randomLine1.intersectionWith(randomLine2);
@@ -317,7 +317,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
-      Line2d someLine = new Line2d(line2dPointPoint);
+      Line2D someLine = new Line2D(line2dPointPoint);
 
       Vector2DReadOnly directionVectorBefore = someLine.getDirection();
       double directionBeforeX = someLine.getDirectionX();
@@ -334,14 +334,14 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
-      Line2d someLine = new Line2d(line2dPointPoint);
+      Line2D someLine = new Line2D(line2dPointPoint);
 
       Vector2DReadOnly directionVectorBefore = someLine.getDirection();
       Point2DReadOnly pointBefore = someLine.getPoint();
       double directionBeforeX = someLine.getDirectionX();
       double directionBeforeY = someLine.getDirectionY();
 
-      Line2d copy = someLine.negateDirectionCopy();
+      Line2D copy = someLine.negateDirectionCopy();
 
       assertEquals(-directionBeforeX, copy.getDirectionX(), EPSILON_FOR_EQUALS);
       assertEquals(-directionBeforeY, copy.getDirectionY(), EPSILON_FOR_EQUALS);
@@ -354,12 +354,12 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
-      Line2d line;
+      Line2D line;
       Vector2D vector;
       Vector2D vectorPerp;
       for (int i = 0; i < 1000000; i++)
       {
-         line = new Line2d(new Point2D(random.nextDouble(), random.nextDouble()), new Vector2D(random.nextDouble(), random.nextDouble()));
+         line = new Line2D(new Point2D(random.nextDouble(), random.nextDouble()), new Vector2D(random.nextDouble(), random.nextDouble()));
          vector = new Vector2D();
          line.getDirection(vector);
          vectorPerp = line.perpendicularVector();
@@ -373,6 +373,6 @@ public class HumanEvaluationLine2dTest
    {
       Vector2D directionAndLength = new Vector2D(0.0, 0.0);
       Point2D start = new Point2D(1.0, 1.0);
-      new Line2d(start, directionAndLength);
+      new Line2D(start, directionAndLength);
    }
 }

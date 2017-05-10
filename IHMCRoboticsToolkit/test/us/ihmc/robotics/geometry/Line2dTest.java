@@ -59,14 +59,14 @@ public class Line2dTest
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
          Vector2D vector = new Vector2D(secondPointOnLine.getX() - firstPointOnLine.getX(), secondPointOnLine.getY() - firstPointOnLine.getY());
-         Line2d line2dByPointVector = new Line2d(firstPointOnLine, vector);
-         Line2d line2dByPointPoint = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2dByPointVector = new Line2D(firstPointOnLine, vector);
+         Line2D line2dByPointPoint = new Line2D(firstPointOnLine, secondPointOnLine);
 
          assertEquals(line2dByPointPoint.getPoint(), line2dByPointVector.getPoint());
          assertEquals(line2dByPointPoint.getDirection().getX(), line2dByPointVector.getDirection().getX(), delta);
          assertEquals(line2dByPointPoint.getDirection().getY(), line2dByPointVector.getDirection().getY(), delta);
 
-         Line2d line2dByCopy = new Line2d(line2dByPointVector);
+         Line2D line2dByCopy = new Line2D(line2dByPointVector);
          assertFalse(line2dByPointVector == line2dByCopy);
          assertEquals(line2dByPointVector.getPoint(), line2dByCopy.getPoint());
          assertEquals(line2dByPointVector.getDirection().getX(), line2dByCopy.getDirection().getX(), delta);
@@ -80,7 +80,7 @@ public class Line2dTest
    @Test(timeout = 30000)
    public void testIsPointInFrontOfLine2d()
    {
-      Line2d line2d = new Line2d();
+      Line2D line2d = new Line2D();
       Point2D point1 = new Point2D();
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
@@ -123,7 +123,7 @@ public class Line2dTest
       // TODO: Test this at various random points, or is this sufficient?
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Vector2D vector = new Vector2D(0.0, 0.0);
-      new Line2d(firstPointOnLine, vector);
+      new Line2D(firstPointOnLine, vector);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -132,7 +132,7 @@ public class Line2dTest
    {
       // TODO: Test this at various random points, or is this sufficient?
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
-      new Line2d(firstPointOnLine, firstPointOnLine);
+      new Line2D(firstPointOnLine, firstPointOnLine);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -142,7 +142,7 @@ public class Line2dTest
       // TODO: Test this at various random points, or is this sufficient?
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       assertEquals(firstPointOnLine, line2d.getPoint());
    }
 
@@ -157,7 +157,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double xdiff = secondPointOnLine.getX() - firstPointOnLine.getX();
          double ydiff = secondPointOnLine.getY() - firstPointOnLine.getY();
          double length = Math.sqrt(MathTools.square(xdiff) + MathTools.square(ydiff));
@@ -174,7 +174,7 @@ public class Line2dTest
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       Vector2D normalizedVector = new Vector2D(Math.sqrt(2.0) / 2.0, Math.sqrt(2.0) / 2.0);
       assertEquals(normalizedVector.getX(), line2d.getDirection().getX(), delta);
@@ -195,18 +195,18 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double slope = (secondPointOnLine.getY() - firstPointOnLine.getY()) / (secondPointOnLine.getX() - firstPointOnLine.getX());
          assertEquals(slope, line2d.getSlope(), delta);
       }
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(0.0, 5.0);
-      Line2d verticalLine = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D verticalLine = new Line2D(firstPointOnLine, secondPointOnLine);
       assertEquals(Double.POSITIVE_INFINITY, verticalLine.getSlope(), delta);
 
       secondPointOnLine = new Point2D(0.0, -5.0);
-      Line2d horizontalLine = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D horizontalLine = new Line2D(firstPointOnLine, secondPointOnLine);
       assertEquals(Double.NEGATIVE_INFINITY, horizontalLine.getSlope(), delta);
    }
 
@@ -220,7 +220,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double slope = (secondPointOnLine.getY() - firstPointOnLine.getY()) / (secondPointOnLine.getX() - firstPointOnLine.getX());
          double additive = firstPointOnLine.getY() - slope * firstPointOnLine.getX();
          assertEquals(-additive / slope, line2d.getXIntercept(), delta);
@@ -229,7 +229,7 @@ public class Line2dTest
       // Edge cases: on top of x-axis and parallel to x-axis
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(5.0, 0.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       assertEquals(Double.NaN, line2d.getXIntercept(), delta);
 
       firstPointOnLine = new Point2D(1.0, 1.0);
@@ -251,7 +251,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double slope = (secondPointOnLine.getY() - firstPointOnLine.getY()) / (secondPointOnLine.getX() - firstPointOnLine.getX());
          double additive = firstPointOnLine.getY() - slope * firstPointOnLine.getX();
          assertEquals(additive, line2d.getYIntercept(), delta);
@@ -260,7 +260,7 @@ public class Line2dTest
       // Edge cases: on top of x-axis and parallel to x-axis
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(0.0, 5.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       assertEquals(Double.NaN, line2d.getYIntercept(), delta);
 
@@ -284,7 +284,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2D normalizedVectorCopy = new Vector2D();
          line2d.getDirection(normalizedVectorCopy);
          line2d.negateDirection();
@@ -301,8 +301,8 @@ public class Line2dTest
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
-      Line2d line2dNegated = line2d.negateDirectionCopy();
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
+      Line2D line2dNegated = line2d.negateDirectionCopy();
       line2d.negateDirection();
       assertEquals(line2d.getDirection().getX(), line2dNegated.getDirection().getX(), delta);
       assertEquals(line2d.getDirection().getY(), line2dNegated.getDirection().getY(), delta);
@@ -319,7 +319,7 @@ public class Line2dTest
       Random random = new Random(9999L);
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       for (int i = 0; i < ITERATIONS; i++)
       {
          firstPointOnLine = randomPoint(random);
@@ -343,7 +343,7 @@ public class Line2dTest
    {
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       line2d.set(firstPointOnLine, firstPointOnLine);
    }
 
@@ -356,7 +356,7 @@ public class Line2dTest
       Random random = new Random(1444L);
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       for (int i = 0; i < ITERATIONS; i++)
       {
          firstPointOnLine = randomPoint(random);
@@ -381,7 +381,7 @@ public class Line2dTest
    {
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D[] points = {firstPointOnLine};
       try
       {
@@ -430,11 +430,11 @@ public class Line2dTest
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       Point2D newFirstPointOnLine = new Point2D(10.0, 15.0);
       Point2D newSecondPointOnLine = new Point2D(15.0, 8.0);
-      Line2d secondLine2d = new Line2d(newFirstPointOnLine, newSecondPointOnLine);
+      Line2D secondLine2d = new Line2D(newFirstPointOnLine, newSecondPointOnLine);
 
       line2d.set(secondLine2d);
       assertFalse(secondLine2d == line2d);
@@ -454,7 +454,7 @@ public class Line2dTest
       // TODO: Failing test case ignored. Should throw an exception like the Point2d, Vector2d constructor
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       line2d.set(5.0, 6.0, 0.0, 0.0);
    }
@@ -465,7 +465,7 @@ public class Line2dTest
    {
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D newPoint = new Point2D(11.0, 9.0);
       line2d.setPoint(newPoint);
 
@@ -483,7 +483,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = new Point2D(0.0, 0.0);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          double angle = Math.atan2(line2d.getDirection().getY(), line2d.getDirection().getX());
          double rotation = randomDouble(random, 2.0 * Math.PI);
          double newAngle = angle + rotation;
@@ -502,8 +502,8 @@ public class Line2dTest
       double epsilon = 1e-7;
 
       // Pointing straight up:
-      Line2d line = new Line2d(0.0, 0.0, 0.0, 1.0);
-      Line2d shiftedLine = new Line2d(line);
+      Line2D line = new Line2D(0.0, 0.0, 0.0, 1.0);
+      Line2D shiftedLine = new Line2D(line);
       shiftedLine.shiftToRight(distanceToShift);
 
       Point2DReadOnly shiftedLineOrigin = shiftedLine.getPoint();
@@ -528,7 +528,7 @@ public class Line2dTest
       assertEquals(lineVector.getY(), shiftedLineVector.getY(), epsilon);
 
       // Pointing straight along x:
-      line = new Line2d(0.0, 0.0, 1.0, 0.0);
+      line = new Line2D(0.0, 0.0, 1.0, 0.0);
       shiftedLine.set(line);
       shiftedLine.shiftToRight(distanceToShift);
 
@@ -554,7 +554,7 @@ public class Line2dTest
       assertEquals(lineVector.getY(), shiftedLineVector.getY(), epsilon);
 
       // Pointing at (1,1)
-      line = new Line2d(0.0, 0.0, 1.0, 1.0);
+      line = new Line2D(0.0, 0.0, 1.0, 1.0);
       shiftedLine.set(line);
       shiftedLine.shiftToRight(distanceToShift);
 
@@ -591,17 +591,17 @@ public class Line2dTest
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 0.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
-      Line2d secondLine2d = new Line2d(line2d);
+      Line2D secondLine2d = new Line2D(line2d);
 
-      Line2d interiorBisector = line2d.interiorBisector(secondLine2d);
+      Line2D interiorBisector = line2d.interiorBisector(secondLine2d);
 
       assertEquals(line2d.getPoint(), interiorBisector.getPoint());
       assertEquals(line2d.getDirection().getX(), interiorBisector.getDirection().getX(), delta);
       assertEquals(line2d.getDirection().getY(), interiorBisector.getDirection().getY(), delta);
 
-      Line2d parallelLine2d = new Line2d(line2d);
+      Line2D parallelLine2d = new Line2D(line2d);
       parallelLine2d.setPoint(new Point2D(5.5, 18));
       assertNull(line2d.interiorBisector(parallelLine2d));
 
@@ -643,7 +643,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2D perpendicular = line2d.perpendicularVector();
 
          assertEquals(0.0, perpendicular.getX() * line2d.getDirection().getX() + perpendicular.getY() * line2d.getDirection().getY(), delta);
@@ -658,7 +658,7 @@ public class Line2dTest
       Point2D firstPointOnLine = new Point2D(3.0, 4.0);
       Point2D secondPointOnLine = new Point2D(8.0, 6.0);
       System.out.println(secondPointOnLine);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
       Vector2D perpendicular = line2d.perpendicularVector();
       System.out.println(perpendicular);
 
@@ -704,9 +704,9 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Point2D pointOnPerpendicularLine = randomPoint(random);
-         Line2d perpendicularLine = line2d.perpendicularLineThroughPoint(pointOnPerpendicularLine);
+         Line2D perpendicularLine = line2d.perpendicularLineThroughPoint(pointOnPerpendicularLine);
 
          assertTrue(perpendicularLine.isPointOnLine(pointOnPerpendicularLine, delta));
          assertEquals(0.0,
@@ -725,7 +725,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2DReadOnly normalizedVector = line2d.getDirection();
          Vector2D perpendicular = line2d.perpendicularVector();
 
@@ -755,7 +755,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2DReadOnly normalizedVector = line2d.getDirection();
          Vector2D perpendicular = line2d.perpendicularVector();
 
@@ -790,18 +790,18 @@ public class Line2dTest
          Point2D secondPoint = randomPoint(random);
          LineSegment2d lineSegment2d = new LineSegment2d(firstPoint, secondPoint);
 
-         Line2d colinearLine2d = new Line2d(firstPoint, secondPoint);
+         Line2D colinearLine2d = new Line2D(firstPoint, secondPoint);
 
          // TODO: Sometimes fails.
 //       assertNull(colinearLine2d.intersectionWith(lineSegment2d));
 
-         Line2d parallelLine2d = new Line2d(colinearLine2d);
+         Line2D parallelLine2d = new Line2D(colinearLine2d);
          double distance = randomDouble(random, 10.0);
          parallelLine2d.shiftToLeft(distance);
          assertNull(parallelLine2d.intersectionWith(lineSegment2d));
 
          Vector2D direction = new Vector2D(randomDouble(random, 10.0), randomDouble(random, 10.0));
-         Line2d lineThroughEndPoint = new Line2d(firstPoint, direction);
+         Line2D lineThroughEndPoint = new Line2D(firstPoint, direction);
          Point2D intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
          assertEquals(firstPoint.getX(), intersection.getX(), delta);
          assertEquals(firstPoint.getY(), intersection.getY(), delta);
@@ -816,7 +816,7 @@ public class Line2dTest
          midPoint.add(firstPoint, secondPoint);
          midPoint.scale(0.5);
 
-         Line2d intersectingLine = new Line2d(midPoint, direction);
+         Line2D intersectingLine = new Line2D(midPoint, direction);
          intersection = intersectingLine.intersectionWith(lineSegment2d);
          assertEquals(midPoint.getX(), intersection.getX(), delta);
          assertEquals(midPoint.getY(), intersection.getY(), delta);
@@ -834,7 +834,7 @@ public class Line2dTest
       {
          Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
-         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
+         Line2D line1 = new Line2D(pointOnLine1, lineDirection1);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection1, pointOnLine1);
@@ -842,11 +842,11 @@ public class Line2dTest
          Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
          Point2D pointOnLine2 = new Point2D(expectedIntersection);
 
-         Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         Point2D actualIntersection = line1.intersectionWith(new Line2D(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
          pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
-         actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         actualIntersection = line1.intersectionWith(new Line2D(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
       }
 
@@ -855,7 +855,7 @@ public class Line2dTest
       {
          Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
-         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
+         Line2D line1 = new Line2D(pointOnLine1, lineDirection1);
 
          Vector2D lineDirection2 = new Vector2D(lineDirection1);
          if (random.nextBoolean())
@@ -866,7 +866,7 @@ public class Line2dTest
 
          pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOnLine2);
          pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
-         Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         Point2D actualIntersection = line1.intersectionWith(new Line2D(pointOnLine2, lineDirection2));
          assertNull(actualIntersection);
       }
 
@@ -875,7 +875,7 @@ public class Line2dTest
       {
          Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
-         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
+         Line2D line1 = new Line2D(pointOnLine1, lineDirection1);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.set(pointOnLine1);
@@ -883,11 +883,11 @@ public class Line2dTest
          Vector2D lineDirection2 = new Vector2D(lineDirection1);
          Point2D pointOnLine2 = new Point2D(expectedIntersection);
 
-         Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         Point2D actualIntersection = line1.intersectionWith(new Line2D(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
          pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
-         actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         actualIntersection = line1.intersectionWith(new Line2D(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
       }
    }
@@ -903,12 +903,12 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Point2D distantPoint = randomPoint(random);
 
          double calculatedDistance = line2d.distance(distantPoint);
 
-         Line2d orthogonalLine = line2d.perpendicularLineThroughPoint(firstPointOnLine);
+         Line2D orthogonalLine = line2d.perpendicularLineThroughPoint(firstPointOnLine);
          Point2D orthogonalProjection = orthogonalLine.orthogonalProjectionCopy(distantPoint);
          double xdiff = orthogonalProjection.getX() - firstPointOnLine.getX();
          double ydiff = orthogonalProjection.getY() - firstPointOnLine.getY();
@@ -928,7 +928,7 @@ public class Line2dTest
 	   {
 	      Point2D pointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 	      Vector2D lineDirection = RandomGeometry.nextVector2D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-	      Line2d line = new Line2d(pointOnLine, lineDirection);
+	      Line2D line = new Line2D(pointOnLine, lineDirection);
 
 	      Point2D randomPointOnLine = new Point2D();
 	      randomPointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection, pointOnLine);
@@ -971,7 +971,7 @@ public class Line2dTest
       Point2D point3 = new Point2D(2.2,3.3);
       Point2D point4 = new Point2D(10,10);
       
-      Line2d line = new Line2d(point1, point2);
+      Line2D line = new Line2D(point1, point2);
       
       assertFalse(line.isPointOnLine(point3));
       assertTrue(line.isPointOnLine(point4));
@@ -990,12 +990,12 @@ public class Line2dTest
       Point2D point5 = new Point2D(-2,4);
       Point2D point5UnProjected = new Point2D(point5);
       
-      Line2d line1 = new Line2d(point1,point2);
-      Line2d line2 = new Line2d(point3,point4);
+      Line2D line1 = new Line2D(point1,point2);
+      Line2D line2 = new Line2D(point3,point4);
       
       line1.orthogonalProjection(point5); //project point5 onto line1, this ensures we have a point for creating a perpendicular line
       
-      Line2d line3 = new Line2d(point5, point5UnProjected);
+      Line2D line3 = new Line2D(point5, point5UnProjected);
       
       assertFalse(line1.areLinesPerpendicular(line2));
       assertTrue(line1.areLinesPerpendicular(line3));
@@ -1010,7 +1010,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2D normalizedVector = new Vector2D();
          line2d.getDirection(normalizedVector);
          Vector2D perpendicularVector = line2d.perpendicularVector();
@@ -1043,7 +1043,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2D normalizedVector = new Vector2D();
          line2d.getDirection(normalizedVector);
          Vector2D perpendicularVector = line2d.perpendicularVector();
@@ -1075,7 +1075,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Vector2D normalizedVector = new Vector2D();
          line2d.getDirection(normalizedVector);
          Vector2D perpendicularVector = line2d.perpendicularVector();
@@ -1099,7 +1099,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Point2D checkPoint = new Point2D(secondPointOnLine);
          double shift = (randomDouble(random) + maxRandomValue) / 2.0 + 1.0;    // Makes sure the shift is strictly positive.
          checkPoint.setX(checkPoint.getX() + shift);
@@ -1120,7 +1120,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Vector2D direction = new Vector2D(1.0, 0.0);
-         Line2d line2d = new Line2d(firstPointOnLine, direction);
+         Line2D line2d = new Line2D(firstPointOnLine, direction);
          Point2D checkPoint = randomPoint(random);
          try
          {
@@ -1142,7 +1142,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Point2D checkPoint = new Point2D(secondPointOnLine);
          double shift = (randomDouble(random) - maxRandomValue) / 2.0 - 1.0;    // Makes sure the shift is strictly negative.
          checkPoint.setX(checkPoint.getX() + shift);
@@ -1163,7 +1163,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Vector2D direction = new Vector2D(1.0, 0.0);
-         Line2d line2d = new Line2d(firstPointOnLine, direction);
+         Line2D line2d = new Line2D(firstPointOnLine, direction);
          Point2D checkPoint = randomPoint(random);
          try
          {
@@ -1185,7 +1185,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
          Point2D checkPoint = new Point2D(secondPointOnLine);
          double shift = randomDouble(random);
          checkPoint.setX(checkPoint.getX() + shift);
@@ -1205,7 +1205,7 @@ public class Line2dTest
       {
          Point2D firsPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firsPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firsPointOnLine, secondPointOnLine);
          double parameter = randomDouble(random);
          Point2D checkPoint = new Point2D(firsPointOnLine);
          Vector2D normalizedVector = new Vector2D();
@@ -1228,7 +1228,7 @@ public class Line2dTest
       {
          Point2D firsPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firsPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firsPointOnLine, secondPointOnLine);
          double parameter = randomDouble(random);
          double perpendicularDistance = randomDouble(random);
          perpendicularDistance = perpendicularDistance + Math.signum(perpendicularDistance);    // Ensures that the point cannot be on the line
@@ -1259,7 +1259,7 @@ public class Line2dTest
       {
          Point2D firstPointOnLine = randomPoint(random);
          Point2D secondPointOnLine = randomPoint(random);
-         Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+         Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
          ArrayList<Point2D> pointList = new ArrayList<Point2D>();
          for (int j = 0; j < 25; j++)
@@ -1276,7 +1276,7 @@ public class Line2dTest
 
       Point2D firstPointOnLine = new Point2D(0.0, 0.0);
       Point2D secondPointOnLine = new Point2D(1.0, 1.0);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       Point2D firstPolygonPoint = new Point2D(0.0, 0.0);
       Point2D secondPolygonPoint = new Point2D(0.0, 1.0);
@@ -1313,7 +1313,7 @@ public class Line2dTest
       Random random = new Random(1776L);
       Point2D firstPointOnLine = randomPoint(random);
       Point2D secondPointOnLine = randomPoint(random);
-      Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line2d = new Line2D(firstPointOnLine, secondPointOnLine);
 
       assertFalse(line2d.containsNaN());
 
@@ -1347,7 +1347,7 @@ public class Line2dTest
 
       Point2D firstPointOnLine = randomPoint(random);
       Point2D secondPointOnLine = randomPoint(random);
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
@@ -1379,7 +1379,7 @@ public class Line2dTest
 
       Point2D firstPointOnLine = randomPoint(random);
       Point2D secondPointOnLine = randomPoint(random);
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
 
       // TODO Check out why this doesn't fail. Should it fail? Is out of plane translation ignored?
       line.applyTransform(transform);
@@ -1403,7 +1403,7 @@ public class Line2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
@@ -1437,7 +1437,7 @@ public class Line2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
 
       line.applyTransform(transform);
    }
@@ -1458,7 +1458,7 @@ public class Line2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
 
       line.applyTransform(transform);
    }
@@ -1481,7 +1481,7 @@ public class Line2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
@@ -1517,13 +1517,13 @@ public class Line2dTest
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
+      Line2D line = new Line2D(firstPointOnLine, secondPointOnLine);
       Point2D point = new Point2D();
       line.getPoint(point);
       Vector2D vector = new Vector2D();
       line.getDirection(vector);
 
-      Line2d transformedCopy = line.applyTransformCopy(transform);
+      Line2D transformedCopy = line.applyTransformCopy(transform);
       line.applyTransform(transform);
       assertNotSame(transformedCopy, line);
       assertNotSame(transformedCopy.getPoint(), line.getPoint());
@@ -1540,7 +1540,7 @@ public class Line2dTest
    {
       Point2D startPoint = new Point2D(-10.0, 0.0);
       Point2D endPoint = new Point2D(10.0, 0.0);
-      Line2d line1 = new Line2d(startPoint, endPoint);
+      Line2D line1 = new Line2D(startPoint, endPoint);
 
       Point2D origionalPoint = new Point2D(-20.0, 10.0);
       Point2D projectedPoint = line1.orthogonalProjectionCopy(origionalPoint);
@@ -1581,17 +1581,17 @@ public class Line2dTest
 	@Test(timeout = 30000)
    public void testIntersectionLine2dLine2d()
    {
-      Line2d line1 = new Line2d(new Point2D(-10.0, 0.0), new Point2D(10.0, 0.0));
-      Line2d line2 = new Line2d(new Point2D(-10.0, 10.0), new Point2D(10.0, 0.0));
-      Line2d line3 = new Line2d(new Point2D(0.0, 10.0), new Point2D(0.0, -10.0));
-      Line2d line4 = new Line2d(new Point2D(0.0, -10.0), new Point2D(0.0, 10.0));
-      Line2d line5 = new Line2d(new Point2D(-10.0, 0.0), new Point2D(10.0, 0.0));
-      Line2d line6 = new Line2d(new Point2D(10.0, 0.0), new Point2D(-10.0, 0.0));
-      Line2d line7 = new Line2d(new Point2D(10.0, 0.0), new Point2D(20.0, 0.0));
-      Line2d line8 = new Line2d(new Point2D(10.0, 0.0), new Point2D(-20.0, 0.0));
-      Line2d line9 = new Line2d(new Point2D(10.1, 0.0), new Point2D(20.0, 0.0));
-      Line2d line10 = new Line2d(new Point2D(10.0, 0.0), new Point2D(20.0, 1.0));
-      Line2d line11 = new Line2d(new Point2D(-10.0, 1.0), new Point2D(10.0, 1.0));
+      Line2D line1 = new Line2D(new Point2D(-10.0, 0.0), new Point2D(10.0, 0.0));
+      Line2D line2 = new Line2D(new Point2D(-10.0, 10.0), new Point2D(10.0, 0.0));
+      Line2D line3 = new Line2D(new Point2D(0.0, 10.0), new Point2D(0.0, -10.0));
+      Line2D line4 = new Line2D(new Point2D(0.0, -10.0), new Point2D(0.0, 10.0));
+      Line2D line5 = new Line2D(new Point2D(-10.0, 0.0), new Point2D(10.0, 0.0));
+      Line2D line6 = new Line2D(new Point2D(10.0, 0.0), new Point2D(-10.0, 0.0));
+      Line2D line7 = new Line2D(new Point2D(10.0, 0.0), new Point2D(20.0, 0.0));
+      Line2D line8 = new Line2D(new Point2D(10.0, 0.0), new Point2D(-20.0, 0.0));
+      Line2D line9 = new Line2D(new Point2D(10.1, 0.0), new Point2D(20.0, 0.0));
+      Line2D line10 = new Line2D(new Point2D(10.0, 0.0), new Point2D(20.0, 1.0));
+      Line2D line11 = new Line2D(new Point2D(-10.0, 1.0), new Point2D(10.0, 1.0));
 
       assertEquals(null, line1.intersectionWith(line11));
 
@@ -1616,7 +1616,7 @@ public class Line2dTest
    {
       Point2D pointOnLine = new Point2D(0.0, 1.0);
       Vector2D directionVector = new Vector2D(1.0, 0.0);
-      Line2d line = new Line2d(pointOnLine, directionVector);
+      Line2D line = new Line2D(pointOnLine, directionVector);
 
       Point2D point = new Point2D(0.0, 2.0);
       double distance = line.distance(point);
@@ -1625,7 +1625,7 @@ public class Line2dTest
 
       pointOnLine = new Point2D(-1.0, 0.0);
       directionVector = new Vector2D(0.0, 1.0);
-      line = new Line2d(pointOnLine, directionVector);
+      line = new Line2D(pointOnLine, directionVector);
 
       point = new Point2D(2.0, 3.0);
       distance = line.distance(point);
@@ -1635,7 +1635,7 @@ public class Line2dTest
 	
 	public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(Line2d.class, Line2dTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(Line2D.class, Line2dTest.class);
    }
 
 }
