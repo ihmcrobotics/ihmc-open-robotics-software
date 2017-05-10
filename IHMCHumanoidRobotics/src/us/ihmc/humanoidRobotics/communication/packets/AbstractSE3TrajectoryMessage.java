@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.*;
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.checkIfFrameIdsMatch;
+import static us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage.checkIfTrajectoryFrameIdsMatch;
 
 import java.util.Random;
 
@@ -14,7 +15,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -80,7 +83,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long dataFrameId,
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long dataFrameId,
                                        long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -92,7 +95,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       this.dataReferenceFrameId = dataFrameId;
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame dataFrame,
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, ReferenceFrame dataFrame,
                                        ReferenceFrame trajectoryReferenceFrame)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -137,7 +140,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    /**
     * Create a trajectory point.
-    * 
+    *
     * @param trajectoryPointIndex index of the trajectory point to create.
     * @param time time at which the trajectory point has to be reached. The time is relative to when
     *           the trajectory starts.
@@ -160,7 +163,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    /**
     * Create a trajectory point.
-    * 
+    *
     * @param trajectoryPointIndex index of the trajectory point to create.
     * @param time time at which the trajectory point has to be reached. The time is relative to when
     *           the trajectory starts.
@@ -203,7 +206,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
     * frame if not defined otherwise.
     * </p>
-    * 
+    *
     * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
     *           modified.
     */
@@ -267,7 +270,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * If this message does not have a angular selection matrix, this method returns
     * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
     * </p>
-    * 
+    *
     * @return the selection frame ID for the angular part of the selection matrix.
     */
    public long getAngularSelectionFrameId()
@@ -285,7 +288,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * If this message does not have a linear selection matrix, this method returns
     * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
     * </p>
-    * 
+    *
     * @return the selection frame ID for the linear part of the selection matrix.
     */
    public long getLinearSelectionFrameId()

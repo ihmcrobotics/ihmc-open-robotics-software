@@ -1019,22 +1019,22 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.translatePolygonCopy(translation, this);
    }
 
-   public LineSegment2d[] getIntersectingEdgesCopy(Line2d line)
+   public LineSegment2d[] getIntersectingEdgesCopy(Line2D line)
    {
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
 
-   public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2d ray)
+   public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2D ray)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices,
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.getPoint(), ray.getDirection(), clockwiseOrderedListOfPoints, numberOfVertices,
                                                                           clockwiseOrdered, pointToPack);
    }
 
-   public Point2D getClosestPointWithRay(Line2d ray)
+   public Point2D getClosestPointWithRay(Line2D ray)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices,
+      return EuclidGeometryPolygonTools.closestPointToNonInterectingRay2D(ray.getPoint(), ray.getDirection(), clockwiseOrderedListOfPoints, numberOfVertices,
                                                                           clockwiseOrdered);
    }
 
@@ -1145,33 +1145,33 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return distance(point) < 1.0E-10;
    }
 
-   public int intersectionWith(Line2d line, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   public int intersectionWith(Line2D line, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints,
+      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.getPoint(), line.getDirection(), clockwiseOrderedListOfPoints,
                                                                                     numberOfVertices, clockwiseOrdered, firstIntersectionToPack,
                                                                                     secondIntersectionToPack);
    }
 
-   public Point2D[] intersectionWith(Line2d line)
+   public Point2D[] intersectionWith(Line2D line)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints,
+      return EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(line.getPoint(), line.getDirection(), clockwiseOrderedListOfPoints,
                                                                                     numberOfVertices, clockwiseOrdered);
    }
 
-   public int intersectionWithRay(Line2d ray, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   public int intersectionWithRay(Line2D ray, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints,
+      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.getPoint(), ray.getDirection(), clockwiseOrderedListOfPoints,
                                                                                    numberOfVertices, clockwiseOrdered, firstIntersectionToPack,
                                                                                    secondIntersectionToPack);
    }
 
-   public Point2D[] intersectionWithRay(Line2d ray)
+   public Point2D[] intersectionWithRay(Line2D ray)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.point, ray.normalizedVector, clockwiseOrderedListOfPoints,
+      return EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(ray.getPoint(), ray.getDirection(), clockwiseOrderedListOfPoints,
                                                                                    numberOfVertices, clockwiseOrdered);
    }
 
@@ -1237,13 +1237,13 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return new Point2D(getVertex(vertexIndex));
    }
 
-   public int getClosestVertexIndex(Line2d line)
+   public int getClosestVertexIndex(Line2D line)
    {
       checkIfUpToDate();
-      return EuclidGeometryPolygonTools.closestVertexIndexToLine2D(line.point, line.normalizedVector, clockwiseOrderedListOfPoints, numberOfVertices);
+      return EuclidGeometryPolygonTools.closestVertexIndexToLine2D(line.getPoint(), line.getDirection(), clockwiseOrderedListOfPoints, numberOfVertices);
    }
    
-   public boolean getClosestVertex(Line2d line, Point2DBasics vertexToPack)
+   public boolean getClosestVertex(Line2D line, Point2DBasics vertexToPack)
    {
       int vertexIndex = getClosestVertexIndex(line);
       if (vertexIndex == -1)
@@ -1252,7 +1252,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return true;
    }
    
-   public Point2D getClosestVertexCopy(Line2d line)
+   public Point2D getClosestVertexCopy(Line2D line)
    {
       int vertexIndex = getClosestVertexIndex(line);
       if (vertexIndex == -1)
@@ -1282,7 +1282,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
    }
 
-   public double distance(Line2d line)
+   public double distance(Line2D line)
    {
       checkIfUpToDate();
       throw new RuntimeException("Not yet implemented");

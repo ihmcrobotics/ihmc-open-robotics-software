@@ -84,7 +84,7 @@ public class ConvexPolygon2dCalculator
     * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
     * only pack the edge before the vertex, not both edges.
     */
-   public static int getIntersectingEdges(Line2d line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
+   public static int getIntersectingEdges(Line2D line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
    {
       if (polygon.hasExactlyOneVertex())
          return 0;
@@ -127,7 +127,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Checks if a line intersects the edge with the given index.
     */
-   public static boolean doesLineIntersectEdge(Line2d line, int edgeIndex, ConvexPolygon2d polygon)
+   public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2d polygon)
    {
       if (!polygon.hasAtLeastTwoVertices())
          return false;
@@ -135,15 +135,15 @@ public class ConvexPolygon2dCalculator
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
       Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
 
-      double lineDirectionX = line.normalizedVector.getX();
-      double lineDirectionY = line.normalizedVector.getY();
+      double lineDirectionX = line.getDirectionX();
+      double lineDirectionY = line.getDirectionY();
       double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
       double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
 
       if (EuclidGeometryTools.areVector2DsParallel(lineDirectionX, lineDirectionY, edgeDirectionX, edgeDirectionY, EuclidGeometryTools.ONE_TEN_MILLIONTH))
             return false;
       else
-         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.point, line.normalizedVector, edgeStart, edgeEnd);
+         return EuclidGeometryTools.doLine2DAndLineSegment2DIntersect(line.getPoint(), line.getDirection(), edgeStart, edgeEnd);
    }
 
    // --- Methods that generate garbage ---
@@ -154,7 +154,7 @@ public class ConvexPolygon2dCalculator
       return ret;
    }
 
-   public static LineSegment2d[] getIntersectingEdgesCopy(Line2d line, ConvexPolygon2d polygon)
+   public static LineSegment2d[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2d polygon)
    {
       LineSegment2d edge1 = new LineSegment2d();
       LineSegment2d edge2 = new LineSegment2d();

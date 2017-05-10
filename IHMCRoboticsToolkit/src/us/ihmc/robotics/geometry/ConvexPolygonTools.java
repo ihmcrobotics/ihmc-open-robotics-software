@@ -693,7 +693,7 @@ public class ConvexPolygonTools
          return new ConvexPolygon2d(polygonQ);
       }
 
-      ArrayList<Line2d> rays = new ArrayList<Line2d>();
+      ArrayList<Line2D> rays = new ArrayList<Line2D>();
 
       Point2D referencePointInPCopy = new Point2D(referencePointInP);
 
@@ -720,7 +720,7 @@ public class ConvexPolygonTools
             {
                referencePointInPCopy.setX(referencePointInP.getX() + vertexQ.getX() - vertexP.getX());
                referencePointInPCopy.setY(referencePointInP.getY() + vertexQ.getY() - vertexP.getY());
-               Line2d ray = new Line2d(referencePointInPCopy, edgeOnQ);
+               Line2D ray = new Line2D(referencePointInPCopy, edgeOnQ);
                rays.add(ray);
 
                vertexQ = nextVertexQ;
@@ -804,7 +804,7 @@ public class ConvexPolygonTools
       return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
    }
 
-   public static int cutPolygonWithLine(Line2d cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(Line2D cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
       Point2D[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
 
@@ -819,7 +819,7 @@ public class ConvexPolygonTools
          while (index < polygonToCut.getNumberOfVertices())
          {
             Point2D vertex = polygonToCut.getVertexUnsafe(index);
-            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut))
+            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
             {
                polygonToCut.removeVertex(index);
                numberOfVerticesRemoved++;

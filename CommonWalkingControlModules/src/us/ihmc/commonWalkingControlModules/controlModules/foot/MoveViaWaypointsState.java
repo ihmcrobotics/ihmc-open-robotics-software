@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -15,6 +16,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,7 +42,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private final FramePose initialPose = new FramePose();
 
-   private final ReferenceFrame controlFrame;
+   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
+   private ReferenceFrame controlFrame;
+   private final ReferenceFrame ankleFrame;
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
@@ -62,7 +66,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-      controlFrame = foot.getParentJoint().getFrameAfterJoint();
+      ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+      controlFrame = ankleFrame;
 
       taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
             graphicsListRegistry, registry);
@@ -100,7 +105,18 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      initialPose.setToZero(taskspaceControlState.getControlFrame());
+      if (command.useCustomControlFrame())
+      {
+         command.getControlFramePose(controlFrameTransform);
+         taskspaceControlState.setControlFramePose(controlFrameTransform);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+
+      controlFrame = taskspaceControlState.getControlFrame();
+      initialPose.setToZero(controlFrame);
 
       if (!taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
@@ -166,11 +182,42 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       isPerformingTouchdown.set(true);
    }
 
+   private final FramePoint desiredAnklePosition = new FramePoint();
+   private final FramePose desiredPose = new FramePose();
+
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
       spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
+      desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+      desiredPose.getPositionIncludingFrame(desiredAnklePosition);
+
+      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+      desiredPose.setPosition(desiredAnklePosition);
+      changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+      desiredPose.getPositionIncludingFrame(desiredPosition);
+
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+   }
+
+   private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();
+   private final RigidBodyTransform newBodyFrameDesiredTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromNewBodyFrameToOldBodyFrame = new RigidBodyTransform();
+
+   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose framePoseToModify)
+   {
+      if (oldBodyFrame == newBodyFrame)
+         return;
+
+      framePoseToModify.getPose(oldBodyFrameDesiredTransform);
+      newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
+      newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
+      newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
+      framePoseToModify.setPose(newBodyFrameDesiredTransform);
    }
 
    public void requestStopTrajectory()
