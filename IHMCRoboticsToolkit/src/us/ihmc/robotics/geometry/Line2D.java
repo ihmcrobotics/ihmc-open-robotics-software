@@ -248,7 +248,7 @@ public class Line2D implements GeometryObject<Line2D>
     * <p>
     * Edge cases:
     * <ul>
-    * <li>if {@code direction.length() < Epsilons.ONE_TRILLIONTH}, this method returns the distance
+    * <li>if {@code direction.length() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method returns the distance
     * between {@code point} and the given {@code point}.
     * </ul>
     * </p>
