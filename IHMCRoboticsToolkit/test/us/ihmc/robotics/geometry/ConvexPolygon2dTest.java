@@ -1904,7 +1904,7 @@ public class ConvexPolygon2dTest
       boolean isClosestVertexPartOfClosestEdge = false;
       for (int i = 0; i < 2; i++)
       {
-         Point2DReadOnly segmentVertex = closestEdge.getEndpoints()[i];
+         Point2DReadOnly segmentVertex = closestEdge.getEndpointsCopy()[i];
          if (arePointsAtExactlyEqualPosition(closestVertex, segmentVertex))
          {
             isClosestVertexPartOfClosestEdge = true;
@@ -1941,7 +1941,7 @@ public class ConvexPolygon2dTest
       for (int i = 0; i < 2; i++)
       {
          Point2DReadOnly neighbourPoint = neighbourPoints[i];
-         Point2DReadOnly closestEdgeVertexThatIsNotClosest = closestEdge.getEndpoints()[otherEdgeVertexIndex];
+         Point2DReadOnly closestEdgeVertexThatIsNotClosest = closestEdge.getEndpointsCopy()[otherEdgeVertexIndex];
          if (arePointsAtExactlyEqualPosition(closestEdgeVertexThatIsNotClosest, neighbourPoint))
          {
             isClosestEdgeVertexThatIsNotClosestVertexNeighbourOfClosestVertex = true;
@@ -1960,7 +1960,7 @@ public class ConvexPolygon2dTest
       Line2D interiorBiSector = segmentLine.interiorBisector(otherLine);
 
       boolean isPointBehindLine = interiorBiSector.isPointBehindLine(point);
-      boolean isOtherEdgeVertexBehindLine = interiorBiSector.isPointBehindLine(closestEdge.getEndpoints()[otherEdgeVertexIndex]);
+      boolean isOtherEdgeVertexBehindLine = interiorBiSector.isPointBehindLine(closestEdge.getEndpointsCopy()[otherEdgeVertexIndex]);
 
       // TODO this may fail, if the point is really close to the "true" biSecotor and the biSector float calc error moves it to the wrong side...
       // TODO edge cases unsolved...
@@ -2360,7 +2360,7 @@ public class ConvexPolygon2dTest
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
 
          // getClosestEdge
-         Point2DReadOnly[] closestEdgeEndpoints = polygonWithTwoPoints.getClosestEdgeCopy(arbitraryPoint0).getEndpoints();
+         Point2DReadOnly[] closestEdgeEndpoints = polygonWithTwoPoints.getClosestEdgeCopy(arbitraryPoint0).getEndpointsCopy();
          assertEqualsInEitherOrder(closestEdgeEndpoints[0], closestEdgeEndpoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // getClosestEdgeVertexIndicesInClockwiseOrderedList
@@ -2411,7 +2411,7 @@ public class ConvexPolygon2dTest
          {
             for (int j : new int[] {0, 1})
             {
-               Point2DReadOnly[] endPoints = intersectingEdges[j].getEndpoints();
+               Point2DReadOnly[] endPoints = intersectingEdges[j].getEndpointsCopy();
                assertEqualsInEitherOrder(endPoints[0], endPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
             }
          }
