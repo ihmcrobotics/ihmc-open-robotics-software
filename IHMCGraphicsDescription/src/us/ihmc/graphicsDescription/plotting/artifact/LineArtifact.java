@@ -65,7 +65,7 @@ public class LineArtifact extends Artifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
-      if (LineSegment2d.areEndpointsTheSame(point1, point2))
+      if (point1.equals(point2))
       {
          graphics.drawPoint(point1);
       }

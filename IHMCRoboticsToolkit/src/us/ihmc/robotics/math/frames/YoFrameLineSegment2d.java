@@ -270,7 +270,7 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
    
    public boolean areEndpointsTheSame()
    {
-      return LineSegment2d.areEndpointsTheSame(getFirstEndpointX(), getFirstEndpointY(), getSecondEndpointX(), getSecondEndpointY());
+      return firstEndpointX.getDoubleValue() == secondEndpointX.getDoubleValue() && firstEndpointY.getDoubleValue() == secondEndpointY.getDoubleValue();
    }
 
    public void setToNaN()

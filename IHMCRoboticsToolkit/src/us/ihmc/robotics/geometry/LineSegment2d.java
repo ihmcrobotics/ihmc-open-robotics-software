@@ -26,19 +26,16 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    {
       endpoints[0] = new Point2D(firstEndpointX, firstEndpointY);
       endpoints[1] = new Point2D(secondEndpointX, secondEndpointY);
-      checkEndpointsDistinct(endpoints);
    }
 
    public LineSegment2d(Point2DReadOnly[] endpoints)
    {
-      checkEndpointsDistinct(endpoints);
       this.endpoints[0] = new Point2D(endpoints[0]);
       this.endpoints[1] = new Point2D(endpoints[1]);
    }
 
    public LineSegment2d(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2)
    {
-      checkEndpointsDistinct(new Point2DReadOnly[] {endpoint1, endpoint2});
       endpoints[0] = new Point2D(endpoint1);
       endpoints[1] = new Point2D(endpoint2);
    }
@@ -108,7 +105,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    {
       endpoints[0].set(endpoint0);
       endpoints[1].set(endpoint1);
-      checkEndpointsDistinct(endpoints);
    }
 
    public void set(Point2DReadOnly endpoint0, Vector2DReadOnly fromPoint0ToPoint1)
@@ -116,14 +112,12 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       endpoints[0].set(endpoint0);
       endpoints[1].set(endpoint0);
       endpoints[1].add(fromPoint0ToPoint1);
-      checkEndpointsDistinct(endpoints);
    }
 
    public void set(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
       endpoints[0].set(firstEndpointX, firstEndpointY);
       endpoints[1].set(secondEndpointX, secondEndpointY);
-      checkEndpointsDistinct(endpoints);
    }
 
    public void set(Point2DReadOnly[] endpoints)
@@ -132,7 +126,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
          throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
       this.endpoints[0].set(endpoints[0]);
       this.endpoints[1].set(endpoints[1]);
-      checkEndpointsDistinct(endpoints);
 
    }
 
@@ -383,24 +376,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    public double distance(ConvexPolygon2d convexPolygon)
    {
       throw new RuntimeException("Not yet implemented");
-   }
-
-   private static void checkEndpointsDistinct(Point2DReadOnly[] endpoints)
-   {
-      if (areEndpointsTheSame(endpoints[0], endpoints[1]))
-      {
-         throw new RuntimeException("Line segment must have two distinct endpoints");
-      }
-   }
-
-   public static boolean areEndpointsTheSame(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
-   {
-      return areEndpointsTheSame(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
-   }
-   
-   public static boolean areEndpointsTheSame(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
-   {
-      return (firstEndpointX == secondEndpointX) && (firstEndpointY == secondEndpointY);
    }
 
    @Override
