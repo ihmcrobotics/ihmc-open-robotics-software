@@ -563,26 +563,103 @@ public class Line2d implements GeometryObject<Line2d>
       return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction) < epsilon;
    }
 
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code this.direction} components x = 0, and y = 1, and the
+    * {@code this.point} coordinates x = 0, and y = 0, a point located on:
+    * <ul>
+    * <li>the left side of this line has a negative y coordinate.
+    * <li>the right side of this line has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param point the coordinates of the query point.
+    * @return {@code true} if the point is on the left side of this line, {@code false} if the point
+    *         is on the right side or exactly on this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public boolean isPointOnLeftSideOfLine(Point2DReadOnly point)
    {
       return isPointOnSideOfLine(point, true);
    }
 
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code this.direction} components x = 0, and y = 1, and the
+    * {@code this.point} coordinates x = 0, and y = 0, a point located on:
+    * <ul>
+    * <li>the left side of this line has a negative y coordinate.
+    * <li>the right side of this line has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param point the coordinates of the query point.
+    * @return {@code true} if the point is on the right side of this line, {@code false} if the
+    *         point is on the left side or exactly on this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public boolean isPointOnRightSideOfLine(Point2DReadOnly point)
    {
       return isPointOnSideOfLine(point, false);
    }
 
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code this.direction} components x = 0, and y = 1, and the
+    * {@code this.point} coordinates x = 0, and y = 0, a point located on:
+    * <ul>
+    * <li>the left side of this line has a negative y coordinate.
+    * <li>the right side of this line has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param point the coordinates of the query point.
+    * @param testLeftSide the query of the side, when equal to {@code true} this will test for the
+    *           left side, {@code false} this will test for the right side.
+    * @return {@code true} if the point is on the query side of this line, {@code false} if the
+    *         point is on the opposite side or exactly on this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public boolean isPointOnSideOfLine(Point2DReadOnly point, boolean testLeftSide)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.isPoint2DOnSideOfLine2D(point, this.point, direction, testLeftSide);
    }
 
-   public boolean isPointOnSideOfLine(double x, double y, boolean testLeftSide)
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code this.direction} components x = 0, and y = 1, and the
+    * {@code this.point} coordinates x = 0, and y = 0, a point located on:
+    * <ul>
+    * <li>the left side of this line has a negative y coordinate.
+    * <li>the right side of this line has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param testLeftSide the query of the side, when equal to {@code true} this will test for the
+    *           left side, {@code false} this will test for the right side.
+    * @return {@code true} if the point is on the query side of this line, {@code false} if the
+    *         point is on the opposite side or exactly on this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public boolean isPointOnSideOfLine(double pointX, double pointY, boolean testLeftSide)
    {
       checkHasBeenInitialized();
-      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(x, y, this.point, direction, testLeftSide);
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(pointX, pointY, this.point, direction, testLeftSide);
    }
 
    /**
