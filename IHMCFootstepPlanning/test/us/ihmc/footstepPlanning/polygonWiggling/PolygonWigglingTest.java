@@ -986,7 +986,7 @@ public class PolygonWigglingTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testConvexConstraintOfLine()
    {
@@ -1001,7 +1001,11 @@ public class PolygonWigglingTest
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
 
+<<<<<<< 455585ce32df6486678b049396e766434b761f00
       Random random = new Random(234235L);
+=======
+      Random random = new Random(-8133358861874482661L);
+>>>>>>> 7a06d1eb1860921443601b66f835140c5b89c1b8
 
       for (int iters= 0; iters < 1000; iters++)
       {
