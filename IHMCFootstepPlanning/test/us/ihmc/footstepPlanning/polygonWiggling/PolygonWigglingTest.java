@@ -790,7 +790,7 @@ public class PolygonWigglingTest
 
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       Point2D point = new Point2D();
-      Random random = new Random();
+      Random random = new Random(234235L);
 
       for (int iter = 0; iter < 1000; iter++)
       {
@@ -1001,7 +1001,7 @@ public class PolygonWigglingTest
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
 
-      Random random = new Random();
+      Random random = new Random(234235L);
 
       for (int iters= 0; iters < 1000; iters++)
       {
@@ -1531,7 +1531,7 @@ public class PolygonWigglingTest
       Point2D thirdQuadrantPoint = new Point2D();
       Point2D fourthQuadrantPoint = new Point2D();
 
-      Random random = new Random();
+      Random random = new Random(234235L);
 
       firstQuadrantPoint.set(1.0 + random.nextDouble(), 1.0 + random.nextDouble());
       secondQuadrantPoint.set(1.0 + random.nextDouble(), -1.0 - random.nextDouble());

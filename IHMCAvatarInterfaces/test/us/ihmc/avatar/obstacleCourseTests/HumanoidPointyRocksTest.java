@@ -42,7 +42,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -1224,8 +1224,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(angle);
 
-      Line2d leftLine = new Line2d(new Point2D(0.0, width / 2.0), new Vector2D(1.0, 0.0));
-      Line2d rightLine = new Line2d(new Point2D(0.0, -width / 2.0), new Vector2D(1.0, 0.0));
+      Line2D leftLine = new Line2D(new Point2D(0.0, width / 2.0), new Vector2D(1.0, 0.0));
+      Line2D rightLine = new Line2D(new Point2D(0.0, -width / 2.0), new Vector2D(1.0, 0.0));
 
       leftLine.applyTransform(transform);
       rightLine.applyTransform(transform);

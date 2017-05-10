@@ -44,7 +44,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -301,7 +301,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       transform.setRotationYawAndZeroTranslation(angle);
       transform.setTranslation(lineOrigin.getX(), lineOrigin.getY(), 0.0);
 
-      Line2d line = new Line2d(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
+      Line2D line = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
       line.applyTransform(transform);
 
       line.shiftToLeft(lineWidth/2.0);

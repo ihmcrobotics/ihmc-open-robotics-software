@@ -362,9 +362,9 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1], intersectionToPack);
    }
    
-   public Point2D intersectionWith(Line2d line2d)
+   public Point2D intersectionWith(Line2D line2d)
    {
-      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.point, line2d.normalizedVector, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.getPoint(), line2d.getDirection(), endpoints[0], endpoints[1]);
    }
    
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
@@ -372,7 +372,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return convexPolygon.intersectionWith(this);
    }
 
-   public double distance(Line2d line)
+   public double distance(Line2D line)
    {
       throw new RuntimeException("Not yet implemented");
    }

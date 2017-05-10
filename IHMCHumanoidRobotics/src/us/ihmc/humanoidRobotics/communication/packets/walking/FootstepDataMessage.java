@@ -35,13 +35,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @RosExportedField(documentation = "Specifies the position of the footstep (sole frame).")
+   @RosExportedField(documentation = "Specifies the position of the footstep (sole frame) in world frame.")
    public Point3D location;
-   @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame).")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame) in world frame.")
    public Quaternion orientation;
-   
-   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all data in this message (except"
-         + "the predictedContactPoints).")
+
+   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. Note, that the final footstep location and orientation must"
+         + "be provided in world frame. Only the swing trajectory will be executed with respect to the frame provided here (TODO).")
    public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
@@ -53,11 +53,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE.")
+   @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE."
+         + "If a value smaller then the minumal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.")
    public double swingHeight = 0.0;
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
    		+ "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
-   		+ "trajectory is desired use the trajectory type WAYPOINTS instead.")
+   		+ "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
    public Point3D[] positionWaypoints = new Point3D[0];
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, up to ten swing waypoints can be specified here. The waypoints do not include the"
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
@@ -355,7 +356,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       {
          return false;
       }
-      
+
       boolean robotSideEquals = robotSide == footstepData.robotSide;
       boolean locationEquals = location.epsilonEquals(footstepData.location, epsilon);
 

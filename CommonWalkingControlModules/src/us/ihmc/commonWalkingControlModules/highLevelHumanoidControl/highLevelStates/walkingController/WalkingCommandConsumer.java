@@ -122,7 +122,7 @@ public class WalkingCommandConsumer
 
       parentRegistry.addChild(registry);
    }
-   
+
    public void avoidManipulationAbortForDuration(double durationToAvoidAbort)
    {
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
@@ -218,7 +218,8 @@ public class WalkingCommandConsumer
          PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
          if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
          {
-            pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
+            if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
+               return;
             balanceManager.handlePelvisTrajectoryCommand(command);
             comHeightManager.handlePelvisTrajectoryCommand(command);
          }
@@ -260,7 +261,7 @@ public class WalkingCommandConsumer
             if (handManagers.get(robotSide) != null)
                handManagers.get(robotSide).handleJointspaceTrajectoryCommand(command);
          }
-         
+
          for (int i = 0; i < handHybridCommands.size(); i++)
          {
             HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
@@ -298,7 +299,7 @@ public class WalkingCommandConsumer
 
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < minimumDurationBetweenTwoManipulationAborts.getDoubleValue())
          return;
-      
+
       if (yoTime.getDoubleValue() < allowManipulationAbortAfterThisTime.getDoubleValue())
          return;
 
