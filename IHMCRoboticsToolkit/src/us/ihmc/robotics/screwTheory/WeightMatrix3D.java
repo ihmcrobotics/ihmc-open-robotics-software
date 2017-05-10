@@ -191,7 +191,7 @@ public class WeightMatrix3D
     */
    public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      getFullSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
+      getFullWeightMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
 
    /**
@@ -210,7 +210,7 @@ public class WeightMatrix3D
     *           inserted. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
+   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
    {
       int numRows = selectionMatrixToPack.getNumRows();
       int numCols = selectionMatrixToPack.getNumCols();
@@ -270,7 +270,7 @@ public class WeightMatrix3D
     * the {@code destinationFrame}.
     * <p>
     * In addition to what
-    * {@link #getFullSelectionMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)} does, this
+    * {@link #getFullWeightMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)} does, this
     * method also removes the zero-rows of the given selection matrix.
     * </p>
     * <p>
