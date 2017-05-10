@@ -306,7 +306,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    {
       weightMatrixToPack.clear();
       if (angularWeightMatrix != null)
-         angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
+         angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getAngularPart());
       if (linearWeightMatrix != null)
          linearWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
    }
