@@ -33,7 +33,7 @@ import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
 /**
@@ -200,7 +200,7 @@ public class Plotter2DAdapter
       drawOvalFilled(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), pixelate(2.0 * radiiFrameVector.getY()));
    }
 
-   public void drawLineSegment(PlotterReferenceFrame frame, LineSegment2d lineSegment)
+   public void drawLineSegment(PlotterReferenceFrame frame, LineSegment2D lineSegment)
    {
       PlotterPoint2d firstEndpoint = pointBin[0];
       PlotterPoint2d secondEndpoint = pointBin[1];

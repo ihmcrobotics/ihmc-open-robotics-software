@@ -394,7 +394,7 @@ public class LineSegment1dTest
       Point2D point2d = new Point2D(1,1);
       Vector2D direction2d = new Vector2D(1,2);
       LineSegment1d firstLine = new LineSegment1d(0, 10);
-      LineSegment2d line2d = firstLine.toLineSegment2d(point2d, direction2d);
+      LineSegment2D line2d = firstLine.toLineSegment2d(point2d, direction2d);
       
       assertEquals(line2d.getFirstEndpoint(), new Point2D(1,1));
       assertEquals(line2d.getSecondEndpoint(), new Point2D(11,21));

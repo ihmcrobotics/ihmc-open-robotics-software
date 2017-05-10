@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -272,7 +272,7 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 
    private void getYoValuesFromFrameLineSegment()
    {
-      LineSegment2d lineSegment2d = frameLineSegment.getLineSegment2d();
+      LineSegment2D lineSegment2d = frameLineSegment.getLineSegment2d();
       firstEndpointX.set(lineSegment2d.getFirstEndpointX());
       firstEndpointY.set(lineSegment2d.getFirstEndpointY());
       secondEndpointX.set(lineSegment2d.getSecondEndpointX());
