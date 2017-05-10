@@ -33,7 +33,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 {
    private final boolean clockwiseOrdered = true;
-   final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
+   private final List<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
    private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
    private int numberOfVertices = 0;
