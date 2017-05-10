@@ -72,7 +72,7 @@ public class KinematicsToolboxHelper
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());
       feedbackControlCommand.setGains(gains);
-      feedbackControlCommand.setWeightsForSolver(command.getWeightMatrix());
+      feedbackControlCommand.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
       feedbackControlCommand.set(command.getDesiredPose());
       feedbackControlCommand.setControlFrameFixedInEndEffector(command.getControlFramePose());
