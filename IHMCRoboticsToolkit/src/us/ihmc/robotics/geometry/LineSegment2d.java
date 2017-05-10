@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -245,38 +246,294 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return firstEndpoint.distance(secondEndpoint);
    }
 
-   public void flipDirection()
+   /**
+    * Computes the squared value of the length of this line segment.
+    * 
+    * @return the length squared of this line segment.
+    */
+   public double lengthSquared()
    {
-      double x = firstEndpoint.getX();
-      double y = firstEndpoint.getY();
-
-      firstEndpoint.set(secondEndpoint);
-      secondEndpoint.set(x, y);
+      return firstEndpoint.distanceSquared(secondEndpoint);
    }
 
+   /**
+    * Returns the square of the minimum distance between a point and this given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns the
+    * distance between {@code firstEndpoint} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from this line segment. Not modified.
+    * @return the minimum distance between the 2D point and this 2D line segment.
+    */
+   public double distanceSquared(Point2DReadOnly point)
+   {
+      return EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(point.getX(), point.getY(), firstEndpoint, secondEndpoint);
+   }
+
+   /**
+    * Returns the minimum distance between a point and this given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns the
+    * distance between {@code firstEndpoint} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from this line segment. Not modified.
+    * @return the minimum distance between the 2D point and this 2D line segment.
+    */
+   public double distance(Point2DReadOnly point)
+   {
+      return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, firstEndpoint, secondEndpoint);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on this 2D line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code firstEndpoint}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside the line segment, the result is the closest of the two
+    * endpoints.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @return the projection of the point onto this line segment or {@code null} if the method
+    *         failed.
+    */
+   public Point2D orthogonalProjectionCopy(Point2DReadOnly pointToProject)
+   {
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(pointToProject, firstEndpoint, secondEndpoint);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on this 2D line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code firstEndpoint}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside the line segment, the result is the closest of the two
+    * endpoints.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to project on this line segment. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public boolean orthogonalProjection(Point2DBasics pointToProject)
+   {
+      return orthogonalProjection(pointToProject, pointToProject);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on this 2D line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code firstEndpoint}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside the line segment, the result is the closest of the two
+    * endpoints.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param projectionToPack point in which the projection of the point onto this line segment is
+    *           stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public boolean orthogonalProjection(Point2DReadOnly pointToProject, Point2DBasics projectionToPack)
+   {
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
+   }
+
+   /**
+    * Computes the coordinates of the point located at a given percentage on this line segment: <br>
+    * {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param percentage the percentage along this line segment of the point. Must be in [0, 1].
+    * @return the computed point.
+    * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
+    */
+   public Point2D pointBetweenEndPointsGivenPercentage(double percentage)
+   {
+      Point2D point = new Point2D();
+      pointBetweenEndPointsGivenPercentage(percentage, point);
+      return point;
+   }
+
+   /**
+    * Computes the coordinates of the point located at a given percentage on this line segment: <br>
+    * {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * 
+    * @param percentage the percentage along this line segment of the point. Must be in [0, 1].
+    * @param pointToPack where the result is stored. Modified.
+    * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
+    */
+   public void pointBetweenEndPointsGivenPercentage(double percentage, Point2DBasics pointToPack)
+   {
+      if (percentage < 0.0 || percentage > 1.0)
+         throw new RuntimeException("Percentage must be between 0.0 and 1.0. Was: " + percentage);
+
+      pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
+   }
+
+   /**
+    * Computes the coordinates of the point located on the line this line segment is lying on: <br>
+    * {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param percentage the percentage along this line segment of the point.
+    * @return the computed point.
+    */
+   public Point2D pointOnLineGivenPercentage(double percentage)
+   {
+      Point2D point = new Point2D();
+      pointOnLineGivenPercentage(percentage, point);
+      return point;
+   }
+
+   /**
+    * Computes the coordinates of the point located on the line this line segment is lying on: <br>
+    * {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * 
+    * @param percentage the percentage along this line segment of the point.
+    * @param pointToPack where the result is stored. Modified.
+    */
+   public void pointOnLineGivenPercentage(double percentage, Point2DBasics pointToPack)
+   {
+      pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
+   }
+
+   /**
+    * Computes and returns the coordinates of the point located exactly at the middle of this line
+    * segment.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the mid-point of this line segment.
+    */
    public Point2D midpoint()
    {
       Point2D midpoint = new Point2D();
-      getMidpoint(midpoint);
+      midpoint(midpoint);
       return midpoint;
    }
 
-   public void getMidpoint(Point2DBasics midpointToPack)
+   /**
+    * Computes the coordinates of the point located exactly at the middle of this line segment.
+    * 
+    * @param midpointToPack point in which the mid-point of this line segment is stored. Modified.
+    */
+   public void midpoint(Point2DBasics midpointToPack)
    {
       midpointToPack.interpolate(firstEndpoint, secondEndpoint, 0.5);
    }
 
-   public double dotProduct(LineSegment2d lineSegment2d)
+   /**
+    * Computes the vector going from the first to the second endpoint of this line segment.
+    * 
+    * @param normalize whether the direction vector is to be normalized.
+    * @param directionToPack vector in which the direction is stored. Modified.
+    */
+   public void getDirection(boolean normalize, Vector2DBasics directionToPack)
    {
-      return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, lineSegment2d.firstEndpoint, lineSegment2d.secondEndpoint);
+      directionToPack.sub(secondEndpoint, firstEndpoint);
+      if (normalize)
+         directionToPack.normalize();
    }
 
-   public boolean isBetweenEndpoints(Point2DReadOnly point2d, double epsilon)
+   /**
+    * Computes the vector going from the first to the second endpoint of this line segment.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param normalize whether the direction vector is to be normalized.
+    * @return the direction of this line segment.
+    */
+   public Vector2D getDirection(boolean normalize)
    {
-      return isBetweenEndpoints(point2d.getX(), point2d.getY(), epsilon);
+      Vector2D direction = new Vector2D();
+      getDirection(normalize, direction);
+      return direction;
    }
 
-   private boolean isBetweenEndpoints(double x, double y, double epsilon)
+   /**
+    * Tests whether the projection of the given point onto this line segment is located between the
+    * two endpoints or exactly on an endpoint.
+    * 
+    * @param point the query. Not modified.
+    * @return {@code true} if the projection of the point is between the endpoints of this line
+    *         segment, {@code false} otherwise.
+    */
+   public boolean isBetweenEndpoints(Point2DReadOnly point)
+   {
+      return isBetweenEndpoints(point, 0);
+   }
+
+   /**
+    * Tests whether the projection of the given point onto this line segment is located between the
+    * two endpoints with a given conservative tolerance {@code epsilon}:
+    * <ul>
+    * <li>if {@code epsilon > 0}, the point has to be between the endpoints and at a minimum
+    * distance of {@code epsilon * this.length()} from the closest endpoint.
+    * <li>if {@code epsilon < 0}, the point has to be between the endpoints or at a maximum distance
+    * of {@code -epsilon * this.length()} from the closest endpoint.
+    * <li>if {@code epsilon = 0}, the point has to be between the endpoints or equal to one of the
+    * endpoints.
+    * </ul>
+    * 
+    * @param point the query. Not modified.
+    * @param epsilon the tolerance to use.
+    * @return {@code true} if the projection of the point is between the endpoints of this line
+    *         segment, {@code false} otherwise.
+    */
+   public boolean isBetweenEndpoints(Point2DReadOnly point, double epsilon)
+   {
+      return isBetweenEndpoints(point.getX(), point.getY(), epsilon);
+   }
+
+   /**
+    * Tests whether the projection of the given point onto this line segment is located between the
+    * two endpoints with a given conservative tolerance {@code epsilon}:
+    * <ul>
+    * <li>if {@code epsilon > 0}, the point has to be between the endpoints and at a minimum
+    * distance of {@code epsilon * this.length()} from the closest endpoint.
+    * <li>if {@code epsilon < 0}, the point has to be between the endpoints or at a maximum distance
+    * of {@code -epsilon * this.length()} from the closest endpoint.
+    * <li>if {@code epsilon = 0}, the point has to be between the endpoints or equal to one of the
+    * endpoints.
+    * </ul>
+    * 
+    * @param x the x-coordinate of the query point.
+    * @param y the y-coordinate of the query point.
+    * @param z the z-coordinate of the query point.
+    * @param epsilon the tolerance to use.
+    * @return {@code true} if the projection of the point is between the endpoints of this line
+    *         segment, {@code false} otherwise.
+    */
+   public boolean isBetweenEndpoints(double x, double y, double epsilon)
    {
       double alpha = percentageAlongLineSegment(x, y);
 
@@ -286,6 +543,84 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
          return false;
 
       return true;
+   }
+
+   /**
+    * Computes a percentage along the line segment representing the location of the given point once
+    * projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
+    * {@code 0.0} representing {@code firstEndpoint}, and {@code 1.0} representing
+    * {@code secondEndpoint}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
+    * given point is located at the middle of this line segment. The coordinates of the projection
+    * of the point can be computed from the {@code percentage} as follows: <code>
+    * Point3D projection = new Point3D(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the length of the given line segment is too small, i.e.
+    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns
+    * {@code 0.0}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the query point. Not modified.
+    * @return the computed percentage along the line segment representing where the point projection
+    *         is located.
+    */
+   public double percentageAlongLineSegment(Point2DReadOnly point)
+   {
+      return percentageAlongLineSegment(point.getX(), point.getY());
+   }
+
+   /**
+    * Computes a percentage along the line segment representing the location of the given point once
+    * projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
+    * {@code 0.0} representing {@code firstEndpoint}, and {@code 1.0} representing
+    * {@code secondEndpoint}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
+    * given point is located at the middle of this line segment. The coordinates of the projection
+    * of the point can be computed from the {@code percentage} as follows: <code>
+    * Point3D projection = new Point3D(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the length of the given line segment is too small, i.e.
+    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns
+    * {@code 0.0}.
+    * </ul>
+    * </p>
+    * 
+    * @param x the x-coordinate of the query point.
+    * @param y the y-coordinate of the query point.
+    * @param z the z-coordinate of the query point.
+    * @return the computed percentage along the line segment representing where the point projection
+    *         is located.
+    */
+   public double percentageAlongLineSegment(double x, double y)
+   {
+      return EuclidGeometryTools.percentageAlongLineSegment2D(x, y, firstEndpoint, secondEndpoint);
+   }
+
+   public void flipDirection()
+   {
+      double x = firstEndpoint.getX();
+      double y = firstEndpoint.getY();
+
+      firstEndpoint.set(secondEndpoint);
+      secondEndpoint.set(x, y);
+   }
+
+   public double dotProduct(LineSegment2d lineSegment2d)
+   {
+      return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, lineSegment2d.firstEndpoint, lineSegment2d.secondEndpoint);
    }
 
    public boolean isPointOnLeftSideOfLineSegment(Point2DReadOnly point)
@@ -368,70 +703,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       secondEndpoint.setY(secondEndpoint.getY() + vectorYPerpToRight);
    }
 
-   /**
-    * Computes a percentage along this line segment representing the location of the given point
-    * once projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
-    * {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing
-    * {@code lineSegmentEnd}.
-    * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
-    * given point is located at the middle of the line segment. The coordinates of the projection of
-    * the point can be computed from the {@code percentage} as follows: <code>
-    * Point2d projection = new Point2d(); </br>
-    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
-    * </code>
-    * </p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    * <li>if the length of the given line segment is too small, i.e.
-    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
-    * method fails and returns {@link Double#NaN}.
-    * </ul>
-    * </p>
-    * 
-    * @param pointX the x-coordinate of the query point.
-    * @param pointY the y-coordinate of the query point.
-    * @return the computed percentage along this line segment representing where the point
-    *         projection is located.
-    */
-   public double percentageAlongLineSegment(Point2DReadOnly point2d)
-   {
-      return percentageAlongLineSegment(point2d.getX(), point2d.getY());
-   }
-
-   /**
-    * Computes a percentage along this line segment representing the location of the given point
-    * once projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
-    * {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing
-    * {@code lineSegmentEnd}.
-    * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
-    * given point is located at the middle of the line segment. The coordinates of the projection of
-    * the point can be computed from the {@code percentage} as follows: <code>
-    * Point2d projection = new Point2d(); </br>
-    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
-    * </code>
-    * </p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    * <li>if the length of the given line segment is too small, i.e.
-    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
-    * method fails and returns {@link Double#NaN}.
-    * </ul>
-    * </p>
-    * 
-    * @param pointX the x-coordinate of the query point.
-    * @param pointY the y-coordinate of the query point.
-    * @return the computed percentage along this line segment representing where the point
-    *         projection is located.
-    */
-   public double percentageAlongLineSegment(double x, double y)
-   {
-      return EuclidGeometryTools.percentageAlongLineSegment2D(x, y, firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
-   }
-
    public boolean isPointOnLineSegment(Point2DReadOnly point2d)
    {
       return isPointOnLineSegment(point2d.getX(), point2d.getY());
@@ -494,48 +765,103 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return firstEndpoint + "-" + secondEndpoint;
    }
 
-   public Point2D[] getEndpointsCopy()
+   /**
+    * Gets the read-only reference to the first endpoint of this line segment.
+    * 
+    * @return the reference to the first endpoint of this line segment.
+    */
+   public Point2DReadOnly getFirstEndpoint()
    {
-      return new Point2D[] {new Point2D(firstEndpoint), new Point2D(secondEndpoint)};
+      return firstEndpoint;
    }
 
+   /**
+    * Gets the first endpoint defining this line segment by storing its coordinates in the given
+    * argument {@code firstEndpointToPack}.
+    * 
+    * @param firstEndpointToPack point in which the coordinates of this line segment's first
+    *           endpoint are stored. Modified.
+    */
+   public void getFirstEndpoint(Point2DBasics firstEndpointToPack)
+   {
+      firstEndpointToPack.set(firstEndpoint);
+   }
+
+   /**
+    * Gets a copy of the first endpoint of this line segment.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the copy of the first endpoint of this line segment.
+    */
+   public Point2D getFirstEndpointCopy()
+   {
+      return new Point2D(firstEndpoint);
+   }
+
+   /**
+    * Gets the read-only reference to the second endpoint of this line segment.
+    * 
+    * @return the reference to the second endpoint of this line segment.
+    */
+   public Point2DReadOnly getSecondEndpoint()
+   {
+      return secondEndpoint;
+   }
+
+   /**
+    * Gets the second endpoint defining this line segment by storing its coordinates in the given
+    * argument {@code secondEndpointToPack}.
+    * 
+    * @param secondEndpointToPack point in which the coordinates of this line segment's second
+    *           endpoint are stored. Modified.
+    */
+   public void getSecondEndpoint(Point2DBasics secondEndpointToPack)
+   {
+      secondEndpointToPack.set(secondEndpoint);
+   }
+
+   /**
+    * Gets a copy of the second endpoint of this line segment.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the copy of the second endpoint of this line segment.
+    */
+   public Point2D getSecondEndpointCopy()
+   {
+      return new Point2D(secondEndpoint);
+   }
+
+   /**
+    * Gets the endpoints defining this line segment by storing their coordinates in the given
+    * arguments.
+    * 
+    * @param firstEndpointToPack point in which the coordinates of this line segment's first
+    *           endpoint are stored. Modified.
+    * @param secondEndpointToPack point in which the coordinates of this line segment's second
+    *           endpoint are stored. Modified.
+    */
    public void getEndpoints(Point2DBasics firstEndpointToPack, Point2DBasics secondEndpointToPack)
    {
       firstEndpointToPack.set(firstEndpoint);
       secondEndpointToPack.set(secondEndpoint);
    }
 
-   public Point2DReadOnly getFirstEndpoint()
+   /**
+    * Gets a copy of the endpoints of this line segment and returns them in a two-element array.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the two-element array containing in order this line segment first and second
+    *         endpoints.
+    */
+   public Point2D[] getEndpointsCopy()
    {
-      return firstEndpoint;
-   }
-
-   public Point2DReadOnly getSecondEndpoint()
-   {
-      return secondEndpoint;
-   }
-
-   public Point2DReadOnly getEndpoint(int index)
-   {
-      switch (index)
-      {
-      case 0:
-         return firstEndpoint;
-      case 1:
-         return secondEndpoint;
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
-      }
-   }
-
-   public Point2D getFirstEndpointCopy()
-   {
-      return new Point2D(firstEndpoint);
-   }
-
-   public Point2D getSecondEndpointCopy()
-   {
-      return new Point2D(secondEndpoint);
+      return new Point2D[] {getFirstEndpointCopy(), getSecondEndpointCopy()};
    }
 
    public double getFirstEndpointX()
@@ -604,99 +930,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
       pointBetweenEndPointsGivenParameter(parameter, pointToReturn);
       return pointToReturn;
-   }
-
-   /**
-    * Compute the smallest distance from the point to this line segment. If the projection of the
-    * given point on this line segment results in a point that is outside the line segment, the
-    * distance is computed between the given point and the closest line segment end point.
-    */
-   public double distance(Point2DReadOnly point)
-   {
-      double alpha = percentageAlongLineSegment(point);
-
-      if (alpha <= 0.0)
-      {
-         return point.distance(firstEndpoint);
-      }
-      else if (alpha >= 1.0)
-      {
-         return point.distance(secondEndpoint);
-      }
-      else
-      {
-         // Here we know the projection of the point belongs to the line segment.
-         // In this case computing the distance from the point to the line segment is the same as computing the distance from the point the equivalent line.
-         return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, firstEndpoint, secondEndpoint);
-      }
-   }
-
-   /**
-    * Computes the orthogonal projection of a 2D point on this 2D line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    * <li>if the length of this line segment is too small, i.e.
-    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
-    * method fails and returns {@code false}.
-    * <li>the projection can not be outside the line segment. When the projection on the
-    * corresponding line is outside this line segment, the result is the closest of the two end
-    * points.
-    * </ul>
-    * </p>
-    * 
-    * @param point the point to compute the projection of. Not modified.
-    * @return the projection of the point onto this line segment or {@code null} if the method
-    *         failed.
-    */
-   public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
-   {
-      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, firstEndpoint, secondEndpoint);
-   }
-
-   /**
-    * Computes the orthogonal projection of a 2D point on this 2D line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    * <li>if the length of this line segment is too small, i.e.
-    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
-    * method fails and returns {@code false}.
-    * <li>the projection can not be outside the line segment. When the projection on the
-    * corresponding line is outside this line segment, the result is the closest of the two end
-    * points.
-    * </ul>
-    * </p>
-    * 
-    * @param point2d the point to project on this line segment. Modified.
-    */
-   public void orthogonalProjection(Point2DBasics point2d)
-   {
-      orthogonalProjection(point2d, point2d);
-   }
-
-   /**
-    * Computes the orthogonal projection of a 2D point on this 2D line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    * <li>if the length of this line segment is too small, i.e.
-    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
-    * method fails and returns {@code false}.
-    * <li>the projection can not be outside the line segment. When the projection on the
-    * corresponding line is outside this line segment, the result is the closest of the two end
-    * points.
-    * </ul>
-    * </p>
-    * 
-    * @param point2d the point to compute the projection of. Not modified.
-    * @param projectionToPack point in which the projection of the point onto this line segment is
-    *           stored. Modified.
-    * @return whether the method succeeded or not.
-    */
-   public boolean orthogonalProjection(Point2DReadOnly point2d, Point2DBasics projectedToPack)
-   {
-      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point2d, firstEndpoint, secondEndpoint, projectedToPack);
    }
 
    public Point2D getClosestPointOnLineSegmentCopy(Point2DReadOnly point2d)
