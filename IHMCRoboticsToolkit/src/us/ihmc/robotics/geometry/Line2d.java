@@ -847,6 +847,72 @@ public class Line2d implements GeometryObject<Line2d>
    }
 
    /**
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the given line direction is too small, i.e.
+    * {@code lineDirection.lengthSquared() < }{@value #ONE_TRILLIONTH}, this method fails and
+    * returns {@code false}.
+    * </ul>
+    * </p>
+    *
+    * @param pointToProject the point to project on this line. Modified.
+    * @return whether the method succeeded or not.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public boolean orthogonalProjection(Point2DBasics pointToProject)
+   {
+      return orthogonalProjection(pointToProject, pointToProject);
+   }
+
+   /**
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the given line direction is too small, i.e.
+    * {@code lineDirection.lengthSquared() < }{@value #ONE_TRILLIONTH}, this method fails and
+    * returns {@code false}.
+    * </ul>
+    * </p>
+    *
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored.
+    *           Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public boolean orthogonalProjection(Point2DReadOnly pointToProject, Point2DBasics projectionToPack)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.orthogonalProjectionOnLine2D(pointToProject, point, direction, projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the given line direction is too small, i.e.
+    * {@code lineDirection.lengthSquared() < }{@value #ONE_TRILLIONTH}, this method fails and
+    * returns {@code false}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public Point2D orthogonalProjectionCopy(Point2DReadOnly pointToProject)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.orthogonalProjectionOnLine2D(pointToProject, point, direction);
+   }
+
+   /**
     * Calculates the interior bisector defined by this line and the given {@code secondLine}.
     * <p>
     * The interior bisector is defined as follows:
@@ -1244,51 +1310,63 @@ public class Line2d implements GeometryObject<Line2d>
       return copy;
    }
 
+   /**
+    * Tests on a per-component basis on the point and vector if this line is equal to {@code other}
+    * with the tolerance {@code epsilon}. This method will return {@code false} if the two lines are
+    * physically the same but either the point or vector of each line is different. For instance, if
+    * {@code this.point == other.point} and {@code this.direction == - other.direction}, the two
+    * lines are physically the same but this method returns {@code false}.
+    * 
+    * @param other the query. Not modified.
+    * @param epsilon the tolerance to use.
+    * @return {@code true} if the two lines are equal, {@code false} otherwise.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    @Override
-   public String toString()
+   public boolean epsilonEquals(Line2d other, double epsilon)
    {
-      String ret = "";
+      checkHasBeenInitialized();
+      if (!point.epsilonEquals(other.point, epsilon))
+         return false;
+      if (!direction.epsilonEquals(other.direction, epsilon))
+         return false;
 
-      ret = ret + point + ", " + direction;
-
-      return ret;
+      return true;
    }
 
    /**
-    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method
+    * returns {@link #equals(Line2d)}, it returns {@code false} otherwise.
     *
-    * @param point2d the point to project on this line. Modified.
+    * @param object the object to compare against this. Not modified.
+    * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
     */
-   public void orthogonalProjection(Point2DBasics point2d)
+   @Override
+   public boolean equals(Object obj)
    {
-      checkHasBeenInitialized();
-      EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, direction, point2d);
+      try
+      {
+         return equals((Line2d) obj);
+      }
+      catch (ClassCastException e)
+      {
+         return false;
+      }
    }
 
    /**
-    * Computes the orthogonal projection of the given 2D point on this 2D line.
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
+    * Tests on a per component basis, if this line 2D is exactly equal to {@code other}.
     *
-    * @param point2d the point to compute the projection of. Not modified.
-    * @return the projection of the point onto the line or {@code null} if the method failed.
+    * @param other the other line 2D to compare against this. Not modified.
+    * @return {@code true} if the two lines are exactly equal component-wise, {@code false}
+    *         otherwise.
     */
-   public Point2D orthogonalProjectionCopy(Point2DReadOnly point2d)
+   public boolean equals(Line2d other)
    {
-      checkHasBeenInitialized();
-      Point2D projection = new Point2D();
-
-      boolean success = EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, direction, projection);
-      if (!success)
-         return null;
+      if (other == null)
+         return false;
       else
-         return projection;
-   }
-
-   public boolean equals(Line2d otherLine)
-   {
-      return point.equals(otherLine.point) && direction.equals(otherLine.direction);
+         return point.equals(other.point) && direction.equals(other.direction);
    }
 
    private void checkReasonableVector(Vector2DReadOnly localVector)
@@ -1315,15 +1393,15 @@ public class Line2d implements GeometryObject<Line2d>
          throw new RuntimeException("The direction of this line has not been initialized.");
    }
 
+   /**
+    * Provides a {@code String} representation of this line 2D as follows:<br>
+    * Line 2D: point = (x, y), direction = (x, y)
+    *
+    * @return the {@code String} representing this line 2D.
+    */
    @Override
-   public boolean epsilonEquals(Line2d other, double epsilon)
+   public String toString()
    {
-      checkHasBeenInitialized();
-      if (!point.epsilonEquals(other.point, epsilon))
-         return false;
-      if (!direction.epsilonEquals(other.direction, epsilon))
-         return false;
-
-      return true;
+      return "Line 2D: point = " + point + ", direction = " + direction;
    }
 }
