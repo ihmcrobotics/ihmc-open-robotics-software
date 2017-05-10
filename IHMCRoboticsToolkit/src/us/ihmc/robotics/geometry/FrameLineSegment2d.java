@@ -492,9 +492,9 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
       framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
    }
    
-   public void getPerpendicularBisector(FrameVector2d perpendicularBisectorToPack, double bisectorLengthDesired)
+   public void getPerpendicular(boolean normalize, FrameVector2d perpendicularBisectorToPack)
    {
-      lineSegment.getPerpendicularBisector(tempVector2d, bisectorLengthDesired);
+      lineSegment.perpendicular(normalize, tempVector2d);
       perpendicularBisectorToPack.setIncludingFrame(referenceFrame, tempVector2d);
    }
 
