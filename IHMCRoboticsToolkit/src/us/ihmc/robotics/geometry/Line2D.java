@@ -121,7 +121,7 @@ public class Line2D implements GeometryObject<Line2D>
     * Copies this line, transforms the copy using the given homogeneous transformation matrix and
     * project the result onto the XY-plane, and returns the result.
     * 
-    * @param transform the transform to apply on this line's point and vector. Not modified.
+    * @param transform the transform to apply on this line's copy. Not modified.
     * @throws RuntimeException if this line has not been initialized yet.
     */
    public Line2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
@@ -601,8 +601,7 @@ public class Line2D implements GeometryObject<Line2D>
     * </p>
     * 
     * @param secondLine the other line that may intersect this line. Not modified.
-    * @param intersectionToPack the 2D point in which the result is stored. Can be {@code null}.
-    *           Modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the two lines intersects, {@code false} otherwise.
     * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
     *            yet.
