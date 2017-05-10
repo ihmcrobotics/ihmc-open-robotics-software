@@ -1615,7 +1615,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             FramePoint2d midpoint = lineSegment.midpoint();
             double bisectorLengthDesired = 0.1;
             FrameVector2d perpendicularBisector = new FrameVector2d();
-            lineSegment.getPerpendicularBisector(perpendicularBisector, bisectorLengthDesired);
+            lineSegment.getPerpendicular(true, perpendicularBisector);
+            perpendicularBisector.scale(-bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
             if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
             {

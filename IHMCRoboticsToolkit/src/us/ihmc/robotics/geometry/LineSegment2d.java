@@ -261,8 +261,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    * <li>if {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns the
-    * distance between {@code firstEndpoint} and the given {@code point}.
+    * <li>if {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method
+    * returns the distance between {@code firstEndpoint} and the given {@code point}.
     * </ul>
     * </p>
     *
@@ -279,8 +279,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    * <li>if {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns the
-    * distance between {@code firstEndpoint} and the given {@code point}.
+    * <li>if {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method
+    * returns the distance between {@code firstEndpoint} and the given {@code point}.
     * </ul>
     * </p>
     *
@@ -298,7 +298,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * Edge cases:
     * <ul>
     * <li>if the length of this line segment is too small, i.e.
-    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method returns
     * {@code firstEndpoint}.
     * <li>the projection can not be outside the line segment. When the projection on the
     * corresponding line is outside the line segment, the result is the closest of the two
@@ -321,7 +321,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * Edge cases:
     * <ul>
     * <li>if the length of this line segment is too small, i.e.
-    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method returns
     * {@code firstEndpoint}.
     * <li>the projection can not be outside the line segment. When the projection on the
     * corresponding line is outside the line segment, the result is the closest of the two
@@ -343,7 +343,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * Edge cases:
     * <ul>
     * <li>if the length of this line segment is too small, i.e.
-    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method returns
+    * {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method returns
     * {@code firstEndpoint}.
     * <li>the projection can not be outside the line segment. When the projection on the
     * corresponding line is outside the line segment, the result is the closest of the two
@@ -456,7 +456,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param normalize whether the direction vector is to be normalized.
     * @param directionToPack vector in which the direction is stored. Modified.
     */
-   public void getDirection(boolean normalize, Vector2DBasics directionToPack)
+   public void direction(boolean normalize, Vector2DBasics directionToPack)
    {
       directionToPack.sub(secondEndpoint, firstEndpoint);
       if (normalize)
@@ -472,11 +472,24 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param normalize whether the direction vector is to be normalized.
     * @return the direction of this line segment.
     */
-   public Vector2D getDirection(boolean normalize)
+   public Vector2D direction(boolean normalize)
    {
       Vector2D direction = new Vector2D();
-      getDirection(normalize, direction);
+      direction(normalize, direction);
       return direction;
+   }
+
+   /**
+    * Computes the vector perpendicular to the direction of this line segment.
+    * 
+    * @param normalize whether the perpendicular vector is to be normalized.
+    * @param perpendicularVectorToPack vector in which the perpendicular vector components are
+    *           stored. Modified.
+    */
+   public void perpendicular(boolean normalize, Vector2DBasics perpendicularVectorToPack)
+   {
+      direction(normalize, perpendicularVectorToPack);
+      EuclidGeometryTools.perpendicularVector2D(perpendicularVectorToPack, perpendicularVectorToPack);
    }
 
    /**
@@ -562,8 +575,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * Edge cases:
     * <ul>
     * <li>if the length of the given line segment is too small, i.e.
-    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns
-    * {@code 0.0}.
+    * {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method fails
+    * and returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -584,7 +597,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
     * given point is located at the middle of this line segment. The coordinates of the projection
-    * of the point can be computed from the {@code percentage} as follows: <code>
+    * of the point can be computed from the {@code percentage} as follows:<br>
+    * <code>
     * Point3D projection = new Point3D(); </br>
     * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
     * </code>
@@ -593,8 +607,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * Edge cases:
     * <ul>
     * <li>if the length of the given line segment is too small, i.e.
-    * {@code this.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns
-    * {@code 0.0}.
+    * {@code this.lengthSquared() < }{@link EuclidGeometryTools#ONE_TRILLIONTH}, this method fails
+    * and returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -621,65 +635,166 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       secondEndpoint.set(x, y);
    }
 
-   public double dotProduct(LineSegment2d lineSegment2d)
+   /**
+    * Computes the dot product of this line segment with the other line segment such that:<br>
+    * {@code this }&middot;
+    * {@code other = Math.cos(}&alpha;{@code ) * this.length() * other.length()}<br>
+    * where &alpha; is the angle from this to the other line segment.
+    * 
+    * @param other the other line segment used to compute the dot product. Not modified.
+    * @return the value of the dot product.
+    */
+   public double dotProduct(LineSegment2d other)
    {
-      return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, lineSegment2d.firstEndpoint, lineSegment2d.secondEndpoint);
+      return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, other.firstEndpoint, other.secondEndpoint);
    }
 
+   /**
+    * Tests if the given is located on this line segment.
+    * <p>
+    * More precisely, the point is assumed to be on this line segment if it is located at a distance
+    * less than {@code 1.0e-8} from it.
+    * </p>
+    * 
+    * @param point the coordinates of the query. Not modified.
+    * @return {@code true} if the point is located on this line segment, {@code false} otherwise.
+    */
+   public boolean isPointOnLineSegment(Point2DReadOnly point)
+   {
+      return isPointOnLineSegment(point, 1.0e-8);
+   }
+
+   /**
+    * Tests if the given is located on this line segment.
+    * <p>
+    * More precisely, the point is assumed to be on this line segment if it is located at a distance
+    * less than {@code epsilon} from it.
+    * </p>
+    * 
+    * @param point the coordinates of the query. Not modified.
+    * @param epsilon the tolerance used for this test.
+    * @return {@code true} if the point is located on this line segment, {@code false} otherwise.
+    */
+   public boolean isPointOnLineSegment(Point2DReadOnly point, double epsilon)
+   {
+      return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, firstEndpoint, secondEndpoint) < epsilon;
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line
+    * segment. The idea of "side" is determined based on the direction of the line segment.
+    * <p>
+    * For instance, given the {@code this.firstEndpoint = (0, 0)} and
+    * {@code this.secondEndpoint = (0, 1)}:
+    * <ul>
+    * <li>the left side of this line segment has a negative y coordinate.
+    * <li>the right side of this line segment has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param point the coordinates of the query point.
+    * @return {@code true} if the point is on the left side of this line segment, {@code false} if
+    *         the point is on the right side or exactly on this line segment.
+    */
    public boolean isPointOnLeftSideOfLineSegment(Point2DReadOnly point)
    {
       return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(point, firstEndpoint, secondEndpoint);
    }
 
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of this line
+    * segment. The idea of "side" is determined based on the direction of the line segment.
+    * <p>
+    * For instance, given the {@code this.firstEndpoint = (0, 0)} and
+    * {@code this.secondEndpoint = (0, 1)}:
+    * <ul>
+    * <li>the left side of this line segment has a negative y coordinate.
+    * <li>the right side of this line segment has a positive y coordinate.
+    * </ul>
+    * </p>
+    * This method will return {@code false} if the point is on this line.
+    *
+    * @param point the coordinates of the query point.
+    * @return {@code true} if the point is on the right side of this line segment, {@code false} if
+    *         the point is on the left side or exactly on this line segment.
+    */
    public boolean isPointOnRightSideOfLineSegment(Point2DReadOnly point)
    {
       return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(point, firstEndpoint, secondEndpoint);
    }
 
-   public LineSegment2d shiftToLeftCopy(double distanceToShift)
+   /**
+    * Translates this line segment by the given (x, y).
+    * <p>
+    * Note that the length and direction of this line segment remains unchanged.
+    * </p>
+    * 
+    * @param x the distance to translate this line along the x-axis.
+    * @param y the distance to translate this line along the y-axis.
+    */
+   public void translate(double x, double y)
    {
-      return shiftAndCopy(true, distanceToShift);
+      firstEndpoint.add(x, y);
+      secondEndpoint.add(x, y);
    }
 
-   public LineSegment2d shiftToRightCopy(double distanceToShift)
-   {
-      return shiftAndCopy(false, distanceToShift);
-   }
-
-   private LineSegment2d shiftAndCopy(boolean shiftToLeft, double distanceToShift)
-   {
-      double vectorX = secondEndpoint.getX() - firstEndpoint.getX();
-      double vectorY = secondEndpoint.getY() - firstEndpoint.getY();
-
-      double vectorXPerpToRight = -vectorY;
-      double vectorYPerpToRight = vectorX;
-
-      if (!shiftToLeft)
-      {
-         vectorXPerpToRight = -vectorXPerpToRight;
-         vectorYPerpToRight = -vectorYPerpToRight;
-      }
-
-      double vectorPerpToRightLength = Math.sqrt(vectorXPerpToRight * vectorXPerpToRight + vectorYPerpToRight * vectorYPerpToRight);
-      vectorXPerpToRight = distanceToShift * vectorXPerpToRight / vectorPerpToRightLength;
-      vectorYPerpToRight = distanceToShift * vectorYPerpToRight / vectorPerpToRightLength;
-
-      Point2D newEndpoint0 = new Point2D(firstEndpoint.getX() + vectorXPerpToRight, firstEndpoint.getY() + vectorYPerpToRight);
-      Point2D newEndpoint1 = new Point2D(secondEndpoint.getX() + vectorXPerpToRight, secondEndpoint.getY() + vectorYPerpToRight);
-
-      LineSegment2d ret = new LineSegment2d(newEndpoint0, newEndpoint1);
-
-      return ret;
-   }
-
+   /**
+    * Translates this line segment by {@code distanceToShift} along the vector perpendicular to this
+    * line segment's direction and pointing to the left.
+    * <p>
+    * Note that the length and direction of this line segment remains unchanged.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line segment.
+    */
    public void shiftToLeft(double distanceToShift)
    {
       shift(true, distanceToShift);
    }
 
+   /**
+    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular to this
+    * line segment's direction and pointing to the left.
+    * <p>
+    * Note that the length and direction of the copy are the same as this line segment.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line segment.
+    * @return the shifted line segment.
+    */
+   public LineSegment2d shiftToLeftCopy(double distanceToShift)
+   {
+      return shiftAndCopy(true, distanceToShift);
+   }
+
+   /**
+    * Translates this line segment by {@code distanceToShift} along the vector perpendicular to this
+    * line segment's direction and pointing to the right.
+    * <p>
+    * Note that the length and direction of this line segment remains unchanged.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line segment.
+    */
    public void shiftToRight(double distanceToShift)
    {
       shift(false, distanceToShift);
+   }
+
+   /**
+    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular to this
+    * line segment's direction and pointing to the right.
+    * <p>
+    * Note that the length and direction of the copy are the same as this line segment.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line segment.
+    * @return the shifted line segment.
+    */
+   public LineSegment2d shiftToRightCopy(double distanceToShift)
+   {
+      return shiftAndCopy(false, distanceToShift);
    }
 
    private void shift(boolean shiftToLeft, double distanceToShift)
@@ -687,42 +802,27 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       double vectorX = secondEndpoint.getX() - firstEndpoint.getX();
       double vectorY = secondEndpoint.getY() - firstEndpoint.getY();
 
-      double vectorXPerpToRight = -vectorY;
-      double vectorYPerpToRight = vectorX;
+      double length = length();
+      double orthogonalVectorX = -vectorY / length;
+      double orthogonalVectorY = vectorX / length;
 
       if (!shiftToLeft)
       {
-         vectorXPerpToRight = -vectorXPerpToRight;
-         vectorYPerpToRight = -vectorYPerpToRight;
+         orthogonalVectorX = -orthogonalVectorX;
+         orthogonalVectorY = -orthogonalVectorY;
       }
 
-      double vectorPerpToRightLength = Math.sqrt(vectorXPerpToRight * vectorXPerpToRight + vectorYPerpToRight * vectorYPerpToRight);
-      vectorXPerpToRight = distanceToShift * vectorXPerpToRight / vectorPerpToRightLength;
-      vectorYPerpToRight = distanceToShift * vectorYPerpToRight / vectorPerpToRightLength;
+      orthogonalVectorX = distanceToShift * orthogonalVectorX;
+      orthogonalVectorY = distanceToShift * orthogonalVectorY;
 
-      firstEndpoint.setX(firstEndpoint.getX() + vectorXPerpToRight);
-      firstEndpoint.setY(firstEndpoint.getY() + vectorYPerpToRight);
-      secondEndpoint.setX(secondEndpoint.getX() + vectorXPerpToRight);
-      secondEndpoint.setY(secondEndpoint.getY() + vectorYPerpToRight);
+      translate(orthogonalVectorX, orthogonalVectorY);
    }
 
-   public boolean isPointOnLineSegment(Point2DReadOnly point2d)
+   private LineSegment2d shiftAndCopy(boolean shiftToLeft, double distanceToShift)
    {
-      return isPointOnLineSegment(point2d.getX(), point2d.getY());
-   }
-
-   private boolean isPointOnLineSegment(double x, double y)
-   {
-      double vx0 = x - firstEndpoint.getX();
-      double vy0 = y - firstEndpoint.getY();
-
-      double vx1 = secondEndpoint.getX() - firstEndpoint.getX();
-      double vy1 = secondEndpoint.getY() - firstEndpoint.getY();
-
-      double cross = vx0 * vy1 - vy0 * vx1;
-      boolean pointIsOnLine = Math.abs(cross) < 1e-7;
-
-      return pointIsOnLine && isBetweenEndpoints(x, y, 0.0);
+      LineSegment2d shifted = new LineSegment2d(this);
+      shifted.shift(shiftToLeft, distanceToShift);
+      return shifted;
    }
 
    public Point2D intersectionWith(LineSegment2d secondLineSegment2d)
@@ -952,16 +1052,6 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
          return true;
 
       return false;
-   }
-
-   public void getPerpendicularBisector(Vector2DBasics perpendicularBisectorToPack, double bisectorLengthDesired)
-   {
-      double x = firstEndpoint.getX() - secondEndpoint.getX();
-      double y = firstEndpoint.getY() - secondEndpoint.getY();
-
-      perpendicularBisectorToPack.set(-y, x);
-      perpendicularBisectorToPack.normalize();
-      perpendicularBisectorToPack.scale(bisectorLengthDesired);
    }
 
    @Override
