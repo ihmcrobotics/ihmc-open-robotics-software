@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Represents an infinitely-long 2D line defined by a 2D point and a 2D unit-vector.
@@ -564,6 +563,28 @@ public class Line2d implements GeometryObject<Line2d>
       return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction) < epsilon;
    }
 
+   public boolean isPointOnLeftSideOfLine(Point2DReadOnly point)
+   {
+      return isPointOnSideOfLine(point, true);
+   }
+
+   public boolean isPointOnRightSideOfLine(Point2DReadOnly point)
+   {
+      return isPointOnSideOfLine(point, false);
+   }
+
+   public boolean isPointOnSideOfLine(Point2DReadOnly point, boolean testLeftSide)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(point, this.point, direction, testLeftSide);
+   }
+
+   public boolean isPointOnSideOfLine(double x, double y, boolean testLeftSide)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(x, y, this.point, direction, testLeftSide);
+   }
+
    /**
     * Flips this line's direction.
     * 
@@ -1090,27 +1111,6 @@ public class Line2d implements GeometryObject<Line2d>
       return ret;
    }
 
-   public boolean isPointOnLeftSideOfLine(Point2DReadOnly point)
-   {
-      return isPointOnSideOfLine(point.getX(), point.getY(), RobotSide.LEFT);
-   }
-
-   public boolean isPointOnRightSideOfLine(Point2DReadOnly point)
-   {
-      return isPointOnSideOfLine(point.getX(), point.getY(), RobotSide.RIGHT);
-   }
-
-   public boolean isPointOnSideOfLine(Point2DReadOnly point, RobotSide side)
-   {
-      return isPointOnSideOfLine(point.getX(), point.getY(), side);
-   }
-
-   private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
-   {
-      checkHasBeenInitialized();
-      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(x, y, point, direction, side == RobotSide.LEFT);
-   }
-
    /**
     * This method could be improved but must be tested better first.
     */
@@ -1140,9 +1140,9 @@ public class Line2d implements GeometryObject<Line2d>
    private boolean isPointInFrontOfLine(double x, double y)
    {
       if (direction.getY() > 0.0)
-         return isPointOnSideOfLine(x, y, RobotSide.RIGHT);
+         return isPointOnSideOfLine(x, y, false);
       else if (direction.getY() < 0.0)
-         return isPointOnSideOfLine(x, y, RobotSide.LEFT);
+         return isPointOnSideOfLine(x, y, true);
       else
          throw new RuntimeException("Not defined when line is pointing exactly along the x-axis");
    }

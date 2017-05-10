@@ -417,7 +417,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
    {
       checkReferenceFrameMatch(point);
 
-      return line.isPointOnSideOfLine(point.tuple, side);
+      return line.isPointOnSideOfLine(point.tuple, side == RobotSide.LEFT);
    }
    
    public boolean isPointInFrontOfLine(FrameVector2d frontDirection, FramePoint2d framePoint)
