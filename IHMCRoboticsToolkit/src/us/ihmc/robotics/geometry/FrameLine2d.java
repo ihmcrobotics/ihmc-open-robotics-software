@@ -103,12 +103,12 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
 
    public FramePoint2d getFramePoint2dGivenParameter(double t)
    {
-      return new FramePoint2d(referenceFrame, line.getPointGivenParameter(t));
+      return new FramePoint2d(referenceFrame, line.pointOnLineGivenParameter(t));
    }
 
    public double getParameterGivenPointEpsilon(FramePoint2d point, double epsilon)
    {
-      return line.getParameterGivenPointEpsilon(point.getPoint(), epsilon);
+      return line.parameterGivenPointOnLine(point.getPoint(), epsilon);
    }
 
    public boolean containsEpsilon(FramePoint2d framePoint, double epsilon)

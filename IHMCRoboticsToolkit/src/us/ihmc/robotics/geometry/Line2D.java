@@ -398,7 +398,7 @@ public class Line2D implements GeometryObject<Line2D>
     * its x-coordinate:<br>
     * y = s * x + y<sub>0</sub><br>
     * where y<sub>0</sub> is the y-coordinate at which this line intercepts the y-axis and which can
-    * be obtained with {@link #getYIntercept()}.
+    * be obtained with {@link #yIntercept()}.
     * </p>
     * 
     * @return the value of the slope of this line.
@@ -434,7 +434,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @param pointToPack the point in which the coordinates of 'p' are stored. Modified.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public void getPointGivenParameter(double t, Point2DBasics pointToPack)
+   public void pointOnLineGivenParameter(double t, Point2DBasics pointToPack)
    {
       checkHasBeenInitialized();
       pointToPack.scaleAdd(t, direction, point);
@@ -457,10 +457,10 @@ public class Line2D implements GeometryObject<Line2D>
     * @return the coordinates of the point 'p'.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Point2D getPointGivenParameter(double t)
+   public Point2D pointOnLineGivenParameter(double t)
    {
       Point2D pointToReturn = new Point2D();
-      getPointGivenParameter(t, pointToReturn);
+      pointOnLineGivenParameter(t, pointToReturn);
       return pointToReturn;
    }
 
@@ -485,11 +485,11 @@ public class Line2D implements GeometryObject<Line2D>
     * @throws RuntimeException if the given point is located at a distance greater than
     *            {@code epsilon} from this line.
     */
-   public double getParameterGivenPointEpsilon(Point2DReadOnly pointOnLine, double epsilon)
+   public double parameterGivenPointOnLine(Point2DReadOnly pointOnLine, double epsilon)
    {
       if (!isPointOnLine(pointOnLine, epsilon))
       {
-         throw new RuntimeException("getParameterGivenPoint: point not part of line");
+         throw new RuntimeException("The given point is not on this line, distance from line: " + distance(pointOnLine));
       }
       else
       {
@@ -508,7 +508,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @return the x-coordinate of the intersection between this line and the x-axis.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public double getXIntercept()
+   public double xIntercept()
    {
       checkHasBeenInitialized();
       double parameterAtIntercept = -point.getY() / direction.getY();
@@ -522,7 +522,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @return the y-coordinate of the intersection between this line and the y-axis.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public double getYIntercept()
+   public double yIntercept()
    {
       checkHasBeenInitialized();
       double parameterAtIntercept = -point.getX() / direction.getX();
