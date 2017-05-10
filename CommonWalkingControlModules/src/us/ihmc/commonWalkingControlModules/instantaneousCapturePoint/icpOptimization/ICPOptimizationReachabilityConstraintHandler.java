@@ -54,7 +54,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       }
    }
 
-   public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
+   public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
    {
       solver.resetReachabilityConstraint();
 
@@ -63,7 +63,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.addReachabilityPolygon(reachabilityPolygon);
    }
 
-   public void updateReachabilityConstraintForDoubleSupport(ICPOptimizationSolver solver)
+   public void updateReachabilityConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
    {
       solver.resetReachabilityConstraint();
    }

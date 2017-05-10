@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
 
 /**
- * Class that represents any objective task that is submitted to the {@link ICPOptimizationSolver}.
+ * Class that represents any objective task that is submitted to the {@link ICPQPOptimizationSolver}.
  * The intended use is to store the quadratic cost objective, linear cost objective, and scalar cost
  * of a given objective for minimization. This is then added to the full problem quadratic, linear,
  * and scalar costs.

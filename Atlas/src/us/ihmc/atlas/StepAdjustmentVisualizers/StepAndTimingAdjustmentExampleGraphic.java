@@ -1,12 +1,6 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -16,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -37,12 +32,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -58,7 +48,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
-public class StepAdjustmentExampleGraphic
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+public class StepAndTimingAdjustmentExampleGraphic
 {
    private static final boolean switchType = true;
    private static final int numberOfFootstepsToCreate = 4;
@@ -67,6 +62,8 @@ public class StepAdjustmentExampleGraphic
 
    private static final double pointFootDuration = 2.0;
    private static final double icpError = 0.05;
+
+   private static final double defaultSingleSupportDuration = 0.75;
 
    private static final double footLengthForControl = 0.22;
    private static final double footWidthForControl = 0.11;
@@ -124,13 +121,13 @@ public class StepAdjustmentExampleGraphic
 
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
-   private final ICPAdjustmentOptimizationController icpOptimizationController;
+   private final ICPTimingOptimizationController icpOptimizationController;
    private final ICPPlanner icpPlanner;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final SimulationConstructionSet scs;
 
-   public StepAdjustmentExampleGraphic()
+   public StepAndTimingAdjustmentExampleGraphic()
    {
       Robot robot = new DummyRobot();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -156,7 +153,7 @@ public class StepAdjustmentExampleGraphic
       singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
       omega0 = new DoubleYoVariable("omega0", registry);
       doubleSupportDuration.set(0.25);
-      singleSupportDuration.set(0.75);
+      singleSupportDuration.set(defaultSingleSupportDuration);
       omega0.set(3.0);
 
       yoTime = robot.getYoTime();
@@ -168,8 +165,8 @@ public class StepAdjustmentExampleGraphic
       icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
-      icpOptimizationController = new ICPAdjustmentOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPTimingOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfFootstepsToCreate; i++)
@@ -448,6 +445,8 @@ public class StepAdjustmentExampleGraphic
    }
 
    private boolean firstTick = true;
+   private boolean secondTick = true;
+   private boolean thirdTick = true;
 
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
@@ -458,9 +457,15 @@ public class StepAdjustmentExampleGraphic
 
    public void updateGraphic()
    {
-      if (firstTick)
+      if (firstTick || secondTick || thirdTick)
       {
          initialize();
+         singleSupportDuration.set(defaultSingleSupportDuration);
+         icpOptimizationController.setSwingDuration(0, defaultSingleSupportDuration);
+         if (!secondTick)
+            thirdTick = false;
+         if (!firstTick)
+            secondTick = false;
          firstTick = false;
       }
 
@@ -470,7 +475,7 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       yoDesiredICP.set(desiredICP);
 
-      updateCurrentICPPosition();
+      //updateCurrentICPPosition();
 
       yoCurrentICP.getFrameTuple2d(currentICP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, currentICP, omega0.getDoubleValue());
@@ -622,7 +627,7 @@ public class StepAdjustmentExampleGraphic
 
    public static void main(String[] args)
    {
-      StepAdjustmentExampleGraphic stepAdjustmentExampleGraphic = new StepAdjustmentExampleGraphic();
+      StepAndTimingAdjustmentExampleGraphic stepAdjustmentExampleGraphic = new StepAndTimingAdjustmentExampleGraphic();
    }
 
    private class DummyRobot extends  Robot
@@ -1379,22 +1384,22 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getFootstepRegularizationWeight()
          {
-            return 0.01;
+            return 0.005;
          }
 
          @Override public double getFeedbackRegularizationWeight()
          {
-            return 0.0001;
+            return 0.00005;
          }
 
          @Override public double getForwardFootstepWeight()
          {
-            return 100.0;
+            return 15.0;
          }
 
          @Override public double getLateralFootstepWeight()
          {
-            return 100.0;
+            return 15.0;
          }
 
          @Override public double getFeedbackForwardWeight()
@@ -1404,7 +1409,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getFeedbackLateralWeight()
          {
-            return 0.1;
+            return 0.5;
          }
 
          @Override
@@ -1421,18 +1426,12 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getFeedbackParallelGain()
          {
-            return 2.5;
+            return 3.0;
          }
 
          @Override public double getFeedbackOrthogonalGain()
          {
-            return 3.0;
-         }
-
-         @Override
-         public double getFootstepSolutionResolution()
-         {
-            return 0.0;
+            return 2.5;
          }
 
          @Override
@@ -1461,7 +1460,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getDynamicRelaxationWeight()
          {
-            return 10000.0;
+            return 1000.0;
          }
 
          @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
@@ -1471,7 +1470,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getAngularMomentumMinimizationWeight()
          {
-            return 500.0;
+            return 50.0;
          }
 
          @Override public boolean useFeedbackRegularization()
@@ -1496,7 +1495,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public boolean scaleStepRegularizationWeightWithTime()
          {
-            return true;
+            return false;
          }
 
          @Override public boolean scaleUpcomingStepWeights()
@@ -1550,7 +1549,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getAdjustmentDeadband()
          {
-            return 0.02;
+            return 0.03;
          }
       };
    }
