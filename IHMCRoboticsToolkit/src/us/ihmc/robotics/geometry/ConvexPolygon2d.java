@@ -1019,7 +1019,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.translatePolygonCopy(translation, this);
    }
 
-   public LineSegment2d[] getIntersectingEdgesCopy(Line2D line)
+   public LineSegment2D[] getIntersectingEdgesCopy(Line2D line)
    {
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
@@ -1175,7 +1175,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
                                                                                    numberOfVertices, clockwiseOrdered);
    }
 
-   public int intersectionWith(LineSegment2d lineSegment2d, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   public int intersectionWith(LineSegment2D lineSegment2d, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
       checkIfUpToDate();
       return EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(lineSegment2d.getFirstEndpoint(), lineSegment2d.getSecondEndpoint(),
@@ -1183,7 +1183,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
                                                                                            firstIntersectionToPack, secondIntersectionToPack);
    }
 
-   public Point2D[] intersectionWith(LineSegment2d lineSegment2d)
+   public Point2D[] intersectionWith(LineSegment2D lineSegment2d)
    {
       checkIfUpToDate();
       return EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(lineSegment2d.getFirstEndpoint(), lineSegment2d.getSecondEndpoint(),
@@ -1196,7 +1196,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return EuclidGeometryPolygonTools.closestEdgeIndexToPoint2D(point, clockwiseOrderedListOfPoints, numberOfVertices, clockwiseOrdered);
    }
 
-   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2DReadOnly point)
+   public boolean getClosestEdge(LineSegment2D closestEdgeToPack, Point2DReadOnly point)
    {
       int edgeIndex = getClosestEdgeIndex(point);
       if (edgeIndex == -1)
@@ -1205,9 +1205,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return true;
    }
 
-   public LineSegment2d getClosestEdgeCopy(Point2DReadOnly point)
+   public LineSegment2D getClosestEdgeCopy(Point2DReadOnly point)
    {
-      LineSegment2d closestEdge = new LineSegment2d();
+      LineSegment2D closestEdge = new LineSegment2D();
       if (getClosestEdge(closestEdge, point))
          return closestEdge;
       else
@@ -1260,7 +1260,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return new Point2D(getVertex(vertexIndex));
    }
 
-   public void getEdge(int edgeIndex, LineSegment2d edgeToPack)
+   public void getEdge(int edgeIndex, LineSegment2D edgeToPack)
    {
       edgeToPack.set(getVertex(edgeIndex), getNextVertex(edgeIndex));
    }
@@ -1288,7 +1288,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       throw new RuntimeException("Not yet implemented");
    }
 
-   public double distance(LineSegment2d lineSegment)
+   public double distance(LineSegment2D lineSegment)
    {
       checkIfUpToDate();
       throw new RuntimeException("Not yet implemented");

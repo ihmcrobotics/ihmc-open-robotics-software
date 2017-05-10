@@ -372,19 +372,19 @@ public class PlanarRegionTest
       assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
 
       // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
-      LineSegment2d lineSegment = new LineSegment2d(0.0, 0.0, 2.0, 2.0);
+      LineSegment2D lineSegment = new LineSegment2D(0.0, 0.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       ArrayList<Point2D[]> intersectionsInPlaneFrame = new ArrayList<>();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(3, intersectionsInPlaneFrame.size());
 
-      lineSegment = new LineSegment2d(0.0, 0.0, 0.5, 0.5);
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.5, 0.5);
       assertFalse("Not intersecting if fully inside a single polygon", planarRegion.isLineSegmentIntersecting(lineSegment));
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(0, intersectionsInPlaneFrame.size());
 
-      lineSegment = new LineSegment2d(0.0, 0.0, 0.0, 1.5);
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.0, 1.5);
       assertTrue("Intersecting if fully inside but cross two polygons", planarRegion.isLineSegmentIntersecting(lineSegment));
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
@@ -396,12 +396,12 @@ public class PlanarRegionTest
       assertEquals(1, points.length);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       
-      lineSegment = new LineSegment2d(2.5, 0.5, 3.0, 9.0);
+      lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
-      lineSegment = new LineSegment2d(2.5, 4.5, 3.0, 9.0);
+      lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
       assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
 
-      lineSegment = new LineSegment2d(2.0, -2.0, 2.0, 2.0);
+      lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));  
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);

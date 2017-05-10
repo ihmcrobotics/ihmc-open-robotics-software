@@ -84,7 +84,7 @@ public class ConvexPolygon2dCalculator
     * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
     * only pack the edge before the vertex, not both edges.
     */
-   public static int getIntersectingEdges(Line2D line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
+   public static int getIntersectingEdges(Line2D line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2d polygon)
    {
       if (polygon.hasExactlyOneVertex())
          return 0;
@@ -154,16 +154,16 @@ public class ConvexPolygon2dCalculator
       return ret;
    }
 
-   public static LineSegment2d[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2d polygon)
+   public static LineSegment2D[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2d polygon)
    {
-      LineSegment2d edge1 = new LineSegment2d();
-      LineSegment2d edge2 = new LineSegment2d();
+      LineSegment2D edge1 = new LineSegment2D();
+      LineSegment2D edge2 = new LineSegment2D();
 
       int edges = getIntersectingEdges(line, edge1, edge2, polygon);
       if (edges == 2)
-         return new LineSegment2d[] {edge1, edge2};
+         return new LineSegment2D[] {edge1, edge2};
       if (edges == 1)
-         return new LineSegment2d[] {edge1};
+         return new LineSegment2D[] {edge1};
       return null;
    }
 }

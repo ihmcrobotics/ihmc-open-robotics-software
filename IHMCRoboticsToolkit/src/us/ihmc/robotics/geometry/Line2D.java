@@ -634,7 +634,7 @@ public class Line2D implements GeometryObject<Line2D>
     *         {@code null} otherwise.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Point2D intersectionWith(LineSegment2d lineSegment)
+   public Point2D intersectionWith(LineSegment2D lineSegment)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint());
@@ -660,7 +660,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public boolean intersectionWith(LineSegment2d lineSegment, Point2DBasics intersectionToPack)
+   public boolean intersectionWith(LineSegment2D lineSegment, Point2DBasics intersectionToPack)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint(),

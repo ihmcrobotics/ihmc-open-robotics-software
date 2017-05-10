@@ -256,13 +256,13 @@ public class LineSegment1d
     * @param direction2d direction toward greater values of {@code endPoint1d}.
     * @return the 2D equivalent of this line segment.
     */
-   public LineSegment2d toLineSegment2d(Point2DReadOnly zero2d, Vector2DReadOnly direction2d)
+   public LineSegment2D toLineSegment2d(Point2DReadOnly zero2d, Vector2DReadOnly direction2d)
    {
       Point2D firstEndpoint = new Point2D();
       Point2D secondEndpoint = new Point2D();
       firstEndpoint.scaleAdd(endpoint1, direction2d, zero2d);
       secondEndpoint.scaleAdd(endpoint2, direction2d, zero2d);
-      return new LineSegment2d(firstEndpoint, secondEndpoint);
+      return new LineSegment2D(firstEndpoint, secondEndpoint);
    }
 
    @Override
