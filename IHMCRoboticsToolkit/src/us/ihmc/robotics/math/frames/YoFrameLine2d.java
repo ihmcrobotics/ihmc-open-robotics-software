@@ -162,20 +162,6 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
       return frameLine.distance(point);
    }
 
-   public double distance(FrameLineSegment2d secondLineSegment)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(secondLineSegment);
-   }
-
-   public double distance(FrameConvexPolygon2d convexPolygon)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(convexPolygon);
-   }
-
    protected void putYoValuesIntoFrameLine()
    {
       if (frameLine == null)
