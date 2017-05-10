@@ -14,91 +14,97 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
  */
 public class LineSegment2d implements GeometryObject<LineSegment2d>
 {
-   private Point2D[] endpoints = new Point2D[2];
+   /** The first endpoint defining this line segment. */
+   private final Point2D firstEndpoint = new Point2D();
+   /** The second endpoint defining this line segment. */
+   private final Point2D secondEndpoint = new Point2D();
 
    public LineSegment2d()
    {
-      endpoints[0] = new Point2D(Double.MIN_VALUE, Double.MIN_VALUE);
-      endpoints[1] = new Point2D(Double.MAX_VALUE, Double.MAX_VALUE);
    }
 
    public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0] = new Point2D(firstEndpointX, firstEndpointY);
-      endpoints[1] = new Point2D(secondEndpointX, secondEndpointY);
+      set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
 
    public LineSegment2d(Point2DReadOnly[] endpoints)
    {
-      this.endpoints[0] = new Point2D(endpoints[0]);
-      this.endpoints[1] = new Point2D(endpoints[1]);
+      set(endpoints);
    }
 
-   public LineSegment2d(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2)
+   public LineSegment2d(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
    {
-      endpoints[0] = new Point2D(endpoint1);
-      endpoints[1] = new Point2D(endpoint2);
+      set(firstEndpoint, secondEndpoint);
    }
 
    public LineSegment2d(LineSegment2d lineSegment2d)
    {
-      endpoints = lineSegment2d.getEndpointsCopy();
+      set(lineSegment2d);
    }
 
    public Point2D[] getEndpointsCopy()
    {
-      return new Point2D[] {new Point2D(endpoints[0]), new Point2D(endpoints[1])};
+      return new Point2D[] {new Point2D(firstEndpoint), new Point2D(secondEndpoint)};
    }
 
-   public void getEndpoints(Point2DBasics endpoint0, Point2DBasics endpoint1)
+   public void getEndpoints(Point2DBasics firstEndpointToPack, Point2DBasics secondEndpointToPack)
    {
-      endpoint0.set(endpoints[0]);
-      endpoint1.set(endpoints[1]);
+      firstEndpointToPack.set(firstEndpoint);
+      secondEndpointToPack.set(secondEndpoint);
    }
-   
+
    public Point2DReadOnly getFirstEndpoint()
    {
-      return endpoints[0];
-   }
-   
-   public Point2DReadOnly getSecondEndpoint()
-   {
-      return endpoints[1];
+      return firstEndpoint;
    }
 
-   public Point2DReadOnly[] getEndpoints()
+   public Point2DReadOnly getSecondEndpoint()
    {
-      return endpoints;
+      return secondEndpoint;
+   }
+
+   public Point2DReadOnly getEndpoint(int index)
+   {
+      switch (index)
+      {
+      case 0:
+         return firstEndpoint;
+      case 1:
+         return secondEndpoint;
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(index));
+      }
    }
 
    public Point2D getFirstEndpointCopy()
    {
-      return new Point2D(endpoints[0]);
+      return new Point2D(firstEndpoint);
    }
 
    public Point2D getSecondEndpointCopy()
    {
-      return new Point2D(endpoints[1]);
+      return new Point2D(secondEndpoint);
    }
 
    public double getFirstEndpointX()
    {
-      return endpoints[0].getX();
+      return firstEndpoint.getX();
    }
 
    public double getFirstEndpointY()
    {
-      return endpoints[0].getY();
+      return firstEndpoint.getY();
    }
 
    public double getSecondEndpointX()
    {
-      return endpoints[1].getX();
+      return secondEndpoint.getX();
    }
 
    public double getSecondEndpointY()
    {
-      return endpoints[1].getY();
+      return secondEndpoint.getY();
    }
 
    /**
@@ -110,7 +116,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public void setFirstEndpoint(double firstEndpointX, double firstEndpointY)
    {
-      endpoints[0].set(firstEndpointX, firstEndpointY);
+      firstEndpoint.set(firstEndpointX, firstEndpointY);
    }
 
    /**
@@ -120,7 +126,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public void setFirstEndpoint(Point2DReadOnly firstEndpoint)
    {
-      this.endpoints[0].set(firstEndpoint);
+      this.firstEndpoint.set(firstEndpoint);
    }
 
    /**
@@ -132,7 +138,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public void setSecondEndpoint(double secondEndpointX, double secondEndpointY)
    {
-      endpoints[1].set(secondEndpointX, secondEndpointY);
+      secondEndpoint.set(secondEndpointX, secondEndpointY);
    }
 
    /**
@@ -142,86 +148,79 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public void setSecondEndpoint(Point2DReadOnly secondEndpoint)
    {
-      this.endpoints[1].set(secondEndpoint);
+      this.secondEndpoint.set(secondEndpoint);
    }
 
-   public void set(Point2DReadOnly endpoint0, Point2DReadOnly endpoint1)
+   public void set(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
    {
-      endpoints[0].set(endpoint0);
-      endpoints[1].set(endpoint1);
+      setFirstEndpoint(firstEndpoint);
+      setSecondEndpoint(secondEndpoint);
    }
 
-   public void set(Point2DReadOnly endpoint0, Vector2DReadOnly fromPoint0ToPoint1)
+   public void set(Point2DReadOnly firstEndpoint, Vector2DReadOnly fromFirstToSecondEndpoint)
    {
-      endpoints[0].set(endpoint0);
-      endpoints[1].set(endpoint0);
-      endpoints[1].add(fromPoint0ToPoint1);
+      this.firstEndpoint.set(firstEndpoint);
+      secondEndpoint.add(firstEndpoint, fromFirstToSecondEndpoint);
    }
 
    public void set(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0].set(firstEndpointX, firstEndpointY);
-      endpoints[1].set(secondEndpointX, secondEndpointY);
+      firstEndpoint.set(firstEndpointX, firstEndpointY);
+      secondEndpoint.set(secondEndpointX, secondEndpointY);
    }
 
    public void set(Point2DReadOnly[] endpoints)
    {
       if (endpoints.length != 2)
          throw new RuntimeException("Length of input array is not correct. Length = " + endpoints.length);
-      this.endpoints[0].set(endpoints[0]);
-      this.endpoints[1].set(endpoints[1]);
+      set(firstEndpoint, secondEndpoint);
 
    }
 
    @Override
    public void set(LineSegment2d lineSegment)
    {
-      endpoints[0].set(lineSegment.endpoints[0]);
-      endpoints[1].set(lineSegment.endpoints[1]);
+      set(lineSegment.firstEndpoint, lineSegment.secondEndpoint);
    }
 
    public void flipDirection()
    {
-      double xTemp = endpoints[0].getX();
-      double yTemp = endpoints[0].getY();
+      double x = firstEndpoint.getX();
+      double y = firstEndpoint.getY();
 
-      endpoints[0].set(endpoints[1]);
-      endpoints[1].set(xTemp, yTemp);
+      firstEndpoint.set(secondEndpoint);
+      secondEndpoint.set(x, y);
    }
 
    public Point2D midpoint()
    {
       Point2D point2d = new Point2D();
-      
+
       getMidpoint(point2d);
 
       return point2d;
    }
-   
+
    public void getMidpoint(Point2DBasics midpointToPack)
    {
-      midpointToPack.setX((endpoints[0].getX() + endpoints[1].getX()) / 2.0);
-      midpointToPack.setY((endpoints[0].getY() + endpoints[1].getY()) / 2.0);
+      midpointToPack.interpolate(firstEndpoint, secondEndpoint, 0.5);
    }
 
    public double length()
    {
-      return endpoints[0].distance(endpoints[1]);
+      return firstEndpoint.distance(secondEndpoint);
    }
 
    public double dotProduct(LineSegment2d lineSegment2d)
    {
-      double dotProduct = (endpoints[1].getX() - endpoints[0].getX()) * (lineSegment2d.endpoints[1].getX() - lineSegment2d.endpoints[0].getX())
-                          + (endpoints[1].getY() - endpoints[0].getY()) * (lineSegment2d.endpoints[1].getY() - lineSegment2d.endpoints[0].getY());
-
-      return dotProduct;
+      return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, lineSegment2d.firstEndpoint, lineSegment2d.secondEndpoint);
    }
 
    public boolean isBetweenEndpoints(Point2DReadOnly point2d, double epsilon)
    {
       return isBetweenEndpoints(point2d.getX(), point2d.getY(), epsilon);
    }
-   
+
    private boolean isBetweenEndpoints(double x, double y, double epsilon)
    {
       double alpha = percentageAlongLineSegment(x, y);
@@ -236,12 +235,12 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public boolean isPointOnLeftSideOfLineSegment(Point2DReadOnly point)
    {
-      return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(point, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(point, firstEndpoint, secondEndpoint);
    }
-   
+
    public boolean isPointOnRightSideOfLineSegment(Point2DReadOnly point)
    {
-      return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(point, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(point, firstEndpoint, secondEndpoint);
    }
 
    public LineSegment2d shiftToLeftCopy(double distanceToShift)
@@ -256,8 +255,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    private LineSegment2d shiftAndCopy(boolean shiftToLeft, double distanceToShift)
    {
-      double vectorX = endpoints[1].getX() - endpoints[0].getX();
-      double vectorY = endpoints[1].getY() - endpoints[0].getY();
+      double vectorX = secondEndpoint.getX() - firstEndpoint.getX();
+      double vectorY = secondEndpoint.getY() - firstEndpoint.getY();
 
       double vectorXPerpToRight = -vectorY;
       double vectorYPerpToRight = vectorX;
@@ -272,8 +271,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       vectorXPerpToRight = distanceToShift * vectorXPerpToRight / vectorPerpToRightLength;
       vectorYPerpToRight = distanceToShift * vectorYPerpToRight / vectorPerpToRightLength;
 
-      Point2D newEndpoint0 = new Point2D(endpoints[0].getX() + vectorXPerpToRight, endpoints[0].getY() + vectorYPerpToRight);
-      Point2D newEndpoint1 = new Point2D(endpoints[1].getX() + vectorXPerpToRight, endpoints[1].getY() + vectorYPerpToRight);
+      Point2D newEndpoint0 = new Point2D(firstEndpoint.getX() + vectorXPerpToRight, firstEndpoint.getY() + vectorYPerpToRight);
+      Point2D newEndpoint1 = new Point2D(secondEndpoint.getX() + vectorXPerpToRight, secondEndpoint.getY() + vectorYPerpToRight);
 
       LineSegment2d ret = new LineSegment2d(newEndpoint0, newEndpoint1);
 
@@ -292,8 +291,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    private void shift(boolean shiftToLeft, double distanceToShift)
    {
-      double vectorX = endpoints[1].getX() - endpoints[0].getX();
-      double vectorY = endpoints[1].getY() - endpoints[0].getY();
+      double vectorX = secondEndpoint.getX() - firstEndpoint.getX();
+      double vectorY = secondEndpoint.getY() - firstEndpoint.getY();
 
       double vectorXPerpToRight = -vectorY;
       double vectorYPerpToRight = vectorX;
@@ -308,19 +307,21 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       vectorXPerpToRight = distanceToShift * vectorXPerpToRight / vectorPerpToRightLength;
       vectorYPerpToRight = distanceToShift * vectorYPerpToRight / vectorPerpToRightLength;
 
-      endpoints[0].setX(endpoints[0].getX() + vectorXPerpToRight);
-      endpoints[0].setY(endpoints[0].getY() + vectorYPerpToRight);
-      endpoints[1].setX(endpoints[1].getX() + vectorXPerpToRight);
-      endpoints[1].setY(endpoints[1].getY() + vectorYPerpToRight);
+      firstEndpoint.setX(firstEndpoint.getX() + vectorXPerpToRight);
+      firstEndpoint.setY(firstEndpoint.getY() + vectorYPerpToRight);
+      secondEndpoint.setX(secondEndpoint.getX() + vectorXPerpToRight);
+      secondEndpoint.setY(secondEndpoint.getY() + vectorYPerpToRight);
    }
 
    /**
-    * Computes a percentage along this line segment representing the location of the given point once projected onto this line segment.
-    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * Computes a percentage along this line segment representing the location of the given point
+    * once projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
+    * {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing
+    * {@code lineSegmentEnd}.
     * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
-    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
-    * <code>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
+    * given point is located at the middle of the line segment. The coordinates of the projection of
+    * the point can be computed from the {@code percentage} as follows: <code>
     * Point2d projection = new Point2d(); </br>
     * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
     * </code>
@@ -328,13 +329,16 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * <li>if the length of the given line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@link Double#NaN}.
     * </ul>
     * </p>
     * 
     * @param pointX the x-coordinate of the query point.
     * @param pointY the y-coordinate of the query point.
-    * @return the computed percentage along this line segment representing where the point projection is located.
+    * @return the computed percentage along this line segment representing where the point
+    *         projection is located.
     */
    public double percentageAlongLineSegment(Point2DReadOnly point2d)
    {
@@ -342,12 +346,14 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    }
 
    /**
-    * Computes a percentage along this line segment representing the location of the given point once projected onto this line segment.
-    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * Computes a percentage along this line segment representing the location of the given point
+    * once projected onto this line segment. The returned percentage is in ] -&infin;; &infin; [,
+    * {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing
+    * {@code lineSegmentEnd}.
     * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
-    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
-    * <code>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the
+    * given point is located at the middle of the line segment. The coordinates of the projection of
+    * the point can be computed from the {@code percentage} as follows: <code>
     * Point2d projection = new Point2d(); </br>
     * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
     * </code>
@@ -355,31 +361,34 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * <li>if the length of the given line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@link Double#NaN}.
     * </ul>
     * </p>
     * 
     * @param pointX the x-coordinate of the query point.
     * @param pointY the y-coordinate of the query point.
-    * @return the computed percentage along this line segment representing where the point projection is located.
+    * @return the computed percentage along this line segment representing where the point
+    *         projection is located.
     */
    public double percentageAlongLineSegment(double x, double y)
    {
-      return EuclidGeometryTools.percentageAlongLineSegment2D(x, y, endpoints[0].getX(), endpoints[0].getY(), endpoints[1].getX(), endpoints[1].getY());
+      return EuclidGeometryTools.percentageAlongLineSegment2D(x, y, firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
    }
 
    public boolean isPointOnLineSegment(Point2DReadOnly point2d)
    {
       return isPointOnLineSegment(point2d.getX(), point2d.getY());
    }
-   
+
    private boolean isPointOnLineSegment(double x, double y)
    {
-      double vx0 = x - endpoints[0].getX();
-      double vy0 = y - endpoints[0].getY();
+      double vx0 = x - firstEndpoint.getX();
+      double vy0 = y - firstEndpoint.getY();
 
-      double vx1 = endpoints[1].getX() - endpoints[0].getX();
-      double vy1 = endpoints[1].getY() - endpoints[0].getY();
+      double vx1 = secondEndpoint.getX() - firstEndpoint.getX();
+      double vy1 = secondEndpoint.getY() - firstEndpoint.getY();
 
       double cross = vx0 * vy1 - vy0 * vx1;
       boolean pointIsOnLine = Math.abs(cross) < 1e-7;
@@ -389,19 +398,21 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public Point2D intersectionWith(LineSegment2d secondLineSegment2d)
    {
-      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1]);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment2d.firstEndpoint,
+                                                                      secondLineSegment2d.secondEndpoint);
    }
-   
+
    public boolean intersectionWith(LineSegment2d secondLineSegment2d, Point2D intersectionToPack)
    {
-      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1], intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment2d.firstEndpoint,
+                                                                      secondLineSegment2d.secondEndpoint, intersectionToPack);
    }
-   
+
    public Point2D intersectionWith(Line2D line2d)
    {
-      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.getPoint(), line2d.getDirection(), endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.getPoint(), line2d.getDirection(), firstEndpoint, secondEndpoint);
    }
-   
+
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
    {
       return convexPolygon.intersectionWith(this);
@@ -425,20 +436,20 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    @Override
    public String toString()
    {
-      return endpoints[0] + "-" + endpoints[1];
+      return firstEndpoint + "-" + secondEndpoint;
    }
 
    @Override
    public void applyTransform(Transform transform)
    {
-      endpoints[0].applyTransform(transform);
-      endpoints[1].applyTransform(transform);
+      firstEndpoint.applyTransform(transform);
+      secondEndpoint.applyTransform(transform);
    }
 
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
-      endpoints[0].applyTransform(transform, false);
-      endpoints[1].applyTransform(transform, false);
+      firstEndpoint.applyTransform(transform, false);
+      secondEndpoint.applyTransform(transform, false);
    }
 
    public LineSegment2d applyTransformCopy(Transform transform)
@@ -462,23 +473,24 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
          throw new RuntimeException("Parameter out of range. Parameter = " + parameter);
       }
 
-      double x = endpoints[0].getX() + (endpoints[1].getX() - endpoints[0].getX()) * parameter;
-      double y = endpoints[0].getY() + (endpoints[1].getY() - endpoints[0].getY()) * parameter;
+      double x = firstEndpoint.getX() + (secondEndpoint.getX() - firstEndpoint.getX()) * parameter;
+      double y = firstEndpoint.getY() + (secondEndpoint.getY() - firstEndpoint.getY()) * parameter;
 
       pointToPack.set(x, y);
    }
-   
+
    public Point2D pointBetweenEndPointsGivenParameter(double parameter)
    {
       Point2D pointToReturn = new Point2D();
-      
+
       pointBetweenEndPointsGivenParameter(parameter, pointToReturn);
       return pointToReturn;
    }
 
    /**
-    * Compute the smallest distance from the point to this line segment.
-    * If the projection of the given point on this line segment results in a point that is outside the line segment, the distance is computed between the given point and the closest line segment end point.
+    * Compute the smallest distance from the point to this line segment. If the projection of the
+    * given point on this line segment results in a point that is outside the line segment, the
+    * distance is computed between the given point and the closest line segment end point.
     */
    public double distance(Point2DReadOnly point)
    {
@@ -486,17 +498,17 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
       if (alpha <= 0.0)
       {
-         return point.distance(endpoints[0]);
+         return point.distance(firstEndpoint);
       }
       else if (alpha >= 1.0)
       {
-         return point.distance(endpoints[1]);
+         return point.distance(secondEndpoint);
       }
       else
       {
          // Here we know the projection of the point belongs to the line segment.
          // In this case computing the distance from the point to the line segment is the same as computing the distance from the point the equivalent line.
-         return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, endpoints[0], endpoints[1]);
+         return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, firstEndpoint, secondEndpoint);
       }
    }
 
@@ -505,20 +517,22 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of this line segment is too small,
-    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
-    *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside this line segment, the result is the closest of the two end points.
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@code false}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside this line segment, the result is the closest of the two end
+    * points.
     * </ul>
     * </p>
     * 
     * @param point the point to compute the projection of. Not modified.
-    * @return the projection of the point onto this line segment or {@code null} if the method failed.
+    * @return the projection of the point onto this line segment or {@code null} if the method
+    *         failed.
     */
    public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
    {
-      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, firstEndpoint, secondEndpoint);
    }
 
    /**
@@ -526,11 +540,12 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of this line segment is too small,
-    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
-    *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside this line segment, the result is the closest of the two end points.
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@code false}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside this line segment, the result is the closest of the two end
+    * points.
     * </ul>
     * </p>
     * 
@@ -546,21 +561,23 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of this line segment is too small,
-    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
-    *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside this line segment, the result is the closest of the two end points.
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@code false}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside this line segment, the result is the closest of the two end
+    * points.
     * </ul>
     * </p>
     * 
     * @param point2d the point to compute the projection of. Not modified.
-    * @param projectionToPack point in which the projection of the point onto this line segment is stored. Modified.
+    * @param projectionToPack point in which the projection of the point onto this line segment is
+    *           stored. Modified.
     * @return whether the method succeeded or not.
     */
    public boolean orthogonalProjection(Point2DReadOnly point2d, Point2DBasics projectedToPack)
    {
-      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point2d, endpoints[0], endpoints[1], projectedToPack);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point2d, firstEndpoint, secondEndpoint, projectedToPack);
    }
 
    public Point2D getClosestPointOnLineSegmentCopy(Point2DReadOnly point2d)
@@ -574,16 +591,18 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of this line segment is too small,
-    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
-    *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside this line segment, the result is the closest of the two end points.
+    * <li>if the length of this line segment is too small, i.e.
+    * {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this
+    * method fails and returns {@code false}.
+    * <li>the projection can not be outside the line segment. When the projection on the
+    * corresponding line is outside this line segment, the result is the closest of the two end
+    * points.
     * </ul>
     * </p>
     * 
     * @param point2d the point to compute the projection of. Not modified.
-    * @param projectionToPack point in which the projection of the point onto this line segment is stored. Modified.
+    * @param projectionToPack point in which the projection of the point onto this line segment is
+    *           stored. Modified.
     * @return whether the method succeeded or not.
     */
    public boolean getClosestPointOnLineSegment(Point2DBasics closestPointToPack, Point2DReadOnly point2d)
@@ -594,15 +613,18 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    @Override
    public boolean equals(Object object)
    {
-      if (object == null) return false;
-      if (!(object instanceof LineSegment2d)) return false;
-      if (object == this) return true;
+      if (object == null)
+         return false;
+      if (!(object instanceof LineSegment2d))
+         return false;
+      if (object == this)
+         return true;
 
       LineSegment2d otherSegment = (LineSegment2d) object;
 
-      if (endpoints[0].equals(otherSegment.endpoints[0]) && endpoints[1].equals(otherSegment.endpoints[1]))
+      if (firstEndpoint.equals(otherSegment.firstEndpoint) && secondEndpoint.equals(otherSegment.secondEndpoint))
          return true;
-      else if (endpoints[0].equals(otherSegment.endpoints[1]) && endpoints[1].equals(otherSegment.endpoints[0]))
+      else if (firstEndpoint.equals(otherSegment.secondEndpoint) && secondEndpoint.equals(otherSegment.firstEndpoint))
          return true;
 
       return false;
@@ -610,9 +632,9 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public void getPerpendicularBisector(Vector2DBasics perpendicularBisectorToPack, double bisectorLengthDesired)
    {
-      double x = endpoints[0].getX() - endpoints[1].getX();
-      double y = endpoints[0].getY() - endpoints[1].getY();
-      
+      double x = firstEndpoint.getX() - secondEndpoint.getX();
+      double y = firstEndpoint.getY() - secondEndpoint.getY();
+
       perpendicularBisectorToPack.set(-y, x);
       perpendicularBisectorToPack.normalize();
       perpendicularBisectorToPack.scale(bisectorLengthDesired);
@@ -621,31 +643,35 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    @Override
    public void setToZero()
    {
-      endpoints[0].setToZero();
-      endpoints[1].setToZero();
+      firstEndpoint.setToZero();
+      secondEndpoint.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
-      endpoints[0].setToNaN();
-      endpoints[1].setToNaN();      
+      firstEndpoint.setToNaN();
+      secondEndpoint.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      if (endpoints[0].containsNaN()) return true;
-      if (endpoints[1].containsNaN()) return true;
-      
+      if (firstEndpoint.containsNaN())
+         return true;
+      if (secondEndpoint.containsNaN())
+         return true;
+
       return false;
    }
 
    @Override
    public boolean epsilonEquals(LineSegment2d other, double epsilon)
    {
-      if (endpoints[0].epsilonEquals(other.endpoints[0], epsilon) && endpoints[1].epsilonEquals(other.endpoints[1], epsilon)) return true;
-      if (endpoints[0].epsilonEquals(other.endpoints[1], epsilon) && endpoints[1].epsilonEquals(other.endpoints[0], epsilon)) return true;
+      if (firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon))
+         return true;
+      if (firstEndpoint.epsilonEquals(other.secondEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.firstEndpoint, epsilon))
+         return true;
 
       return false;
    }

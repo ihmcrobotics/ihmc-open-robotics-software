@@ -186,7 +186,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
    public void getFrameVector(FrameVector2d vectorToPack)
    {
       vectorToPack.setToZero(referenceFrame);
-      vectorToPack.sub(lineSegment.getEndpoints()[1], lineSegment.getEndpoints()[0]);
+      vectorToPack.sub(lineSegment.getSecondEndpoint(), lineSegment.getFirstEndpoint());
    }
 
    public void set(FramePoint2d[] endpoints)

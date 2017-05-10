@@ -15,7 +15,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class LineSegment2dTest
@@ -278,26 +277,6 @@ public class LineSegment2dTest
 	@Test(timeout = 30000)
    public void testGetEndpointsPoint2dPoint2d()
    {
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetEndpoints()
-   {
-	   Point2DReadOnly[] points = testSegment1.getEndpoints();
-      Point2D[] pointsCopy = testSegment1.getEndpointsCopy();
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
-      assertEquals(pointsCopy[0], segment1Point1);
-      assertEquals(pointsCopy[1], segment1Point2);
-
-      // make sure that chaning the copy does not change the origional
-      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
-      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
-
-      assertEquals(segment1Point1, points[0]);
-      assertEquals(segment1Point2, points[1]);
-
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
