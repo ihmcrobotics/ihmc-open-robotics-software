@@ -419,13 +419,6 @@ public class WeightMatrix3D
       if (getClass() != obj.getClass())
          return false;
       WeightMatrix3D other = (WeightMatrix3D) obj;
-      if (frameMatrix == null)
-      {
-         if (other.frameMatrix != null)
-            return false;
-      }
-      else if (!frameMatrix.equals(other.frameMatrix))
-         return false;
       if (selectionFrame == null)
       {
          if (other.selectionFrame != null)
