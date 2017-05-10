@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 /**
  * Represents an infinitely-long 2D line defined by a 2D point and a 2D unit-vector.
  */
-public class Line2d implements GeometryObject<Line2d>
+public class Line2D implements GeometryObject<Line2D>
 {
    private final static double minAllowableVectorPart = Math.sqrt(Double.MIN_NORMAL);
 
@@ -31,7 +31,7 @@ public class Line2d implements GeometryObject<Line2d>
     * Default constructor that initializes both {@link #point} and {@link #direction} to zero. This
     * point and vector have to be set to valid values to make this line usable.
     */
-   public Line2d()
+   public Line2D()
    {
       hasPointBeenSet = false;
       hasDirectionBeenSet = false;
@@ -43,7 +43,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @param other the other line used to initialize this line. Not modified.
     * @throws RuntimeException if the other line has not been initialized yet.
     */
-   public Line2d(Line2d other)
+   public Line2D(Line2D other)
    {
       set(other);
    }
@@ -55,7 +55,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @param lineDirection direction of this line. Not modified.
     * @throws RuntimeException if the new direction is unreasonably small.
     */
-   public Line2d(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
+   public Line2D(Point2DReadOnly pointOnLine, Vector2DReadOnly lineDirection)
    {
       set(pointOnLine, lineDirection);
    }
@@ -68,7 +68,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if the new direction is unreasonably small.
     * @throws RuntimeException if the two given points are exactly equal.
     */
-   public Line2d(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
+   public Line2D(Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
       set(firstPointOnLine, secondPointOnLine);
    }
@@ -82,7 +82,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @param lineDirectionY the y-component of the direction of this line.
     * @throws RuntimeException if the new direction is unreasonably small.
     */
-   public Line2d(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
+   public Line2D(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY)
    {
       set(pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
@@ -201,7 +201,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if the other line has not been initialized yet.
     */
    @Override
-   public void set(Line2d other)
+   public void set(Line2D other)
    {
       set(other.getPoint(), other.getDirection());
    }
@@ -747,10 +747,10 @@ public class Line2d implements GeometryObject<Line2d>
     * 
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Line2d negateDirectionCopy()
+   public Line2D negateDirectionCopy()
    {
       checkHasBeenInitialized();
-      Line2d ret = new Line2d(this);
+      Line2D ret = new Line2D(this);
       ret.negateDirection();
 
       return ret;
@@ -941,7 +941,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
     *            yet.
     */
-   public boolean interiorBisector(Line2d secondLine, Line2d interiorBisectorToPack)
+   public boolean interiorBisector(Line2D secondLine, Line2D interiorBisectorToPack)
    {
       checkHasBeenInitialized();
       secondLine.checkHasBeenInitialized();
@@ -997,9 +997,9 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
     *            yet.
     */
-   public Line2d interiorBisector(Line2d secondLine)
+   public Line2D interiorBisector(Line2D secondLine)
    {
-      Line2d interiorBisector = new Line2d();
+      Line2D interiorBisector = new Line2D();
       boolean success = interiorBisector(secondLine, interiorBisector);
       return success ? interiorBisector : null;
    }
@@ -1041,7 +1041,7 @@ public class Line2d implements GeometryObject<Line2d>
     *           {@code point}. Modified.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public void perpendicularLineThroughPoint(Point2DReadOnly point, Line2d perpendicularLineToPack)
+   public void perpendicularLineThroughPoint(Point2DReadOnly point, Line2D perpendicularLineToPack)
    {
       checkHasBeenInitialized();
       perpendicularLineToPack.set(point.getX(), point.getY(), -direction.getY(), direction.getX());
@@ -1058,10 +1058,10 @@ public class Line2d implements GeometryObject<Line2d>
     * @return the line perpendicular to {@code this} and going through {@code point}.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Line2d perpendicularLineThroughPoint(Point2DReadOnly point)
+   public Line2D perpendicularLineThroughPoint(Point2DReadOnly point)
    {
       checkHasBeenInitialized();
-      return new Line2d(point, perpendicularVector());
+      return new Line2D(point, perpendicularVector());
    }
 
    /**
@@ -1142,7 +1142,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
     *            yet.
     */
-   public boolean intersectionWith(Line2d secondLine, Point2DBasics intersectionToPack)
+   public boolean intersectionWith(Line2D secondLine, Point2DBasics intersectionToPack)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.getPoint(), secondLine.getDirection(), intersectionToPack);
@@ -1170,7 +1170,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
     *            yet.
     */
-   public Point2D intersectionWith(Line2d secondLine)
+   public Point2D intersectionWith(Line2D secondLine)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.getPoint(), secondLine.getDirection());
@@ -1183,7 +1183,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @return {@code true} if the two lines are perpendicular, {@code false} otherwise.
     * @throws RuntimeException if either this line or {@code other} has not been initialized yet.
     */
-   public boolean areLinesPerpendicular(Line2d other)
+   public boolean areLinesPerpendicular(Line2D other)
    {
       checkHasBeenInitialized();
       // Dot product of two vectors is zero if the vectors are perpendicular
@@ -1274,10 +1274,10 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
     *            transformation in the XY-plane.
     */
-   public Line2d applyTransformCopy(Transform transform)
+   public Line2D applyTransformCopy(Transform transform)
    {
       checkHasBeenInitialized();
-      Line2d copy = new Line2d(this);
+      Line2D copy = new Line2D(this);
       copy.applyTransform(transform);
       return copy;
    }
@@ -1303,9 +1303,9 @@ public class Line2d implements GeometryObject<Line2d>
     * @param transform the transform to apply on this line's point and vector. Not modified.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Line2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
+   public Line2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
-      Line2d copy = new Line2d(this);
+      Line2D copy = new Line2D(this);
       copy.applyTransformAndProjectToXYPlane(transform);
       return copy;
    }
@@ -1323,7 +1323,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @throws RuntimeException if this line has not been initialized yet.
     */
    @Override
-   public boolean epsilonEquals(Line2d other, double epsilon)
+   public boolean epsilonEquals(Line2D other, double epsilon)
    {
       checkHasBeenInitialized();
       if (!point.epsilonEquals(other.point, epsilon))
@@ -1336,7 +1336,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(Line2d)}, it returns {@code false} otherwise.
+    * returns {@link #equals(Line2D)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -1346,7 +1346,7 @@ public class Line2d implements GeometryObject<Line2d>
    {
       try
       {
-         return equals((Line2d) obj);
+         return equals((Line2D) obj);
       }
       catch (ClassCastException e)
       {
@@ -1361,7 +1361,7 @@ public class Line2d implements GeometryObject<Line2d>
     * @return {@code true} if the two lines are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(Line2d other)
+   public boolean equals(Line2D other)
    {
       if (other == null)
          return false;

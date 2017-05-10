@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class LineArtifact extends Artifact
@@ -26,7 +26,7 @@ public class LineArtifact extends Artifact
    /**
     * Set to normalized line. Length = 1.
     */
-   public LineArtifact(String id, Line2d line)
+   public LineArtifact(String id, Line2D line)
    {
       super(id);
       setLine(line);
@@ -39,7 +39,7 @@ public class LineArtifact extends Artifact
       this.point2.set(point2);
    }
 
-   public void setLine(Line2d line)
+   public void setLine(Line2D line)
    {
       line.getTwoPointsOnLine(point1, point2);
    }

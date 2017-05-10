@@ -12,15 +12,15 @@ public class ConvexPolygonShrinker
    private final ArrayList<Point2D> newVertices = new ArrayList<Point2D>();
    private final Point2D newVertex0 = new Point2D();
    private final Point2D newVertex1 = new Point2D();
-   private final ArrayList<Line2d> rays = new ArrayList<Line2d>();
+   private final ArrayList<Line2D> rays = new ArrayList<Line2D>();
 
-   private final Line2d edgeOnQ = new Line2d();
+   private final Line2D edgeOnQ = new Line2D();
    private final Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D();
-   private final Line2d LinePerpendicularToEdgeOnQ = new Line2d();
+   private final Line2D LinePerpendicularToEdgeOnQ = new Line2D();
    private final Point2D referencePoint = new Point2D();
    private final Vector2D normalizedVector = new Vector2D();
    
-   private final ArrayList<Line2d> edgePool = new ArrayList<Line2d>();
+   private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>();
    
    private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
@@ -28,17 +28,17 @@ public class ConvexPolygonShrinker
    {
       for (int i=0; i<8; i++)
       {
-         edgePool.add(new Line2d());
+         edgePool.add(new Line2D());
       }
    }
    
-   private Line2d getARay(int index)
+   private Line2D getARay(int index)
    {
       if (edgePool.size() <= index)
       {
          for (int i=0; i<index - edgePool.size() + 1; i++)
          {
-            edgePool.add(new Line2d());
+            edgePool.add(new Line2D());
          }
       }
       
@@ -109,7 +109,7 @@ public class ConvexPolygonShrinker
          edgeOnQ.getDirection(normalizedVector);
          
          
-         Line2d newEdge = getARay(rays.size());
+         Line2D newEdge = getARay(rays.size());
          newEdge.set(referencePoint, normalizedVector);
          rays.add(newEdge);
 

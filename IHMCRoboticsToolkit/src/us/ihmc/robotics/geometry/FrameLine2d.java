@@ -16,10 +16,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /**
  * @author Twan Koolen
  */
-public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
+public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
 {
    private RigidBodyTransform temporaryTransformToDesiredFrame;
-   protected final Line2d line;
+   protected final Line2D line;
 
    public FrameLine2d()
    {
@@ -28,10 +28,10 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
 
    public FrameLine2d(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, new Line2d(new Point2D(), new Vector2D(1.0, 0.0)));
+      this(referenceFrame, new Line2D(new Point2D(), new Vector2D(1.0, 0.0)));
    }
 
-   public FrameLine2d(ReferenceFrame referenceFrame, Line2d line2d)
+   public FrameLine2d(ReferenceFrame referenceFrame, Line2D line2d)
    {
       super(referenceFrame, line2d);
       this.line = getGeometryObject();
@@ -39,29 +39,29 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
 
    public FrameLine2d(ReferenceFrame referenceFrame, Point2DReadOnly point2d, Vector2DReadOnly vector2d)
    {
-      this(referenceFrame, new Line2d(point2d, vector2d));
+      this(referenceFrame, new Line2D(point2d, vector2d));
    }
 
    public FrameLine2d(ReferenceFrame referenceFrame, Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
-      this(referenceFrame, new Line2d(firstPointOnLine, secondPointOnLine));
+      this(referenceFrame, new Line2D(firstPointOnLine, secondPointOnLine));
    }
 
    public FrameLine2d(FramePoint2d framePoint2d, FrameVector2d frameVector2d)
    {
-      this(framePoint2d.getReferenceFrame(), new Line2d(framePoint2d.getPointCopy(), frameVector2d.getVectorCopy()));
+      this(framePoint2d.getReferenceFrame(), new Line2D(framePoint2d.getPointCopy(), frameVector2d.getVectorCopy()));
       framePoint2d.checkReferenceFrameMatch(frameVector2d);
    }
 
    public FrameLine2d(FramePoint2d firstPointOnLine, FramePoint2d secondPointOnLine)
    {
-      this(firstPointOnLine.getReferenceFrame(), new Line2d(firstPointOnLine.getPointCopy(), secondPointOnLine.getPointCopy()));
+      this(firstPointOnLine.getReferenceFrame(), new Line2D(firstPointOnLine.getPointCopy(), secondPointOnLine.getPointCopy()));
       firstPointOnLine.checkReferenceFrameMatch(secondPointOnLine);
    }
 
    public FrameLine2d(FrameLine2d frameLine2d)
    {
-      this(frameLine2d.getReferenceFrame(), new Line2d(frameLine2d.line));
+      this(frameLine2d.getReferenceFrame(), new Line2D(frameLine2d.line));
    }
 
    public FrameLine2d(FrameLineSegment2d frameLineSegment2d)
@@ -69,14 +69,14 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
       this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.endpoints[0], frameLineSegment2d.lineSegment.endpoints[1]);
    }
 
-   public Line2d getLine2d()
+   public Line2D getLine2d()
    {
       return line;
    }
 
-   public Line2d getLine2dCopy()
+   public Line2D getLine2dCopy()
    {
-      return new Line2d(line);
+      return new Line2D(line);
    }
 
    public void getPoint2d(Point2DBasics origin)
@@ -233,7 +233,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
    {
       this.checkReferenceFrameMatch(secondLine);
       ReferenceFrame referenceFrame = this.referenceFrame;
-      Line2d bisectorLine2d = this.line.interiorBisector(secondLine.line);
+      Line2D bisectorLine2d = this.line.interiorBisector(secondLine.line);
 
       if (bisectorLine2d == null)
       {
@@ -254,7 +254,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2d>
    {
       line.checkReferenceFrameMatch(point);
       ReferenceFrame referenceFrame = line.referenceFrame;
-      Line2d perpLine2d = line.line.perpendicularLineThroughPoint(point.getPointCopy());
+      Line2D perpLine2d = line.line.perpendicularLineThroughPoint(point.getPointCopy());
 
       return new FrameLine2d(referenceFrame, perpLine2d);
    }

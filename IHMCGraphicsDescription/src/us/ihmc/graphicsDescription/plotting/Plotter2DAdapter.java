@@ -32,7 +32,7 @@ import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
@@ -230,7 +230,7 @@ public class Plotter2DAdapter
       drawLineSegment(pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()), pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()));
    }
 
-   public void drawLine(PlotterReferenceFrame frame, Line2d line)
+   public void drawLine(PlotterReferenceFrame frame, Line2D line)
    {
       PlotterPoint2d start = pointBin[0];
       PlotterVector2d direction = vectorBin[0];

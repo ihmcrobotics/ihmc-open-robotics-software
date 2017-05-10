@@ -28,7 +28,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -639,7 +639,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double xSNext = Double.NaN;
       if (nextContactFramePosition != null)
       {
-         Line2d line2d = new Line2d(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
+         Line2D line2d = new Line2D(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
          Point2D nextPoint2d = new Point2D(nextContactFramePosition.getX(), nextContactFramePosition.getY());
          line2d.orthogonalProjectionCopy(nextPoint2d);
          xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();

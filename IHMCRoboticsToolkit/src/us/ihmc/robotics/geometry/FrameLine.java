@@ -107,7 +107,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       lineToPack.set(getReferenceFrame(), line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
    }
    
-   public void projectOntoXYPlane(Line2d lineToPack)
+   public void projectOntoXYPlane(Line2D lineToPack)
    {
       lineToPack.set(line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
    }

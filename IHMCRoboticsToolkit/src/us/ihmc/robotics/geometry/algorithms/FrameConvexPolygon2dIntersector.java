@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -318,20 +318,20 @@ public class FrameConvexPolygon2dIntersector
          return new FrameLine();
       }
    };
-   private static final ThreadLocal<Line2d> tempIntersectLine2dOne = new ThreadLocal<Line2d>()
+   private static final ThreadLocal<Line2D> tempIntersectLine2dOne = new ThreadLocal<Line2D>()
    {
       @Override
-      public Line2d initialValue()
+      public Line2D initialValue()
       {
-         return new Line2d();
+         return new Line2D();
       }
    };
-   private static final ThreadLocal<Line2d> tempIntersectLine2dTwo = new ThreadLocal<Line2d>()
+   private static final ThreadLocal<Line2D> tempIntersectLine2dTwo = new ThreadLocal<Line2D>()
    {
       @Override
-      public Line2d initialValue()
+      public Line2D initialValue()
       {
-         return new Line2d();
+         return new Line2D();
       }
    };
    private static final ThreadLocal<Point2D> tempLine2DIntersection = new ThreadLocal<Point2D>()
