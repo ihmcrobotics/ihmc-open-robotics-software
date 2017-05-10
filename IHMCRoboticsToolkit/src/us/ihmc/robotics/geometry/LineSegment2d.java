@@ -56,7 +56,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       endpoint1.set(endpoints[1]);
    }
    
-   public Point2D getFirstEndpoint()
+   public Point2DReadOnly getFirstEndpoint()
    {
       return endpoints[0];
    }
@@ -99,6 +99,50 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    public double getSecondEndpointY()
    {
       return endpoints[1].getY();
+   }
+
+   /**
+    * Changes the first endpoint of this line segment.
+    * 
+    * @param firstEndpointX x-coordinate of the new first endpoint.
+    * @param firstEndpointY y-coordinate of the new first endpoint.
+    * @param firstEndpointZ z-coordinate of the new first endpoint.
+    */
+   public void setFirstEndpoint(double firstEndpointX, double firstEndpointY)
+   {
+      endpoints[0].set(firstEndpointX, firstEndpointY);
+   }
+
+   /**
+    * Changes the first endpoint of this line segment.
+    * 
+    * @param firstEndpoint new endpoint of this line segment. Not modified
+    */
+   public void setFirstEndpoint(Point2DReadOnly firstEndpoint)
+   {
+      this.endpoints[0].set(firstEndpoint);
+   }
+
+   /**
+    * Changes the second endpoint of this line segment.
+    * 
+    * @param secondEndpointX x-coordinate of the new second endpoint.
+    * @param secondEndpointY y-coordinate of the new second endpoint.
+    * @param secondEndpointZ z-coordinate of the new second endpoint.
+    */
+   public void setSecondEndpoint(double secondEndpointX, double secondEndpointY)
+   {
+      endpoints[1].set(secondEndpointX, secondEndpointY);
+   }
+
+   /**
+    * Changes the second endpoint of this line segment.
+    * 
+    * @param secondEndpoint new second endpoint of this line segment. Not modified.
+    */
+   public void setSecondEndpoint(Point2DReadOnly secondEndpoint)
+   {
+      this.endpoints[1].set(secondEndpoint);
    }
 
    public void set(Point2DReadOnly endpoint0, Point2DReadOnly endpoint1)

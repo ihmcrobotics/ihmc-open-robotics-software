@@ -2,8 +2,10 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
@@ -239,10 +241,11 @@ public class LineSegment1d
     */
    public LineSegment3D toLineSegment3d(Point3DReadOnly zero3d, Vector3DReadOnly direction3d)
    {
-      LineSegment3D lineSegment3d = new LineSegment3D();
-      lineSegment3d.getFirstEndpoint().scaleAdd(endpoint1, direction3d, zero3d);
-      lineSegment3d.getSecondEndpoint().scaleAdd(endpoint2, direction3d, zero3d);
-      return lineSegment3d;
+      Point3D firstEndpoint = new Point3D();
+      Point3D secondEndpoint = new Point3D();
+      firstEndpoint.scaleAdd(endpoint1, direction3d, zero3d);
+      secondEndpoint.scaleAdd(endpoint2, direction3d, zero3d);
+      return new LineSegment3D(firstEndpoint, secondEndpoint);
    }
 
    /**
@@ -255,10 +258,11 @@ public class LineSegment1d
     */
    public LineSegment2d toLineSegment2d(Point2DReadOnly zero2d, Vector2DReadOnly direction2d)
    {
-      LineSegment2d lineSegment2d = new LineSegment2d();
-      lineSegment2d.getFirstEndpoint().scaleAdd(endpoint1, direction2d, zero2d);
-      lineSegment2d.getSecondEndpoint().scaleAdd(endpoint2, direction2d, zero2d);
-      return lineSegment2d;
+      Point2D firstEndpoint = new Point2D();
+      Point2D secondEndpoint = new Point2D();
+      firstEndpoint.scaleAdd(endpoint1, direction2d, zero2d);
+      secondEndpoint.scaleAdd(endpoint2, direction2d, zero2d);
+      return new LineSegment2d(firstEndpoint, secondEndpoint);
    }
 
    @Override

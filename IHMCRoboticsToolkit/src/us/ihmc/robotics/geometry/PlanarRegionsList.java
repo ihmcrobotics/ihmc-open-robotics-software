@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PlanarRegionsList
@@ -99,7 +100,7 @@ public class PlanarRegionsList
        double xMax = boundingBox.getMaxX();
        double yMax = boundingBox.getMaxY();
 
-       Point2D firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
+       Point2DReadOnly firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
        Point2D secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
 
        if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;

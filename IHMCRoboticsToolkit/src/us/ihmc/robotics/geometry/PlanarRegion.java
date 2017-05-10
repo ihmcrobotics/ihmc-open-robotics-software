@@ -341,7 +341,7 @@ public class PlanarRegion
    {
       Point2D[] snappedEndpoints = new Point2D[2];
 
-      Point2D originalVertex = lineSegmentInWorld.getFirstEndpoint();
+      Point2DReadOnly originalVertex = lineSegmentInWorld.getFirstEndpoint();
       Point3D snappedVertex3d = new Point3D();
 
       // Find the vertex 3d that is snapped to the plane following z-world.
