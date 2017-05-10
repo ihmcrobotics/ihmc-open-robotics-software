@@ -61,7 +61,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return endpoints[0];
    }
    
-   public Point2D getSecondEndpoint()
+   public Point2DReadOnly getSecondEndpoint()
    {
       return endpoints[1];
    }

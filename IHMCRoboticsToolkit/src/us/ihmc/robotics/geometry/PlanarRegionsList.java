@@ -101,7 +101,7 @@ public class PlanarRegionsList
        double yMax = boundingBox.getMaxY();
 
        Point2DReadOnly firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
-       Point2D secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
+       Point2DReadOnly secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
 
        if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;
        if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax)) return true;

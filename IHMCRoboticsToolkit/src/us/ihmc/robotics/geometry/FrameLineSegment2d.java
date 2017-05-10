@@ -140,7 +140,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
    public void setSecondEndpoint(ReferenceFrame referenceFrame, double secondPointX, double secondPointY)
    {
       this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
-      lineSegment.getSecondEndpoint().set(secondPointX, secondPointY);
+      lineSegment.setSecondEndpoint(secondPointX, secondPointY);
    }
 
    public FramePoint2d getFirstEndpointCopy()
