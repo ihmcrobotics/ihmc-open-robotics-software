@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.exceptions.NotAMatrix2DException;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -9,7 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -41,6 +42,7 @@ public class Line2d implements GeometryObject<Line2d>
     * Creates a new line 2D and initializes it to {@code other}.
     * 
     * @param other the other line used to initialize this line. Not modified.
+    * @throws RuntimeException if the other line has not been initialized yet.
     */
    public Line2d(Line2d other)
    {
@@ -197,6 +199,7 @@ public class Line2d implements GeometryObject<Line2d>
     * Sets this line to be the same as the given line.
     * 
     * @param other the other line to copy. Not modified.
+    * @throws RuntimeException if the other line has not been initialized yet.
     */
    @Override
    public void set(Line2d other)
@@ -509,9 +512,7 @@ public class Line2d implements GeometryObject<Line2d>
    public double getXIntercept()
    {
       checkHasBeenInitialized();
-
       double parameterAtIntercept = -point.getY() / direction.getY();
-
       return parameterAtIntercept * direction.getX() + point.getX();
    }
 
@@ -529,18 +530,59 @@ public class Line2d implements GeometryObject<Line2d>
       return parameterAtIntercept * direction.getY() + point.getY();
    }
 
+   /**
+    * Tests if the given is located on this line.
+    * <p>
+    * More precisely, the point is assumed to be on this line if it is located at a distance less
+    * than {@code 1.0e-8} from it.
+    * </p>
+    * 
+    * @param point the coordinates of the query. Not modified.
+    * @return {@code true} if the point is located on this line, {@code false} otherwise.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public boolean isPointOnLine(Point2DReadOnly point)
+   {
+      return isPointOnLine(point, 1.0e-8);
+   }
+
+   /**
+    * Tests if the given is located on this line.
+    * <p>
+    * More precisely, the point is assumed to be on this line if it is located at a distance less
+    * than {@code epsilon} from it.
+    * </p>
+    * 
+    * @param point the coordinates of the query. Not modified.
+    * @param epsilon the tolerance used for this test.
+    * @return {@code true} if the point is located on this line, {@code false} otherwise.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public boolean isPointOnLine(Point2DReadOnly point, double epsilon)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, direction) < epsilon;
    }
 
+   /**
+    * Flips this line's direction.
+    * 
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void negateDirection()
    {
       checkHasBeenInitialized();
       direction.negate();
    }
 
+   /**
+    * Copies this line and then flips the direction of the copy before returning it.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Line2d negateDirectionCopy()
    {
       checkHasBeenInitialized();
@@ -550,28 +592,69 @@ public class Line2d implements GeometryObject<Line2d>
       return ret;
    }
 
-   public void rotate(double radians)
+   /**
+    * Applies a counter-clockwise rotation to the direction of this line about the z-axis by
+    * {@code angleInRadians}.
+    * <p>
+    * Note that the point of this line remains unchanged.
+    * </p>
+    * 
+    * @param angleInRadians the angle to rotate this line's direction in radians.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void rotate(double angleInRadians)
    {
       checkHasBeenInitialized();
       double vXOld = direction.getX();
       double vYOld = direction.getY();
 
-      double vXNew = Math.cos(radians) * vXOld - Math.sin(radians) * vYOld;
-      double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * vYOld;
+      double vXNew = Math.cos(angleInRadians) * vXOld - Math.sin(angleInRadians) * vYOld;
+      double vYNew = Math.sin(angleInRadians) * vXOld + Math.cos(angleInRadians) * vYOld;
 
       direction.set(vXNew, vYNew);
    }
 
+   /**
+    * Translates this line by the given (x, y).
+    * <p>
+    * Note that this line's direction remains unchanged.
+    * </p>
+    * 
+    * @param x the distance to translate this line along the x-axis.
+    * @param y the distance to translate this line along the y-axis.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void translate(double x, double y)
    {
+      checkHasBeenInitialized();
       point.add(x, y);
    }
 
+   /**
+    * Translates this line by {@code distanceToShift} along the vector perpendicular to this line's
+    * direction and pointing to the left.
+    * <p>
+    * Note that this line's direction remains unchanged.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void shiftToLeft(double distanceToShift)
    {
       shift(true, distanceToShift);
    }
 
+   /**
+    * Translates this line by {@code distanceToShift} along the vector perpendicular to this line's
+    * direction and pointing to the right.
+    * <p>
+    * Note that this line's direction remains unchanged.
+    * </p>
+    * 
+    * @param distanceToShift the distance to shift this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void shiftToRight(double distanceToShift)
    {
       shift(false, distanceToShift);
@@ -595,105 +678,406 @@ public class Line2d implements GeometryObject<Line2d>
       vectorXPerpToRight = distanceToShift * vectorXPerpToRight;
       vectorYPerpToRight = distanceToShift * vectorYPerpToRight;
 
-      point.setX(point.getX() + vectorXPerpToRight);
-      point.setY(point.getY() + vectorYPerpToRight);
+      point.addX(vectorXPerpToRight);
+      point.addY(vectorYPerpToRight);
    }
 
-   public Line2d interiorBisector(Line2d secondLine)
+   /**
+    * Calculates the interior bisector defined by this line and the given {@code secondLine}.
+    * <p>
+    * The interior bisector is defined as follows:
+    * <ul>
+    * <li>It goes through the intersection between this line and {@code secondLine}.
+    * <li>Its direction point toward this line direction and the {@code secondLine}'s direction such
+    * that: {@code interiorBisector.direction.dot(this.direction) > 0.0} and
+    * {@code interiorBisector.direction.dot(secondLine.direction) > 0.0}.
+    * <li>Finally the angle from {@code this} to the interior bisector is half the angle from
+    * {@code this} to {@code secondLine}.
+    * </ul>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the two lines are parallel but not collinear, this method fails, returns {@code false},
+    * and {@code interiorBisectorToPack} remains unchanged.
+    * <li>If the two lines are collinear, {@code interiorBisectorToPack} is set to {@code this}.
+    * </ul>
+    * </p>
+    * 
+    * @param secondLine the second line needed to calculate the interior bisector. Not modified.
+    * @param interiorBisectorToPack the line in which the interior bisector point and direction are
+    *           stored. Modified.
+    * @return {@code true} if this method succeeded, {@code false} otherwise.
+    * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
+    *            yet.
+    */
+   public boolean interiorBisector(Line2d secondLine, Line2d interiorBisectorToPack)
    {
       checkHasBeenInitialized();
-      Point2D pointOnLine = intersectionWith(secondLine);
-      if (pointOnLine == null)
-      {
-         double distanceBetweenLines = secondLine.distance(point);
-         double epsilon = 1E-7;
+      secondLine.checkHasBeenInitialized();
 
-         boolean sameLines = distanceBetweenLines < epsilon;
-         if (sameLines)
-         {
-            return new Line2d(this);
-         }
-         else
-         {
-            return null;
-         }
+      double t = EuclidGeometryTools.percentageOfIntersectionBetweenTwoLine2Ds(point, direction, secondLine.point, secondLine.direction);
+
+      if (Double.isNaN(t))
+      { // Lines are parallel but not collinear
+         return false;
       }
-
-      Vector2D directionVector = new Vector2D(direction);
-      directionVector.add(secondLine.direction);
-
-      return new Line2d(pointOnLine, directionVector);
-
+      else if (t == 0.0 && EuclidGeometryTools.areVector2DsParallel(direction, secondLine.direction, 1.0e-7))
+      { // Lines are collinear
+         interiorBisectorToPack.set(this);
+         return true;
+      }
+      else
+      { // Lines are not parallel
+         double pointOnBisectorX = t * direction.getX() + point.getX();
+         double pointOnBisectorY = t * direction.getY() + point.getY();
+         double bisectorDirectionX = direction.getX() + secondLine.direction.getX();
+         double bisectorDirectionY = direction.getY() + secondLine.direction.getY();
+         interiorBisectorToPack.set(pointOnBisectorX, pointOnBisectorY, bisectorDirectionX, bisectorDirectionY);
+         return true;
+      }
    }
 
+   /**
+    * Calculates the interior bisector defined by this line and the given {@code secondLine}.
+    * <p>
+    * The interior bisector is defined as follows:
+    * <ul>
+    * <li>It goes through the intersection between this line and {@code secondLine}.
+    * <li>Its direction point toward this line direction and the {@code secondLine}'s direction such
+    * that: {@code interiorBisector.direction.dot(this.direction) > 0.0} and
+    * {@code interiorBisector.direction.dot(secondLine.direction) > 0.0}.
+    * <li>Finally the angle from {@code this} to the interior bisector is half the angle from
+    * {@code this} to {@code secondLine}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the two lines are parallel but not collinear, this method fails, returns {@code null}.
+    * <li>If the two lines are collinear, this method returns a copy of {@code this}.
+    * </ul>
+    * </p>
+    * 
+    * @param secondLine the second line needed to calculate the interior bisector. Not modified.
+    * @return the interior bisector if this method succeeded, {@code null} otherwise.
+    * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
+    *            yet.
+    */
+   public Line2d interiorBisector(Line2d secondLine)
+   {
+      Line2d interiorBisector = new Line2d();
+      boolean success = interiorBisector(secondLine, interiorBisector);
+      return success ? interiorBisector : null;
+   }
+
+   /**
+    * Packs into {@code vectorToPack} the vector that is perpendicular to this line and pointing to
+    * the left.
+    * 
+    * @param vectorToPack the perpendicular vector to this line. Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public void perpendicularVector(Vector2DBasics vectorToPack)
    {
       checkHasBeenInitialized();
-      vectorToPack.set(direction.getY(), -direction.getX());
+      EuclidGeometryTools.perpendicularVector2D(direction, vectorToPack);
    }
 
+   /**
+    * Returns the vector that is perpendicular to this line and pointing to the left.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @return the perpendicular vector to this line.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Vector2D perpendicularVector()
    {
-      Vector2D vectorToReturn = new Vector2D();
-      perpendicularVector(vectorToReturn);
-      return vectorToReturn;
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.perpendicularVector2D(direction);
    }
 
+   /**
+    * Modifies {@code perpendicularLineToPack} such that it is perpendicular to this line, with its
+    * direction pointing to the left of this line, while going through the given point.
+    * 
+    * @param point the point the line has to go through. Not modified.
+    * @param perpendicularLineToPack the line perpendicular to {@code this} and going through
+    *           {@code point}. Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void perpendicularLineThroughPoint(Point2DReadOnly point, Line2d perpendicularLineToPack)
+   {
+      checkHasBeenInitialized();
+      perpendicularLineToPack.set(point.getX(), point.getY(), -direction.getY(), direction.getX());
+   }
+
+   /**
+    * Calculates and returns a line that is perpendicular to this line, with its direction pointing
+    * to the left of this line, while going through the given point.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param point the point the line has to go through. Not modified.
+    * @return the line perpendicular to {@code this} and going through {@code point}.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Line2d perpendicularLineThroughPoint(Point2DReadOnly point)
    {
       checkHasBeenInitialized();
       return new Line2d(point, perpendicularVector());
    }
 
+   /**
+    * Calculates the coordinates of the intersection between this line and the given line segment
+    * and stores the result in {@code intersectionToPack}.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When this line and the line segment are parallel but not collinear, they do not intersect.
+    * <li>When this line and the line segment are collinear, they are assumed to intersect at
+    * {@code lineSegmentStart}.
+    * <li>When this line intersects the line segment at one of its endpoints, this method returns
+    * {@code true} and the endpoint is the intersection.
+    * </ul>
+    * </p>
+    * 
+    * @param lineSegment the line segment that may intersect this line. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Can be {@code null}.
+    *           Modified.
+    * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public boolean intersectionWith(LineSegment2d lineSegment, Point2DBasics intersectionToPack)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint(),
+                                                                           intersectionToPack);
+   }
+
+   /**
+    * Calculates the coordinates of the intersection between this line and the given line segment
+    * and returns the result.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When this line and the line segment are parallel but not collinear, they do not intersect.
+    * <li>When this line and the line segment are collinear, they are assumed to intersect at
+    * {@code lineSegmentStart}.
+    * <li>When this line intersects the line segment at one of its endpoints, this method returns a
+    * copy of the endpoint where the intersection is happening.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param lineSegment the line segment that may intersect this line. Not modified.
+    * @return the coordinates of the intersection if the line intersects the line segment,
+    *         {@code null} otherwise.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public Point2D intersectionWith(LineSegment2d lineSegment)
    {
       checkHasBeenInitialized();
-      return lineSegment.intersectionWith(this);
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint());
    }
 
-   public boolean areLinesPerpendicular(Line2d line)
-   {
-      checkHasBeenInitialized();
-      // Dot product of two vectors is zero if the vectors are perpendicular
-      return direction.dot(line.getDirection()) < 1e-7;
-   }
-
-   public Point2D intersectionWith(Line2d secondLine)
-   {
-      checkHasBeenInitialized();
-      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.point, secondLine.direction);
-   }
-
+   /**
+    * Calculates the coordinates of the intersection between this line and the given line and stores
+    * the result in {@code intersectionToPack}.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the two lines are parallel but not collinear, the two lines do not intersect and this
+    * method returns {@code null}.
+    * <li>if the two lines are collinear, the two lines are assumed to be intersecting at
+    * {@code this.point}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param secondLine the other line that may intersect this line. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Can be {@code null}.
+    *           Modified.
+    * @return {@code true} if the two lines intersects, {@code false} otherwise.
+    * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
+    *            yet.
+    */
    public boolean intersectionWith(Line2d secondLine, Point2DBasics intersectionToPack)
    {
       checkHasBeenInitialized();
-      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.point, secondLine.direction, intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.getPoint(), secondLine.getDirection(), intersectionToPack);
    }
 
+   /**
+    * Calculates the coordinates of the intersection between this line and the given line and
+    * returns the result.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the two lines are parallel but not collinear, the two lines do not intersect and this
+    * method returns {@code null}.
+    * <li>if the two lines are collinear, the two lines are assumed to be intersecting at
+    * {@code this.point}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param secondLine the other line that may intersect this line. Not modified.
+    * @return the coordinates of the intersection if the two lines intersects, {@code null}
+    *         otherwise.
+    * @throws RuntimeException if either this line or {@code secondLine} has not been initialized
+    *            yet.
+    */
+   public Point2D intersectionWith(Line2d secondLine)
+   {
+      checkHasBeenInitialized();
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, direction, secondLine.getPoint(), secondLine.getDirection());
+   }
+
+   /**
+    * Tests if this line and the other line are perpendicular.
+    * 
+    * @param other the query. Not modified.
+    * @return {@code true} if the two lines are perpendicular, {@code false} otherwise.
+    * @throws RuntimeException if either this line or {@code other} has not been initialized yet.
+    */
+   public boolean areLinesPerpendicular(Line2d other)
+   {
+      checkHasBeenInitialized();
+      // Dot product of two vectors is zero if the vectors are perpendicular
+      return direction.dot(other.getDirection()) < 1e-7;
+   }
+
+   /**
+    * Computes the coordinates of the possible intersection(s) between this line and the given
+    * convex polygon 2D.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the polygon has no vertices, this method behaves as if there is no intersections.
+    * <li>If no intersections exist, this method returns {@code 0} and the two intersection-to-pack
+    * arguments remain unmodified.
+    * <li>If there is only one intersection, this method returns {@code 1} and the coordinates of
+    * the only intersection are stored in {@code firstIntersectionToPack}.
+    * {@code secondIntersectionToPack} remains unmodified.
+    * </ul>
+    * </p>
+    * 
+    * @param convexPolygon the convex polygon this line may intersect. Not modified.
+    * @param firstIntersectionToPack point in which the coordinates of the first intersection. Can
+    *           be {@code null}. Modified.
+    * @param secondIntersectionToPack point in which the coordinates of the second intersection. Can
+    *           be {@code null}. Modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
+    */
+   public int intersectionWith(ConvexPolygon2d convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   {
+      checkHasBeenInitialized();
+      return convexPolygon.intersectionWith(this, firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   /**
+    * Computes the coordinates of the possible intersection(s) between this line and the given
+    * convex polygon 2D.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the polygon has no vertices, this method behaves as if there is no intersections and
+    * returns {@code null}.
+    * <li>If no intersections exist, this method returns {@code null}.
+    * </ul>
+    * </p>
+    * 
+    * @param convexPolygon the convex polygon this line may intersect. Not modified.
+    * @return the intersections between between the line and the polygon or {@code null} if the
+    *         method failed or if there is no intersections.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
+    */
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
    {
       checkHasBeenInitialized();
       return convexPolygon.intersectionWith(this);
    }
 
-   public double distanceSquared(Point2DReadOnly point)
+   /**
+    * Transforms this line using the given homogeneous transformation matrix.
+    * 
+    * @param transform the transform to apply on this line's point and vector. Not modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY-plane.
+    */
+   @Override
+   public void applyTransform(Transform transform)
    {
       checkHasBeenInitialized();
-      double distance = distance(point);
-
-      return distance * distance;
+      point.applyTransform(transform);
+      direction.applyTransform(transform);
    }
 
-   public double distance(LineSegment2d lineSegment)
+   /**
+    * Copies this line, transforms the copy using the given homogeneous transformation matrix, and
+    * returns the result.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param transform the transform to apply on this line's copy. Not modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY-plane.
+    */
+   public Line2d applyTransformCopy(Transform transform)
    {
       checkHasBeenInitialized();
-      throw new RuntimeException("Not yet implemented");
+      Line2d copy = new Line2d(this);
+      copy.applyTransform(transform);
+      return copy;
    }
 
-   public double distance(ConvexPolygon2d convexPolygon)
+   /**
+    * Transforms this line using the given homogeneous transformation matrix and project the result
+    * onto the XY-plane.
+    * 
+    * @param transform the transform to apply on this line's point and vector. Not modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       checkHasBeenInitialized();
-      throw new RuntimeException("Not yet implemented");
+      point.applyTransform(transform, false);
+      direction.applyTransform(transform, false);
+   }
+
+   /**
+    * Copies this line, transforms the copy using the given homogeneous transformation matrix and
+    * project the result onto the XY-plane, and returns the result.
+    * 
+    * @param transform the transform to apply on this line's point and vector. Not modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
+   public Line2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
+   {
+      Line2d copy = new Line2d(this);
+      copy.applyTransformAndProjectToXYPlane(transform);
+      return copy;
    }
 
    @Override
@@ -704,51 +1088,6 @@ public class Line2d implements GeometryObject<Line2d>
       ret = ret + point + ", " + direction;
 
       return ret;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      checkHasBeenInitialized();
-      point.applyTransform(transform);
-      direction.applyTransform(transform);
-   }
-
-   public void applyTransformAndProjectToXYPlane(Transform transform)
-   {
-      checkHasBeenInitialized();
-      point.applyTransform(transform, false);
-      direction.applyTransform(transform, false);
-   }
-
-   public Line2d applyTransformCopy(Transform transform)
-   {
-      Line2d copy = new Line2d(this);
-      copy.applyTransform(transform);
-      return copy;
-   }
-
-   public Line2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
-   {
-      Line2d copy = new Line2d(this);
-      copy.applyTransformAndProjectToXYPlane(transform);
-      return copy;
-   }
-
-   public boolean isPointOnLine(Point2DReadOnly point)
-   {
-      checkHasBeenInitialized();
-      double epsilon = 1e-8;
-      if (Math.abs(direction.getX()) < 10E-10)
-         return MathTools.epsilonEquals(point.getX(), this.point.getX(), epsilon);
-
-      // y = A*x + b with point = (x,y)
-      double A = direction.getY() / direction.getX();
-      double b = this.point.getY() - A * this.point.getX();
-
-      double value = point.getY() - A * point.getX() - b;
-
-      return epsilon > Math.abs(value);
    }
 
    public boolean isPointOnLeftSideOfLine(Point2DReadOnly point)

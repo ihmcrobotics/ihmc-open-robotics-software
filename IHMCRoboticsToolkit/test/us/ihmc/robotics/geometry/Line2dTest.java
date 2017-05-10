@@ -1014,6 +1014,7 @@ public class Line2dTest
          Vector2D normalizedVector = new Vector2D();
          line2d.getDirection(normalizedVector);
          Vector2D perpendicularVector = line2d.perpendicularVector();
+         perpendicularVector.negate();
          Point2D checkPoint = new Point2D();
 
          double longitude = randomDouble(random);
@@ -1046,6 +1047,7 @@ public class Line2dTest
          Vector2D normalizedVector = new Vector2D();
          line2d.getDirection(normalizedVector);
          Vector2D perpendicularVector = line2d.perpendicularVector();
+         perpendicularVector.negate();
          Point2D checkPoint = new Point2D();
 
          double longitude = randomDouble(random);
