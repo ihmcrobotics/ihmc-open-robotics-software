@@ -120,7 +120,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public void set(SpatialAccelerationCommand other)
    {
-      setWeights(other.weightMatrix);
+      setWeightMatrix(other.weightMatrix);
 
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
@@ -534,7 +534,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
-   public void setWeights(WeightMatrix6D weightMartrix)
+   public void setWeightMatrix(WeightMatrix6D weightMartrix)
    {
       this.weightMatrix.set(weightMartrix);
    }
