@@ -27,7 +27,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class Line2dTest
+public class Line2DTest
 {
    private static final int ITERATIONS = 1000;
    private static final double maxRandomValue = 1.0e5;
@@ -1635,7 +1635,7 @@ public class Line2dTest
 	
 	public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(Line2D.class, Line2dTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(Line2D.class, Line2DTest.class);
    }
 
 }
