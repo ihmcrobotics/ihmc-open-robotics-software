@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -22,6 +24,8 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
+   private static final boolean USE_TIMING_OPTIMIZATION = false;
+
    private final ICPOptimizationController icpOptimizationController;
    private final DoubleYoVariable yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -60,8 +64,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
 
-      icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-            bipedSupportPolygons, contactableFeet, totalMass, gravityZ, controlDT, registry, yoGraphicsListRegistry);
+      if (USE_TIMING_OPTIMIZATION)
+      {
+         icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      }
    }
 
    @Override

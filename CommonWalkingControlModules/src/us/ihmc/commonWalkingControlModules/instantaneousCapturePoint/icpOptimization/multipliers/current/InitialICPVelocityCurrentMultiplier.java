@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -19,9 +17,9 @@ import java.util.List;
 public class InitialICPVelocityCurrentMultiplier
 {
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
-   private final NewCubicMatrix cubicMatrix;
+   private final EfficientCubicMatrix cubicMatrix;
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
-   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
+   private final EfficientCubicDerivativeMatrix cubicDerivativeMatrix;
 
    /** whether or not the cubic matrix needs to be updated inside this class or is updated outside it. */
    private final boolean givenCubicMatrix;
@@ -44,7 +42,7 @@ public class InitialICPVelocityCurrentMultiplier
       this(null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPVelocityCurrentMultiplier(NewCubicMatrix cubicMatrix, NewCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix,
+   public InitialICPVelocityCurrentMultiplier(EfficientCubicMatrix cubicMatrix, EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix,
          YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
@@ -52,7 +50,7 @@ public class InitialICPVelocityCurrentMultiplier
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new NewCubicMatrix();
+         this.cubicMatrix = new EfficientCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -63,7 +61,7 @@ public class InitialICPVelocityCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new EfficientCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
