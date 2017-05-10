@@ -11,10 +11,7 @@ public class SolarPanel
    private double sizeY;
    private double sizeZ = 0.05;
    private Pose centerPose;
-      
-   public static double defaultSizeX = 0.6;
-   public static double defaultSizeY = 0.6;
-      
+            
    public SolarPanel(Pose pose, double sizeX, double sizeY)
    {
       this.sizeX = sizeX;
