@@ -182,7 +182,7 @@ public class Line2D implements GeometryObject<Line2D>
     * Redefines this line such that it goes through the two given points.
     * 
     * @param twoPointsOnLine a two-element array containing in order the first point and second
-    *           point this line line is to go through. Not modified.
+    *           point this line is to go through. Not modified.
     * @throws RuntimeException if the new direction is unreasonably small.
     * @throws RuntimeException if the two given points are exactly equal.
     * @throws IllegalArgumentException if the given array has a length different than 2.
