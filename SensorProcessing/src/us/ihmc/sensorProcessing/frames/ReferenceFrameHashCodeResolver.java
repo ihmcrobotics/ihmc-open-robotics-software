@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.frames;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotModels.FullRobotModel;
@@ -29,7 +30,7 @@ public class ReferenceFrameHashCodeResolver
 {
    
    private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
-
+   
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
@@ -70,6 +71,22 @@ public class ReferenceFrameHashCodeResolver
                checkAndAddReferenceFrame(referenceFrame);
             }
             checkAndAddReferenceFrame(referenceFrame, key);
+         }
+      }
+   }
+   
+   /**
+    * For Testing
+    * @param referenceFrames
+    */
+   public ReferenceFrameHashCodeResolver(List<ReferenceFrame> referenceFrames)
+   {
+      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
+      for(ReferenceFrame referenceFrame : referenceFrames)
+      {
+         if(referenceFrame != null)
+         {
+            nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.getNameBasedHashCode(), referenceFrame);
          }
       }
    }
