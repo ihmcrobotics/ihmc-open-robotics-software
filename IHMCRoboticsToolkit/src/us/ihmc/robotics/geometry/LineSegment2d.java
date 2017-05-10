@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.exceptions.NotAMatrix2DException;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 
 /**
  * Represents a finite-length 2D line segment defined by its two 2D endpoints.
@@ -754,8 +756,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    }
 
    /**
-    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular to this
-    * line segment's direction and pointing to the left.
+    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular
+    * to this line segment's direction and pointing to the left.
     * <p>
     * Note that the length and direction of the copy are the same as this line segment.
     * </p>
@@ -783,8 +785,8 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    }
 
    /**
-    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular to this
-    * line segment's direction and pointing to the right.
+    * Copies this and translates the copy by {@code distanceToShift} along the vector perpendicular
+    * to this line segment's direction and pointing to the right.
     * <p>
     * Note that the length and direction of the copy are the same as this line segment.
     * </p>
@@ -825,21 +827,109 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return shifted;
    }
 
-   public Point2D intersectionWith(LineSegment2d secondLineSegment2d)
+   /**
+    * Computes the intersection between this line segment and the given line segment and returns the
+    * result.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When the two line segments are parallel but not collinear, the two line segments do not
+    * intersect, this method returns {@code null}.
+    * <li>When the two line segments are collinear, if the two line segments do not overlap do not
+    * have at least one common endpoint, this method returns {@code null}.
+    * <li>When the two line segments have a common endpoint, this method returns the common endpoint
+    * as the intersection.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param secondLineSegment the other line segment that may intersect this line segment. Not
+    *           modified.
+    * @return the intersection point if it exists, {@code null} otherwise.
+    */
+   public Point2D intersectionWith(LineSegment2d secondLineSegment)
    {
-      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment2d.firstEndpoint,
-                                                                      secondLineSegment2d.secondEndpoint);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment.firstEndpoint,
+                                                                      secondLineSegment.secondEndpoint);
    }
 
-   public boolean intersectionWith(LineSegment2d secondLineSegment2d, Point2D intersectionToPack)
+   /**
+    * Computes the intersection between this line segment and the given line segment and stores the
+    * result in {@code intersectionToPack}.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When the two line segments are parallel but not collinear, the two line segments do not
+    * intersect.
+    * <li>When the two line segments are collinear, this methods returns {@code true} only if the
+    * two line segments overlap or have at least one common endpoint.
+    * <li>When the two line segments have a common endpoint, this method returns true.
+    * </ul>
+    * </p>
+    *
+    * @param secondLineSegment the other line segment that may intersect this line segment. Not
+    *           modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return {@code true} if the two lines intersects, {@code false} otherwise.
+    */
+   public boolean intersectionWith(LineSegment2d secondLineSegment, Point2D intersectionToPack)
    {
-      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment2d.firstEndpoint,
-                                                                      secondLineSegment2d.secondEndpoint, intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment.firstEndpoint,
+                                                                      secondLineSegment.secondEndpoint, intersectionToPack);
    }
 
-   public Point2D intersectionWith(Line2D line2d)
+   /**
+    * Calculates the coordinates of the intersection between this line segment and the given line
+    * and returns the result.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When this line segment and the line are parallel but not collinear, they do not intersect.
+    * <li>When this line segment and the line are collinear, they are assumed to intersect at
+    * {@code lineSegmentStart}.
+    * <li>When the line intersects this line segment at one of its endpoints, this method returns
+    * {@code true} and the endpoint is the intersection.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param line the line that may intersect this line segment. Not modified.
+    * @return the coordinates of the intersection if the line intersects this line segment,
+    *         {@code null} otherwise.
+    * @return {@code true} if the line intersects this line segment, {@code false} otherwise.
+    */
+   public Point2D intersectionWith(Line2D line)
    {
-      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.getPoint(), line2d.getDirection(), firstEndpoint, secondEndpoint);
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), firstEndpoint, secondEndpoint);
+   }
+
+   /**
+    * Calculates the coordinates of the intersection between this line segment and the given line
+    * and stores the result in {@code intersectionToPack}.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>When this line segment and the line are parallel but not collinear, they do not intersect.
+    * <li>When this line segment and the line are collinear, they are assumed to intersect at
+    * {@code lineSegmentStart}.
+    * <li>When the line intersects this line segment at one of its endpoints, this method returns
+    * {@code true} and the endpoint is the intersection.
+    * </ul>
+    * </p>
+    * 
+    * @param line the line that may intersect this line segment. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Can be {@code null}.
+    *           Modified.
+    * @return {@code true} if the line intersects this line segment, {@code false} otherwise.
+    */
+   public boolean intersectionWith(Line2D line, Point2DBasics intersectionToPack)
+   {
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), firstEndpoint, secondEndpoint,
+                                                                           intersectionToPack);
    }
 
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
@@ -847,25 +937,42 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return convexPolygon.intersectionWith(this);
    }
 
-   public double distance(Line2D line)
+   /**
+    * Computes the coordinates of the possible intersection(s) between this line segment and the
+    * given convex polygon 2D.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>If the polygon has no vertices, this method behaves as if there is no intersections.
+    * <li>If no intersections exist, this method returns {@code 0} and the two intersection-to-pack
+    * arguments remain unmodified.
+    * <li>If there is only one intersection, this method returns {@code 1} and the coordinates of
+    * the only intersection are stored in {@code firstIntersectionToPack}.
+    * {@code secondIntersectionToPack} remains unmodified.
+    * <li>If this line segment is collinear to an edge:
+    * <ul>
+    * <li>The edge entirely contains this line segment: this method finds two intersections which
+    * are the endpoints of this line segment.
+    * <li>This line segment entirely contains the edge: this method finds two intersections which
+    * are the vertices of the edge.
+    * <li>The edge and this line segment partially overlap: this method finds two intersections
+    * which the polygon's vertex that on this line segment and this line segment's endpoint that is
+    * on the polygon's edge.
+    * </ul>
+    * </ul>
+    * </p>
+    * 
+    * @param convexPolygon the convex polygon this line segment may intersect. Not modified.
+    * @param firstIntersectionToPack point in which the coordinates of the first intersection. Can
+    *           be {@code null}. Modified.
+    * @param secondIntersectionToPack point in which the coordinates of the second intersection. Can
+    *           be {@code null}. Modified.
+    * @return the number of intersections between this line segment and the polygon.
+    * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
+    */
+   public int intersectionWith(ConvexPolygon2d convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   public double distance(LineSegment2d lineSegment)
-   {
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   public double distance(ConvexPolygon2d convexPolygon)
-   {
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   @Override
-   public String toString()
-   {
-      return firstEndpoint + "-" + secondEndpoint;
+      return convexPolygon.intersectionWith(this, firstIntersectionToPack, secondIntersectionToPack);
    }
 
    /**
@@ -1007,6 +1114,13 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return secondEndpoint.getY();
    }
 
+   /**
+    * Transforms this line segment using the given homogeneous transformation matrix.
+    * 
+    * @param transform the transform to apply on the endpoints of this line segment. Not modified.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY-plane.
+    */
    @Override
    public void applyTransform(Transform transform)
    {
@@ -1014,12 +1128,29 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       secondEndpoint.applyTransform(transform);
    }
 
+   /**
+    * Transforms this line segment using the given homogeneous transformation matrix and project the
+    * result onto the XY-plane.
+    * 
+    * @param transform the transform to apply on this line segment's endpoints. Not modified.
+    */
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       firstEndpoint.applyTransform(transform, false);
       secondEndpoint.applyTransform(transform, false);
    }
 
+   /**
+    * Copies this line segment, transforms the copy using the given homogeneous transformation
+    * matrix, and returns the result.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param transform the transform to apply on this line segment's copy. Not modified.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY-plane.
+    */
    public LineSegment2d applyTransformCopy(Transform transform)
    {
       LineSegment2d copy = new LineSegment2d(this);
@@ -1027,6 +1158,13 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return copy;
    }
 
+   /**
+    * Copies this line segment, transforms the copy using the given homogeneous transformation
+    * matrix and project the result onto the XY-plane, and returns the result.
+    * 
+    * @param transform the transform to apply on this line segment's copy. Not modified.
+    * @throws RuntimeException if this line has not been initialized yet.
+    */
    public LineSegment2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       LineSegment2d copy = new LineSegment2d(this);
@@ -1034,34 +1172,65 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       return copy;
    }
 
+   /**
+    * Tests if the given {@code object}'s class is the same as this, in which case the method
+    * returns {@link #equals(LineSegment2d)}, it returns {@code false} otherwise.
+    *
+    * @param object the object to compare against this. Not modified.
+    * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
+    */
    @Override
-   public boolean equals(Object object)
+   public boolean equals(Object obj)
    {
-      if (object == null)
+      try
+      {
+         return equals((LineSegment2d) obj);
+      }
+      catch (ClassCastException e)
+      {
          return false;
-      if (!(object instanceof LineSegment2d))
-         return false;
-      if (object == this)
-         return true;
-
-      LineSegment2d otherSegment = (LineSegment2d) object;
-
-      if (firstEndpoint.equals(otherSegment.firstEndpoint) && secondEndpoint.equals(otherSegment.secondEndpoint))
-         return true;
-      else if (firstEndpoint.equals(otherSegment.secondEndpoint) && secondEndpoint.equals(otherSegment.firstEndpoint))
-         return true;
-
-      return false;
+      }
    }
 
+   /**
+    * Tests on a per component basis, if this line segment 2D is exactly equal to {@code other}.
+    *
+    * @param other the other line segment 2D to compare against this. Not modified.
+    * @return {@code true} if the two line segments are exactly equal component-wise, {@code false}
+    *         otherwise.
+    */
+   public boolean equals(LineSegment2d other)
+   {
+      if (other == null)
+         return false;
+      else
+         return firstEndpoint.equals(other.firstEndpoint) && secondEndpoint.equals(other.secondEndpoint);
+   }
+
+   /**
+    * Provides a {@code String} representation of this line segment 2D as follows:<br>
+    * Line segment 2D: 1st endpoint = (x, y), 2nd endpoint = (x, y)
+    *
+    * @return the {@code String} representing this line segment 2D.
+    */
+   @Override
+   public String toString()
+   {
+      return "Line segment 2D: 1st endpoint = " + firstEndpoint + ", 2nd endpoint = " + secondEndpoint;
+   }
+
+   /**
+    * Tests on a per-component basis on both endpoints if this line segment is equal to
+    * {@code other} with the tolerance {@code epsilon}.
+    * 
+    * @param other the query. Not modified.
+    * @param epsilon the tolerance to use.
+    * @return {@code true} if the two line segments are equal, {@code false} otherwise.
+    */
    @Override
    public boolean epsilonEquals(LineSegment2d other, double epsilon)
    {
-      if (firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon))
-         return true;
-      if (firstEndpoint.epsilonEquals(other.secondEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.firstEndpoint, epsilon))
-         return true;
-
-      return false;
+      return firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon);
    }
+
 }
