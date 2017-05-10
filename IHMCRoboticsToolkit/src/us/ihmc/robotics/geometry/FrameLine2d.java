@@ -66,7 +66,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
 
    public FrameLine2d(FrameLineSegment2d frameLineSegment2d)
    {
-      this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.endpoints[0], frameLineSegment2d.lineSegment.endpoints[1]);
+      this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.getFirstEndpoint(), frameLineSegment2d.lineSegment.getSecondEndpoint());
    }
 
    public Line2D getLine2d()

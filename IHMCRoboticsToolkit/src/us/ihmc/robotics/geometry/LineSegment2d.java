@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
  */
 public class LineSegment2d implements GeometryObject<LineSegment2d>
 {
-   protected Point2D[] endpoints = new Point2D[2];
+   private Point2D[] endpoints = new Point2D[2];
 
    public LineSegment2d()
    {
