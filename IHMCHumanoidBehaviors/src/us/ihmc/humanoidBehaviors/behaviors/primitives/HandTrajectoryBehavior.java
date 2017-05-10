@@ -54,13 +54,13 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
    }
 
-   public void setInput(HandTrajectoryMessage armTrajectoryMessage)
+   public void setInput(HandTrajectoryMessage handTrajectoryMessage)
    {
-      outgoingMessage = armTrajectoryMessage;
+      outgoingMessage = handTrajectoryMessage;
 
-      robotSide = armTrajectoryMessage.getRobotSide();
+      robotSide = handTrajectoryMessage.getRobotSide();
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getTrajectoryTime());
+      trajectoryTime.set(handTrajectoryMessage.getTrajectoryTime());
 
       hasInputBeenSet.set(true);
    }
