@@ -20,6 +20,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public class WeightMatrix6DTest
 {
@@ -33,8 +35,8 @@ public class WeightMatrix6DTest
       Random random = new Random(123423L);
 
       WeightMatrix6D weightMatrix6D = new WeightMatrix6D();
-      assertNull(weightMatrix6D.getAngularSelectionFrame());
-      assertNull(weightMatrix6D.getLinearSelectionFrame());
+      assertNull(weightMatrix6D.getAngularWeightFrame());
+      assertNull(weightMatrix6D.getLinearWeightFrame());
       WeightMatrix3D linearPart = weightMatrix6D.getLinearPart();
       assertTrue(Double.isNaN(linearPart.getXAxisWeight()));
       assertTrue(Double.isNaN(linearPart.getYAxisWeight()));
@@ -102,8 +104,8 @@ public class WeightMatrix6DTest
          assertTrue(Double.isNaN(linearPart.getZAxisWeight()));
          
          weightMatrix6D.clear();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
          
          linearPart = weightMatrix6D.getLinearPart();
          assertTrue(Double.isNaN(linearPart.getXAxisWeight()));
@@ -115,47 +117,47 @@ public class WeightMatrix6DTest
          assertTrue(Double.isNaN(angularPart.getZAxisWeight()));
 
          ReferenceFrame randomFrame = ReferenceFrame.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
-         weightMatrix6D.setSelectionFrame(randomFrame);
-         assertTrue(randomFrame == weightMatrix6D.getLinearSelectionFrame());
-         assertTrue(randomFrame == weightMatrix6D.getAngularSelectionFrame());
+         weightMatrix6D.setWeightFrame(randomFrame);
+         assertTrue(randomFrame == weightMatrix6D.getLinearWeightFrame());
+         assertTrue(randomFrame == weightMatrix6D.getAngularWeightFrame());
 
-         weightMatrix6D.clearSelectionFrame();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         weightMatrix6D.clearWeightFrame();
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
 
-         weightMatrix6D.setSelectionFrame(randomFrame);
+         weightMatrix6D.setWeightFrame(randomFrame);
          weightMatrix6D.clear();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
 
-         weightMatrix6D.setSelectionFrame(randomFrame);
+         weightMatrix6D.setWeightFrame(randomFrame);
          weightMatrix6D.clear();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
 
-         weightMatrix6D.setSelectionFrames(randomFrame, ReferenceFrame.getWorldFrame());
-         assertTrue(randomFrame == weightMatrix6D.getAngularSelectionFrame());
-         assertTrue(ReferenceFrame.getWorldFrame() == weightMatrix6D.getLinearSelectionFrame());
+         weightMatrix6D.setWeightFrames(randomFrame, ReferenceFrame.getWorldFrame());
+         assertTrue(randomFrame == weightMatrix6D.getAngularWeightFrame());
+         assertTrue(ReferenceFrame.getWorldFrame() == weightMatrix6D.getLinearWeightFrame());
          weightMatrix6D.clear();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
          
-         weightMatrix6D.setSelectionFrames(ReferenceFrame.getWorldFrame(), randomFrame);
-         assertTrue(randomFrame == weightMatrix6D.getLinearSelectionFrame());
-         assertTrue(ReferenceFrame.getWorldFrame() == weightMatrix6D.getAngularSelectionFrame());
+         weightMatrix6D.setWeightFrames(ReferenceFrame.getWorldFrame(), randomFrame);
+         assertTrue(randomFrame == weightMatrix6D.getLinearWeightFrame());
+         assertTrue(ReferenceFrame.getWorldFrame() == weightMatrix6D.getAngularWeightFrame());
          weightMatrix6D.clear();
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
          
-         weightMatrix6D.setSelectionFrame(randomFrame);
-         weightMatrix6D.clearAngularSelectionFrame();
-         assertTrue(randomFrame == weightMatrix6D.getLinearSelectionFrame());
-         assertNull(weightMatrix6D.getAngularSelectionFrame());
+         weightMatrix6D.setWeightFrame(randomFrame);
+         weightMatrix6D.clearAngularWeightFrame();
+         assertTrue(randomFrame == weightMatrix6D.getLinearWeightFrame());
+         assertNull(weightMatrix6D.getAngularWeightFrame());
          
-         weightMatrix6D.setSelectionFrame(randomFrame);
-         weightMatrix6D.clearLinearSelectionFrame();
-         assertTrue(randomFrame == weightMatrix6D.getAngularSelectionFrame());
-         assertNull(weightMatrix6D.getLinearSelectionFrame());
+         weightMatrix6D.setWeightFrame(randomFrame);
+         weightMatrix6D.clearLinearWeightFrame();
+         assertTrue(randomFrame == weightMatrix6D.getAngularWeightFrame());
+         assertNull(weightMatrix6D.getLinearWeightFrame());
          
       }
    }
@@ -196,12 +198,12 @@ public class WeightMatrix6DTest
 
                weightMatrix6D.setAngularWeights(angularXWeight, angularYWeight, angularZWeight);
                weightMatrix6D.setLinearWeights(linearXWeight, linearYWeight, linearZWeight);
-               weightMatrix6D.setSelectionFrame(selectionFrame);
+               weightMatrix6D.setWeightFrame(selectionFrame);
 
                angularPart3D.setWeights(angularXWeight, angularYWeight, angularZWeight);
-               angularPart3D.setSelectionFrame(selectionFrame);
+               angularPart3D.setWeightFrame(selectionFrame);
                linearPart3D.setWeights(linearXWeight, linearYWeight, linearZWeight);
-               linearPart3D.setSelectionFrame(selectionFrame);
+               linearPart3D.setWeightFrame(selectionFrame);
 
                weightMatrix6D.getFullWeightMatrixInFrame(destinationFrame, actualSelectionMatrix);
 
@@ -290,12 +292,12 @@ public class WeightMatrix6DTest
 
                weightMatrix6D.setAngularWeights(angularXWeight, angularYWeight, angularZWeight);
                weightMatrix6D.setLinearWeights(linearXWeight, linearYWeight, linearZWeight);
-               weightMatrix6D.setSelectionFrame(selectionFrame);
+               weightMatrix6D.setWeightFrame(selectionFrame);
 
                weightMatrix6D.getFullWeightMatrixInFrame(destinationFrame, expectedSelectionMatrix);
                MatrixTools.removeZeroRows(expectedSelectionMatrix, 1.0e-7);
 
-               weightMatrix6D.getCompactSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
+               weightMatrix6D.getCompactWeightMatrixInFrame(destinationFrame, actualSelectionMatrix);
 
                assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
             }

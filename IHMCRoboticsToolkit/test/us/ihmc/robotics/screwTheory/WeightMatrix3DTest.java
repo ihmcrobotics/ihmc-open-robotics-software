@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class WeightMatrix3DTest
 {
@@ -33,7 +34,7 @@ public class WeightMatrix3DTest
       Random random = new Random(123423L);
 
       WeightMatrix3D weightMatrix3D = new WeightMatrix3D();
-      assertNull(weightMatrix3D.getSelectionFrame());
+      assertNull(weightMatrix3D.getWeightFrame());
       assertTrue(Double.isNaN(weightMatrix3D.getXAxisWeight()));
       assertTrue(Double.isNaN(weightMatrix3D.getYAxisWeight()));
       assertTrue(Double.isNaN(weightMatrix3D.getZAxisWeight()));
@@ -60,25 +61,25 @@ public class WeightMatrix3DTest
          assertEquals(zWeight, weightMatrix3D.getZAxisWeight(), 1e-8);
 
          weightMatrix3D.clear();
-         assertNull(weightMatrix3D.getSelectionFrame());
+         assertNull(weightMatrix3D.getWeightFrame());
          assertTrue(Double.isNaN(weightMatrix3D.getXAxisWeight()));
          assertTrue(Double.isNaN(weightMatrix3D.getYAxisWeight()));
          assertTrue(Double.isNaN(weightMatrix3D.getZAxisWeight()));
 
          ReferenceFrame randomFrame = ReferenceFrame.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
-         weightMatrix3D.setSelectionFrame(randomFrame);
-         assertTrue(randomFrame == weightMatrix3D.getSelectionFrame());
+         weightMatrix3D.setWeightFrame(randomFrame);
+         assertTrue(randomFrame == weightMatrix3D.getWeightFrame());
 
-         weightMatrix3D.clearSelectionFrame();
-         assertNull(weightMatrix3D.getSelectionFrame());
+         weightMatrix3D.clearWeightFrame();
+         assertNull(weightMatrix3D.getWeightFrame());
 
-         weightMatrix3D.setSelectionFrame(randomFrame);
+         weightMatrix3D.setWeightFrame(randomFrame);
          weightMatrix3D.clear();
-         assertNull(weightMatrix3D.getSelectionFrame());
+         assertNull(weightMatrix3D.getWeightFrame());
 
-         weightMatrix3D.setSelectionFrame(randomFrame);
+         weightMatrix3D.setWeightFrame(randomFrame);
          weightMatrix3D.clear();
-         assertNull(weightMatrix3D.getSelectionFrame());
+         assertNull(weightMatrix3D.getWeightFrame());
       }
    }
 
@@ -113,14 +114,14 @@ public class WeightMatrix3DTest
                double zWeight = random.nextDouble();
 
                weightMatrix3D.setWeights(xWeight, yWeight, zWeight);
-               weightMatrix3D.setSelectionFrame(selectionFrame);
+               weightMatrix3D.setWeightFrame(selectionFrame);
 
                frameMatrix3D.setToZero(selectionFrame);
                frameMatrix3D.setM00(xWeight);
                frameMatrix3D.setM11(yWeight);
                frameMatrix3D.setM22(zWeight);
 
-               weightMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, actualWeightMatrix);
+               weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, actualWeightMatrix);
                if (selectionFrame != null)
                   frameMatrix3D.changeFrame(destinationFrame);
                frameMatrix3D.getDenseMatrix(expectedWeightMatrix);
@@ -133,7 +134,7 @@ public class WeightMatrix3DTest
              FrameVector randomVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
              DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
              randomVector.get(originalVector);
-             weightMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedWeightMatrix);
+             weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, expectedWeightMatrix);
              CommonOps.mult(expectedWeightMatrix, originalVector, actualSubspaceVector);
 
              
@@ -190,12 +191,12 @@ public class WeightMatrix3DTest
                double zWeight = random.nextDouble();
 
                weightMatrix3D.setWeights(xWeight, yWeight, zWeight);
-               weightMatrix3D.setSelectionFrame(selectionFrame);
+               weightMatrix3D.setWeightFrame(selectionFrame);
 
-               weightMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
+               weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, expectedSelectionMatrix);
                MatrixTools.removeZeroRows(expectedSelectionMatrix, 1.0e-6);
 
-               weightMatrix3D.getEfficientSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
+               weightMatrix3D.getEfficientWeightMatrixInFrame(destinationFrame, actualSelectionMatrix);
 
                assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
             }

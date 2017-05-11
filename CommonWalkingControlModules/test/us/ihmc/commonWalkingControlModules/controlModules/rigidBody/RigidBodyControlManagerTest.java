@@ -48,8 +48,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.WeightMatrix3D;
-import us.ihmc.robotics.screwTheory.WeightMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -254,8 +254,8 @@ public class RigidBodyControlManagerTest
          assertEquals(angularZWeight, weightMartrixFromCommandAngularPart.getZAxisWeight(), 1e-08);
          
          assertTrue(weightMatrix.equals(weightMatrixFromCommand));
-         assertNull(weightMatrix.getAngularSelectionFrame());
-         assertNull(weightMatrix.getLinearSelectionFrame());
+         assertNull(weightMatrix.getAngularWeightFrame());
+         assertNull(weightMatrix.getLinearWeightFrame());
       }
    }
    
@@ -320,7 +320,7 @@ public class RigidBodyControlManagerTest
          
          ReferenceFrame angularWeightFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
          ReferenceFrame linearWeightFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
-         weightMatrix.setSelectionFrames(angularWeightFrame, linearWeightFrame);
+         weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
          message.setWeightMatrix(weightMatrix);
          
          SE3Command command = new SE3Command();
@@ -377,8 +377,8 @@ public class RigidBodyControlManagerTest
             assertEquals(angularYWeight, weightMartrixFromCommandAngularPart.getYAxisWeight(), 1e-08);
             assertEquals(angularZWeight, weightMartrixFromCommandAngularPart.getZAxisWeight(), 1e-08);
             
-            assertEquals(angularWeightFrame, weightMatrix.getAngularSelectionFrame());
-            assertEquals(linearWeightFrame, weightMatrix.getLinearSelectionFrame());
+            assertEquals(angularWeightFrame, weightMatrix.getAngularWeightFrame());
+            assertEquals(linearWeightFrame, weightMatrix.getLinearWeightFrame());
             assertTrue(weightMatrix.equals(weightMatrixFromCommand));
          }
       }

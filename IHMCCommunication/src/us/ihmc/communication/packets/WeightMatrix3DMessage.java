@@ -3,15 +3,15 @@ package us.ihmc.communication.packets;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
 {
-   @RosExportedField(documentation = "The Id of the reference frame defining the selection frame."
+   @RosExportedField(documentation = "The Id of the reference frame defining the weight frame."
          + " This reference frame defines the x axis,y axis, z axis for the weights."
          + " This frame is optional. It is preferable to provide it when possible, but when it is absent, i.e. equal to {@code 0L},"
          + " the weight matrix will then be generated regardless to what frame is it used in.")
-   public long selectionFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
+   public long weightFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
    @RosExportedField(documentation = "Specifies the qp weight for the x-axis, If set to NaN the controller will use the default weight for this axis. The weight is NaN by default.")
    public double xWeight = Double.NaN;
    @RosExportedField(documentation = "Specifies the qp weight for the y-axis, If set to NaN the controller will use the default weight for this axis. The weight is NaN by default.")
@@ -20,8 +20,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    public double zWeight = Double.NaN;
 
    /**
-    * Creates a new selection matrix message. It is initialized with all the axes selected. Until
-    * the selection is changed, this selection matrix is independent from its selection frame.
+    * Creates a new weight matrix message. It is initialized with all the weights set to NaN. Until
+    * the weights are changed, this weight matrix is independent from its frame.
     */
    public WeightMatrix3DMessage()
    {
@@ -43,11 +43,11 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    /**
     * Sets this weight matrix message to {@code qpWeightMatrix}.
     * 
-    * @param selectionMatrix3D the selection matrix to copy the data of. parameter will not be modified.
+    * @param weightMatrix3D the weight matrix to copy the data of. parameter will not be modified.
     */
    public void set(WeightMatrix3DMessage weightMatrix)
    {
-      selectionFrameId = weightMatrix.getSelectionFrameId();
+      weightFrameId = weightMatrix.getWeightFrameId();
       this.xWeight = weightMatrix.getXWeight();
       this.yWeight = weightMatrix.getYWeight();
       this.zWeight = weightMatrix.getZWeight();
@@ -60,7 +60,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
     */
    public void set(WeightMatrix3D weightMatrix)
    {
-      setSelectionFrame(weightMatrix.getSelectionFrame());
+      setWeightFrame(weightMatrix.getWeightFrame());
       this.xWeight = weightMatrix.getXAxisWeight();
       this.yWeight = weightMatrix.getYAxisWeight();
       this.zWeight = weightMatrix.getZAxisWeight();
@@ -69,7 +69,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    /**
     * Sets the weights
     * <p>
-    * Note that it is preferable to also set selection frame to which these weights are expressed in
+    * Note that it is preferable to also set weight frame to which these weights are expressed in
     * to.
     * </p>
     * 
@@ -87,50 +87,50 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    /**
     * sets the frame the weights are expressed in
     * 
-    * @param selectionFrame the new frame to which the weights are expressed in 
+    * @param weightFrame the new frame to which the weights are expressed in 
     */
-   public void setSelectionFrame(ReferenceFrame selectionFrame)
+   public void setWeightFrame(ReferenceFrame weightFrame)
    {
-      if (selectionFrame == null)
-         selectionFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
+      if (weightFrame == null)
+         weightFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
       else
-         selectionFrameId = selectionFrame.getNameBasedHashCode();
+         weightFrameId = weightFrame.getNameBasedHashCode();
    }
 
    /**
-    * Sets the ID of the selection frame to use. The selection of the axes of interest refers to the
-    * axes of the selection frame.
+    * Sets the ID of the weight frame to use. The weights refer to the
+    * axes of the weight frame.
     * 
-    * @param selectionFrame the ID of the new frame to which the axes selection is referring to.
+    * @param weightFrameID the ID of the new frame to which the weights are referring to.
     */
-   public void setSelectionFrameId(long selectionFrameId)
+   public void setWeightFrameId(long weightFrameId)
    {
-      this.selectionFrameId = selectionFrameId;
+      this.weightFrameId = weightFrameId;
    }
 
    /**
-    * Unpacks this message into the given {@code selectionMatrix3D}.
+    * Unpacks this message into the given {@code weightMatrix3D}.
     * <p>
-    * Note that the selection frame can not be retrieved here, it has to be set afterwards.
+    * Note that the weight frame can not be retrieved here, it has to be set afterwards.
     * </p>
     * 
-    * @param selectionMatrix3D the selection matrix into which this message is being unpacked.
+    * @param weightMatrix3D the weight matrix into which this message is being unpacked.
     *           Modified.
     */
    public void getWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
-      weightMatrix3D.clearSelectionFrame();
+      weightMatrix3D.clearWeightFrame();
       weightMatrix3D.setWeights(xWeight, yWeight, zWeight);
    }
 
    /**
-    * Returns the unique ID referring to the selection frame to use with this selection matrix.
+    * Returns the unique ID referring to the weight frame to use with this weight matrix.
     * 
-    * @return the selection frame ID.
+    * @return the weight frame ID.
     */
-   public long getSelectionFrameId()
+   public long getWeightFrameId()
    {
-      return selectionFrameId;
+      return weightFrameId;
    }
 
    /**
@@ -193,7 +193,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (int) (selectionFrameId ^ (selectionFrameId >>> 32));
+      result = prime * result + (int) (weightFrameId ^ (weightFrameId >>> 32));
       long temp;
       temp = Double.doubleToLongBits(xWeight);
       result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -220,7 +220,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    @Override
    public boolean epsilonEquals(WeightMatrix3DMessage other, double epsilon)
    {
-      if (selectionFrameId != other.selectionFrameId)
+      if (weightFrameId != other.weightFrameId)
          return false;
       
       if(Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct

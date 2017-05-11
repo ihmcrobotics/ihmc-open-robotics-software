@@ -17,7 +17,7 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.WeightMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link KinematicsToolboxRigidBodyMessage} is part of the API of the
@@ -70,21 +70,14 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public SelectionMatrix3DMessage linearSelectionMatrix;
 
    /**
-    * Array of 6 floats used to define the priority of this task on the solver side:<br>
-    * <code>float[] weights = {weightAngularX, weightAngularY, weightAngularZ, weightLinearX, weightLinearY, weightLinearZ};</code>
-    * <ul>
-    * <li>The three floats <code>(weightAngularX, weightAngularY, weightAngularZ)</code> refer to
-    * the priority of controlling the rotation around each axis of the control frame. If
-    * {@code controlFrame} has not been defined, it is instead
-    * {@code endEffector.getBodyFixedFrame()}.
-    * <li>The three floats <code>(weightLinearX, weightLinearY, weightLinearZ)</code> refer to the
-    * priority of controlling the position along each axis of the control frame. If
-    * {@code controlFrame} has not been defined, it is instead
-    * {@code endEffector.getBodyFixedFrame()}.
-    * </ul>
+    * Weight Matrix used to define the priority of controlling the rotation around each axis on the solver side:<br>
     */
-   public WeightMatrix3DMessage angularWeights;
-   public WeightMatrix3DMessage linearWeights;
+   public WeightMatrix3DMessage angularWeightMatrix;
+   
+   /**
+    * Weight Matrix used to define the priority of controlling the translation of each axis on the solver side:<br>
+    */
+   public WeightMatrix3DMessage linearWeightMatrix;
 
    /**
     * Do not use this constructor, it is needed only for efficient serialization/deserialization.
@@ -318,17 +311,17 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
       setDesiredPose(desiredPose.getGeometryObject());
    }
 
-   /** Ensures that the array for the weights is initialized. */
+   /** Ensures that the weight matrix's are initialized. */
    private void initializeWeight()
    {
-      if (linearWeights == null)
+      if (linearWeightMatrix == null)
       {
-         linearWeights = new WeightMatrix3DMessage();
+         linearWeightMatrix = new WeightMatrix3DMessage();
       }
       
-      if (angularWeights == null)
+      if (angularWeightMatrix == null)
       {
-         angularWeights = new WeightMatrix3DMessage();
+         angularWeightMatrix = new WeightMatrix3DMessage();
       }
       
       
@@ -346,8 +339,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void setWeight(double weight)
    {
       initializeWeight();
-      linearWeights.setWeights(weight, weight, weight);
-      angularWeights.setWeights(weight, weight, weight);
+      linearWeightMatrix.setWeights(weight, weight, weight);
+      angularWeightMatrix.setWeights(weight, weight, weight);
    }
 
    /**
@@ -363,8 +356,25 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void setWeight(double angular, double linear)
    {
       initializeWeight();
-      linearWeights.setWeights(linear, linear, linear);
-      angularWeights.setWeights(angular, angular, angular);
+      linearWeightMatrix.setWeights(linear, linear, linear);
+      angularWeightMatrix.setWeights(angular, angular, angular);
+   }
+   
+   /**
+    * Sets the weight to use for this task with the angular and linear parts set independently.
+    * <p>
+    * The weight relates to the priority of a task relative to the other active tasks. A higher
+    * weight refers to a higher priority.
+    * </p>
+    * 
+    * @param angular the weight to use for the angular part of this task.
+    * @param linear the weight to use for the linear part of this task.
+    */
+   public void setWeight(WeightMatrix6D weightMatrix)
+   {
+      initializeWeight();
+      linearWeightMatrix.set(weightMatrix.getLinearPart());
+      angularWeightMatrix.set(weightMatrix.getAngularPart());
    }
 
    /**
@@ -565,10 +575,10 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
    {
       weightMatrixToPack.clear();
-      if (angularWeights!= null)
-         angularWeights.getWeightMatrix(weightMatrixToPack.getAngularPart());
-      if (linearWeights != null)
-         linearWeights.getWeightMatrix(weightMatrixToPack.getLinearPart());
+      if (angularWeightMatrix!= null)
+         angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getAngularPart());
+      if (linearWeightMatrix != null)
+         linearWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
    }
 
    /**
@@ -619,8 +629,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     */
    public long getLinearWeightFrameId()
    {
-      if (linearWeights != null)
-         return linearWeights.getSelectionFrameId();
+      if (linearWeightMatrix != null)
+         return linearWeightMatrix.getWeightFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -637,8 +647,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     */
    public long getAngularWeightFrameId()
    {
-      if (angularWeights != null)
-         return angularWeights.getSelectionFrameId();
+      if (angularWeightMatrix != null)
+         return angularWeightMatrix.getWeightFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -669,21 +679,21 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
          return false;
 
       // TODO Add the selection matrix back in here
-      if(linearWeights == null ^ other.linearWeights == null)//bit wise or
+      if(linearWeightMatrix == null ^ other.linearWeightMatrix == null)//bit wise or
       {
          return false;
       }
-      if(angularWeights == null ^ other.angularWeights == null)//bit wise or
+      if(angularWeightMatrix == null ^ other.angularWeightMatrix == null)//bit wise or
       {
          return false;
       }
       
-      if(linearWeights != null && !linearWeights.epsilonEquals(linearWeights, epsilon))
+      if(linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(linearWeightMatrix, epsilon))
       {
          return false;
       }
 
-      if(angularWeights != null && !angularWeights.epsilonEquals(angularWeights, epsilon))
+      if(angularWeightMatrix != null && !angularWeightMatrix.epsilonEquals(angularWeightMatrix, epsilon))
       {
          return false;
       }
