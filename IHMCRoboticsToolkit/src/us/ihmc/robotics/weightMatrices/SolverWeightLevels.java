@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command;
+package us.ihmc.robotics.weightMatrices;
 
 public abstract class SolverWeightLevels
 {

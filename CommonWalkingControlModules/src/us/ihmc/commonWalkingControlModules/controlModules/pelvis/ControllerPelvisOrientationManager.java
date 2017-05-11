@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -24,6 +23,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ControllerPelvisOrientationManager extends PelvisOrientationControlState

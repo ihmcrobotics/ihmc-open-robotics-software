@@ -474,12 +474,11 @@ public class SelectionMatrix3D
       if (getClass() != obj.getClass())
          return false;
       SelectionMatrix3D other = (SelectionMatrix3D) obj;
-      if (selectionFrame == null)
+      if (selectionFrame == null ^ other.selectionFrame == null)
       {
-         if (other.selectionFrame != null)
-            return false;
+         return false;
       }
-      else if (selectionFrame.getNameBasedHashCode() != other.selectionFrame.getNameBasedHashCode())
+      else if (selectionFrame != null && selectionFrame.getNameBasedHashCode() != other.selectionFrame.getNameBasedHashCode())
          return false;
       if (xSelected != other.xSelected)
          return false;

@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -43,6 +44,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -237,6 +239,118 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 //      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
    }
    
+   @ContinuousIntegrationTest(estimatedDuration = 22.8)
+   @Test (timeout = 110000)
+   public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      
+      Random random = new Random(564574L);
+      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+      humanoidReferenceFrames.updateFrames();
+      
+      double trajectoryTime = 1.0;
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+      
+      OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+      
+      for(int i = 0; i < 50; i++)
+      {
+         ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+         RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+         FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+         desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         Quaternion desiredOrientation = new Quaternion();
+         desiredRandomChestOrientation.getQuaternion(desiredOrientation);
+         
+         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
+         chestTrajectoryMessage.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+         
+         WeightMatrix3D weightMatrix = new WeightMatrix3D();
+         
+         double xWeight = random.nextDouble();
+         double yWeight = random.nextDouble();
+         double zWeight = random.nextDouble();
+         
+         weightMatrix.setWeights(xWeight, yWeight, zWeight);
+         chestTrajectoryMessage.setWeightMatrix(weightMatrix);
+         drcSimulationTestHelper.send(chestTrajectoryMessage);
+         
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 4.0));
+         assertWeightsMatch(xWeight, yWeight, zWeight, chest, scs);
+      }
+      
+      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+      FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+      desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      Quaternion desiredOrientation = new Quaternion();
+      desiredRandomChestOrientation.getQuaternion(desiredOrientation);
+      
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
+      chestTrajectoryMessage.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+      
+      WeightMatrix3D weightMatrix = new WeightMatrix3D();
+      
+      double xWeight = Double.NaN;
+      double yWeight = Double.NaN;
+      double zWeight = Double.NaN;
+      
+      weightMatrix.setWeights(xWeight, yWeight, zWeight);
+      chestTrajectoryMessage.setWeightMatrix(weightMatrix);
+      drcSimulationTestHelper.send(chestTrajectoryMessage);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 4.0));
+      assertAngularWeightsMatchDefault(chest, scs);
+      
+   }
+   
+   private void assertAngularWeightsMatchDefault(RigidBody rigidBody, SimulationConstructionSet scs)
+   {
+      String prefix = rigidBody.getName() + "Taskspace";
+      DoubleYoVariable angularWeightX = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightX_RO");
+      DoubleYoVariable angularWeightY = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightY_RO");
+      DoubleYoVariable angularWeightZ = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightZ_RO");
+      DoubleYoVariable defaultAngularWeightX = (DoubleYoVariable) scs.getVariable(prefix + "DefaultAngularWeightX");
+      DoubleYoVariable defaultAngularWeightY = (DoubleYoVariable) scs.getVariable(prefix + "DefaultAngularWeightY");
+      DoubleYoVariable defaultAngularWeightZ = (DoubleYoVariable) scs.getVariable(prefix + "DefaultAngularWeightZ");
+      assertEquals(defaultAngularWeightX.getDoubleValue(), angularWeightX.getDoubleValue(), 1e-8);
+      assertEquals(defaultAngularWeightY.getDoubleValue(), angularWeightY.getDoubleValue(), 1e-8);
+      assertEquals(defaultAngularWeightZ.getDoubleValue(), angularWeightZ.getDoubleValue(), 1e-8);
+      
+   }
+
+   private void assertWeightsMatch(double xWeight, double yWeight, double zWeight, RigidBody rigidBody, SimulationConstructionSet scs)
+   {
+//      AngularWeightX
+      String prefix = rigidBody.getName() + "Taskspace";
+      DoubleYoVariable angularWeightX = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightX_RO");
+      DoubleYoVariable angularWeightY = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightY_RO");
+      DoubleYoVariable angularWeightZ = (DoubleYoVariable) scs.getVariable(prefix + "AngularWeightZ_RO");
+//      DoubleYoVariable linearWeightX = (DoubleYoVariable) scs.getVariable(prefix + "LinearWeightX_RO");
+//      DoubleYoVariable linearWeightY = (DoubleYoVariable) scs.getVariable(prefix + "LinearWeightY_RO");
+//      DoubleYoVariable linearWeightZ = (DoubleYoVariable) scs.getVariable(prefix + "LinearWeightZ_RO");
+      
+      assertEquals(xWeight, angularWeightX.getDoubleValue(), 1e-8);
+      assertEquals(yWeight, angularWeightY.getDoubleValue(), 1e-8);
+      assertEquals(zWeight, angularWeightZ.getDoubleValue(), 1e-8);
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 22.8)
    @Test (timeout = 110000)
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
