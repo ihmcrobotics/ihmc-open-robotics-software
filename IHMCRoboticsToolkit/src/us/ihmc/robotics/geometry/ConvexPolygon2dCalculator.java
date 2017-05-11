@@ -1,9 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 
 /**
@@ -71,7 +69,7 @@ public class ConvexPolygon2dCalculator
     */
    public static int getIntersectingEdges(Line2D line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2d polygon)
    {
-      if (polygon.hasExactlyOneVertex())
+      if (polygon.getNumberOfVertices() == 1)
          return 0;
 
       int foundEdges = 0;
@@ -83,7 +81,7 @@ public class ConvexPolygon2dCalculator
          // edge is on the line
          if (line.isPointOnLine(startVertex) && line.isPointOnLine(endVertex))
          {
-            if (polygon.hasExactlyTwoVertices())
+            if (polygon.getNumberOfVertices() == 2)
                return 0;
             // set the edges to be the previous and the next edge
             edgeToPack1.set(polygon.getPreviousVertex(i), startVertex);
@@ -114,7 +112,7 @@ public class ConvexPolygon2dCalculator
     */
    public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2d polygon)
    {
-      if (!polygon.hasAtLeastTwoVertices())
+      if (polygon.getNumberOfVertices() < 2)
          return false;
 
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);

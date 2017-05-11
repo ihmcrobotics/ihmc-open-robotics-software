@@ -93,8 +93,10 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d list = new ConvexPolygon2d(verticesList);
       assertEquals("Number of vertices should be 4", 4.0, list.getNumberOfVertices(), epsilon);
       assertTrue(list.isUpToDate());
-      list.clear();
+      list.clearAndUpdate();
       assertEquals("Number of vertices should be 0", 0.0, list.getNumberOfVertices(), epsilon);
+      assertTrue(list.isUpToDate());
+      list.clear();
       assertFalse(list.isUpToDate());
    }
 
@@ -219,9 +221,9 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d allIntersect = new ConvexPolygon2d();
       ConvexPolygon2d someIntersect = new ConvexPolygon2d();
 
-      assertTrue(polygon1.intersectionWith(polygon2, allIntersect));
-      assertFalse("Should be false", polygon1.intersectionWith(polygon3, noIntersect));
-      assertTrue(polygon1.intersectionWith(polygon4, someIntersect));
+      assertTrue(ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon2, allIntersect));
+      assertFalse("Should be false", ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon3, noIntersect));
+      assertTrue(ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon4, someIntersect));
       //
       //      System.out.println("No" + noIntersect);
       //      System.out.println("Some" + someIntersect);
@@ -893,10 +895,15 @@ public class ConvexPolygon2dTest
       FrameConvexPolygon2d square = new FrameConvexPolygon2d(squareList);
 
       // Compute the extreme points:
-      FramePoint2d frontmostLeft = square.getMinXMaxYPointCopy();
-      FramePoint2d frontmostRight = square.getMaxXMaxYPointCopy();
-      FramePoint2d backmostRight = square.getMaxXMinYPointCopy();
-      FramePoint2d backmostLeft = square.getMinXMinYPointCopy();
+      FramePoint2d frontmostLeft  = new FramePoint2d();
+      FramePoint2d frontmostRight = new FramePoint2d();
+      FramePoint2d backmostRight  = new FramePoint2d();
+      FramePoint2d backmostLeft   = new FramePoint2d();
+
+      square.getFrameVertex(square.getMinXMaxYIndex(), frontmostLeft);
+      square.getFrameVertex(square.getMaxXMaxYIndex(), frontmostRight);
+      square.getFrameVertex(square.getMaxXMinYIndex(), backmostRight);
+      square.getFrameVertex(square.getMinXMinYIndex(), backmostLeft);
 
       for (int i = 0; i < square.getNumberOfVertices(); i++)
       {
@@ -1095,10 +1102,15 @@ public class ConvexPolygon2dTest
       FrameConvexPolygon2d randomPolygon = new FrameConvexPolygon2d(randomPointList);
 
       // Compute the extreme points:
-      FramePoint2d frontmostLeft = randomPolygon.getMinXMaxYPointCopy();
-      FramePoint2d frontmostRight = randomPolygon.getMaxXMaxYPointCopy();
-      FramePoint2d backmostRight = randomPolygon.getMaxXMinYPointCopy();
-      FramePoint2d backmostLeft = randomPolygon.getMinXMinYPointCopy();
+      FramePoint2d frontmostLeft  = new FramePoint2d();
+      FramePoint2d frontmostRight = new FramePoint2d();
+      FramePoint2d backmostRight  = new FramePoint2d();
+      FramePoint2d backmostLeft   = new FramePoint2d();
+
+      randomPolygon.getFrameVertex(randomPolygon.getMinXMaxYIndex(), frontmostLeft);
+      randomPolygon.getFrameVertex(randomPolygon.getMaxXMaxYIndex(), frontmostRight);
+      randomPolygon.getFrameVertex(randomPolygon.getMaxXMinYIndex(), backmostRight);
+      randomPolygon.getFrameVertex(randomPolygon.getMinXMinYIndex(), backmostLeft);
 
       for (int i = 0; i < randomPolygon.getNumberOfVertices(); i++)
       {
@@ -2194,14 +2206,14 @@ public class ConvexPolygon2dTest
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.intersectionWith(sparePolygon) == null);
+         assertTrue(ConvexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, sparePolygon) == null);
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLine) == null);
          assertFalse(polygonWithOnePoint.isPointInside(arbitraryPoint0));
          assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithOnePoint));
-         assertTrue(polygonWithOnePoint.getMaxXMaxYPointCopy().equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.getMaxXMinYPointCopy().equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.getMinXMaxYPointCopy().equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.getMinXMinYPointCopy().equals(pointThatDefinesThePolygon));
+         assertEquals(0, polygonWithOnePoint.getMaxXMaxYIndex());
+         assertEquals(0, polygonWithOnePoint.getMaxXMinYIndex());
+         assertEquals(0, polygonWithOnePoint.getMinXMaxYIndex());
+         assertEquals(0, polygonWithOnePoint.getMinXMinYIndex());
          assertTrue(polygonWithOnePoint.orthogonalProjectionCopy(arbitraryPoint0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.pointIsOnPerimeter(pointThatDefinesThePolygon));
          assertFalse(polygonWithOnePoint.pointIsOnPerimeter(arbitraryPoint0));
@@ -2459,18 +2471,15 @@ public class ConvexPolygon2dTest
             minXPoint = pointThatDefinesThePolygon0;
          }
 
-         assertTrue(polygonWithTwoPoints.getMaxXMaxYPointCopy().equals(maxXPoint));
-         assertTrue(polygonWithTwoPoints.getMaxXMinYPointCopy().equals(maxXPoint));
-         boolean test = polygonWithTwoPoints.getMinXMaxYPointCopy().equals(minXPoint);
-         if (!test)
-            System.out.println();
-         assertTrue(test);
-         assertTrue(polygonWithTwoPoints.getMinXMinYPointCopy().equals(minXPoint));
+         assertTrue(polygonWithTwoPoints.getVertex(polygonWithTwoPoints.getMaxXMaxYIndex()).equals(maxXPoint));
+         assertTrue(polygonWithTwoPoints.getVertex(polygonWithTwoPoints.getMaxXMinYIndex()).equals(maxXPoint));
+         assertTrue(polygonWithTwoPoints.getVertex(polygonWithTwoPoints.getMinXMaxYIndex()).equals(minXPoint));
+         assertTrue(polygonWithTwoPoints.getVertex(polygonWithTwoPoints.getMinXMinYIndex()).equals(minXPoint));
 
          // intersectionWith
          Point2D[] expectedIntersectionWithSparePolygon = sparePolygon.intersectionWith(new LineSegment2D(pointThatDefinesThePolygon0,
                                                                                                           pointThatDefinesThePolygon1));
-         ConvexPolygon2d actualIntersectionWithSparePolygon = sparePolygon.intersectionWith(polygonWithTwoPoints);
+         ConvexPolygon2d actualIntersectionWithSparePolygon = ConvexPolygonTools.computeIntersectionOfPolygons(sparePolygon, polygonWithTwoPoints);
 
          if (expectedIntersectionWithSparePolygon == null)
          {

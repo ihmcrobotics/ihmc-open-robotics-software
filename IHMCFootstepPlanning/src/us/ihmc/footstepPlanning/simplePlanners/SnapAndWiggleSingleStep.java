@@ -5,6 +5,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -80,7 +81,7 @@ public class SnapAndWiggleSingleStep
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
          footPolygonInRegion.setAndUpdate(footStepPolygon);
          footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-         ConvexPolygon2d foothold = regionToMoveTo.getConvexHull().intersectionWith(footPolygonInRegion);
+         ConvexPolygon2d foothold = ConvexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion);
          soleToRegion.invert();
          foothold.applyTransformAndProjectToXYPlane(soleToRegion);
          return foothold;

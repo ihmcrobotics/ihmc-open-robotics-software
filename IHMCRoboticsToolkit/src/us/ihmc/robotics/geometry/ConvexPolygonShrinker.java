@@ -54,7 +54,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyTwoVertices())
+      if (polygonQ.getNumberOfVertices() == 2)
       {
          Point2DReadOnly vertex0 = polygonQ.getVertex(0);
          Point2DReadOnly vertex1 = polygonQ.getVertex(1);
@@ -85,7 +85,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyOneVertex())
+      if (polygonQ.getNumberOfVertices() == 1)
       {
          polygonToPack.setAndUpdate(polygonQ);
          
