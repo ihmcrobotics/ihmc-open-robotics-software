@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -15,7 +16,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 
@@ -323,7 +323,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
 
@@ -336,7 +336,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
       }
