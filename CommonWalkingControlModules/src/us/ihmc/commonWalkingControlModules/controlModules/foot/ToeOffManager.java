@@ -386,7 +386,7 @@ public class ToeOffManager
       }
       else
       {
-         ConvexPolygon2d footPolygon = footDefaultPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
+         ConvexPolygon2D footPolygon = footDefaultPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
          leadingFootSupportPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
       }
       leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);

@@ -144,7 +144,7 @@ public class HullFace
       }
    }
 
-   public void get2DPolygonAndPose(ConvexPolygon2d polygonToPack, Pose polygonPose)
+   public void get2DPolygonAndPose(ConvexPolygon2D polygonToPack, Pose polygonPose)
    {
       if (facePoints.isEmpty())
       {

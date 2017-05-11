@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -233,7 +233,7 @@ public class FrameConvexPolygon2dIntersector
     * Gets the closest point to a filled polygon. If inside, packs that point.
     * If outside, the closest vertex or point along edge.
     */
-   public static void getClosestPoint(Point2D point, ConvexPolygon2d polygon, Point2D closestPointToPack)
+   public static void getClosestPoint(Point2D point, ConvexPolygon2D polygon, Point2D closestPointToPack)
    {
       if (polygon.isPointInside(point))
       {

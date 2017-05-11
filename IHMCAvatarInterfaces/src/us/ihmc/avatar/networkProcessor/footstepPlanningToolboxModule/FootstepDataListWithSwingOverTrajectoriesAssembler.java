@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -33,7 +33,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private final FramePose stanceFootPose;
    private final FramePose swingStartPose;
    private final FramePose swingEndPose;
-   private final ConvexPolygon2d partialFootholdPolygon;
+   private final ConvexPolygon2D partialFootholdPolygon;
 
    private static final double maxSwingSpeed = 1.0;
 
@@ -49,7 +49,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       stanceFootPose = new FramePose();
       swingStartPose = new FramePose();
       swingEndPose = new FramePose();
-      partialFootholdPolygon = new ConvexPolygon2d();
+      partialFootholdPolygon = new ConvexPolygon2D();
    }
 
    public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()

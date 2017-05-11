@@ -33,34 +33,34 @@ public class ConvexPolygon2dCalculatorTest
    @Test(timeout = 3000)
    public void testIsPolygonInside1()
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(0.0, 0.0));
       polygon.addVertex(new Point2D(2.0, 1.0));
       polygon.addVertex(new Point2D(1.0, 2.0));
       polygon.update();
 
-      ConvexPolygon2d polygonToTest1 = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToTest1 = new ConvexPolygon2D();
       polygonToTest1.addVertex(new Point2D(0.1, 0.1));
       polygonToTest1.addVertex(new Point2D(0.2, 0.2));
       polygonToTest1.update();
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest1, polygon));
 
-      ConvexPolygon2d polygonToTest2 = new ConvexPolygon2d(polygon);
+      ConvexPolygon2D polygonToTest2 = new ConvexPolygon2D(polygon);
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, polygon));
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, epsilon, polygon));
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, -epsilon, polygon));
 
-      ConvexPolygon2d polygonToTest3 = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToTest3 = new ConvexPolygon2D();
       polygonToTest3.addVertex(new Point2D(0.3, 0.9));
       polygonToTest3.addVertex(new Point2D(0.1, 0.1));
       polygonToTest3.addVertex(new Point2D(1.0, 1.2));
       polygonToTest3.update();
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest3, polygon));
 
-      ConvexPolygon2d polygonToTest4 = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToTest4 = new ConvexPolygon2D();
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest4, polygon));
 
-      ConvexPolygon2d polygonToTest5 = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToTest5 = new ConvexPolygon2D();
       polygonToTest5.addVertex(new Point2D(-0.1, 0.1));
       polygonToTest5.update();
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest5, polygon));
@@ -70,18 +70,18 @@ public class ConvexPolygon2dCalculatorTest
    @Test(timeout = 3000)
    public void testTranslatePolygon1()
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(0.0, 0.0));
       polygon.addVertex(new Point2D(10.0, 0.0));
       polygon.addVertex(new Point2D(0.0, 10.0));
       polygon.update();
 
       Vector2D translation1 = new Vector2D(0.0, 0.0);
-      ConvexPolygon2d polygon1 = polygon.translateCopy(translation1);
+      ConvexPolygon2D polygon1 = polygon.translateCopy(translation1);
       assertTrue(polygon1.epsilonEquals(polygon, epsilon));
 
       Vector2D translation2 = new Vector2D(1.0, 0.5);
-      ConvexPolygon2d polygon2 = polygon.translateCopy(translation2);
+      ConvexPolygon2D polygon2 = polygon.translateCopy(translation2);
       assertTrue(polygon2.getVertex(2).epsilonEquals(new Point2D(1.0, 0.5), epsilon));
       assertTrue(polygon2.getVertex(1).epsilonEquals(new Point2D(11.0, 0.5), epsilon));
       assertTrue(polygon2.getVertex(0).epsilonEquals(new Point2D(1.0, 10.5), epsilon));
@@ -92,7 +92,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testGetMiddleIndexCounterClockwise1()
    {
       Random random = new Random(234);
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       while (polygon.getNumberOfVertices() < 6)
       {
          polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
@@ -170,7 +170,7 @@ public class ConvexPolygon2dCalculatorTest
       Point2D vertex4 = new Point2D(1.0, 0.0);
       Point2D vertex5 = new Point2D(0.0, 0.0);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(vertex1);
       polygon.addVertex(vertex2);
       polygon.addVertex(vertex3);
@@ -205,7 +205,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testGetLineOfSightVertices2()
    {
       // empty polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
 
       Point2D observer1 = new Point2D(0.5, 0.5);
       assertPointsEqual(null, polygon.lineOfSightVertices(observer1), true);
@@ -218,7 +218,7 @@ public class ConvexPolygon2dCalculatorTest
       Point2D vertex = new Point2D(-0.5, 0.5);
 
       // point polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(vertex);
       polygon.update();
 
@@ -236,7 +236,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testGetLineOfSightVertexIndices4()
    {
       // add vertices in clockwise order so updating the polygon does not change indices
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(0.0, 1.0));
       polygon.addVertex(new Point2D(1.0, 1.0));
       polygon.update();
@@ -262,7 +262,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testDoesLineIntersectEdge1()
    {
       // add in order so update does not change indices:
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(0.0, 1.0));
       polygon.addVertex(new Point2D(1.0, 1.0));
       polygon.addVertex(new Point2D(1.5, 0.5));
@@ -304,7 +304,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testDoesLineIntersectEdge2()
    {
       // add in order so update does not change indices:
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(0.0, 1.0));
       polygon.addVertex(new Point2D(1.0, 1.0));
       polygon.update();
@@ -338,7 +338,7 @@ public class ConvexPolygon2dCalculatorTest
    @Test(timeout = 3000)
    public void testDoesLineIntersectEdge3()
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
 
       Line2D line5 = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line5, 0, polygon));
@@ -359,7 +359,7 @@ public class ConvexPolygon2dCalculatorTest
       LineSegment2D edge4 = new LineSegment2D(vertex4, vertex1);
 
       // add in order so update does not change indices:
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(vertex1);
       polygon.addVertex(vertex2);
       polygon.addVertex(vertex3);
@@ -435,7 +435,7 @@ public class ConvexPolygon2dCalculatorTest
       LineSegment2D edge2 = new LineSegment2D(vertex2, vertex1);
 
       // add in order so update does not change indices:
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(vertex1);
       polygon.addVertex(vertex2);
       polygon.update();
@@ -465,7 +465,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testGetIntersectingEdges3()
    {
       // point polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(-1.0, -0.5));
       polygon.update();
 
@@ -490,7 +490,7 @@ public class ConvexPolygon2dCalculatorTest
    public void testGetIntersectingEdges4()
    {
       // empty polygon
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
 
       LineSegment2D result1 = new LineSegment2D();
       LineSegment2D result2 = new LineSegment2D();
@@ -504,7 +504,7 @@ public class ConvexPolygon2dCalculatorTest
    @Test(timeout = 3000)
    public void testGetEdgeNormal()
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(new Point2D(-1.0, 0.0));
       polygon.addVertex(new Point2D(0.0, 1.0));
       polygon.addVertex(new Point2D(2.0, 0.0));

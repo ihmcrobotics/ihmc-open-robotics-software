@@ -27,7 +27,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
  * This implementation of convex polygon is designed for garbage free operations.
  * </p>
  */
-public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
+public class ConvexPolygon2D implements GeometryObject<ConvexPolygon2D>
 {
    /**
     * Field for future expansion of {@code ConvexPolygon2d} to enable having the vertices in
@@ -131,7 +131,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
    /**
     * Creates an empty convex polygon.
     */
-   public ConvexPolygon2d()
+   public ConvexPolygon2D()
    {
       numberOfVertices = 0;
       update();
@@ -151,7 +151,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws IllegalArgumentException if {@code numberOfVertices} is negative or greater than the
     *            size of the given list of vertices.
     */
-   public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
+   public ConvexPolygon2D(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
       setAndUpdate(vertices, numberOfVertices);
    }
@@ -166,7 +166,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * 
     * @param vertices the 2D point cloud from which the convex hull is to be computed. Not modified.
     */
-   public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices)
+   public ConvexPolygon2D(List<? extends Point2DReadOnly> vertices)
    {
       this(vertices, vertices.size());
    }
@@ -185,7 +185,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws IllegalArgumentException if {@code numberOfVertices} is negative or greater than the
     *            size of the given array of vertices.
     */
-   public ConvexPolygon2d(Point2DReadOnly[] vertices, int numberOfVertices)
+   public ConvexPolygon2D(Point2DReadOnly[] vertices, int numberOfVertices)
    {
       setAndUpdate(vertices, numberOfVertices);
    }
@@ -200,7 +200,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * 
     * @param vertices the 2D point cloud from which the convex hull is to be computed. Not modified.
     */
-   public ConvexPolygon2d(Point2DReadOnly[] vertices)
+   public ConvexPolygon2D(Point2DReadOnly[] vertices)
    {
       this(vertices, vertices.length);
    }
@@ -221,7 +221,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws IllegalArgumentException if {@code numberOfVertices} is negative or greater than the
     *            size of the given array of vertices.
     */
-   public ConvexPolygon2d(double[][] vertices, int numberOfVertices)
+   public ConvexPolygon2D(double[][] vertices, int numberOfVertices)
    {
       clear();
       addVertices(vertices, numberOfVertices);
@@ -240,7 +240,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *           contains one point whereas the (at least) two columns contains in order the
     *           coordinates x and y. Not modified.
     */
-   public ConvexPolygon2d(double[][] vertices)
+   public ConvexPolygon2D(double[][] vertices)
    {
       this(vertices, vertices.length);
    }
@@ -252,7 +252,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws OutdatedPolygonException if {@link #update()} has not been called since last time the
     *            other polygon's vertices were edited.
     */
-   public ConvexPolygon2d(ConvexPolygon2d otherPolygon)
+   public ConvexPolygon2D(ConvexPolygon2D otherPolygon)
    {
       setAndUpdate(otherPolygon);
    }
@@ -270,7 +270,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws OutdatedPolygonException if {@link #update()} has not been called since last time the
     *            other polygons' vertices were edited.
     */
-   public ConvexPolygon2d(ConvexPolygon2d firstPolygon, ConvexPolygon2d secondPolygon)
+   public ConvexPolygon2D(ConvexPolygon2D firstPolygon, ConvexPolygon2D secondPolygon)
    {
       setAndUpdate(firstPolygon, secondPolygon);
    }
@@ -287,10 +287,10 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @return the random convex polygon.
     * @throws RuntimeException if {@code maxAbsoluteXY < 0}.
     */
-   public static ConvexPolygon2d generateRandomConvexPolygon2d(Random random, double maxAbsoluteXY, int numberOfPossiblePoints)
+   public static ConvexPolygon2D generateRandomConvexPolygon2d(Random random, double maxAbsoluteXY, int numberOfPossiblePoints)
    {
       List<Point2D> vertices = EuclidGeometryRandomTools.generateRandomPointCloud2D(random, 0.0, maxAbsoluteXY, numberOfPossiblePoints);
-      return new ConvexPolygon2d(vertices);
+      return new ConvexPolygon2D(vertices);
    }
 
    /**
@@ -479,7 +479,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws OutdatedPolygonException if {@link #update()} has not been called since last time the
     *            other polygon's vertices were edited.
     */
-   public void addVertices(ConvexPolygon2d otherPolygon)
+   public void addVertices(ConvexPolygon2D otherPolygon)
    {
       for (int i = 0; i < otherPolygon.getNumberOfVertices(); i++)
          addVertex(otherPolygon.getVertex(i));
@@ -620,7 +620,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * This method does:
     * <ol>
     * <li>{@link #clear()}.
-    * <li>{@link #addVertices(ConvexPolygon2d)}.
+    * <li>{@link #addVertices(ConvexPolygon2D)}.
     * <li>{@link #update()}.
     * </ol>
     * 
@@ -629,7 +629,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            other polygon's vertices were edited.
     */
    @Override
-   public void set(ConvexPolygon2d other)
+   public void set(ConvexPolygon2D other)
    {
       setAndUpdate(other);
    }
@@ -638,7 +638,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * This method does:
     * <ol>
     * <li>{@link #clear()}.
-    * <li>{@link #addVertices(ConvexPolygon2d)}.
+    * <li>{@link #addVertices(ConvexPolygon2D)}.
     * <li>{@link #update()}.
     * </ol>
     * 
@@ -647,7 +647,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            other polygon's vertices were edited.
     */
    // TODO There is no need to call update() there, instead update everything from the other polygon to make it faster.
-   public void setAndUpdate(ConvexPolygon2d otherPolygon)
+   public void setAndUpdate(ConvexPolygon2D otherPolygon)
    {
       clear();
       addVertices(otherPolygon);
@@ -668,7 +668,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            other polygons' vertices were edited.
     */
    // TODO: Make this more efficient by finding the rotating calipers, as in the intersection method.
-   public void setAndUpdate(ConvexPolygon2d firstPolygon, ConvexPolygon2d secondPolygon)
+   public void setAndUpdate(ConvexPolygon2D firstPolygon, ConvexPolygon2D secondPolygon)
    {
       clear();
       addVertices(firstPolygon);
@@ -1208,9 +1208,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            polygon's vertices were edited.
     * @throws EmptyPolygonException if this polygon is empty when calling this method.
     */
-   public ConvexPolygon2d translateCopy(Tuple2DReadOnly translation)
+   public ConvexPolygon2D translateCopy(Tuple2DReadOnly translation)
    {
-      ConvexPolygon2d copy = new ConvexPolygon2d(this);
+      ConvexPolygon2D copy = new ConvexPolygon2D(this);
       copy.translate(translation);
       return copy;
    }
@@ -1294,9 +1294,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
     *            transformation in the XY-plane.
     */
-   public ConvexPolygon2d applyTransformCopy(Transform transform)
+   public ConvexPolygon2D applyTransformCopy(Transform transform)
    {
-      ConvexPolygon2d copy = new ConvexPolygon2d(this);
+      ConvexPolygon2D copy = new ConvexPolygon2D(this);
       copy.applyTransform(transform);
       return copy;
    }
@@ -1315,9 +1315,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            polygon's vertices were edited.
     * @throws EmptyPolygonException if this polygon is empty when calling this method.
     */
-   public ConvexPolygon2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
+   public ConvexPolygon2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
-      ConvexPolygon2d copy = new ConvexPolygon2d(this);
+      ConvexPolygon2D copy = new ConvexPolygon2D(this);
       copy.applyTransformAndProjectToXYPlane(transform);
       return copy;
    }
@@ -1545,7 +1545,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     *            polygon's vertices were edited.
     * @throws EmptyPolygonException if this polygon is empty when calling this method.
     */
-   protected void getVerticesInClockwiseOrder(int startIndexInclusive, int endIndexInclusive, ConvexPolygon2d polygonToPack)
+   protected void getVerticesInClockwiseOrder(int startIndexInclusive, int endIndexInclusive, ConvexPolygon2D polygonToPack)
    {
       checkIfUpToDate();
       int index = startIndexInclusive;
@@ -1575,7 +1575,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * @throws EmptyPolygonException if this polygon is empty when calling this method.
     */
    @Override
-   public boolean epsilonEquals(ConvexPolygon2d other, double epsilon)
+   public boolean epsilonEquals(ConvexPolygon2D other, double epsilon)
    {
       checkIfUpToDate();
 

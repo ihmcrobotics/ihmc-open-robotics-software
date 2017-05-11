@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,7 +53,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry, null);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       PlanarRegionBipedalFootstepPlannerVisualizer listener = new PlanarRegionBipedalFootstepPlannerVisualizer(100, footPolygonsInSoleFrame, registry,
                                                                                                                graphicsListRegistry);
 

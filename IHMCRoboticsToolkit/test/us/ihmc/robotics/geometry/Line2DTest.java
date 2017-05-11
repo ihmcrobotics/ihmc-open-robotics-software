@@ -1267,7 +1267,7 @@ public class Line2DTest
             pointList.add(randomPoint(random));
          }
 
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(pointList);
          Point2D[] intersectionList = line2d.intersectionWith(convexPolygon);
 
          assertTrue((intersectionList == null) || (intersectionList.length % 2 == 0));
@@ -1285,7 +1285,7 @@ public class Line2DTest
       polygonPoints.add(firstPolygonPoint);
       polygonPoints.add(secondPolygonPoint);
       polygonPoints.add(thirdPolygonPoint);
-      ConvexPolygon2d triangle = new ConvexPolygon2d(polygonPoints);
+      ConvexPolygon2D triangle = new ConvexPolygon2D(polygonPoints);
 
       Point2D[] intersections = line2d.intersectionWith(triangle);
       assertEquals(1, intersections.length);

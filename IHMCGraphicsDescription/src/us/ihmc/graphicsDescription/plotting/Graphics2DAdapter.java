@@ -6,7 +6,7 @@ import java.awt.Font;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2D;
 
@@ -83,12 +83,12 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawRotatedCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawPolygon(ConvexPolygon2d polygon)
+   public void drawPolygon(ConvexPolygon2D polygon)
    {
       plotter2dAdapter.drawPolygon(plotter2dAdapter.getMetersFrame(), polygon);
    }
 
-   public void drawPolygonFilled(ConvexPolygon2d polygon)
+   public void drawPolygonFilled(ConvexPolygon2D polygon)
    {
       plotter2dAdapter.drawPolygonFilled(plotter2dAdapter.getMetersFrame(), polygon);
    }

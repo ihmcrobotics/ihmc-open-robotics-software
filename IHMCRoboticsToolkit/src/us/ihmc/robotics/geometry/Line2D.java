@@ -523,7 +523,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @throws RuntimeException if this line has not been initialized yet.
     * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
     */
-   public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
+   public Point2D[] intersectionWith(ConvexPolygon2D convexPolygon)
    {
       checkHasBeenInitialized();
       return convexPolygon.intersectionWith(this);
@@ -552,7 +552,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @throws RuntimeException if this line has not been initialized yet.
     * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
     */
-   public int intersectionWith(ConvexPolygon2d convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   public int intersectionWith(ConvexPolygon2D convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
       checkHasBeenInitialized();
       return convexPolygon.intersectionWith(this, firstIntersectionToPack, secondIntersectionToPack);

@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -476,7 +476,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
             minHeight = point.getZ();
       }
 
-      ConvexPolygon2d lowerBoundPolygon = parameters.getCollisionPolygon();
+      ConvexPolygon2D lowerBoundPolygon = parameters.getCollisionPolygon();
       double dropDistance = parameters.getBoundingSquareSizeLength();
       double cosYaw = Math.cos(yaw);
       double sinYaw = Math.sin(yaw);
@@ -534,8 +534,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       }
 
       // find the convex hull of all the points inside the supportPolgon convex hull
-      ConvexPolygon2d maxSupportPolygon = parameters.getSupportPolygon();
-      ConvexPolygon2d actualSupportPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D maxSupportPolygon = parameters.getSupportPolygon();
+      ConvexPolygon2D actualSupportPolygon = new ConvexPolygon2D();
       for (Point2D point2d : pointsInFootstepFrame)
       {
          if (maxSupportPolygon.isPointInside(point2d, distanceTolerance))
@@ -642,7 +642,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    public ArrayList<Point2DReadOnly> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
    {
-      ConvexPolygon2d supportPolygon = new ConvexPolygon2d(listOfPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
       supportPolygon.update();
       Point2DReadOnly polygonCentroid = supportPolygon.getCentroid();
 
@@ -684,8 +684,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    private ArrayList<? extends Point2DReadOnly> reduceListOfPointsToFourFootstepBased(List<? extends Point2DReadOnly> listOfPoints)
    {
 
-      ConvexPolygon2d basePolygon = parameters.getCollisionPolygon();
-      ConvexPolygon2d supportPolygon = new ConvexPolygon2d(listOfPoints);
+      ConvexPolygon2D basePolygon = parameters.getCollisionPolygon();
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
       supportPolygon.update();
 
       ArrayList<Point2D> finalListOfSupportPoints = new ArrayList<Point2D>();
@@ -700,7 +700,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       return finalListOfSupportPoints;
    }
 
-   private Point2D getPointInPolygonNearestPoint(ConvexPolygon2d polygon, Point2DReadOnly point2d)
+   private Point2D getPointInPolygonNearestPoint(ConvexPolygon2D polygon, Point2DReadOnly point2d)
    {
       LineSegment2D closestEdge = new LineSegment2D();
       polygon.getClosestEdge(point2d, closestEdge);

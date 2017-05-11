@@ -201,9 +201,9 @@ public class ConvexPolygonToolsTest
          Point2D offset1 = new Point2D(-1.0, 0.0);
          Point2D offset2 = new Point2D(1.0, 0.0);
 
-         ConvexPolygon2d polygon1 = new ConvexPolygon2d();
-         ConvexPolygon2d polygon2 = new ConvexPolygon2d();
-         ConvexPolygon2d expectedPolygon = new ConvexPolygon2d();
+         ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+         ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+         ConvexPolygon2D expectedPolygon = new ConvexPolygon2D();
 
          for (int index = 0; index < pointList.size(); index++)
          {
@@ -224,7 +224,7 @@ public class ConvexPolygonToolsTest
 
          expectedPolygon.update();
 
-         ConvexPolygon2d actualPolygon = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2).getConvexPolygon2d();
+         ConvexPolygon2D actualPolygon = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2).getConvexPolygon2d();
 
          assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon, expectedPolygon.epsilonEquals(actualPolygon, epsilon));
       }
@@ -407,8 +407,8 @@ public class ConvexPolygonToolsTest
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsIntersectingPolygons()
    {
-      ConvexPolygon2d polygon1 = getPolygon(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2});
-      ConvexPolygon2d polygon2 = getPolygon(new double[] {1, 1, 0, 3, 2, 2, 3, 0});
+      ConvexPolygon2D polygon1 = getPolygon(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2});
+      ConvexPolygon2D polygon2 = getPolygon(new double[] {1, 1, 0, 3, 2, 2, 3, 0});
 
       try
       {
@@ -440,8 +440,8 @@ public class ConvexPolygonToolsTest
          throw new RuntimeException("Invalid input.");
       }
 
-      ConvexPolygon2d polygon1 = getPolygon(p1);
-      ConvexPolygon2d polygon2 = getPolygon(p2);
+      ConvexPolygon2D polygon1 = getPolygon(p1);
+      ConvexPolygon2D polygon2 = getPolygon(p2);
       Point2DReadOnly[] closestPoints = ConvexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2);
       Point2DReadOnly[] closestPointsReversed = ConvexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1);
       assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
@@ -451,7 +451,7 @@ public class ConvexPolygonToolsTest
       assertEquals(expectedSolution[3], closestPoints[1].getY(), epsilon);
    }
 
-   private ConvexPolygon2d getPolygon(double[] polygon)
+   private ConvexPolygon2D getPolygon(double[] polygon)
    {
       if (polygon.length % 2 != 0)
       {
@@ -464,6 +464,6 @@ public class ConvexPolygonToolsTest
          list.add(new Point2D(polygon[i], polygon[i + 1]));
       }
 
-      return new ConvexPolygon2d(list);
+      return new ConvexPolygon2D(list);
    }
 }

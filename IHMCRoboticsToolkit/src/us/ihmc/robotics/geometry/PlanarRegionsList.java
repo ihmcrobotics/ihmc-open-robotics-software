@@ -42,7 +42,7 @@ public class PlanarRegionsList
     * @param convexPolygon the query.
     * @return the list of planar regions intersecting with the given polygon. Returns null when no region intersects.
     */
-   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2d convexPolygon)
+   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2D convexPolygon)
    {
       List<PlanarRegion> containers = null;
 

@@ -448,7 +448,7 @@ public class LineSegment2D implements GeometryObject<LineSegment2D>
       return secondEndpoint.getY();
    }
 
-   public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
+   public Point2D[] intersectionWith(ConvexPolygon2D convexPolygon)
    {
       return convexPolygon.intersectionWith(this);
    }
@@ -486,7 +486,7 @@ public class LineSegment2D implements GeometryObject<LineSegment2D>
     * @return the number of intersections between this line segment and the polygon.
     * @throws OutdatedPolygonException if the convex polygon is not up-to-date.
     */
-   public int intersectionWith(ConvexPolygon2d convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
+   public int intersectionWith(ConvexPolygon2D convexPolygon, Point2DBasics firstIntersectionToPack, Point2DBasics secondIntersectionToPack)
    {
       return convexPolygon.intersectionWith(this, firstIntersectionToPack, secondIntersectionToPack);
    }

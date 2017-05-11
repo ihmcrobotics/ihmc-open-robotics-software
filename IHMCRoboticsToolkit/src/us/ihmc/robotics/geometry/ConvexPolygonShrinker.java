@@ -46,7 +46,7 @@ public class ConvexPolygonShrinker
    }
    
    
-   public boolean shrinkConstantDistanceInto(ConvexPolygon2d polygonQ, double distance, ConvexPolygon2d polygonToPack)
+   public boolean shrinkConstantDistanceInto(ConvexPolygon2D polygonQ, double distance, ConvexPolygon2D polygonToPack)
    {
       if (Math.abs(distance) < 1.0e-10)
       {
@@ -140,7 +140,7 @@ public class ConvexPolygonShrinker
       
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
-      ConvexPolygon2d polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
+      ConvexPolygon2D polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
       shrinkConstantDistanceInto(polygonQ.getConvexPolygon2dCopy(), distance, polygon2dToPack);
 //      framePolygonToPack.updateFramePoints();
       framePolygonToPack.update();

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -35,7 +35,7 @@ public class ConstraintToConvexRegion
    private double deltaInside = 0.0;
 
    /** convex polygon in which to constrain the variable. */
-   private final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+   private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
 
    /**
     * Creates the Constraint To Convex Region. Refer to the class documentation: {@link ConstraintToConvexRegion}.

@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 
 /**
  * Based on a {@link JavaFXMeshBuilder}, this class can combine different meshes with different colors into a single mesh.
@@ -457,7 +457,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param polygon the polygon to render.
     * @param color color of the polygon. Color accuracy depends on the color palette in use.
     */
-   public void addPolygon(RigidBodyTransform transformToWorld, ConvexPolygon2d polygon, Color color)
+   public void addPolygon(RigidBodyTransform transformToWorld, ConvexPolygon2D polygon, Color color)
    {
       addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon), color);
    }

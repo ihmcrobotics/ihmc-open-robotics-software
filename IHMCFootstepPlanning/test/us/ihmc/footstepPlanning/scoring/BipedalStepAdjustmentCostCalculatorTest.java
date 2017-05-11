@@ -24,7 +24,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -39,7 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class BipedalStepAdjustmentCostCalculatorTest
 {
    private Color[] costColorGradient;
-   private ConvexPolygon2d defaultFootPolygon;
+   private ConvexPolygon2D defaultFootPolygon;
    private Map<Integer, YoGraphicPolygon> candidateFootstepPolygons;
    private DoubleYoVariable colorIndexYoVariable;
    private DoubleYoVariable stanceFootPitch;
