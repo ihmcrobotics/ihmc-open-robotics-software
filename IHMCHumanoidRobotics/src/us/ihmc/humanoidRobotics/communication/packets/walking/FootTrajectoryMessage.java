@@ -65,7 +65,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
       this.robotSide = robotSide;
    }
 
@@ -80,8 +80,6 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    {
       super(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
-      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
-      super.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
    }
 
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose desiredPose)

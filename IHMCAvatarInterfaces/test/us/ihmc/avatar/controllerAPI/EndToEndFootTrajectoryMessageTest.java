@@ -188,8 +188,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       footTrajectoryMessage.setUseCustomControlFrame(true);
       footTrajectoryMessage.setControlFrameOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
       footTrajectoryMessage.setControlFramePosition(new Point3D(controlFrameTransform.getTranslationVector()));
-      footTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryFrame);
-      footTrajectoryMessage.setDataReferenceFrameId(trajectoryFrame);
+      footTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
 
       drcSimulationTestHelper.send(footTrajectoryMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime));
