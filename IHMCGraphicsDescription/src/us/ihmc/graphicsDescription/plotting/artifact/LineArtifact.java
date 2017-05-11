@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 
 public class LineArtifact extends Artifact
 {
@@ -16,7 +16,7 @@ public class LineArtifact extends Artifact
    private final Point2D point1 = new Point2D();
    private final Point2D point2 = new Point2D(0.01, 0.01);
 
-   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   private final LineSegment2D tempLineSegment = new LineSegment2D();
    
    public LineArtifact(String id)
    {

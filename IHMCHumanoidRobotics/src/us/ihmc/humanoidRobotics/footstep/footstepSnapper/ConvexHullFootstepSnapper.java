@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -702,8 +702,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    private Point2D getPointInPolygonNearestPoint(ConvexPolygon2d polygon, Point2DReadOnly point2d)
    {
-      LineSegment2d closestEdge = new LineSegment2d();
-      polygon.getClosestEdge(closestEdge, point2d);
+      LineSegment2D closestEdge = new LineSegment2D();
+      polygon.getClosestEdge(point2d, closestEdge);
       return closestEdge.orthogonalProjectionCopy(point2d);
    }
 }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
+import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -19,6 +20,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends QueueableMessage<T>
       implements Transformable, FrameBasedMessage
@@ -32,6 +34,10 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
+
+   @RosIgnoredField
+   public WeightMatrix3DMessage angularWeightMatrix;
+   public WeightMatrix3DMessage linearWeightMatrix;
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
@@ -115,7 +121,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
-                                                      se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+               se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
    }
 
@@ -135,7 +141,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-                                        Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
+         Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -158,7 +164,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-                                        Vector3D angularVelocity, long expressedInReferenceFrameId)
+         Vector3D angularVelocity, long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -204,6 +210,34 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
 
+   /**
+    * Sets the weight matrix to use for executing this message.
+    * <p>
+    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the end-effector.
+    * When it is not provided, or when the weights are set to Double.NaN, the controller will use the default QP Weights
+    * set for each axis.
+    * </p>
+    * <p>
+    * The selection frame coming along with the given weight matrix is used to determine to what
+    * reference frame the weights are referring to.
+    * </p>
+    *
+    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not
+    *           modified.
+    */
+   public void setWeightMatrix(WeightMatrix6D weightMatrix)
+   {
+      if (this.angularWeightMatrix == null)
+         this.angularWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getAngularPart());
+      else
+         this.angularWeightMatrix.set(weightMatrix.getAngularPart());
+
+      if (linearWeightMatrix == null)
+         linearWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getLinearPart());
+      else
+         linearWeightMatrix.set(weightMatrix.getLinearPart());
+   }
+
    public final int getNumberOfTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints.length;
@@ -242,6 +276,20 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
       if (linearSelectionMatrix != null)
          linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
+   }
+
+   public boolean hasWeightMatrix()
+   {
+      return angularWeightMatrix != null && linearWeightMatrix != null;
+   }
+
+   public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
+   {
+      weightMatrixToPack.clear();
+      if (angularWeightMatrix != null)
+         angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getAngularPart());
+      if (linearWeightMatrix != null)
+         linearWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
    }
 
    @Override
@@ -286,18 +334,96 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
 
+   /**
+    * Returns the unique ID referring to the angular weight frame to use with the weight matrix of
+    * this message.
+    * <p>
+    * If this message does not have an angular weight matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    *
+    * @return the weight frame ID for the angular weight matrix.
+    */
+   public long getAngularWeightMatrixFrameId()
+   {
+      if (angularWeightMatrix != null)
+         return angularWeightMatrix.getWeightFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+
+   /**
+    * Returns the unique ID referring to the linear weight frame to use with the weight matrix of
+    * this message.
+    * <p>
+    * If this message does not have a linear weight matrix, this method returns
+    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * </p>
+    *
+    * @return the weight frame ID for the angular weight matrix.
+    */
+   public long getLinearWeightMatrixFrameId()
+   {
+      if (linearWeightMatrix != null)
+         return linearWeightMatrix.getWeightFrameId();
+      else
+         return NameBasedHashCodeTools.NULL_HASHCODE;
+   }
+
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
-               + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException(
+               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
+      {
          return false;
+      }
+
+      if (linearSelectionMatrix == null && other.linearSelectionMatrix != null)
+      {
+         return false;
+      }
+
+      if (linearSelectionMatrix != null && !linearSelectionMatrix.equals(other.linearSelectionMatrix))
+      {
+         return false;
+      }
+
+      if (angularSelectionMatrix == null && other.angularSelectionMatrix != null)
+      {
+         return false;
+      }
+
+      if (angularSelectionMatrix != null && !angularSelectionMatrix.equals(other.angularSelectionMatrix))
+      {
+         return false;
+      }
+
+      if (linearWeightMatrix == null && other.linearWeightMatrix != null)
+      {
+         return false;
+      }
+
+      if (linearWeightMatrix != null && !linearWeightMatrix.equals(other.linearWeightMatrix))
+      {
+         return false;
+      }
+
+      if (angularWeightMatrix == null && other.angularWeightMatrix != null)
+      {
+         return false;
+      }
+
+      if (angularWeightMatrix != null && !angularWeightMatrix.equals(other.angularWeightMatrix))
+      {
+         return false;
+      }
 
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;

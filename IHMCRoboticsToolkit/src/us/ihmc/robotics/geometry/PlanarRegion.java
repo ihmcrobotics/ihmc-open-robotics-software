@@ -120,11 +120,11 @@ public class PlanarRegion
     * @param lineSegmentInWorld
     * @return true if the lineSegment intersects this PlanarRegion.
     */
-   public boolean isLineSegmentIntersecting(LineSegment2d lineSegmentInWorld)
+   public boolean isLineSegmentIntersecting(LineSegment2D lineSegmentInWorld)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given lineSegment is projected along the z-world axis to be snapped onto plane.
-      LineSegment2d projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
+      LineSegment2D projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
 
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
@@ -143,11 +143,11 @@ public class PlanarRegion
     * @param convexPolygonInWorld Polygon to project vertically.
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     */
-   public void getLineSegmentIntersectionsWhenProjectedVertically(LineSegment2d lineSegmentInWorld, ArrayList<Point2D[]> intersectionsInPlaneFrameToPack)
+   public void getLineSegmentIntersectionsWhenProjectedVertically(LineSegment2D lineSegmentInWorld, ArrayList<Point2D[]> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given lineSegment is projected along the z-world axis to be snapped onto plane.
-      LineSegment2d projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
+      LineSegment2D projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
 
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
@@ -181,7 +181,7 @@ public class PlanarRegion
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2d polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = polygonToCheck.intersectionWith(projectedPolygon, dummyPolygon);
+         boolean hasIntersection = ConvexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, dummyPolygon);
          if (hasIntersection)
             return true;
       }
@@ -203,7 +203,7 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+         ConvexPolygon2d intersectingPolygon = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon);
 
          if (intersectingPolygon != null)
          {
@@ -251,7 +251,7 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+         ConvexPolygon2d intersectingPolygon = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon);
 
          if (intersectingPolygon != null)
          {
@@ -337,7 +337,7 @@ public class PlanarRegion
     * @param lineSegmentInWorld LineSegment2d to project
     * @return new projected LineSegment2d
     */
-   private LineSegment2d projectLineSegmentVerticallyToRegion(LineSegment2d lineSegmentInWorld)
+   private LineSegment2D projectLineSegmentVerticallyToRegion(LineSegment2D lineSegmentInWorld)
    {
       Point2D[] snappedEndpoints = new Point2D[2];
 
@@ -364,7 +364,7 @@ public class PlanarRegion
       fromWorldToLocalTransform.transform(snappedVertex3d);
       snappedEndpoints[1] = new Point2D(snappedVertex3d.getX(), snappedVertex3d.getY());
 
-      LineSegment2d projectedLineSegment = new LineSegment2d(snappedEndpoints);
+      LineSegment2D projectedLineSegment = new LineSegment2D(snappedEndpoints);
       return projectedLineSegment;
    }
    

@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 
 /**
  * This is a public interface for drawing geometry in the Plotter.
@@ -103,7 +103,7 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawLine(plotter2dAdapter.getMetersFrame(), line);
    }
 
-   public void drawLineSegment(LineSegment2d lineSegment)
+   public void drawLineSegment(LineSegment2D lineSegment)
    {
       plotter2dAdapter.drawLineSegment(plotter2dAdapter.getMetersFrame(), lineSegment);
    }

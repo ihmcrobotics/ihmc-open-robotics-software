@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class ConvexPolygonShrinker
 {
-   private final LineSegment2d polygonAsLineSegment = new LineSegment2d();
+   private final LineSegment2D polygonAsLineSegment = new LineSegment2D();
    private final ArrayList<Point2D> newVertices = new ArrayList<Point2D>();
    private final Point2D newVertex0 = new Point2D();
    private final Point2D newVertex1 = new Point2D();
@@ -54,7 +54,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyTwoVertices())
+      if (polygonQ.getNumberOfVertices() == 2)
       {
          Point2DReadOnly vertex0 = polygonQ.getVertex(0);
          Point2DReadOnly vertex1 = polygonQ.getVertex(1);
@@ -85,7 +85,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyOneVertex())
+      if (polygonQ.getNumberOfVertices() == 1)
       {
          polygonToPack.setAndUpdate(polygonQ);
          

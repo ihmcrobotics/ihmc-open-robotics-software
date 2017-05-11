@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 /**
  * Represents a finite-length 2D line segment defined by its two 2D endpoints.
  */
-public class LineSegment2d implements GeometryObject<LineSegment2d>
+public class LineSegment2D implements GeometryObject<LineSegment2D>
 {
    /** The first endpoint defining this line segment. */
    private final Point2D firstEndpoint = new Point2D();
@@ -25,7 +25,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    /**
     * Default constructor that initializes both endpoints of this line segment to zero.
     */
-   public LineSegment2d()
+   public LineSegment2D()
    {
    }
 
@@ -37,7 +37,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param secondEndpointX x-coordinate of the second endpoint of this line segment.
     * @param secondEndpointY y-coordinate of the second endpoint of this line segment.
     */
-   public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
+   public LineSegment2D(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
       set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
@@ -47,7 +47,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * 
     * @param other the other line segment used to initialize this line segment. Not modified.
     */
-   public LineSegment2d(LineSegment2d other)
+   public LineSegment2D(LineSegment2D other)
    {
       set(other);
    }
@@ -58,7 +58,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param firstEndpoint the first endpoint of this line segment. Not modified.
     * @param secondEndpoint the second endpoint of this line segment. Not modified.
     */
-   public LineSegment2d(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
+   public LineSegment2D(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
    {
       set(firstEndpoint, secondEndpoint);
    }
@@ -70,7 +70,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     *           this line segment. Not modified.
     * @throws IllegalArgumentException if the given array has a length different than 2.
     */
-   public LineSegment2d(Point2DReadOnly[] endpoints)
+   public LineSegment2D(Point2DReadOnly[] endpoints)
    {
       set(endpoints);
    }
@@ -104,13 +104,17 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    /**
     * Copies this line segment, transforms the copy using the given homogeneous transformation
     * matrix and project the result onto the XY-plane, and returns the result.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param transform the transform to apply on this line segment's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public LineSegment2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
+   public LineSegment2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
-      LineSegment2d copy = new LineSegment2d(this);
+      LineSegment2D copy = new LineSegment2D(this);
       copy.applyTransformAndProjectToXYPlane(transform);
       return copy;
    }
@@ -123,12 +127,13 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * </p>
     * 
     * @param transform the transform to apply on this line segment's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
     *            transformation in the XY-plane.
     */
-   public LineSegment2d applyTransformCopy(Transform transform)
+   public LineSegment2D applyTransformCopy(Transform transform)
    {
-      LineSegment2d copy = new LineSegment2d(this);
+      LineSegment2D copy = new LineSegment2D(this);
       copy.applyTransform(transform);
       return copy;
    }
@@ -219,7 +224,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param other the other line segment used to compute the dot product. Not modified.
     * @return the value of the dot product.
     */
-   public double dotProduct(LineSegment2d other)
+   public double dotProduct(LineSegment2D other)
    {
       return EuclidGeometryTools.dotProduct(firstEndpoint, secondEndpoint, other.firstEndpoint, other.secondEndpoint);
    }
@@ -233,7 +238,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @return {@code true} if the two line segments are equal, {@code false} otherwise.
     */
    @Override
-   public boolean epsilonEquals(LineSegment2d other, double epsilon)
+   public boolean epsilonEquals(LineSegment2D other, double epsilon)
    {
       return firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon);
    }
@@ -245,7 +250,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @return {@code true} if the two line segments are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(LineSegment2d other)
+   public boolean equals(LineSegment2D other)
    {
       if (other == null)
          return false;
@@ -255,7 +260,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(LineSegment2d)}, it returns {@code false} otherwise.
+    * returns {@link #equals(LineSegment2D)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -265,7 +270,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    {
       try
       {
-         return equals((LineSegment2d) obj);
+         return equals((LineSegment2D) obj);
       }
       catch (ClassCastException e)
       {
@@ -299,9 +304,9 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
    /**
     * Returns a copy of this line segment with the endpoints swapped.
     */
-   public LineSegment2d flipDirectionCopy()
+   public LineSegment2D flipDirectionCopy()
    {
-      return new LineSegment2d(secondEndpoint, firstEndpoint);
+      return new LineSegment2D(secondEndpoint, firstEndpoint);
    }
 
    /**
@@ -560,7 +565,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     *           modified.
     * @return the intersection point if it exists, {@code null} otherwise.
     */
-   public Point2D intersectionWith(LineSegment2d secondLineSegment)
+   public Point2D intersectionWith(LineSegment2D secondLineSegment)
    {
       return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment.firstEndpoint,
                                                                       secondLineSegment.secondEndpoint);
@@ -585,7 +590,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the two lines intersects, {@code false} otherwise.
     */
-   public boolean intersectionWith(LineSegment2d secondLineSegment, Point2D intersectionToPack)
+   public boolean intersectionWith(LineSegment2D secondLineSegment, Point2D intersectionToPack)
    {
       return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(firstEndpoint, secondEndpoint, secondLineSegment.firstEndpoint,
                                                                       secondLineSegment.secondEndpoint, intersectionToPack);
@@ -1019,7 +1024,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param other the other line segment to copy. Not modified.
     */
    @Override
-   public void set(LineSegment2d other)
+   public void set(LineSegment2D other)
    {
       set(other.firstEndpoint, other.secondEndpoint);
    }
@@ -1149,9 +1154,9 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       translate(orthogonalVectorX, orthogonalVectorY);
    }
 
-   private LineSegment2d shiftAndCopy(boolean shiftToLeft, double distanceToShift)
+   private LineSegment2D shiftAndCopy(boolean shiftToLeft, double distanceToShift)
    {
-      LineSegment2d shifted = new LineSegment2d(this);
+      LineSegment2D shifted = new LineSegment2D(this);
       shifted.shift(shiftToLeft, distanceToShift);
       return shifted;
    }
@@ -1180,7 +1185,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param distanceToShift the distance to shift this line segment.
     * @return the shifted line segment.
     */
-   public LineSegment2d shiftToLeftCopy(double distanceToShift)
+   public LineSegment2D shiftToLeftCopy(double distanceToShift)
    {
       return shiftAndCopy(true, distanceToShift);
    }
@@ -1209,7 +1214,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     * @param distanceToShift the distance to shift this line segment.
     * @return the shifted line segment.
     */
-   public LineSegment2d shiftToRightCopy(double distanceToShift)
+   public LineSegment2D shiftToRightCopy(double distanceToShift)
    {
       return shiftAndCopy(false, distanceToShift);
    }

@@ -68,7 +68,7 @@ public class PlanarRegionsList
     * @param lineSegmentInWorld the query.
     * @param intersectingRegionsToPack ArrayList were the intersecting regions will be packed into.
     */
-   public void findPlanarRegionsIntersectingLineSegment(LineSegment2d lineSegmentInWorld, ArrayList<PlanarRegion> intersectingRegionsToPack)
+   public void findPlanarRegionsIntersectingLineSegment(LineSegment2D lineSegmentInWorld, ArrayList<PlanarRegion> intersectingRegionsToPack)
    {
       for (int i = 0; i < regions.size(); i++)
       {
@@ -91,7 +91,7 @@ public class PlanarRegionsList
     * @param lineSegmentInWorld
     * @return
     */
-   private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2d lineSegmentInWorld)
+   private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2D lineSegmentInWorld)
    {
 	   BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
 
