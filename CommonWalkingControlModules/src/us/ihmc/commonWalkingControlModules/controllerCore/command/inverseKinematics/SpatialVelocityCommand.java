@@ -645,19 +645,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public boolean isHardConstraint()
    {
-      WeightMatrix3D angularPart = weightMatrix.getAngularPart();
-      if(angularPart.getXAxisWeight() == HARD_CONSTRAINT || angularPart.getYAxisWeight() == HARD_CONSTRAINT || angularPart.getZAxisWeight() == HARD_CONSTRAINT)
-      {
-         return true;
-      }
-      
-      WeightMatrix3D linearPart = weightMatrix.getLinearPart();
-      if(linearPart.getXAxisWeight() == HARD_CONSTRAINT || linearPart.getYAxisWeight() == HARD_CONSTRAINT || linearPart.getZAxisWeight() == HARD_CONSTRAINT)
-      {
-         return true;
-      }
-      
-      return false;
+      return weightMatrix.containsHardConstraint();
    }
    /**
     * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
