@@ -10,7 +10,7 @@ public class DynamicReachabilityParameters
     */
    public double getThresholdForStepUp()
    {
-      return 0.05;
+      return 0.10;
    }
 
    /**
@@ -21,7 +21,7 @@ public class DynamicReachabilityParameters
     */
    public double getThresholdForStepDown()
    {
-      return -0.05;
+      return -0.10;
    }
 
    /**
@@ -102,7 +102,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumTransferDuration()
    {
-      return 0.25;
+      return 0.15;
    }
 
    /**
@@ -134,7 +134,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumInitialTransferDuration()
    {
-      return 0.1;
+      return 0.05;
    }
 
    /**
@@ -142,7 +142,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumEndTransferDuration()
    {
-      return 0.1;
+      return 0.05;
    }
 
    /**
@@ -212,7 +212,7 @@ public class DynamicReachabilityParameters
 
    public double getTransferEqualAdjustmentWeight()
    {
-      return 100.0;
+      return 50.0;
    }
 
    public double getSwingEqualAdjustmentWeight()

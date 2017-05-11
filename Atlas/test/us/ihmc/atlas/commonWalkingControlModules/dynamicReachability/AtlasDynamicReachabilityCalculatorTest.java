@@ -35,13 +35,7 @@ public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachab
                   @Override
                   public double maximumHeightAboveAnkle()
                   {
-                     return 0.95; // height for straight leg steps
-                  }
-
-                  @Override
-                  public boolean useOptimizationBasedICPController()
-                  {
-                     return true;
+                     return 0.92; // height for straight leg steps
                   }
 
                   @Override
@@ -52,7 +46,7 @@ public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachab
                         @Override
                         public double getMaximumDesiredKneeBend()
                         {
-                           return 0.8;
+                           return 0.4;
                         }
                      };
                   }
@@ -69,7 +63,7 @@ public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachab
       AtlasDynamicReachabilityCalculatorTest test = new AtlasDynamicReachabilityCalculatorTest();
       try
       {
-         test.testForwardWalking();
+         test.testForwardWalkingMedium();
       }
       catch(SimulationExceededMaximumTimeException e)
       {
