@@ -21,7 +21,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.screwTheory.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T>
       implements Transformable, FrameBasedMessage
@@ -119,7 +119,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
-                                                      so3TrajectoryPointMessage.angularVelocity);
+               so3TrajectoryPointMessage.angularVelocity);
       }
    }
 
@@ -146,7 +146,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     *           point. It is should be expressed in the frame defined by referenceFrameId
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
-                                        ReferenceFrame expressedInReferenceFrame)
+         ReferenceFrame expressedInReferenceFrame)
    {
       checkIfTrajectoryFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -165,7 +165,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     *           point. It is should be expressed in the frame defined by referenceFrameId
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
-                                        long expressedInReferenceFrameId)
+         long expressedInReferenceFrameId)
    {
       checkIfFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -205,7 +205,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       else
          this.selectionMatrix.set(selectionMatrix);
    }
-   
+
    /**
     * Sets the weight matrix to use for executing this message.
     * <p>
@@ -214,11 +214,11 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     * set for each axis.
     * </p>
     * <p>
-    * The selection frame coming along with the given weight matrix is used to determine to what
+    * The weight frame coming along with the given weight matrix is used to determine to what
     * reference frame the weights are referring to.
     * </p>
     * 
-    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not 
+    * @param weightMatrix the weight matrix to use when executing this trajectory message. parameter is not 
     *           modified.
     */
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
@@ -260,16 +260,16 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       return selectionMatrix != null;
    }
 
-   public boolean hasWeightMatrix()
-   {
-      return weightMatrix != null;
-   }
-
    public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
       selectionMatrixToPack.resetSelection();
       if (selectionMatrix != null)
          selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+   }
+   
+   public boolean hasWeightMatrix()
+   {
+      return weightMatrix != null;
    }
 
    public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
@@ -298,19 +298,19 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    }
 
    /**
-    * Returns the unique ID referring to the weight selection frame to use with the weight matrix of
+    * Returns the unique ID referring to the weight frame to use with the weight matrix of
     * this message.
     * <p>
     * If this message does not have a weight matrix, this method returns
     * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
     * </p>
     * 
-    * @return the selection frame ID for the selection matrix.
+    * @return the weight frame ID for the weight matrix.
     */
    public long getWeightMatrixFrameId()
    {
       if (weightMatrix != null)
-         return weightMatrix.getSelectionFrameId();
+         return weightMatrix.getWeightFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -318,8 +318,8 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
-               + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException(
+               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    /** {@inheritDoc} */

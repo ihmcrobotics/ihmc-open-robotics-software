@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.robotics.weightMatrices;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
@@ -10,32 +10,32 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 
  * <p>
  * Given the set of weights about particular axis of interest and a reference frame to which these axes refer to, the
- * {@code WeightMatrix3D} is then able compute the corresponding 6-by-6 selection matrix.
+ * {@code WeightMatrix3D} is then able compute the corresponding 6-by-6 weight matrix.
  * </p>
  * <p>
  * The principal use-case of this class is to help users define the QP weights of each axis for a given end-effector and what frame they should be 
  * expressed in. 
  * </p>
  * <p>
- * Note that the {@link #selectionFrame} is optional. It is preferable to provide it when possible,
+ * Note that the {@link #weightFrame} is optional. It is preferable to provide it when possible,
  * but when it is absent, i.e. equal to {@code null}, the weight matrix will then be generated
- * assuming the destination frame is the same as the selection frame.
+ * assuming the destination frame is the same as the weight frame.
  * </p>
  */
 public class WeightMatrix6D
 {
    /**
-    * The 3-by-3 selection matrix A<sub>3x3</sub> for the angular part of this weight matrix.
+    * The 3-by-3 weight matrix A<sub>3x3</sub> for the angular part of this weight matrix.
     */
    private final WeightMatrix3D angularWeights = new WeightMatrix3D();
    /**
-    * The 3-by-3 selection matrix L<sub>3x3</sub> for the linear part of this weight matrix.
+    * The 3-by-3 weight matrix L<sub>3x3</sub> for the linear part of this weight matrix.
     */
    private final WeightMatrix3D linearWeights = new WeightMatrix3D();
 
    /**
     * Creates a new weight matrix. This weight matrix is initialized with all the weights set to NAN. Until the weights are changed, this weight matrix is independent from its
-    * selection frame.
+    * weight frame.
     */
    public WeightMatrix6D()
    {
@@ -44,7 +44,7 @@ public class WeightMatrix6D
    /**
     * Copy constructor.
     * 
-    * @param other the selection matrix to copy. Not modified.
+    * @param other the weight matrix to copy. Not modified.
     */
    public WeightMatrix6D(WeightMatrix6D other)
    {
@@ -52,73 +52,73 @@ public class WeightMatrix6D
    }
 
    /**
-    * Sets the selection frame of both the angular and linear parts to {@code null}.
+    * Sets the weight frame of both the angular and linear parts to {@code null}.
     * <p>
-    * When the selection frame is {@code null}, the conversion into a 6-by-6 weight matrix will
+    * When the weight frame is {@code null}, the conversion into a 6-by-6 weight matrix will
     * be done regardless of the destination frame.
     * </p>
     */
-   public void clearSelectionFrame()
+   public void clearWeightFrame()
    {
-      setSelectionFrame(null);
+      setWeightFrame(null);
    }
 
    /**
-    * Sets the selection frame of the angular part to {@code null}.
+    * Sets the weight frame of the angular part to {@code null}.
     * <p>
-    * When the selection frame is {@code null}, the conversion into a weight matrix will be done
+    * When the weight frame is {@code null}, the conversion into a weight matrix will be done
     * regardless of the destination frame.
     * </p>
     * <p>
     * The linear part of this weight matrix remains unchanged.
     * </p>
     */
-   public void clearAngularSelectionFrame()
+   public void clearAngularWeightFrame()
    {
-      angularWeights.clearSelectionFrame();
+      angularWeights.clearWeightFrame();
    }
 
    /**
-    * Sets the selection frame of the linear part to {@code null}.
+    * Sets the weight frame of the linear part to {@code null}.
     * <p>
-    * When the selection frame is {@code null}, the conversion into a weight matrix will be done
+    * When the weight frame is {@code null}, the conversion into a weight matrix will be done
     * regardless of the destination frame.
     * </p>
     * <p>
     * The angular part of this weight matrix remains unchanged.
     * </p>
     */
-   public void clearLinearSelectionFrame()
+   public void clearLinearWeightFrame()
    {
-      linearWeights.clearSelectionFrame();
+      linearWeights.clearWeightFrame();
    }
 
    /**
     * set the frame the linear and angular weights are expressed in 
     * 
-    * @param selectionFrame the new frame to which the weights are expressed in 
+    * @param weightFrame the new frame to which the weights are expressed in 
     */
-   public void setSelectionFrame(ReferenceFrame selectionFrame)
+   public void setWeightFrame(ReferenceFrame weightFrame)
    {
-      setSelectionFrames(selectionFrame, selectionFrame);
+      setWeightFrames(weightFrame, weightFrame);
    }
 
    /**
-    * Sets the selection frame for the angular and linear parts separately.
+    * Sets the weight frame for the angular and linear parts separately.
     * 
-    * @param angularSelectionFrame the new frame to which the angular weights are referring to.
-    * @param linearSelectionFrame the new frame to which the linear  weights are referring to.
+    * @param angularWeightFrame the new frame to which the angular weights are referring to.
+    * @param linearWeightFrame the new frame to which the linear  weights are referring to.
     */
-   public void setSelectionFrames(ReferenceFrame angularSelectionFrame, ReferenceFrame linearSelectionFrame)
+   public void setWeightFrames(ReferenceFrame angularWeightFrame, ReferenceFrame linearWeightFrame)
    {
-      angularWeights.setSelectionFrame(angularSelectionFrame);
-      linearWeights.setSelectionFrame(linearSelectionFrame);
+      angularWeights.setWeightFrame(angularWeightFrame);
+      linearWeights.setWeightFrame(linearWeightFrame);
    }
 
    /**
-    * sets the linear and angular weights to NAN and sets the selection frame to null
+    * sets the linear and angular weights to NAN and sets the weight frame to null
     * <p>
-    * Until the selection is changed, this weight matrix is independent from its selection frame.
+    * Until the weights are changed, this weight matrix is independent from its weight frame.
     * </p>
     */
    public void clear()
@@ -128,7 +128,7 @@ public class WeightMatrix6D
    }
 
    /**
-    * Sets all the angular weights to NAN and clears the angular selection frame.
+    * Sets all the angular weights to NAN and clears the angular weight frame.
     * <p>
     * The linear part remains unmodified.
     * </p>
@@ -139,7 +139,7 @@ public class WeightMatrix6D
    }
 
    /**
-    * Sets all the linear weights to NAN and clears the angular selection frame.
+    * Sets all the linear weights to NAN and clears the angular weight frame.
     * <p>
     * The angular part remains unmodified.
     * </p>
@@ -180,12 +180,11 @@ public class WeightMatrix6D
       this.linearWeights.set(linearPart);
    }
 
-   
    /**
     * sets the angular weights
     * 
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -193,18 +192,17 @@ public class WeightMatrix6D
     * @param angularYWeight angular weight of the y axis
     * @param angularZWeight angular weight of the z axis
     */
-  public void setAngularWeights(double angularXWeight, double angularYWeight, double angularZWeight)
-  {
-     setAngularXAxisWeight(angularXWeight);
-     setAngularYAxisWeight(angularYWeight);
-     setAngularZAxisWeight(angularZWeight);
-  }
-
+   public void setAngularWeights(double angularXWeight, double angularYWeight, double angularZWeight)
+   {
+      setAngularXAxisWeight(angularXWeight);
+      setAngularYAxisWeight(angularYWeight);
+      setAngularZAxisWeight(angularZWeight);
+   }
 
    /**
     * sets the angular x axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -218,7 +216,7 @@ public class WeightMatrix6D
    /**
     * sets the angular y axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -232,7 +230,7 @@ public class WeightMatrix6D
    /**
     * sets the angular z axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -242,11 +240,25 @@ public class WeightMatrix6D
    {
       angularWeights.setZAxisWeight(weight);
    }
+
+   /**
+    * set the angular weights
+    * @param angularWeights the linear weights
+    * <p>
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
+    * to.
+    * </p>
+    */
+   public void setAngularWeights(Vector3D angularWeights)
+   {
+      this.angularWeights.setWeights(angularWeights.getX(), angularWeights.getY(), angularWeights.getZ());
+   }
+
    /**
     * sets the linear weights
     * 
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -264,7 +276,7 @@ public class WeightMatrix6D
    /**
     * sets the linear x axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -278,7 +290,7 @@ public class WeightMatrix6D
    /**
     * sets the linear y axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -292,7 +304,7 @@ public class WeightMatrix6D
    /**
     * sets the linear z axis weight
     * <p>
-    * Note that it is preferable to also set selection frame to which this selection is referring
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
     * to.
     * </p>
     * 
@@ -304,10 +316,23 @@ public class WeightMatrix6D
    }
 
    /**
+    * set the linear weights
+    * @param linearWeights the linear weights
+    * <p>
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring
+    * to.
+    * </p>
+    */
+   public void setLinearWeights(Vector3D linearWeights)
+   {
+      this.linearWeights.setWeights(linearWeights.getX(), linearWeights.getY(), linearWeights.getZ());
+   }
+
+   /**
     * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in
     * the {@code destinationFrame}.
     * <p>
-    * The given {@code selectionMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
+    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
     * set to represent this.
     * </p>
     * 
@@ -335,49 +360,49 @@ public class WeightMatrix6D
     * large matrix.
     * </p>
     * <p>
-    * The given {@code selectionMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
+    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
     * set to represent this.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the selection matrix is to be used.
+    * @param destinationFrame the reference frame in which the weight matrix is to be used.
     * @param weightMatrixToPack the dense-matrix is first reshaped to a 6-by-6 matrix and then
     *           set to represent this. The zero-rows of the resulting matrix are removed. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
    {
       weightMatrixToPack.reshape(6, 6);
       weightMatrixToPack.zero();
 
       // Need to do the linear part first as rows might be removed.
-      linearWeights.getCompactSelectionMatrixInFrame(destinationFrame, 3, 3, weightMatrixToPack);
-      angularWeights.getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
+      linearWeights.getCompactWeightMatrixInFrame(destinationFrame, 3, 3, weightMatrixToPack);
+      angularWeights.getCompactWeightMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
    }
 
    /**
     * The reference frame to which the angular weights are referring.
     * <p>
-    * This selection frame can be {@code null}.
+    * This weight frame can be {@code null}.
     * </p>
     * 
-    * @return the current selection frame for the angular part of this weight matrix.
+    * @return the current weight frame for the angular part of this weight matrix.
     */
-   public ReferenceFrame getAngularSelectionFrame()
+   public ReferenceFrame getAngularWeightFrame()
    {
-      return angularWeights.getSelectionFrame();
+      return angularWeights.getWeightFrame();
    }
 
    /**
     * The reference frame to which the linear weights are referring.
     * <p>
-    * This selection frame can be {@code null}.
+    * This weight frame can be {@code null}.
     * </p>
     * 
-    * @return the current selection frame for the linear part of this weight matrix.
+    * @return the current weight frame for the linear part of this weight matrix.
     */
-   public ReferenceFrame getLinearSelectionFrame()
+   public ReferenceFrame getLinearWeightFrame()
    {
-      return linearWeights.getSelectionFrame();
+      return linearWeights.getWeightFrame();
    }
 
    /**
@@ -399,11 +424,20 @@ public class WeightMatrix6D
    {
       return linearWeights;
    }
-   
+
    @Override
    public String toString()
    {
       return "Angular: " + angularWeights + ", linear: " + linearWeights;
+   }
+
+   /**
+    * Returns true if any weight equals {@code SolverWeightLevels.HARD_CONSTRAINT}.
+    * @return
+    */
+   public boolean containsHardConstraint()
+   {
+      return angularWeights.containsHardConstraint() || linearWeights.containsHardConstraint();
    }
 
    @Override
@@ -435,7 +469,7 @@ public class WeightMatrix6D
          return false;
       if (linearWeights == null)
       {
-         if (other.linearWeights != null)
+         if (other.angularWeights != null)
             return false;
       }
       else if (!linearWeights.equals(other.linearWeights))
@@ -443,13 +477,4 @@ public class WeightMatrix6D
       return true;
    }
 
-   public void setLinearWeights(Vector3D linearWeight)
-   {
-      linearWeights.setWeights(linearWeight.getX(), linearWeight.getY(), linearWeight.getZ());
-   }
-
-   public void setAngularWeights(Vector3D angularWeight)
-   {
-      angularWeights.setWeights(angularWeight.getX(), angularWeight.getY(), angularWeight.getZ());
-   }
 }

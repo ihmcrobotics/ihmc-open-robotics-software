@@ -38,8 +38,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.WeightMatrix3D;
-import us.ihmc.robotics.screwTheory.WeightMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
@@ -276,9 +276,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
       
       //update the qp weight yovariables.
-      ReferenceFrame angularSelectionFrame = weightMatrix.getAngularSelectionFrame();
+      ReferenceFrame angularSelectionFrame = weightMatrix.getAngularWeightFrame();
       yoWeightMatrixAngularFrameID.set(angularSelectionFrame == null ? controlFrame.getNameBasedHashCode() : angularSelectionFrame.getNameBasedHashCode());
-      ReferenceFrame linearSelectionFrame = weightMatrix.getLinearSelectionFrame();
+      ReferenceFrame linearSelectionFrame = weightMatrix.getLinearWeightFrame();
       yoWeightMatrixLinearFrameID.set(linearSelectionFrame == null ? controlFrame.getNameBasedHashCode() : linearSelectionFrame.getNameBasedHashCode());
       
       WeightMatrix3D linearPart = weightMatrix.getLinearPart();

@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -23,8 +21,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.WeightMatrix3D;
-import us.ihmc.robotics.screwTheory.WeightMatrix6D;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link SpatialAccelerationCommand} is a command meant to be submitted to the
@@ -60,8 +58,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    private final Vector3D desiredAngularAcceleration = new Vector3D();
 
    /**
-    * Weights on a per component basis to use in the optimization function. A higher weight means
-    * higher priority of this task.
+    * The Weight matrix describes the qp weights used for optimization. All weights are initially set to NaN. If the weights are NaN the controller will use the default weights.
+    * A higher weight means a higher priority of this task.
     */
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
@@ -529,14 +527,12 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weightVector dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
     */
-   public void setWeightMatrix(WeightMatrix6D weightMartrix)
+   public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
-      this.weightMatrix.set(weightMartrix);
+      this.weightMatrix.set(weightMatrix);
    }
 
    /**
@@ -589,11 +585,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom to
     * zero.
-    * <p>
-    * By doing so, the angular part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForLinearControl()} as by doing so
-    * the angular part will not be submitted to the optimization.
-    * </p>
     */
    public void setAngularWeightsToZero()
    {
@@ -603,11 +594,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    /**
     * Sets the weights to use in the optimization problem for each translational degree of freedom
     * to zero.
-    * <p>
-    * By doing so, the linear part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForAngularControl()} as by doing
-    * so the linear part will not be submitted to the optimization.
-    * </p>
     */
    public void setLinearWeightsToZero()
    {
@@ -626,19 +612,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public boolean isHardConstraint()
    {
-      WeightMatrix3D angularPart = weightMatrix.getAngularPart();
-      if(angularPart.getXAxisWeight() == HARD_CONSTRAINT || angularPart.getYAxisWeight() == HARD_CONSTRAINT || angularPart.getZAxisWeight() == HARD_CONSTRAINT)
-      {
-         return true;
-      }
-      
-      WeightMatrix3D linearPart = weightMatrix.getLinearPart();
-      if(linearPart.getXAxisWeight() == HARD_CONSTRAINT || linearPart.getYAxisWeight() == HARD_CONSTRAINT || linearPart.getZAxisWeight() == HARD_CONSTRAINT)
-      {
-         return true;
-      }
-      
-      return false;
+      return weightMatrix.containsHardConstraint();
    }
 
    /**
@@ -656,26 +630,22 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Returns the reference to the 6-by-1 weight vector to use with this command:
+    * Returns the weight Matrix used in this command:
     * 
-    * <pre>
-    *     / w0 \
-    *     | w1 |
-    * W = | w2 |
-    *     | w3 |
-    *     | w4 |
-    *     \ w5 /
-    * </pre>
-    * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
-    * </p>
-    * 
-    * @return the reference to the weights to use with this command.
+    * @return the reference to the weight matrix used in this command.
     */
    public WeightMatrix6D getWeightMatrix()
    {
       return weightMatrix;
+   }
+
+   /**
+    * Sets the weightMatrixToPack to the weight matrix used in this command:
+    * @param weightMatrixToPack the weightMatrix To Pack. parameter is Modified
+    */
+   public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
+   {
+      weightMatrixToPack.set(weightMatrix);
    }
 
    /**
