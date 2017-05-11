@@ -2,6 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.*;
 
+import java.util.Random;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -9,6 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -87,10 +91,13 @@ public class ConvexPolygon2dCalculatorTest
    @Test(timeout = 3000)
    public void testGetMiddleIndexCounterClockwise1()
    {
-      // do not update polygon to keep number of vertices
+      Random random = new Random(234);
       ConvexPolygon2d polygon = new ConvexPolygon2d();
-      for (int i = 0; i < 6; i++)
-         polygon.addVertex(new Point2D());
+      while (polygon.getNumberOfVertices() < 6)
+      {
+         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.update();
+      }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 3);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 1, polygon), 4);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 2, polygon), 5);
@@ -128,9 +135,12 @@ public class ConvexPolygon2dCalculatorTest
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 5, polygon), 1);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 5, polygon), 2);
 
-      polygon.clear();
-      for (int i = 0; i < 3; i++)
-         polygon.addVertex(new Point2D());
+      polygon.clearAndUpdate();
+      while (polygon.getNumberOfVertices() < 3)
+      {
+         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.update();
+      }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 2);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 1, polygon), 0);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 2, polygon), 1);
@@ -141,8 +151,12 @@ public class ConvexPolygon2dCalculatorTest
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 0, polygon), 1);
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 1, polygon), 2);
 
-      polygon.clear();
-      polygon.addVertex(new Point2D());
+      polygon.clearAndUpdate();
+      while (polygon.getNumberOfVertices() < 1)
+      {
+         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.update();
+      }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 0);
    }
 
