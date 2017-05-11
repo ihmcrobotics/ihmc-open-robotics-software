@@ -4,11 +4,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
-import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2D;
 
 /**
  * This is a public interface for drawing geometry in the Plotter.

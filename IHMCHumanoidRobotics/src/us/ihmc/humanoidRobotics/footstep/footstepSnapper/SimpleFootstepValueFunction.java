@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
 
 /**
  * Created by agrabertilton on 1/20/15.

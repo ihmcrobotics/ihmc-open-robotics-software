@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 
 /**
  * <p>Title: </p>

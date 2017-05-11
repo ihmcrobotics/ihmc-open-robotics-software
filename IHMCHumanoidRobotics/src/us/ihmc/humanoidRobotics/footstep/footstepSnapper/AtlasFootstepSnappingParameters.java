@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 
 public class AtlasFootstepSnappingParameters extends FootstepSnappingParameters
 {

@@ -8,6 +8,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,7 +19,6 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
 
 /**
  * Based on a {@link JavaFXMeshBuilder}, this class can combine different meshes with different colors into a single mesh.

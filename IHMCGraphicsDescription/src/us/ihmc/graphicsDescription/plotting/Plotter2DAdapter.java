@@ -26,14 +26,14 @@ import java.util.Map;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
-import us.ihmc.robotics.geometry.ConvexPolygon2D;
-import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2D;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
 /**

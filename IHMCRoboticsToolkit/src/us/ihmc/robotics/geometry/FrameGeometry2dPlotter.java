@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;

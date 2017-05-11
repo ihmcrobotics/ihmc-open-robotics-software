@@ -2,6 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -13,26 +16,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ConvexPolygonTools
 {
    private static final boolean DEBUG = false;
-
-   public static class EmptyPolygonException extends RuntimeException
-   {
-      private static final long serialVersionUID = -323833885395952453L;
-
-      public EmptyPolygonException(String description)
-      {
-         super(description);
-      }
-   }
-
-   public static class OutdatedPolygonException extends RuntimeException
-   {
-      private static final long serialVersionUID = -5043468839061602341L;
-
-      public OutdatedPolygonException(String description)
-      {
-         super(description);
-      }
-   }
 
    /**
     * Assumes that the polygons are disjoint. Find the vertex indices corresponding to the end

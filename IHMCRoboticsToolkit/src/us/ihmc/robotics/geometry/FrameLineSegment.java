@@ -110,7 +110,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
    public void pointBetweenEndPointsGivenPercantage(double percentage, FramePoint pointToPack)
    {
       checkReferenceFrameMatch(pointToPack);
-      lineSegment3d.pointBetweenEndPointsGivenPercentage(percentage, pointToPack.getPoint());
+      lineSegment3d.pointBetweenEndpointsGivenPercentage(percentage, pointToPack.getPoint());
    }
 
    public double length()
