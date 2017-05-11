@@ -60,8 +60,8 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getTrajectoryReferenceFrameId());
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getExpectedDataId());
 
       clear(dataFrame);
       set(message);
