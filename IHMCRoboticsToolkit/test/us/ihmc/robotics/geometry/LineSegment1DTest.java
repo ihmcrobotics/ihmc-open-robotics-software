@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class LineSegment1dTest
+public class LineSegment1DTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
@@ -31,7 +31,7 @@ public class LineSegment1dTest
       double p5 = -5.2;
       double p6 = 16.2;
 
-      LineSegment1d line = new LineSegment1d(pointsArray);
+      LineSegment1D line = new LineSegment1D(pointsArray);
 
       assertEquals(line.getMinPoint(), secondPoint, 0.001 / line.length());
       assertEquals(line.getMaxPoint(), firstPoint, 0.001 / line.length());
@@ -49,7 +49,7 @@ public class LineSegment1dTest
       assertFalse(line.isBetweenEndpoints(p3, 20 / line.length()));
       assertTrue(line.isBetweenEndpoints(p6, 0.5 / line.length()));
 
-      LineSegment1d pointLine = new LineSegment1d(firstPoint, firstPoint);
+      LineSegment1D pointLine = new LineSegment1D(firstPoint, firstPoint);
 
       assertTrue(pointLine.isBetweenEndpoints(firstPoint, 0.0));
       assertTrue(pointLine.isBetweenEndpoints(firstPoint, 0.01));
@@ -63,12 +63,12 @@ public class LineSegment1dTest
       double firstPoint = -10;
       double secondPoint = 10;
 
-      LineSegment1d emptyLine = new LineSegment1d();
-      LineSegment1d mainLine = new LineSegment1d(firstPoint, secondPoint);
-      LineSegment1d separateLine = new LineSegment1d(firstPoint + 100, secondPoint + 100);
-      LineSegment1d otherLine1 = new LineSegment1d(firstPoint - 3, secondPoint - 3);
-      LineSegment1d intersectionLine1 = new LineSegment1d(firstPoint, secondPoint - 3);
-      LineSegment1d otherLine2 = new LineSegment1d(secondPoint, secondPoint + 10);
+      LineSegment1D emptyLine = new LineSegment1D();
+      LineSegment1D mainLine = new LineSegment1D(firstPoint, secondPoint);
+      LineSegment1D separateLine = new LineSegment1D(firstPoint + 100, secondPoint + 100);
+      LineSegment1D otherLine1 = new LineSegment1D(firstPoint - 3, secondPoint - 3);
+      LineSegment1D intersectionLine1 = new LineSegment1D(firstPoint, secondPoint - 3);
+      LineSegment1D otherLine2 = new LineSegment1D(secondPoint, secondPoint + 10);
 
       assertTrue(mainLine.computeOverlap(otherLine1, emptyLine));
       assertEquals(intersectionLine1.getMaxPoint(), emptyLine.getMaxPoint(), 0.001);
@@ -78,10 +78,10 @@ public class LineSegment1dTest
 
       assertTrue(mainLine.isOverlappingInclusive(otherLine2));
       assertFalse(mainLine.isOverlappingExclusive(otherLine2));
-      assertTrue(mainLine.isOverlappingExclusive(new LineSegment1d(-9.9, 9.9)));
+      assertTrue(mainLine.isOverlappingExclusive(new LineSegment1D(-9.9, 9.9)));
 
-      LineSegment1d intersectionLine2 = mainLine.computeOverlap(otherLine1);
-      LineSegment1d intersectionLine3 = mainLine.computeOverlap(separateLine);
+      LineSegment1D intersectionLine2 = mainLine.computeOverlap(otherLine1);
+      LineSegment1D intersectionLine3 = mainLine.computeOverlap(separateLine);
 
       assertEquals(intersectionLine1.getMaxPoint(), intersectionLine2.getMaxPoint(), 0.001);
       assertEquals(intersectionLine1.getMinPoint(), intersectionLine2.getMinPoint(), 0.001);
@@ -90,7 +90,7 @@ public class LineSegment1dTest
       assertFalse(mainLine.isBetweenEndpointsExclusive(mainLine));
       assertTrue(mainLine.isBetweenEndpointsInclusive(mainLine));
       assertFalse(mainLine.isBetweenEndpointsInclusive(otherLine2));
-      assertTrue(mainLine.isBetweenEndpointsExclusive(new LineSegment1d(-5, 5)));
+      assertTrue(mainLine.isBetweenEndpointsExclusive(new LineSegment1D(-5, 5)));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -104,18 +104,18 @@ public class LineSegment1dTest
       {
          double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
          double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
-         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+         LineSegment1D lineSegment1 = new LineSegment1D(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
          double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
-         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+         LineSegment1D lineSegment2 = new LineSegment1D(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
          double expectedOverlapEnd = lineSegmentEnd2;
 
-         LineSegment1d actualOverlap = new LineSegment1d();
+         LineSegment1D actualOverlap = new LineSegment1D();
 
          boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
          assertTrue(areOverlaping);
@@ -151,18 +151,18 @@ public class LineSegment1dTest
       {
          double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
          double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
-         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+         LineSegment1D lineSegment1 = new LineSegment1D(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
          double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryOne - 10.0, boundaryOne);
-         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+         LineSegment1D lineSegment2 = new LineSegment1D(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
          double expectedOverlapEnd = boundaryOne;
 
-         LineSegment1d actualOverlap = new LineSegment1d();
+         LineSegment1D actualOverlap = new LineSegment1D();
 
          boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
          assertTrue(areOverlaping);
@@ -198,18 +198,18 @@ public class LineSegment1dTest
       {
          double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
          double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
-         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+         LineSegment1D lineSegment1 = new LineSegment1D(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
          double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryTwo, boundaryTwo + 10.0);
-         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+         LineSegment1D lineSegment2 = new LineSegment1D(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
          double expectedOverlapEnd = boundaryTwo;
 
-         LineSegment1d actualOverlap = new LineSegment1d();
+         LineSegment1D actualOverlap = new LineSegment1D();
 
          boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
          assertTrue(areOverlaping);
@@ -245,14 +245,14 @@ public class LineSegment1dTest
       {
          double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
          double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
-         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+         LineSegment1D lineSegment1 = new LineSegment1D(lineSegmentStart1, lineSegmentEnd1);
 
          double max = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double lineSegmentStart2 = RandomNumbers.nextDouble(random, max, max + 10.0);
          double lineSegmentEnd2 = RandomNumbers.nextDouble(random, max, max + 10.0);
-         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+         LineSegment1D lineSegment2 = new LineSegment1D(lineSegmentStart2, lineSegmentEnd2);
 
-         LineSegment1d actualOverlap = new LineSegment1d();
+         LineSegment1D actualOverlap = new LineSegment1D();
 
          boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
          assertFalse(areOverlaping);
@@ -266,14 +266,14 @@ public class LineSegment1dTest
       {
          double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
          double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
-         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+         LineSegment1D lineSegment1 = new LineSegment1D(lineSegmentStart1, lineSegmentEnd1);
 
          double min = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double lineSegmentStart2 = RandomNumbers.nextDouble(random, min - 10.0, min);
          double lineSegmentEnd2 = RandomNumbers.nextDouble(random, min - 10.0, min);
-         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+         LineSegment1D lineSegment2 = new LineSegment1D(lineSegmentStart2, lineSegmentEnd2);
 
-         LineSegment1d actualOverlap = new LineSegment1d();
+         LineSegment1D actualOverlap = new LineSegment1D();
 
          boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
          assertFalse(areOverlaping);
@@ -293,8 +293,8 @@ public class LineSegment1dTest
       double p2 = -15;
       double p3 = 2.0;
 
-      LineSegment1d mainLine = new LineSegment1d(firstPoint, secondPoint);
-      LineSegment1d secondLine = new LineSegment1d(secondPoint, firstPoint);
+      LineSegment1D mainLine = new LineSegment1D(firstPoint, secondPoint);
+      LineSegment1D secondLine = new LineSegment1D(secondPoint, firstPoint);
 
       assertEquals(mainLine.signedDistance(p1), 5, 0.001);
       assertEquals(mainLine.signedDistance(p2), 5, 0.001);
@@ -328,7 +328,7 @@ public class LineSegment1dTest
       double p2 = -15;
       double p3 = 0.0;
 
-      LineSegment1d mainLine = new LineSegment1d(firstPoint, secondPoint);
+      LineSegment1D mainLine = new LineSegment1D(firstPoint, secondPoint);
 
       mainLine.extendSegmentToPoint(p1);
       assertEquals(mainLine.getMaxPoint(), p1, 0.001);
@@ -347,8 +347,8 @@ public class LineSegment1dTest
       double p1 = 15;
       double p2 = -15;
       boolean fail = false;
-      LineSegment1d line1 = new LineSegment1d();
-      LineSegment1d line2 = new LineSegment1d(-10,10);
+      LineSegment1D line1 = new LineSegment1D();
+      LineSegment1D line2 = new LineSegment1D(-10,10);
 
       line1.setFirstEndpoint(p1);
       line1.setSecondEndpoint(p2);
@@ -393,7 +393,7 @@ public class LineSegment1dTest
    {
       Point2D point2d = new Point2D(1,1);
       Vector2D direction2d = new Vector2D(1,2);
-      LineSegment1d firstLine = new LineSegment1d(0, 10);
+      LineSegment1D firstLine = new LineSegment1D(0, 10);
       LineSegment2D line2d = firstLine.toLineSegment2d(point2d, direction2d);
       
       assertEquals(line2d.getFirstEndpoint(), new Point2D(1,1));
@@ -409,7 +409,7 @@ public class LineSegment1dTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(LineSegment1d.class, LineSegment1dTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(LineSegment1D.class, LineSegment1DTest.class);
    }
 
 }

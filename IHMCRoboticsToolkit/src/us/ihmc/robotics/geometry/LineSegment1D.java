@@ -13,7 +13,7 @@ import us.ihmc.robotics.MathTools;
 /**
  * Represents a finite-length 1D line segment defined by its two 1D endpoints.
  */
-public class LineSegment1d
+public class LineSegment1D
 {
    /** The first endpoint defining this line segment. */
    private double firstEndpoint = Double.NaN;
@@ -25,7 +25,7 @@ public class LineSegment1d
     * Default constructor that initializes both endpoints of this line segment to
     * {@link Double#NaN}.
     */
-   public LineSegment1d()
+   public LineSegment1D()
    {
    }
 
@@ -35,7 +35,7 @@ public class LineSegment1d
     * @param firstEndpoint coordinate of the first endpoint of this line segment.
     * @param secondEndpoint coordinate of the second endpoint of this line segment.
     */
-   public LineSegment1d(double firstEndpoint, double secondEndpoint)
+   public LineSegment1D(double firstEndpoint, double secondEndpoint)
    {
       set(firstEndpoint, secondEndpoint);
    }
@@ -47,7 +47,7 @@ public class LineSegment1d
     *           this line segment. Not modified.
     * @throws IllegalArgumentException if the given array has a length different than 2.
     */
-   public LineSegment1d(double[] endpoints)
+   public LineSegment1D(double[] endpoints)
    {
       set(endpoints);
    }
@@ -67,7 +67,7 @@ public class LineSegment1d
     * @param intersectionToPack line segment used to store the result. Modified.
     * @return whether the two line segment overlap or no.
     */
-   public boolean computeOverlap(LineSegment1d other, LineSegment1d intersectionToPack)
+   public boolean computeOverlap(LineSegment1D other, LineSegment1D intersectionToPack)
    {
       if (!isOverlappingInclusive(other))
          return false;
@@ -96,14 +96,14 @@ public class LineSegment1d
     * @return the line segment representing the overlap, or {@code null} if the line segments do not
     *         overlap.
     */
-   public LineSegment1d computeOverlap(LineSegment1d other)
+   public LineSegment1D computeOverlap(LineSegment1D other)
    {
       if (!isOverlappingInclusive(other))
          return null;
 
       double intersectionMin = Math.max(getMinPoint(), other.getMinPoint());
       double intersectionMax = Math.min(getMaxPoint(), other.getMaxPoint());
-      return new LineSegment1d(intersectionMin, intersectionMax);
+      return new LineSegment1D(intersectionMin, intersectionMax);
    }
 
    /**
@@ -119,7 +119,7 @@ public class LineSegment1d
     * @param other the query. Not modified.
     * @return {@code true} if the two line segments overlap, {@code false} otherwise.
     */
-   public boolean isOverlappingInclusive(LineSegment1d other)
+   public boolean isOverlappingInclusive(LineSegment1D other)
    {
       return isBetweenEndpointsInclusive(other.firstEndpoint) || isBetweenEndpointsInclusive(other.secondEndpoint)
             || other.isBetweenEndpointsInclusive(this.firstEndpoint) || other.isBetweenEndpointsInclusive(this.secondEndpoint);
@@ -137,7 +137,7 @@ public class LineSegment1d
     * @param other the query. Not modified.
     * @return {@code true} if the two line segments overlap, {@code false} otherwise.
     */
-   public boolean isOverlappingExclusive(LineSegment1d other)
+   public boolean isOverlappingExclusive(LineSegment1D other)
    {
       return isBetweenEndpointsExclusive(other.firstEndpoint) || isBetweenEndpointsExclusive(other.secondEndpoint)
             || other.isBetweenEndpointsExclusive(this.firstEndpoint) || other.isBetweenEndpointsExclusive(this.secondEndpoint);
@@ -156,7 +156,7 @@ public class LineSegment1d
     * @param other the query. Not modified.
     * @return {@code true} if this line segment contains {@code other}, {@code false} otherwise.
     */
-   public boolean isBetweenEndpointsInclusive(LineSegment1d other)
+   public boolean isBetweenEndpointsInclusive(LineSegment1D other)
    {
       return isBetweenEndpointsInclusive(other.firstEndpoint) && isBetweenEndpointsInclusive(other.secondEndpoint);
    }
@@ -174,7 +174,7 @@ public class LineSegment1d
     * @param other the query. Not modified.
     * @return {@code true} if this line segment contains {@code other}, {@code false} otherwise.
     */
-   public boolean isBetweenEndpointsExclusive(LineSegment1d other)
+   public boolean isBetweenEndpointsExclusive(LineSegment1D other)
    {
       return isBetweenEndpointsExclusive(other.firstEndpoint) && isBetweenEndpointsExclusive(other.secondEndpoint);
    }
