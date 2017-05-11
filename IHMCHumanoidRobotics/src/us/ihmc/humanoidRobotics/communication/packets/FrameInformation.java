@@ -25,10 +25,10 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * It is recommended that this should be the same frame as the {@link #trajectoryReferenceFrameId} to
     * avoid unexpected behavior. Setting this frame to something different then the trajectory execution
     * frame is equivalent to calling {@link FrameObject#changeFrame(trajectoryFrame)} on all trajectory
-    * data right before it is processed by the controller.
+    * data right before it is received by the controller.
     * </p>
-    * The data frame is only useful if the relation between trajectory frame and data frame is not known
-    * when the message is packed. However, unexpected behavior might occur if the data frame is moving
+    * The data frame is only useful if the user is unable to change the frame the data is expressed in
+    * to the trajectory frame. However, unexpected behavior might occur if the data frame is moving
     * with respect to the trajectory frame during execution. To highlight this consider the following
     * example:
     * </p>
@@ -36,7 +36,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * trajectory might be known in world frame but for safety the trajectory execution frame is set
     * to a frame attached to the robot. If the data is packed in world and the data frame is set to world
     * this will cause the resulting trajectory to be wrong since the transformation to trajectory frame
-    * happens at the start of execution rather then every controller tick.
+    * happens at the start of execution rather than every controller tick.
     */
    private long dataReferenceFrameId = NameBasedHashCodeTools.DEFAULT_HASHCODE;
 
@@ -62,7 +62,12 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
 
    public long getDataReferenceFrameId()
    {
-      return dataReferenceFrameId;
+      long dataId = dataReferenceFrameId;
+      if (dataId == NameBasedHashCodeTools.DEFAULT_HASHCODE)
+      {
+         dataId = trajectoryReferenceFrameId;
+      }
+      return dataId;
    }
 
    public void setDataReferenceFrameId(long dataReferenceFrameId)
@@ -106,19 +111,9 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
          return "Trajectory Frame: " + trajectoryReferenceFrameId + ", DataFrame: " + dataReferenceFrameId;
    }
 
-   public long getExpectedDataId()
-   {
-      long dataId = dataReferenceFrameId;
-      if (dataId == NameBasedHashCodeTools.DEFAULT_HASHCODE)
-      {
-         dataId = trajectoryReferenceFrameId;
-      }
-      return dataId;
-   }
-
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, ReferenceFrame referenceFrame)
    {
-      long expectedId = frameInformation.getExpectedDataId();
+      long expectedId = frameInformation.getDataReferenceFrameId();
 
       if (expectedId != referenceFrame.getNameBasedHashCode() && expectedId != referenceFrame.getAdditionalNameBasedHashCode())
       {
@@ -129,7 +124,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
 
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, long otherReferenceFrameId)
    {
-      long expectedId = frameInformation.getExpectedDataId();
+      long expectedId = frameInformation.getDataReferenceFrameId();
 
       if (expectedId != otherReferenceFrameId)
       {

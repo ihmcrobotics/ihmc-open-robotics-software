@@ -66,7 +66,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
       this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getTrajectoryReferenceFrameId());
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getExpectedDataId());
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getDataReferenceFrameId());
 
       clear(dataFrame);
       set(message);
@@ -74,12 +74,12 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionFrameId());
       ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-      
+
       ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrixFrameId());
       ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrixFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
-   
+
    @Override
    public void set(M message)
    {
@@ -120,7 +120,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       return selectionMatrix;
    }
-   
+
    public WeightMatrix6D getWeightMatrix()
    {
       return weightMatrix;
