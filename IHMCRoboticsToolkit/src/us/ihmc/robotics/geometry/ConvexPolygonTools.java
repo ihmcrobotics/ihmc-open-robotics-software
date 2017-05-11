@@ -54,7 +54,7 @@ public class ConvexPolygonTools
       if (polygon1.isEmpty() || polygon2.isEmpty())
          return false;
 
-      if (polygon1.hasExactlyOneVertex() && polygon2.hasExactlyOneVertex())
+      if (polygon1.getNumberOfVertices() == 1 && polygon2.getNumberOfVertices() == 1)
       {
          verticesIndices[0][0] = 0;
          verticesIndices[0][1] = 0;
@@ -63,7 +63,7 @@ public class ConvexPolygonTools
          return true;
       }
 
-      if (polygon1.hasExactlyOneVertex())
+      if (polygon1.getNumberOfVertices() == 1)
       {
          verticesIndices[0][0] = 0;
          verticesIndices[0][1] = 0;
@@ -75,7 +75,7 @@ public class ConvexPolygonTools
          return success;
       }
 
-      if (polygon2.hasExactlyOneVertex())
+      if (polygon2.getNumberOfVertices() == 1)
       {
          verticesIndices[1][0] = 0;
          verticesIndices[1][1] = 0;
@@ -182,8 +182,8 @@ public class ConvexPolygonTools
          return false;
 
       combinedPolygonToPack.clear();
-      polygon1.addVerticesInClockwiseOrderInPolygon(verticesIndices[0][1], verticesIndices[0][0], combinedPolygonToPack);
-      polygon2.addVerticesInClockwiseOrderInPolygon(verticesIndices[1][0], verticesIndices[1][1], combinedPolygonToPack);
+      polygon1.getVerticesInClockwiseOrder(verticesIndices[0][1], verticesIndices[0][0], combinedPolygonToPack);
+      polygon2.getVerticesInClockwiseOrder(verticesIndices[1][0], verticesIndices[1][1], combinedPolygonToPack);
       combinedPolygonToPack.update();
 
       getConnectingEdges(polygon1, polygon2, connectingEdge1ToPack, connectingEdge2Topack, verticesIndices);
@@ -230,6 +230,13 @@ public class ConvexPolygonTools
       return new ConvexPolygon2dAndConnectingEdges(combinedPolygon, connectingEdge1, connectingEdge2);
    }
 
+   public static ConvexPolygon2d computeIntersectionOfPolygons(ConvexPolygon2d polygonP, ConvexPolygon2d polygonQ)
+   {
+      ConvexPolygon2d intersection = new ConvexPolygon2d();
+      boolean success = computeIntersectionOfPolygons(polygonP, polygonQ, intersection);
+      return success ? intersection : null;
+   }
+
    /**
     * Computes the intersection of two convex polygons. For references see:
     * http://www.iro.umontreal.ca/~plante/compGeom/algorithm.html Returns null if the polygons do
@@ -247,22 +254,22 @@ public class ConvexPolygonTools
       if (polygonQ == null || polygonQ.isEmpty())
          return false;
 
-      if (polygonP.hasExactlyTwoVertices() && polygonQ.hasAtLeastTwoVertices())
+      if (polygonP.getNumberOfVertices() == 2 && polygonQ.getNumberOfVertices() >= 2)
       {
          return computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(polygonP, polygonQ, intersectingPolygonToPack);
       }
 
-      else if (polygonQ.hasExactlyTwoVertices())
+      else if (polygonQ.getNumberOfVertices() == 2)
       {
          return computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(polygonQ, polygonP, intersectingPolygonToPack);
       }
 
-      if (polygonP.hasExactlyOneVertex() && polygonQ.hasAtLeastOneVertex())
+      if (polygonP.getNumberOfVertices() == 1 && !polygonQ.isEmpty())
       {
          return computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(polygonP, polygonQ, intersectingPolygonToPack);
       }
 
-      else if (polygonQ.hasExactlyOneVertex())
+      else if (polygonQ.getNumberOfVertices() == 1)
       {
          return computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(polygonQ, polygonP, intersectingPolygonToPack);
       }
@@ -688,7 +695,7 @@ public class ConvexPolygonTools
 
    public static ConvexPolygon2d shrinkInto(ConvexPolygon2d polygonP, Point2DReadOnly referencePointInP, ConvexPolygon2d polygonQ)
    {
-      if (polygonQ.hasAtLeastOneVertex() && !polygonQ.hasAtLeastThreeVertices())
+      if (!polygonQ.isEmpty() && polygonQ.getNumberOfVertices() < 3)
       {
          return new ConvexPolygon2d(polygonQ);
       }
@@ -818,7 +825,7 @@ public class ConvexPolygonTools
          int index = 0;
          while (index < polygonToCut.getNumberOfVertices())
          {
-            Point2D vertex = polygonToCut.getVertexUnsafe(index);
+            Point2DReadOnly vertex = polygonToCut.getVertex(index);
             if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
             {
                polygonToCut.removeVertex(index);

@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PolygonWiggler
@@ -49,7 +50,7 @@ public class PolygonWiggler
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2d intersection = new ConvexPolygon2d();
-         regionToWiggleInto.getConvexPolygon(i).intersectionWith(polygonToWiggleInRegionFrame, intersection);
+         ConvexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
          if (intersection.getArea() > overlap)
          {
             overlap = intersection.getArea();
