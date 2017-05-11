@@ -811,6 +811,7 @@ public class ConvexPolygonTools
       return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
    }
 
+   // TODO Needs to be extracted to Euclid and improved such that it is garbage free.
    public static int cutPolygonWithLine(Line2D cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
       Point2D[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
@@ -829,6 +830,7 @@ public class ConvexPolygonTools
             if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
             {
                polygonToCut.removeVertex(index);
+               polygonToCut.update();
                numberOfVerticesRemoved++;
             }
             else
