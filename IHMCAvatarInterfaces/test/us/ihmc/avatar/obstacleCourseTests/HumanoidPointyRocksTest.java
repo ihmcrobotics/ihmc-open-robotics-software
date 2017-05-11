@@ -38,7 +38,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -1241,7 +1241,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       soleVertices.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
-      ConvexPolygon2d solePolygon = new ConvexPolygon2d(soleVertices);
+      ConvexPolygon2D solePolygon = new ConvexPolygon2D(soleVertices);
       solePolygon.update();
 
       Point2D[] leftIntersections = solePolygon.intersectionWith(leftLine);

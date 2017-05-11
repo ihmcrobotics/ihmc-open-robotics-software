@@ -26,7 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -93,7 +93,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final FramePose desiredCenterOfMassPoseForPacking = new FramePose(worldFrame);
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", desiredCenterOfMassPoseForPacking);
 
-   private final ConvexPolygon2d supportPolygonHolder = new ConvexPolygon2d();
+   private final ConvexPolygon2D supportPolygonHolder = new ConvexPolygon2D();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
 

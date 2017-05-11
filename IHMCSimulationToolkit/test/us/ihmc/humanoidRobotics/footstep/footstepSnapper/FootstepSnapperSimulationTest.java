@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -638,7 +638,7 @@ public class FootstepSnapperSimulationTest
             robot.getRobotsYoVariableRegistry().addChild(registry);
             YoGraphicsListRegistry yoGraphicsListRegistry = footstepVisualizer.getGraphicsListRegistry();
 
-            ConvexPolygon2d polygon2d = new ConvexPolygon2d(new double[][]
+            ConvexPolygon2D polygon2d = new ConvexPolygon2D(new double[][]
             {
                {0.1, 0.1}, {0.1, -0.1}, {-0.1, -0.1}, {-0.1, 0.1}
             });

@@ -296,7 +296,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
 
-   public synchronized void addConvexPolygons(ArrayList<ConvexPolygon2d> convexPolygons, Color color)
+   public synchronized void addConvexPolygons(ArrayList<ConvexPolygon2D> convexPolygons, Color color)
    {
       FrameConvexPolygonGroup frameConvexPolygonGroup = frameConvexPolygonGroups.get(color);
       if (frameConvexPolygonGroup == null)
@@ -306,7 +306,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
 
       ArrayList<FrameConvexPolygon2d> frameConvexPolygons = new ArrayList<FrameConvexPolygon2d>();
-      for (ConvexPolygon2d polygon : convexPolygons)
+      for (ConvexPolygon2D polygon : convexPolygons)
       {
          frameConvexPolygons.add(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), polygon));
       }
@@ -314,7 +314,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
 
-   public synchronized void addConvexPolygons(ConvexPolygon2d[] convexPolygons, Color color)
+   public synchronized void addConvexPolygons(ConvexPolygon2D[] convexPolygons, Color color)
    {
       FrameConvexPolygonGroup frameConvexPolygonGroup = frameConvexPolygonGroups.get(color);
       if (frameConvexPolygonGroup == null)
@@ -324,7 +324,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
 
       ArrayList<FrameConvexPolygon2d> frameConvexPolygons = new ArrayList<FrameConvexPolygon2d>();
-      for (ConvexPolygon2d polygon : convexPolygons)
+      for (ConvexPolygon2D polygon : convexPolygons)
       {
          if (polygon == null)
             continue;
@@ -334,7 +334,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
 
-   public synchronized void addConvexPolygon(ConvexPolygon2d convexPolygon, Color color)
+   public synchronized void addConvexPolygon(ConvexPolygon2D convexPolygon, Color color)
    {
       FrameConvexPolygonGroup frameConvexPolygonGroup = frameConvexPolygonGroups.get(color);
       if (frameConvexPolygonGroup == null)

@@ -31,7 +31,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.geometry.LineSegment2D;
 
@@ -251,13 +251,13 @@ public class Plotter2DAdapter
       drawLineSegment(pixelate(farPointNegative.getX()), pixelate(farPointNegative.getY()), pixelate(farPointPositive.getX()), pixelate(farPointPositive.getY()));
    }
 
-   public void drawPolygonFilled(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   public void drawPolygonFilled(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       if (setupForDrawPolygon(frame, convexPolygon2d))
          drawPolygonFilled(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
    }
 
-   public void drawPolygon(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   public void drawPolygon(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       if (setupForDrawPolygon(frame, convexPolygon2d))
          drawPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
@@ -287,7 +287,7 @@ public class Plotter2DAdapter
       drawString(string, pixelate(plotStart.getX()), pixelate(plotStart.getY()));
    }
 
-   private boolean setupForDrawPolygon(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   private boolean setupForDrawPolygon(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {

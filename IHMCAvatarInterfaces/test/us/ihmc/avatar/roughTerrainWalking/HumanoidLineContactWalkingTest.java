@@ -39,7 +39,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -285,11 +285,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       soleVertices.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
-      ConvexPolygon2d solePolygon = new ConvexPolygon2d(soleVertices);
+      ConvexPolygon2D solePolygon = new ConvexPolygon2D(soleVertices);
       solePolygon.update();
 
       // shrink polygon and project line origin inside
-      ConvexPolygon2d shrunkSolePolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkSolePolygon = new ConvexPolygon2D();
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
       shrinker.shrinkConstantDistanceInto(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
 

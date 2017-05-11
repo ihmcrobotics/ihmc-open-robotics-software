@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -23,7 +23,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
    
    private final Point2D tempFirstEndpoint = new Point2D();
    private final LineSegment2D tempLineSegment = new LineSegment2D();
-   private final ConvexPolygon2d tempArrowPolygon = new ConvexPolygon2d(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
+   private final ConvexPolygon2D tempArrowPolygon = new ConvexPolygon2D(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
    
    private final boolean drawArrow;
 

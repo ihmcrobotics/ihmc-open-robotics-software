@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,7 +31,7 @@ public class BipedalFootstepPlannerNode
 
    private double singleStepCost;
    private double percentageOfFoothold = 1.0;
-   private ConvexPolygon2d partialFootholdPolygon;
+   private ConvexPolygon2D partialFootholdPolygon;
 
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
@@ -282,12 +282,12 @@ public class BipedalFootstepPlannerNode
    }
 
 
-   public ConvexPolygon2d getPartialFootholdPolygon()
+   public ConvexPolygon2D getPartialFootholdPolygon()
    {
       return partialFootholdPolygon;
    }
 
-   public void setPartialFootholdPolygon(ConvexPolygon2d partialFootholdPolygon)
+   public void setPartialFootholdPolygon(ConvexPolygon2D partialFootholdPolygon)
    {
       this.partialFootholdPolygon = partialFootholdPolygon;
    }

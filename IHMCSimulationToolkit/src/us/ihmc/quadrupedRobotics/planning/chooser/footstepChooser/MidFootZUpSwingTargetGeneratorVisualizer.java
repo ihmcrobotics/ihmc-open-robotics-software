@@ -19,7 +19,7 @@ import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.QuadrupedGaitS
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -289,7 +289,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())
       {
          FramePoint footstep = supportPolygon.getFootstep(quadrant);

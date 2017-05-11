@@ -271,7 +271,7 @@ public class GeometryToolsTest
          firstList.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
 
-      ConvexPolygon2d firstPolygon = new ConvexPolygon2d(firstList);
+      ConvexPolygon2D firstPolygon = new ConvexPolygon2D(firstList);
 
       ArrayList<Point2D> secondList = new ArrayList<Point2D>();
       for (int i = 0; i < 200; i++)
@@ -279,9 +279,9 @@ public class GeometryToolsTest
          secondList.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
 
-      ConvexPolygon2d secondPolygon = new ConvexPolygon2d(secondList);
+      ConvexPolygon2D secondPolygon = new ConvexPolygon2D(secondList);
 
-      ConvexPolygon2d result = new ConvexPolygon2d(firstPolygon, secondPolygon);
+      ConvexPolygon2D result = new ConvexPolygon2D(firstPolygon, secondPolygon);
 
       // convexity of the result is already checked in another test
       for (Point2D point : firstList)
