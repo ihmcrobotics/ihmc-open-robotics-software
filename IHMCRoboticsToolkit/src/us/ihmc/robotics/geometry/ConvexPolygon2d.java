@@ -1108,12 +1108,9 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
     * Gets the number of vertices composing this convex polygon.
     * 
     * @return this polygon's size.
-    * @throws OutdatedPolygonException if {@link #update()} has not been called since last time this
-    *            polygon's vertices were edited.
     */
    public int getNumberOfVertices()
    {
-      checkIfUpToDate();
       return numberOfVertices;
    }
 
