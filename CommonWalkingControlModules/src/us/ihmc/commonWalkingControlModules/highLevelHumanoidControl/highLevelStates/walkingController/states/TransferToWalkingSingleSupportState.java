@@ -64,7 +64,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
 
-         footstepTiming.setTimings(currentTransferDuration, currentSwingDuration);
+         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
       }
 
       pelvisOrientationManager.setUpcomingFootstep(walkingMessageHandler.peek(0));
