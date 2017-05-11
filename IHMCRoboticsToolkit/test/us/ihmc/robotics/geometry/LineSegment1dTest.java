@@ -33,26 +33,26 @@ public class LineSegment1dTest
 
       LineSegment1d line = new LineSegment1d(pointsArray);
 
-      assertEquals(line.getMinPoint(), secondPoint, 0.001);
-      assertEquals(line.getMaxPoint(), firstPoint, 0.001);
-      assertEquals(line.getSecondEndpoint(), secondPoint, 0.001);
-      assertEquals(line.getFirstEndpoint(), firstPoint, 0.001);
-      assertEquals(line.getMidPoint(), p4, 0.001);
+      assertEquals(line.getMinPoint(), secondPoint, 0.001 / line.length());
+      assertEquals(line.getMaxPoint(), firstPoint, 0.001 / line.length());
+      assertEquals(line.getSecondEndpoint(), secondPoint, 0.001 / line.length());
+      assertEquals(line.getFirstEndpoint(), firstPoint, 0.001 / line.length());
+      assertEquals(line.getMidPoint(), p4, 0.001 / line.length());
 
-      assertFalse(line.isBetweenEndpoints(p2, 0.001));
-      assertTrue(line.isBetweenEndpoints(p3, 0.001));
-      assertFalse(line.isBetweenEndpoints(p5, 0.001));
+      assertFalse(line.isBetweenEndpoints(p2, 0.001 / line.length()));
+      assertTrue(line.isBetweenEndpoints(p3, 0.001 / line.length()));
+      assertFalse(line.isBetweenEndpoints(p5, 0.001 / line.length()));
       assertFalse(line.isBetweenEndpointsExclusive(firstPoint));
       assertTrue(line.isBetweenEndpointsInclusive(secondPoint));
 
-      assertTrue(line.isBetweenEndpoints(p1, 5.0));
-      assertFalse(line.isBetweenEndpoints(p3, 20));
-      assertTrue(line.isBetweenEndpoints(p6, 0.5));
+      assertTrue(line.isBetweenEndpoints(p1, 4.999 / line.length()));
+      assertFalse(line.isBetweenEndpoints(p3, 20 / line.length()));
+      assertTrue(line.isBetweenEndpoints(p6, 0.5 / line.length()));
 
       LineSegment1d pointLine = new LineSegment1d(firstPoint, firstPoint);
 
       assertTrue(pointLine.isBetweenEndpoints(firstPoint, 0.0));
-      assertFalse(pointLine.isBetweenEndpoints(firstPoint, 0.01));
+      assertTrue(pointLine.isBetweenEndpoints(firstPoint, 0.01));
       assertFalse(pointLine.isBetweenEndpoints(secondPoint, 0.0));
    }
 
@@ -285,7 +285,7 @@ public class LineSegment1dTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testDistance()
+   public void testSignedDistance()
    {
       double firstPoint = -10;
       double secondPoint = 10;
@@ -296,10 +296,10 @@ public class LineSegment1dTest
       LineSegment1d mainLine = new LineSegment1d(firstPoint, secondPoint);
       LineSegment1d secondLine = new LineSegment1d(secondPoint, firstPoint);
 
-      assertEquals(mainLine.distance(p1), 5, 0.001);
-      assertEquals(mainLine.distance(p2), 5, 0.001);
-      assertEquals(mainLine.distance(p3), -8, 0.001);
-      assertEquals(mainLine.distance(firstPoint), 0, 0.001);
+      assertEquals(mainLine.signedDistance(p1), 5, 0.001);
+      assertEquals(mainLine.signedDistance(p2), 5, 0.001);
+      assertEquals(mainLine.signedDistance(p3), -8, 0.001);
+      assertEquals(mainLine.signedDistance(firstPoint), 0, 0.001);
 
       assertTrue(mainLine.isBefore(p2));
       assertTrue(mainLine.isAfter(p1));
@@ -394,7 +394,7 @@ public class LineSegment1dTest
       Point2D point2d = new Point2D(1,1);
       Vector2D direction2d = new Vector2D(1,2);
       LineSegment1d firstLine = new LineSegment1d(0, 10);
-      LineSegment2d line2d = firstLine.toLineSegment2d(point2d, direction2d);
+      LineSegment2D line2d = firstLine.toLineSegment2d(point2d, direction2d);
       
       assertEquals(line2d.getFirstEndpoint(), new Point2D(1,1));
       assertEquals(line2d.getSecondEndpoint(), new Point2D(11,21));

@@ -788,7 +788,7 @@ public class Line2DTest
       {
          Point2D firstPoint = randomPoint(random);
          Point2D secondPoint = randomPoint(random);
-         LineSegment2d lineSegment2d = new LineSegment2d(firstPoint, secondPoint);
+         LineSegment2D lineSegment2d = new LineSegment2D(firstPoint, secondPoint);
 
          Line2D colinearLine2d = new Line2D(firstPoint, secondPoint);
 

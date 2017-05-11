@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -86,7 +86,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
 
-   private LineSegment2d projectionSegment;
+   private LineSegment2D projectionSegment;
 
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
@@ -410,7 +410,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       getPoint2d(tempPoint2dA, transferFromContactFramePosition);
       getPoint2d(tempPoint2dB, transferToContactFramePosition);
 
-      projectionSegment = new LineSegment2d(tempPoint2dA, tempPoint2dB);
+      projectionSegment = new LineSegment2D(tempPoint2dA, tempPoint2dB);
       setPointXValues(nextContactFramePosition);
 
       transferFromContactFramePosition.changeFrame(frameOfLastFoostep);
@@ -956,7 +956,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       initializeToCurrent.set(true);
    }
 
-   private void getPartialDerivativesWithRespectToS(LineSegment2d segment, double[] partialDerivativesToPack)
+   private void getPartialDerivativesWithRespectToS(LineSegment2D segment, double[] partialDerivativesToPack)
    {
       double dsdx = (segment.getSecondEndpointX() - segment.getFirstEndpointX()) / segment.length();
       double dsdy = (segment.getSecondEndpointY() - segment.getFirstEndpointY()) / segment.length();

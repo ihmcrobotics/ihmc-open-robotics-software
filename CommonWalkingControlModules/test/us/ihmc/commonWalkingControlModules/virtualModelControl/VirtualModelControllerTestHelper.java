@@ -35,7 +35,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
@@ -1935,7 +1935,7 @@ public class VirtualModelControllerTestHelper
 
       private final SideDependentList<ArrayList<Point2D>> controllerFootGroundContactPoints = new SideDependentList<>();
       private final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
-      private final SideDependentList<LineSegment2d> controllerToeContactLines = new SideDependentList<>();
+      private final SideDependentList<LineSegment2D> controllerToeContactLines = new SideDependentList<>();
 
       private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
       private final SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
@@ -1964,7 +1964,7 @@ public class VirtualModelControllerTestHelper
 
             controllerToeContactPoints.put(robotSide, new Point2D(footLength / 2.0, 0.0));
 
-            controllerToeContactLines.put(robotSide, new LineSegment2d(new Point2D(footLength / 2.0, -toeWidth / 2.0), new Point2D(footLength / 2.0, toeWidth / 2.0)));
+            controllerToeContactLines.put(robotSide, new LineSegment2D(new Point2D(footLength / 2.0, -toeWidth / 2.0), new Point2D(footLength / 2.0, toeWidth / 2.0)));
          }
 
          contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);

@@ -207,7 +207,7 @@ public class MotionQPInputCalculator
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         commandToConvert.getWeightMatrix(tempTaskWeight);
+         commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
@@ -325,7 +325,7 @@ public class MotionQPInputCalculator
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         commandToConvert.getWeightMatrix(tempTaskWeight);
+         commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);

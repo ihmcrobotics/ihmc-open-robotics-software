@@ -26,7 +26,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final FramePoint2d exitCMP2d = new FramePoint2d();
 
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
-   private final LineSegment2d toeOffContactLine2d = new LineSegment2d();
+   private final LineSegment2D toeOffContactLine2d = new LineSegment2D();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 

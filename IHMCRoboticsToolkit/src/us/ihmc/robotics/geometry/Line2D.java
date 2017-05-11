@@ -122,6 +122,7 @@ public class Line2D implements GeometryObject<Line2D>
     * project the result onto the XY-plane, and returns the result.
     * 
     * @param transform the transform to apply on this line's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws RuntimeException if this line has not been initialized yet.
     */
    public Line2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
@@ -139,6 +140,7 @@ public class Line2D implements GeometryObject<Line2D>
     * </p>
     * 
     * @param transform the transform to apply on this line's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws RuntimeException if this line has not been initialized yet.
     * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
     *            transformation in the XY-plane.
@@ -634,7 +636,7 @@ public class Line2D implements GeometryObject<Line2D>
     *         {@code null} otherwise.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public Point2D intersectionWith(LineSegment2d lineSegment)
+   public Point2D intersectionWith(LineSegment2D lineSegment)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint());
@@ -660,7 +662,7 @@ public class Line2D implements GeometryObject<Line2D>
     * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
     * @throws RuntimeException if this line has not been initialized yet.
     */
-   public boolean intersectionWith(LineSegment2d lineSegment, Point2DBasics intersectionToPack)
+   public boolean intersectionWith(LineSegment2D lineSegment, Point2DBasics intersectionToPack)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(point, direction, lineSegment.getFirstEndpoint(), lineSegment.getSecondEndpoint(),

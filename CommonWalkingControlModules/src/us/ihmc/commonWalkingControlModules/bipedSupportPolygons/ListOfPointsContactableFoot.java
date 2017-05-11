@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.geometry.LineSegment2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -16,7 +16,7 @@ public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBod
    private final FrameLineSegment2d toeOffContactLine = new FrameLineSegment2d();
 
    public ListOfPointsContactableFoot(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
-         LineSegment2d toeOffContactLineInSoleFrame)
+         LineSegment2D toeOffContactLineInSoleFrame)
    {
       super(rigidBody, soleFrame, contactPointsInSoleFrame);
 
