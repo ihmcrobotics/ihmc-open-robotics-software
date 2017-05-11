@@ -10,6 +10,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
@@ -17,6 +18,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+   private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;
@@ -33,6 +35,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
+      weightMatrix.clear();
    }
 
    public void clear(ReferenceFrame referenceFrame)
@@ -40,6 +43,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       clearQueuableCommandVariables();
       trajectoryPointList.clear(referenceFrame);
       selectionMatrix.resetSelection();
+      weightMatrix.clear();
    }
 
    @Override
@@ -63,6 +67,19 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
 
       ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionFrameId());
       selectionMatrix.setSelectionFrame(selectionFrame);
+      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrixFrameId());
+      weightMatrix.setWeightFrame(weightSelectionFrame);
+   }
+   
+   @Override
+   public void set(M message)
+   {
+      message.getTrajectoryPoints(trajectoryPointList);
+      setQueueqableCommandVariables(message);
+      message.getSelectionMatrix(selectionMatrix);
+      message.getWeightMatrix(weightMatrix);
+      useCustomControlFrame = message.useCustomControlFrame();
+      message.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
    /**
@@ -74,16 +91,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       setQueueqableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
-   }
-
-   @Override
-   public void set(M message)
-   {
-      message.getTrajectoryPoints(trajectoryPointList);
-      setQueueqableCommandVariables(message);
-      message.getSelectionMatrix(selectionMatrix);
-      useCustomControlFrame = message.useCustomControlFrame();
-      message.getControlFramePose(controlFramePoseInBodyFrame);
+      weightMatrix.set(other.getWeightMatrix());
    }
 
    public void setTrajectoryPointList(FrameSO3TrajectoryPointList trajectoryPointList)
@@ -99,6 +107,16 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   public WeightMatrix3D getWeightMatrix()
+   {
+      return weightMatrix;
+   }
+   
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      this.weightMatrix.set(weightMatrix);
    }
 
    public FrameSO3TrajectoryPointList getTrajectoryPointList()

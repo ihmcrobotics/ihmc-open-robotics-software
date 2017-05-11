@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -22,6 +20,7 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -580,14 +579,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weightVector dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
     */
-   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   public void setWeightMatrixForSolver(WeightMatrix6D weightMatrix)
    {
-      spatialAccelerationCommand.setWeights(weightVector);
+      spatialAccelerationCommand.setWeightMatrix(weightMatrix);
    }
 
    /**
