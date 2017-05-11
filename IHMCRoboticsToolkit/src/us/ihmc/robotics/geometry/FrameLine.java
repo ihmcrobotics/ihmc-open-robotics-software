@@ -50,12 +50,12 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       return new FrameVector(referenceFrame, line.getDirection());
    }
 
-   public Point3D getPoint()
+   public Point3DReadOnly getPoint()
    {
       return line.getPoint();
    }
 
-   public Vector3D getNormalizedVector()
+   public Vector3DReadOnly getNormalizedVector()
    {
       return line.getDirection();
    }
