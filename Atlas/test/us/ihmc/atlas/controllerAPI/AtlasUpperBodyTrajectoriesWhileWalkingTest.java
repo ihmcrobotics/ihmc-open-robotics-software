@@ -48,8 +48,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -93,7 +93,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
       assertTrue(success);
    }
-   
+
    @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 31.3)
    @Test(timeout = 160000)
    public void testWalkingWithArmsHoldingInFeetFrame() throws Exception
@@ -101,23 +101,23 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       Random random = new Random(564654L);
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      
+
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
-      
+
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      
+
       YoVariableRegistry registry = drcSimulationTestHelper.getYovariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
-      
-      
+
+
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      for (RobotSide robotSide : RobotSide.values) 
+      for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame handFrame = referenceFrames.getHandFrame(robotSide);
          FramePose handPosition = new FramePose();
@@ -127,10 +127,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          handPosition.getPosition(position);
          Quaternion orientation = new Quaternion();
          handPosition.getOrientation(orientation);
-         
+
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
-         handHoldMessage.setTrajectoryReferenceFrameId(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-         handHoldMessage.setDataReferenceFrameId(worldFrame);
+         handHoldMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
+         handHoldMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
          Vector3D zeroVelocity = new Vector3D();
          handHoldMessage.setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
          drcSimulationTestHelper.send(handHoldMessage);
@@ -148,10 +148,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
       double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
-      
+
       SideDependentList<OneDoFJoint[]> armsJoints = new SideDependentList<>();
       SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody chest = fullRobotModel.getChest();
@@ -169,7 +169,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             if (messageIndex > 0)
                armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
-            
+
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
 
             for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
@@ -212,7 +212,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       double swingTime = walkingControllerParameters.getDefaultSwingTime();
       double transferTime = walkingControllerParameters.getDefaultTransferTime();
       double stepTime = swingTime + transferTime;
-      
+
       RateBasedDesiredHeadingControlModule desiredHeadingControlModule = new RateBasedDesiredHeadingControlModule(0.0, robotModel.getControllerDT(), registry);
       ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(
             desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
@@ -230,26 +230,26 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
       desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
       desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
-      
+
       desiredFootstepCalculator.initialize();
       FootstepDataListMessage footsteps = computeNextFootsteps(RobotSide.LEFT, desiredFootstepCalculator, stepTime);
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
-      
+
       int numberOfSteps = footsteps.getDataList().size();
       drcSimulationTestHelper.send(footsteps);
-      
+
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
       return timeToCompleteWalking;
    }
-   
+
    private FootstepDataListMessage computeNextFootsteps(RobotSide supportLeg, ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator, double stepTime)
    {
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
       FootstepDataMessage footStep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
       FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
-      
+
       RobotSide robotSide = supportLeg;
       FootstepDataMessage previousFootStep = footStep;
       for (int i = 0; i < 30; i++)

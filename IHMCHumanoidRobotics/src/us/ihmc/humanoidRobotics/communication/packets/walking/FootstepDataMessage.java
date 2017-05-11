@@ -16,7 +16,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -31,7 +30,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>, FrameBasedMessage
+public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
@@ -39,10 +38,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public Point3D location;
    @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame) in world frame.")
    public Quaternion orientation;
-
-   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. Note, that the final footstep location and orientation must"
-         + "be provided in world frame. Only the swing trajectory will be executed with respect to the frame provided here (TODO).")
-   public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to using the entire foot. Contact points are expressed in sole frame. This ordering does not matter.\n"
@@ -158,8 +153,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       FramePoint location = new FramePoint();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(location, orientation);
-      ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
-      setTrajectoryReferenceFrameId(trajectoryFrame);
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.location = location.getPoint();
       this.orientation = orientation.getQuaternion();
 
@@ -192,7 +186,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
          {
             FramePoint framePoint = footstep.getCustomPositionWaypoints().get(i);
-            framePoint.checkReferenceFrameMatch(trajectoryFrame);
+            framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             positionWaypoints[i] = new Point3D(framePoint.getPoint());
          }
       }
@@ -352,11 +346,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @Override
    public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
    {
-      if (trajectoryReferenceFrameId != footstepData.getTrajectoryReferenceFrameId())
-      {
-         return false;
-      }
-
       boolean robotSideEquals = robotSide == footstepData.robotSide;
       boolean locationEquals = location.epsilonEquals(footstepData.location, epsilon);
 
@@ -478,23 +467,5 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public String validateMessage()
    {
       return PacketValidityChecker.validateFootstepDataMessage(this);
-   }
-
-   /** {@inheritDoc} */
-   public long getTrajectoryReferenceFrameId()
-   {
-      return trajectoryReferenceFrameId;
-   }
-
-   /** {@inheritDoc} */
-   public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
-   {
-      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
-   }
-
-   /** {@inheritDoc} */
-   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
-   {
-      trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
 }

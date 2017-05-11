@@ -6,16 +6,14 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>, FrameBasedCommand<AdjustFootstepMessage>
+public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>
 {
    private RobotSide robotSide;
    private final FramePoint adjustedPosition = new FramePoint();
@@ -63,13 +61,6 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
-   }
-
-   @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, AdjustFootstepMessage message)
-   {
-      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
-      set(message);
    }
 
    public void setRobotSide(RobotSide robotSide)

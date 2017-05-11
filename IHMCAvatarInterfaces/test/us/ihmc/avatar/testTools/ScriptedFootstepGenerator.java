@@ -45,7 +45,7 @@ public class ScriptedFootstepGenerator
    {
       return generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations, 0.0, 0.0);
    }
-   
+
    public FootstepDataListMessage generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
@@ -57,7 +57,6 @@ public class ScriptedFootstepGenerator
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(),
                                                                     footstep.getFootstepPose().getOrientation());
-         footstepData.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
          footstepDataList.add(footstepData);
       }
 
@@ -83,7 +82,7 @@ public class ScriptedFootstepGenerator
       anklePose.setRotation(orientation);
       anklePose.setTranslation(position);
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), anklePose);
-      
+
       footstep.setFromAnklePose(pose, transformsFromAnkleToSole.get(robotSide));
 
       return footstep;
