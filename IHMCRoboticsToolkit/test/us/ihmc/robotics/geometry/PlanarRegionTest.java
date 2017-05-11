@@ -771,7 +771,7 @@ public class PlanarRegionTest
    static ConvexPolygon2d translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2d convexPolygon)
    {
       Vector2D translation = new Vector2D(xTranslation, yTranslation);
-      return ConvexPolygon2dCalculator.translatePolygonCopy(translation, convexPolygon);
+      return convexPolygon.translateCopy(translation);
    }
 
    private static ConvexPolygon2d transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2d convexPolygon)

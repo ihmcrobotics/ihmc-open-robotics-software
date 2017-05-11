@@ -68,6 +68,19 @@ public class ConvexPolygon2dTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testTranslate()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2D(0.0, 0.0));
+      polygon.update();
+
+      Vector2D translation1 = new Vector2D(-0.1, 0.0);
+      polygon.translate(translation1);
+      assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    {
