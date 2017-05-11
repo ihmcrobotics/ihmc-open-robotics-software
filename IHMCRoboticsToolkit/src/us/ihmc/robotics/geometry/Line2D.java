@@ -122,6 +122,7 @@ public class Line2D implements GeometryObject<Line2D>
     * project the result onto the XY-plane, and returns the result.
     * 
     * @param transform the transform to apply on this line's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws RuntimeException if this line has not been initialized yet.
     */
    public Line2D applyTransformAndProjectToXYPlaneCopy(Transform transform)
@@ -139,6 +140,7 @@ public class Line2D implements GeometryObject<Line2D>
     * </p>
     * 
     * @param transform the transform to apply on this line's copy. Not modified.
+    * @param the copy of this transformed.
     * @throws RuntimeException if this line has not been initialized yet.
     * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
     *            transformation in the XY-plane.
