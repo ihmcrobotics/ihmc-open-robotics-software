@@ -35,21 +35,6 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Translates the given polygon.
-    */
-   public static void translatePolygon(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
-   {
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2D vertex = polygon.getVertexUnsafe(i);
-         vertex.add(translation);
-      }
-
-      polygon.updateBoundingBox();
-      polygon.updateCentroidAndArea();
-   }
-
-   /**
     * Returns the index in the middle of the range from firstIndex to secondIndex moving counter clockwise.
     * E.g. in a polygon with 6 vertices given indices 0 and 2 (in this order) the method will return the
     * middle of the range [0 5 4 3 2]: 4
@@ -147,13 +132,6 @@ public class ConvexPolygon2dCalculator
    }
 
    // --- Methods that generate garbage ---
-   public static ConvexPolygon2d translatePolygonCopy(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
-   {
-      ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
-      translatePolygon(translation, ret);
-      return ret;
-   }
-
    public static LineSegment2D[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2d polygon)
    {
       LineSegment2D edge1 = new LineSegment2D();

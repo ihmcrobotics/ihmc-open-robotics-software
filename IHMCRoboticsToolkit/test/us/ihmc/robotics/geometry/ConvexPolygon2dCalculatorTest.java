@@ -73,27 +73,14 @@ public class ConvexPolygon2dCalculatorTest
       polygon.update();
 
       Vector2D translation1 = new Vector2D(0.0, 0.0);
-      ConvexPolygon2d polygon1 = ConvexPolygon2dCalculator.translatePolygonCopy(translation1, polygon);
+      ConvexPolygon2d polygon1 = polygon.translateCopy(translation1);
       assertTrue(polygon1.epsilonEquals(polygon, epsilon));
 
       Vector2D translation2 = new Vector2D(1.0, 0.5);
-      ConvexPolygon2d polygon2 = ConvexPolygon2dCalculator.translatePolygonCopy(translation2, polygon);
+      ConvexPolygon2d polygon2 = polygon.translateCopy(translation2);
       assertTrue(polygon2.getVertex(2).epsilonEquals(new Point2D(1.0, 0.5), epsilon));
       assertTrue(polygon2.getVertex(1).epsilonEquals(new Point2D(11.0, 0.5), epsilon));
       assertTrue(polygon2.getVertex(0).epsilonEquals(new Point2D(1.0, 10.5), epsilon));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testTranslatePolygon2()
-   {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.update();
-
-      Vector2D translation1 = new Vector2D(-0.1, 0.0);
-      ConvexPolygon2dCalculator.translatePolygon(translation1, polygon);
-      assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
