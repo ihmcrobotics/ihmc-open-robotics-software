@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -27,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
-public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket, FrameBasedMessage
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
@@ -161,6 +160,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
 
+   @Override
    public boolean epsilonEquals(FootstepDataListMessage otherList, double epsilon)
    {
       for (int i = 0; i < size(); i++)
@@ -199,6 +199,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       return true;
    }
 
+   @Override
    public String toString()
    {
       String startingFootstep = "";
@@ -232,11 +233,13 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       }
    }
 
+   @Override
    public Iterator<FootstepDataMessage> iterator()
    {
       return footstepDataList.iterator();
    }
 
+   @Override
    public FootstepDataListMessage transform(RigidBodyTransform transform)
    {
       FootstepDataListMessage ret = new FootstepDataListMessage(defaultSwingDuration, defaultTransferDuration, finalTransferDuration);

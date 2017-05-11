@@ -59,8 +59,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getDataReferenceFrameId());
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getTrajectoryReferenceFrameId());
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getDataReferenceFrameId());
 
       clear(dataFrame);
       set(message);
@@ -70,7 +70,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrixFrameId());
       weightMatrix.setWeightFrame(weightSelectionFrame);
    }
-   
+
    @Override
    public void set(M message)
    {
@@ -103,7 +103,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       return selectionMatrix;
    }
-   
+
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
@@ -113,7 +113,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       return weightMatrix;
    }
-   
+
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       this.weightMatrix.set(weightMatrix);
