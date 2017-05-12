@@ -295,6 +295,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    @Override
    public FrameInformation getFrameInformation()
    {
+      if (frameInformation == null)
+         frameInformation = new FrameInformation();
       return frameInformation;
    }
 
