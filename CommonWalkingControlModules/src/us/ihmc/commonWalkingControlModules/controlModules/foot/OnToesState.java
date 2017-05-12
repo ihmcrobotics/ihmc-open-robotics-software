@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -25,6 +27,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 public class OnToesState extends AbstractFootControlState
 {
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -48,6 +51,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
 
    private final TwistCalculator twistCalculator;
+   private final TranslationReferenceFrame toeOffFrame;
 
    public OnToesState(FootControlHelper footControlHelper, ToeOffHelper toeOffHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -78,24 +82,40 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
+      toeOffFrame = new TranslationReferenceFrame(namePrefix + "ToeOffFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+
       feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       feedbackControlCommand.setPrimaryBase(pelvis);
       feedbackControlCommand.setGains(gains);
 
-      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      selectionMatrix.selectAngularY(false); // Remove pitch
-      feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+      zeroAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
+      zeroAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
+      zeroAccelerationCommand.setPrimaryBase(pelvis);
+
+      SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
+      feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getSoleFrame(), worldFrame);
+      feedbackControlSelectionMatrix.selectLinearZ(false); // We want to do zero acceleration along z-world.
+      feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
+      feedbackControlCommand.setSelectionMatrix(feedbackControlSelectionMatrix);
+
+      SelectionMatrix6D zeroAccelerationSelectionMatrix = new SelectionMatrix6D();
+      zeroAccelerationSelectionMatrix.clearSelection();
+      zeroAccelerationSelectionMatrix.setSelectionFrames(worldFrame, worldFrame);
+      zeroAccelerationSelectionMatrix.selectLinearZ(true);
+      zeroAccelerationCommand.setSelectionMatrix(zeroAccelerationSelectionMatrix);
    }
 
    public void setWeight(double weight)
    {
       feedbackControlCommand.setWeightForSolver(weight);
+      zeroAccelerationCommand.setWeight(weight);
    }
 
    public void setWeights(Vector3D angular, Vector3D linear)
    {
       feedbackControlCommand.setWeightsForSolver(angular, linear);
+      zeroAccelerationCommand.setWeights(angular, linear);
    }
 
    @Override
@@ -128,6 +148,7 @@ public class OnToesState extends AbstractFootControlState
 
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
       setupSingleContactPoint();
    }
@@ -177,6 +198,7 @@ public class OnToesState extends AbstractFootControlState
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      toeOffFrame.updateTranslation(contactPointPosition);
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
       desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
@@ -214,7 +236,7 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return zeroAccelerationCommand;
    }
 
    @Override
