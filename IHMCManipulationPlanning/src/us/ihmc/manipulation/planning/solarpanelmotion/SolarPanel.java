@@ -11,7 +11,14 @@ public class SolarPanel
    private double sizeY;
    private double sizeZ = 0.05;
    private Pose centerPose;
-            
+    
+   public SolarPanel()
+   {
+      this.centerPose = new Pose();
+      this.sizeX = 0;
+      this.sizeY = 0;      
+   }
+   
    public SolarPanel(Pose pose, double sizeX, double sizeY)
    {
       this.sizeX = sizeX;

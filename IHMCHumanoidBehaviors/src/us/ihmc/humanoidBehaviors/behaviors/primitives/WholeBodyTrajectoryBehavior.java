@@ -69,7 +69,6 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
             getTrajectoryTime = outgoingMessage.getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime();
          
          trajectoryTime.set(getTrajectoryTime);
-         PrintTools.info("TrajectoryTime "+trajectoryTime.getDoubleValue());
       }
    }
    
