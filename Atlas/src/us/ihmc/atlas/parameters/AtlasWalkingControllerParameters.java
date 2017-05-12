@@ -1008,7 +1008,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = 0.0;
+      double kpZ = 100.0;
       double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
       double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
@@ -1425,6 +1425,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.18;
+      return 0.05; // JCarff ToeOff
    }
 }
