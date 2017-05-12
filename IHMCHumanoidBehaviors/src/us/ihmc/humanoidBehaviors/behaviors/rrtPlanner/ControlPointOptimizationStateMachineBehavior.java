@@ -33,11 +33,16 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 30;
+   private int numberOfCandidates = 20;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.3;
    
    private int currentIndexOfCandidate;
+   
+   private int numberOfRetry = 5;
+   private int currentIndexOfRetry;
+   
+   private boolean isSolved = false;
    
    
    public enum ControlPointOptimizationStates
@@ -61,6 +66,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       numberOfLinearPath = TimeDomain1DNode.cleaningPath.getNumerOfLinearPath();
       
       currentIndexOfCandidate = 0;
+      currentIndexOfRetry = 0;
       
       optimalScoreOfControlPoint = Double.MAX_VALUE;
       
@@ -108,6 +114,11 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       aNode.setRandomNodeData();
       
       return aNode;
+   }
+   
+   public boolean isSolved()
+   {
+      return isSolved;
    }
    
    private void setUpStateMachine()
@@ -161,11 +172,13 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          @Override
          public boolean checkCondition()
          {            
-            boolean b = (candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates) && optimalControlPointNodePath == null;
+            boolean b = ((candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates) && optimalControlPointNodePath == null) && (currentIndexOfRetry < numberOfRetry);
             if(b == true)
             {
+               PrintTools.info("No solution .. Retry! " + currentIndexOfRetry + " "+numberOfRetry);
+               currentIndexOfRetry++;
                currentIndexOfCandidate = 0;
-               numberOfCandidates = 5;   
+               numberOfCandidates = 3;   
             }
             return b;
          }
@@ -176,8 +189,18 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          @Override
          public boolean checkCondition()
          {
-            boolean b = candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates && optimalControlPointNodePath != null;
-            PrintTools.info("Yes solution ");
+            boolean b = (candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates && optimalControlPointNodePath != null) || (currentIndexOfRetry == numberOfRetry);
+            PrintTools.info("Yes solution !" + currentIndexOfRetry + " "+numberOfRetry);
+            if(currentIndexOfRetry == numberOfRetry)
+            {               
+               isSolved = false;
+               PrintTools.info("Finally... No solution "+isSolved);
+            }
+            else
+            {               
+               isSolved = true;
+               PrintTools.info("Planner get solution!! "+isSolved);
+            }
             return b;
          }
       };
@@ -199,6 +222,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       statemachine.addState(doneAction);
       
       statemachine.setStartState(ControlPointOptimizationStates.GET_SCORE);
+      PrintTools.info("setUpStateMachine done ");
    }
 
    @Override
@@ -296,8 +320,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       public void onBehaviorEntered()
       {   
          PrintTools.info("TestDoneBehavior");
-         for(int i =0;i<optimalControlPointNodePath.size();i++)
-            PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
+//         for(int i =0;i<optimalControlPointNodePath.size();i++)
+//            PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
          PrintTools.info("numberOfTest "+ WholeBodyPoseValidityTester.numberOfTest);
       }
 

@@ -13,7 +13,6 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavio
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
@@ -233,9 +232,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
                                                                                                              fiducialDetectorBehaviorService));
-      
-      dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR,
-                             new SolarPanelStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, wholeBodyControllerParameters, fullRobotModel));
+    
 
       if (objectDetectorBehaviorService != null)
       {

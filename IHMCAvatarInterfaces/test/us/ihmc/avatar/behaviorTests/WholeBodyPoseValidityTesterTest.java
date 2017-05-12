@@ -30,8 +30,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomainTree;
@@ -44,7 +44,6 @@ import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner.Cl
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
@@ -318,43 +317,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       PrintTools.info("behavior Out " + testNodesBehavior.getNodesValdity());
    }
-   
+         
    //@Test
-   public void controlPointOptimizationStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
-   {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      drcBehaviorTestHelper.updateRobotModel();
-      
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
-      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-      //cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-      
-      TimeDomain1DNode.cleaningPath = cleaningPath;
-      TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
-            
-      ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
-      
-      drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
-
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
-      
-      PrintTools.info("behavior Out " );      
-   }
-   
-      
-   @Test
    public void wholebodyTrajectoryBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -385,9 +349,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   
    //@Test
-   public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   public void controlPointOptimizationStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -398,9 +361,48 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
             
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
       
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
+      TimeDomain1DNode.cleaningPath = cleaningPath;
+      TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
+            
+      ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
+      = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      
+      drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
+
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
+      
+      PrintTools.info("behavior Out " );      
+   }
+   
+   @Test
+   public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+            
+      CleaningMotionStateMachineBehavior cleaningStateMachineBehavior
+      = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      
+      drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(150);
       
       PrintTools.info("behavior Out " );      
    }
@@ -424,6 +426,17 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       poseSolarPanel.setOrientation(quaternionSolarPanel);
       
       solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+      
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
+      
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      
+      TimeDomain1DNode.cleaningPath = cleaningPath;
    }
    
    
