@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -59,8 +60,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, M message)
    {
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getTrajectoryReferenceFrameId());
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getFrameInformation().getDataReferenceFrameId());
+      FrameInformation frameInformation = message.getFrameInformation();
+      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+      long dataFrameId = FrameInformation.getDataFrameIDConsideringDefault(frameInformation);
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
 
       clear(dataFrame);
       set(message);

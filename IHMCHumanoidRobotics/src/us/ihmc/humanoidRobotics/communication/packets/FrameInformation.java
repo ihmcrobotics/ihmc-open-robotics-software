@@ -62,12 +62,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
 
    public long getDataReferenceFrameId()
    {
-      long dataId = dataReferenceFrameId;
-      if (dataId == NameBasedHashCodeTools.DEFAULT_HASHCODE)
-      {
-         dataId = trajectoryReferenceFrameId;
-      }
-      return dataId;
+      return dataReferenceFrameId;
    }
 
    public void setDataReferenceFrameId(long dataReferenceFrameId)
@@ -113,7 +108,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
 
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, ReferenceFrame referenceFrame)
    {
-      long expectedId = frameInformation.getDataReferenceFrameId();
+      long expectedId = getDataFrameIDConsideringDefault(frameInformation);
 
       if (expectedId != referenceFrame.getNameBasedHashCode() && expectedId != referenceFrame.getAdditionalNameBasedHashCode())
       {
@@ -124,12 +119,22 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
 
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, long otherReferenceFrameId)
    {
-      long expectedId = frameInformation.getDataReferenceFrameId();
+      long expectedId = getDataFrameIDConsideringDefault(frameInformation);
 
       if (expectedId != otherReferenceFrameId)
       {
          String msg = "Argument's hashcode " + otherReferenceFrameId + " does not match " + expectedId;
          throw new ReferenceFrameMismatchException(msg);
       }
+   }
+
+   public static long getDataFrameIDConsideringDefault(FrameInformation frameInformation)
+   {
+      long dataId = frameInformation.getDataReferenceFrameId();
+      if (dataId == NameBasedHashCodeTools.DEFAULT_HASHCODE)
+      {
+         dataId = frameInformation.getTrajectoryReferenceFrameId();
+      }
+      return dataId;
    }
 }
