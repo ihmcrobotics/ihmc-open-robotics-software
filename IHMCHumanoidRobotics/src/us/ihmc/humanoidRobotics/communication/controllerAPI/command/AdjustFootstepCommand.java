@@ -20,8 +20,6 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    private final FrameOrientation adjustedOrientation = new FrameOrientation();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
-   private ReferenceFrame trajectoryFrame;
-
    public AdjustFootstepCommand()
    {
       clear();
@@ -40,8 +38,8 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    public void set(AdjustFootstepMessage message)
    {
       robotSide = message.getRobotSide();
-      adjustedPosition.setIncludingFrame(trajectoryFrame, message.getLocation());
-      adjustedOrientation.setIncludingFrame(trajectoryFrame, message.getOrientation());
+      adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());
+      adjustedOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getOrientation());
       List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
