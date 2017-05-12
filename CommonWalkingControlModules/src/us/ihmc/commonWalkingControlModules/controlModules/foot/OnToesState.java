@@ -16,8 +16,13 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -36,8 +41,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final Twist footTwist = new Twist();
 
-   private double desiredYawToHold = 0.0;
-   private double desiredRollToHold = 0.0;
+   private final FrameOrientation startOrientation = new FrameOrientation();
    private final double[] tempYawPitchRoll = new double[3];
 
    private final FramePoint contactPointPosition = new FramePoint();
@@ -55,6 +59,8 @@ public class OnToesState extends AbstractFootControlState
 
    private final TwistCalculator twistCalculator;
    private final TranslationReferenceFrame toeOffFrame;
+
+   private final ReferenceFrame soleZUpFrame;
 
    public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -89,6 +95,8 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
       toeOffFrame = new TranslationReferenceFrame(namePrefix + "ToeOffFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+
+      soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
 
       feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
@@ -133,13 +141,13 @@ public class OnToesState extends AbstractFootControlState
    public void doSpecificAction()
    {
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
-      desiredOrientation.changeFrame(worldFrame);
+      desiredOrientation.changeFrame(soleZUpFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
+      toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
 
       twistCalculator.getRelativeTwist(rootBody, contactableFoot.getRigidBody(), footTwist);
       footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
-      toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
       toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
 
       desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
@@ -147,14 +155,19 @@ public class OnToesState extends AbstractFootControlState
 
       computeDesiredsForFreeMotion();
 
-      desiredOrientation.setYawPitchRoll(desiredYawToHold, toeOffDesiredPitchAngle.getDoubleValue(), desiredRollToHold);
+      desiredOrientation.setIncludingFrame(startOrientation);
+      desiredOrientation.changeFrame(soleZUpFrame);
+      desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll[1] = toeOffDesiredPitchAngle.getDoubleValue();
+      desiredOrientation.setYawPitchRoll(tempYawPitchRoll);
+      desiredOrientation.changeFrame(worldFrame);
 
       desiredLinearVelocity.setToZero(worldFrame);
-      desiredAngularVelocity.setIncludingFrame(contactableFoot.getFrameAfterParentJoint(), 0.0, toeOffDesiredPitchVelocity.getDoubleValue(), 0.0);
+      desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, toeOffDesiredPitchVelocity.getDoubleValue(), 0.0);
       desiredAngularVelocity.changeFrame(worldFrame);
 
       desiredLinearAcceleration.setToZero(worldFrame);
-      desiredAngularAcceleration.setIncludingFrame(contactableFoot.getFrameAfterParentJoint(), 0.0, toeOffDesiredPitchAcceleration.getDoubleValue(), 0.0);
+      desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, toeOffDesiredPitchAcceleration.getDoubleValue(), 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
@@ -175,7 +188,7 @@ public class OnToesState extends AbstractFootControlState
 
    private void computeDesiredsForFreeMotion()
    {
-      boolean blockToMaximumPitch = tempYawPitchRoll[1] > maximumToeOffAngleProvider.getValue();
+      boolean blockToMaximumPitch = toeOffCurrentPitchAngle.getDoubleValue() > maximumToeOffAngleProvider.getValue();
 
       if (blockToMaximumPitch)
       {
@@ -240,6 +253,7 @@ public class OnToesState extends AbstractFootControlState
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
+      toeOffFrame.updateTranslation(contactPointPosition);
 
       desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       desiredContactPointPosition.changeFrame(worldFrame);
@@ -269,10 +283,8 @@ public class OnToesState extends AbstractFootControlState
       else
          setControlPointPositionFromContactLine();
 
-      desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
-      desiredOrientation.changeFrame(worldFrame);
-      desiredYawToHold = desiredOrientation.getYaw();
-      desiredRollToHold = desiredOrientation.getRoll();
+      startOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
+      startOrientation.changeFrame(worldFrame);
 
       ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
       if (toeSlippingDetector != null)
