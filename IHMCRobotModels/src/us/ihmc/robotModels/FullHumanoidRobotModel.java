@@ -1,10 +1,8 @@
 package us.ihmc.robotModels;
 
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -74,9 +72,6 @@ public interface FullHumanoidRobotModel extends FullRobotModel
     * @return
     */
    public abstract ReferenceFrame getHandControlFrame(RobotSide robotSide);
-
-   // TODO This methods is currently for the DRCDemo0 in BoxMovingHighLevelHumanoidController. We should get rid of it.
-   public abstract FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName); // FIXME Should be moved to somewhere where current joint data may be used once we start grasping
 
    /**
     * Returns the left or right sole reference frame.
