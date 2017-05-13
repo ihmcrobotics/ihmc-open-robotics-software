@@ -23,7 +23,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -78,7 +77,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoOrientationPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
@@ -93,7 +91,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    {
       this.endEffector = endEffector;
 
-      twistCalculator = toolbox.getTwistCalculator();
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
@@ -331,7 +328,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     */
    public void computeDerivativeTerm(FrameVector feedbackTermToPack)
    {
-      twistCalculator.getAngularVelocityOfBody(endEffector, currentAngularVelocity);
+      endEffector.getBodyFixedFrame().getTwistOfFrame().getAngularPart(currentAngularVelocity);
       currentAngularVelocity.changeFrame(worldFrame);
       yoCurrentAngularVelocity.set(currentAngularVelocity);
 
