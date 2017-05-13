@@ -50,7 +50,7 @@ public class MotionQPInputCalculatorTest
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
       YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, centroidalMomentumHandler, jointIndexHandler, null, registry);
+      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
