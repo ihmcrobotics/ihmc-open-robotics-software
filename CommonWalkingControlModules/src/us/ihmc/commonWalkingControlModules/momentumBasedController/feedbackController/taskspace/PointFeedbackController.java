@@ -26,7 +26,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
@@ -77,7 +76,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final Matrix3DReadOnly kp, kd, ki;
    private final YoSE3OffsetFrame controlFrame;
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
@@ -91,7 +89,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       this.endEffector = endEffector;
 
-      twistCalculator = toolbox.getTwistCalculator();
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
@@ -318,10 +315,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void computeDerivativeTerm(FrameVector feedbackTermToPack)
    {
-      currentPosition.setToZero(controlFrame);
-      currentPosition.changeFrame(endEffector.getBodyFixedFrame());
-
-      twistCalculator.getLinearVelocityOfBodyFixedPoint(base, endEffector, currentPosition, currentLinearVelocity);
+      controlFrame.getTwistOfFrame().getLinearPart(currentLinearVelocity);
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
@@ -387,10 +381,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void addCoriolisAcceleration(FrameVector linearAccelerationToModify)
    {
-      twistCalculator.getTwistOfBody(endEffector, currentTwist);
-      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
-      currentTwist.changeFrame(controlFrame);
-
+      controlFrame.getTwistOfFrame(currentTwist);
       currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.getLinearPart(currentLinearVelocity);
 
@@ -417,10 +408,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void subtractCoriolisAcceleration(FrameVector linearAccelerationToModify)
    {
-      twistCalculator.getTwistOfBody(endEffector, currentTwist);
-      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
-      currentTwist.changeFrame(controlFrame);
-
+      controlFrame.getTwistOfFrame(currentTwist);
       currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.getLinearPart(currentLinearVelocity);
 
