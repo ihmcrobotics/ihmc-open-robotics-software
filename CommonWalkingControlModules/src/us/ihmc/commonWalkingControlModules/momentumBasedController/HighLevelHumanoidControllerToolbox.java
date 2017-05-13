@@ -80,7 +80,6 @@ public class HighLevelHumanoidControllerToolbox
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
-   private final TwistCalculator twistCalculator;
 
    protected final SideDependentList<ContactableFoot> feet;
    protected final List<ContactablePlaneBody> contactableBodies;
@@ -183,7 +182,6 @@ public class HighLevelHumanoidControllerToolbox
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      this.twistCalculator = twistCalculator;
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
@@ -408,7 +406,6 @@ public class HighLevelHumanoidControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      twistCalculator.compute();
       centerOfMassJacobian.compute();
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -803,11 +800,6 @@ public class HighLevelHumanoidControllerToolbox
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public CenterOfMassJacobian getCenterOfMassJacobian()
