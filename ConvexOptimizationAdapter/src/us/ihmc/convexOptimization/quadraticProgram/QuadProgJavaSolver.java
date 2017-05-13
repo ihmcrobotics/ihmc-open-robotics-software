@@ -15,6 +15,7 @@ public class QuadProgJavaSolver
    private enum QuadProgStep {step1, step2, step2a, step2b, step2c};
 
    private QuadProgStep currentStep;
+   private final DenseMatrix64F negAin = new DenseMatrix64F(0), negAeq = new DenseMatrix64F(0);
 
    private static final boolean traceSolver = false;
 
@@ -264,12 +265,31 @@ public class QuadProgJavaSolver
       iaexcl.zero();
    }
 
+   private void allocateTempraryMatrixOnDemand(int nvar, int neq, int nin)
+   {
+      negAin.reshape(nvar, nin);
+      negAeq.reshape(nvar, neq);
+   }
+
+   public double solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
+         DenseMatrix64F bin, DenseMatrix64F x, boolean initialize)
+   {
+      allocateTempraryMatrixOnDemand(Q.numCols, Aeq.numRows, Ain.numRows);
+
+      CommonOps.transpose(Aeq, this.negAeq);
+      CommonOps.scale(-1, this.negAeq);
+      CommonOps.transpose(Ain, this.negAin);
+      CommonOps.scale(-1, this.negAin);
+
+      return solveQuadprog(Q, f, negAeq, beq, negAin, bin, x, initialize);
+   }
 
 
    // The solving function, implementing the Goldfarb-Idani method
    public double solveQuadprog(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector,
-         DenseMatrix64F CE, DenseMatrix64F ce0, DenseMatrix64F CI, DenseMatrix64F ci0, DenseMatrix64F solution)
+         DenseMatrix64F CE, DenseMatrix64F ce0, DenseMatrix64F CI, DenseMatrix64F ci0, DenseMatrix64F solution, boolean initialize)
    {
+      //// TODO: 5/13/17  initialize
       problemSize = costQuadraticMatrix.getNumCols();
       numberOfEqualityConstraints = CE.getNumCols();
       numberOfInequalityConstraints = CI.getNumCols();
