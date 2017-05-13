@@ -694,12 +694,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -996,12 +990,6 @@ public class VirtualModelControllerTestHelper
       {
          worldFrame.update();
          elevator.updateFramesRecursively();
-      }
-
-      @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
       }
 
       @Override
@@ -1358,12 +1346,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -1710,12 +1692,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -2019,12 +1995,6 @@ public class VirtualModelControllerTestHelper
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
-      }
-
-      @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
       }
 
       @Override
