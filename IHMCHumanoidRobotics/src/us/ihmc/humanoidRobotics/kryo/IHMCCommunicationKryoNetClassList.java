@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -298,6 +299,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SO3TrajectoryPointMessage[].class);
       registerPacketField(SE3TrajectoryPointMessage.class);
       registerPacketField(SE3TrajectoryPointMessage[].class);
+      registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
 
       // Controller failure

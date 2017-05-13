@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.beetle.planning;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -13,7 +14,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -237,11 +237,11 @@ public class FootStepPlanner
    }
 
    FramePoint footPosition = new FramePoint();
-   ConvexPolygon2d polygon = new ConvexPolygon2d();
+   ConvexPolygon2D polygon = new ConvexPolygon2D();
 
    private void drawSupportPolygon(RobotSextant[] feet, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      polygon = new ConvexPolygon2d();
+      polygon = new ConvexPolygon2D();
       for (RobotSextant robotSextant : feet)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);

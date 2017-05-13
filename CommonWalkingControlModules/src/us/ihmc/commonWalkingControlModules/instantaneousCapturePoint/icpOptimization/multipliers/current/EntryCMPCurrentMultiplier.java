@@ -2,15 +2,12 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.NewCubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingEntryCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferEntryCMPMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
 
 import java.util.List;
 
@@ -21,9 +18,9 @@ import java.util.List;
 public class EntryCMPCurrentMultiplier
 {
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current value. */
-   private final NewCubicMatrix cubicMatrix;
+   private final EfficientCubicMatrix cubicMatrix;
    /** Cubic spline matrix that multiplies the boundary conditions to compute the current derivative value. */
-   private final NewCubicDerivativeMatrix cubicDerivativeMatrix;
+   private final EfficientCubicDerivativeMatrix cubicDerivativeMatrix;
 
    /** Boundary conditions matrix for the entry CMP when in transfer. */
    private final TransferEntryCMPMatrix transferEntryCMPMatrix;
@@ -63,8 +60,8 @@ public class EntryCMPCurrentMultiplier
    }
 
    public EntryCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, NewCubicMatrix cubicMatrix,
-         NewCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, EfficientCubicMatrix cubicMatrix,
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime,
          YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "EntryCMPCurrentMultiplier", registry);
@@ -80,7 +77,7 @@ public class EntryCMPCurrentMultiplier
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new NewCubicMatrix();
+         this.cubicMatrix = new EfficientCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -91,7 +88,7 @@ public class EntryCMPCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new NewCubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new EfficientCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else

@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -13,7 +14,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -53,7 +53,7 @@ public class DynamicGraphicObjectEvaluation
          {0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.5, 1.2}, {0.5, -0.2}
       };
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(pointList);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(pointList);
 
       AppearanceDefinition appearance = YoAppearance.Red();
       appearance.setTransparency(0.8);
@@ -141,10 +141,10 @@ public class DynamicGraphicObjectEvaluation
             {
                quickPause();
 
-               ConvexPolygon2d newPolygon = new ConvexPolygon2d(secondPointList);
+               ConvexPolygon2D newPolygon = new ConvexPolygon2D(secondPointList);
                yoPolygon.setConvexPolygon2d(newPolygon);
 
-               ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
+               ConvexPolygon2D newYoPolygon = new ConvexPolygon2D(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
                yoGraphicYoFramePolygon.update();
 
@@ -159,11 +159,11 @@ public class DynamicGraphicObjectEvaluation
                scs.tickAndUpdate();
 
                quickPause();
-               newPolygon = new ConvexPolygon2d(pointList);
+               newPolygon = new ConvexPolygon2D(pointList);
                yoPolygon.setConvexPolygon2d(newPolygon);
                yoGraphicYoFramePolygon.update();
 
-               newYoPolygon = new ConvexPolygon2d(secondPointList);
+               newYoPolygon = new ConvexPolygon2D(secondPointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
 
                yoGraphicText.setText("GoodBye");

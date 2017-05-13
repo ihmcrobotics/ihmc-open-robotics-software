@@ -10,9 +10,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.random.RandomGeometry;
 
 
@@ -37,7 +37,7 @@ public class ConvexHullFootstepSnapperTest
 
       List<Point2DReadOnly> finalPoints = footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4);
       assertTrue(finalPoints.size() == 4.0);
-      ConvexPolygon2d endPolygon = new ConvexPolygon2d(finalPoints);
+      ConvexPolygon2D endPolygon = new ConvexPolygon2D(finalPoints);
       assertEquals(4.0, endPolygon.getArea(), 1e-15);
    }
 
@@ -56,17 +56,17 @@ public class ConvexHullFootstepSnapperTest
          pointsToCrop.add(RandomGeometry.nextPoint2D(random, maxX, maxY));
       }
 
-      ConvexPolygon2d startPolygon = new ConvexPolygon2d(pointsToCrop);
+      ConvexPolygon2D startPolygon = new ConvexPolygon2D(pointsToCrop);
       startPolygon.update();
       double startArea = startPolygon.getArea();
 
-      ConvexPolygon2d intermediateStepPolygon = new ConvexPolygon2d(footstepSnapper.reduceListOfPointsByArea(pointsToCrop, Math.max(4, startPolygon.getNumberOfVertices() / 2)));
+      ConvexPolygon2D intermediateStepPolygon = new ConvexPolygon2D(footstepSnapper.reduceListOfPointsByArea(pointsToCrop, Math.max(4, startPolygon.getNumberOfVertices() / 2)));
       intermediateStepPolygon.update();
       double intermediateStepArea = intermediateStepPolygon.getArea();
       assertTrue(intermediateStepArea <= startArea);
       assertTrue(intermediateStepPolygon.getNumberOfVertices() <= Math.max(4, startPolygon.getNumberOfVertices()));
 
-      ConvexPolygon2d endPolygon = new ConvexPolygon2d(footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4));
+      ConvexPolygon2D endPolygon = new ConvexPolygon2D(footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4));
       endPolygon.update();
       double endArea = endPolygon.getArea();
       assertTrue(endArea <= startArea);

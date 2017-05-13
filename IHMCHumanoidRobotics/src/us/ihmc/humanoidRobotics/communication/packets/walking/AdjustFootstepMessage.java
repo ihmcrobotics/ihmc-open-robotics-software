@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -26,7 +25,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>, FrameBasedMessage
+public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>
 {
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public RobotSide robotSide;
@@ -34,9 +33,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public Point3D location;
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
    public Quaternion orientation;
-
-   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all pose data in this message.")
-   public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to keep the contact points used for the original footstep. Contact points  are expressed in sole frame. This ordering does not matter.\n"
@@ -116,8 +112,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       FramePoint location = new FramePoint();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(location, orientation);
-      ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
-      setTrajectoryReferenceFrameId(trajectoryFrame);
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.location = location.getPoint();
       this.orientation = orientation.getQuaternion();
 
@@ -291,23 +286,5 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public String validateMessage()
    {
       return PacketValidityChecker.validateFootstepDataMessage(this);
-   }
-
-   /** {@inheritDoc} */
-   public long getTrajectoryReferenceFrameId()
-   {
-      return trajectoryReferenceFrameId;
-   }
-
-   /** {@inheritDoc} */
-   public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
-   {
-      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
-   }
-
-   /** {@inheritDoc} */
-   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
-   {
-      trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
 }

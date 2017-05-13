@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,11 +39,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -135,7 +137,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
       {
-         double timeAtWaypoint = totalTime * (double) waypoint / (double) waypoints;
+         double timeAtWaypoint = totalTime * waypoint / waypoints;
          double desiredPosition = amplitude * Math.sin(2.0 * Math.PI * frequency * timeAtWaypoint);
          double desiredVelocity = 2.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * timeAtWaypoint);
 
@@ -170,7 +172,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-            message.setTrajectoryPoint(jointIdx, waypoint, 0.1 * (double) waypoint, 0.0, 0.0);
+            message.setTrajectoryPoint(jointIdx, waypoint, 0.1 * waypoint, 0.0, 0.0);
       executeMessage(message);
 
       assertControlWasConsistent(controllerSpy);
@@ -275,7 +277,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          int numberOfPoinsForJoint = numberOfPoints[jointIdx];
-         double timePerPoint = trajectoryTime[jointIdx] / (double) numberOfPoinsForJoint;
+         double timePerPoint = trajectoryTime[jointIdx] / numberOfPoinsForJoint;
          double time = timePerPoint;
 
          OneDoFJointTrajectoryMessage jointTrajectoryMessage = new OneDoFJointTrajectoryMessage(numberOfPoinsForJoint);
@@ -292,7 +294,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       double controllerDT = getRobotModel().getControllerDT();
       drcSimulationTestHelper.send(message);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
@@ -377,7 +379,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      
+
       OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
       RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();

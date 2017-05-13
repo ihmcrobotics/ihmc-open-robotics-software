@@ -3,13 +3,13 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 import java.awt.Color;
 
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -126,7 +126,7 @@ public class QuadrupedPathPreview
 
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoPolygon)
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          FramePoint footstep = supportPolygon.getFootstep(quadrant);

@@ -6,13 +6,13 @@ import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -29,49 +29,34 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
-               public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+               public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
                {
-                  YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+                  YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
-                  double kpXY = 150.0;
-                  double kpZ = 200.0; //200.0;
-                  double zetaXYZ = 0.7;
+                  double kpXY = 80.0;
+                  double kpZ = 80.0;
+                  double zeta = 0.8;
+                  double maxAccel = 36.0;
+                  double maxJerk = 540.0;
 
-                  double kpXYOrientation = 200.0; // 200.0;
-                  double kpZOrientation = 200.0; // 200.0;
-                  double zetaOrientation = 0.7;
-
-                  double maxPositionAcceleration = Double.POSITIVE_INFINITY;
-                  double maxPositionJerk = Double.POSITIVE_INFINITY;
-                  double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
-                  double maxOrientationJerk = Double.POSITIVE_INFINITY;
-
-                  double kdReductionRatio = 1.0;
-                  double parallelDampingDeadband = 100.0;
-                  double positionErrorForMinimumKd = 10000.0;
-
-                  gains.setPositionProportionalGains(kpXY, kpZ);
-                  gains.setPositionDampingRatio(zetaXYZ);
-                  gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
-                  gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-                  gains.setOrientationDampingRatio(zetaOrientation);
-                  gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-                  gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
+                  gains.setProportionalGains(kpXY, kpZ);
+                  gains.setDampingRatio(zeta);
+                  gains.setMaximumFeedback(maxAccel);
+                  gains.setMaximumFeedbackRate(maxJerk);
                   gains.createDerivativeGainUpdater(true);
 
                   return gains;
                }
-
                @Override
-               public double getMaxICPErrorBeforeSingleSupportX()
+               public boolean doHeelTouchdownIfPossible()
                {
-                  return 0.05;
+                  return true;
                }
 
                @Override
-               public double getMaxICPErrorBeforeSingleSupportY()
+               public double getHeelTouchdownLengthRatio()
                {
-                  return 0.03;
+                  return 0.5;
                }
 
                @Override
@@ -83,7 +68,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getAnkleLowerLimitToTriggerToeOff()
                {
-                  return -0.45;
+                  return -0.60;
                }
 
                @Override
@@ -101,7 +86,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.15;
+                  return 0.1;
                }
 
                @Override
@@ -113,13 +98,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getECMPProximityForToeOff()
                {
-                  return 0.03;
+                  return 0.02;
                }
 
                @Override
                public boolean useOptimizationBasedICPController()
                {
-                  return true; //false;
+                  return true;
+               }
+
+               @Override
+               public boolean editStepTimingForReachability()
+               {
+                  return false; // // TODO: 4/27/17  
                }
 
                @Override
@@ -148,13 +139,25 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 0.8;
+                        return 0.7;
                      }
 
                      @Override
                      public double getFractionOfTransferToCollapseLeg()
                      {
-                        return 0.8;
+                        return 0.7;
+                     }
+
+                     @Override
+                     public double getFractionOfSwingToCollapseStanceLeg()
+                     {
+                        return 0.95;
+                     }
+
+                     @Override
+                     public double getSupportKneeCollapsingDuration()
+                     {
+                        return 0.2;
                      }
 
                      @Override
@@ -166,7 +169,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightKneeAngle()
                      {
-                        return 0.4;
+                        return 0.1;
+                     }
+
+                     @Override
+                     public double getLegPitchPrivilegedWeight()
+                     {
+                        return 10.0;
                      }
 
                      @Override
@@ -184,7 +193,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getKneeStraightLegPrivilegedWeight()
                      {
-                        return 100.0;
+                        return 200.0;
                      }
 
                      @Override
@@ -219,40 +228,35 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new AtlasMomentumOptimizationSettings(getJointMap(), getContactPointParameters().getNumberOfContactableBodies())
                   {
                      @Override
-                     public Vector3D getHighAngularFootWeight()
-                     {
-                        return new Vector3D(5.0, 5.0, 5.0);
-                     }
-
-                     @Override
-                     public Vector3D getDefaultAngularFootWeight()
-                     {
-                        return new Vector3D(0.1, 0.1, 0.1);// Vector3D(0.5, 0.5, 0.5);
-                     }
-
-                     @Override
-                     public Vector3D getDefaultLinearFootWeight()
-                     {
-                        return new Vector3D(10.0, 10.0, 10.0);// Vector3D(30.0, 30.0, 30.0);
-                     }
-
-                     @Override
                      public double getJointAccelerationWeight()
                      {
-                        return 0.05; //0.005;
+                        //return 0.005;
+                        return 0.05;
+                     }
+                  };
+               }
+
+               @Override
+               public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+               {
+                  return new PelvisOffsetWhileWalkingParameters()
+                  {
+                     @Override
+                     public boolean addPelvisOrientationOffsetsFromWalkingMotion()
+                     {
+                        return true;
                      }
 
-                     @Override
-                     public double getJointJerkWeight()
+                     public double getPelvisPitchRatioOfLegAngle()
                      {
-                        return 0.5; //0.1;
+                        return 0.7;
                      }
 
-                     @Override
-                     public double getRhoRateDefaultWeight()
+                     public double getPelvisYawRatioOfStepAngle()
                      {
-                        return 0.005; //0.002;
+                        return 0.25;
                      }
+
                   };
                }
 
@@ -273,18 +277,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getExitCMPForwardSafetyMarginOnToes()
                {
-                  return 0.0;
-               }
-
-               public double getExitCMPInsideOffset()
-               {
-                  return 0.015;
+                  return 0.002;
                }
 
                @Override
                public boolean putExitCMPOnToes()
                {
                   return true;
+               }
+
+               @Override
+               public double getExitCMPInsideOffset()
+               {
+                  return 0.015;
                }
             };
          }

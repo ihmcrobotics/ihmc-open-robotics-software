@@ -31,7 +31,7 @@ public class PlanarRegionTerrainObjectTest
       for (int i = 0; i < 100000; i++)
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
-                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            RandomNumbers.nextDouble(random, 0.0, 30.0),
                                                                                                             random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
@@ -67,7 +67,7 @@ public class PlanarRegionTerrainObjectTest
       for (int i = 0; i < 100000; i++)
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
-                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            RandomNumbers.nextDouble(random, 0.0, 30.0),
                                                                                                             random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
@@ -95,7 +95,7 @@ public class PlanarRegionTerrainObjectTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 4.0)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
       Random random = new Random(1776L);
@@ -108,7 +108,7 @@ public class PlanarRegionTerrainObjectTest
       for (int i = 0; i < 100000; i++)
       {
          int numberOfRandomlyGeneratedPolygons = random.nextInt(10);
-         double maxAbsoluteXYForPolygons = RandomNumbers.nextDouble(random, 30.0);
+         double maxAbsoluteXYForPolygons = RandomNumbers.nextDouble(random, 0.0, 30.0);
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfRandomlyGeneratedPolygons,
                                                                                                             maxAbsoluteXYForPolygons,
                                                                                                             numberOfRandomlyGeneratedPolygons);
@@ -146,7 +146,7 @@ public class PlanarRegionTerrainObjectTest
       for (int i = 0; i < 100000; i++)
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
-                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            RandomNumbers.nextDouble(random, 0.0, 30.0),
                                                                                                             random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
@@ -184,7 +184,7 @@ public class PlanarRegionTerrainObjectTest
       {
 
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
-                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            RandomNumbers.nextDouble(random, 0.0, 30.0),
                                                                                                             random.nextInt(10));
 
          double randomXCoord = RandomNumbers.nextDouble(random, 15.0);

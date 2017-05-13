@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -89,15 +89,15 @@ public class DefaultFootContactPoints implements FootContactPoints
    }
 
    @Override
-   public SideDependentList<LineSegment2d> getToeOffContactLines(double footLength, double footWidth, double toeWidth)
+   public SideDependentList<LineSegment2D> getToeOffContactLines(double footLength, double footWidth, double toeWidth)
    {
-      SideDependentList<LineSegment2d> ret = new SideDependentList<>();
+      SideDependentList<LineSegment2D> ret = new SideDependentList<>();
 
       double footForward = footLength / 2.0;
       double halfToeWidth = toeWidth / 2.0;
 
       for (RobotSide robotSide : RobotSide.values)
-         ret.put(robotSide, new LineSegment2d(new Point2D(footForward, -halfToeWidth), new Point2D(footForward, halfToeWidth)));
+         ret.put(robotSide, new LineSegment2D(new Point2D(footForward, -halfToeWidth), new Point2D(footForward, halfToeWidth)));
 
       return ret;
    }

@@ -360,7 +360,14 @@ public class PartialFootholdControlModule
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
       {
          controllerFootPolygon.getFrameVertexXY(i, tempPosition);
-         contactPoints.get(i).setPosition(tempPosition);
+         YoContactPoint contactPoint = contactPoints.get(i);
+         contactPoint.setPosition(tempPosition);
+         contactPoint.setInContact(true);
+      }
+
+      for (int i = controllerFootPolygon.getNumberOfVertices(); i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).setInContact(false);
       }
 
       backupFootPolygon.set(shrunkFootPolygon);

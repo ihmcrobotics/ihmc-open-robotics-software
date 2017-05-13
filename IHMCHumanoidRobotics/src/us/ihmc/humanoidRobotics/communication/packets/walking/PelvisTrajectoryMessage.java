@@ -33,17 +33,11 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public PelvisTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
    public PelvisTrajectoryMessage(Random random)
    {
       super(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
    /**
@@ -53,10 +47,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public PelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
       super(pelvisTrajectoryMessage);
-      setUniqueId(pelvisTrajectoryMessage.getUniqueId());
-      setDestination(pelvisTrajectoryMessage.getDestination());
-      setDataReferenceFrameId(pelvisTrajectoryMessage.getDataReferenceFrameId());
-      setTrajectoryReferenceFrameId(pelvisTrajectoryMessage.getTrajectoryReferenceFrameId());
+      setEnableUserPelvisControlDuringWalking(pelvisTrajectoryMessage.isEnableUserPelvisControlDuringWalking());
    }
 
    /**
@@ -68,10 +59,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
     */
    public PelvisTrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -83,9 +71,6 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public PelvisTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()

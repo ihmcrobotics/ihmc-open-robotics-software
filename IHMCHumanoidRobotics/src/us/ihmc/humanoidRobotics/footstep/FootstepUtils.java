@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -78,7 +78,7 @@ public class FootstepUtils
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null)
       {
-         ConvexPolygon2d contactPolygon = new ConvexPolygon2d(predictedContactPoints);
+         ConvexPolygon2D contactPolygon = new ConvexPolygon2D(predictedContactPoints);
          footstepCenter = new Point2D(contactPolygon.getCentroid());
       }
       else

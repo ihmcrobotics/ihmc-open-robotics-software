@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -11,7 +12,7 @@ public class StringStretcher2d
    private final Point2D startPoint = new Point2D();
    private final Point2D endPoint = new Point2D();
 
-   private final Line2d tempLine = new Line2d(new Point2D(), new Vector2D(1.0, 0.0));
+   private final Line2D tempLine = new Line2D(new Point2D(), new Vector2D(1.0, 0.0));
 
    private final ArrayList<Point2D[]> minMaxPoints = new ArrayList<Point2D[]>();
 
