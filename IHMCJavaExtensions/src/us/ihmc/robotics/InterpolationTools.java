@@ -94,8 +94,7 @@ public class InterpolationTools
     */
    public static double hermiteInterpolate(double a, double b, double alpha) throws IllegalArgumentException
    {
-      if (!MathTools.intervalContains(alpha, 0.0, 1.0))
-         throw new IllegalArgumentException("Attempting to extrapolate! alpha must be between 0.0 and 1.0.");
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       double h00 = hermite00Coefficient(alpha);
       double h01 = hermite01Coefficient(alpha);
@@ -118,8 +117,7 @@ public class InterpolationTools
     */
    public static double hermiteInterpolate(double a, double aTangent, double b, double bTangent, double alpha) throws IllegalArgumentException
    {
-      if (!MathTools.intervalContains(alpha, 0.0, 1.0))
-         throw new IllegalArgumentException("Attempting to extrapolate! alpha must be between 0.0 and 1.0.");
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       double h00 = hermite00Coefficient(alpha);
       double h10 = hermite10Coefficient(alpha);

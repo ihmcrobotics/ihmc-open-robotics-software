@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -61,7 +61,7 @@ public class SingleFootstepVisualizer
       }
 
       footPolygon = new YoFrameConvexPolygon2d(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), maxContactPoints, registry);
-      footPolygon.setConvexPolygon2d(new ConvexPolygon2d(polyPoints));
+      footPolygon.setConvexPolygon2d(new ConvexPolygon2D(polyPoints));
 
       soleFramePose = new YoFramePose(namePrefix + "polygonPose", "", ReferenceFrame.getWorldFrame(), registry);
       soleFramePose.setXYZ(0.0, 0.0, -1.0);
@@ -116,7 +116,7 @@ public class SingleFootstepVisualizer
          yoContactPoints[i].set(pointInWorld.getPoint());
       }
 
-      footPolygon.setConvexPolygon2d(new ConvexPolygon2d(predictedContactPoints));
+      footPolygon.setConvexPolygon2d(new ConvexPolygon2D(predictedContactPoints));
       footPolygonViz.update();
    }
 }

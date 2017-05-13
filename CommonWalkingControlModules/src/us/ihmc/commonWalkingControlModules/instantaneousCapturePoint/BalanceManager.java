@@ -555,7 +555,7 @@ public class BalanceManager
       controllerToolbox.getCapturePoint(capturePoint2d);
 
       // signed distance returns a negative number if the point is inside the polygon.
-      return supportPolygonInWorld.getSignedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
+      return supportPolygonInWorld.signedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
    }
 
    public double getICPErrorMagnitude()

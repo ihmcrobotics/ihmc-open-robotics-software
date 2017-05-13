@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -11,7 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -70,17 +70,17 @@ public class PlanarRegionBaseOfCliffAvoider
 
       //TODO: Too many hard coded numbers around here...
 
-      LineSegment2d middleToLeft = new LineSegment2d(0.0, 0.0, 0.0, minimumDistanceFromCliffBottoms);
-      LineSegment2d middleToRight = new LineSegment2d(0.0, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
-      LineSegment2d frontToLeft = new LineSegment2d(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
-      LineSegment2d frontToRight = new LineSegment2d(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
-      LineSegment2d backToLeft = new LineSegment2d(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
-      LineSegment2d backToRight = new LineSegment2d(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
+      LineSegment2D middleToLeft = new LineSegment2D(0.0, 0.0, 0.0, minimumDistanceFromCliffBottoms);
+      LineSegment2D middleToRight = new LineSegment2D(0.0, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
+      LineSegment2D frontToLeft = new LineSegment2D(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
+      LineSegment2D frontToRight = new LineSegment2D(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
+      LineSegment2D backToLeft = new LineSegment2D(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
+      LineSegment2D backToRight = new LineSegment2D(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
       
-      LineSegment2d backToBackFurther = new LineSegment2d(-0.0, 0.0, -minimumDistanceFromCliffBottoms, 0.0);
-      LineSegment2d frontToFrontFurther = new LineSegment2d(-0.0, 0.0, minimumDistanceFromCliffBottoms, 0.0);
+      LineSegment2D backToBackFurther = new LineSegment2D(-0.0, 0.0, -minimumDistanceFromCliffBottoms, 0.0);
+      LineSegment2D frontToFrontFurther = new LineSegment2D(-0.0, 0.0, minimumDistanceFromCliffBottoms, 0.0);
 
-      ArrayList<LineSegment2d> lineSegmentsInSoleFrame = new ArrayList<>();
+      ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
       lineSegmentsInSoleFrame.add(middleToLeft);
       lineSegmentsInSoleFrame.add(middleToRight);
       lineSegmentsInSoleFrame.add(frontToLeft);
@@ -91,7 +91,7 @@ public class PlanarRegionBaseOfCliffAvoider
       lineSegmentsInSoleFrame.add(frontToFrontFurther);
 
       Point3D highestPointInSoleFrame = new Point3D();
-      LineSegment2d highestLineSegmentInSoleFrame = new LineSegment2d();
+      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
       maximumCliffZInSoleFrame.set(findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame));
       maximumCliffXInSoleFrame.set(highestPointInSoleFrame.getX());
       maximumCliffYInSoleFrame.set(highestPointInSoleFrame.getY());
@@ -129,16 +129,16 @@ public class PlanarRegionBaseOfCliffAvoider
       }
    }
    
-   private double findHighestPointInOriginalSoleFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2d> lineSegmentsInSoleFrame,
-                                                      Point3D highestPointInSoleFrameToPack, LineSegment2d highestLineSegmentInSoleFrameToPack)
+   private double findHighestPointInOriginalSoleFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
+                                                      Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack)
      {
         double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
-        LineSegment2d lineSegmentInWorldFrame = new LineSegment2d();
+        LineSegment2D lineSegmentInWorldFrame = new LineSegment2D();
         Point3D pointOneInWorldFrame = new Point3D();
         Point3D pointTwoInWorldFrame = new Point3D();
 
-        for (LineSegment2d lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
+        for (LineSegment2D lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
         {
            pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
            pointTwoInWorldFrame.set(lineSegmentInSoleFrame.getSecondEndpointX(), lineSegmentInSoleFrame.getSecondEndpointY(), 0.0);

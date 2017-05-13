@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.polygonWiggling;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,6 +20,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -27,7 +29,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -49,21 +50,21 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testSimpleProjection()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.0, 0.0);
       plane.addVertex(0.5, 0.0);
       plane.addVertex(0.0, 0.5);
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
 
       if (visualize)
       {
@@ -80,14 +81,14 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testSimpleProjectionWithDeltaInside()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.0, 0.0);
       plane.addVertex(0.5, 0.0);
       plane.addVertex(0.0, 0.5);
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -95,7 +96,7 @@ public class PolygonWigglingTest
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = 0.06;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
 
       if (visualize)
       {
@@ -110,14 +111,14 @@ public class PolygonWigglingTest
 
    }
 
-   private void checkThatWiggledInsideJustTheRightAmount(ConvexPolygon2d plane, WiggleParameters wiggleParameters, ConvexPolygon2d foot)
+   private void checkThatWiggledInsideJustTheRightAmount(ConvexPolygon2D plane, WiggleParameters wiggleParameters, ConvexPolygon2D foot)
    {
       double largestDistance = Double.NEGATIVE_INFINITY;
 
       for (int i=0; i<foot.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = foot.getVertex(i);
-         double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(vertex, plane);
+         double signedDistance = plane.signedDistance(vertex);
 
          if (signedDistance > largestDistance)
          {
@@ -132,14 +133,14 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testSimpleProjectionWithWiggleLimits()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.0, 0.0);
       plane.addVertex(0.5, 0.0);
       plane.addVertex(0.0, 0.5);
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
@@ -148,7 +149,7 @@ public class PolygonWigglingTest
       WiggleParameters parameters = new WiggleParameters();
       parameters.minX = 0.02;
       parameters.maxX = 0.02;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -165,16 +166,16 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionThatRequiredRotation()
    {
-      ConvexPolygon2d plane = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D plane = PlanningTestTools.createDefaultFootPolygon();
       plane.scale(1.1);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-13.0));
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -191,7 +192,7 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testImpossibleCases()
    {
-      ConvexPolygon2d plane = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D plane = PlanningTestTools.createDefaultFootPolygon();
       plane.scale(0.9);
       addPolygonToArtifacts("Plane", plane, Color.BLACK);
 
@@ -199,7 +200,7 @@ public class PolygonWigglingTest
       double yawLimit = Math.toRadians(15.0);
       for (int i = 0; i < 1000; i ++)
       {
-         ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+         ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
          RigidBodyTransform initialFootTransform = new RigidBodyTransform();
          double x = 5.0 * (random.nextDouble() - 0.5);
          double y = 5.0 * (random.nextDouble() - 0.5);
@@ -208,7 +209,7 @@ public class PolygonWigglingTest
          initialFootTransform.setTranslation(x, y, 0.0);
          initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
+         ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
          assertTrue(foot == null);
 
          if (visualize)
@@ -228,19 +229,19 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionOnlyTranslation()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.0, 0.0);
       plane.addVertex(0.5, 0.0);
       plane.addVertex(0.0, 0.5);
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -257,21 +258,21 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionTranslationLimits()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.0, 0.0);
       plane.addVertex(0.5, 0.0);
       plane.addVertex(0.0, 0.5);
       plane.addVertex(0.5, 0.5);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
       WiggleParameters parameters = new WiggleParameters();
       parameters.maxX = 0.1;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -288,22 +289,22 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionTranslationLimitX1()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(1.0, 0.0);
       plane.addVertex(0.0, 1.0);
       plane.addVertex(2.0, 0.0);
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.0, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
       WiggleParameters parameters = new WiggleParameters();
-      parameters.maxX = 0.0;
+      parameters.maxX = 1.0e-15;
       parameters.maxY = 1.0;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -313,10 +314,16 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() <= parameters.maxX);
-      assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() >= parameters.minX);
-      assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() <= parameters.maxY);
-      assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() >= parameters.minY);
+      Point2DReadOnly footCentroid = foot.getCentroid();
+      Point2DReadOnly initialFootCentroid = initialFoot.getCentroid();
+
+      System.out.println("footCentroid: " + footCentroid);
+      System.out.println("initialFootCentroid: " + initialFootCentroid);
+
+      assertTrue(footCentroid.getX() - initialFootCentroid.getX() <= parameters.maxX);
+      assertTrue(footCentroid.getX() - initialFootCentroid.getX() >= parameters.minX);
+      assertTrue(footCentroid.getY() - initialFootCentroid.getY() <= parameters.maxY);
+      assertTrue(footCentroid.getY() - initialFootCentroid.getY() >= parameters.minY);
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
    }
 
@@ -324,14 +331,14 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionTranslationLimitX2()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(1.0, 0.0);
       plane.addVertex(0.0, 1.0);
       plane.addVertex(2.0, 0.0);
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(1.0, 1.5, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
@@ -339,7 +346,7 @@ public class PolygonWigglingTest
       WiggleParameters parameters = new WiggleParameters();
       parameters.minX = 0.0;
       parameters.minY = -1.0;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -360,14 +367,14 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionTranslationLimitY1()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(1.0, 0.0);
       plane.addVertex(0.0, 1.0);
       plane.addVertex(2.0, 0.0);
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.0, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
@@ -375,7 +382,7 @@ public class PolygonWigglingTest
       WiggleParameters parameters = new WiggleParameters();
       parameters.maxX = 1.0;
       parameters.maxY = 0.05;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -396,14 +403,14 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionTranslationLimitY2()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(1.0, 0.0);
       plane.addVertex(0.0, 1.0);
       plane.addVertex(2.0, 0.0);
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(1.0, 1.5, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
@@ -411,7 +418,7 @@ public class PolygonWigglingTest
       WiggleParameters parameters = new WiggleParameters();
       parameters.minX = -1.0;
       parameters.minY = 0.0;
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -433,14 +440,14 @@ public class PolygonWigglingTest
    public void testKnownResult()
    {
       // this is a regression test - this will check if the expected result is produced.
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(1.0, 0.0);
       plane.addVertex(0.0, 1.0);
       plane.addVertex(2.0, 0.0);
       plane.addVertex(0.0, 2.0);
       plane.update();
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setTranslationAndIdentityRotation(0.5, 0.05, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
@@ -453,7 +460,7 @@ public class PolygonWigglingTest
       parameters.minY = -0.5;
       parameters.maxYaw = Math.toRadians(15.0);
       parameters.minYaw = -Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
 
       if (visualize)
       {
@@ -467,20 +474,25 @@ public class PolygonWigglingTest
 
       // expected:
       ArrayList<Point2D> expected = new ArrayList<>();
+      expected.add(new Point2D(0.6946910259467516, 0.3057219822306081));
       expected.add(new Point2D(0.7021375429674444, 0.405444343736243));
       expected.add(new Point2D(0.901582265978714, 0.39055130969485763));
       expected.add(new Point2D(0.8941357489580215, 0.2908289481892227));
-      expected.add(new Point2D(0.6946910259467516, 0.3057219822306081));
 
       for (int i = 0; i < foot.getNumberOfVertices(); i++)
-         assertTrue(foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10));
+      {
+         if (!foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10))
+         {
+            fail("Failed at vertex index: " + i + ", expected: " + expected + ", was: " + foot);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testCompexProjectionArea()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
+      ConvexPolygon2D plane = new ConvexPolygon2D();
       plane.addVertex(0.5, -0.5);
       plane.addVertex(-0.8, 0.5);
       plane.addVertex(0.5, 1.5);
@@ -500,7 +512,7 @@ public class PolygonWigglingTest
 
       for (int i = 0; i < 1000; i++)
       {
-         ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+         ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
          if (random.nextBoolean())
          {
             initialFoot.removeVertex(random.nextInt(4));
@@ -515,7 +527,7 @@ public class PolygonWigglingTest
          initialFootTransform.setTranslation(x, y, 0.0);
          initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
+         ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
          assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
          if (ConvexPolygon2dCalculator.isPolygonInside(initialFoot, 1.0e-5, plane))
             assertTrue(initialFoot.epsilonEquals(foot, 1.0e-10));
@@ -537,22 +549,22 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegion1()
    {
-      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
-      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
+      ConvexPolygon2D plane1 = new ConvexPolygon2D();
       plane1.addVertex(0.0, 0.0);
       plane1.addVertex(0.5, 0.0);
       plane1.addVertex(0.0, 0.5);
       plane1.addVertex(0.5, 0.5);
       plane1.update();
       planes.add(plane1);
-      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.6, 0.0);
       plane2.addVertex(-0.1, 0.0);
       plane2.addVertex(-0.6, 0.5);
       plane2.addVertex(-0.1, 0.5);
       plane2.update();
       planes.add(plane2);
-      ConvexPolygon2d plane3 = new ConvexPolygon2d();
+      ConvexPolygon2D plane3 = new ConvexPolygon2D();
       plane3.addVertex(-0.25, 0.0);
       plane3.addVertex(0.25, 0.0);
       plane3.addVertex(-0.25, -0.5);
@@ -563,7 +575,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -572,7 +584,7 @@ public class PolygonWigglingTest
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
       assertFalse(wiggleTransfrom == null);
 
-      ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
+      ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
       foot.applyTransformAndProjectToXYPlane(wiggleTransfrom);
 
       if (visualize)
@@ -591,15 +603,15 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegion2()
    {
-      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
-      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
+      ConvexPolygon2D plane1 = new ConvexPolygon2D();
       plane1.addVertex(-0.6, 0.0);
       plane1.addVertex(-0.1, 0.0);
       plane1.addVertex(-0.6, 0.5);
       plane1.addVertex(-0.1, 0.5);
       plane1.update();
       planes.add(plane1);
-      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.25, 0.0);
       plane2.addVertex(0.25, 0.0);
       plane2.addVertex(-0.25, -0.5);
@@ -610,7 +622,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -619,7 +631,7 @@ public class PolygonWigglingTest
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
       assertFalse(wiggleTransfrom == null);
 
-      ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
+      ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
       foot.applyTransformAndProjectToXYPlane(wiggleTransfrom);
 
       if (visualize)
@@ -638,15 +650,15 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegionNoOverlap()
    {
-      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
-      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
+      ConvexPolygon2D plane1 = new ConvexPolygon2D();
       plane1.addVertex(-0.6, 0.0);
       plane1.addVertex(-0.1, 0.0);
       plane1.addVertex(-0.6, 0.5);
       plane1.addVertex(-0.1, 0.5);
       plane1.update();
       planes.add(plane1);
-      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.25, 0.0);
       plane2.addVertex(0.25, 0.0);
       plane2.addVertex(-0.25, -0.5);
@@ -657,7 +669,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(0.1, 0.1, 0.0);
@@ -679,15 +691,15 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegionInvalidLimits()
    {
-      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
-      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
+      ConvexPolygon2D plane1 = new ConvexPolygon2D();
       plane1.addVertex(-0.6, 0.0);
       plane1.addVertex(-0.1, 0.0);
       plane1.addVertex(-0.6, 0.5);
       plane1.addVertex(-0.1, 0.5);
       plane1.update();
       planes.add(plane1);
-      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.25, 0.0);
       plane2.addVertex(0.25, 0.0);
       plane2.addVertex(-0.25, -0.5);
@@ -698,7 +710,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
@@ -722,15 +734,15 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegionHull()
    {
-      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
-      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
+      ConvexPolygon2D plane1 = new ConvexPolygon2D();
       plane1.addVertex(0.0, 0.0);
       plane1.addVertex(0.5, 0.0);
       plane1.addVertex(0.0, 0.5);
       plane1.addVertex(0.5, 0.5);
       plane1.update();
       planes.add(plane1);
-      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.6, 0.0);
       plane2.addVertex(-0.1, 0.0);
       plane2.addVertex(-0.6, 0.5);
@@ -741,7 +753,7 @@ public class PolygonWigglingTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
-      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      ConvexPolygon2D initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.setTranslation(-0.05, 0.05, 0.0);
@@ -750,7 +762,7 @@ public class PolygonWigglingTest
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters());
       assertFalse(wiggleTransfrom == null);
 
-      ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
+      ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
       foot.applyTransformAndProjectToXYPlane(wiggleTransfrom);
 
       if (visualize)
@@ -762,7 +774,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      ConvexPolygon2d hullOfRegion = new ConvexPolygon2d(plane1, plane2);
+      ConvexPolygon2D hullOfRegion = new ConvexPolygon2D(plane1, plane2);
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, hullOfRegion));
    }
 
@@ -776,9 +788,9 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point = new Point2D();
-      Random random = new Random();
+      Random random = new Random(234235L);
 
       for (int iter = 0; iter < 1000; iter++)
       {
@@ -974,7 +986,8 @@ public class PolygonWigglingTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   // TODO: 05/10/2017 moved to development
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testConvexConstraintOfLine()
    {
@@ -984,12 +997,12 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
 
-      Random random = new Random();
+      Random random = new Random(-8133358861874482661L);
 
       for (int iters= 0; iters < 1000; iters++)
       {
@@ -1166,7 +1179,7 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
@@ -1241,7 +1254,7 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
       Point2D point2 = new Point2D();
       Point2D point3 = new Point2D();
@@ -1296,7 +1309,7 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D firstQuadrantPoint = new Point2D();
       Point2D secondQuadrantPoint = new Point2D();
       Point2D thirdQuadrantPoint = new Point2D();
@@ -1513,13 +1526,13 @@ public class PolygonWigglingTest
       DenseMatrix64F x = new DenseMatrix64F(2, 1);
       DenseMatrix64F solution = new DenseMatrix64F(4, 1);
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D firstQuadrantPoint = new Point2D();
       Point2D secondQuadrantPoint = new Point2D();
       Point2D thirdQuadrantPoint = new Point2D();
       Point2D fourthQuadrantPoint = new Point2D();
 
-      Random random = new Random();
+      Random random = new Random(234235L);
 
       firstQuadrantPoint.set(1.0 + random.nextDouble(), 1.0 + random.nextDouble());
       secondQuadrantPoint.set(1.0 + random.nextDouble(), -1.0 - random.nextDouble());
@@ -1578,7 +1591,7 @@ public class PolygonWigglingTest
       assertFalse(allInside);
    }
 
-   private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
+   private void addPolygonToArtifacts(String name, ConvexPolygon2D polygon, Color color)
    {
       YoFrameConvexPolygon2d yoPlanePolygon = new YoFrameConvexPolygon2d(name + "Polygon", worldFrame, 10, registry);
       artifacts.add(new YoArtifactPolygon(name, yoPlanePolygon , color, false));

@@ -88,16 +88,16 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.setTrajectoryReferenceFrameId(chestFrame);
-      handTrajectoryMessage1.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage1.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+      handTrajectoryMessage1.getFrameInformation().setDataReferenceFrame(worldFrame);
       handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.setTrajectoryReferenceFrameId(chestFrame);
-      handTrajectoryMessage2.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage2.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+      handTrajectoryMessage2.getFrameInformation().setDataReferenceFrame(worldFrame);
       handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
@@ -155,8 +155,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.inverse();
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
-      handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
-      handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
       handTrajectoryMessage.setUseCustomControlFrame(true);
       handTrajectoryMessage.setControlFramePosition(new Point3D(-0.307, -0.027, -0.022)); // hard coded to be at the simulation contact point.
       handTrajectoryMessage.setControlFrameOrientation(handOrientation);
@@ -215,8 +213,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
-      liftHand.setTrajectoryReferenceFrameId(worldFrame);
-      liftHand.setDataReferenceFrameId(worldFrame);
       liftHand.setUseCustomControlFrame(true);
       liftHand.setControlFrameOrientation(handOrientation);
       liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);

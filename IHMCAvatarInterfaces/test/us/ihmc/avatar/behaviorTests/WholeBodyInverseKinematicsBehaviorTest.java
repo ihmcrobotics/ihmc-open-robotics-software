@@ -150,7 +150,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -226,7 +227,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -314,7 +316,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -414,7 +417,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -501,7 +505,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -564,7 +569,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -618,7 +624,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());

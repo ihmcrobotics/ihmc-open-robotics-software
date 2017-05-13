@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -63,18 +64,18 @@ public class PlanarRegionsListGenerator
 
    public void addRectangle(double lengthX, double widthY)
    {
-      ConvexPolygon2d rectangle = createRectanglePolygon(lengthX, widthY);
+      ConvexPolygon2D rectangle = createRectanglePolygon(lengthX, widthY);
       addPolygon(rectangle);
    }
 
-   public void addPolygon(ConvexPolygon2d polygon)
+   public void addPolygon(ConvexPolygon2D polygon)
    {
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
       planarRegion.setRegionId(id++);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 
-   public void addPolygons(ArrayList<ConvexPolygon2d> polygons)
+   public void addPolygons(ArrayList<ConvexPolygon2D> polygons)
    {
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygons);
       planarRegion.setRegionId(id++);
@@ -83,15 +84,15 @@ public class PlanarRegionsListGenerator
 
    private void addRectangle(RigidBodyTransformGenerator transformGenerator, double lengthX, double widthY)
    {
-      ConvexPolygon2d rectangle = createRectanglePolygon(lengthX, widthY);
+      ConvexPolygon2D rectangle = createRectanglePolygon(lengthX, widthY);
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), rectangle);
       planarRegion.setRegionId(id++);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 
-   private static ConvexPolygon2d createRectanglePolygon(double lengthX, double widthY)
+   private static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
    {
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
       convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
       convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
 
 /**
- * Class intended to manage the indices of all components used in the {@link ICPOptimizationSolver}.
+ * Class intended to manage the indices of all components used in the {@link ICPQPOptimizationSolver}.
  */
 public class ICPQPIndexHandler
 {
