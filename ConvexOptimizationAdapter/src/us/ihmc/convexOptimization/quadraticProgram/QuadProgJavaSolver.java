@@ -3,6 +3,7 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
+
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
@@ -11,6 +12,10 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class QuadProgJavaSolver
 {
+   private enum QuadProgStep {step1, step2, step2a, step2b, step2c};
+
+   private QuadProgStep currentStep;
+
    private static final boolean traceSolver = false;
 
    private static final int defaultSize = 100;
@@ -135,7 +140,7 @@ public class QuadProgJavaSolver
       return true;
    }
 
-   private void deleteConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F A, DenseMatrix64F u, int n, int p, int iq, int l)
+   private void deleteConstraint(DenseMatrix64F R, DenseMatrix64F J, TIntArrayList A, DenseMatrix64F u, int n, int p, int iq, int l)
    {
       PrintTools.debug(traceSolver, "Delete constraint " + l + " " + iq);
 
@@ -164,7 +169,7 @@ public class QuadProgJavaSolver
 
       A.set(iq - 1, A.get(iq));
       u.set(iq - 1, u.get(iq));
-      A.set(iq, 0.0);
+      A.set(iq, 0);
       u.set(iq, 0.0);
       for (int j = 0; j < iq; j++)
          R.set(j, iq - 1, 0.0);
@@ -290,6 +295,8 @@ public class QuadProgJavaSolver
       reshape();
       zero();
 
+      currentStep = QuadProgStep.step1;
+
       int q = 0;
 
       PrintTools.debug(traceSolver, "G : " + costQuadraticMatrix);
@@ -330,10 +337,10 @@ public class QuadProgJavaSolver
       PrintTools.debug(traceSolver, "x : " + solution);
 
       // Add equality constraints to the working set A
-      int ip; // this is the index of the constraint to be added to the active set
+      int ip = 0; // this is the index of the constraint to be added to the active set
       int iq = 0;
       int iter = 0;
-      double t, t1, t2; // t is the step length, which is the minimum of the partial step t1 and the full step length t2
+      double t = 0.0, t1 = 0.0, t2 = 0.0; // t is the step length, which is the minimum of the partial step t1 and the full step length t2
       for (int i = 0; i < numberOfEqualityConstraints; i++)
       {
          for (int j = 0; j < problemSize; j++)
@@ -374,8 +381,9 @@ public class QuadProgJavaSolver
 
          if (!addConstraint(R, costQuadraticLowerInverse, d, iq, R_norm))
          {
-            throw new RuntimeException("Constraints are linearly dependent.");
+            PrintTools.info("Constraints are linearly dependent.");
             return f_value;
+            //throw new RuntimeException("Constraints are linearly dependent.");
          }
       }
 
@@ -383,229 +391,247 @@ public class QuadProgJavaSolver
       for (int i = 0; i < numberOfInequalityConstraints; i++)
          iai.set(i, i);
 
-      l1: // // FIXME: 5/13/17 
-      iter++;
-
-      PrintTools.debug(traceSolver, "x : " + solution);
-
-      // step 1: choose a violated constraint
-      for (int i = numberOfEqualityConstraints; i < iq; i++)
-      {
-         ip = A.get(i);
-         iai.set(ip, -1);
-      }
-
-      // compute s(x) = ci^t * x + ci0 for all elements of K \ A
       double ss = 0.0;
-      double psi = 0.0; // this value will contain the sum of all infeasibilities
-      ip = 0; // ip will be the index of the chosen violated constraint
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
-      {
-         iaexcl.set(i, 0.0);
-         double sum = 0.0;
-         for (int j = 0; j < problemSize; j++)
-            sum += CI.get(j, i) * solution.get(j);
-         sum += ci0.get(i);
-         s.set(i, sum);
-         psi += Math.min(0.0, sum);
-      }
-
-      PrintTools.debug(traceSolver, "s : " + s);
-
-      if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
-      {
-         // numerically there are not infeasibilities anymore
-         return f_value;
-      }
-
-      // save old values for u, solution, and A
-      for (int i = 0; i < iq; i++)
-      {
-         u_old.set(i, u.get(i));
-         A_old.set(i, A.get(i));
-      }
-      // and for solution
-      for (int i = 0; i < problemSize; i++)
-         x_old.set(i, solution.get(i));
-      
-      l2: //// FIXME: 5/13/17
-      // Step 2: check for feasibility and determine a new S-pair
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
-      {
-         if (s.get(i) < ss && iai.get(i) != -1 && iaexcl.get(i) == 1)
-         {
-            ss = s.get(i);
-            ip = i;
-         }
-      }
-      if (ss >= 0.0)
-      {
-         q = iq;
-         return f_value;
-      }
-
-      // set np = n(ip)
-      for (int i = 0; i < problemSize; i++)
-         np.set(i, CI.get(i, ip));
-      // set u = (u 0)^T
-      u.set(iq, 0.0);
-      // add ip to the active set A
-      A.set(iq, ip);
-
-      PrintTools.debug(traceSolver, "Trying with constraint " + ip);
-      PrintTools.debug(traceSolver, "np : " + np);
-
-      l2a: // // FIXME: 5/13/17
-      // Step 2a: determine step direction
-      // compute z = H np: the step direction in the primal space (through J, see the paper)
-      compute_d(d, costQuadraticLowerInverse, np);
-      update_z(z, costQuadraticLowerInverse, d, iq);
-      // compute N* np (if q > 0): the negative of the step direction in the dual space
-      update_r(R, r, d, iq);
-
-      PrintTools.debug(traceSolver, "Step direction z.");
-      PrintTools.debug(traceSolver, "z :" + z);
-      PrintTools.debug(traceSolver, "r :" + r);
-      PrintTools.debug(traceSolver, "u :" + u);
-      PrintTools.debug(traceSolver, "d :" + d);
-      PrintTools.debug(traceSolver, "A :" + A);
-
-      // Step 2b: compute step length
+      double psi;
       int l = 0;
-      // Compute t1: partial step length (maximum step in dual space without violating dual feasibility
-      t1 = Double.POSITIVE_INFINITY;
-      // find the index l s.t. it reaches the minimum of u+(x) / r
-      for (int k = numberOfEqualityConstraints; k < iq; k++)
+
+      while (true)
       {
-         double tmp;
-         if (r.get(k) > 0.0 && (tmp = u.get(k) / r.get(k)) < t1)
+         switch(currentStep)
          {
-            t1 = tmp;
-            l = A.get(k);
+         default:
+            // // FIXME: 5/13/17
+            iter++;
+
+            PrintTools.debug(traceSolver, "x : " + solution);
+
+            // step 1: choose a violated constraint
+            for (int i = numberOfEqualityConstraints; i < iq; i++)
+            {
+               ip = A.get(i);
+               iai.set(ip, -1);
+            }
+
+            // compute s(x) = ci^t * x + ci0 for all elements of K \ A
+            ss = 0.0;
+            psi = 0.0; // this value will contain the sum of all infeasibilities
+            ip = 0; // ip will be the index of the chosen violated constraint
+            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            {
+               iaexcl.set(i, 0.0);
+               double sum = 0.0;
+               for (int j = 0; j < problemSize; j++)
+                  sum += CI.get(j, i) * solution.get(j);
+               sum += ci0.get(i);
+               s.set(i, sum);
+               psi += Math.min(0.0, sum);
+            }
+
+            PrintTools.debug(traceSolver, "s : " + s);
+
+            if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
+            {
+               // numerically there are not infeasibilities anymore
+               return f_value;
+            }
+
+            // save old values for u, solution, and A
+            for (int i = 0; i < iq; i++)
+            {
+               u_old.set(i, u.get(i));
+               A_old.set(i, A.get(i));
+            }
+            // and for solution
+            for (int i = 0; i < problemSize; i++)
+               x_old.set(i, solution.get(i));
+
+         case step2:
+            // Step 2: check for feasibility and determine a new S-pair
+            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            {
+               if (s.get(i) < ss && iai.get(i) != -1 && iaexcl.get(i) == 1)
+               {
+                  ss = s.get(i);
+                  ip = i;
+               }
+            }
+            if (ss >= 0.0)
+            {
+               q = iq;
+               return f_value;
+            }
+
+            // set np = n(ip)
+            for (int i = 0; i < problemSize; i++)
+               np.set(i, CI.get(i, ip));
+            // set u = (u 0)^T
+            u.set(iq, 0.0);
+            // add ip to the active set A
+            A.set(iq, ip);
+
+            PrintTools.debug(traceSolver, "Trying with constraint " + ip);
+            PrintTools.debug(traceSolver, "np : " + np);
+
+         case step2a:
+            // Step 2a: determine step direction
+            // compute z = H np: the step direction in the primal space (through J, see the paper)
+            compute_d(d, costQuadraticLowerInverse, np);
+            update_z(z, costQuadraticLowerInverse, d, iq);
+            // compute N* np (if q > 0): the negative of the step direction in the dual space
+            update_r(R, r, d, iq);
+
+            PrintTools.debug(traceSolver, "Step direction z.");
+            PrintTools.debug(traceSolver, "z :" + z);
+            PrintTools.debug(traceSolver, "r :" + r);
+            PrintTools.debug(traceSolver, "u :" + u);
+            PrintTools.debug(traceSolver, "d :" + d);
+            PrintTools.debug(traceSolver, "A :" + A);
+
+         case step2b:
+            // Step 2b: compute step length
+            // Compute t1: partial step length (maximum step in dual space without violating dual feasibility
+            t1 = Double.POSITIVE_INFINITY;
+            // find the index l s.t. it reaches the minimum of u+(x) / r
+            for (int k = numberOfEqualityConstraints; k < iq; k++)
+            {
+               double tmp;
+               if (r.get(k) > 0.0 && (tmp = u.get(k) / r.get(k)) < t1)
+               {
+                  t1 = tmp;
+                  l = A.get(k);
+               }
+            }
+
+            // Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible
+            CommonOps.multTransA(z, z, scalarMatrix);
+            if (Math.abs(z.get(0)) > epsilon)
+            {
+               CommonOps.multTransA(z, np, scalarMatrix);
+               t2 = -s.get(ip) / scalarMatrix.get(0);
+            }
+            else
+            {
+               t2 = Double.POSITIVE_INFINITY;
+            }
+
+            // the step is chosen as the minimum of t1 and t2
+            t = Math.min(t1, t2);
+
+            PrintTools.debug(traceSolver, "Step Sizes: " + t + " (t1 = " + t1 + ", t2 = " + t2 + ") ");
+         case step2c:
+            // Step 2c: determine new S-pair and take step:
+
+            // case (i): no step in primal or dual space
+            if (t >= Double.POSITIVE_INFINITY)
+            {
+               /* QPP is infeasible */
+               // FIXME: unbounded to raise
+               q = iq;
+               return Double.POSITIVE_INFINITY;
+            }
+            // case (ii): step in dual space
+            if (t2 >= Double.POSITIVE_INFINITY)
+            {
+               // set u = u + t * (-r 1) and drop constraint l from the active set A
+               for (int k = 0; k < iq; k++)
+                  u.set(k, u.get(k) - t * r.get(k));
+               u.set(iq, u.get(iq) + t);
+               iai.set(l, l);
+               deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
+
+               PrintTools.debug(traceSolver, "in dual space: " + f_value);
+               PrintTools.debug(traceSolver, "x : " + solution);
+               PrintTools.debug(traceSolver, "z : " + z);
+               PrintTools.debug(traceSolver, "A : " + A);
+
+               currentStep = QuadProgStep.step2a;
+               continue;
+            }
+            // case (iii): step in primal and dual space
+            for (int k = 0; k < problemSize; k++)
+               solution.set(k, solution.get(k) + t * z.get(k));
+            // update the solution value
+            CommonOps.multTransA(z, np, scalarMatrix);
+            f_value += t * scalarMatrix.get(0) * (0.5 * t + u.get(iq));
+            // u = u + t * (-r 1)
+            for (int k = 0; k < iq; k++)
+               u.set(k, u.get(k) - t * r.get(k));
+            u.set(iq, u.get(iq) + t);
+
+            PrintTools.debug(traceSolver, "in dual space: " + f_value);
+            PrintTools.debug(traceSolver, "x : " + solution);
+            PrintTools.debug(traceSolver, "u : " + u);
+            PrintTools.debug(traceSolver, "r : " + r);
+            PrintTools.debug(traceSolver, "A : " + A);
+
          }
-      }
 
-      // Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible
-      CommonOps.multTransA(z, z, scalarMatrix);
-      if (Math.abs(z.get(0)) > epsilon)
-      {
-         CommonOps.multTransA(z, np, scalarMatrix);
-         t2 = -s.get(ip) / scalarMatrix.get(0);
-      }
-      else
-      {
-         t2 = Double.POSITIVE_INFINITY;
-      }
 
-      // the step is chosen as the minimum of t1 and t2
-      t = Math.min(t1, t2);
-
-      PrintTools.debug(traceSolver, "Step Sizes: " + t + " (t1 = " + t1 + ", t2 = " + t2 + ") ");
-
-      // Step 2c: determine new S-pair and take step:
-
-      // case (i): no step in primal or dual space
-      if (t >= Double.POSITIVE_INFINITY)
-      {
-         /* QPP is infeasible */
-         // FIXME: unbounded to raise
-         q = iq;
-         return Double.POSITIVE_INFINITY;
-      }
-      // case (ii): step in dual space
-      if (t2 >= Double.POSITIVE_INFINITY)
-      {
-         // set u = u + t * (-r 1) and drop constraint l from the active set A
-         for (int k = 0; k < iq; k++)
-            u.set(k, u.get(k) - t * r.get(k));
-         u.set(iq, u.get(iq) + t);
-         iai.set(l, l);
-         deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
-
-         PrintTools.debug(traceSolver, "in dual space: " + f_value);
-         PrintTools.debug(traceSolver, "x : " + solution);
-         PrintTools.debug(traceSolver, "z : " + z);
-         PrintTools.debug(traceSolver, "A : " + A);
-         
-         goto l2a; // // FIXME: 5/13/17
-      }
-      // case (iii): step in primal and dual space
-      for (int k = 0; k < problemSize; k++)
-         solution.set(k, solution.get(k) + t * z.get(k));
-      // update the solution value
-      CommonOps.multTransA(z, np, scalarMatrix);
-      f_value += t * scalarMatrix.get(0) * (0.5 * t + u.get(iq));
-      // u = u + t * (-r 1)
-      for (int k = 0; k < iq; k++)
-         u.set(k, u.get(k) - t * r.get(k));
-      u.set(iq, u.get(iq) + t);
-
-      PrintTools.debug(traceSolver, "in dual space: " + f_value);
-      PrintTools.debug(traceSolver, "x : " + solution);
-      PrintTools.debug(traceSolver, "u : " + u);
-      PrintTools.debug(traceSolver, "r : " + r);
-      PrintTools.debug(traceSolver, "A : " + A);
-
-      if (MathTools.epsilonEquals(t - t2, 0.0, epsilon))
-      {
-         PrintTools.debug(traceSolver, "Full step has taken " + t);
-         PrintTools.debug(traceSolver, "x : " + solution);
-
-         // full step has taken
-         // add constraint ip to the active set
-         if (!addConstraint(R, costQuadraticLowerInverse, d, iq, R_norm))
+         if (MathTools.epsilonEquals(t - t2, 0.0, epsilon))
          {
-            iaexcl.set(ip, 0.0);
-            deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, ip);
+            PrintTools.debug(traceSolver, "Full step has taken " + t);
+            PrintTools.debug(traceSolver, "x : " + solution);
+
+            // full step has taken
+            // add constraint ip to the active set
+            if (!addConstraint(R, costQuadraticLowerInverse, d, iq, R_norm))
+            {
+               iaexcl.set(ip, 0.0);
+               deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, ip);
+
+               PrintTools.debug(traceSolver, "R : " + R);
+               PrintTools.debug(traceSolver, "A : " + A);
+               PrintTools.debug(traceSolver, "iai : " + iai);
+
+               for (int i = 0; i < numberOfInequalityConstraints; i++)
+                  iai.set(i, i);
+               for (int i = numberOfEqualityConstraints; i < iq; i++)
+               {
+                  A.set(i, A_old.get(i));
+                  u.set(i, u_old.get(i));
+                  iai.set(A.get(i), -1);
+               }
+               for (int i = 0; i < problemSize; i++)
+                  solution.set(i, x_old.get(i));
+
+               currentStep = QuadProgStep.step2;
+               continue;
+            }
+            else
+            {
+               iai.set(ip, -1);
+            }
 
             PrintTools.debug(traceSolver, "R : " + R);
             PrintTools.debug(traceSolver, "A : " + A);
             PrintTools.debug(traceSolver, "iai : " + iai);
 
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
-               iai.set(i, i);
-            for (int i = numberOfEqualityConstraints; i < iq; i++)
-            {
-               A.set(i, A_old.get(i));
-               u.set(i, u_old.get(i));
-               iai.set(A.get(i), -1);
-            }
-            for (int i = 0; i < problemSize; i++)
-               solution.set(i, x_old.get(i));
-            goto l2; // // FIXME: 5/13/17
+            currentStep = QuadProgStep.step1;
+            continue;
          }
-         else
-         {
-            iai.set(ip, -1);
-         }
+
+         // a partial step has taken
+         PrintTools.debug(traceSolver, "Partial step has taken " + t);
+         PrintTools.debug(traceSolver, "x : " + solution);
+
+         // drop constraint l
+         iai.set(l, l);
+         deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
 
          PrintTools.debug(traceSolver, "R : " + R);
          PrintTools.debug(traceSolver, "A : " + A);
-         PrintTools.debug(traceSolver, "iai : " + iai);
-         
-         goto l1; // // FIXME: 5/13/17
+
+         // update s(ip) = CI * x + ci0
+         double sum = 0.0;
+         for (int k = 0; k < problemSize; k++)
+            sum += CI.get(k, ip) * solution.get(k);
+         s.set(ip, sum + ci0.get(ip));
+
+         PrintTools.debug(traceSolver, "s : " + s);
+
+         currentStep = QuadProgStep.step2a;
+         continue;
       }
-
-      // a partial step has taken
-      PrintTools.debug(traceSolver, "Partial step has taken " + t);
-      PrintTools.debug(traceSolver, "x : " + solution);
-
-      // drop constraint l
-      iai.set(l, l);
-      deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
-
-      PrintTools.debug(traceSolver, "R : " + R);
-      PrintTools.debug(traceSolver, "A : " + A);
-
-      // update s(ip) = CI * x + ci0
-      double sum = 0.0;
-      for (int k = 0; k < problemSize; k++)
-         sum += CI.get(k, ip) * solution.get(k);
-      s.set(ip, sum + ci0.get(ip));
-
-      PrintTools.debug(traceSolver, "s : " + s);
-
-      goto l2a; // // FIXME: 5/13/17 
    }
 
    private static double distance(double a, double b)
@@ -625,5 +651,4 @@ public class QuadProgJavaSolver
 
       return a1 * Math.sqrt(2.0);
    }
-}
 }
