@@ -32,7 +32,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
 {
@@ -115,7 +114,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final FramePoint desiredFootPosition = new FramePoint();
    private final FrameVector desiredFootLinearVelocity = new FrameVector();
    private final FrameVector desiredFootLinearAcceleration = new FrameVector();
-   private final TwistCalculator twistCalculator;
 
    private final YoFramePoint yoCurrentFootPosition;
    private final YoFramePoint yoDesiredFootPosition;
@@ -169,7 +167,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       minimumLegLength = new DoubleYoVariable(namePrefix + "MinLegLength", registry);
       minimumLegLength.set(walkingControllerParameters.getMinMechanicalLegLength());
 
-      twistCalculator = controllerToolbox.getTwistCalculator();
       controlDT = controllerToolbox.getControlDT();
       yoTime = controllerToolbox.getYoTime();
 
@@ -474,7 +471,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          return;
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      twistCalculator.getTwistOfBody(pelvis, pelvisTwist);
+      pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
       //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
@@ -580,7 +577,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          return;
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      twistCalculator.getTwistOfBody(pelvis, pelvisTwist);
+      pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
