@@ -40,9 +40,10 @@ public class ConvectiveTermCalculatorTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, true);
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, ReferenceFrame.getWorldFrame(), rootFrame);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true, true);
 
+      elevator.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
@@ -78,8 +79,9 @@ public class ConvectiveTermCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new  TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false , false);
-         
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
+
+         rootBody.updateFramesRecursively();
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();
 

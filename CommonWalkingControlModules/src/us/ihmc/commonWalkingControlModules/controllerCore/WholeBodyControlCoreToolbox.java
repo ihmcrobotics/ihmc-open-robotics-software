@@ -131,7 +131,7 @@ public class WholeBodyControlCoreToolbox
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
       parentRegistry.addChild(registry);

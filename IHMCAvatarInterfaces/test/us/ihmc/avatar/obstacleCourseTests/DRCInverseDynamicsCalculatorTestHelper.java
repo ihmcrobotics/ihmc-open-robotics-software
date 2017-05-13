@@ -29,7 +29,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -60,7 +59,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final HumanoidFloatingRootJointRobot robot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
-   private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
@@ -121,9 +119,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       double gravity = -robot.getGravityZ();
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator(), gravity);
 
       robot.addYoVariableRegistry(registry);
 
@@ -855,7 +852,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void computeTwistCalculatorAndInverseDynamicsCalculator()
    {
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
    }
 

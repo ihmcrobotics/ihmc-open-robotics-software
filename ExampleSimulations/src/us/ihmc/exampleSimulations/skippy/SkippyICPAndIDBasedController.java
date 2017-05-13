@@ -50,7 +50,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       this.skippy = skippy;
 
       twistCalculator = new TwistCalculator(worldFrame, skippy.getElevator());
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -skippy.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(skippy.getElevator(), -skippy.getGravityZ());
 
       setupGraphics(graphicsListRegistry);
       totalMass.set(skippy.computeCenterOfMass(new Point3D()));

@@ -44,8 +44,7 @@ public class CentroidalMomentumRateADotVTerm
       this.centroidalMomentumMatrix = centroidalMomentumMatrix;
 
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(this.rootAcceleration, this.twistCalculator, true,
-            false, false);
+      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, this.rootAcceleration, true, false, false);
 
       this.comTwist = new Twist(centerOfMassFrame, rootBody.getBodyFixedFrame(), centerOfMassFrame);
       comTwist.setToZero();

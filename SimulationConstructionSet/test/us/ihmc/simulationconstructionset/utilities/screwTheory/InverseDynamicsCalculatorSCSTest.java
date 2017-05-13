@@ -32,7 +32,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -92,9 +91,9 @@ public class InverseDynamicsCalculatorSCSTest
       RigidBody body = copyLinkAsRigidBody(link, rootInverseDynamicsJoint, "body");
 
       setRandomPosition(rootJoint, rootInverseDynamicsJoint);
-      elevator.updateFramesRecursively();
 
       setRandomVelocity(rootJoint, rootInverseDynamicsJoint);
+      elevator.updateFramesRecursively();
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       
@@ -118,9 +117,7 @@ public class InverseDynamicsCalculatorSCSTest
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
-      TwistCalculator twistCalculator = new TwistCalculator(inertialFrame, elevator);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
-      twistCalculator.compute();
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -gravity);
       inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
@@ -331,14 +328,11 @@ public class InverseDynamicsCalculatorSCSTest
    
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
-      ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
-      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), -gravity);
+      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
       LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(inertialFrame, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration, twistCalculator);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration);
 //      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       return inverseDynamicsCalculator;
    }
