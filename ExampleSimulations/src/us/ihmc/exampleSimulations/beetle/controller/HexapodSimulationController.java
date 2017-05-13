@@ -160,8 +160,7 @@ public class HexapodSimulationController implements RobotController
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerDt, -gravity, rootJoint, controlledJoints, centerOfMassFrame,
-                                                                            twistCalculator, momentumOptimizationSettings, yoGraphicsListRegistry,
-                                                                            registry);
+                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       toolbox.setupForInverseDynamicsSolver(footContactableBodies);
       toolbox.setupForInverseKinematicsSolver();

@@ -357,8 +357,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            twistCalculator, momentumOptimizationSettings, yoGraphicsListRegistry,
-                                                                            registry);
+                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       if (setupInverseDynamicsSolver)
          toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
