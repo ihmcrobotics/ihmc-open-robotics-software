@@ -321,8 +321,8 @@ public class DynamicReachabilityCalculator
             YoGraphicPosition footViz = new YoGraphicPosition("foot", yoAnkleLocations.get(robotSide), 0.075, YoAppearance.Blue());
             YoGraphicPosition hipViz = new YoGraphicPosition("hip", yoHipLocations.get(robotSide), 0.075, YoAppearance.Red());
 
-            ballInside.getAppearance().setTransparency(0.5);
-            ballOutside.getAppearance().setTransparency(0.8);
+            ballInside.getAppearance().setTransparency(0.8);
+            ballOutside.getAppearance().setTransparency(0.95);
 
             reachabilityGraphicsList.add(ballInside);
             reachabilityGraphicsList.add(ballOutside);
@@ -701,12 +701,12 @@ public class DynamicReachabilityCalculator
 
       double minimumStanceLegLength, minimumStepLegLength;
       if (heightChange > dynamicReachabilityParameters.getThresholdForStepUp())
-      {
+      { // stepping up, so we should allow the upcoming stance leg length to bend as much as we want
          minimumStepLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStanceLegLength = minimumLegLength.getDoubleValue();
       }
       else if (heightChange < dynamicReachabilityParameters.getThresholdForStepDown())
-      {
+      { // stepping down, so we should allow the upcoming swing leg to bend as much as we want
          minimumStanceLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
