@@ -58,19 +58,41 @@ public class QuadProgJavaSolver
    /** Utility functions for updating some data needed by the solution method */
    private void compute_d(DenseMatrix64F dToPack, DenseMatrix64F J, DenseMatrix64F np)
    {
-      CommonOps.multTransA(J, np, dToPack);
+      // compute d = J^T * np
+      for (int i = 0; i < problemSize; i++)
+      {
+         double sum = 0.0;
 
+         for (int j = 0; j < problemSize; j++)
+            sum += J.get(j, i) * np.get(j);
+
+         dToPack.set(i, sum);
+      }
    }
 
    private void update_z(DenseMatrix64F zToPack, DenseMatrix64F J, DenseMatrix64F d, int iq)
    {
-      CommonOps.mult(J, d, zToPack);
+      // setting of z = J * d
+      for (int i = 0; i < problemSize; i++)
+      {
+         zToPack.set(i, 0.0);
+
+         for (int j = iq; j < problemSize; j++)
+            zToPack.set(i, zToPack.get(i) + J.get(i, j) * d.get(j));
+      }
    }
 
    private void update_r(DenseMatrix64F rToPack, DenseMatrix64F R, DenseMatrix64F d, int iq)
    {
-      solver.setA(R);
-      solver.solve(d, rToPack);
+      // setting of r = R^-1 d
+      for (int i = iq - 1; i >= 0; i--)
+      {
+         double sum = 0.0;
+         for (int j = i + 1; j < iq; j++)
+            sum += R.get(i, j) * r.get(j);
+
+         rToPack.set(i, (d.get(i) - sum) / R.get(i, i));
+      }
    }
 
    private boolean addConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F d, int iq, double R_norm)
