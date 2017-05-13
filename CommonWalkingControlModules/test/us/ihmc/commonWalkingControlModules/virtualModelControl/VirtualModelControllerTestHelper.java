@@ -49,6 +49,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -607,7 +608,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -694,7 +695,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -899,7 +900,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -993,7 +994,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1215,7 +1216,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1346,7 +1347,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1572,7 +1573,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1692,7 +1693,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1998,7 +1999,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevator.getBodyFixedFrame();
       }
