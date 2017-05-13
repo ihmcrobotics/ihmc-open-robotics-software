@@ -49,7 +49,6 @@ import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WholeBodyVirtualModelControlSolver
@@ -70,7 +69,6 @@ public class WholeBodyVirtualModelControlSolver
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final VirtualWrenchCommandList virtualWrenchCommandList = new VirtualWrenchCommandList();
-   private final TwistCalculator twistCalculator;
    private final Wrench tmpWrench = new Wrench();
    private final Twist tmpTwist = new Twist();
    private final SpatialAccelerationVector tmpAcceleration = new SpatialAccelerationVector();
@@ -104,8 +102,6 @@ public class WholeBodyVirtualModelControlSolver
 
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      twistCalculator = toolbox.getTwistCalculator();
-
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, USE_CONTACT_FORCE_QP, registry);
 
@@ -377,8 +373,7 @@ public class WholeBodyVirtualModelControlSolver
    // Watch for this one, it is correct except when the orientation is only partially controlled. It should be expressed at the command's controlFrame. (Sylvain)
       tmpAcceleration.changeFrameNoRelativeMotion(controlledBody.getBodyFixedFrame());
 
-      twistCalculator.getTwistOfBody(controlledBody, tmpTwist);
-
+      controlledBody.getBodyFixedFrame().getTwistOfFrame(tmpTwist);
       tmpWrench.setToZero(tmpAcceleration.getBodyFrame(), tmpAcceleration.getExpressedInFrame());
 
       conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(tmpAcceleration, tmpTwist, tmpWrench);
