@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MovingMidFrameZUpFrame extends MovingReferenceFrame
 {

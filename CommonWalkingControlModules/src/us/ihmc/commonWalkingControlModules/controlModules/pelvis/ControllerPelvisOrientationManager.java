@@ -21,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
@@ -56,7 +57,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameVector tempAngularAcceleration = new FrameVector();
 
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
    private final ReferenceFrame midFeetZUpGroundFrame;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
