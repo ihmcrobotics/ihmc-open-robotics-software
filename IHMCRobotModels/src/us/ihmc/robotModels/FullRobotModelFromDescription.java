@@ -184,13 +184,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getWorldFrame()
-   {
-      return worldFrame;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public ReferenceFrame getElevatorFrame()
    {
       return elevator.getBodyFixedFrame();

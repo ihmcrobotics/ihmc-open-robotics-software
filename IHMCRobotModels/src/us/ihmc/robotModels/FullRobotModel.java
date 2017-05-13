@@ -25,9 +25,6 @@ public interface FullRobotModel
    /** Update all the {@link ReferenceFrame}s attached to this robot. */
    public abstract void updateFrames();
 
-   /** Same as {@link ReferenceFrame#getWorldFrame()}. */
-   public abstract ReferenceFrame getWorldFrame();
-
    /** Returns the {@link ReferenceFrame} attached to the elevator (see {@link FullHumanoidRobotModel#getElevator()}).*/
    public abstract ReferenceFrame getElevatorFrame();
 
