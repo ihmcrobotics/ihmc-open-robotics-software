@@ -6,9 +6,7 @@ import java.util.EnumMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -231,14 +229,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
    {
       return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName)
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 
    /** {@inheritDoc} */
