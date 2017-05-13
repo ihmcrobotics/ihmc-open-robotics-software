@@ -74,7 +74,7 @@ public class DesiredJointAccelerationCalculatorTest
             desiredJointAccelerationCalculator.compute(accelerationOfEndEffectorWithRespectToBase);
 
             TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
+            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, true);
 
             twistCalculator.compute();
             spatialAccelerationCalculator.compute();

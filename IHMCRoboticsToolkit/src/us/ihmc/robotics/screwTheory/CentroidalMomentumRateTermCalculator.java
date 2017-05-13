@@ -74,8 +74,7 @@ public class CentroidalMomentumRateTermCalculator
 
       this.tempSpatialAcceleration = new SpatialAccelerationVector();
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(this.rootAcceleration, this.twistCalculator, true,
-                                                                             false, false);
+      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, this.rootAcceleration, true, false, false);
 
       this.denseInertias = new DenseMatrix64F[jointList.length];
       this.bodyMomenta = new Momentum[jointList.length];

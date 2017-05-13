@@ -67,7 +67,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
       twistCalculator.compute();
 
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, true);
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector endEffectorAcceleration = new SpatialAccelerationVector();

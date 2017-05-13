@@ -22,7 +22,7 @@ public class FullInverseDynamicsStructure
       this.rootJoint = rootInverseDynamicsJoint;
 
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
 
       this.estimationLink = estimationLink;
    }

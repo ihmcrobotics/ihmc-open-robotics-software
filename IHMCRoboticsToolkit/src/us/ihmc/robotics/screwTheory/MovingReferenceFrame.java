@@ -349,6 +349,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       if (base.isAStationaryFrame())
       {
          getTwistOfFrame(relativeTwistToPack);
+         relativeTwistToPack.changeBaseFrameNoRelativeTwist(base);
       }
       else if (base instanceof MovingReferenceFrame)
       {

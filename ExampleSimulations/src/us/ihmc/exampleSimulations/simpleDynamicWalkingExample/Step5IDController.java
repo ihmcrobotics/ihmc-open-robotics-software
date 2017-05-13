@@ -67,7 +67,7 @@ public class Step5IDController implements RobotController
       {
       twistCalculator = new TwistCalculator(worldFrame, robot.getLegRigidBody(LinkNames.LOWER_LINK, robotSide));
       }
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator(), -robot.getGravityZ());
       crbMassMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(robot.getElevator());
       differentialIDMassMatrixCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, robot.getElevator());
       
