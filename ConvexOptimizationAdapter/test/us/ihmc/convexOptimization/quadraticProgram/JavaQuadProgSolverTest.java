@@ -7,14 +7,11 @@ import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class QuadProgJavaSolverTest
+public class JavaQuadProgSolverTest
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("root");
-
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSolveContrainedQP() throws NoConvergenceException
@@ -30,13 +27,13 @@ public class QuadProgJavaSolverTest
       DenseMatrix64F Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1);
       DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
 
-      QuadProgJavaSolver solver = new QuadProgJavaSolver();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       for (int repeat = 0; repeat < 10000; repeat++)
       {
-            DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
-            solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
-            Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
+         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
+         solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
 
       numberOfInequalityConstraints = 1;
@@ -52,24 +49,25 @@ public class QuadProgJavaSolverTest
 
       for (int repeat = 0; repeat < 10000; repeat++)
       {
-            DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
-            solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
-            Assert.assertArrayEquals("repeat = " + repeat, x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
+         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+         solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + solver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
 
-            DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
-            CommonOps.mult(Aeq, x, bEqualityVerify);
 
-            // Verify Ax=b Equality constraints hold:
-            JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+         DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+         CommonOps.mult(Aeq, x, bEqualityVerify);
 
-            // Verify Ax<b Inequality constraints hold:
-            DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
-            CommonOps.mult(Ain, x, bInequalityVerify);
+         // Verify Ax=b Equality constraints hold:
+         JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
 
-            for (int j=0; j<bInequalityVerify.getNumRows(); j++)
-            {
-               Assert.assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
-            }
+         // Verify Ax<b Inequality constraints hold:
+         DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+         CommonOps.mult(Ain, x, bInequalityVerify);
+
+         for (int j=0; j<bInequalityVerify.getNumRows(); j++)
+         {
+            Assert.assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
+         }
       }
    }
 
@@ -90,18 +88,17 @@ public class QuadProgJavaSolverTest
       bin.set(0, -1.0);
       bin.set(0, -2.0);
 
-      DenseMatrix64F f = new DenseMatrix64F(0);
+      DenseMatrix64F f = new DenseMatrix64F(1, 1);
       DenseMatrix64F Aeq = new DenseMatrix64F(0, 1);
       DenseMatrix64F beq = new DenseMatrix64F(0, 1);
 
-      QuadProgJavaSolver solver = new QuadProgJavaSolver();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
-
-         PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
-         solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
-         boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
-         if (!correct)
-            PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
-      }
+      PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+      solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
+      boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
+      if (!correct)
+         PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
    }
+}
 
