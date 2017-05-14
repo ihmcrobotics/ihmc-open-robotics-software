@@ -2,17 +2,17 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolverFactory;
 
+import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
-public class QuadProgJavaSolver
+public class JavaQuadProgSolver
 {
-   private enum QuadProgStep {step1, step2, step2a, step2b, step2c};
+   private enum QuadProgStep {step1, step2, step2a, step2b, step2c, step3};
 
    private QuadProgStep currentStep;
    private final DenseMatrix64F negAin = new DenseMatrix64F(0), negAeq = new DenseMatrix64F(0);
@@ -30,23 +30,31 @@ public class QuadProgJavaSolver
    private final DenseMatrix64F d = new DenseMatrix64F(defaultSize);
    private final DenseMatrix64F np = new DenseMatrix64F(defaultSize);
    private final DenseMatrix64F u = new DenseMatrix64F(defaultSize);
-   private final DenseMatrix64F x_old = new DenseMatrix64F(defaultSize);
    private final DenseMatrix64F u_old = new DenseMatrix64F(defaultSize);
+   private final DenseMatrix64F x_old = new DenseMatrix64F(defaultSize);
 
    private final TIntArrayList A = new TIntArrayList(defaultSize);
    private final TIntArrayList A_old = new TIntArrayList(defaultSize);
    private final TIntArrayList iai = new TIntArrayList(defaultSize);
-   private final DenseMatrix64F iaexcl = new DenseMatrix64F(defaultSize);
+   private final TIntArrayList iaexcl = new TIntArrayList(defaultSize);
 
    private final DenseMatrix64F costQuadraticLowerInverse = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F J = new DenseMatrix64F(defaultSize, defaultSize);
 
    private final DenseMatrix64F scalarMatrix = new DenseMatrix64F(1, 1);
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(0);
+   private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(0, true);
 
-   private int problemSize;
-   private int numberOfEqualityConstraints;
-   private int numberOfInequalityConstraints;
+   private int n;
+   private int m;
+   private int p;
+
+   private int iq;
+   private double R_norm;
+   private int l;
+
+   private int numberOfIterations;
 
    /**
     * The problem is of the form:
@@ -58,12 +66,12 @@ public class QuadProgJavaSolver
    /** Utility functions for updating some data needed by the solution method */
    private void compute_d(DenseMatrix64F dToPack, DenseMatrix64F J, DenseMatrix64F np)
    {
-      // compute d = J^T * np
-      for (int i = 0; i < problemSize; i++)
+      // compute d = H^T * np
+      for (int i = 0; i < n; i++)
       {
          double sum = 0.0;
 
-         for (int j = 0; j < problemSize; j++)
+         for (int j = 0; j < n; j++)
             sum += J.get(j, i) * np.get(j);
 
          dToPack.set(i, sum);
@@ -73,16 +81,17 @@ public class QuadProgJavaSolver
    private void update_z(DenseMatrix64F zToPack, DenseMatrix64F J, DenseMatrix64F d, int iq)
    {
       // setting of z = J * d
-      for (int i = 0; i < problemSize; i++)
+      for (int i = 0; i < n; i++)
       {
-         zToPack.set(i, 0.0);
+         double sum = 0.0;
 
-         for (int j = iq; j < problemSize; j++)
-            zToPack.set(i, zToPack.get(i) + J.get(i, j) * d.get(j));
+         for (int j = iq; j < n; j++)
+            sum += J.get(i, j) * d.get(j);
+         zToPack.set(i, sum);
       }
    }
 
-   private void update_r(DenseMatrix64F rToPack, DenseMatrix64F R, DenseMatrix64F d, int iq)
+   private void update_r(DenseMatrix64F R, DenseMatrix64F rToPack, DenseMatrix64F d, int iq)
    {
       // setting of r = R^-1 d
       for (int i = iq - 1; i >= 0; i--)
@@ -95,7 +104,7 @@ public class QuadProgJavaSolver
       }
    }
 
-   private boolean addConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F d, int iq, double R_norm)
+   private boolean addConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F d)
    {
       PrintTools.debug(traceSolver, "Add constraint " + iq);
 
@@ -103,7 +112,7 @@ public class QuadProgJavaSolver
 
       // we have to find the Givens rotation which will reduce the element d(j) to zero.
       // if it is already zero, we don't have to do anything, except of decreasing j
-      for (int j = problemSize - 1; j >= iq + 1; j--)
+      for (int j = n - 1; j >= iq + 1; j--)
       {
          /* The Givens rotation is done with the matrix (cc cs, cs -cc). If cc is one, then element (j) of d is zero compared with
           element (j - 1). Hence we don't have to do anything.
@@ -114,7 +123,7 @@ public class QuadProgJavaSolver
          cc = d.get(j - 1);
          ss = d.get(j);
          h = distance(cc, ss);
-         if (MathTools.epsilonEquals(h, 0.0, epsilon))
+         if (Math.abs(h) < epsilon) // h == 0
             continue;
          d.set(j, 0.0);
          ss = ss / h;
@@ -131,7 +140,7 @@ public class QuadProgJavaSolver
          }
 
          xny = ss / (1.0 + cc);
-         for (int k = 0; k < problemSize; k++)
+         for (int k = 0; k < n; k++)
          {
             t1 = J.get(k, j - 1);
             t2 = J.get(k, j);
@@ -142,6 +151,7 @@ public class QuadProgJavaSolver
 
       // update the number of constraints added
       iq++;
+
       // To update R we have to put the iq components fo the d vector into column iq - 1 of R
       for (int i = 0; i < iq; i++)
          R.set(i, iq - 1, d.get(i));
@@ -161,7 +171,7 @@ public class QuadProgJavaSolver
       return true;
    }
 
-   private void deleteConstraint(DenseMatrix64F R, DenseMatrix64F J, TIntArrayList A, DenseMatrix64F u, int n, int p, int iq, int l)
+   private void deleteConstraint(DenseMatrix64F R, DenseMatrix64F J, TIntArrayList A, DenseMatrix64F u)
    {
       PrintTools.debug(traceSolver, "Delete constraint " + l + " " + iq);
 
@@ -208,9 +218,8 @@ public class QuadProgJavaSolver
          ss = R.get(j + 1, j);
          h = distance(cc, ss);
 
-         if (Math.abs(h) < epsilon)
+         if (Math.abs(h) < epsilon) // h == 0
             continue;
-         ;
 
          cc = cc / h;
          ss = ss / h;
@@ -252,22 +261,22 @@ public class QuadProgJavaSolver
    /** Utility functions for computing the scalar product and the euclidean distance between two numbers */
    public void reshape()
    {
-      int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints;
+      int numberOfConstraints = p + m;
 
-      R.reshape(problemSize, problemSize);
+      R.reshape(n, n);
       s.reshape(numberOfConstraints, 1);
-      z.reshape(problemSize, 1);
+      z.reshape(n, 1);
       r.reshape(numberOfConstraints, 1);
-      d.reshape(problemSize, 1);
-      np.reshape(problemSize, 1);
+      d.reshape(n, 1);
+      np.reshape(n, 1);
       u.reshape(numberOfConstraints, 1);
-      x_old.reshape(problemSize, 1);
+      x_old.reshape(n, 1);
       u_old.reshape(numberOfConstraints, 1);
 
       A.fill(0, numberOfConstraints, 0);
       A_old.fill(0, numberOfConstraints, 0);
       iai.fill(0, numberOfConstraints, 0);
-      iaexcl.reshape(numberOfConstraints, 1);
+      iaexcl.fill(0, numberOfConstraints, 0);
    }
 
    private void zero()
@@ -281,8 +290,6 @@ public class QuadProgJavaSolver
       u.zero();
       x_old.zero();
       u_old.zero();
-
-      iaexcl.zero();
    }
 
    private void allocateTempraryMatrixOnDemand(int nvar, int neq, int nin)
@@ -310,26 +317,26 @@ public class QuadProgJavaSolver
          DenseMatrix64F CE, DenseMatrix64F ce0, DenseMatrix64F CI, DenseMatrix64F ci0, DenseMatrix64F solution, boolean initialize)
    {
       //// TODO: 5/13/17  initialize
-      problemSize = costQuadraticMatrix.getNumCols();
-      numberOfEqualityConstraints = CE.getNumCols();
-      numberOfInequalityConstraints = CI.getNumCols();
+      n = costQuadraticMatrix.getNumCols();
+      p = CE.getNumCols();
+      m = CI.getNumCols();
 
       if (costLinearVector.getNumCols() != 1)
          throw new RuntimeException("costLinearVector.getNumCols() != 1");
       if (costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows())
          throw new RuntimeException("costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows()");
-      if (costQuadraticMatrix.getNumRows() != problemSize)
+      if (costQuadraticMatrix.getNumRows() != n)
          throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
-      if (CE.getNumRows() != problemSize)
+      if (CE.getNumRows() != n)
          throw new RuntimeException("Equality constraint matrix is incompatible, wrong number of variables.");
-      if (ce0.getNumRows() != numberOfEqualityConstraints)
+      if (ce0.getNumRows() != p)
          throw new RuntimeException("Equality constraint objective is incompatible, wrong number of constraints.");
-      if (CI.getNumRows() != problemSize)
+      if (CI.getNumRows() != n)
          throw new RuntimeException("Inequality constraint matrix is incompatible, wrong number of variables.");
-      if (ci0.getNumRows() != numberOfInequalityConstraints)
+      if (ci0.getNumRows() != m)
          throw new RuntimeException("IneEquality constraint objective is incompatible, wrong number of constraints.");
 
-      solution.reshape(problemSize, 1);
+      solution.reshape(n, 1);
       solution.zero();
 
       reshape();
@@ -337,7 +344,11 @@ public class QuadProgJavaSolver
 
       currentStep = QuadProgStep.step1;
 
-      int q = 0;
+      double f_value, psi, c1, c2, sum, ss;
+      double t = 0.0, t1 = 0.0, t2 = 0.0; // t is the step length, which is the minimum of the partial step t1 and the full step length t2
+      int ip = 0; // this is the index of the constraint to be added to the active set
+      int q = 0;// Size of the active set {@link A}
+      numberOfIterations = 0;
 
       PrintTools.debug(traceSolver, "G : " + costQuadraticMatrix);
       PrintTools.debug(traceSolver, "g0 : " + costLinearVector);
@@ -348,46 +359,53 @@ public class QuadProgJavaSolver
 
       /** Preprocessing phase */
 
-      double R_norm = 1.0;
-      double c1 = CommonOps.trace(costQuadraticMatrix);
+      c1 = CommonOps.trace(costQuadraticMatrix);
 
-      costQuadraticLowerInverse.reshape(problemSize, problemSize);
+      costQuadraticLowerInverse.reshape(n, n);
+      J.reshape(n, n);
+
+
+      PrintTools.debug(traceSolver, "G : " + costQuadraticMatrix); // todo this should be decomposed
+      R_norm = 1.0; // this variable will hold the norm of the matrix R
 
       // compute the inverse of the factorized matrix G^-1, this is the initial value for H
       solver.setA(costQuadraticMatrix);
       solver.invert(costQuadraticLowerInverse);
+      decomposer.decompose(costQuadraticMatrix); // // FIXME: 5/14/17  remove
+      decomposer.getT(J);
+      solver.setA(J);
+      solver.invert(J);
+
+      c2 = CommonOps.trace(J);
 
       PrintTools.debug(traceSolver, "J : " + costQuadraticLowerInverse);
-
-      double c2 = CommonOps.trace(costQuadraticLowerInverse);
+      PrintTools.debug(traceSolver, "J alternative : " + J);
 
       // c1 * c2 is an estimate for cond(G)
 
       // Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
       // this is the feasible point in the dual space
-      // x = G^-1 * g0
+      // x = -G^-1 * g0
+      solver.setA(costQuadraticMatrix);
       solver.solve(costLinearVector, solution);
       CommonOps.scale(-1.0, solution);
 
       // compute the current solution value
       CommonOps.multTransA(0.5, costLinearVector, solution, scalarMatrix);
-      double f_value = scalarMatrix.get(0, 0);
+      f_value = scalarMatrix.get(0, 0);
 
       PrintTools.debug(traceSolver, "Unconstrained solution : " + f_value);
       PrintTools.debug(traceSolver, "x : " + solution);
 
       // Add equality constraints to the working set A
-      int ip = 0; // this is the index of the constraint to be added to the active set
-      int iq = 0;
-      int iter = 0;
-      double t = 0.0, t1 = 0.0, t2 = 0.0; // t is the step length, which is the minimum of the partial step t1 and the full step length t2
-      for (int i = 0; i < numberOfEqualityConstraints; i++)
+      iq = 0;
+      for (int i = 0; i < p; i++)
       {
-         for (int j = 0; j < problemSize; j++)
+         for (int j = 0; j < n; j++)
             np.set(j, 0, CE.get(j, i));
 
-         compute_d(d, costQuadraticLowerInverse, np);
-         update_z(z, costQuadraticLowerInverse, d, iq);
+         compute_d(d, J, np);
+         update_z(z, J, d, iq);
          update_r(R, r, d, iq);
 
          PrintTools.debug(traceSolver, "R : " +  R);
@@ -398,7 +416,8 @@ public class QuadProgJavaSolver
          // compute full step length t2: i.e., the minimum step in primal space s.t. the constraint becomes feasible
          t2 = 0.0;
          CommonOps.multTransA(z, z, scalarMatrix);
-         if (!MatrixTools.isEmptyMatrix(scalarMatrix))
+         //if (!MatrixTools.isEmptyMatrix(scalarMatrix))
+         if (Math.abs(scalarMatrix.get(0)) > epsilon) // i.e. z != 0
          {
             CommonOps.multTransA(-1.0, np, solution, scalarMatrix);
             t2 = scalarMatrix.get(0, 0) - ce0.get(i);
@@ -407,6 +426,7 @@ public class QuadProgJavaSolver
             t2 /= scalarMatrix.get(0, 0);
          }
 
+         // set x = x + t2 * z
          CommonOps.addEquals(solution, t2, z);
 
          // set u = u+
@@ -419,34 +439,32 @@ public class QuadProgJavaSolver
          f_value += 0.5 * Math.pow(t2, 2.0) * scalarMatrix.get(0 ,0);
          A.set(i, -i - 1);
 
-         if (!addConstraint(R, costQuadraticLowerInverse, d, iq, R_norm))
+         if (!addConstraint(R, J, d))
          {
             PrintTools.info("Constraints are linearly dependent.");
             return f_value;
-            //throw new RuntimeException("Constraints are linearly dependent.");
          }
       }
 
       // set iai = K \ A
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
+      for (int i = 0; i < m; i++)
          iai.set(i, i);
 
-      double ss = 0.0;
-      double psi;
-      int l = 0;
+      ss = 0.0;
+      psi = 0.0;
+      l = 0;
 
       while (true)
       {
          switch(currentStep)
          {
-         default:
-            // // FIXME: 5/13/17
-            iter++;
+         case step1: // ideally, step 1
+            numberOfIterations++;
 
             PrintTools.debug(traceSolver, "x : " + solution);
 
             // step 1: choose a violated constraint
-            for (int i = numberOfEqualityConstraints; i < iq; i++)
+            for (int i = p; i < iq; i++)
             {
                ip = A.get(i);
                iai.set(ip, -1);
@@ -456,11 +474,11 @@ public class QuadProgJavaSolver
             ss = 0.0;
             psi = 0.0; // this value will contain the sum of all infeasibilities
             ip = 0; // ip will be the index of the chosen violated constraint
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            for (int i = 0; i < m; i++)
             {
-               iaexcl.set(i, 0.0);
-               double sum = 0.0;
-               for (int j = 0; j < problemSize; j++)
+               iaexcl.set(i, 1);
+               sum = 0.0;
+               for (int j = 0; j < n; j++)
                   sum += CI.get(j, i) * solution.get(j);
                sum += ci0.get(i);
                s.set(i, sum);
@@ -469,9 +487,11 @@ public class QuadProgJavaSolver
 
             PrintTools.debug(traceSolver, "s : " + s);
 
-            if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
+            if (Math.abs(psi) < m * epsilon * c1 * c2 * 100.0)
             {
                // numerically there are not infeasibilities anymore
+               q = iq;
+
                return f_value;
             }
 
@@ -482,12 +502,15 @@ public class QuadProgJavaSolver
                A_old.set(i, A.get(i));
             }
             // and for solution
-            for (int i = 0; i < problemSize; i++)
+            for (int i = 0; i < n; i++)
                x_old.set(i, solution.get(i));
+
+            currentStep = QuadProgStep.step2;
+            continue;
 
          case step2:
             // Step 2: check for feasibility and determine a new S-pair
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            for (int i = 0; i < m; i++)
             {
                if (s.get(i) < ss && iai.get(i) != -1 && iaexcl.get(i) == 1)
                {
@@ -502,9 +525,9 @@ public class QuadProgJavaSolver
             }
 
             // set np = n(ip)
-            for (int i = 0; i < problemSize; i++)
+            for (int i = 0; i < n; i++)
                np.set(i, CI.get(i, ip));
-            // set u = (u 0)^T
+            // set u = [u 0]^T
             u.set(iq, 0.0);
             // add ip to the active set A
             A.set(iq, ip);
@@ -512,11 +535,14 @@ public class QuadProgJavaSolver
             PrintTools.debug(traceSolver, "Trying with constraint " + ip);
             PrintTools.debug(traceSolver, "np : " + np);
 
+            currentStep = QuadProgStep.step2a;
+            continue;
+
          case step2a:
             // Step 2a: determine step direction
             // compute z = H np: the step direction in the primal space (through J, see the paper)
-            compute_d(d, costQuadraticLowerInverse, np);
-            update_z(z, costQuadraticLowerInverse, d, iq);
+            compute_d(d, J, np);
+            update_z(z, J, d, iq);
             // compute N* np (if q > 0): the negative of the step direction in the dual space
             update_r(R, r, d, iq);
 
@@ -527,18 +553,25 @@ public class QuadProgJavaSolver
             PrintTools.debug(traceSolver, "d :" + d);
             PrintTools.debug(traceSolver, "A :" + A);
 
+            currentStep = QuadProgStep.step2b;
+            continue;
+
          case step2b:
             // Step 2b: compute step length
+            l = 0;
             // Compute t1: partial step length (maximum step in dual space without violating dual feasibility
             t1 = Double.POSITIVE_INFINITY;
             // find the index l s.t. it reaches the minimum of u+(x) / r
-            for (int k = numberOfEqualityConstraints; k < iq; k++)
+            for (int k = p; k < iq; k++)
             {
-               double tmp;
-               if (r.get(k) > 0.0 && (tmp = u.get(k) / r.get(k)) < t1)
+               if (r.get(k) > 0.0)
                {
-                  t1 = tmp;
-                  l = A.get(k);
+                  double tmp = u.get(k) / r.get(k);
+                  if (tmp < t1)
+                  {
+                     t1 = tmp;
+                     l = A.get(k);
+                  }
                }
             }
 
@@ -548,6 +581,8 @@ public class QuadProgJavaSolver
             {
                CommonOps.multTransA(z, np, scalarMatrix);
                t2 = -s.get(ip) / scalarMatrix.get(0);
+               if (t2 < 0.0) // patch suggested by Takano Akio for handling numerical inconsistencies
+                  t2 = Double.POSITIVE_INFINITY;
             }
             else
             {
@@ -558,26 +593,30 @@ public class QuadProgJavaSolver
             t = Math.min(t1, t2);
 
             PrintTools.debug(traceSolver, "Step Sizes: " + t + " (t1 = " + t1 + ", t2 = " + t2 + ") ");
+            currentStep = QuadProgStep.step2c;
+            continue;
+
          case step2c:
             // Step 2c: determine new S-pair and take step:
 
             // case (i): no step in primal or dual space
             if (t >= Double.POSITIVE_INFINITY)
             {
-               /* QPP is infeasible */
+               // QPP is infeasible
                // FIXME: unbounded to raise
                q = iq;
                return Double.POSITIVE_INFINITY;
             }
+
             // case (ii): step in dual space
             if (t2 >= Double.POSITIVE_INFINITY)
             {
-               // set u = u + t * (-r 1) and drop constraint l from the active set A
+               // set u = u + t * [-r 1] and drop constraint l from the active set
                for (int k = 0; k < iq; k++)
                   u.set(k, u.get(k) - t * r.get(k));
                u.set(iq, u.get(iq) + t);
                iai.set(l, l);
-               deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
+               deleteConstraint(R, J, A, u);
 
                PrintTools.debug(traceSolver, "in dual space: " + f_value);
                PrintTools.debug(traceSolver, "x : " + solution);
@@ -587,12 +626,14 @@ public class QuadProgJavaSolver
                currentStep = QuadProgStep.step2a;
                continue;
             }
+
             // case (iii): step in primal and dual space
-            for (int k = 0; k < problemSize; k++)
+            for (int k = 0; k < n; k++)
                solution.set(k, solution.get(k) + t * z.get(k));
             // update the solution value
             CommonOps.multTransA(z, np, scalarMatrix);
             f_value += t * scalarMatrix.get(0) * (0.5 * t + u.get(iq));
+
             // u = u + t * (-r 1)
             for (int k = 0; k < iq; k++)
                u.set(k, u.get(k) - t * r.get(k));
@@ -604,76 +645,94 @@ public class QuadProgJavaSolver
             PrintTools.debug(traceSolver, "r : " + r);
             PrintTools.debug(traceSolver, "A : " + A);
 
-         }
+            currentStep = QuadProgStep.step3;
+            continue;
 
+         case step3:
 
-         if (MathTools.epsilonEquals(t - t2, 0.0, epsilon))
-         {
-            PrintTools.debug(traceSolver, "Full step has taken " + t);
-            PrintTools.debug(traceSolver, "x : " + solution);
-
-            // full step has taken
-            // add constraint ip to the active set
-            if (!addConstraint(R, costQuadraticLowerInverse, d, iq, R_norm))
+            if (Math.abs(t - t2) < epsilon)
             {
-               iaexcl.set(ip, 0.0);
-               deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, ip);
+               PrintTools.debug(traceSolver, "Full step has taken " + t);
+               PrintTools.debug(traceSolver, "x : " + solution);
+
+               // full step has been taken
+               // add constraint ip to the active set
+               if (!addConstraint(R, J, d))
+               {
+                  iaexcl.set(ip, 0);
+                  deleteConstraint(R, J, A, u);
+
+                  PrintTools.debug(traceSolver, "R : " + R);
+                  PrintTools.debug(traceSolver, "A : " + A);
+                  PrintTools.debug(traceSolver, "iai : " + iai);
+
+                  for (int i = 0; i < m; i++)
+                     iai.set(i, i);
+
+                  for (int i = iq; i < iq; i++)
+                  {
+                     A.set(i, A_old.get(i));
+                     u.set(i, u_old.get(i));
+                     iai.set(A.get(i), -1);
+                  }
+                  for (int i = 0; i < n; i++)
+                     solution.set(i, x_old.get(i));
+
+                  currentStep = QuadProgStep.step2;
+                  continue;
+               }
+               else
+               {
+                  iai.set(ip, -1);
+               }
 
                PrintTools.debug(traceSolver, "R : " + R);
                PrintTools.debug(traceSolver, "A : " + A);
                PrintTools.debug(traceSolver, "iai : " + iai);
 
-               for (int i = 0; i < numberOfInequalityConstraints; i++)
-                  iai.set(i, i);
-               for (int i = numberOfEqualityConstraints; i < iq; i++)
-               {
-                  A.set(i, A_old.get(i));
-                  u.set(i, u_old.get(i));
-                  iai.set(A.get(i), -1);
-               }
-               for (int i = 0; i < problemSize; i++)
-                  solution.set(i, x_old.get(i));
-
-               currentStep = QuadProgStep.step2;
+               currentStep = QuadProgStep.step1;
                continue;
             }
-            else
-            {
-               iai.set(ip, -1);
-            }
+
+            // a partial step has taken
+            PrintTools.debug(traceSolver, "Partial step has taken " + t);
+            PrintTools.debug(traceSolver, "x : " + solution);
+
+            // drop constraint l
+            iai.set(l, l);
+            deleteConstraint(R, J, A, u);
 
             PrintTools.debug(traceSolver, "R : " + R);
             PrintTools.debug(traceSolver, "A : " + A);
-            PrintTools.debug(traceSolver, "iai : " + iai);
 
-            currentStep = QuadProgStep.step1;
+            // update s(ip) = CI * x + ci0
+            sum = 0.0;
+            for (int k = 0; k < n; k++)
+               sum += CI.get(k, ip) * solution.get(k);
+            s.set(ip, sum + ci0.get(ip));
+
+            PrintTools.debug(traceSolver, "s : " + s);
+
+            currentStep = QuadProgStep.step2a;
             continue;
+
+         default:
+            throw new RuntimeException("This is an empty state.");
          }
-
-         // a partial step has taken
-         PrintTools.debug(traceSolver, "Partial step has taken " + t);
-         PrintTools.debug(traceSolver, "x : " + solution);
-
-         // drop constraint l
-         iai.set(l, l);
-         deleteConstraint(R, costQuadraticLowerInverse, A, u, problemSize, numberOfEqualityConstraints, iq, l);
-
-         PrintTools.debug(traceSolver, "R : " + R);
-         PrintTools.debug(traceSolver, "A : " + A);
-
-         // update s(ip) = CI * x + ci0
-         double sum = 0.0;
-         for (int k = 0; k < problemSize; k++)
-            sum += CI.get(k, ip) * solution.get(k);
-         s.set(ip, sum + ci0.get(ip));
-
-         PrintTools.debug(traceSolver, "s : " + s);
-
-         currentStep = QuadProgStep.step2a;
-         continue;
       }
    }
 
+   public int getNumberOfIterations()
+   {
+      return numberOfIterations;
+   }
+
+   /**
+    * Computes the Euclidean distance between two numbers
+    * @param a first number
+    * @param b second number
+    * @return Euclidean distance
+    */
    private static double distance(double a, double b)
    {
       double a1 = Math.abs(a);
