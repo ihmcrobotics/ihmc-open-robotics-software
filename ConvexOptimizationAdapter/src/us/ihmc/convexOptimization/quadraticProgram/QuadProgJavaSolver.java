@@ -97,15 +97,13 @@ public class QuadProgJavaSolver
 
    private boolean addConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F d, int iq, double R_norm)
    {
-      int n = d.getNumRows();
-
       PrintTools.debug(traceSolver, "Add constraint " + iq);
 
       double cc, ss, h, t1, t2, xny;
 
       // we have to find the Givens rotation which will reduce the element d(j) to zero.
       // if it is already zero, we don't have to do anything, except of decreasing j
-      for (int j = n - 1; j >= iq; j--)
+      for (int j = problemSize - 1; j >= iq + 1; j--)
       {
          /* The Givens rotation is done with the matrix (cc cs, cs -cc). If cc is one, then element (j) of d is zero compared with
           element (j - 1). Hence we don't have to do anything.
@@ -133,7 +131,7 @@ public class QuadProgJavaSolver
          }
 
          xny = ss / (1.0 + cc);
-         for (int k = 0; k < n; k++)
+         for (int k = 0; k < problemSize; k++)
          {
             t1 = J.get(k, j - 1);
             t2 = J.get(k, j);
