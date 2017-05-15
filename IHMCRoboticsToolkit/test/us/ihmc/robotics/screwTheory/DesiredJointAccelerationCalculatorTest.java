@@ -31,7 +31,7 @@ public class DesiredJointAccelerationCalculatorTest
                                         new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevatorFrame);
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
       RigidBody floatingBase = ScrewTestTools.addRandomRigidBody("floatingBase", random, sixDoFJoint);
 
       ArrayList<RevoluteJoint> jointsList = new ArrayList<RevoluteJoint>();
@@ -73,10 +73,8 @@ public class DesiredJointAccelerationCalculatorTest
 
             desiredJointAccelerationCalculator.compute(accelerationOfEndEffectorWithRespectToBase);
 
-            TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
+            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, true);
 
-            twistCalculator.compute();
             spatialAccelerationCalculator.compute();
 
             SpatialAccelerationVector accelerationOfEndEffectorWithRespectToBaseBack = new SpatialAccelerationVector();

@@ -63,10 +63,8 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
       rootJoint.getFrameAfterJoint().update();
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
-      updateRootJointTwistAngularPart(twistCalculator, rootJoint, angularVelocityPort.getData());
+      updateRootJointTwistAngularPart(rootJoint, angularVelocityPort.getData());
       rootJoint.getFrameAfterJoint().update();
-      twistCalculator.compute();
    }
 
    public void startComputation()
@@ -82,10 +80,10 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final Twist tempRootJointTwist = new Twist();
 
-   private void updateRootJointTwistAngularPart(TwistCalculator twistCalculator, FloatingInverseDynamicsJoint rootJoint, FrameVector estimationLinkAngularVelocity)
+   private void updateRootJointTwistAngularPart(FloatingInverseDynamicsJoint rootJoint, FrameVector estimationLinkAngularVelocity)
    {
       rootJoint.getJointTwist(tempRootJointTwist);
-      computeRootJointAngularVelocity(twistCalculator, tempRootJointAngularVelocity, estimationLinkAngularVelocity);
+      computeRootJointAngularVelocity(tempRootJointAngularVelocity, estimationLinkAngularVelocity);
 
       tempRootJointTwist.setAngularPart(tempRootJointAngularVelocity.getVector());
       rootJoint.setJointTwist(tempRootJointTwist);
@@ -95,7 +93,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    private final FrameVector tempRootToEstimationAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempEstimationLinkAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private void computeRootJointAngularVelocity(TwistCalculator twistCalculator, FrameVector rootJointAngularVelocityToPack,
+   private void computeRootJointAngularVelocity(FrameVector rootJointAngularVelocityToPack,
            FrameVector angularVelocityEstimationLink)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
@@ -105,7 +103,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       tempEstimationLinkAngularVelocity.setIncludingFrame(angularVelocityEstimationLink);
 
       // T_{root}^{root, estimation}
-      twistCalculator.getRelativeTwist(estimationLink, rootJoint.getSuccessor(), tempRootToEstimationTwist);
+      rootJoint.getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(estimationLink.getBodyFixedFrame(), tempRootToEstimationTwist);
       tempRootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
 
       // omega_{root}^{root, estimation}

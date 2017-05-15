@@ -8,7 +8,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -24,7 +23,6 @@ public class JointStateUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody rootBody;
 
@@ -37,9 +35,8 @@ public class JointStateUpdater
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
-      twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
-      rootBody = twistCalculator.getRootBody();
+      rootBody = inverseDynamicsStructure.getElevator();
 
       this.sensorMap = sensorOutputMapReadOnly;
 
@@ -148,7 +145,6 @@ public class JointStateUpdater
       }
 
       rootBody.updateFramesRecursively();
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
    }
 }

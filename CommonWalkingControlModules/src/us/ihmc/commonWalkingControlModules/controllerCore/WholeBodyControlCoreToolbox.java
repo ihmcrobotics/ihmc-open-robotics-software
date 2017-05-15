@@ -26,9 +26,9 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -40,7 +40,6 @@ public class WholeBodyControlCoreToolbox
    private final double gravityZ;
    private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrame centerOfMassFrame;
-   private final TwistCalculator twistCalculator;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -105,9 +104,6 @@ public class WholeBodyControlCoreToolbox
     * @param centerOfMassFrame the reference frame centered at the robot's center of mass and
     *           oriented as world frame. This reference is assumed to be updated from outside the
     *           controller core.
-    * @param twistCalculator calculator to compute the twist of the robot bodies from the measured
-    *           joint velocities. This tool is assumed to be updated from outside the controller
-    *           core.
     * @param controllerCoreOptimizationSettings set of parameters used to initialize the
     *           optimization problems.
     * @param yoGraphicsListRegistry the registry in which the {@link YoGraphic}s and
@@ -115,23 +111,21 @@ public class WholeBodyControlCoreToolbox
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
-                                      ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
-                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                      YoVariableRegistry parentRegistry)
+                                      ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
       this.centerOfMassFrame = centerOfMassFrame;
-      this.twistCalculator = twistCalculator;
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      RigidBody rootBody = twistCalculator.getRootBody();
+      RigidBody rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
       parentRegistry.addChild(registry);
@@ -246,7 +240,7 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, centroidalMomentumHandler, jointIndexHandler,
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler,
                                                                jointPrivilegedConfigurationParameters, registry);
       }
       return motionQPInputCalculator;
@@ -276,11 +270,6 @@ public class WholeBodyControlCoreToolbox
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public SpatialAccelerationCalculator getSpatialAccelerationCalculator()

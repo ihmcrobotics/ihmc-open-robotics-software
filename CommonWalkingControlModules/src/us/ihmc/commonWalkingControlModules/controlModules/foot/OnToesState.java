@@ -26,7 +26,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
 public class OnToesState extends AbstractFootControlState
@@ -57,7 +56,6 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
-   private final TwistCalculator twistCalculator;
    private final TranslationReferenceFrame toeOffFrame;
 
    private final ReferenceFrame soleZUpFrame;
@@ -67,8 +65,6 @@ public class OnToesState extends AbstractFootControlState
       super(ConstraintType.TOES, footControlHelper);
 
       this.toeOffCalculator = toeOffCalculator;
-
-      twistCalculator = controllerToolbox.getTwistCalculator();
 
       String namePrefix = contactableFoot.getName();
 
@@ -145,8 +141,7 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
       toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
 
-      twistCalculator.getRelativeTwist(rootBody, contactableFoot.getRigidBody(), footTwist);
-      footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
+      contactableFoot.getFrameAfterParentJoint().getTwistOfFrame(footTwist);
 
       toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
 

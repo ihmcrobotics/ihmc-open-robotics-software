@@ -330,11 +330,13 @@ public class ScrewTestTools
    public static void setRandomVelocity(OneDoFJoint joint, Random random)
    {
       joint.setQd(random.nextDouble());
+      joint.updateFramesRecursively();
    }
 
    public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
    {
       joint.setQd(RandomNumbers.nextDouble(random, min, max));
+      joint.updateFramesRecursively();
    }
 
    public static void setRandomAcceleration(OneDoFJoint joint, Random random, double min, double max)
@@ -614,7 +616,7 @@ public class ScrewTestTools
       {
          elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
-         rootJoint = new SixDoFJoint("rootJoint", elevator, elevator.getBodyFixedFrame());
+         rootJoint = new SixDoFJoint("rootJoint", elevator);
          RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
          revoluteJoints = new ArrayList<RevoluteJoint>();

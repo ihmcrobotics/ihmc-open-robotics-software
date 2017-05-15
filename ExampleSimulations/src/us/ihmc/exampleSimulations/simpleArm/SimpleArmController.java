@@ -28,7 +28,6 @@ public class SimpleArmController extends SimpleRobotController
    private DoubleYoVariable offset = new DoubleYoVariable("Offset", registry);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final TwistCalculator twistCalculator;
 
    public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, DoubleYoVariable time)
    {
@@ -39,8 +38,7 @@ public class SimpleArmController extends SimpleRobotController
       decay.set(0.05);
       frequency.set(0.5);
 
-      twistCalculator = new TwistCalculator(worldFrame, endEffectorBody);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, SimpleArmRobot.gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(endEffectorBody, SimpleArmRobot.gravity);
    }
 
    @Override
@@ -54,7 +52,6 @@ public class SimpleArmController extends SimpleRobotController
       double angle = 2.0 * Math.PI * frequency.getDoubleValue() * time.getDoubleValue();
       double randomTorque = magnitude.getDoubleValue() * Math.sin(angle) + offset.getDoubleValue();
 
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
       robot.addYawTorque(randomTorque);

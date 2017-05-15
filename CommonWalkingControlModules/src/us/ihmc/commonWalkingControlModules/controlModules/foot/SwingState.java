@@ -33,10 +33,9 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTraject
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 
@@ -102,7 +101,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final DoubleYoVariable minHeightDifferenceForObstacleClearance;
 
-   private final ReferenceFrame soleFrame;
+   private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame controlFrame;
 
    private final PoseReferenceFrame desiredSoleFrame = new PoseReferenceFrame("desiredSoleFrame", worldFrame);
@@ -182,9 +181,6 @@ public class SwingState extends AbstractUnconstrainedState
       controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
-      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
-      RigidBody foot = contactableFoot.getRigidBody();
-
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
 
@@ -203,7 +199,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", 12, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
-      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame, foot, twistCalculator);
+      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
       
       activeTrajectoryType = new EnumYoVariable<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
       swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration", registry);

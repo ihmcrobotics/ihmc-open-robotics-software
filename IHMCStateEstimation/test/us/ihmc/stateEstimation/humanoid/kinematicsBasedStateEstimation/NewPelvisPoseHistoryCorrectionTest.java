@@ -104,7 +104,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          }
       };
       RigidBody rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
-      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody, worldFrame);
+      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
    private void setupSim()

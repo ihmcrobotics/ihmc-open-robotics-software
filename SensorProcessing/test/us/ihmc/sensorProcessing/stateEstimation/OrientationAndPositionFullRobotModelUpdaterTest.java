@@ -68,7 +68,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
          new ControlFlowInputPort<FullInverseDynamicsStructure>("inverseDynamicsStructureInputPort", controlFlowElement);
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator); 
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
       OrientationAndPositionFullRobotModelUpdater fullRobotModelUpdater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort,

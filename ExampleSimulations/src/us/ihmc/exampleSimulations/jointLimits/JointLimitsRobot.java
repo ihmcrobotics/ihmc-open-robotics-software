@@ -11,7 +11,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -32,7 +31,6 @@ public class JointLimitsRobot extends Robot
    private final RigidBody elevator;
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final TwistCalculator twistCalculator;
 
    public JointLimitsRobot()
    {
@@ -52,8 +50,7 @@ public class JointLimitsRobot extends Robot
       this.addRootJoint(joint);
 
       // --- setup ID calculator ---
-      twistCalculator = new TwistCalculator(worldFrame, arm);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -this.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -this.getGravityZ());
    }
 
    private Link makeLink()
@@ -96,7 +93,6 @@ public class JointLimitsRobot extends Robot
    {
       updateInverseDynamicsStructureFromSimulation();
       idJoint.setQddDesired(qdd);
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       joint.setTau(idJoint.getTau());
    }

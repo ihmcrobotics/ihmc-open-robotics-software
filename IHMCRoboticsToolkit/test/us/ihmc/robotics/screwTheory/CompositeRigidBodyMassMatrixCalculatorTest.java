@@ -36,7 +36,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
    public void testSixDoFJoint()
    {
       Random random = new Random(1982L);
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
 
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
