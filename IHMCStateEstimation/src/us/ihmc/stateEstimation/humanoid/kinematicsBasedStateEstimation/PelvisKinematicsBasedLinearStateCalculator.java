@@ -427,7 +427,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       tempRootBodyTwist.setLinearPart(tempFrameVector);
       rootJoint.setJointTwist(tempRootBodyTwist);
-      rootJoint.getFrameAfterJoint().update();
+      rootJoint.updateFramesRecursively();
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
