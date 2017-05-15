@@ -22,7 +22,6 @@ public class SolarPanelPath
       wayPoses.add(startPose);
       arrivalTime.add(0.0);
    }
-<<<<<<< HEAD
    
    public SolarPanelCleaningPose getStartPose()
    {
@@ -38,10 +37,6 @@ public class SolarPanelPath
    {
       return linearPath.size();
    }
-   
-=======
-
->>>>>>> refs/remotes/origin/develop
    public ArrayList<Double> getArrivalTime()
    {
       return arrivalTime;

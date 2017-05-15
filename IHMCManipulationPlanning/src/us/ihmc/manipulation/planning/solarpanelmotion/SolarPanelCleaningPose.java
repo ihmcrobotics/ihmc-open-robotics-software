@@ -55,7 +55,6 @@ public class SolarPanelCleaningPose
       this.wCoordinate = w;
       this.zRotation = zRotation;
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
-<<<<<<< HEAD
    } 
    
    public SolarPanel getSolarPanel()
@@ -63,10 +62,6 @@ public class SolarPanelCleaningPose
       return solarPanel;
    }
    
-=======
-   }
-
->>>>>>> refs/remotes/origin/develop
    public void setUcoordinate(double u)
    {
       this.uCoordinate = u;
