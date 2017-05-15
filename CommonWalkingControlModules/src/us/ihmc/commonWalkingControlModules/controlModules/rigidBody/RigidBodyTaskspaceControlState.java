@@ -43,7 +43,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
-   public static final int maxPoints = 200;
+   public static final int maxPoints = 1000;
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -137,7 +137,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       yoDefaultLinearWeight = new YoFrameVector(prefix + "DefaultLinearWeight", null, registry);
       yoWeightMatrixAngularFrameID = new LongYoVariable(prefix + "WeightMatrixAngularFrameID_RO", null, registry);
       yoWeightMatrixLinearFrameID = new LongYoVariable(prefix + "WeightMatrixLinearFrameID_RO", null, registry);
-      
+
       yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
       yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);
       yoDesiredPoint = new YoFramePoint(prefix + "DesiredPoint", worldFrame, registry);
@@ -214,7 +214,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       yoDefaultAngularWeight.get(this.angularWeight);
       yoDefaultLinearWeight.get(this.linearWeight);
-      
+
       weightMatrix.setLinearWeights(this.linearWeight);
       weightMatrix.setAngularWeights(this.angularWeight);
    }
@@ -225,10 +225,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       yoDefaultAngularWeight.set(weight, weight, weight);
       hasLinearWeight.set(true);
       yoDefaultLinearWeight.set(weight, weight, weight);
-      
+
       yoDefaultAngularWeight.get(this.angularWeight);
       yoDefaultLinearWeight.get(this.linearWeight);
-      
+
       weightMatrix.setLinearWeights(this.linearWeight);
       weightMatrix.setAngularWeights(this.angularWeight);
    }
@@ -271,16 +271,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          spatialFeedbackControlCommand.setGains(orientationGains);
       if (positionGains != null)
          spatialFeedbackControlCommand.setGains(positionGains);
-      
+
       spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
       spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
-      
+
       //update the qp weight yovariables.
       ReferenceFrame angularSelectionFrame = weightMatrix.getAngularWeightFrame();
       yoWeightMatrixAngularFrameID.set(angularSelectionFrame == null ? controlFrame.getNameBasedHashCode() : angularSelectionFrame.getNameBasedHashCode());
       ReferenceFrame linearSelectionFrame = weightMatrix.getLinearWeightFrame();
       yoWeightMatrixLinearFrameID.set(linearSelectionFrame == null ? controlFrame.getNameBasedHashCode() : linearSelectionFrame.getNameBasedHashCode());
-      
+
       WeightMatrix3D linearPart = weightMatrix.getLinearPart();
       yoLinearWeight.set(linearPart.getXAxisWeight(), linearPart.getYAxisWeight(), linearPart.getZAxisWeight());
       WeightMatrix3D angularPart = weightMatrix.getAngularPart();
@@ -499,12 +499,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
          selectionMatrix.setToAngularSelectionOnly();
          selectionMatrix.setAngularPart(command.getSelectionMatrix());
-         
+
          WeightMatrix3D weightMatrix = command.getWeightMatrix();
          double xAxisWeight = Double.isNaN(weightMatrix.getXAxisWeight()) ? yoDefaultAngularWeight.getX() : weightMatrix.getXAxisWeight();
          double yAxisWeight = Double.isNaN(weightMatrix.getYAxisWeight()) ? yoDefaultAngularWeight.getY() : weightMatrix.getYAxisWeight();
          double zAxisWeight = Double.isNaN(weightMatrix.getZAxisWeight()) ? yoDefaultAngularWeight.getZ() : weightMatrix.getZAxisWeight();
-         
+
          weightMatrix.setWeights(xAxisWeight, yAxisWeight, zAxisWeight);
          this.weightMatrix.setAngularPart(weightMatrix);
 
@@ -557,22 +557,22 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             queueInitialPoint(initialPose);
 
          selectionMatrix.set(command.getSelectionMatrix());
-         
+
          WeightMatrix6D weightMatrix = command.getWeightMatrix();
          WeightMatrix3D linearPart = weightMatrix.getLinearPart();
          double linearXAxisWeight = Double.isNaN(linearPart.getXAxisWeight()) ? yoDefaultLinearWeight.getX() : linearPart.getXAxisWeight();
          double linearYAxisWeight = Double.isNaN(linearPart.getYAxisWeight()) ? yoDefaultLinearWeight.getY() : linearPart.getYAxisWeight();
          double linearZAxisWeight = Double.isNaN(linearPart.getZAxisWeight()) ? yoDefaultLinearWeight.getZ() : linearPart.getZAxisWeight();
-         
+
          weightMatrix.setLinearWeights(linearXAxisWeight, linearYAxisWeight, linearZAxisWeight);
-         
+
          WeightMatrix3D angularPart = weightMatrix.getAngularPart();
          double angularXAxisWeight = Double.isNaN(angularPart.getXAxisWeight()) ? yoDefaultAngularWeight.getX() : angularPart.getXAxisWeight();
          double angularYAxisWeight = Double.isNaN(angularPart.getYAxisWeight()) ? yoDefaultAngularWeight.getY() : angularPart.getYAxisWeight();
          double angularZAxisWeight = Double.isNaN(angularPart.getZAxisWeight()) ? yoDefaultAngularWeight.getZ() : angularPart.getZAxisWeight();
-         
+
          weightMatrix.setAngularWeights(angularXAxisWeight, angularYAxisWeight, angularZAxisWeight);
-         
+
          this.weightMatrix.set(weightMatrix);
 
          trackingOrientation.set(selectionMatrix.isAngularPartActive());
@@ -723,13 +723,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       orientationTrajectoryGenerator.clear();
       positionTrajectoryGenerator.clear();
       selectionMatrix.resetSelection();
-      
+
       weightMatrix.clear();
       yoDefaultLinearWeight.get(linearWeight);
       weightMatrix.setLinearWeights(linearWeight);
       yoDefaultAngularWeight.get(angularWeight);
       weightMatrix.setAngularWeights(angularWeight);
-      
+
       pointQueue.clear();
       numberOfPointsInQueue.set(0);
       numberOfPointsInGenerator.set(0);
