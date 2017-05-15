@@ -45,6 +45,7 @@ public class JavaQuadProgSolver
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(defaultSize);
+   private double quadraticCostScalar = 0.0;
 
    private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(defaultSize);
@@ -70,11 +71,30 @@ public class JavaQuadProgSolver
     */
 
 
+   private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
+   public double getObjectiveCost(DenseMatrix64F x)
+   {
+      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      CommonOps.scale(0.5, computedObjectiveFunctionValue);
+      CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
+      return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
+   }
+
+   private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
+
+   private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
+   {
+      temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
+      tempMatrix.reshape(xVector.numCols, QMatrix.numCols);
+      CommonOps.multTransA(xVector, QMatrix, tempMatrix);
+      CommonOps.multTransB(tempMatrix, QMatrix, temporaryMatrix);
+      CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
+   }
 
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    // The solving function, implementing the Goldfarb-Idani method
-   public int solve(DenseMatrix64F G, DenseMatrix64F g0,
+   public int solve(DenseMatrix64F G, DenseMatrix64F g0, double q,
          DenseMatrix64F CE, DenseMatrix64F ce0, DenseMatrix64F CI, DenseMatrix64F ci0, DenseMatrix64F solutionToPack, boolean initialize)
    {
       //// TODO: 5/13/17  initialize
@@ -101,6 +121,7 @@ public class JavaQuadProgSolver
       quadraticCostQVector.reshape(problemSize, 1);
       quadraticCostQMatrix.set(G);
       quadraticCostQVector.set(g0);
+      quadraticCostScalar = q;
 
       linearEqualityConstraintsAMatrix.reshape(problemSize, numberOfEqualityConstraints);
       CommonOps.transpose(CE, linearEqualityConstraintsAMatrix);

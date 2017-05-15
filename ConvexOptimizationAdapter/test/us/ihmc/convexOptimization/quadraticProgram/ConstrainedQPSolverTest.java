@@ -53,7 +53,7 @@ public class ConstrainedQPSolverTest
          solver.setLinearEqualityConstraints(Aeq, beq);
          solver.solve(x);
          */
-         solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
 
          Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
@@ -111,7 +111,7 @@ public class ConstrainedQPSolverTest
             solver.setLinearEqualityConstraints(Aeq, beq);
             solver.solve(x);
             */
-            solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+            solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
             Assert.assertArrayEquals("repeat = " + repeat + ", Java solver", x.getData(), new double[] {-7.75, 8.5, -0.75}, 1e-10);
 
             DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
@@ -176,7 +176,7 @@ public class ConstrainedQPSolverTest
       solver.setLinearEqualityConstraints(Aeq, beq);
       solver.solve(x);
       */
-      solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+      solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
       boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
       if (!correct)
          PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
