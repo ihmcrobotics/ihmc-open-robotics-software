@@ -74,6 +74,70 @@ public class JavaQuadProgSolverTest
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
+   public void testAgainstStandardQuadProg() throws NoConvergenceException
+   {
+      int numberOfInequalityConstraints = 1;
+      int numberOfEqualityConstraints = 1;
+      int numberOfVariables = 2;
+
+      DenseMatrix64F Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 0, 1);
+      DenseMatrix64F f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0);
+      DenseMatrix64F Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1);
+      DenseMatrix64F beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0);
+      DenseMatrix64F Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1);
+      DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
+
+      JavaQuadProgSolver javaSolver = new JavaQuadProgSolver();
+      QuadProgSolver solver = new QuadProgSolver();
+
+      for (int repeat = 0; repeat < 10000; repeat++)
+      {
+         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
+         javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
+      }
+
+      numberOfInequalityConstraints = 1;
+      numberOfEqualityConstraints = 2;
+      numberOfVariables = 3;
+
+      Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 1, 0, 1, 2, 1, 3, 7);
+      f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0, 9);
+      Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1, 1, 2, 3, 4);
+      beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0, 7);
+      Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1, 3);
+      bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
+
+      for (int repeat = 0; repeat < 10000; repeat++)
+      {
+         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+         DenseMatrix64F xWrapper = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+         javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         solver.solve(Q, f, Aeq, beq, Ain, bin, xWrapper, false);
+
+         DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+         CommonOps.mult(Aeq, x, bEqualityVerify);
+
+         // Verify Ax=b Equality constraints hold:
+         JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+
+         // Verify Ax<b Inequality constraints hold:
+         DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+         CommonOps.mult(Ain, x, bInequalityVerify);
+
+         for (int j=0; j<bInequalityVerify.getNumRows(); j++)
+         {
+            Assert.assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
+         }
+
+         // Verify solution is as expected
+         Assert.assertArrayEquals("repeat = " + repeat, x.getData(), xWrapper.getData(), 1e-10);
+         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + javaSolver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
+      }
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testSolveProblemWithParallelConstraints() throws NoConvergenceException
    {
       // our simple active set solver can not solve this:
