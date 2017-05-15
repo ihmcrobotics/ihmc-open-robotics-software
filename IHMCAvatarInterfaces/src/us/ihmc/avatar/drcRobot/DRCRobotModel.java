@@ -28,6 +28,7 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
+import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedWholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -96,4 +97,18 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
    public abstract CollisionBoxProvider getCollisionBoxProvider();
 
    public abstract FootstepSnappingParameters getSnappingParameters();
+
+   /**
+    * Override this method to create a custom output writer to be used with this robot.
+    * <p>
+    * <b> This output writer is meant to be used in simulation only.
+    * </p>
+    * 
+    * @param parentOutputWriter the default output writer that should be wrapped in the custom output writer.
+    * @return the custom output writer.
+    */
+   public default DRCOutputWriter getCustomSimulationOutputWriter(DRCOutputWriter parentOutputWriter)
+   {
+      return null;
+   }
 }

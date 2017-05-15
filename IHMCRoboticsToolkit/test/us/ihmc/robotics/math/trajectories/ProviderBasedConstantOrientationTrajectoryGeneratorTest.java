@@ -34,7 +34,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    @Before
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame!", false, true, true);
+      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame!");
       frameOrientation = new FrameOrientation(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(frameOrientation);
    }

@@ -1,6 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
+import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -36,7 +35,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -119,8 +117,6 @@ public class PelvisLinearStateUpdater
 
    private final BooleanYoVariable requestStopEstimationOfPelvisLinearState = new BooleanYoVariable("userRequestStopEstimationOfPelvisLinearState", registry);
 
-   private final TwistCalculator twistCalculator;
-
    private final PelvisKinematicsBasedLinearStateCalculator kinematicsBasedLinearStateCalculator;
    private final PelvisIMUBasedLinearStateCalculator imuBasedLinearStateCalculator;
 
@@ -155,7 +151,6 @@ public class PelvisLinearStateUpdater
 
       this.estimatorCenterOfMassDataHolderToUpdate = estimatorCenterOfMassDataHolderToUpdate;
       
-      twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
 
@@ -326,9 +321,7 @@ public class PelvisLinearStateUpdater
       rootJoint.getJointTwist(rootJointTwist);
       rootJointTwist.setToZero();
       rootJoint.setJointTwist(rootJointTwist);
-
-      rootJointFrame.update();
-      twistCalculator.compute();
+      rootJoint.updateFramesRecursively();
 
       updateCoMState();
    }
@@ -417,9 +410,7 @@ public class PelvisLinearStateUpdater
       tempVelocity.changeFrame(rootJointTwist.getExpressedInFrame());
       rootJointTwist.setLinearPart(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);
-
-      rootJointFrame.update();
-      twistCalculator.compute();
+      rootJoint.updateFramesRecursively();
    }
 
    private int setTrustedFeetUsingFootSwitches()

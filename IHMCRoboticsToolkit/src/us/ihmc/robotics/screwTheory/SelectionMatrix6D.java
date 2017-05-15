@@ -587,10 +587,65 @@ public class SelectionMatrix6D
    {
       return linearPart;
    }
+   
+   /**
+    * Returns true if any of the angular axis are enabled
+    * @return
+    */
+   public boolean isAngularPartActive()
+   {
+      return isAngularXSelected() || isAngularYSelected() || isAngularZSelected();
+   }
+   
+   /**
+    * Returns true if any of the linear axis are enabled
+    * @return
+    */
+   public boolean isLinearPartActive()
+   {
+      return isLinearXSelected() || isLinearYSelected() || isLinearZSelected();
+   }
 
    @Override
    public String toString()
    {
       return "Angular: " + angularPart + ", linear: " + linearPart;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((angularPart == null) ? 0 : angularPart.hashCode());
+      result = prime * result + ((linearPart == null) ? 0 : linearPart.hashCode());
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      SelectionMatrix6D other = (SelectionMatrix6D) obj;
+      if (angularPart == null)
+      {
+         if (other.angularPart != null)
+            return false;
+      }
+      else if (!angularPart.equals(other.angularPart))
+         return false;
+      if (linearPart == null)
+      {
+         if (other.linearPart != null)
+            return false;
+      }
+      else if (!linearPart.equals(other.linearPart))
+         return false;
+      return true;
    }
 }

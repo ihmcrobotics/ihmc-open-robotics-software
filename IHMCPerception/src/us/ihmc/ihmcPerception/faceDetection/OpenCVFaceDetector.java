@@ -58,7 +58,6 @@ public class OpenCVFaceDetector
          URI uri = ClassLoader.getSystemResource(HAARCASCADE_FRONTALFACE_ALT_XML).toURI();
          Map<String, String> env = new HashMap<>();
          env.put("create", "true");
-         FileSystem zipfs = FileSystems.newFileSystem(uri, env);
          Path xmlPath = Paths.get(uri);
          cascadeClassifierForFaces = new CascadeClassifier(xmlPath.toString());
 
@@ -67,7 +66,7 @@ public class OpenCVFaceDetector
             throw new RuntimeException("cascadeClassifier is empty");
          }
       }
-      catch (URISyntaxException | IOException e)
+      catch (URISyntaxException e)
       {
          cascadeClassifierForFaces = null;
          e.printStackTrace();

@@ -19,7 +19,7 @@ public class ViconReferenceFrame extends ReferenceFrame
 
    public ViconReferenceFrame(String bodyName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, ViconClient viconClient)
    {
-      super(bodyName.replace(":", "_"), parentFrame, transformToParent, false, false, false);
+      super(bodyName.replace(":", "_"), parentFrame, transformToParent, false, false);
       this.bodyName = bodyName;
       this.viconClient = viconClient;
    }

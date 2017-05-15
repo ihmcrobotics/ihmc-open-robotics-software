@@ -10,8 +10,10 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.Twist;
 
-public class YoSE3OffsetFrame extends ReferenceFrame
+public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
    private static final long serialVersionUID = 2800529580025439076L;
    private final Vector3D tempVector = new Vector3D();
@@ -88,5 +90,11 @@ public class YoSE3OffsetFrame extends ReferenceFrame
       translationToParent.get(tempVector);
       rotationToParent.get(tempQuaternion);
       transformToParent.set(tempQuaternion, tempVector);
+   }
+
+   @Override
+   protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+   {
+      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
    }
 }

@@ -32,7 +32,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
@@ -47,8 +46,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private static final boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final TwistCalculator twistCalculator;
 
    private final FloatingInverseDynamicsJoint rootJoint;
    private final List<RigidBody> feetRigidBodies;
@@ -109,7 +106,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
-      this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       this.footSwitches = footSwitches;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
@@ -405,8 +401,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       reset();
       updateKinematicsNewTwist();
 
-      twistCalculator.compute();
-
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
          RigidBody foot = feetRigidBodies.get(i);
@@ -433,8 +427,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       tempRootBodyTwist.setLinearPart(tempFrameVector);
       rootJoint.setJointTwist(tempRootBodyTwist);
-
-      twistCalculator.compute();
+      rootJoint.updateFramesRecursively();
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
@@ -442,7 +435,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(foot);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
-         twistCalculator.getTwistOfBody(foot, footTwistInWorld);
+         foot.getBodyFixedFrame().getTwistOfFrame(footTwistInWorld);
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 

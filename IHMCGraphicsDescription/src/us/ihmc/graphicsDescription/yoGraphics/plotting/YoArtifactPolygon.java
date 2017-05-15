@@ -4,11 +4,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
@@ -16,7 +16,7 @@ public class YoArtifactPolygon extends YoArtifact
 {
    private final YoFrameConvexPolygon2d convexPolygon;
    
-   private final ConvexPolygon2d tempConvexPolygon = new ConvexPolygon2d();
+   private final ConvexPolygon2D tempConvexPolygon = new ConvexPolygon2D();
 
    private final boolean fill;
    private final BasicStroke stroke;

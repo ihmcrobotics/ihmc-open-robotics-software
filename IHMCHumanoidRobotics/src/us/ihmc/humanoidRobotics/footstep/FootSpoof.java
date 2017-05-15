@@ -17,6 +17,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -54,7 +55,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
 
       for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
@@ -81,7 +82,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
       FramePoint point1 = new FramePoint(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
       FramePoint point2 = new FramePoint(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
       FramePoint point3 = new FramePoint(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
@@ -151,7 +152,7 @@ public class FootSpoof implements ContactablePlaneBody
       return ret;
    }
 
-   public ReferenceFrame getFrameAfterParentJoint()
+   public MovingReferenceFrame getFrameAfterParentJoint()
    {
       return ankle.getFrameAfterJoint();
    }

@@ -11,7 +11,7 @@ public class OrientationFrame extends ReferenceFrame
 
    public OrientationFrame(FrameOrientation orientation)
    {
-      super("Orientation_" + orientationNumber, orientation.getReferenceFrame(), false, false, false);
+      super("Orientation_" + orientationNumber, orientation.getReferenceFrame());
 
       orientationNumber++;
 

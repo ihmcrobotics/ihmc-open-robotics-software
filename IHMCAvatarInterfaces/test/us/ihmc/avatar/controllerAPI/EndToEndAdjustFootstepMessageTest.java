@@ -1,6 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,6 +36,7 @@ import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -66,7 +67,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      SideDependentList<ReferenceFrame> soleFrames = fullRobotModel.getSoleFrames();
+      SideDependentList<MovingReferenceFrame> soleFrames = fullRobotModel.getSoleFrames();
       drcSimulationTestHelper.send(createFootsteps(soleFrames));
 
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -150,7 +151,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       }
    }
 
-   private FootstepDataListMessage createFootsteps(SideDependentList<ReferenceFrame> soleFrames)
+   private FootstepDataListMessage createFootsteps(SideDependentList<? extends ReferenceFrame> soleFrames)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 

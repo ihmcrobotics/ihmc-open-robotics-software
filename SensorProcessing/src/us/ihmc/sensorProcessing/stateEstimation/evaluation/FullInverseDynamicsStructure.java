@@ -5,11 +5,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class FullInverseDynamicsStructure
 {
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody estimationLink;
    private final RigidBody elevator;
@@ -21,8 +19,7 @@ public class FullInverseDynamicsStructure
       this.elevator = elevator;
       this.rootJoint = rootInverseDynamicsJoint;
 
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
 
       this.estimationLink = estimationLink;
    }
@@ -30,11 +27,6 @@ public class FullInverseDynamicsStructure
    public FloatingInverseDynamicsJoint getRootJoint()
    {
       return rootJoint;
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public SpatialAccelerationCalculator getSpatialAccelerationCalculator()
@@ -59,7 +51,6 @@ public class FullInverseDynamicsStructure
 
    public void updateInternalState()
    {
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
    }
 

@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -41,7 +42,7 @@ public abstract class GeneralizedRigidBodyInertia
     * @param massMomentOfInertia the mass moment of inertia matrix in ReferenceFrame frame
     * @param mass the mass of the rigid body to which this GeneralizedRigidBodyInertia corresponds
     */
-   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass)
+   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3DReadOnly massMomentOfInertia, double mass)
    {
       this.expressedInframe = frame;
       this.massMomentOfInertiaPart = new Matrix3D(massMomentOfInertia);
@@ -60,7 +61,7 @@ public abstract class GeneralizedRigidBodyInertia
       this.crossPartZero = true;
    }
 
-   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass, Vector3D crossPart)
+   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3DReadOnly massMomentOfInertia, double mass, Vector3D crossPart)
    {
       this.expressedInframe = frame;
       this.massMomentOfInertiaPart = new Matrix3D(massMomentOfInertia);

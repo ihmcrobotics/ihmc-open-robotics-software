@@ -14,6 +14,7 @@ import org.junit.Assert;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,10 +49,10 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -230,12 +231,12 @@ public class VirtualModelControllerTestHelper
       robotLeg.setGravity(gravity);
       HashMap<InverseDynamicsJoint, Joint> jointMap = new HashMap<>();
 
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3D(), robotLeg);
       robotLeg.addRootJoint(floatingJoint);
-      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator, elevatorFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator);
       jointMap.put(rootJoint, floatingJoint);
 
       Link pelvisLink = pelvis();
@@ -384,15 +385,15 @@ public class VirtualModelControllerTestHelper
             toFootCenterY, -ankleHeight);
       RigidBodyTransform rightSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
             -toFootCenterY, -ankleHeight);
-      ReferenceFrame leftSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Left_Sole",
+      MovingReferenceFrame leftSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Left_Sole",
             leftFootBody.getBodyFixedFrame(), leftSoleToAnkleFrame);
-      ReferenceFrame rightSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Right_Sole",
+      MovingReferenceFrame rightSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Right_Sole",
             rightFootBody.getBodyFixedFrame(), rightSoleToAnkleFrame);
 
       SideDependentList<RigidBody> feet = new SideDependentList<>();
       feet.put(RobotSide.LEFT, leftFootBody);
       feet.put(RobotSide.RIGHT, rightFootBody);
-      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       soleFrames.put(RobotSide.LEFT, leftSoleFrame);
       soleFrames.put(RobotSide.RIGHT, rightSoleFrame);
 
@@ -528,12 +529,8 @@ public class VirtualModelControllerTestHelper
       link.getComOffset(comOffset);
       Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
-      ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, bodyName);
-      nextFrame.update();
-      RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, link.getMass());
-      RigidBody rigidBody = new RigidBody(bodyName, inertia, currentInverseDynamicsJoint);
 
-      return rigidBody;
+      return ScrewTools.addRigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
    public static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3D offset, String frameName)
@@ -541,7 +538,7 @@ public class VirtualModelControllerTestHelper
       ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslationAndIdentityRotation(offset);
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+      ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;
    }
@@ -611,7 +608,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -625,8 +622,8 @@ public class VirtualModelControllerTestHelper
 
       public PlanarRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          upperArm = createUpperArm(elevator);
@@ -698,13 +695,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -816,18 +807,7 @@ public class VirtualModelControllerTestHelper
          joint.setQ(Math.toRadians(20));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
-         nextFrame.update();
-
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
-         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBody createLowerArm(RigidBody parentBody)
@@ -836,18 +816,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(Math.toRadians(40));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
-         RigidBody rigidBody = new RigidBody("lowerArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBody createHand(RigidBody parentBody)
@@ -856,18 +826,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(Math.toRadians(30));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
-         RigidBody rigidBody = new RigidBody("hand", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -940,7 +900,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -953,8 +913,8 @@ public class VirtualModelControllerTestHelper
 
       public RobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -1034,13 +994,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1159,18 +1113,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D();
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.005);
-         momentOfInertia.setElement(1, 1, 0.005);
-         momentOfInertia.setElement(2, 2, 0.005);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, 0.1);
-         RigidBody rigidBody = new RigidBody(name, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody(name, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
       private RigidBody createUpperArm(RigidBody parentBody)
@@ -1179,18 +1123,7 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
-         nextFrame.update();
-
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
-         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBody createLowerArm(RigidBody parentBody)
@@ -1199,18 +1132,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
-         RigidBody rigidBody = new RigidBody("lowerArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBody createHand(RigidBody parentBody)
@@ -1219,18 +1142,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
-         RigidBody rigidBody = new RigidBody("hand", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -1303,7 +1216,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1320,8 +1233,8 @@ public class VirtualModelControllerTestHelper
 
       public ForkedRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -1434,13 +1347,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1563,18 +1470,7 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D();
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
-         nextFrame.update();
-
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.005);
-         momentOfInertia.setElement(1, 1, 0.005);
-         momentOfInertia.setElement(2, 2, 0.005);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, 0.1);
-         RigidBody rigidBody = new RigidBody(name, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody(jointName, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
       private RigidBody createUpperArm(RigidBody parentBody)
@@ -1583,18 +1479,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
-         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBody createLowerArm(String suffix, RigidBody parentBody)
@@ -1603,18 +1489,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame" + suffix);
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
-         RigidBody rigidBody = new RigidBody("lowerArm" + suffix, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBody createHand(String suffix, RigidBody parentBody)
@@ -1623,18 +1499,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame" + suffix);
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
-         RigidBody rigidBody = new RigidBody("hand" + suffix, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -1707,7 +1573,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1723,8 +1589,8 @@ public class VirtualModelControllerTestHelper
 
       public PlanarForkedRobotArm()
       {
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", worldFrame);
+         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          List<InverseDynamicsJoint> joints = new ArrayList<>();
@@ -1827,13 +1693,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1943,51 +1803,13 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      private RigidBody createDifferential(String name, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
-      {
-         String jointName;
-         if (jointAxis == X)
-            jointName = name + "_x";
-         else if (jointAxis == Y)
-            jointName = name + "_y";
-         else
-            jointName = name + "_z";
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
-         joint.setQ(random.nextDouble());
-
-         Vector3D comOffset = new Vector3D();
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
-         nextFrame.update();
-
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.005);
-         momentOfInertia.setElement(1, 1, 0.005);
-         momentOfInertia.setElement(2, 2, 0.005);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, 0.1);
-         RigidBody rigidBody = new RigidBody(name, inertia, joint);
-
-         return rigidBody;
-      }
-
       private RigidBody createUpperArm(RigidBody parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
-         nextFrame.update();
-
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
-         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBody createLowerArm(String suffix, RigidBody parentBody)
@@ -1996,18 +1818,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame" + suffix);
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
-         RigidBody rigidBody = new RigidBody("lowerArm" + suffix, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBody createHand(String suffix, RigidBody parentBody)
@@ -2016,18 +1828,8 @@ public class VirtualModelControllerTestHelper
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
-         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame" + suffix);
-         nextFrame.update();
 
-         Matrix3D momentOfInertia = new Matrix3D();
-         momentOfInertia.setElement(0, 0, 0.0437);
-         momentOfInertia.setElement(1, 1, 0.0437);
-         momentOfInertia.setElement(2, 2, 0.0054);
-
-         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
-         RigidBody rigidBody = new RigidBody("hand" + suffix, inertia, joint);
-
-         return rigidBody;
+         return ScrewTools.addRigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -2101,7 +1903,7 @@ public class VirtualModelControllerTestHelper
       private RigidBody pelvis;
 
       private SideDependentList<RigidBody> feet = new SideDependentList<>();
-      private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      private SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       private SixDoFJoint rootJoint;
       private OneDoFJoint[] joints;
 
@@ -2110,6 +1912,7 @@ public class VirtualModelControllerTestHelper
 
       private final SideDependentList<ArrayList<Point2D>> controllerFootGroundContactPoints = new SideDependentList<>();
       private final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
+      private final SideDependentList<LineSegment2D> controllerToeContactLines = new SideDependentList<>();
 
       private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
       private final SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
@@ -2135,17 +1938,21 @@ public class VirtualModelControllerTestHelper
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(-footLength / 2.0, footWidth / 2.0));
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
             controllerFootGroundContactPoints.get(robotSide).add(new Point2D(footLength / 2.0, toeWidth / 2.0));
+
             controllerToeContactPoints.put(robotSide, new Point2D(footLength / 2.0, 0.0));
+
+            controllerToeContactLines.put(robotSide, new LineSegment2D(new Point2D(footLength / 2.0, -toeWidth / 2.0), new Point2D(footLength / 2.0, toeWidth / 2.0)));
          }
 
-         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
 
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBody foot = feet.get(robotSide);
             ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
             List<Point2D> contactPointsInSoleFrame = controllerFootGroundContactPoints.get(robotSide);
-            ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, controllerToeContactPoints.get(robotSide));
+            ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame,
+                  controllerToeContactPoints.get(robotSide), controllerToeContactLines.get(robotSide));
             footContactableBodies.put(robotSide, footContactableBody);
          }
       }
@@ -2170,7 +1977,7 @@ public class VirtualModelControllerTestHelper
          this.feet.set(feet);
       }
 
-      public void setSoleFrames(SideDependentList<ReferenceFrame> soleFrames)
+      public void setSoleFrames(SideDependentList<MovingReferenceFrame> soleFrames)
       {
          this.soleFrames.set(soleFrames);
       }
@@ -2192,13 +1999,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevator.getBodyFixedFrame();
       }
@@ -2380,13 +2181,13 @@ public class VirtualModelControllerTestHelper
 
    private static class LegReferenceFrames implements CommonHumanoidReferenceFrames
    {
-      private final ReferenceFrame pelvisFrame;
+      private final MovingReferenceFrame pelvisFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final SideDependentList<ReferenceFrame> footReferenceFrames = new SideDependentList<>();
-      private final SideDependentList<ReferenceFrame> soleReferenceFrames = new SideDependentList<>();
+      private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
+      private final SideDependentList<MovingReferenceFrame> soleReferenceFrames = new SideDependentList<>();
 
-      public LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames)
+      public LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<MovingReferenceFrame> soleFrames)
       {
          pelvisFrame = pelvis.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
@@ -2410,73 +2211,73 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getABodyAttachedZUpFrame()
+      public MovingReferenceFrame getABodyAttachedZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFeetZUpFrame()
+      public MovingReferenceFrame getMidFeetZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFeetUnderPelvisFrame()
+      public MovingReferenceFrame getMidFeetUnderPelvisFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFootZUpGroundFrame()
+      public MovingReferenceFrame getMidFootZUpGroundFrame()
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames()
+      public SideDependentList<MovingReferenceFrame> getAnkleZUpReferenceFrames()
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getFootReferenceFrames()
+      public SideDependentList<MovingReferenceFrame> getFootReferenceFrames()
       {
          return footReferenceFrames;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getSoleFrames()
+      public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleReferenceFrames;
       }
 
       @Override
-      public ReferenceFrame getPelvisFrame()
+      public MovingReferenceFrame getPelvisFrame()
       {
          return pelvisFrame;
       }
 
       @Override
-      public ReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
+      public MovingReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getFootFrame(RobotSide robotSide)
+      public MovingReferenceFrame getFootFrame(RobotSide robotSide)
       {
          return footReferenceFrames.get(robotSide);
       }
 
       @Override
-      public ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
+      public MovingReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
       {
          return null;
       }
 
       @Override
-      public EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide)
+      public EnumMap<LegJointName, MovingReferenceFrame> getLegJointFrames(RobotSide robotSide)
       {
          return null;
       }
@@ -2494,31 +2295,31 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getPelvisZUpFrame()
+      public MovingReferenceFrame getPelvisZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getSoleFrame(RobotSide robotSide)
+      public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
       {
          return soleReferenceFrames.get(robotSide);
       }
 
       @Override
-      public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+      public MovingReferenceFrame getSoleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+      public SideDependentList<MovingReferenceFrame> getSoleZUpFrames()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getChestFrame()
+      public MovingReferenceFrame getChestFrame()
       {
          return null;
       }

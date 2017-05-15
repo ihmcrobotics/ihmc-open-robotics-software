@@ -3,11 +3,11 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -43,9 +43,9 @@ public class SteppingStones
 
 
 
-   public ArrayList<ConvexPolygon2d> getConvexPolygons()
+   public ArrayList<ConvexPolygon2D> getConvexPolygons()
    {
-      ArrayList<ConvexPolygon2d> ret = new ArrayList<ConvexPolygon2d>();
+      ArrayList<ConvexPolygon2D> ret = new ArrayList<ConvexPolygon2D>();
 
       for (SteppingStone steppingStone : steppingStones)
       {
@@ -55,9 +55,9 @@ public class SteppingStones
       return ret;
    }
 
-   public ArrayList<ConvexPolygon2d> getShrunkenConvexPolygons()
+   public ArrayList<ConvexPolygon2D> getShrunkenConvexPolygons()
    {
-      ArrayList<ConvexPolygon2d> ret = new ArrayList<ConvexPolygon2d>();
+      ArrayList<ConvexPolygon2D> ret = new ArrayList<ConvexPolygon2D>();
 
       for (SteppingStone steppingStone : steppingStones)
       {
@@ -76,7 +76,7 @@ public class SteppingStones
       {
          SteppingStone steppingStone = steppingStones.get(i);
 
-         ConvexPolygon2d convexPolygon2d = steppingStone.getConvexPolygon2d();
+         ConvexPolygon2D convexPolygon2d = steppingStone.getConvexPolygon2d();
 
          ret[i] = new double[convexPolygon2d.getNumberOfVertices()][];
 
@@ -99,7 +99,7 @@ public class SteppingStones
       {
          SteppingStone steppingStone = steppingStones.get(i);
 
-         ConvexPolygon2d shrunkenConvexPolygon2d = steppingStone.getShrunkenConvexPolygon2d();
+         ConvexPolygon2D shrunkenConvexPolygon2d = steppingStone.getShrunkenConvexPolygon2d();
 
          ret[i] = new double[shrunkenConvexPolygon2d.getNumberOfVertices()][];
 
@@ -132,7 +132,7 @@ public class SteppingStones
       return linkGraphicsArray;
    }
 
-   public static SteppingStones generateRandomSteppingStones(Random random, int numStones, ConvexPolygon2d polygonToShrink)
+   public static SteppingStones generateRandomSteppingStones(Random random, int numStones, ConvexPolygon2D polygonToShrink)
    {
       double xMin = -2.0;
       double xMax = 2.0;
@@ -149,7 +149,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRandomSteppingStones(Random random, double xMin, double xMax, double yMin, double yMax, double baseZ, double minHeight,
-           double maxHeight, double minRadius, double maxRadius, int numStones, ConvexPolygon2d polygonToShrink)
+           double maxHeight, double minRadius, double maxRadius, int numStones, ConvexPolygon2D polygonToShrink)
    {
       SteppingStones ret = new SteppingStones();
 
@@ -169,7 +169,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRectangularCheckeredStripSteppingStones(double startXPosition, double startYPosition, double stoneXDimension,
-           double stoneYDimension, double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2d polygonToShrink,
+           double stoneYDimension, double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2D polygonToShrink,
            boolean variableHeight)
    {
       double minX, maxX, minY, maxY;
@@ -229,7 +229,7 @@ public class SteppingStones
 
    public static SteppingStones generateRectangularChessBoardSteppingStones(double startXPosition, double startYPosition, double stoneXDimension,
            double stoneYDimension, double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns,
-           ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       double minX, maxX, minY, maxY;
       int columns = numColumns;
@@ -281,7 +281,7 @@ public class SteppingStones
 
    public static SteppingStones generateRectangularUniformSteppingStones(double startXPosition, double startYPosition, double stoneXDimension,
            double stoneYDimension, double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns,
-           ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       double minX, maxX, minY, maxY;
       int rows = 2 * numRows;
@@ -324,7 +324,7 @@ public class SteppingStones
 
    public static SteppingStones generateRectangularBeamBalance(double startXPosition, double startYPosition, double stoneXDimension, double stoneYDimension,
            double spacingInX, double spacingInYSmall, double spacingInYLarge, double baseZ, double height, int numRows, int numColumns,
-           ConvexPolygon2d polygonToShrink)
+           ConvexPolygon2D polygonToShrink)
    {
       double minX, maxX, minY, maxY;
       int rows = 2 * numRows;
@@ -369,7 +369,7 @@ public class SteppingStones
 
    public static SteppingStones generateRectangularCrissCrossBeams(double startXPosition, double startYPosition, double stoneXDimension,
            double stoneYDimension, double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns,
-           ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       SteppingStones ret = new SteppingStones();
       ret = SteppingStones.generateRectangularUniformSteppingStones(startXPosition, startYPosition, stoneXDimension, stoneYDimension, spacingInX, spacingInY,
@@ -488,7 +488,7 @@ public class SteppingStones
 
 
    public static SteppingStones generateRegularPolygonalCheckeredStripSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       Random random = new Random(1972L);
       double alpha = (2.0 * Math.PI) / (numSides);
@@ -514,7 +514,7 @@ public class SteppingStones
       else
       {
          xDistance = radius + radius * Math.cos(alpha / 2.0);
-         ConvexPolygon2d convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
+         ConvexPolygon2D convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
 
          for (int k = ((numSides + 1) / 2) - 1, j = (numSides + 1) / 2; k > 0; k--, j++)
          {
@@ -575,7 +575,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRegularPolygonalChessBoardSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2d polygonToShrink,
+           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2D polygonToShrink,
            boolean variableHeight)
    {
       Random random = new Random(1972L);
@@ -601,7 +601,7 @@ public class SteppingStones
       else
       {
          xDistance = radius + radius * Math.cos(alpha / 2.0);
-         ConvexPolygon2d convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
+         ConvexPolygon2D convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
 
          for (int k = ((numSides + 1) / 2) - 1, j = (numSides + 1) / 2; k > 0; k--, j++)
          {
@@ -649,7 +649,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRegularPolygonalUniformSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2d polygonToShrink,
+           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2D polygonToShrink,
            boolean variableHeight)
    {
       Random random = new Random(1972L);
@@ -676,7 +676,7 @@ public class SteppingStones
       else
       {
          xDistance = radius + radius * Math.cos(alpha / 2.0);
-         ConvexPolygon2d convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
+         ConvexPolygon2D convexPolygon2d = steppingStoneInitial.getConvexPolygon2d();
 
          for (int k = ((numSides + 1) / 2) - 1, j = (numSides + 1) / 2; k > 0; k--, j++)
          {
@@ -715,7 +715,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRandomPolygonalCheckeredStripSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           double spacingInX, double spacingInY, double baseZ, double height, int numStones, ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       double xCenter, yCenter, xbuffer = 0.0, ybuffer = 0.0;
       int count = 0;
@@ -772,7 +772,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRandomPolygonalChessBoardSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2d polygonToShrink,
+           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2D polygonToShrink,
            boolean variableHeight)
    {
       Random random = new Random(1972L);
@@ -819,7 +819,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRandomPolygonalUniformSteppingStones(double startXPosition, double startYPosition, double radius, int numSides,
-           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2d polygonToShrink,
+           double spacingInX, double spacingInY, double baseZ, double height, int numRows, int numColumns, ConvexPolygon2D polygonToShrink,
            boolean variableHeight)
    {
       Random random = new Random(1972L);
@@ -856,7 +856,7 @@ public class SteppingStones
    }
 
    public static SteppingStones generateRandomPolygonalRandomPatternOneSteppingStones(double startXPosition, double startYPosition, double radius,
-           int numSides, double spacingInX, double baseZ, double height, int numStones, ConvexPolygon2d polygonToShrink, boolean variableHeight)
+           int numSides, double spacingInX, double baseZ, double height, int numStones, ConvexPolygon2D polygonToShrink, boolean variableHeight)
    {
       Random random = new Random(1972L);
       @SuppressWarnings("unused")
@@ -947,7 +947,7 @@ public class SteppingStones
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Null"));
-      ConvexPolygon2d footPolygon = new ConvexPolygon2d(new double[][]
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D(new double[][]
       {
          {-0.2, -0.2}, {-0.2, 0.2}, {0.2, 0.2}, {0.2, -0.2}
       });

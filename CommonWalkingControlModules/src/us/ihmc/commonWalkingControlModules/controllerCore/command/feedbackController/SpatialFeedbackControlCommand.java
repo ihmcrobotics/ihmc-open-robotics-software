@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -20,8 +18,10 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -71,6 +71,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    */
+   private ReferenceFrame controlBaseFrame = null;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -97,6 +104,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredOrientationInWorld.set(other.desiredOrientationInWorld);
       desiredAngularVelocityInWorld.set(other.desiredAngularVelocityInWorld);
       feedForwardAngularAccelerationInWorld.set(other.feedForwardAngularAccelerationInWorld);
+
+      controlBaseFrame = other.controlBaseFrame;
    }
 
    /**
@@ -137,6 +146,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setPrimaryBase(RigidBody primaryBase)
    {
       spatialAccelerationCommand.setPrimaryBase(primaryBase);
+   }
+
+   /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    * 
+    * @param controlBaseFrame the new control base frame.
+    */
+   public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
+   {
+      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+         this.controlBaseFrame = controlBaseFrame;
+      else
+         throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
    }
 
    /**
@@ -580,14 +604,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weightVector dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
     */
-   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   public void setWeightMatrixForSolver(WeightMatrix6D weightMatrix)
    {
-      spatialAccelerationCommand.setWeights(weightVector);
+      spatialAccelerationCommand.setWeightMatrix(weightMatrix);
    }
 
    /**
@@ -642,6 +664,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public RigidBody getEndEffector()
    {
       return spatialAccelerationCommand.getEndEffector();
+   }
+
+   public ReferenceFrame getControlBaseFrame()
+   {
+      if (controlBaseFrame != null)
+         return controlBaseFrame;
+      else
+         return spatialAccelerationCommand.getBase().getBodyFixedFrame();
    }
 
    public SpatialAccelerationCommand getSpatialAccelerationCommand()

@@ -18,7 +18,7 @@ public class IMUDefinition
       this.transformFromIMUToJoint = new RigidBodyTransform(transformFromIMUToJoint);
 
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
-      imuFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
+      imuFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
    }
 
    public String getName()

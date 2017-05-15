@@ -6,42 +6,43 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 
 public interface CommonHumanoidReferenceFrames extends ReferenceFrames
 {
-   public abstract ReferenceFrame getABodyAttachedZUpFrame();
+   public abstract MovingReferenceFrame getABodyAttachedZUpFrame();
 
-   public abstract ReferenceFrame getMidFeetZUpFrame();
+   public abstract MovingReferenceFrame getMidFeetZUpFrame();
 
-   public abstract ReferenceFrame getMidFeetUnderPelvisFrame();
+   public abstract MovingReferenceFrame getMidFeetUnderPelvisFrame();
 
-   public abstract SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames();
+   public abstract SideDependentList<MovingReferenceFrame> getAnkleZUpReferenceFrames();
 
-   public abstract SideDependentList<ReferenceFrame> getFootReferenceFrames();
+   public abstract SideDependentList<MovingReferenceFrame> getFootReferenceFrames();
 
-   public abstract SideDependentList<ReferenceFrame> getSoleFrames();
+   public abstract SideDependentList<MovingReferenceFrame> getSoleFrames();
 
-   public abstract ReferenceFrame getPelvisFrame();
+   public abstract MovingReferenceFrame getPelvisFrame();
 
-   public abstract ReferenceFrame getAnkleZUpFrame(RobotSide robotSide);
+   public abstract MovingReferenceFrame getAnkleZUpFrame(RobotSide robotSide);
 
-   public abstract ReferenceFrame getFootFrame(RobotSide robotSide);
+   public abstract MovingReferenceFrame getFootFrame(RobotSide robotSide);
 
-   public abstract ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName);
+   public abstract MovingReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName);
 
-   public abstract EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide);
+   public abstract EnumMap<LegJointName, MovingReferenceFrame> getLegJointFrames(RobotSide robotSide);
 
    public abstract ReferenceFrame getIMUFrame();
 
-   public abstract ReferenceFrame getPelvisZUpFrame();
+   public abstract MovingReferenceFrame getPelvisZUpFrame();
 
-   public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
+   public abstract MovingReferenceFrame getSoleFrame(RobotSide robotSide);
 
-   public abstract ReferenceFrame getSoleZUpFrame(RobotSide robotSide);
+   public abstract MovingReferenceFrame getSoleZUpFrame(RobotSide robotSide);
 
-   public abstract SideDependentList<ReferenceFrame> getSoleZUpFrames();
+   public abstract SideDependentList<MovingReferenceFrame> getSoleZUpFrames();
 
-   public abstract ReferenceFrame getChestFrame();
+   public abstract MovingReferenceFrame getChestFrame();
 
-   public abstract ReferenceFrame getMidFootZUpGroundFrame();
+   public abstract MovingReferenceFrame getMidFootZUpGroundFrame();
 }

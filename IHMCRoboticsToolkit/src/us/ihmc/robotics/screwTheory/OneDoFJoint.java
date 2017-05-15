@@ -1,17 +1,13 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {
-   protected final OneDoFJointReferenceFrame afterJointFrame;
-
    protected Twist unitJointTwist;
    protected Twist unitSuccessorTwist;
    protected Twist unitPredecessorTwist;
@@ -57,16 +53,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    private boolean isOnline = true;
 
-   public OneDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame)
+   public OneDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
-      super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = afterJointFrame;
-   }
-
-   @Override
-   public ReferenceFrame getFrameAfterJoint()
-   {
-      return afterJointFrame;
+      super(name, predecessor, transformToParent);
    }
 
    @Override
@@ -201,7 +190,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       if (Double.isNaN(q))
          throw new RuntimeException("q is NaN! this = " + this);
       this.q = q;
-      afterJointFrame.setAndUpdate(q);
+      getFrameAfterJoint().update();
    }
 
    public double getQd()
@@ -260,9 +249,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    protected void setMotionSubspace()
    {
-      ArrayList<Twist> unitTwists = new ArrayList<Twist>();
-      unitTwists.add(unitSuccessorTwist);
-
       this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getExpressedInFrame());
       this.motionSubspace.compute();
    }

@@ -4,17 +4,14 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Base interface that describes the basic API for the joints composing a kinematic chain/tree
  * compatible with the screw theory. Here are a few examples of useful screw tools:
  * <ul>
  * <li>The {@link GeometricJacobian} can compute the Jacobian matrix of a kinematic chain.
- * <li>The {@link TwistCalculator} can compute all the {@code Twist} (angular and linear velocity)
- * of all the {@code RigidBody}s of a kinematic chain/tree.
- * <li>Similar to the {@code TwistCalculator}, the {@link SpatialAccelerationCalculator} can compute
- * all the spatial accelerations of all the {@code RigidBody}s of a kinematic chain/tree.
+ * <li>The {@link SpatialAccelerationCalculator} can compute all the spatial accelerations of all
+ * the {@code RigidBody}s of a kinematic chain/tree.
  * <li>Based on the recursive Newton-Euler algorithm, the {@link InverseDynamicsCalculator} computes
  * the desired joint torques {@code tau} from the joint configurations {@code q}, velocities
  * {@code qd}, desired accelerations {@code qddDesired}, and the list of external {@code Wrench}es
@@ -30,22 +27,22 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
    public static int maxDoF = 6;
 
    /**
-    * Returns the the {@code ReferenceFrame} that is attached to the predecessor of this joint,
-    * namely the {@code RigidBody} before this joint, and has its origin centered at the joint
-    * origin. The pose of the {@code frameBeforeJoint} is independent from this joint motion.
+    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this
+    * joint, namely the {@code RigidBody} before this joint, and has its origin centered at the
+    * joint origin. The pose of the {@code frameBeforeJoint} is independent from this joint motion.
     * 
-    * @return the {@code ReferenceFrame} located right before this joint.
+    * @return the {@code MovingReferenceFrame} located right before this joint.
     */
-   public abstract ReferenceFrame getFrameBeforeJoint();
+   public abstract MovingReferenceFrame getFrameBeforeJoint();
 
    /**
-    * Returns the the {@code ReferenceFrame} that is attached to the successor of this joint, namely
-    * the {@code RigidBody} after this joint, and has its origin centered at the joint origin. The
-    * pose of the {@code frameAfterJoint} will change as this joint moves.
+    * Returns the the {@code MovingReferenceFrame} that is attached to the successor of this joint,
+    * namely the {@code RigidBody} after this joint, and has its origin centered at the joint
+    * origin. The pose of the {@code frameAfterJoint} will change as this joint moves.
     * 
-    * @return the {@code ReferenceFrame} located right after this joint.
+    * @return the {@code MovingReferenceFrame} located right after this joint.
     */
-   public abstract ReferenceFrame getFrameAfterJoint();
+   public abstract MovingReferenceFrame getFrameAfterJoint();
 
    /**
     * Packs the actual, not desired, velocity of this joint in a {@code Twist} (the 3D angular and

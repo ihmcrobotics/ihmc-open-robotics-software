@@ -27,7 +27,7 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
          if (getRRTTree().getNewNode().getDistance(getGoalNode()) < getRRTTree().getStepLength())
          {
             getRRTTree().getNewNode().addChildNode(getGoalNode());
-            getRRTTree().updatePath(getGoalNode());
+            getRRTTree().updatePathNode(getGoalNode());
             setOptimalPath(getRRTTree().getPathNode());
             
             PrintTools.info("path size is "+getOptimalPath().size());

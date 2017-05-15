@@ -3,38 +3,58 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+/**
+ * Class that represents constraining a variable to lie in a convex region. This constraint has the form<br>
+ *    A<sub>in</sub>x <= b<sub>in</sub><br>
+ * where x is the variable to be constrained. This class also allows the formulation<br>
+ *    A<sub>in</sub>(x - a) <= b<sub>in</sub>,<br>
+ * allowing the constrained variable to be offset inside the polygon. <br>
+ * Note that this representation
+ * relies on the ability to represent lying in a convex polygon as a linear inequality constraint.
+ * Higher complexity convex regions can be represented, but may require more complex constraints. As
+ * an example, the variable can be constrained to a circle, but this requires a quadratic constraint.
+ */
 public class ConstraintToConvexRegion
 {
-   public final DenseMatrix64F indexSelectionMatrix = CommonOps.identity(2, 2);
-
+   /** position offset of the constrained variable. */
    public final DenseMatrix64F positionOffset;
 
+   /** matrix multiplier of the constrained variable. */
    public final DenseMatrix64F Aineq;
+   /** desired convex region for the constrained variable. */
    public final DenseMatrix64F bineq;
 
-   private int indexOfVariableToConstrain;
-
+   /** distance inside the convex region required for the constrained variable. */
    private double deltaInside = 0.0;
 
-   private final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+   /** convex polygon in which to constrain the variable. */
+   private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
 
+   /**
+    * Creates the Constraint To Convex Region. Refer to the class documentation: {@link ConstraintToConvexRegion}.
+    *
+    * @param maximumNumberOfVertices maximum number of vertices to initialize the convex region size.
+    */
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
-      CommonOps.scale(-1.0, indexSelectionMatrix);
-
       positionOffset = new DenseMatrix64F(2, 1);
 
       Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
    }
 
+   /**
+    * Resets the convex region, requiring all the vertices to be readded. Should be called whenever
+    * the shape of the convex region changes.
+    */
    public void reset()
    {
       positionOffset.zero();
@@ -44,6 +64,11 @@ public class ConstraintToConvexRegion
       bineq.zero();
    }
 
+   /**
+    * Adds a vertex to the convex region.
+    *
+    * @param vertex vertex to add.
+    */
    public void addVertex(FramePoint2d vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -51,6 +76,16 @@ public class ConstraintToConvexRegion
       convexPolygon.addVertex(vertex.getPoint());
    }
 
+   public void addPolygon(FrameConvexPolygon2d polygon)
+   {
+      convexPolygon.addVertices(polygon.getConvexPolygon2d());
+   }
+
+   /**
+    * Adds a vertex to the convex region.
+    *
+    * @param vertex vertex to add.
+    */
    public void addVertex(FramePoint vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -58,49 +93,61 @@ public class ConstraintToConvexRegion
       convexPolygon.addVertex(vertex.getX(), vertex.getY());
    }
 
+   /**
+    * Sets the polygon for the convex constraint to use. Should be called after
+    * all the vertices have been added using {@link #addVertex(FramePoint)} or
+    * {@link #addVertex(FramePoint2d)}.
+    */
    public void setPolygon()
    {
       convexPolygon.update();
    }
 
-   public void setIndexOfVariableToConstrain(int index)
-   {
-      indexOfVariableToConstrain = index;
-   }
-
-
+   /**
+    * Sets the position offset of the variable that is being constrained. This is
+    * useful when the constrained variable is a vector from a point, such as a feedback
+    * modification.
+    * @param offset offset from the constrained variable.
+    */
    public void setPositionOffset(DenseMatrix64F offset)
    {
       MatrixTools.setMatrixBlock(positionOffset, 0, 0, offset, 0, 0, 2, 1, 1.0);
    }
 
+   /**
+    * Sets a desired distance inside the convex region for the constrained variable to
+    * be. It is useful to use this as some small value, so that the constrained variable
+    * does not sit completely on the bounds of the convex region.
+    *
+    * @param deltaInside distance inside the convex region.
+    */
    public void setDeltaInside(double deltaInside)
    {
       this.deltaInside = deltaInside;
    }
 
-   private void reshape()
-   {
-      int numberOfVertices = convexPolygon.getNumberOfVertices();
-      Aineq.reshape(numberOfVertices, numberOfVertices);
-      bineq.reshape(numberOfVertices, 1);
-   }
-
+   /**
+    * Formulates the actual constraint from the {@link #convexPolygon}
+    */
    public void formulateConstraint()
    {
-      reshape();
-
       PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, deltaInside);
       CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 
-   public int getNumberOfVertices()
+   /**
+    * Gets the total size of the required inequality constraint.
+    *
+    * @return number of vertices.
+    */
+   public int getInequalityConstraintSize()
    {
-      return convexPolygon.getNumberOfVertices();
-   }
-
-   public int getIndexOfVariableToConstrain()
-   {
-      return indexOfVariableToConstrain;
+      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      if (numberOfVertices > 2)
+         return numberOfVertices;
+      else if (numberOfVertices > 0)
+         return 4;
+      else
+         return 0;
    }
 }

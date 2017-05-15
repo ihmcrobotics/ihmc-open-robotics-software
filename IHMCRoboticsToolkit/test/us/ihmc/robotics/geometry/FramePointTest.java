@@ -53,7 +53,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public final void testRunTestMain()
    {
       // create frames
-      ReferenceFrame A = ReferenceFrame.constructARootFrame("A", false, true, true);
+      ReferenceFrame A = ReferenceFrame.constructARootFrame("A");
 
       RigidBodyTransform transform = new RigidBodyTransform();
       Vector3D euler = new Vector3D(Math.PI / 2.0, 0.0, 0.0);
@@ -62,7 +62,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       transform.setTranslation(translation);
 
       //    System.out.println("B translation = \n" + transform);
-      ReferenceFrame B = ReferenceFrame.constructFrameWithUnchangingTransformToParent("B", A, transform, false, true, true);
+      ReferenceFrame B = ReferenceFrame.constructFrameWithUnchangingTransformToParent("B", A, transform);
 
       transform = new RigidBodyTransform();
       euler = new Vector3D(0.0, Math.PI / 2.0, 0.0);
@@ -71,7 +71,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       transform.setTranslation(translation);
 
       //    System.out.println("C translation = \n" + transform);
-      ReferenceFrame C = ReferenceFrame.constructFrameWithUnchangingTransformToParent("C", B, transform, false, true, true);
+      ReferenceFrame C = ReferenceFrame.constructFrameWithUnchangingTransformToParent("C", B, transform);
 
       transform = new RigidBodyTransform();
       euler = new Vector3D(0.0, 0.0, Math.PI / 2.0);
@@ -80,7 +80,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       transform.setTranslation(translation);
 
       //    System.out.println("D translation = \n" + transform);
-      ReferenceFrame D = ReferenceFrame.constructFrameWithUnchangingTransformToParent("D", C, transform, false, true, true);
+      ReferenceFrame D = ReferenceFrame.constructFrameWithUnchangingTransformToParent("D", C, transform);
 
       FramePoint V1 = new FramePoint(D, 2.0, 3.0, 4.0);
 

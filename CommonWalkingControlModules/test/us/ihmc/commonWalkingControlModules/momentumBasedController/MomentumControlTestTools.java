@@ -73,15 +73,13 @@ public class MomentumControlTestTools
 
    public static void assertRootJointWrenchZero(Map<RigidBody, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
    {
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootJoint.getPredecessor(), gravityZ);
       for (RigidBody rigidBody : externalWrenches.keySet())
       {
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.changeFrame(rigidBody.getBodyFixedFrame());
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrench);
       }
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       Wrench wrench = new Wrench();
       rootJoint.getWrench(wrench);

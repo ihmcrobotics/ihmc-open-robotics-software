@@ -58,7 +58,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
 
       RigidBodyTransform vehicleToWorldTransform = new RigidBodyTransform();
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
-            vehicleToWorldTransform, false, true, true);
+            vehicleToWorldTransform);
       VehicleModelObjects vehicleModelObjects = new VehicleModelObjects();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();

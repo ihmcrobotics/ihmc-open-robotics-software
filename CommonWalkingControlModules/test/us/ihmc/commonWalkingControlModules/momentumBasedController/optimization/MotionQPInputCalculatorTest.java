@@ -22,7 +22,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculatorTest;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class MotionQPInputCalculatorTest
 {
@@ -45,12 +44,11 @@ public class MotionQPInputCalculatorTest
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootBody);
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, rootBody);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, twistCalculator, 0.0, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, 0.0, true);
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
       YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, centroidalMomentumHandler, jointIndexHandler, null, registry);
+      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
@@ -67,7 +65,6 @@ public class MotionQPInputCalculatorTest
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();
-         twistCalculator.compute();
 
          SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
          desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
@@ -95,7 +92,6 @@ public class MotionQPInputCalculatorTest
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();
-         twistCalculator.compute();
 
          RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
          controlFrameTransform.setTranslation(EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0));

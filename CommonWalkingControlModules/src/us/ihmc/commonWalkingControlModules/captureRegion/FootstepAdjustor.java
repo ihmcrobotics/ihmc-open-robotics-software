@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -30,7 +30,7 @@ public class FootstepAdjustor
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
 
-   private final SideDependentList<ConvexPolygon2d> defaultSupportPolygons;
+   private final SideDependentList<ConvexPolygon2D> defaultSupportPolygons;
 
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
 //   private SteppingStones steppingStones = null;
