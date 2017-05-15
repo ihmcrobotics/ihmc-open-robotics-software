@@ -21,74 +21,6 @@ import static org.junit.Assert.fail;
 
 public class JavaQuadProgSolverTest
 {
-   /*
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testSolveConstrainedQP() throws NoConvergenceException
-   {
-      int numberOfInequalityConstraints = 1;
-      int numberOfEqualityConstraints = 1;
-      int numberOfVariables = 2;
-
-      DenseMatrix64F Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 0, 1);
-      DenseMatrix64F f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0);
-      DenseMatrix64F Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1);
-      DenseMatrix64F beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0);
-      DenseMatrix64F Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1);
-      DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
-
-      JavaQuadProgSolver solver = new JavaQuadProgSolver();
-
-      for (int repeat = 0; repeat < 10000; repeat++)
-      {
-         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
-         solver.clear();
-         solver.setQuadraticCostFunction(Q, f, 0.0);
-         solver.setLinearInequalityConstraints(Ain, bin);
-         solver.setLinearEqualityConstraints(Aeq, beq);
-         solver.solve(x);
-         Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
-      }
-
-      numberOfInequalityConstraints = 1;
-      numberOfEqualityConstraints = 2;
-      numberOfVariables = 3;
-
-      Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 1, 0, 1, 2, 1, 3, 7);
-      f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0, 9);
-      Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1, 1, 2, 3, 4);
-      beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0, 7);
-      Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1, 3);
-      bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
-
-      for (int repeat = 0; repeat < 10000; repeat++)
-      {
-         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
-         solver.clear();
-         solver.setQuadraticCostFunction(Q, f, 0.0);
-         solver.setLinearInequalityConstraints(Ain, bin);
-         solver.setLinearEqualityConstraints(Aeq, beq);
-         int numberOfIterations = solver.solve(x);
-
-         DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
-         CommonOps.mult(Aeq, x, bEqualityVerify);
-
-         // Verify Ax=b Equality constraints hold:
-         JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
-
-         // Verify Ax<b Inequality constraints hold:
-         DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
-         CommonOps.mult(Ain, x, bInequalityVerify);
-
-         for (int j=0; j<bInequalityVerify.getNumRows(); j++)
-         {
-            Assert.assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
-         }
-
-         // Verify solution is as expected
-         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + numberOfIterations, x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
-      }
-   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
@@ -150,9 +82,7 @@ public class JavaQuadProgSolverTest
       PrintTools.info("Wrapper solve time : " + wrapperSolverTimer.getAverageTime());
       PrintTools.info("Java solve time : " + javaSolverTimer.getAverageTime());
    }
-   */
 
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testAgainstStandardQuadProg() throws NoConvergenceException
@@ -265,9 +195,7 @@ public class JavaQuadProgSolverTest
       if (!correct)
          PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
    }
-   */
 
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithNoInequalityConstraints() throws NoConvergenceException
@@ -452,9 +380,7 @@ public class JavaQuadProgSolverTest
       assertEquals(solution[0], solutionMatrix.get(0), 1e-7);
       assertEquals(solution[1], solutionMatrix.get(1), 1e-7);
    }
-   */
 
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithInequalityConstraints() throws NoConvergenceException
@@ -475,18 +401,14 @@ public class JavaQuadProgSolverTest
       double[] solution = new double[1];
       double[] lagrangeEqualityMultipliers = new double[0];
       double[] lagrangeInequalityMultipliers = new double[1];
-      */
 
-      /*
       int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
       assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], 1e-7);
       assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
-      */
 
-   /*
       // Verify this equals the quad prog solution
       DenseMatrix64F Q = new DenseMatrix64F(costQuadraticMatrix);
       DenseMatrix64F f = MatrixTools.createVector(costLinearVector);
@@ -495,15 +417,15 @@ public class JavaQuadProgSolverTest
       DenseMatrix64F Ain = new DenseMatrix64F(linearInequalityConstraintsCMatrix);
       DenseMatrix64F bin = MatrixTools.createVector(costLinearVector);
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(1, 1);
-      */
-      /*
-      originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrix, false);
+      DenseMatrix64F solutionMatrixAlt = new DenseMatrix64F(1, 1);
 
-      assertEquals(solution[0], solutionMatrix.get(0), 1e-7);
-      */
+      solver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrix, false);
+      originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
+
+      assertEquals(solution[0], solutionMatrixAlt.get(0), 1e-7);
+      assertEquals(solutionMatrix.get(0), solutionMatrixAlt.get(0), 1e-7);
 
 
-   /*
       // Minimize x^T * x subject to x >= 1 (-x <= -1)
       solver.clear();
       costQuadraticMatrix = new double[][] { { 2.0 } };
@@ -518,8 +440,8 @@ public class JavaQuadProgSolverTest
       solution = new double[1];
       lagrangeEqualityMultipliers = new double[0];
       lagrangeInequalityMultipliers = new double[1];
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-      assertEquals(1, numberOfIterations);
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(2, numberOfIterations);
 
       // Verify this equals the quad prog solution
       Q = new DenseMatrix64F(costQuadraticMatrix);
@@ -529,9 +451,12 @@ public class JavaQuadProgSolverTest
       Ain = new DenseMatrix64F(linearInequalityConstraintsCMatrix);
       bin = MatrixTools.createVector(costLinearVector);
       solutionMatrix = new DenseMatrix64F(1, 1);
-      originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrix, false);
+      solutionMatrixAlt = new DenseMatrix64F(1, 1);
+      solver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrix, false);
+      originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
 
-      assertEquals(solution[0], solutionMatrix.get(0), 1e-7);
+      assertEquals(solutionMatrix.get(0), solutionMatrixAlt.get(0), 1e-7);
+      assertEquals(solution[0], solutionMatrixAlt.get(0), 1e-7);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], 1e-7); // // FIXME: 5/15/17  why is this different?
@@ -662,7 +587,6 @@ public class JavaQuadProgSolverTest
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(2.0, objectiveCost, 1e-7);
    }
-   */
 
    /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

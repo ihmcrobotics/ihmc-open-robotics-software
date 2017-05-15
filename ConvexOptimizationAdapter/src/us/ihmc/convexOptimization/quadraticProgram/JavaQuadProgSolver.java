@@ -44,6 +44,7 @@ public class JavaQuadProgSolver
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(defaultSize);
+   private double quadraticCostScalar;
 
    private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(defaultSize);
@@ -69,6 +70,112 @@ public class JavaQuadProgSolver
     */
 
 
+   public void clear()
+   {
+      quadraticCostQMatrix.reshape(0, 0);
+      quadraticCostQVector.reshape(0, 0);
+
+      linearEqualityConstraintsAMatrix.reshape(0, 0);
+      linearEqualityConstraintsBVector.reshape(0, 0);
+
+      linearInequalityConstraintsCMatrix.reshape(0, 0);
+      linearInequalityConstraintsDVector.reshape(0, 0);
+
+      //variableLowerBounds.reshape(0, 0);
+      //variableUpperBounds.reshape(0, 0);
+   }
+
+   public void setQuadraticCostFunction(double[][] quadraticCostFunctionQMatrix, double[] quadraticCostFunctionQVector, double quadraticCostScalar)
+   {
+      setQuadraticCostFunction(new DenseMatrix64F(quadraticCostFunctionQMatrix), MatrixTools.createVector(quadraticCostFunctionQVector), quadraticCostScalar);
+   }
+
+   public void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar)
+   {
+      if (costLinearVector.getNumCols() != 1)
+         throw new RuntimeException("costLinearVector.getNumCols() != 1");
+      if (costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows())
+         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows()");
+      if (costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols())
+         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
+
+      problemSize = costQuadraticMatrix.getNumCols();
+
+      this.quadraticCostQMatrix.set(costQuadraticMatrix);
+      this.quadraticCostQVector.set(costLinearVector);
+      this.quadraticCostScalar = quadraticCostScalar;
+   }
+
+   public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
+   {
+      setLinearEqualityConstraints(new DenseMatrix64F(linearEqualityConstraintsAMatrix), MatrixTools.createVector(linearEqualityConstraintsBVector));
+   }
+
+   public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
+   {
+      numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+
+      if (linearEqualityConstraintsBVector.getNumCols() != 1)
+         throw new RuntimeException("linearEqualityConstraintsBVector.getNumCols() != 1");
+      if (linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows())
+         throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows()");
+      if (linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
+         throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
+
+      this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
+      this.linearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
+
+      this.linearEqualityConstraintsAMatrix.reshape(problemSize, numberOfEqualityConstraints);
+      CommonOps.transpose(linearEqualityConstraintsAMatrix, this.linearEqualityConstraintsAMatrix);
+      CommonOps.scale(-1.0, this.linearEqualityConstraintsAMatrix);
+
+      this.linearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints, 1);
+      this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
+   }
+
+   public void setLinearInequalityConstraints(double[][] linearInequalityConstraintsCMatrix, double[] linearInqualityConstraintsDVector)
+   {
+      setLinearInequalityConstraints(new DenseMatrix64F(linearInequalityConstraintsCMatrix), MatrixTools.createVector(linearInqualityConstraintsDVector));
+   }
+
+   public void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector)
+   {
+      numberOfInequalityConstraints = linearInequalityConstraintCMatrix.getNumRows();
+
+      if (linearInequalityConstraintDVector.getNumCols() != 1)
+         throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
+      if (linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows())
+         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows()");
+      if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
+         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
+
+      this.linearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints);
+      CommonOps.transpose(linearInequalityConstraintCMatrix, this.linearInequalityConstraintsCMatrix);
+      CommonOps.scale(-1.0, this.linearInequalityConstraintsCMatrix);
+
+      this.linearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints, 1);
+      this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
+   }
+
+   private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
+   public double getObjectiveCost(DenseMatrix64F x)
+   {
+      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
+      CommonOps.scale(0.5, computedObjectiveFunctionValue);
+      CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
+      return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
+   }
+
+   private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
+
+   private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
+   {
+      temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
+      tempMatrix.reshape(xVector.numCols, QMatrix.numCols);
+      CommonOps.multTransA(xVector, QMatrix, tempMatrix);
+      CommonOps.multTransB(tempMatrix, QMatrix, temporaryMatrix);
+      CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
+   }
 
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(defaultSize, defaultSize);
@@ -105,7 +212,6 @@ public class JavaQuadProgSolver
       CommonOps.transpose(CE, linearEqualityConstraintsAMatrix);
       CommonOps.scale(-1.0, linearEqualityConstraintsAMatrix);
 
-
       linearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints, 1);
       linearEqualityConstraintsBVector.set(ce0);
 
@@ -116,7 +222,126 @@ public class JavaQuadProgSolver
       linearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints, 1);
       linearInequalityConstraintsDVector.set(ci0);
 
+      return solve(solutionToPack);
+   }
 
+   public int solve(double[] solutionToPack)
+   {
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+
+      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
+      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
+   }
+   
+   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
+   {
+      //// TODO: 5/15/17  
+      //int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
+      //int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
+      int numberOfLowerBoundConstraints = 0;
+      int numberOfUpperBoundConstraints = 0;
+
+      double[] lagrangeLowerBoundsConstraintMultipliersToPack = new double[numberOfLowerBoundConstraints];
+      double[] lagrangeUpperBoundsConstraintMultipliersToPack = new double[numberOfUpperBoundConstraints];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+            lagrangeLowerBoundsConstraintMultipliersToPack, lagrangeUpperBoundsConstraintMultipliersToPack);
+   }
+
+   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack,
+         double[] lagrangeLowerBoundsConstraintMultipliersToPack, double[] lagrangeUpperBoundsConstraintMultipliersToPack)
+   {
+      int numberOfVariables = quadraticCostQMatrix.getNumCols();
+      //int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      //int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+
+      // // TODO: 5/15/17
+      //int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
+      //int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
+      int numberOfLowerBoundConstraints = 0;
+      int numberOfUpperBoundConstraints = 0;
+
+      if (solutionToPack.length != numberOfVariables)
+         throw new RuntimeException("solutionToPack.length != numberOfVariables");
+      if (lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints)
+         throw new RuntimeException("lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints");
+      if (lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints)
+         throw new RuntimeException("lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints");
+
+      if (lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints)
+         throw new RuntimeException("lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints. numberOfLowerBoundConstraints = "
+               + numberOfLowerBoundConstraints);
+      if (lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints)
+         throw new RuntimeException("lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints");
+
+      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
+      DenseMatrix64F lagrangeEqualityConstraintMultipliers = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+      DenseMatrix64F lagrangeInequalityConstraintMultipliers = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+      DenseMatrix64F lagrangeLowerBoundConstraintMultipliers = new DenseMatrix64F(numberOfLowerBoundConstraints, 1);
+      DenseMatrix64F lagrangeUpperBoundConstraintMultipliers = new DenseMatrix64F(numberOfUpperBoundConstraints, 1);
+
+      int numberOfIterations = solve(solution, lagrangeEqualityConstraintMultipliers, lagrangeInequalityConstraintMultipliers,
+            lagrangeLowerBoundConstraintMultipliers, lagrangeUpperBoundConstraintMultipliers);
+
+      double[] solutionData = solution.getData();
+
+      for (int i = 0; i < numberOfVariables; i++)
+      {
+         solutionToPack[i] = solutionData[i];
+      }
+
+      double[] lagrangeEqualityConstraintMultipliersData = lagrangeEqualityConstraintMultipliers.getData();
+      double[] lagrangeInequalityConstraintMultipliersData = lagrangeInequalityConstraintMultipliers.getData();
+      double[] lagrangeLowerBoundMultipliersData = lagrangeLowerBoundConstraintMultipliers.getData();
+      double[] lagrangeUpperBoundMultipliersData = lagrangeUpperBoundConstraintMultipliers.getData();
+
+      for (int i = 0; i < numberOfEqualityConstraints; i++)
+      {
+         lagrangeEqualityConstraintMultipliersToPack[i] = lagrangeEqualityConstraintMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfInequalityConstraints; i++)
+      {
+         lagrangeInequalityConstraintMultipliersToPack[i] = lagrangeInequalityConstraintMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfLowerBoundConstraints; i++)
+      {
+         lagrangeLowerBoundsConstraintMultipliersToPack[i] = lagrangeLowerBoundMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfUpperBoundConstraints; i++)
+      {
+         lagrangeUpperBoundsConstraintMultipliersToPack[i] = lagrangeUpperBoundMultipliersData[i];
+      }
+
+      return numberOfIterations;
+   }
+
+   private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F lagrangeLowerBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F lagrangeUpperBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+
+   public int solve(DenseMatrix64F solutionToPack)
+   {
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToThrowAway, lagrangeInequalityConstraintMultipliersToThrowAway);
+   }
+
+   public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
+         DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
+   {
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+            lagrangeLowerBoundMultipliersToThrowAway, lagrangeUpperBoundMultipliersToThrowAway);
+   }
+
+   public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
+         DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack, DenseMatrix64F lagrangeLowerBoundConstraintMultipliersToPack,
+         DenseMatrix64F lagrangeUpperBoundConstraintMultipliersToPack)
+   {
       solutionToPack.reshape(problemSize, 1);
       solutionToPack.zero();
 
