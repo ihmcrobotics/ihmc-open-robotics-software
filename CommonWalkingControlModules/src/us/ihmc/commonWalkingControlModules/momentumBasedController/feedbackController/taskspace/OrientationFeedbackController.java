@@ -181,7 +181,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
-      desiredOrientation.getRotationVector(yoDesiredRotationVector.getFrameTuple());
+      yoDesiredRotationVector.setAsRotationVector(desiredOrientation);
 
       yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
 
