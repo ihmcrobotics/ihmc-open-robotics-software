@@ -204,6 +204,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
             sixDoFJoint.setJointTwist(bodyTwist);
+            sixDoFJoint.updateFramesRecursively();
 
             // Acceleration:
             //Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.
