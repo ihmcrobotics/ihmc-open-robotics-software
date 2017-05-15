@@ -93,7 +93,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       robot = new Robot("dummy");
 
-      pelvisReferenceFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame())
+      pelvisReferenceFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
