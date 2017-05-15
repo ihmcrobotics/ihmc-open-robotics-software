@@ -51,8 +51,6 @@ public class JavaQuadProgSolverTest
       {
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
          solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
-         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + solver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
-
 
          DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
          CommonOps.mult(Aeq, x, bEqualityVerify);
@@ -68,6 +66,9 @@ public class JavaQuadProgSolverTest
          {
             Assert.assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
          }
+
+         // Verify solution is as expected
+         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + solver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
       }
    }
 
