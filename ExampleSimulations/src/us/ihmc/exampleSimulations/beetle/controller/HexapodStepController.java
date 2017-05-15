@@ -26,7 +26,6 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class HexapodStepController
@@ -62,7 +61,6 @@ public class HexapodStepController
 
    private final FootStepPlanner footStepPlanner;
 
-   private final TwistCalculator twistCalculator;
    private final DoubleYoVariable swingTime;
    private final BooleanYoVariable inStance;
    private final DoubleYoVariable timeInStance;
@@ -72,12 +70,11 @@ public class HexapodStepController
    private final HexapodReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
 
-   public HexapodStepController(String prefix, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+   public HexapodStepController(String prefix, FullRobotModel fullRobotModel,
          SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters, YoGraphicsListRegistry yoGraphicsListRegistry,
          double controllerDt, YoVariableRegistry parentRegistry, HexapodReferenceFrames referenceFrames)
    {
       this.fullRobotModel = fullRobotModel;
-      this.twistCalculator = twistCalculator;
       this.contactStateUpdaters = contactStateUpdaters;
       this.controllerDt = controllerDt;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -91,7 +88,7 @@ public class HexapodStepController
       groundClearance = new DoubleYoVariable(prefix + "GroundClearance", registry);
       timeInSwing = new DoubleYoVariable(prefix + "TimeInSwing", registry);
 
-      footStepPlanner = new FootStepPlanner(prefix, fullRobotModel, referenceFrames, twistCalculator, yoGraphicsListRegistry, registry);
+      footStepPlanner = new FootStepPlanner(prefix, fullRobotModel, referenceFrames, yoGraphicsListRegistry, registry);
       transferTime.set(0.01);
       swingTime.set(0.5);
       groundClearance.set(0.03);
@@ -224,7 +221,7 @@ public class HexapodStepController
          currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          //get current velocity of foot
-         twistCalculator.getTwistOfBody(shinRigidBodies.get(robotSextant), currentTwist);
+         shinRigidBodies.get(robotSextant).getBodyFixedFrame().getTwistOfFrame(currentTwist);
          currentTwist.changeFrame(currentTwist.getBaseFrame());
 
          pointFixedInBodyFrame.setToZero(footFrame);

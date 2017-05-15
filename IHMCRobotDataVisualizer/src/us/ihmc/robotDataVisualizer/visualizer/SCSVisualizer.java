@@ -274,6 +274,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
 
       for (int i = 0; i < stateListeners.size(); i++)
       {

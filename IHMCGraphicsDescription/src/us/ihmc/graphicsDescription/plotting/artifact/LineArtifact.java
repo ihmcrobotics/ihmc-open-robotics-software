@@ -2,12 +2,12 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 
 import java.awt.BasicStroke;
 
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.geometry.Line2d;
-import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class LineArtifact extends Artifact
 {
@@ -16,7 +16,7 @@ public class LineArtifact extends Artifact
    private final Point2D point1 = new Point2D();
    private final Point2D point2 = new Point2D(0.01, 0.01);
 
-   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   private final LineSegment2D tempLineSegment = new LineSegment2D();
    
    public LineArtifact(String id)
    {
@@ -26,7 +26,7 @@ public class LineArtifact extends Artifact
    /**
     * Set to normalized line. Length = 1.
     */
-   public LineArtifact(String id, Line2d line)
+   public LineArtifact(String id, Line2D line)
    {
       super(id);
       setLine(line);
@@ -39,7 +39,7 @@ public class LineArtifact extends Artifact
       this.point2.set(point2);
    }
 
-   public void setLine(Line2d line)
+   public void setLine(Line2D line)
    {
       line.getTwoPointsOnLine(point1, point2);
    }
@@ -65,7 +65,7 @@ public class LineArtifact extends Artifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
-      if (LineSegment2d.areEndpointsTheSame(point1, point2))
+      if (point1.equals(point2))
       {
          graphics.drawPoint(point1);
       }

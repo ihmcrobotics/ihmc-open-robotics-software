@@ -28,7 +28,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class MotionQPInputCalculator
 {
@@ -70,9 +69,8 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, CentroidalMomentumHandler centroidalMomentumHandler,
-                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                  YoVariableRegistry parentRegistry)
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumHandler centroidalMomentumHandler, JointIndexHandler jointIndexHandler,
+                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
@@ -207,7 +205,7 @@ public class MotionQPInputCalculator
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         commandToConvert.getWeightMatrix(tempTaskWeight);
+         commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
@@ -325,7 +323,7 @@ public class MotionQPInputCalculator
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-         commandToConvert.getWeightMatrix(tempTaskWeight);
+         commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
          CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);

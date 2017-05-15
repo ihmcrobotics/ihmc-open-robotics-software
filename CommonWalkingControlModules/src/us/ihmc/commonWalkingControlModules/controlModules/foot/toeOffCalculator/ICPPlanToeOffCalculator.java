@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -26,7 +27,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final FramePoint2d exitCMP2d = new FramePoint2d();
 
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
-   private final LineSegment2d toeOffContactLine2d = new LineSegment2d();
+   private final LineSegment2D toeOffContactLine2d = new LineSegment2D();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 

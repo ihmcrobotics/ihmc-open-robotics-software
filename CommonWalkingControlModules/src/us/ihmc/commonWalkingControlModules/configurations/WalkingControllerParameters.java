@@ -229,9 +229,48 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getToeTouchdownAngle();
 
+   /**
+    * When stepping down, and we want to do toe strike, this ratio is used to determine the toe touchdown angle. This ratio is used to multiply the stepping
+    * depth to determine the toe touchdown angle. This touchdown angle is then clipped to above and below the value returned by {@link #getToeTouchdownAngle()}.
+    * @return touchdown depth ratio
+    */
+   public double getToeTouchdownDepthRatio()
+   {
+      return 5.0;
+   }
+
+   /**
+    * Returns the minimum distance stepping down that will be used to do toe touchdown if {@link #doToeTouchdownIfPossible()} is enabled.
+    * @return minimum step down height (m).
+    */
+   public double getStepDownHeightForToeTouchdown()
+   {
+      return -0.05;
+   }
+
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
+
+   /**
+    * When stepping over terrain of the correct height, and we want to do heel strike, this ratio is used to determine the heel touchdown angle.
+    * This ratio is used to multiply the step length to determine the heel touchdown angle. This touchdown angle is then clipped to above and
+    * below the value returned by {@link #getHeelTouchdownAngle()}.
+    * @return touchdown length ratio.
+    */
+   public double getHeelTouchdownLengthRatio()
+   {
+      return 0.35;
+   }
+
+   /**
+    * Returns the maximum height that heel touchdown will be used if {@link #doHeelTouchdownIfPossible()} is enabled.
+    * @return maximum height (m).
+    */
+   public double getMaximumHeightForHeelTouchdown()
+   {
+      return 0.10;
+   }
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 

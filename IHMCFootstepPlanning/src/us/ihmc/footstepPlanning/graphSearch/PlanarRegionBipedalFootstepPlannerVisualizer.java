@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -71,12 +71,12 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private TickAndUpdatable tickAndUpdatable;
 
-   public PlanarRegionBipedalFootstepPlannerVisualizer(int numberOfSolutionPolygons, SideDependentList<ConvexPolygon2d> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PlanarRegionBipedalFootstepPlannerVisualizer(int numberOfSolutionPolygons, SideDependentList<ConvexPolygon2D> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.numberOfSolutionPolygons = numberOfSolutionPolygons;
 
-      ConvexPolygon2d leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
-      ConvexPolygon2d rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
+      ConvexPolygon2D leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
+      ConvexPolygon2D rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
 
       int maxNumberOfVertices = leftFootInSoleFrame.getNumberOfVertices();
 

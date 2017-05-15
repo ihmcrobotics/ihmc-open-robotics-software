@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -45,6 +46,7 @@ import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
@@ -287,6 +289,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SO3TrajectoryPointMessage.class);
       registerPacketClass(SE3TrajectoryPointMessage.class);
       registerPacketClass(BodyPart.class);
+      registerPacketClass(FrameInformation.class);
 
       registerPacketField(OneDoFJointTrajectoryMessage.class);
       registerPacketField(OneDoFJointTrajectoryMessage[].class);
@@ -298,6 +301,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SO3TrajectoryPointMessage[].class);
       registerPacketField(SE3TrajectoryPointMessage.class);
       registerPacketField(SE3TrajectoryPointMessage[].class);
+      registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
 
       // Controller failure

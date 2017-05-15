@@ -12,7 +12,9 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -65,7 +67,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
          angularVelocity = new Vector3D(se3TrajectoryPointMessage.angularVelocity);
    }
 
-   public SE3TrajectoryPointMessage(double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3D linearVelocity, Vector3D angularVelocity)
    {
       this.time = time;
       this.position = new Point3D(position);
@@ -116,7 +118,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       positionToPack.set(position);
    }
 
-   public void setPosition(Point3D position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
@@ -126,7 +128,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       orientationToPack.set(orientation);
    }
 
-   public void setOrientation(Quaternion orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }

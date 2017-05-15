@@ -5,13 +5,14 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PolygonWiggler
@@ -27,7 +28,7 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static RigidBodyTransform wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
+   public static RigidBodyTransform wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2D polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
    {
       return findWiggleTransform(polygonToWiggleInRegionFrame, regionToWiggleInto.getConvexHull(), parameters);
    }
@@ -41,15 +42,15 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
+   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2D polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
    {
       // find the part of the region that has the biggest intersection with the polygon
-      ConvexPolygon2d bestMatch = null;
+      ConvexPolygon2D bestMatch = null;
       double overlap = 0.0;
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2d intersection = new ConvexPolygon2d();
-         regionToWiggleInto.getConvexPolygon(i).intersectionWith(polygonToWiggleInRegionFrame, intersection);
+         ConvexPolygon2D intersection = new ConvexPolygon2D();
+         ConvexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
          if (intersection.getArea() > overlap)
          {
             overlap = intersection.getArea();
@@ -73,9 +74,9 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static ConvexPolygon2d wigglePolygon(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
+   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
    {
-      ConvexPolygon2d wiggledPolygon = new ConvexPolygon2d(polygonToWiggle);
+      ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D(polygonToWiggle);
       RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
       if (wiggleTransform == null)
          return null;
@@ -92,7 +93,7 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
    {
       int constraintsPerPoint = planeToWiggleInto.getNumberOfVertices();
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
@@ -204,7 +205,7 @@ public class PolygonWiggler
     * @param A
     * @param b
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraints(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
 
@@ -216,7 +217,7 @@ public class PolygonWiggler
          convertToInequalityConstraintsPoint(polygon, A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -238,7 +239,7 @@ public class PolygonWiggler
       b.set(3, 0, -point.getY());
    }
 
-   public static void convertToInequalityConstraintsLine(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -275,7 +276,7 @@ public class PolygonWiggler
       b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
    }
 
-   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);

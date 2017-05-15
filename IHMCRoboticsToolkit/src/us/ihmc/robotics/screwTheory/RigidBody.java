@@ -23,10 +23,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * Here are a few examples of useful screw tools:
  * <ul>
  * <li>The {@link GeometricJacobian} can compute the Jacobian matrix of a kinematic chain.
- * <li>The {@link TwistCalculator} can compute all the {@code Twist} (angular and linear velocity)
- * of all the {@code RigidBody}s of a kinematic chain/tree.
- * <li>Similar to the {@code TwistCalculator}, the {@link SpatialAccelerationCalculator} can compute
- * all the spatial accelerations of all the {@code RigidBody}s of a kinematic chain/tree.
+ * <li>The {@link SpatialAccelerationCalculator} can compute all the spatial accelerations of all
+ * the {@code RigidBody}s of a kinematic chain/tree.
  * <li>Based on the recursive Newton-Euler algorithm, the {@link InverseDynamicsCalculator} computes
  * the desired joint torques {@code tau} from the joint configurations {@code q}, velocities
  * {@code qd}, desired accelerations {@code qddDesired}, and the list of external {@code Wrench}es
@@ -45,7 +43,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * This is a reference rigidly attached this rigid-body. It's usually centered at the
     * rigid-body's center of mass.
     */
-   private final BodyFixedReferenceFrame bodyFixedFrame;
+   private final MovingReferenceFrame bodyFixedFrame;
    /**
     * The parent joint is the joint directly connected to a rigid-body and located between the
     * rigid-body and the robot's root.
@@ -119,10 +117,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(bodyName);
       name = bodyName;
       inertia = null;
-      boolean isParentStationary = parentStationaryFrame.isAStationaryFrame();
-      boolean isZUpFrame = isParentStationary && transformToParent.isRotation2D();
-
-      bodyFixedFrame = new BodyFixedReferenceFrame("Frame", this, parentStationaryFrame, transformToParent, isParentStationary, isZUpFrame);
+      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "Frame", parentStationaryFrame, transformToParent);
       parentJoint = null;
    }
 
@@ -150,7 +145,7 @@ public class RigidBody implements NameBasedHashCodeHolder
 
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
-      bodyFixedFrame = new BodyFixedReferenceFrame("CoM", this, frameAfterJoint, inertiaPose, false);
+      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
       inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
       inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
       parentJoint.setSuccessor(this);
@@ -187,7 +182,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @return the reference frame attached to this rigid-body.
     */
-   public ReferenceFrame getBodyFixedFrame()
+   public MovingReferenceFrame getBodyFixedFrame()
    {
       return bodyFixedFrame;
    }

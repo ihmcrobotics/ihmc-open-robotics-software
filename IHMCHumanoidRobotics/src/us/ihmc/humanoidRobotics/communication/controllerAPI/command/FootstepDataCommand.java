@@ -6,7 +6,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -16,10 +15,11 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>, FrameBasedCommand<FootstepDataMessage>
+public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private RobotSide robotSide;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    private double swingHeight = 0.0;
@@ -63,9 +63,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       trajectoryType = message.getTrajectoryType();
       swingHeight = message.getSwingHeight();
-      position.setIncludingFrame(trajectoryFrame, message.getLocation());
-      orientation.setIncludingFrame(trajectoryFrame, message.getOrientation());
-      
+      position.setIncludingFrame(worldFrame, message.getLocation());
+      orientation.setIncludingFrame(worldFrame, message.getOrientation());
+
       Point3D[] originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalPositionWaypointList != null)
@@ -73,7 +73,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          for (int i = 0; i < originalPositionWaypointList.length; i++)
             customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList[i]);
       }
-      
+
       SE3TrajectoryPointMessage[] messageSwingTrajectory = message.getSwingTrajectory();
       swingTrajectory.clear();
       if (messageSwingTrajectory != null)
@@ -85,7 +85,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             messageSwingTrajectory[i].packData(point);
          }
       }
-      
+
       ArrayList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
@@ -124,13 +124,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
-   }
-
-   @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, FootstepDataMessage message)
-   {
-      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
-      set(message);
    }
 
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)

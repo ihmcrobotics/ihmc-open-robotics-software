@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -19,7 +20,6 @@ import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFoots
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -44,13 +44,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       PlanarRegionBipedalFootstepPlanner normalPlannerTwo = createNormalPlanner(registryTwo);
       SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerThree = createAnytimePlanner(registryThree);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameOne = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrameOne = PlanningTestTools.createDefaultFootPolygons();
       anytimePlannerOne.setFeetPolygons(footPolygonsInSoleFrameOne);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameTwo = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrameTwo = PlanningTestTools.createDefaultFootPolygons();
       normalPlannerTwo.setFeetPolygons(footPolygonsInSoleFrameTwo);
       
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameThree = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrameThree = PlanningTestTools.createDefaultFootPolygons();
       anytimePlannerThree.setFeetPolygons(footPolygonsInSoleFrameThree);
 
       PlanarRegionBipedalFootstepPlannerVisualizer visualizerOne = null;

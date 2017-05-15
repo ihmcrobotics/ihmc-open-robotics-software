@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -45,7 +44,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testOrientationOrientation()
    {
       FrameOrientation original = new FrameOrientation(testFrame);
@@ -66,9 +65,9 @@ public class FrameOrientationTest
       assertEquals(original.getReferenceFrame(), testFrame);
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }
-	
+
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -253,8 +252,8 @@ public class FrameOrientationTest
 //      fail("Not yet implemented");    // TODO
 //   }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5, categoriesOverride = {IntegrationCategory.FLAKY})
-   @Test(timeout=1000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test
    public void testApplyTransform()
    {
       Random random = new Random(56165161L);
@@ -283,7 +282,7 @@ public class FrameOrientationTest
 
          expectedTransformedTransform.set(randomTransformToWorld);
          expectedTransformedTransform.multiply(originalTransform);
-         
+
          EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
 
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
@@ -303,7 +302,7 @@ public class FrameOrientationTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout=1000)
+   @Test
    public void testChangeFrame()
    {
       Random random = new Random(56165161L);
@@ -332,7 +331,7 @@ public class FrameOrientationTest
 
          expectedTransformedTransform.set(randomTransformToWorld);
          expectedTransformedTransform.multiply(originalTransform);
-         
+
          EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
 
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
@@ -352,7 +351,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testChangeFrameCopy()
    {
       FrameOrientation origOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());

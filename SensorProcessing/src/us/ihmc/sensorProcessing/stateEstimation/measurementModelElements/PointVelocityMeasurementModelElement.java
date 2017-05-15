@@ -159,16 +159,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       RigidBody stationaryPointLink = estimatorRigidBodyToIndexMap.getRigidBodyByName(pointVelocityMeasurementInputPort.getData().getRigidBodyName());
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
-
-      try
-      {
-         twistCalculator.getTwistOfBody(stationaryPointLink, tempTwist);
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
+      stationaryPointLink.getBodyFixedFrame().getTwistOfFrame(tempTwist);
       tempTwist.changeFrame(tempTwist.getBaseFrame());
       ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
       tempFramePoint.setIncludingFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());

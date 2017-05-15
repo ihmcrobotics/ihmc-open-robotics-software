@@ -18,7 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {
-   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
    private final Quaternion jointRotation = new Quaternion();
    private final FrameVector jointAngularVelocity;
    private final FrameVector jointAngularAcceleration;
@@ -27,19 +26,18 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    private List<Twist> unitTwists;
 
-   public SphericalJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public SphericalJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
-      super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
+      super(name, predecessor, transformToParent);
       this.jointAngularVelocity = new FrameVector(afterJointFrame);
       this.jointAngularAcceleration = new FrameVector(afterJointFrame);
       this.jointAngularAccelerationDesired = new FrameVector(afterJointFrame);
    }
 
    @Override
-   public ReferenceFrame getFrameAfterJoint()
+   protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      return afterJointFrame;
+      jointTransform.setRotationAndZeroTranslation(jointRotation);
    }
 
    @Override
@@ -140,19 +138,16 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public void setRotation(double yaw, double pitch, double roll)
    {
       jointRotation.setYawPitchRoll(yaw, pitch, roll);
-      this.afterJointFrame.setRotation(jointRotation);
    }
 
    public void setRotation(QuaternionReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
-      this.afterJointFrame.setRotation(jointRotation);
    }
 
    public void setRotation(RotationMatrixReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
-      this.afterJointFrame.setRotation(this.jointRotation);
    }
 
    public void setJointAngularVelocity(FrameVector jointAngularVelocity)
@@ -259,7 +254,6 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       jointRotation.set(rowStart, matrix);
-      this.afterJointFrame.setRotation(jointRotation);
    }
 
    @Override

@@ -104,7 +104,7 @@ public class Step5IDandSCSRobot extends Robot
       elevator = new RigidBody("elevator", worldFrame);
       elevatorFrame = elevator.getBodyFixedFrame();
 
-      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
+      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)

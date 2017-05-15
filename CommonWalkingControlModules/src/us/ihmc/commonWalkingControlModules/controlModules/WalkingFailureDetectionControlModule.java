@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -86,7 +86,7 @@ public class WalkingFailureDetectionControlModule
       if (isUsingNextFootstep.getBooleanValue())
       {
          ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
-         ConvexPolygon2d footPolygon = footPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
+         ConvexPolygon2D footPolygon = footPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
          nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
          nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }

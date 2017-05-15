@@ -16,7 +16,6 @@ import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class MomentumVisualizer implements Updatable
 {
@@ -28,17 +27,17 @@ public class MomentumVisualizer implements Updatable
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
    private final FrameVector frameVector = new FrameVector();
 
-   public MomentumVisualizer(String name, OneDoFJoint rootJoint, TwistCalculator twistCalculator, YoVariableRegistry registry,
+   public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)
    {
-      this(name, twistCalculator, registry, graphicsRegistry, ScrewTools.computeRigidBodiesAfterThisJoint(rootJoint));
+      this(name, registry, graphicsRegistry, ScrewTools.computeRigidBodiesAfterThisJoint(rootJoint));
    }
 
-   public MomentumVisualizer(String name, TwistCalculator twistCalculator, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
+   public MomentumVisualizer(String name, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
          RigidBody... rigidBodies)
    {
       comCalculator = new CenterOfMassCalculator(rigidBodies, ReferenceFrame.getWorldFrame());
-      momentumCalculator = new MomentumCalculator(twistCalculator, rigidBodies);
+      momentumCalculator = new MomentumCalculator(rigidBodies);
       centerOfMass = new YoFramePoint(name + "CoM", ReferenceFrame.getWorldFrame(), registry);
       linearMomentum = new YoFrameVector(name + "Momentum", ReferenceFrame.getWorldFrame(), registry);
 

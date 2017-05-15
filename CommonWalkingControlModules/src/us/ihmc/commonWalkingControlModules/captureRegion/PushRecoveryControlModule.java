@@ -18,6 +18,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -56,7 +57,7 @@ public class PushRecoveryControlModule
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final ReferenceFrame midFeetZUp;
-   private final SideDependentList<ReferenceFrame> soleFrames;
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 

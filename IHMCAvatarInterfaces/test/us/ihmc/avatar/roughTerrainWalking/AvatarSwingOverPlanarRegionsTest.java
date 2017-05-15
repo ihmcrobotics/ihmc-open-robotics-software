@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,7 +21,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -82,10 +82,10 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
-         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
+         footPolygons.set(side, new ConvexPolygon2D(contactPointParameters.getFootContactPoints().get(side)));
       }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);

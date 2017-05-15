@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -46,8 +46,8 @@ public class PlanarRegionPotentialNextStepCalculator
    private final BipedalFootstepPlannerParameters parameters;
 
    private PlanarRegionsList planarRegionsList;
-   private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
-   private SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame;
+   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2D xyGoal;
@@ -80,12 +80,12 @@ public class PlanarRegionPotentialNextStepCalculator
       parentRegistry.addChild(registry);
    }
    
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
    }
    
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
@@ -687,11 +687,11 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
       nodeToExpand.getSoleTransform(nodeToExpandTransform);
 
-      ConvexPolygon2d snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
+      ConvexPolygon2D snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
       snappedPolygon.update();
       footArea.set(snappedPolygon.getArea());
 
-      ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D footholdPolygon = new ConvexPolygon2D();
       totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
       nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
@@ -728,7 +728,7 @@ public class PlanarRegionPotentialNextStepCalculator
                + bipedalFootstepPlannerNode);
       }
 
-      ConvexPolygon2d currentFootPolygon = new ConvexPolygon2d(footPolygonsInSoleFrame.get(nodeSide));
+      ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D(footPolygonsInSoleFrame.get(nodeSide));
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
 
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
@@ -760,7 +760,7 @@ public class PlanarRegionPotentialNextStepCalculator
       //      parameters.maxYaw = 0.1;
       //      parameters.rotationWeight = 1.0;
 
-      ConvexPolygon2d polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
+      ConvexPolygon2D polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
       //      System.out.println("polygonToWiggleInRegionFrame = \n" + polygonToWiggleInRegionFrame);
       //      System.out.println("planarRegionToPack = \n" + planarRegionToPack);
 
@@ -827,12 +827,12 @@ public class PlanarRegionPotentialNextStepCalculator
       snapAndWiggleTransform.multiply(snapTransform);
 
       // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
-      ConvexPolygon2d checkFootPolygonInWorld = new ConvexPolygon2d(currentFootPolygon);
+      ConvexPolygon2D checkFootPolygonInWorld = new ConvexPolygon2D(currentFootPolygon);
       checkFootPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
 
       List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(checkFootPolygonInWorld);
 
-      ArrayList<ConvexPolygon2d> intersectionsInPlaneFrameToPack = new ArrayList<>();
+      ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack = new ArrayList<>();
       RigidBodyTransform transformToWorldFromIntersectingPlanarRegion = new RigidBodyTransform();
 
       if (planarRegionsIntersectingSnappedAndWiggledPolygon != null)
@@ -845,7 +845,7 @@ public class PlanarRegionPotentialNextStepCalculator
                                                                                                             intersectionsInPlaneFrameToPack);
 
             // If any points are above the plane of the planarRegionToPack, then this is stepping into a v type problem.
-            for (ConvexPolygon2d intersectionPolygon : intersectionsInPlaneFrameToPack)
+            for (ConvexPolygon2D intersectionPolygon : intersectionsInPlaneFrameToPack)
             {
                int numberOfVertices = intersectionPolygon.getNumberOfVertices();
                for (int i = 0; i < numberOfVertices; i++)

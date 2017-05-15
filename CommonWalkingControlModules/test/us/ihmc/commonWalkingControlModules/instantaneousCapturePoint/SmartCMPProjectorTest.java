@@ -28,6 +28,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -38,7 +39,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -157,7 +157,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.15, -0.15);
       Point2D finalICP = new Point2D(-0.05, -0.15);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(0.0, -0.05));
       expectedArea.addVertex(new Point2D(0.1, -0.05));
       expectedArea.addVertex(new Point2D(0.05, 0.05));
@@ -173,7 +173,7 @@ public class SmartCMPProjectorTest
       Point2D capturePoint = new Point2D(0.11, 0.06);
       Point2D desiredCMP = new Point2D(0.08, 0.06);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.1, 0.05));
       expectedArea.update();
@@ -189,7 +189,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.08, 0.06);
       Point2D finalICP = new Point2D(0.11, 0.1);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(0.08, 0.05));
       expectedArea.addVertex(new Point2D(0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.1, -0.05));
@@ -206,7 +206,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.08, 0.06);
       Point2D finalICP = new Point2D(0.15, 0.06);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.1, 0.05));
       expectedArea.update();
@@ -222,7 +222,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.08, 0.06);
       Point2D finalICP = new Point2D(0.12, -0.07);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.1, 0.05));
       expectedArea.update();
@@ -237,7 +237,7 @@ public class SmartCMPProjectorTest
       Point2D capturePoint = new Point2D(0.0, 0.1);
       Point2D desiredCMP = new Point2D(-0.03, 0.15);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.0, 0.05));
       expectedArea.update();
@@ -253,7 +253,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(-0.03, 0.15);
       Point2D finalICP = new Point2D(0.0, 0.15);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.0, 0.05));
       expectedArea.update();
@@ -269,7 +269,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(-0.03, 0.15);
       Point2D finalICP = new Point2D(0.075, 0.0);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.0, 0.05));
       expectedArea.update();
@@ -285,7 +285,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(-0.03, 0.15);
       Point2D finalICP = new Point2D(-0.1, 0.1);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.1, 0.05));
       expectedArea.update();
@@ -300,7 +300,7 @@ public class SmartCMPProjectorTest
       Point2D capturePoint = new Point2D(0.03, 0.06);
       Point2D desiredCMP = new Point2D(0.0, 0.06);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.03, 0.05));
       expectedArea.update();
@@ -316,7 +316,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.0, 0.06);
       Point2D finalICP = new Point2D(0.12, -0.07);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(-0.1, 0.05));
       expectedArea.addVertex(new Point2D(0.03, 0.05));
       expectedArea.update();
@@ -331,7 +331,7 @@ public class SmartCMPProjectorTest
       Point2D capturePoint = new Point2D(0.0, -0.06);
       Point2D desiredCMP = new Point2D(0.07, -0.08);
 
-      ConvexPolygon2d expectedArea = new ConvexPolygon2d();
+      ConvexPolygon2D expectedArea = new ConvexPolygon2D();
       expectedArea.addVertex(new Point2D(0.0, -0.05));
       expectedArea.addVertex(new Point2D(0.1, -0.05));
       expectedArea.update();
@@ -347,7 +347,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.07, -0.08);
 
       Point2D expectedCMP = new Point2D(0.0, 0.0);
-      ConvexPolygon2d footPolygon = makeFootPolygon();
+      ConvexPolygon2D footPolygon = makeFootPolygon();
       footPolygon.scale(0.03);
 
       doTest(footPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
@@ -361,7 +361,7 @@ public class SmartCMPProjectorTest
       Point2D desiredCMP = new Point2D(0.07, -0.08);
 
       Point2D expectedCMP = new Point2D();
-      ConvexPolygon2d projectionArea = makeRandomPolygon(0.01);
+      ConvexPolygon2D projectionArea = makeRandomPolygon(0.01);
       projectionArea.getCentroid(expectedCMP);
 
       doTest(projectionArea, capturePoint, desiredCMP, expectedCMP, null, null);
@@ -379,7 +379,7 @@ public class SmartCMPProjectorTest
 
       for (int i = 0; i < 100; i++)
       {
-         ConvexPolygon2d projectionArea = makeRandomPolygon(0.3);
+         ConvexPolygon2D projectionArea = makeRandomPolygon(0.3);
          Point2D desiredCMP = new Point2D(random.nextDouble() - 0.5, random.nextDouble() - 0.5);
          if (!projectionArea.isPointInside(desiredCMP))
             projectionArea.orthogonalProjection(desiredCMP);
@@ -402,7 +402,7 @@ public class SmartCMPProjectorTest
 
       for (int i = 0; i < 100; i++)
       {
-         ConvexPolygon2d projectionArea = makeRandomPolygon(0.3);
+         ConvexPolygon2D projectionArea = makeRandomPolygon(0.3);
 
          double xCMP = 0.3 * (random.nextDouble() - 0.5);
          double yCMP = 0.3 * (random.nextDouble() - 0.5);
@@ -557,9 +557,9 @@ public class SmartCMPProjectorTest
       return Math.abs(angleDifference) < 1.0e-7;
    }
 
-   private ConvexPolygon2d makeFootPolygon()
+   private ConvexPolygon2D makeFootPolygon()
    {
-      ConvexPolygon2d ret = new ConvexPolygon2d();
+      ConvexPolygon2D ret = new ConvexPolygon2D();
       ret.addVertex(new Point2D(0.1, 0.05));
       ret.addVertex(new Point2D(-0.1, 0.05));
       ret.addVertex(new Point2D(0.1, -0.05));
@@ -568,9 +568,9 @@ public class SmartCMPProjectorTest
       return ret;
    }
 
-   private ConvexPolygon2d makeRandomPolygon(double size)
+   private ConvexPolygon2D makeRandomPolygon(double size)
    {
-      ConvexPolygon2d ret = new ConvexPolygon2d();
+      ConvexPolygon2D ret = new ConvexPolygon2D();
       for (int i = 0; i < random.nextInt(10) + 1; i++)
       {
          double x = size * (random.nextDouble() - 0.5);
@@ -582,8 +582,8 @@ public class SmartCMPProjectorTest
       return ret;
    }
 
-   private void doTest(ConvexPolygon2d projectionArea, Point2D capturePoint, Point2D desiredCMP, Point2D expectedProjection, Point2D finalCapturePoint,
-         ConvexPolygon2d expectedArea)
+   private void doTest(ConvexPolygon2D projectionArea, Point2D capturePoint, Point2D desiredCMP, Point2D expectedProjection, Point2D finalCapturePoint,
+         ConvexPolygon2D expectedArea)
    {
       FrameConvexPolygon2d projectionAreaWithFrame = new FrameConvexPolygon2d(worldFrame, projectionArea);
       FramePoint2d capturePointWithFrame = new FramePoint2d(worldFrame, capturePoint);
@@ -686,7 +686,7 @@ public class SmartCMPProjectorTest
             yoFinalCapturePoint.set(finalCapturePoint);
          }
 
-         ConvexPolygon2d plotHelperPolygon = new ConvexPolygon2d(projectionArea.getConvexPolygon2d());
+         ConvexPolygon2D plotHelperPolygon = new ConvexPolygon2D(projectionArea.getConvexPolygon2d());
          plotHelperPolygon.addVertex(capturePoint.getPoint());
          plotHelperPolygon.addVertex(projectedCMP.getPoint());
          plotHelperPolygon.addVertex(desiredCMP.getPoint());

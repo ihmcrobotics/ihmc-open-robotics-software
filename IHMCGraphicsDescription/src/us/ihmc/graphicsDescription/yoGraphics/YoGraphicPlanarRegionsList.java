@@ -9,6 +9,7 @@ import java.util.Random;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -579,7 +579,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       PlanarRegionsList planarRegionsListToProcess = planarRegionsListsDeque.peekFirst();
       PlanarRegion planarRegionToProcess = null;
-      ConvexPolygon2d polygonToProcess = null;
+      ConvexPolygon2D polygonToProcess = null;
 
       // Find the next polygon to update
       while (polygonToProcess == null)

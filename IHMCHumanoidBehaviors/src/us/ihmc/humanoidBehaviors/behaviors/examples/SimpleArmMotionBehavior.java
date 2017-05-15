@@ -97,7 +97,8 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
       FramePose point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion(), ReferenceFrame.getWorldFrame().getNameBasedHashCode(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+            point.getFrameOrientationCopy().getQuaternion(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }

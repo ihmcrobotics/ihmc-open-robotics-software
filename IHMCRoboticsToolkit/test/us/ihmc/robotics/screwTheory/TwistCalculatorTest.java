@@ -12,6 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -453,81 +454,12 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.03)
-   @Test(timeout = 30000)
-   public void testGetTwistOfBodyFixedReferenceFrame() throws Exception
-   {
-      Random random = new Random(234234L);
-
-      int numberOfJoints = 100;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
-
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
-
-      Twist actualTwist = new Twist();
-      Twist expectedTwist = new Twist();
-      Twist actualRelativeTwist = new Twist();
-      Twist expectedRelativeTwist = new Twist();
-
-      for (int i = 0; i < 100; i++)
-      {
-         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
-
-         joints.get(0).updateFramesRecursively();
-
-         twistCalculator.compute();
-
-         for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
-         {
-            OneDoFJoint joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
-            ReferenceFrame bodyFrame = body.getBodyFixedFrame();
-            twistCalculator.getTwistOfReferenceFrame(bodyFrame, actualTwist);
-            twistCalculator.getTwistOfBody(body, expectedTwist);
-
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
-
-            // Assert relative twist
-            for (int baseJointIndex = 0; baseJointIndex < joints.size(); baseJointIndex++)
-            {
-               RigidBody base = joints.get(baseJointIndex).getSuccessor();
-               ReferenceFrame baseFrame = base.getBodyFixedFrame();
-               twistCalculator.getRelativeTwist(baseFrame, bodyFrame, actualRelativeTwist);
-               twistCalculator.getRelativeTwist(base, body, expectedRelativeTwist);
-
-               assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-12);
-            }
-         }
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.03)
-   @Test(timeout = 30000)
-   public void testUnhandledReferenceFrameExceptions() throws Exception
-   {
-      Random random = new Random(234234L);
-
-      int numberOfJoints = 100;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
-
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
-      Twist twist = new Twist();
-
-      try
-      {
-         twistCalculator.getTwistOfReferenceFrame(ReferenceFrame.constructARootFrame("blop"), twist);
-      }
-      catch (ScrewTheoryException e)
-      {
-         // good
-      }
-
-      // The twist calculator can handle 
-      twistCalculator.getTwistOfReferenceFrame(ReferenceFrame.constructARootFrame("blop"), twist);
-   }
-
    public static void assertTwistEquals(Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
+   {
+      assertTwistEquals(null, expectedTwist, actualTwist, epsilon);
+   }
+
+   public static void assertTwistEquals(String messagePrefix, Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
    {
       try
       {
@@ -535,7 +467,14 @@ public class TwistCalculatorTest
       }
       catch (AssertionError e)
       {
-         throw new AssertionError("expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">");
+         Vector3D difference = new Vector3D();
+         difference.sub(expectedTwist.getLinearPart(), actualTwist.getLinearPart());
+         double linearPartDifference = difference.length();
+         difference.sub(expectedTwist.getAngularPart(), actualTwist.getAngularPart());
+         double angularPartDifference = difference.length();
+         messagePrefix = messagePrefix != null ? messagePrefix + " " : "";
+         throw new AssertionError(messagePrefix + "expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">\n difference: linear part: " + linearPartDifference
+               + ", angular part: " + angularPartDifference);
       }
    }
 

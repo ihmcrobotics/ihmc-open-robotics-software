@@ -20,7 +20,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public PoseReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
-      super(frameName, parentFrame);
+      super(frameName, parentFrame, parentFrame.isAStationaryFrame(), false);
 
       originPose = new FramePose(parentFrame);
    }

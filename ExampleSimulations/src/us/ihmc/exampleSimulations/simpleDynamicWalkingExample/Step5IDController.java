@@ -4,7 +4,6 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
-import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -15,7 +14,6 @@ import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.robotics.screwTheory.DifferentialIDMassMatrixCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class Step5IDController implements RobotController
 {
@@ -45,7 +43,6 @@ public class Step5IDController implements RobotController
    //Temporary variables 
    private final DenseMatrix64F desiredJointAccelerations = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F jointTorques = new DenseMatrix64F(2, 1);
-   private  TwistCalculator twistCalculator;
    
    // The inverse dynamics calculator is required either to do inverse dynamics based control or to compute the joint-space bias force    
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -63,11 +60,7 @@ public class Step5IDController implements RobotController
       this.robot = robot;
       hipJoint = robot.getLegJoint(JointNames.HIP, RobotSide.LEFT);
       
-      for (RobotSide robotSide : RobotSide.values())
-      {
-      twistCalculator = new TwistCalculator(worldFrame, robot.getLegRigidBody(LinkNames.LOWER_LINK, robotSide));
-      }
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator(), -robot.getGravityZ());
       crbMassMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(robot.getElevator());
       differentialIDMassMatrixCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, robot.getElevator());
       
@@ -120,7 +113,6 @@ public class Step5IDController implements RobotController
    private void doControlUsingInverseDynamicsCalculatorOnly()
    {
       hipJoint.setQddDesired(qddDesiredHip.getDoubleValue());
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
    }
 }

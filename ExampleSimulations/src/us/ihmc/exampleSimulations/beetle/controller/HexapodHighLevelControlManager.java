@@ -36,7 +36,7 @@ public class HexapodHighLevelControlManager
    private final HexapodControllerParameters vmcParameters;
    private final HexapodControllerParameters idParameters;
 
-   public HexapodHighLevelControlManager(FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, TwistCalculator twistCalculator, SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters,
+   public HexapodHighLevelControlManager(FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters,
          ArrayList<String> jointsToControl, HexapodControllerParameters idParameters, HexapodControllerParameters vmcParameters, YoGraphicsListRegistry yoGraphicsListRegistry, double controllerDt, YoVariableRegistry parentRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -50,7 +50,7 @@ public class HexapodHighLevelControlManager
       String bodyName = pelvis.getName();
 
       bodySpatialManager = new HexapodBodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
-      stepController = new HexapodStepController("HexapodStepController", fullRobotModel, twistCalculator, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);
+      stepController = new HexapodStepController("HexapodStepController", fullRobotModel, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);
       hexapodMomentumController = new HexapodMomentumController("HexapodMomentumController", referenceFrames, fullRobotModel, controllerDt, registry, yoGraphicsListRegistry);
       
       parentRegistry.addChild(registry);
