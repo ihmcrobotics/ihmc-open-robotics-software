@@ -35,11 +35,11 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    
    private int numberOfCandidates = 20;
    private int numberOfLinearPath;
-   private double minimumTimeGapOfWayPoints = 0.3;
+   private double minimumTimeGapOfWayPoints = 0.4;
    
    private int currentIndexOfCandidate;
    
-   private int numberOfRetry = 5;
+   private int numberOfRetry = 10;
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
@@ -64,6 +64,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       doneBehavior = new TestDoneBehavior(communicationBridge);
             
       numberOfLinearPath = TimeDomain1DNode.cleaningPath.getNumerOfLinearPath();
+      PrintTools.info("## number of linear path "+ numberOfLinearPath);
       
       currentIndexOfCandidate = 0;
       currentIndexOfRetry = 0;
@@ -97,9 +98,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          retNodes.add(aNode);
       }
       
-//      for(int i=0;i<numberOfWayPoints;i++)
-//         PrintTools.info("data "+i+" "+ retNodes.get(i).getNodeData(0)+" "+ retNodes.get(i).getNodeData(1));
-
       return retNodes;
    }
    
@@ -148,10 +146,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             validNodesStateMachineBehavior.setNodes(randomSelectedNodes);               
             validNodesStateMachineBehavior.setSolarPanel(TimeDomain1DNode.cleaningPath.getSolarPanel());
             
-            currentIndexOfCandidate++;     
-            
-            
-            
+            currentIndexOfCandidate++;  
          }
       };
       
@@ -175,7 +170,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             boolean b = ((candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates) && optimalControlPointNodePath == null) && (currentIndexOfRetry < numberOfRetry);
             if(b == true)
             {
-               PrintTools.info("No solution .. Retry! " + currentIndexOfRetry + " "+numberOfRetry);
+               PrintTools.info("No solution .. Retry! " + currentIndexOfRetry);
                currentIndexOfRetry++;
                currentIndexOfCandidate = 0;
                numberOfCandidates = 3;   
@@ -190,7 +185,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          public boolean checkCondition()
          {
             boolean b = (candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates && optimalControlPointNodePath != null) || (currentIndexOfRetry == numberOfRetry);
-            PrintTools.info("Yes solution !" + currentIndexOfRetry + " "+numberOfRetry);
+//            PrintTools.info("Yes solution !" + currentIndexOfRetry + " "+numberOfRetry);
             if(currentIndexOfRetry == numberOfRetry)
             {               
                isSolved = false;
@@ -200,6 +195,10 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             {               
                isSolved = true;
                PrintTools.info("Planner get solution!! "+isSolved);
+               PrintTools.info("isSolved() "+isSolved());
+               
+            for(int i =0;i<optimalControlPointNodePath.size();i++)
+               PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
             }
             return b;
          }
@@ -230,8 +229,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    {
       // TODO Auto-generated method stub
    }
-   
-   
    
    private class CandidateBehavior extends AbstractBehavior
    {
@@ -320,8 +317,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       public void onBehaviorEntered()
       {   
          PrintTools.info("TestDoneBehavior");
-//         for(int i =0;i<optimalControlPointNodePath.size();i++)
-//            PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
          PrintTools.info("numberOfTest "+ WholeBodyPoseValidityTester.numberOfTest);
       }
 
