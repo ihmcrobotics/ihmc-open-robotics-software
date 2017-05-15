@@ -8,31 +8,20 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.commons.PrintTools;
 
-/**
- * Solves a Quadratic Program using an active set method known as the Goldfarb-Idani method.
- * This allows it to work where simple active set solvers may not work, finding a solution
- * even when some inequality constraints may violate one another.
- *
- * This algorithm is the same algorithm implemented in the QuadProg, QuadProg++, and uQuadProg++ algorithms.
- *
- * Uses the algorithm found in the paper
- * "A numerically stable dual method for solving strictly convex quadratic programs"
- * by D. Goldfarb and A. Idnani.
- *
- * @author Robert Griffin
- */
-public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
+public class JavaQuadProgSolver
 {
-   private enum QuadProgStep {step1, step2, step2a}
+   private enum QuadProgStep {step1, step2, step2a, step2b, step2c, step3};
 
    private static final int TRUE = 1;
    private static final int FALSE = 0;
 
    private static final int defaultSize = 100;
    private static final double epsilon = 0.00001;
+
+   private final DenseMatrix64F negAin = new DenseMatrix64F(defaultSize);
+   private final DenseMatrix64F negAeq = new DenseMatrix64F(defaultSize);
 
    private final DenseMatrix64F R = new DenseMatrix64F(defaultSize, defaultSize);
 
@@ -57,7 +46,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(defaultSize);
-   private double quadraticCostScalar;
 
    private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(defaultSize);
@@ -73,591 +61,17 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private double R_norm;
    private int constraintIndexForMinimumStepLength;
 
-   private int maxNumberOfIterations = 10;
+   private int numberOfIterations;
 
    /**
-    * The internal problem is of the form:
+    * The problem is of the form:
     * min 0.5 * x G x + g0 x
     * s.t.
     *     CE^T x + ce0 = 0
     *     CI^T x + ci0 >= 0
-    *
-    *
-    * To interface with it, assume the standard form:
-    * min 0.5 * x G x + g0 x
-    * s.t.
-    *     CE^T x = ce0
-    *     CI^T x >= ci0
     */
 
 
-
-   //// // TODO: 5/15/17 get rid of this 
-
-   private void reshape()
-   {
-      int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints;
-
-      R.reshape(problemSize, problemSize);
-      inequalityConstraintViolations.reshape(numberOfConstraints, 1);
-      stepDirectionInPrimalSpace.reshape(problemSize, 1);
-      stepDirectionInDualSpace.reshape(numberOfConstraints, 1);
-      d.reshape(problemSize, 1);
-      np.reshape(problemSize, 1);
-      lagrangeMultipliers.reshape(numberOfConstraints, 1);
-      previousSolution.reshape(problemSize, 1);
-      previousLagrangeMultipliers.reshape(numberOfConstraints, 1);
-
-      activeSetIndices.fill(0, numberOfConstraints, 0);
-      previousActiveSetIndices.fill(0, numberOfConstraints, 0);
-      inactiveSetIndices.fill(0, numberOfConstraints, 0);
-      excludeConstraintFromActiveSet.fill(0, numberOfConstraints, FALSE);
-   }
-
-   // // TODO: 5/15/17  get rid of this 
-   private void zero()
-   {
-      R.zero();
-      inequalityConstraintViolations.zero();
-      stepDirectionInPrimalSpace.zero();
-      stepDirectionInDualSpace.zero();
-      d.zero();
-      np.zero();
-      lagrangeMultipliers.zero();
-      previousSolution.zero();
-      previousLagrangeMultipliers.zero();
-   }
-
-   @Override
-   public void setMaxNumberOfIterations(int maxNumberOfIterations)
-   {
-      this.maxNumberOfIterations = maxNumberOfIterations;
-   }
-
-   @Override
-   public void clear()
-   {
-      quadraticCostQMatrix.reshape(0, 0);
-      quadraticCostQVector.reshape(0, 0);
-
-      linearEqualityConstraintsAMatrix.reshape(0, 0);
-      linearEqualityConstraintsBVector.reshape(0, 0);
-
-      linearInequalityConstraintsCMatrix.reshape(0, 0);
-      linearInequalityConstraintsDVector.reshape(0, 0);
-   }
-
-   @Override
-   public void setVariableBounds(DenseMatrix64F variableLowerBounds, DenseMatrix64F variableUpperBounds)
-   {
-      throw new RuntimeException("This has yet to be implemented!");
-   }
-
-   @Override
-   public void setVariableBounds(double[] variableLowerBounds, double[] variableUpperBounds)
-   {
-      setVariableBounds(MatrixTools.createVector(variableLowerBounds), MatrixTools.createVector(variableUpperBounds));
-   }
-
-   @Override
-   public void setQuadraticCostFunction(double[][] quadraticCostFunctionQMatrix, double[] quadraticCostFunctionQVector, double quadraticCostScalar)
-   {
-      setQuadraticCostFunction(new DenseMatrix64F(quadraticCostFunctionQMatrix), MatrixTools.createVector(quadraticCostFunctionQVector), quadraticCostScalar);
-   }
-
-   @Override
-   public void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar)
-   {
-      if (costLinearVector.getNumCols() != 1)
-         throw new RuntimeException("costLinearVector.getNumCols() != 1");
-      if (costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows())
-         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows()");
-      if (costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols())
-         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
-
-      this.quadraticCostQMatrix.set(costQuadraticMatrix);
-      this.quadraticCostQVector.set(costLinearVector);
-      this.quadraticCostScalar = quadraticCostScalar;
-
-      problemSize = quadraticCostQMatrix.getNumCols();
-   }
-
-   private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
-   @Override
-   public double getObjectiveCost(DenseMatrix64F x)
-   {
-      multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
-      CommonOps.scale(0.5, computedObjectiveFunctionValue);
-      CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
-      return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
-   }
-
-   private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
-
-   private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QUpperMatrix, DenseMatrix64F xTransposeQx)
-   {
-      temporaryMatrix.reshape(xVector.numCols, QUpperMatrix.numCols);
-      tempMatrix.reshape(xVector.numCols, QUpperMatrix.numCols);
-      CommonOps.multTransA(xVector, QUpperMatrix, tempMatrix);
-      CommonOps.multTransB(tempMatrix, QUpperMatrix, temporaryMatrix);
-      CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
-   }
-
-   @Override
-   public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
-   {
-      setLinearEqualityConstraints(new DenseMatrix64F(linearEqualityConstraintsAMatrix), MatrixTools.createVector(linearEqualityConstraintsBVector));
-   }
-
-   @Override
-   public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
-   {
-      if (linearEqualityConstraintsBVector.getNumCols() != 1)
-         throw new RuntimeException("linearEqualityConstraintsBVector.getNumCols() != 1");
-      if (linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows())
-         throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows()");
-      if (linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
-         throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
-
-      this.linearEqualityConstraintsAMatrix.reshape(linearEqualityConstraintsAMatrix.getNumCols(), linearEqualityConstraintsAMatrix.getNumRows());
-      CommonOps.transpose(linearEqualityConstraintsAMatrix, this.linearEqualityConstraintsAMatrix);
-      CommonOps.scale(-1.0, this.linearEqualityConstraintsAMatrix);
-
-      this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
-      numberOfEqualityConstraints = linearEqualityConstraintsBVector.getNumRows();
-   }
-
-   @Override
-   public void setLinearInequalityConstraints(double[][] linearInequalityConstraintsCMatrix, double[] linearInqualityConstraintsDVector)
-   {
-      setLinearInequalityConstraints(new DenseMatrix64F(linearInequalityConstraintsCMatrix), MatrixTools.createVector(linearInqualityConstraintsDVector));
-   }
-
-   @Override
-   public void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector)
-   {
-      if (linearInequalityConstraintDVector.getNumCols() != 1)
-         throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
-      if (linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows())
-         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows()");
-      if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
-         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
-
-      linearInequalityConstraintsCMatrix.reshape(linearInequalityConstraintCMatrix.getNumCols(), linearInequalityConstraintCMatrix.getNumRows());
-      CommonOps.transpose(linearInequalityConstraintCMatrix, linearInequalityConstraintsCMatrix);
-      CommonOps.scale(-1.0, linearInequalityConstraintsCMatrix);
-
-      this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
-      numberOfInequalityConstraints = linearInequalityConstraintDVector.getNumRows();
-   }
-
-   @Override
-   public int solve(double[] solutionToPack)
-   {
-      int numberOfEqualityConstraints = linearEqualityConstraintsBVector.getNumRows();
-      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
-
-      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
-      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
-
-      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
-   }
-
-   @Override
-   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
-   {
-      //// TODO: 5/15/17  bounds
-      //int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
-      //int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
-      int numberOfLowerBoundConstraints = 0;
-      int numberOfUpperBoundConstraints = 0;
-
-      double[] lagrangeLowerBoundsConstraintMultipliersToPack = new double[numberOfLowerBoundConstraints];
-      double[] lagrangeUpperBoundsConstraintMultipliersToPack = new double[numberOfUpperBoundConstraints];
-
-      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
-            lagrangeLowerBoundsConstraintMultipliersToPack, lagrangeUpperBoundsConstraintMultipliersToPack);
-   }
-
-   @Override
-   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack,
-         double[] lagrangeLowerBoundsConstraintMultipliersToPack, double[] lagrangeUpperBoundsConstraintMultipliersToPack)
-   {
-      int numberOfVariables = quadraticCostQMatrix.getNumCols();
-      int numberOfEqualityConstraints = linearEqualityConstraintsBVector.getNumRows();
-      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
-      //// TODO: 5/15/17  bounds
-      //int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
-      //int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
-      int numberOfLowerBoundConstraints = 0;
-      int numberOfUpperBoundConstraints = 0;
-
-      if (solutionToPack.length != numberOfVariables)
-         throw new RuntimeException("solutionToPack.length != numberOfVariables");
-      if (lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints)
-         throw new RuntimeException("lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints");
-      if (lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints)
-         throw new RuntimeException("lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints");
-
-      if (lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints)
-         throw new RuntimeException("lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints. numberOfLowerBoundConstraints = "
-               + numberOfLowerBoundConstraints);
-      if (lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints)
-         throw new RuntimeException("lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints");
-
-      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
-      DenseMatrix64F lagrangeEqualityConstraintMultipliers = new DenseMatrix64F(numberOfEqualityConstraints, 1);
-      DenseMatrix64F lagrangeInequalityConstraintMultipliers = new DenseMatrix64F(numberOfInequalityConstraints, 1);
-      DenseMatrix64F lagrangeLowerBoundConstraintMultipliers = new DenseMatrix64F(numberOfLowerBoundConstraints, 1);
-      DenseMatrix64F lagrangeUpperBoundConstraintMultipliers = new DenseMatrix64F(numberOfUpperBoundConstraints, 1);
-
-      int numberOfIterations = solve(solution, lagrangeEqualityConstraintMultipliers, lagrangeInequalityConstraintMultipliers,
-            lagrangeLowerBoundConstraintMultipliers, lagrangeUpperBoundConstraintMultipliers);
-
-      double[] solutionData = solution.getData();
-
-      for (int i = 0; i < numberOfVariables; i++)
-      {
-         solutionToPack[i] = solutionData[i];
-      }
-
-      double[] lagrangeEqualityConstraintMultipliersData = lagrangeEqualityConstraintMultipliers.getData();
-      double[] lagrangeInequalityConstraintMultipliersData = lagrangeInequalityConstraintMultipliers.getData();
-      double[] lagrangeLowerBoundMultipliersData = lagrangeLowerBoundConstraintMultipliers.getData();
-      double[] lagrangeUpperBoundMultipliersData = lagrangeUpperBoundConstraintMultipliers.getData();
-
-      for (int i = 0; i < numberOfEqualityConstraints; i++)
-      {
-         lagrangeEqualityConstraintMultipliersToPack[i] = lagrangeEqualityConstraintMultipliersData[i];
-      }
-
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
-      {
-         lagrangeInequalityConstraintMultipliersToPack[i] = lagrangeInequalityConstraintMultipliersData[i];
-      }
-
-      for (int i = 0; i < numberOfLowerBoundConstraints; i++)
-      {
-         lagrangeLowerBoundsConstraintMultipliersToPack[i] = lagrangeLowerBoundMultipliersData[i];
-      }
-
-      for (int i = 0; i < numberOfUpperBoundConstraints; i++)
-      {
-         lagrangeUpperBoundsConstraintMultipliersToPack[i] = lagrangeUpperBoundMultipliersData[i];
-      }
-
-      return numberOfIterations;
-   }
-
-   @Override
-   public void setUseWarmStart(boolean useWarmStart)
-   {
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   @Override
-   public void resetActiveConstraints()
-   {
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(defaultSize, defaultSize);
-
-
-
-   private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F lagrangeLowerBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F lagrangeUpperBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
-
-   @Override
-   public int solve(DenseMatrix64F solutionToPack)
-   {
-      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToThrowAway, lagrangeInequalityConstraintMultipliersToThrowAway);
-   }
-
-   @Override
-   public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
-         DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
-   {
-      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
-            lagrangeLowerBoundMultipliersToThrowAway, lagrangeUpperBoundMultipliersToThrowAway);
-   }
-
-   // The solving function, implementing the Goldfarb-Idani method
-   @Override
-   public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
-         DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack, DenseMatrix64F lagrangeLowerBoundConstraintMultipliersToPack,
-         DenseMatrix64F lagrangeUpperBoundConstraintMultipliersToPack)
-   {
-      solutionToPack.reshape(problemSize, 1);
-      solutionToPack.zero();
-
-      reshape();
-      zero();
-
-      QuadProgStep currentStep = QuadProgStep.step1;
-
-      double c1, c2;
-      int solutionPairConstraintIndex = 0; // this is the index of the constraint to be added to the active set
-      int numberOfIterations = 0;
-
-      J.reshape(problemSize, problemSize);
-      tempMatrix.reshape(problemSize, 1);
-
-      /** Preprocessing phase */
-
-      // compute the trace of the original matrix quadraticCostQMatrix
-      c1 = CommonOps.trace(quadraticCostQMatrix);
-
-      // decompose the matrix quadraticCostQMatrix in the form L^T L
-      decomposer.decompose(quadraticCostQMatrix);
-
-      R_norm = 1.0; // this variable will hold the norm of the matrix R
-
-      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition 
-      solver.setA(quadraticCostQMatrix);
-      solver.invert(J);
-      c2 = CommonOps.trace(J);
-
-      // c1 * c2 is an estimate for cond(G)
-
-      // Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
-      // this is the feasible point in the dual space.
-      // x = -G^-1 * g0 = -J * J^T * g0
-      CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
-      CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
-
-      // There aren't any constraints, so this is a valid solution
-      if (numberOfInequalityConstraints + numberOfEqualityConstraints == 0)
-      {
-         return numberOfIterations;
-      }
-
-      // Add equality constraints to the working set A
-      numberOfActiveConstraints = 0;
-      double minimumStepInPrimalSpace;
-      for (int i = 0; i < numberOfEqualityConstraints; i++)
-      {
-         MatrixTools.setMatrixBlock(np, 0, 0, linearEqualityConstraintsAMatrix, 0, i, problemSize, 1, 1.0); // np is the ith constraint value
-
-         compute_d();
-         updateStepDirectionInPrimalSpace();
-         updateStepDirectionInDualSpace();
-
-         // compute full step length minimumStepInPrimalSpace: i.e., the minimum step in primal space s.t. the constraint becomes feasible
-         minimumStepInPrimalSpace = 0.0;
-         if (Math.abs(CommonOps.dot(stepDirectionInPrimalSpace, stepDirectionInPrimalSpace)) > epsilon) // i.e. z != 0
-         {
-            minimumStepInPrimalSpace = (-CommonOps.dot(np, solutionToPack) - linearEqualityConstraintsBVector.get(i)) / CommonOps.dot(stepDirectionInPrimalSpace, np);
-         }
-
-         // set x = x + minimumStepInPrimalSpace * stepDirectionInPrimalSpace
-         CommonOps.addEquals(solutionToPack, minimumStepInPrimalSpace, stepDirectionInPrimalSpace);
-
-         // set u = u+
-         lagrangeMultipliers.set(numberOfActiveConstraints, minimumStepInPrimalSpace);
-         MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStepInPrimalSpace);
-
-         activeSetIndices.set(i, -i - 1);
-
-         if (!addConstraint())
-         {
-            throw new RuntimeException("Constraints are linearly dependent.");
-         }
-      }
-      
-      // // TODO: 5/15/17 exit if the current active set is valid 
-
-      // set iai = K \ A, i.e., the whole set is inactive
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
-         inactiveSetIndices.set(i, i);
-
-      double solutionPairConstraintViolation = 0.0;
-      constraintIndexForMinimumStepLength = 0;
-
-      while (numberOfIterations < maxNumberOfIterations)
-      {
-         switch(currentStep)
-         {
-         case step1:
-            numberOfIterations++;
-
-            // step 1: choose a violated constraint
-            for (int i = numberOfEqualityConstraints; i < numberOfActiveConstraints; i++)
-            {
-               solutionPairConstraintIndex = activeSetIndices.get(i);
-               inactiveSetIndices.set(solutionPairConstraintIndex, -1);
-            }
-
-            // compute s(x) = ci^T * x + ci0 for all elements of K \ A
-            solutionPairConstraintViolation = 0.0;
-            double psi = 0.0; // this value will contain the sum of all infeasibilities
-            solutionPairConstraintIndex = 0;
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
-            {
-               excludeConstraintFromActiveSet.set(i, TRUE);
-               double sum = 0.0;
-               for (int j = 0; j < problemSize; j++)
-                  sum += linearInequalityConstraintsCMatrix.get(j, i) * solutionToPack.get(j);
-               sum += linearInequalityConstraintsDVector.get(i);
-               inequalityConstraintViolations.set(i, sum);
-               psi += Math.min(0.0, sum);
-            }
-
-            if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
-            {
-               // numerically there are not infeasibilities anymore
-               return numberOfIterations;
-            }
-
-            // save old values for u, x, and A
-            MatrixTools.setMatrixBlock(previousLagrangeMultipliers, 0, 0, lagrangeMultipliers, 0, 0, numberOfActiveConstraints, 1, 1.0);
-            previousSolution.set(solutionToPack);
-            for (int i = 0; i < numberOfActiveConstraints; i++)
-               previousActiveSetIndices.set(i, activeSetIndices.get(i));
-
-         case step2:
-            // Step 2: check for feasibility and determine a new S-pair
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
-            {
-               // select the constraint from the inactive set that is most violated
-               if (inequalityConstraintViolations.get(i) < solutionPairConstraintViolation && inactiveSetIndices.get(i) != -1
-                     && excludeConstraintFromActiveSet.get(i) == TRUE)
-               {
-                  solutionPairConstraintViolation = inequalityConstraintViolations.get(i);
-                  solutionPairConstraintIndex = i;
-               }
-            }
-            if (solutionPairConstraintViolation >= 0.0)
-            { // Solution is valid
-               return numberOfIterations;
-            }
-
-            // set np = n(solutionPairConstraintIndex)
-            MatrixTools.setMatrixBlock(np, 0, 0, linearEqualityConstraintsAMatrix, 0, solutionPairConstraintIndex, problemSize, 1, 1.0); // np is the solutionPairConstraint
-            // set u = [u 0]^T
-            lagrangeMultipliers.set(numberOfActiveConstraints, 0.0);
-            // add the violated constraint to the active set A
-            activeSetIndices.set(numberOfActiveConstraints, solutionPairConstraintIndex);
-
-         case step2a:
-            // Step 2a: determine step direction
-            compute_d();
-            // compute z = H np: the step direction in the primal space (through J, see the paper)
-            updateStepDirectionInPrimalSpace();
-            // compute N* np (if activeSetSize > 0): the negative of the step direction in the dual space
-            updateStepDirectionInDualSpace();
-
-            break;
-         default:
-            throw new RuntimeException("This is an empty state.");
-         }
-
-
-         // Step 2b: compute step length
-         constraintIndexForMinimumStepLength = 0;
-         // Compute partial step length (maximum step in dual space without violating dual feasibility
-         double maximumStepInDualSpace = Double.POSITIVE_INFINITY;
-         // find the constraintIndexForMinimumStepLength s.t. it reaches the minimum of u+(x) / r
-         for (int k = numberOfEqualityConstraints; k < numberOfActiveConstraints; k++)
-         {
-            double minimumStepLength = -lagrangeMultipliers.get(k) / stepDirectionInDualSpace.get(k);
-            if (stepDirectionInDualSpace.get(k) < 0.0 && minimumStepLength < maximumStepInDualSpace)
-            {
-               maximumStepInDualSpace = minimumStepLength;
-               constraintIndexForMinimumStepLength = activeSetIndices.get(k);
-            }
-         }
-
-         // Compute full step length (minimum step in primal space such that the violated constraint becomes feasible
-         if (Math.abs(CommonOps.dot(stepDirectionInPrimalSpace, stepDirectionInPrimalSpace)) > epsilon)
-         {
-            minimumStepInPrimalSpace = -inequalityConstraintViolations.get(solutionPairConstraintIndex) / CommonOps.dot(stepDirectionInPrimalSpace, np);
-            if (minimumStepInPrimalSpace < 0.0) // patch suggested by Takano Akio for handling numerical inconsistencies
-               minimumStepInPrimalSpace = Double.POSITIVE_INFINITY;
-         }
-         else
-         {
-            minimumStepInPrimalSpace = Double.POSITIVE_INFINITY;
-         }
-
-         // the step is chosen as the minimum of maximumStepInDualSpace and minimumStepInPrimalSpace
-         double minimumStep = Math.min(maximumStepInDualSpace, minimumStepInPrimalSpace); // step length, minimum of partial step (maximumStepInDualSpace) and full step (minimumStepInPrimalSpace);
-
-         // Step 2c: determine new S-pair and take step:
-
-         if (!Double.isFinite(minimumStep))
-         { // case (i): no step in primal or dual space, QPP is infeasible
-            return numberOfIterations;
-         }
-         else if (!Double.isFinite(minimumStepInPrimalSpace))
-         { // case (ii): step in dual space
-            // set u = u + t * [r 1] and drop constraintIndexForMinimumStepLength from the active set
-            MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStep);
-            lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
-            inactiveSetIndices.set(constraintIndexForMinimumStepLength, constraintIndexForMinimumStepLength);
-            deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
-
-            currentStep = QuadProgStep.step2a;
-         }
-         else
-         { // case (iii): step in primal and dual space.
-            MatrixTools.addMatrixBlock(solutionToPack, 0, 0, stepDirectionInPrimalSpace, 0, 0, problemSize, 1, minimumStep);
-
-            // u = u + t * [r 1]
-            MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStep);
-            lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
-
-
-            if (MathTools.epsilonEquals(minimumStep, minimumStepInPrimalSpace, epsilon))
-            { // full step has been taken, using the minimumStepInPrimalSpace
-               // add the violated constraint to the active set
-               if (!addConstraint())
-               { // fail out because adding the constraint causes it to degenerate
-                  excludeConstraintFromActiveSet.set(solutionPairConstraintIndex, FALSE);
-                  deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
-
-                  for (int i = 0; i < numberOfInequalityConstraints; i++)
-                     inactiveSetIndices.set(i, i);
-
-                  for (int i = 0; i < numberOfActiveConstraints; i++)
-                  {
-                     activeSetIndices.set(i, previousActiveSetIndices.get(i));
-                     inactiveSetIndices.set(activeSetIndices.get(i), -1);
-                  }
-                  MatrixTools.setMatrixBlock(lagrangeMultipliers, 0, 0, previousLagrangeMultipliers, 0, 0, numberOfActiveConstraints, 1, 1.0);
-
-                  solutionToPack.set(previousSolution);
-
-                  currentStep = QuadProgStep.step2;
-               }
-               else
-               {
-                  inactiveSetIndices.set(solutionPairConstraintIndex, -1);
-                  // we need to go all the way back to the beginning, as this constraint has been saturated.
-                  currentStep = QuadProgStep.step1;
-               }
-            }
-            else
-            { // a partial step has been taken
-               // drop constraintIndexForMinimumStepLength
-               inactiveSetIndices.set(constraintIndexForMinimumStepLength, constraintIndexForMinimumStepLength);
-               deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
-
-               // update s[ip] = CI * x + ci0
-               double sum = 0.0;
-               for (int k = 0; k < problemSize; k++)
-                  sum += linearInequalityConstraintsCMatrix.get(k, solutionPairConstraintIndex) * solutionToPack.get(k);
-               inequalityConstraintViolations.set(solutionPairConstraintIndex, sum + linearInequalityConstraintsDVector.get(solutionPairConstraintIndex));
-
-               currentStep = QuadProgStep.step2a;
-            }
-         }
-      }
-
-      return numberOfIterations;
-   }
 
    private void compute_d()
    {
@@ -668,7 +82,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    // compute z = H np: the step direction in the primal space (through J, see the paper)
    private void updateStepDirectionInPrimalSpace()
    {
-      // // TODO: 5/15/17 make block operations
+      // // TODO: 5/15/17 make block operations 
       // setting of z = J * d
       for (int i = 0; i < problemSize; i++)
       {
@@ -683,7 +97,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    // compute -N* np (if activeSetSize > 0): the step direction in the dual space
    private void updateStepDirectionInDualSpace()
    {
-      // // TODO: 5/15/17  make block operations
+      // // TODO: 5/15/17  make block operations 
       // setting of r = -R^-1 * d
       for (int i = numberOfActiveConstraints - 1; i >= 0; i--)
       {
@@ -697,8 +111,10 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
    private boolean addConstraint()
    {
+      double cc, ss, h, t1, t2, xny;
+
       // we have to find the Givens rotation which will reduce the element d(j) to zero.
-      // if it is already zero, we don't have to do anything, except decrease j
+      // if it is already zero, we don't have to do anything, except of decreasing j
       for (int j = problemSize - 1; j >= numberOfActiveConstraints + 1; j--)
       {
          /* The Givens rotation is done with the matrix (cc cs, cs -cc). If cc is one, then element (j) of d is zero compared with
@@ -707,9 +123,9 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
           to be careful how we update d depending on the sign of gs.
           Otherwise we have to apply the Givens rotation to these columns.
           The i - 1 element of d has to be updated to h. */
-         double cc = d.get(j - 1);
-         double ss = d.get(j);
-         double h = distance(cc, ss);
+         cc = d.get(j - 1);
+         ss = d.get(j);
+         h = distance(cc, ss);
          if (Math.abs(h) < epsilon) // h == 0
             continue;
          d.set(j, 0.0);
@@ -726,11 +142,11 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             d.set(j - 1, h);
          }
 
-         double xny = ss / (1.0 + cc);
+         xny = ss / (1.0 + cc);
          for (int k = 0; k < problemSize; k++)
          {
-            double t1 = J.get(k, j - 1);
-            double t2 = J.get(k, j);
+            t1 = J.get(k, j - 1);
+            t2 = J.get(k, j);
             J.set(k, j - 1, t1 * cc + t2 * ss);
             J.set(k, j, xny * (t1 + J.get(k, j - 1)) - t2);
          }
@@ -834,6 +250,409 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       }
    }
 
+
+   public void reshape()
+   {
+      int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints;
+
+      R.reshape(problemSize, problemSize);
+      inequalityConstraintViolations.reshape(numberOfConstraints, 1);
+      stepDirectionInPrimalSpace.reshape(problemSize, 1);
+      stepDirectionInDualSpace.reshape(numberOfConstraints, 1);
+      d.reshape(problemSize, 1);
+      np.reshape(problemSize, 1);
+      lagrangeMultipliers.reshape(numberOfConstraints, 1);
+      previousSolution.reshape(problemSize, 1);
+      previousLagrangeMultipliers.reshape(numberOfConstraints, 1);
+
+      activeSetIndices.fill(0, numberOfConstraints, 0);
+      previousActiveSetIndices.fill(0, numberOfConstraints, 0);
+      inactiveSetIndices.fill(0, numberOfConstraints, 0);
+      excludeConstraintFromActiveSet.fill(0, numberOfConstraints, FALSE);
+   }
+
+   private void zero()
+   {
+      R.zero();
+      inequalityConstraintViolations.zero();
+      stepDirectionInPrimalSpace.zero();
+      stepDirectionInDualSpace.zero();
+      d.zero();
+      np.zero();
+      lagrangeMultipliers.zero();
+      previousSolution.zero();
+      previousLagrangeMultipliers.zero();
+   }
+
+   private void allocatedTemporaryMatrixOnDemand(int nvar, int neq, int nin)
+   {
+      negAin.reshape(nvar, nin);
+      negAeq.reshape(nvar, neq);
+   }
+
+   public double solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
+         DenseMatrix64F bin, DenseMatrix64F x, boolean initialize)
+   {
+      allocatedTemporaryMatrixOnDemand(Q.numCols, Aeq.numRows, Ain.numRows);
+
+      CommonOps.transpose(Aeq, this.negAeq);
+      CommonOps.scale(-1, this.negAeq);
+      CommonOps.transpose(Ain, this.negAin);
+      CommonOps.scale(-1, this.negAin);
+
+      return solveQuadprog(Q, f, negAeq, beq, negAin, bin, x, initialize);
+   }
+
+
+   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   // The solving function, implementing the Goldfarb-Idani method
+   public double solveQuadprog(DenseMatrix64F G, DenseMatrix64F g0,
+         DenseMatrix64F CE, DenseMatrix64F ce0, DenseMatrix64F CI, DenseMatrix64F ci0, DenseMatrix64F solutionToPack, boolean initialize)
+   {
+      //// TODO: 5/13/17  initialize
+      problemSize = G.getNumCols();
+      numberOfEqualityConstraints = CE.getNumCols();
+      numberOfInequalityConstraints = CI.getNumCols();
+
+      if (g0.getNumCols() != 1)
+         throw new RuntimeException("g0.getNumCols() != 1");
+      if (G.getNumRows() != g0.getNumRows())
+         throw new RuntimeException("G.getNumRows() != g0.getNumRows()");
+      if (G.getNumRows() != problemSize)
+         throw new RuntimeException("G.getNumRows() != G.getNumCols()");
+      if (CE.getNumRows() != problemSize)
+         throw new RuntimeException("Equality constraint matrix is incompatible, wrong number of variables.");
+      if (ce0.getNumRows() != numberOfEqualityConstraints)
+         throw new RuntimeException("Equality constraint objective is incompatible, wrong number of constraints.");
+      if (CI.getNumRows() != problemSize)
+         throw new RuntimeException("Inequality constraint matrix is incompatible, wrong number of variables.");
+      if (ci0.getNumRows() != numberOfInequalityConstraints)
+         throw new RuntimeException("IneEquality constraint objective is incompatible, wrong number of constraints.");
+
+      quadraticCostQMatrix.reshape(problemSize, problemSize);
+      quadraticCostQVector.reshape(problemSize, 1);
+      quadraticCostQMatrix.set(G);
+      quadraticCostQVector.set(g0);
+
+      linearEqualityConstraintsAMatrix.reshape(problemSize, numberOfEqualityConstraints);
+      linearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints, 1);
+      linearEqualityConstraintsAMatrix.set(CE);
+      linearEqualityConstraintsBVector.set(ce0);
+
+      linearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints);
+      linearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints, 1);
+      linearInequalityConstraintsCMatrix.set(CI);
+      linearInequalityConstraintsDVector.set(ci0);
+
+
+      solutionToPack.reshape(problemSize, 1);
+      solutionToPack.zero();
+
+      reshape();
+      zero();
+
+      QuadProgStep currentStep = QuadProgStep.step1;
+
+      double solutionValue, c1, c2;
+      double minimumStep = 0.0; // step length, minimum of partial step (maximumStepInDualSpace) and full step (minimumStepInPrimalSpace);
+      double maximumStepInDualSpace = 0.0;
+      double minimumStepInPrimalSpace = 0.0;
+      int solutionPairConstraintIndex = 0; // this is the index of the constraint to be added to the active set
+      numberOfIterations = 0;
+
+      J.reshape(problemSize, problemSize);
+      tempMatrix.reshape(problemSize, 1);
+
+      /** Preprocessing phase */
+
+      // compute the trace of the original matrix quadraticCostQMatrix
+      c1 = CommonOps.trace(quadraticCostQMatrix);
+
+
+      // decompose the matrix quadraticCostQMatrix in the form L^T L
+      decomposer.decompose(quadraticCostQMatrix);
+
+      R_norm = 1.0; // this variable will hold the norm of the matrix R
+
+      // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition 
+      solver.setA(quadraticCostQMatrix);
+      solver.invert(J);
+      c2 = CommonOps.trace(J);
+
+      // c1 * c2 is an estimate for cond(G)
+
+      // Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
+      // this is the feasible point in the dual space.
+      // x = -G^-1 * g0 = -J * J^T * g0
+      CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
+      CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
+
+      // compute the current x value
+      solutionValue = 0.5 * CommonOps.dot(quadraticCostQVector, solutionToPack);
+
+      // Add equality constraints to the working set A
+      numberOfActiveConstraints = 0;
+      for (int i = 0; i < numberOfEqualityConstraints; i++)
+      {
+         for (int j = 0; j < problemSize; j++)
+            np.set(j, linearEqualityConstraintsAMatrix.get(j, i));
+
+         compute_d();
+         updateStepDirectionInPrimalSpace();
+         updateStepDirectionInDualSpace();
+
+         // compute full step length minimumStepInPrimalSpace: i.e., the minimum step in primal space s.t. the constraint becomes feasible
+         minimumStepInPrimalSpace = 0.0;
+         if (Math.abs(CommonOps.dot(stepDirectionInPrimalSpace, stepDirectionInPrimalSpace)) > epsilon) // i.e. z != 0
+         {
+            minimumStepInPrimalSpace = (-CommonOps.dot(np, solutionToPack) - linearEqualityConstraintsBVector.get(i)) / CommonOps.dot(stepDirectionInPrimalSpace, np);
+         }
+
+         // set x = x + minimumStepInPrimalSpace * stepDirectionInPrimalSpace
+         CommonOps.addEquals(solutionToPack, minimumStepInPrimalSpace, stepDirectionInPrimalSpace);
+
+         // set u = u+
+         lagrangeMultipliers.set(numberOfActiveConstraints, minimumStepInPrimalSpace);
+         for (int k = 0; k < numberOfActiveConstraints; k++)
+            lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStepInPrimalSpace * stepDirectionInDualSpace.get(k));
+
+         // compute the new solution value
+         solutionValue += 0.5 * Math.pow(minimumStepInPrimalSpace, 2.0) * CommonOps.dot(stepDirectionInPrimalSpace, np);
+         activeSetIndices.set(i, -i - 1);
+
+         if (!addConstraint())
+         {
+            PrintTools.info("Constraints are linearly dependent.");
+            return solutionValue;
+         }
+      }
+
+      // set iai = K \ A
+      for (int i = 0; i < numberOfInequalityConstraints; i++)
+         inactiveSetIndices.set(i, i);
+
+      double solutionPairConstraintViolation = 0.0;
+      constraintIndexForMinimumStepLength = 0;
+
+      while (true)
+      {
+         switch(currentStep)
+         {
+         case step1:
+            numberOfIterations++;
+
+            // step 1: choose a violated constraint
+            for (int i = numberOfEqualityConstraints; i < numberOfActiveConstraints; i++)
+            {
+               solutionPairConstraintIndex = activeSetIndices.get(i);
+               inactiveSetIndices.set(solutionPairConstraintIndex, -1);
+            }
+
+            // compute s(x) = ci^T * x + ci0 for all elements of K \ A
+            solutionPairConstraintViolation = 0.0;
+            double psi = 0.0; // this value will contain the sum of all infeasibilities
+            solutionPairConstraintIndex = 0;
+            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            {
+               excludeConstraintFromActiveSet.set(i, TRUE);
+               double sum = 0.0;
+               for (int j = 0; j < problemSize; j++)
+                  sum += linearInequalityConstraintsCMatrix.get(j, i) * solutionToPack.get(j);
+               sum += linearInequalityConstraintsDVector.get(i);
+               inequalityConstraintViolations.set(i, sum);
+               psi += Math.min(0.0, sum);
+            }
+
+            if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
+            {
+               // numerically there are not infeasibilities anymore
+               return solutionValue;
+            }
+
+            // save old values for u, x, and A
+            for (int i = 0; i < numberOfActiveConstraints; i++)
+            {
+               previousLagrangeMultipliers.set(i, lagrangeMultipliers.get(i));
+               previousActiveSetIndices.set(i, activeSetIndices.get(i));
+            }
+            // and for x
+            for (int i = 0; i < problemSize; i++)
+               previousSolution.set(i, solutionToPack.get(i));
+
+            currentStep = QuadProgStep.step2;
+            continue;
+
+         case step2:
+            // Step 2: check for feasibility and determine a new S-pair
+            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            {
+               // select the constraint from the inactive set that is most violated
+               if (inequalityConstraintViolations.get(i) < solutionPairConstraintViolation && inactiveSetIndices.get(i) != -1 && excludeConstraintFromActiveSet.get(i) == TRUE)
+               {
+                  solutionPairConstraintViolation = inequalityConstraintViolations.get(i);
+                  solutionPairConstraintIndex = i;
+               }
+            }
+            if (solutionPairConstraintViolation >= 0.0)
+            {
+               return solutionValue;
+            }
+
+            // set np = n(solutionPairConstraintIndex)
+            for (int i = 0; i < problemSize; i++)
+               np.set(i, linearInequalityConstraintsCMatrix.get(i, solutionPairConstraintIndex));
+            // set u = [u 0]^T
+            lagrangeMultipliers.set(numberOfActiveConstraints, 0.0);
+            // add the violated constraint to the active set A
+            activeSetIndices.set(numberOfActiveConstraints, solutionPairConstraintIndex);
+
+            currentStep = QuadProgStep.step2a;
+            continue;
+
+         case step2a:
+            // Step 2a: determine step direction
+            compute_d();
+            // compute z = H np: the step direction in the primal space (through J, see the paper)
+            updateStepDirectionInPrimalSpace();
+            // compute N* np (if activeSetSize > 0): the negative of the step direction in the dual space
+            updateStepDirectionInDualSpace();
+
+            currentStep = QuadProgStep.step2b;
+            continue;
+
+         case step2b:
+            // Step 2b: compute step length
+            constraintIndexForMinimumStepLength = 0;
+            // Compute partial step length (maximum step in dual space without violating dual feasibility
+            maximumStepInDualSpace = Double.POSITIVE_INFINITY;
+            // find the constraintIndexForMinimumStepLength s.t. it reaches the minimum of u+(x) / r
+            for (int k = numberOfEqualityConstraints; k < numberOfActiveConstraints; k++)
+            {
+               double minimumStepLength = -lagrangeMultipliers.get(k) / stepDirectionInDualSpace.get(k);
+               if (stepDirectionInDualSpace.get(k) < 0.0 && minimumStepLength < maximumStepInDualSpace)
+               {
+                  maximumStepInDualSpace = minimumStepLength;
+                  constraintIndexForMinimumStepLength = activeSetIndices.get(k);
+               }
+            }
+
+            // Compute full step length (minimum step in primal space such that the violated constraint becomes feasible
+            if (Math.abs(CommonOps.dot(stepDirectionInPrimalSpace, stepDirectionInPrimalSpace)) > epsilon)
+            {
+               minimumStepInPrimalSpace = -inequalityConstraintViolations.get(solutionPairConstraintIndex) / CommonOps.dot(stepDirectionInPrimalSpace, np);
+               if (minimumStepInPrimalSpace < 0.0) // patch suggested by Takano Akio for handling numerical inconsistencies
+                  minimumStepInPrimalSpace = Double.POSITIVE_INFINITY;
+            }
+            else
+            {
+               minimumStepInPrimalSpace = Double.POSITIVE_INFINITY;
+            }
+
+            // the step is chosen as the minimum of maximumStepInDualSpace and minimumStepInPrimalSpace
+            minimumStep = Math.min(maximumStepInDualSpace, minimumStepInPrimalSpace);
+
+            currentStep = QuadProgStep.step2c;
+            continue;
+
+         case step2c:
+            // Step 2c: determine new S-pair and take step:
+
+            // // TODO: 5/15/17  clean all the stuff from here through step 3 up, as it can be made into a lot of other conditions
+            // case (i): no step in primal or dual space
+            if (!Double.isFinite(minimumStep))
+            {
+               // QPP is infeasible
+               // FIXME: unbounded to raise
+               return Double.POSITIVE_INFINITY;
+            }
+
+            // case (ii): step in dual space
+            if (!Double.isFinite(minimumStepInPrimalSpace))
+            {
+               // set u = u + t * [r 1] and drop constraintIndexForMinimumStepLength from the active set
+               for (int k = 0; k < numberOfActiveConstraints; k++)
+                  lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStep * stepDirectionInDualSpace.get(k));
+               lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
+               inactiveSetIndices.set(constraintIndexForMinimumStepLength, constraintIndexForMinimumStepLength);
+               deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
+
+               currentStep = QuadProgStep.step2a;
+               continue;
+            }
+
+            // case (iii): step in primal and dual space.
+            for (int k = 0; k < problemSize; k++)
+               solutionToPack.set(k, solutionToPack.get(k) + minimumStep * stepDirectionInPrimalSpace.get(k));
+            // update the solution value
+            solutionValue += minimumStep * CommonOps.dot(stepDirectionInPrimalSpace, np) * (0.5 * minimumStep + lagrangeMultipliers.get(numberOfActiveConstraints));
+
+            // u = u + t * [r 1]
+            for (int k = 0; k < numberOfActiveConstraints; k++)
+               lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStep * stepDirectionInDualSpace.get(k));
+            lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
+
+            currentStep = QuadProgStep.step3;
+            continue;
+
+         case step3:
+
+            if (Math.abs(minimumStep - minimumStepInPrimalSpace) < epsilon)
+            {
+               // full step has been taken, using the minimumStepInPrimalSpace
+               // add the violated constraint to the active set
+               if (!addConstraint())
+               {
+                  excludeConstraintFromActiveSet.set(solutionPairConstraintIndex, FALSE);
+                  deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
+
+                  for (int i = 0; i < numberOfInequalityConstraints; i++)
+                     inactiveSetIndices.set(i, i);
+
+                  for (int i = 0; i < numberOfActiveConstraints; i++)
+                  {
+                     activeSetIndices.set(i, previousActiveSetIndices.get(i));
+                     inactiveSetIndices.set(activeSetIndices.get(i), -1);
+                     lagrangeMultipliers.set(i, previousLagrangeMultipliers.get(i));
+                  }
+                  for (int i = 0; i < problemSize; i++)
+                     solutionToPack.set(i, previousSolution.get(i));
+
+                  currentStep = QuadProgStep.step2;
+                  continue;
+               }
+               else
+               {
+                  inactiveSetIndices.set(solutionPairConstraintIndex, -1);
+               }
+
+               currentStep = QuadProgStep.step1;
+               continue;
+            }
+
+            // a partial step has taken
+            // drop constraint constraintIndexForMinimumStepLength
+            inactiveSetIndices.set(constraintIndexForMinimumStepLength, constraintIndexForMinimumStepLength);
+            deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
+
+            // update s[ip] = CI * x + ci0
+            double sum = 0.0;
+            for (int k = 0; k < problemSize; k++)
+               sum += linearInequalityConstraintsCMatrix.get(k, solutionPairConstraintIndex) * solutionToPack.get(k);
+            inequalityConstraintViolations.set(solutionPairConstraintIndex, sum + linearInequalityConstraintsDVector.get(solutionPairConstraintIndex));
+
+            currentStep = QuadProgStep.step2a;
+            continue;
+
+         default:
+            throw new RuntimeException("This is an empty state.");
+         }
+      }
+   }
+
+   public int getNumberOfIterations()
+   {
+      return numberOfIterations;
+   }
 
    /**
     * Computes the Euclidean distance between two numbers
