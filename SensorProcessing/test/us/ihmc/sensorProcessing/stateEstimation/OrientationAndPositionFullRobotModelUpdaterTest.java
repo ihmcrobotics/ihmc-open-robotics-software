@@ -93,6 +93,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
 
          // update full robot model
          fullRobotModelUpdater.run();
+         twistCalculator.compute();
 
          // compare with ports
          double epsilon = 1e-12;
