@@ -225,18 +225,17 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public void setInitialPose(FramePose initialPose)
    {
       initialPose.getPoseIncludingFrame(tempPosition, tempOrientation);
-      tempPosition.changeFrame(initialPosition.getReferenceFrame());
-      initialPosition.set(tempPosition);
-      tempOrientation.changeFrame(initialOrientation.getReferenceFrame());
-      initialOrientation.set(tempOrientation);
+
+      initialPosition.setAndMatchFrame(tempPosition);
+      initialOrientation.setAndMatchFrame(tempOrientation);
 
       initialOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
    public void setInitialPose(FramePoint initialPosition, FrameOrientation initialOrientation)
    {
-      this.initialPosition.set(initialPosition);
-      this.initialOrientation.set(initialOrientation);
+      this.initialPosition.setAndMatchFrame(initialPosition);
+      this.initialOrientation.setAndMatchFrame(initialOrientation);
 
       initialOrientationForViz.setAndMatchFrame(initialOrientation);
    }
@@ -245,16 +244,16 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       finalPose.getPoseIncludingFrame(tempPosition, tempOrientation);
 
-      finalPosition.set(tempPosition);
-      finalOrientation.set(tempOrientation);
+      finalPosition.setAndMatchFrame(tempPosition);
+      finalOrientation.setAndMatchFrame(tempOrientation);
 
       finalOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
    public void setFinalPose(FramePoint finalPosition, FrameOrientation finalOrientation)
    {
-      this.finalPosition.set(finalPosition);
-      this.finalOrientation.set(finalOrientation);
+      this.finalPosition.setAndMatchFrame(finalPosition);
+      this.finalOrientation.setAndMatchFrame(finalOrientation);
 
       finalOrientationForViz.setAndMatchFrame(finalOrientation);
 
@@ -408,6 +407,11 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
+   }
+
+   public ReferenceFrame getCurrentReferenceFrame()
+   {
+      return currentPosition.getReferenceFrame();
    }
 
    private void checkIfMultipleFramesAllowed()
