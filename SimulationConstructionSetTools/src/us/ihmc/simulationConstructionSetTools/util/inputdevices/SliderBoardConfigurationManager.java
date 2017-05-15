@@ -15,6 +15,11 @@ public class SliderBoardConfigurationManager extends MidiSliderBoard
       super(scs, useVirtualSliderBoard, showSliderboardVisualizer);
    }
 
+   public SliderBoardConfigurationManager(SimulationConstructionSet scs, int registerNthSliderBoard)
+   {
+      super(scs, registerNthSliderBoard);
+   }
+
    public SliderBoardConfigurationManager(SimulationConstructionSet scs, boolean useVirtualSliderBoard)
    {
       super(scs, useVirtualSliderBoard);
