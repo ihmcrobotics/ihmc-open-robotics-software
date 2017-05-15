@@ -79,6 +79,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
+   private ReferenceFrame controlBaseFrame;
 
    private final RigidBody endEffector;
 
@@ -160,6 +161,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
+      controlBaseFrame = command.getControlBaseFrame();
 
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
@@ -315,7 +317,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void computeDerivativeTerm(FrameVector feedbackTermToPack)
    {
-      controlFrame.getTwistOfFrame().getLinearPart(currentLinearVelocity);
+      controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
+      currentTwist.getLinearPart(currentLinearVelocity);
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
