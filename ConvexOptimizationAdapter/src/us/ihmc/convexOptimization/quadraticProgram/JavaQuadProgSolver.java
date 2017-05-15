@@ -2,11 +2,7 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolverFactory;
 
-import org.ejml.interfaces.decomposition.CholeskyDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
 
@@ -40,10 +36,8 @@ public class JavaQuadProgSolver
 
    private final DenseMatrix64F J = new DenseMatrix64F(defaultSize, defaultSize);
 
-   private final DenseMatrix64F scalarMatrix = new DenseMatrix64F(1, 1);
-
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(0);
-   private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(0, true);
+   private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(defaultSize);
 
    private int n;
    private int m;
@@ -82,11 +76,9 @@ public class JavaQuadProgSolver
       // setting of z = J * d
       for (int i = 0; i < n; i++)
       {
-         double sum = 0.0;
-
+         zToPack.set(i, 0.0);
          for (int j = iq; j < n; j++)
-            sum += J.get(i, j) * d.get(j);
-         zToPack.set(i, sum);
+            zToPack.set(i, zToPack.get(i) + J.get(i, j) * d.get(j));
       }
    }
 
@@ -103,7 +95,7 @@ public class JavaQuadProgSolver
       }
    }
 
-   private boolean addConstraint(DenseMatrix64F R, DenseMatrix64F J, DenseMatrix64F d)
+   private boolean addConstraint(DenseMatrix64F J)
    {
       PrintTools.debug(traceSolver, "Add constraint " + iq);
 
@@ -170,7 +162,7 @@ public class JavaQuadProgSolver
       return true;
    }
 
-   private void deleteConstraint(DenseMatrix64F R, DenseMatrix64F J, TIntArrayList A, DenseMatrix64F u)
+   private void deleteConstraint(DenseMatrix64F J, TIntArrayList A, DenseMatrix64F u)
    {
       PrintTools.debug(traceSolver, "Delete constraint " + l + " " + iq);
 
@@ -255,9 +247,6 @@ public class JavaQuadProgSolver
    }
 
 
-   /** Utility functions for computing the Cholesky decomposition and solving linear systems */
-
-   /** Utility functions for computing the scalar product and the euclidean distance between two numbers */
    public void reshape()
    {
       int numberOfConstraints = p + m;
@@ -320,6 +309,7 @@ public class JavaQuadProgSolver
       p = CE.getNumCols();
       m = CI.getNumCols();
 
+
       if (g0.getNumCols() != 1)
          throw new RuntimeException("g0.getNumCols() != 1");
       if (G.getNumRows() != g0.getNumRows())
@@ -334,6 +324,12 @@ public class JavaQuadProgSolver
          throw new RuntimeException("Inequality constraint matrix is incompatible, wrong number of variables.");
       if (ci0.getNumRows() != m)
          throw new RuntimeException("IneEquality constraint objective is incompatible, wrong number of constraints.");
+
+      quadraticCostQMatrix.reshape(n, n);
+      quadraticCostQMatrix.set(G);
+
+      quadraticCostQVector.reshape(n, 1);
+      quadraticCostQVector.set(g0);
 
       x.reshape(n, 1);
       x.zero();
@@ -351,8 +347,8 @@ public class JavaQuadProgSolver
       int me = p; // number of equality constraints
       int mi = m; // number of inequality constraints
 
-      PrintTools.debug(traceSolver, "G : " + G);
-      PrintTools.debug(traceSolver, "g0 : " + g0);
+      PrintTools.debug(traceSolver, "G : " + quadraticCostQMatrix);
+      PrintTools.debug(traceSolver, "g0 : " + quadraticCostQVector);
       PrintTools.debug(traceSolver, "CE : " + CE);
       PrintTools.debug(traceSolver, "ce0 : " + ce0);
       PrintTools.debug(traceSolver, "CI : " + CI);
@@ -362,20 +358,25 @@ public class JavaQuadProgSolver
 
       /** Preprocessing phase */
 
-      // compute the trace of the original matrix G
+      // compute the trace of the original matrix quadraticCostQMatrix
       c1 = 0.0;
       for (int i = 0; i < n; i++)
       {
-         c1 += G.get(i, i);
+         c1 += quadraticCostQMatrix.get(i, i);
       }
-      //c1 = CommonOps.trace(G);
+      //c1 = CommonOps.trace(quadraticCostQMatrix);
 
-      // decompose the matrix G in the form L^T L
-      choleskyDecomposition(G);
+      // decompose the matrix quadraticCostQMatrix in the form L^T L
+      choleskyDecomposition(quadraticCostQMatrix);
+      PrintTools.debug(traceSolver, "G : " + quadraticCostQMatrix);
 
-
-
-      PrintTools.debug(traceSolver, "G : " + G); // todo this should be decomposed
+      // initialize the matrix R
+      for (int i = 0; i < n; i++)
+      {
+         d.set(i, 0.0);
+         for (int j = 0; j < n; j++)
+            R.set(i, j, 0.0);
+      }
       R_norm = 1.0; // this variable will hold the norm of the matrix R
 
       // compute the inverse of the factorized matrix G^-1, this is the initial value for H
@@ -383,7 +384,7 @@ public class JavaQuadProgSolver
       for (int i = 0; i < n; i++)
       {
          d.set(i, 1.0);
-         forwardElimination(G, z, d);
+         forwardElimination(quadraticCostQMatrix, z, d);
          for (int j = 0; j < n; j++)
             J.set(i, j, z.get(j));
          d.set(i, 0.0);
@@ -398,12 +399,12 @@ public class JavaQuadProgSolver
       // Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
       // this is the feasible point in the dual space
       // x = -G^-1 * g0
-      choleskySolve(G, x, g0);
+      choleskySolve(quadraticCostQMatrix, x, quadraticCostQVector);
       for (int i = 0; i < n; i++)
          x.set(i, -x.get(i));
 
       // compute the current x value
-      f_value = 0.5 * scalarProduct(g0, x);
+      f_value = 0.5 * scalarProduct(quadraticCostQVector, x);
 
       PrintTools.debug(traceSolver, "Unconstrained x : " + f_value);
       PrintTools.debug(traceSolver, "x : " + x);
@@ -446,7 +447,7 @@ public class JavaQuadProgSolver
          f_value += 0.5 * Math.pow(t2, 2.0) * scalarProduct(z, np);
          A.set(i, -i - 1);
 
-         if (!addConstraint(R, J, d))
+         if (!addConstraint(J))
          {
             PrintTools.info("Constraints are linearly dependent.");
             return f_value;
@@ -573,18 +574,15 @@ public class JavaQuadProgSolver
             {
                if (r.get(k) > 0.0)
                {
-                  double tmp = u.get(k) / r.get(k);
-                  if (tmp < t1)
+                  if (u.get(k) / r.get(k) < t1)
                   {
-                     t1 = tmp;
+                     t1 = u.get(k) / r.get(k);
                      l = A.get(k);
                   }
                }
             }
 
             // Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible
-            //CommonOps.multTransA(z, z, scalarMatrix);
-            //if (Math.abs(z.get(0)) > epsilon)
             if (Math.abs(scalarProduct(z, z)) > epsilon)
             {
                t2 = -s.get(ip) / scalarProduct(z, np);
@@ -623,7 +621,7 @@ public class JavaQuadProgSolver
                   u.set(k, u.get(k) - t * r.get(k));
                u.set(iq, u.get(iq) + t);
                iai.set(l, l);
-               deleteConstraint(R, J, A, u);
+               deleteConstraint(J, A, u);
 
                PrintTools.debug(traceSolver, "in dual space: " + f_value);
                PrintTools.debug(traceSolver, "x : " + x);
@@ -665,10 +663,10 @@ public class JavaQuadProgSolver
 
                // full step has been taken
                // add constraint ip to the active set
-               if (!addConstraint(R, J, d))
+               if (!addConstraint(J))
                {
                   iaexcl.set(ip, 0);
-                  deleteConstraint(R, J, A, u);
+                  deleteConstraint(J, A, u);
 
                   PrintTools.debug(traceSolver, "R : " + R);
                   PrintTools.debug(traceSolver, "A : " + A);
@@ -708,7 +706,7 @@ public class JavaQuadProgSolver
 
             // drop constraint l
             iai.set(l, l);
-            deleteConstraint(R, J, A, u);
+            deleteConstraint(J, A, u);
 
             PrintTools.debug(traceSolver, "R : " + R);
             PrintTools.debug(traceSolver, "A : " + A);

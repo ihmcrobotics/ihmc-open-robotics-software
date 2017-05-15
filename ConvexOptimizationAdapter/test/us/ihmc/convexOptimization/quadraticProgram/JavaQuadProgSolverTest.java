@@ -112,6 +112,7 @@ public class JavaQuadProgSolverTest
       {
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
          DenseMatrix64F xWrapper = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+
          javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
          solver.solve(Q, f, Aeq, beq, Ain, bin, xWrapper, false);
 
@@ -132,7 +133,6 @@ public class JavaQuadProgSolverTest
 
          // Verify solution is as expected
          Assert.assertArrayEquals("repeat = " + repeat, x.getData(), xWrapper.getData(), 1e-10);
-         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + javaSolver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
       }
    }
 
