@@ -19,8 +19,6 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class GeometricJacobianTest
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final Random random = new Random(101L);
 
    private GeometricJacobian bodyManipulatorJacobian;
@@ -118,6 +116,7 @@ public class GeometricJacobianTest
          ScrewTestTools.setRandomVelocity(floatingJoint, random);
          ScrewTestTools.setRandomPositions(revoluteJoints, random);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
+         floatingChain.getElevator().updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -127,6 +126,7 @@ public class GeometricJacobianTest
          DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
@@ -138,6 +138,7 @@ public class GeometricJacobianTest
          jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
