@@ -460,7 +460,7 @@ public class JavaQuadProgSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSimpleCasesWithBoundsConstraints()
+   public void testSimpleCasesWithBoundsConstraints() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
@@ -495,7 +495,7 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-int       numberOfIterations = solver.solve(solution);
+      int numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
@@ -562,14 +562,23 @@ int       numberOfIterations = solver.solve(solution);
       quadraticCostScalar = 0.0;
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-      variableLowerBounds = new double[] { 1.0 + epsilon };
-      variableUpperBounds = new double[] { 1.0 - epsilon };
+      variableLowerBounds = new double[] { 1.0 + 1e7 };
+      variableUpperBounds = new double[] { 1.0 - 1e7 };
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
+      boolean caughtException = false;
+      try
+      {
+         numberOfIterations = solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         caughtException = true;
+      }
+      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
 
+      assertTrue(caughtException);
       assertEquals(1, solution.length);
       assertTrue(Double.isNaN(solution[0]));
 
@@ -645,7 +654,7 @@ int       numberOfIterations = solver.solve(solution);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClear()
+   public void testClear() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
@@ -1009,7 +1018,7 @@ int       numberOfIterations = solver.solve(solution);
    @Ignore // This should pass with a good solver. But a simple one has trouble on it.
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testChallengingCasesWithPolygonConstraints()
+   public void testChallengingCasesWithPolygonConstraints() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       solver.setMaxNumberOfIterations(10);
@@ -1060,7 +1069,7 @@ int       numberOfIterations = solver.solve(solution);
    // This should pass with a good solver. But a simple one has trouble on it.
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolver()
+   public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolver() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       solver.setMaxNumberOfIterations(10);
@@ -1088,7 +1097,7 @@ int       numberOfIterations = solver.solve(solution);
    // this has no solution with a simple solver
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testCaseWithNoSolution()
+   public void testCaseWithNoSolution() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       int maxNumberOfIterations = 10;
@@ -1219,7 +1228,7 @@ int       numberOfIterations = solver.solve(solution);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
-   public void testLargeRandomProblemWithInequalityAndBoundsConstraints()
+   public void testLargeRandomProblemWithInequalityAndBoundsConstraints() throws NoConvergenceException
    {
       Random random = new Random(1776L);
 
@@ -1236,9 +1245,6 @@ int       numberOfIterations = solver.solve(solution);
 
       DenseMatrix64F solution = new DenseMatrix64F(0, 0);
       double[] solutionWithSmallPerturbation = new double[numberOfVariables];
-
-      DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
-      DenseMatrix64F augmentedLinearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
 
       int numberOfNaNSolutions = 0;
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
@@ -1280,11 +1286,9 @@ int       numberOfIterations = solver.solve(solution);
             continue;
          }
 
-         double objectiveCost = solver.getObjectiveCost(solution);
-
          // Verify constraints hold:
          verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
-//         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution); //// FIXME: 5/15/17 
+         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution); //// FIXME: 5/15/17
          verifyVariableBoundsHold(variableLowerBounds, variableUpperBounds, solution);
 
          // Verify objective is minimized by comparing to small perturbation:
@@ -1300,19 +1304,6 @@ int       numberOfIterations = solver.solve(solution);
 
          // Equality constraints usually do not hold. Sometimes they do, so if you run with lots of numberOfTests, comment out the following:
          verifyInequalityConstraintsDoNotHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
-
-
-         augmentedLinearEqualityConstraintsAMatrix.zero();
-         augmentedLinearEqualityConstraintsBVector.zero();
-
-         CommonOps.extract(linearEqualityConstraintsAMatrix, 0, numberOfEqualityConstraints, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, 0, 0);
-         CommonOps.extract(linearEqualityConstraintsBVector, 0, numberOfEqualityConstraints, 0, 1, augmentedLinearEqualityConstraintsBVector, 0, 0);
-
-         DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solution, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector);
-
-         double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
-
-         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
       }
 
       assertTrue(numberOfNaNSolutions < 0.05 * numberOfTests);
@@ -1335,7 +1326,7 @@ int       numberOfIterations = solver.solve(solution);
     */
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testFindValidSolutionForDataset20160319()
+   public void testFindValidSolutionForDataset20160319() throws NoConvergenceException
    {
       ActualDatasetFrom20160319 dataset = new ActualDatasetFrom20160319();
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
@@ -1350,7 +1341,7 @@ int       numberOfIterations = solver.solve(solution);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testMaxIterations()
+   public void testMaxIterations() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
@@ -1390,7 +1381,6 @@ int       numberOfIterations = solver.solve(solution);
       assertEquals(-4.0, solution[0], 1e-7);
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
-
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);

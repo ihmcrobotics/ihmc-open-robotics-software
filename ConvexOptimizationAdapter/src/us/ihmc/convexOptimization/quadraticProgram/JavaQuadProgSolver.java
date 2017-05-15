@@ -11,6 +11,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class JavaQuadProgSolver
 {
@@ -44,6 +45,7 @@ public class JavaQuadProgSolver
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(defaultSize);
    private double quadraticCostScalar = 0.0;
 
@@ -101,6 +103,7 @@ public class JavaQuadProgSolver
       numberOfUpperBounds = 0;
 
       quadraticCostQMatrix.reshape(0, 0);
+      decomposedQuadraticCostQMatrix.reshape(0, 0);
       quadraticCostQVector.reshape(0, 0);
 
       linearEqualityConstraintsAMatrix.reshape(0, 0);
@@ -246,25 +249,36 @@ public class JavaQuadProgSolver
       this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
    }
 
-   public int solve(double[] solutionToPack)
+   public int solve(double[] solutionToPack) throws NoConvergenceException
    {
       if (solutionToPack.length != problemSize)
          throw new RuntimeException("solutionToPack.length != numberOfVariables");
 
       DenseMatrix64F solution = new DenseMatrix64F(problemSize, 1);
-      int numberOfIterations = solve(solution);
-
-      double[] solutionData = solution.getData();
-
-      for (int i = 0; i < problemSize; i++)
+      int numberOfIterations;
+      try
       {
-         solutionToPack[i] = solutionData[i];
+         numberOfIterations = solve(solution);
+
+         for (int i = 0; i < problemSize; i++)
+         {
+            solutionToPack[i] = solution.get(i);
+         }
+      }
+      catch(NoConvergenceException e)
+      {
+         for (int i = 0; i < problemSize; i++)
+         {
+            solutionToPack[i] = Double.NaN;
+         }
+
+         throw e;
       }
 
       return numberOfIterations;
    }
 
-   public int solve(DenseMatrix64F solutionToPack)
+   public int solve(DenseMatrix64F solutionToPack) throws NoConvergenceException
    {
       solutionToPack.reshape(problemSize, 1);
       solutionToPack.zero();
@@ -290,12 +304,13 @@ public class JavaQuadProgSolver
       c1 = CommonOps.trace(quadraticCostQMatrix);
 
       // decompose the matrix quadraticCostQMatrix in the form L^T L
-      decomposer.decompose(quadraticCostQMatrix);
+      decomposedQuadraticCostQMatrix.set(quadraticCostQMatrix);
+      decomposer.decompose(decomposedQuadraticCostQMatrix);
 
       R_norm = 1.0; // this variable will hold the norm of the matrix R
 
       // compute the inverse of the factorized matrix G^-1, this is the initial value for H //// TODO: 5/14/17 combine this with the decomposition 
-      solver.setA(quadraticCostQMatrix);
+      solver.setA(decomposedQuadraticCostQMatrix);
       solver.invert(J);
       c2 = CommonOps.trace(J);
 
@@ -456,10 +471,10 @@ public class JavaQuadProgSolver
 
          // Step 2c: determine new S-pair and take step:
 
-         // // TODO: 5/15/17  clean all the stuff from here through step 3 up, as it can be made into a lot of other conditions
          if (!Double.isFinite(minimumStep))
          { // case (i): no step in primal or dual space, QPP is infeasible
-            return numberOfIterations;
+            CommonOps.fill(solutionToPack, Double.NaN);
+            throw new NoConvergenceException(numberOfIterations);
          }
          else if (!Double.isFinite(minimumStepInPrimalSpace))
          { // case (ii): step in dual space
