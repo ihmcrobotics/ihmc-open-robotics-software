@@ -26,6 +26,11 @@ public class SolarPanelPath
       arrivalTime.add(0.0);
    }
    
+   public SolarPanelCleaningPose getStartPose()
+   {
+      return wayPoses.get(0);
+   }
+   
    public SolarPanel getSolarPanel()
    {
       return wayPoses.get(0).getSolarPanel();
