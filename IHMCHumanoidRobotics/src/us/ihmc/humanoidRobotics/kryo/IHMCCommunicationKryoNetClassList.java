@@ -46,6 +46,7 @@ import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
@@ -288,6 +289,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SO3TrajectoryPointMessage.class);
       registerPacketClass(SE3TrajectoryPointMessage.class);
       registerPacketClass(BodyPart.class);
+      registerPacketClass(FrameInformation.class);
 
       registerPacketField(OneDoFJointTrajectoryMessage.class);
       registerPacketField(OneDoFJointTrajectoryMessage[].class);
