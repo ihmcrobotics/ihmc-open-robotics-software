@@ -74,7 +74,6 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBody r2 = ScrewTools.addRigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
 
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, worldFrame, elevatorFrame);
-      TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true, false);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
@@ -91,7 +90,6 @@ public class CenterOfMassAccelerationCalculatorTest
       j2.setQdd(qdd2);
       elevator.updateFramesRecursively();
 
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);

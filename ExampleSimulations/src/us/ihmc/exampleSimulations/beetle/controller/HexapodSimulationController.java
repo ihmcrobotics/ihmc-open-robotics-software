@@ -62,7 +62,6 @@ public class HexapodSimulationController implements RobotController
    private final HexapodHighLevelControlManager highLevelController;
 
    private final HexapodReferenceFrames referenceFrames;
-   private final TwistCalculator twistCalculator;
    private LongYoVariable totalTimeToCompleteTick = new LongYoVariable("totalTimeToCompleteTick", registry);
    private DoubleYoVariable totalTimeToCompleteTickInSeconds = new DoubleYoVariable("totalTimeToCompleteTickInSeconds", registry);
 
@@ -77,10 +76,9 @@ public class HexapodSimulationController implements RobotController
       this.sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
       this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
-      this.twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
       setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
 
-      highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, twistCalculator, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
+      highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
@@ -213,7 +211,6 @@ public class HexapodSimulationController implements RobotController
       }
 
       referenceFrames.updateFrames();
-      twistCalculator.compute();
 
       if (firstTick)
       {

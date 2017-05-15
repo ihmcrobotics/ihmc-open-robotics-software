@@ -205,10 +205,9 @@ public class SpatialAccelerationCalculator
     * {@code inertialFrame}, expressed in the {@code body.getBodyFixedFrame()}.
     * </p>
     * <p>
-    * WARNING: This method assumes that the internal memory of this and {@code twistCalculator} is
-    * up-to-date. The user has to notify this calculator every time the system state has changed,
-    * this is done through the method {@link #compute()} and notify the {@link TwistCalculator} the
-    * same way.
+    * WARNING: This method assumes that the internal memory of this and
+    * {@code spatialAccelerationCalculator} is up-to-date. The user has to notify this calculator
+    * every time the system state has changed, this is done through the method {@link #compute()}.
     * </p>
     * <p>
     * In the case the acceleration of the given {@code body} has been computed already no extra

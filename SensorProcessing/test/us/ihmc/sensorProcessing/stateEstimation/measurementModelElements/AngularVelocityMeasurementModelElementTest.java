@@ -54,7 +54,7 @@ public class AngularVelocityMeasurementModelElementTest
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getRootJoint());
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
       
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator(); 
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator); 
 
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
