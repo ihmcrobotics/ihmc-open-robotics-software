@@ -321,8 +321,7 @@ public class PelvisLinearStateUpdater
       rootJoint.getJointTwist(rootJointTwist);
       rootJointTwist.setToZero();
       rootJoint.setJointTwist(rootJointTwist);
-
-      rootJointFrame.update();
+      rootJoint.updateFramesRecursively();
 
       updateCoMState();
    }
@@ -411,8 +410,7 @@ public class PelvisLinearStateUpdater
       tempVelocity.changeFrame(rootJointTwist.getExpressedInFrame());
       rootJointTwist.setLinearPart(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);
-
-      rootJointFrame.update();
+      rootJoint.updateFramesRecursively();
    }
 
    private int setTrustedFeetUsingFootSwitches()

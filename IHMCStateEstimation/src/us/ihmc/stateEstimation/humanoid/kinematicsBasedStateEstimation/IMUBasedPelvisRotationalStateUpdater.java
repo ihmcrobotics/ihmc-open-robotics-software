@@ -18,7 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
@@ -280,7 +279,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
-      rootJointFrame.update();
+      rootJoint.updateFramesRecursively();
 
       yoRootJointAngularVelocity.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);
       yoRootJointAngularVelocityMeasFrame.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);
