@@ -96,6 +96,16 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public MidiSliderBoard(YoVariableHolder scs)
    {
+      this(scs, 1);
+   }
+
+   /**
+    *
+    * @param scs
+    * @param registerNthSliderBoard take the nth slider board
+    */
+   public MidiSliderBoard(YoVariableHolder scs, int registerNthSliderBoard)
+   {
       try
       {
          MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
@@ -104,7 +114,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
          // findPotentialDeviceNumbers(infos, inDeviceNumbers, printInfo);
 
-         init(infos);
+         init(infos, registerNthSliderBoard);
 
          // if no devices are found
 
@@ -268,9 +278,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          visualizer.createLabels();
    }
 
-   public int init(MidiDevice.Info[] infos)
+   public int init(MidiDevice.Info[] infos, int registerNthDevice)
    {
       MidiDevice outDevice = null;
+
       if (DEBUG)
          System.out.println("EvolutionUC33E::init found " + infos.length + " MIDI device infos.");
 
@@ -279,6 +290,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       String name = null;
       String description = null;
       MidiDevice current = null;
+      int numberOfDevicesFound = 0;
+
       for (int i = 0; i < infos.length; i++)
       {
          if (DEBUG)
@@ -296,6 +309,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          {
             if (preferdDeviceNumber == -1)
             {
+               numberOfDevicesFound++;
+               if(numberOfDevicesFound < registerNthDevice)
+                  continue;
+
                preferdDeviceNumber = i;
 
                if (DEBUG)
@@ -363,6 +380,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          }
          else if (name.contains("BCF2000") || description.contains("BCF2000"))
          {
+            numberOfDevicesFound++;
+            if(numberOfDevicesFound < registerNthDevice)
+               continue;
+
             preferdDeviceNumber = i;
             preferedDevice = Devices.MOTORIZED;
             if (DEBUG)
