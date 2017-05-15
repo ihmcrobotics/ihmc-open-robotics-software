@@ -76,8 +76,8 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
             double time = rrtPath.get(i).getNodeData(0);
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
                                     
-            handTrajectoryMessage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
-            handTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
+//            handTrajectoryMessage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+//            handTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
             handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());            
             
             Quaternion desiredChestOrientation = new Quaternion();

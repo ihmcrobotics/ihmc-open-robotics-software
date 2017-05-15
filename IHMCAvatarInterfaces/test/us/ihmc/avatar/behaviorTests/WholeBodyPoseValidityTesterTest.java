@@ -333,7 +333,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       //HandTrajectoryBehavior handBehavior = new HandTrajectoryBehavior("rigthHand", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.35, 1.2), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.35, 1.2), new Quaternion(), ReferenceFrame.getWorldFrame());
       Quaternion chestOrientation = new Quaternion();
       chestOrientation.appendYawRotation(Math.PI*0.3);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(3.0, chestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
