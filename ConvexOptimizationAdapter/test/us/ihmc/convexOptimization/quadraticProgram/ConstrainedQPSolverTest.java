@@ -45,14 +45,13 @@ public class ConstrainedQPSolverTest
             Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
          }
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
-         solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
-      /*
-      solver.clear();
-      solver.setQuadraticCostFunction(Q, f, 0.0);
-      solver.setLinearInequalityConstraints(Ain, bin);
-      solver.setLinearEqualityConstraints(Aeq, beq);
-      solver.solve(x);
-      */
+
+         solver.clear();
+         solver.setQuadraticCostFunction(Q, f, 0.0);
+         solver.setLinearInequalityConstraints(Ain, bin);
+         solver.setLinearEqualityConstraints(Aeq, beq);
+         solver.solve(x);
+
          Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
 
@@ -101,14 +100,12 @@ public class ConstrainedQPSolverTest
          if (optimizers.length > 0)
          {
             DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
-            solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
-      /*
-      solver.clear();
-      solver.setQuadraticCostFunction(Q, f, 0.0);
-      solver.setLinearInequalityConstraints(Ain, bin);
-      solver.setLinearEqualityConstraints(Aeq, beq);
-      solver.solve(x);
-      */
+
+            solver.clear();
+            solver.setQuadraticCostFunction(Q, f, 0.0);
+            solver.setLinearInequalityConstraints(Ain, bin);
+            solver.setLinearEqualityConstraints(Aeq, beq);
+            solver.solve(x);
             Assert.assertArrayEquals("repeat = " + repeat + ", Java solver", x.getData(), new double[] {-7.75, 8.5, -0.75}, 1e-10);
 
             DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
@@ -166,14 +163,12 @@ public class ConstrainedQPSolverTest
 
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
-      solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
-      /*
+      //solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
       solver.clear();
       solver.setQuadraticCostFunction(Q, f, 0.0);
       solver.setLinearInequalityConstraints(Ain, bin);
       solver.setLinearEqualityConstraints(Aeq, beq);
       solver.solve(x);
-      */
       boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
       if (!correct)
          PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
