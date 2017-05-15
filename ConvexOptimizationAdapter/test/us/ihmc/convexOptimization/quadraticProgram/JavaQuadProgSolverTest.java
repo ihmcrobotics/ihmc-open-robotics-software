@@ -219,10 +219,8 @@ public class JavaQuadProgSolverTest
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
       double[] solution = new double[1];
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[0];
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers); // Make sure ok to solve twice in a row without changing stuff.
+      int numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution); // Make sure ok to solve twice in a row without changing stuff.
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], epsilon);
@@ -235,8 +233,7 @@ public class JavaQuadProgSolverTest
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(1, solution.length);
@@ -254,8 +251,7 @@ public class JavaQuadProgSolverTest
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[0];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(2, solution.length);
@@ -278,8 +274,7 @@ public class JavaQuadProgSolverTest
       solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(0.5, solution[0], epsilon);
@@ -302,15 +297,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[2];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
-      //assertEquals(-2.0, lagrangeEqualityMultipliers[0], epsilon); // Lagrange multiplier //// TODO: 5/15/17
-      //assertEquals(0.0, lagrangeEqualityMultipliers[1], epsilon); // Lagrange multiplier //// TODO: 5/15/17
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
@@ -337,20 +329,14 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[1];
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[1];
 
-      int numberOfIterations;/* = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      int numberOfIterations = solver.solve(solution);
       assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], 1e-7);
-      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
-      */
 
       // Minimize x^T * x subject to x >= 1 (-x <= -1)
-      /*
       solver.clear();
       costQuadraticMatrix = new double[][] { { 2.0 } };
       costLinearVector = new double[] { 0.0 };
@@ -362,14 +348,11 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], 1e-7);
-      assertEquals(2.0, lagrangeInequalityMultipliers[0], 1e-7);
 
       // Minimize (x-5) * (x-5) = x^2 - 10x + 25 subject to x <= 3.0
       solver.clear();
@@ -383,15 +366,11 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(3.0, solution[0], epsilon);
-      assertEquals(4.0, lagrangeInequalityMultipliers[0], epsilon);
-      */
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
@@ -410,16 +389,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[2];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(2, numberOfIterations); //// TODO: 5/15/17  
 
       assertEquals(2, solution.length);
       assertEquals(5.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
-      //assertEquals(0.0, lagrangeInequalityMultipliers[0], epsilon); //// TODO: 5/15/17
-      //assertEquals(4.0, lagrangeInequalityMultipliers[1], epsilon); //// TODO: 5/15/17
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
@@ -442,16 +417,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(2, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(2, solution.length);
       assertEquals(0.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
-      assertEquals(-1.0, lagrangeEqualityMultipliers[0], epsilon);
-      assertEquals(1.0, lagrangeInequalityMultipliers[0], epsilon);
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
@@ -474,19 +445,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[2];
-      lagrangeInequalityMultipliers = new double[3];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(1, numberOfIterations); //// TODO: 5/15/17  
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
-      assertEquals(-2.0, lagrangeEqualityMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeEqualityMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeInequalityMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeInequalityMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeInequalityMultipliers[2], epsilon);
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
@@ -494,13 +458,11 @@ public class JavaQuadProgSolverTest
       assertEquals(2.0, objectiveCost, epsilon);
    }
 
-   //// TODO: 5/15/17
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       // Minimize x^T * x
       double[][] costQuadraticMatrix = new double[][] { { 2.0 } };
@@ -513,19 +475,13 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       double[] solution = new double[1];
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[0];
-      double[] lagrangeLowerBoundMultipliers = new double[1];
-      double[] lagrangeUpperBoundMultipliers = new double[1];
 
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(1, numberOfIterations);
+      //int numberOfIterations = solver.solve(solution);
+      //numberOfIterations = solver.solve(solution);
+      //assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], epsilon);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], epsilon);
 
       // Minimize x^T * x subject to x >= 1
       solver.clear();
@@ -539,17 +495,11 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[1];
-      lagrangeUpperBoundMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+int       numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], epsilon);
-      assertEquals(2.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], epsilon);
 
       // Minimize x^T * x subject to x <= -1
       solver.clear();
@@ -563,17 +513,11 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[1];
-      lagrangeUpperBoundMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(-1.0, solution[0], epsilon);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(2.0, lagrangeUpperBoundMultipliers[0], epsilon);
 
       // Minimize x^T * x subject to 1 + 1e-12 <= x <= 1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
       solver.clear();
@@ -587,17 +531,11 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[1];
-      lagrangeUpperBoundMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], epsilon);
-      assertEquals(2.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], epsilon);
 
       // Minimize x^T * x subject to -1 + 1e-12 <= x <= -1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
       solver.clear();
@@ -611,17 +549,11 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[1];
-      lagrangeUpperBoundMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(-1.0, solution[0], epsilon);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(2.0, lagrangeUpperBoundMultipliers[0], epsilon);
 
       // Minimize x^T * x subject to 1 + epsilon <= x <= 1 - epsilon (Should not give valid solution since this is too much to blame on roundoff)
       solver.clear();
@@ -635,17 +567,11 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[1];
-      lagrangeUpperBoundMultipliers = new double[1];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(3, numberOfIterations);
+      numberOfIterations = solver.solve(solution);
+      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
 
       assertEquals(1, solution.length);
       assertTrue(Double.isNaN(solution[0]));
-      assertTrue(Double.isInfinite(lagrangeLowerBoundMultipliers[0]));
-      assertTrue(Double.isInfinite(lagrangeUpperBoundMultipliers[0]));
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z
       solver.clear();
@@ -666,29 +592,15 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY });
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      lagrangeLowerBoundMultipliers = new double[3];
-      lagrangeUpperBoundMultipliers = new double[3];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(3, numberOfIterations);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
+      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
       assertEquals(6.0, solution[1], epsilon);
       assertEquals(14.0, solution[2], epsilon);
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], epsilon);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], epsilon);
-
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], epsilon);
-
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], epsilon);
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
@@ -714,14 +626,10 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(new double[] { 3.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY });
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      lagrangeLowerBoundMultipliers = new double[3];
-      lagrangeUpperBoundMultipliers = new double[3];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(2, numberOfIterations);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
+      //assertEquals(2, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -733,14 +641,13 @@ public class JavaQuadProgSolverTest
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertTrue(Double.isNaN(objectiveCost));
    }
-   */
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    {
-      SimpleActiveSetQPSolverInterface solver = new JavaQuadProgSolver();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z
       solver.clear();
@@ -758,40 +665,23 @@ public class JavaQuadProgSolverTest
       double[] linearInqualityConstraintsDVector = new double[] { -8.0 };
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
-      //solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY }); //todo
+      solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY }); //todo
 
       double[] solution = new double[3];
-      double[] lagrangeEqualityMultipliers = new double[1];
-      double[] lagrangeInequalityMultipliers = new double[1];
-      double[] lagrangeLowerBoundMultipliers = new double[0]; //// TODO: 5/15/17  
-      double[] lagrangeUpperBoundMultipliers = new double[0]; //// TODO: 5/15/17  
 
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      int numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
 
-      //// TODO: 5/15/17  
-      /*
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
       assertEquals(6.0, solution[1], epsilon);
       assertEquals(14.0, solution[2], epsilon);
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], epsilon);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], epsilon);
-
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], epsilon);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], epsilon);
-
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], epsilon);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], epsilon);
-      */
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(248.0, objectiveCost, epsilon); //// TODO: 5/15/17
+      assertEquals(248.0, objectiveCost, epsilon); //// TODO: 5/15/17
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8  (Remove -5 <= x <= 5, 6 <= y <= 10, 11 <= z)
       solver.clear();
@@ -810,26 +700,19 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
-
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(4.0, solution[0], epsilon);
       assertEquals(-2.0, solution[1], epsilon);
       assertEquals(6.0, solution[2], epsilon);
-      //assertEquals(-8.0, lagrangeEqualityMultipliers[0], epsilon); //// TODO: 5/15/17
-      //assertEquals(12.0, lagrangeInequalityMultipliers[0], epsilon); //// TODO: 5/15/17
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(56.0, objectiveCost, epsilon); //// TODO: 5/15/17  
+      assertEquals(56.0, objectiveCost, epsilon); //// TODO: 5/15/17
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, (Remove y - z <= -8)
       solver.clear();
@@ -844,25 +727,20 @@ public class JavaQuadProgSolverTest
       solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17  
 
       assertEquals(3, solution.length);
       assertEquals(1.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
       assertEquals(0.0, solution[2], epsilon);
-      //assertEquals(-2.0, lagrangeEqualityMultipliers[0], 1e-7); //// TODO: 5/15/17  
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(2.0, objectiveCost, epsilon); //// TODO: 5/15/17  
+      assertEquals(2.0, objectiveCost, epsilon);
 
       // Minimize x^2 + y^2 + z^2 (Remove subject to x + y = 2.0)
       solver.clear();
@@ -873,13 +751,9 @@ public class JavaQuadProgSolverTest
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17  
 
       assertEquals(3, solution.length);
@@ -898,25 +772,20 @@ public class JavaQuadProgSolverTest
       solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[0];
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(3, solution.length);
       assertEquals(1.0, solution[0], epsilon);
       assertEquals(1.0, solution[1], epsilon);
       assertEquals(0.0, solution[2], epsilon);
-      //assertEquals(-2.0, lagrangeEqualityMultipliers[0], epsilon); //// TODO: 5/15/17  
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(2.0, objectiveCost, epsilon); //// TODO: 5/15/17  
+      assertEquals(2.0, objectiveCost, epsilon);
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8  (Added without clearing)
       linearInequalityConstraintsCMatrix = new double[][] { { 0.0, 1.0, -1.0 } };
@@ -924,64 +793,39 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(4.0, solution[0], epsilon);
       assertEquals(-2.0, solution[1], epsilon);
       assertEquals(6.0, solution[2], epsilon);
-      //assertEquals(-8.0, lagrangeEqualityMultipliers[0], epsilon); //// TODO: 5/15/17
-      //assertEquals(12.0, lagrangeInequalityMultipliers[0], epsilon); //// TODO: 5/15/17
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(56.0, objectiveCost, epsilon); //// TODO: 5/15/17  
+      assertEquals(56.0, objectiveCost, epsilon);
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z (Added without clearing)
-      //solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY }); //// TODO: 5/15/17  
+      solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY });
 
       solution = new double[3];
-      lagrangeEqualityMultipliers = new double[1];
-      lagrangeInequalityMultipliers = new double[1];
-      //lagrangeLowerBoundMultipliers = new double[3]; //// TODO: 5/15/17
-      //lagrangeUpperBoundMultipliers = new double[3]; //// TODO: 5/15/17
-      lagrangeLowerBoundMultipliers = new double[0];
-      lagrangeUpperBoundMultipliers = new double[0];
 
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
+      numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
+      //assertEquals(3, numberOfIterations);
 
-      //// TODO: 5/15/17
-      /*
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
-
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
-
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
-      */
 
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(248.0, objectiveCost, 1e-7); //// TODO: 5/15/17  
+      assertEquals(248.0, objectiveCost, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1010,8 +854,6 @@ public class JavaQuadProgSolverTest
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(2, 1);
       DenseMatrix64F solutionMatrixAlt = new DenseMatrix64F(2, 1);
-      double[] lagrangeEqualityMultipliers = new double[1];
-      double[] lagrangeInequalityMultipliers = new double[3];
 
       solver.clear();
       solver.setQuadraticCostFunction(G, f, quadraticCostScalar);
@@ -1024,13 +866,8 @@ public class JavaQuadProgSolverTest
 
       assertEquals(-1.0, solutionMatrix.get(0), 1e-7);
       assertEquals(3.0, solutionMatrix.get(1), 1e-7);
-      //assertEquals(2, solution.length);
       assertEquals(-1.0, solutionMatrixAlt.get(0), 1e-7);
       assertEquals(3.0, solutionMatrixAlt.get(1), 1e-7);
-      //assertEquals(2.0, lagrangeEqualityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(8.0, lagrangeInequalityMultipliers[1], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7); //// FIXME: 5/15/17
 
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(10.0, objectiveCost, 1e-7);
@@ -1048,10 +885,6 @@ public class JavaQuadProgSolverTest
       assertEquals(2, solution.length);
       assertEquals(-1.0, solution[0], 1e-7);
       assertEquals(3.0, solution[1], 1e-7);
-      //assertEquals(2.0, lagrangeEqualityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(8.0, lagrangeInequalityMultipliers[1], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7); //// FIXME: 5/15/17
 
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
@@ -1068,19 +901,13 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       DenseMatrix64F solutionMatrix64F = new DenseMatrix64F(quadraticCostMatrix64F.getNumRows(), 1);
-      DenseMatrix64F lagrangeEqualityMultipliers64F = new DenseMatrix64F(linearEqualityConstraintsAMatrix.length, 1);
-      DenseMatrix64F lagrangeInequalityMultipliers64F = new DenseMatrix64F(linearInequalityConstraintsCMatrix.length, 1);
-      numberOfIterations = solver.solve(solutionMatrix64F, lagrangeEqualityMultipliers64F, lagrangeInequalityMultipliers64F);
+      numberOfIterations = solver.solve(solutionMatrix64F);
 
       //assertEquals(2, numberOfIterations); //// FIXME: 5/15/17 
 
       assertEquals(2, solutionMatrix64F.getNumRows());
       assertEquals(-1.0, solutionMatrix64F.get(0, 0), 1e-7);
       assertEquals(3.0, solutionMatrix64F.get(1, 0), 1e-7);
-      //assertEquals(2.0, lagrangeEqualityMultipliers64F.get(0, 0), 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers64F.get(0, 0), 1e-7); //// FIXME: 5/15/17
-      //assertEquals(8.0, lagrangeInequalityMultipliers64F.get(1, 0), 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers64F.get(2, 0), 1e-7); //// FIXME: 5/15/17
 
       objectiveCost = solver.getObjectiveCost(solutionMatrix64F);
       assertEquals(10.0, objectiveCost, 1e-7);
@@ -1133,14 +960,11 @@ public class JavaQuadProgSolverTest
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(2, 1);
       DenseMatrix64F solutionMatrixAlt = new DenseMatrix64F(2, 1);
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[4];
       solver.clear();
       solver.setQuadraticCostFunction(Q, f, quadraticCostScalar);
       solver.setLinearInequalityConstraints(Ain, bin);
       solver.setLinearEqualityConstraints(Aeq, beq);
       int numberOfIterations = solver.solve(solutionMatrix);
-      //int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
       originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
 
       //assertEquals(2, numberOfIterations); //// TODO: 5/15/17  
@@ -1150,10 +974,6 @@ public class JavaQuadProgSolverTest
       assertEquals(2.0, solutionMatrixAlt.get(1), 1e-7);
       assertEquals(3.0, solutionMatrix.get(0), 1e-7);
       assertEquals(2.0, solutionMatrix.get(1), 1e-7);
-      //assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(6.0, lagrangeInequalityMultipliers[1], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(4.0, lagrangeInequalityMultipliers[3], 1e-7); //// FIXME: 5/15/17
 
       // Minimize x^2 + y^2 subject to x + y >= 2 (-x -y <= -2), y <= 10x - 2 (-10x + y <= -2)
       // Equality solution will violate both constraints, but optimal only has the first constraint active.
@@ -1171,14 +991,11 @@ public class JavaQuadProgSolverTest
       Aeq = new DenseMatrix64F(0, 2);
       beq = new DenseMatrix64F(0, 1);
 
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[2];
       solver.clear();
       solver.setQuadraticCostFunction(Q, f, quadraticCostScalar);
       solver.setLinearInequalityConstraints(Ain, bin);
       solver.setLinearEqualityConstraints(Aeq, beq);
-      solver.solve(solutionMatrix);
-      //int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solutionMatrix);
       originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
       //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
 
@@ -1187,8 +1004,6 @@ public class JavaQuadProgSolverTest
       assertEquals(1.0, solutionMatrixAlt.get(1), 1e-7);
       assertEquals(1.0, solutionMatrix.get(0), 1e-7);
       assertEquals(1.0, solutionMatrix.get(1), 1e-7);
-      //assertEquals(2.0, lagrangeInequalityMultipliers[0], 1e-7); //// FIXME: 5/15/17
-      //assertEquals(0.0, lagrangeInequalityMultipliers[1], 1e-7); //// FIXME: 5/15/17
    }
 
    @Ignore // This should pass with a good solver. But a simple one has trouble on it.
@@ -1212,17 +1027,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[2];
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[3];
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      int numberOfIterations = solver.solve(solution);
       assertEquals(3, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], 1e-7);
       assertEquals(1.0, solution[1], 1e-7);
-      assertEquals(2.0, lagrangeInequalityMultipliers[0], 1e-7);
-      assertEquals(0.0, lagrangeInequalityMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7);
 
       // Reorder and make sure it works:
       // Minimize x^2 + y^2 subject to x + y >= 2 (-x -y <= -2), y <= 10x - 2 (-10x + y <= -2), x <= 10y - 2 (x - 10y <= -2),
@@ -1239,17 +1049,12 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[2];
-      lagrangeEqualityMultipliers = new double[0];
-      lagrangeInequalityMultipliers = new double[3];
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(3, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], 1e-7);
       assertEquals(1.0, solution[1], 1e-7);
-      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
-      assertEquals(2.0, lagrangeInequalityMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7);
    }
 
    // This should pass with a good solver. But a simple one has trouble on it.
@@ -1273,16 +1078,11 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[2];
-      double[] lagrangeEqualityMultipliers = new double[0];
-      double[] lagrangeInequalityMultipliers = new double[3];
-      solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      solver.solve(solution);
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], 1e-7);
       assertEquals(1.0, solution[1], 1e-7);
-      //assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0]) || Double.isNaN(lagrangeInequalityMultipliers[0])); // // FIXME: 5/15/17
-      //assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[1]) || Double.isNaN(lagrangeInequalityMultipliers[1])); // // FIXME: 5/15/17
-      //assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[2]) || Double.isNaN(lagrangeInequalityMultipliers[2])); // // FIXME: 5/15/17
    }
 
    // this has no solution with a simple solver
@@ -1309,15 +1109,11 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[2];
-      double[] lagrangeEqualityMultipliers = new double[1];
-      double[] lagrangeInequalityMultipliers = new double[1];
-      solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      solver.solve(solution);
 
       assertEquals(2, solution.length);
       assertEquals(2.5, solution[0], 1e-7);
       assertEquals(2.5, solution[1], 1e-7);
-      //assertTrue(Double.isInfinite(lagrangeEqualityMultipliers[0])); // // FIXME: 5/15/17
-      //assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0])); // // FIXME: 5/15/17
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
@@ -1340,8 +1136,6 @@ public class JavaQuadProgSolverTest
 
       DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
       DenseMatrix64F solutionAlt = new DenseMatrix64F(numberOfVariables, 1);
-      DenseMatrix64F lagrangeEqualityMultipliers = new DenseMatrix64F(numberOfEqualityConstraints, 1);
-      DenseMatrix64F lagrangeInequalityMultipliers = new DenseMatrix64F(numberOfInequalityConstraints, 1);
       double[] solutionWithSmallPerturbation = new double[numberOfVariables];
 
       DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
@@ -1349,7 +1143,7 @@ public class JavaQuadProgSolverTest
 
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
       {
-         //solver.clear();
+         solver.clear();
 
          DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
@@ -1359,35 +1153,25 @@ public class JavaQuadProgSolverTest
          DenseMatrix64F costLinearVector = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1);
          double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
-         //solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+         solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
          DenseMatrix64F linearEqualityConstraintsAMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, numberOfVariables);
          DenseMatrix64F linearEqualityConstraintsBVector = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, 1);
-         //solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+         solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
          DenseMatrix64F linearInequalityConstraintsCMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, numberOfVariables);
          DenseMatrix64F linearInequalityConstraintsDVector = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, 1);
-         //solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
-
-         //int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-         solver.clear();
-         solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
-         solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
          solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
+
          int numberOfIterations = solver.solve(solution);
-         /*
-         int numberOfIterations = solver.solve(costQuadraticMatrix, costLinearVector, quadraticCostScalar, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector,
-               linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution, false);
-               */
          originalSolver.solve(costQuadraticMatrix, costLinearVector, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solutionAlt, false);
          if (numberOfIterations > maxNumberOfIterations)
             maxNumberOfIterations = numberOfIterations;
          //         System.out.println("numberOfIterations = " + numberOfIterations);
 
          assertEquals(numberOfVariables, solution.getNumRows());
-         assertEquals(numberOfEqualityConstraints, lagrangeEqualityMultipliers.getNumRows());
 
-         //double objectiveCost = solver.getObjectiveCost(solution);
+         double objectiveCost = solver.getObjectiveCost(solution);
 
          // Verify constraints hold:
          verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
@@ -1408,19 +1192,6 @@ public class JavaQuadProgSolverTest
          verifyInequalityConstraintsDoNotHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
 
          int activeSetSize = 0;
-         for (int i = 0; i < numberOfInequalityConstraints; i++)
-         {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               activeSetSize++;
-            }
-         }
 
          augmentedLinearEqualityConstraintsAMatrix.reshape(numberOfEqualityConstraints + activeSetSize, numberOfVariables);
          augmentedLinearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints + activeSetSize, 1);
@@ -1428,29 +1199,12 @@ public class JavaQuadProgSolverTest
          CommonOps.extract(linearEqualityConstraintsAMatrix, 0, numberOfEqualityConstraints, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, 0, 0);
          CommonOps.extract(linearEqualityConstraintsBVector, 0, numberOfEqualityConstraints, 0, 1, augmentedLinearEqualityConstraintsBVector, 0, 0);
 
-         int index = 0;
-         for (int i = 0; i < numberOfInequalityConstraints; i++)
-         {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               CommonOps.extract(linearInequalityConstraintsCMatrix, i, i + 1, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, numberOfEqualityConstraints + index, 0);
-               CommonOps.extract(linearInequalityConstraintsDVector, i, i + 1, 0, 1, augmentedLinearEqualityConstraintsBVector, numberOfEqualityConstraints + index, 0);
-               index++;
-            }
-         }
-
          DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solution, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector);
          verifyEqualityConstraintsHold(numberOfEqualityConstraints + activeSetSize, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector, solutionMatrixProjectedOntoEqualityConstraints);
 
-         //double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
+         double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
 
-         //assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
+         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
       }
 
       long endTimeMillis = System.currentTimeMillis();
@@ -1463,7 +1217,6 @@ public class JavaQuadProgSolverTest
       }
    }
 
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityAndBoundsConstraints()
@@ -1482,10 +1235,6 @@ public class JavaQuadProgSolverTest
       int numberOfInequalityConstraints = 36;
 
       DenseMatrix64F solution = new DenseMatrix64F(0, 0);
-      DenseMatrix64F lagrangeEqualityMultipliers = new DenseMatrix64F(0, 0);
-      DenseMatrix64F lagrangeInequalityMultipliers = new DenseMatrix64F(0, 0);
-      DenseMatrix64F lagrangeLowerBoundMultipliers = new DenseMatrix64F(0, 0);
-      DenseMatrix64F lagrangeUpperBoundMultipliers = new DenseMatrix64F(0, 0);
       double[] solutionWithSmallPerturbation = new double[numberOfVariables];
 
       DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
@@ -1494,7 +1243,6 @@ public class JavaQuadProgSolverTest
       int numberOfNaNSolutions = 0;
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
       {
-         //         System.out.println("testNumber = " + testNumber);
          solver.clear();
 
          DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
@@ -1515,23 +1263,16 @@ public class JavaQuadProgSolverTest
          DenseMatrix64F linearInequalityConstraintsDVector = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, 1);
          solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
 
-         //// TODO: 5/15/17
-         //DenseMatrix64F variableLowerBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, -5.0, -0.01);
-         //DenseMatrix64F variableUpperBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, 0.01, 5.0);
-         //solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+         DenseMatrix64F variableLowerBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, -5.0, -0.01);
+         DenseMatrix64F variableUpperBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, 0.01, 5.0);
+         solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
-         int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+         int numberOfIterations = solver.solve(solution);
          if (numberOfIterations > maxNumberOfIterations)
             maxNumberOfIterations = numberOfIterations;
 
-         //         System.out.println(solution);
-         //         System.out.println("numberOfIterations = " + numberOfIterations);
 
          assertEquals(numberOfVariables, solution.getNumRows());
-         //assertEquals(numberOfEqualityConstraints, lagrangeEqualityMultipliers.getNumRows()); //// TODO: 5/15/17
-         //assertEquals(numberOfInequalityConstraints, lagrangeInequalityMultipliers.getNumRows()); //// TODO: 5/15/17
-         //assertEquals(variableLowerBounds.getNumRows(), lagrangeLowerBoundMultipliers.getNumRows()); //// TODO: 5/15/17
-         //assertEquals(variableUpperBounds.getNumRows(), lagrangeUpperBoundMultipliers.getNumRows()); //// TODO: 5/15/17
 
          if (Double.isNaN(solution.get(0)))
          {
@@ -1543,8 +1284,8 @@ public class JavaQuadProgSolverTest
 
          // Verify constraints hold:
          verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
-         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
-         //verifyVariableBoundsHold(variableLowerBounds, variableUpperBounds, solution); //// TODO: 5/15/17
+//         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution); //// FIXME: 5/15/17 
+         verifyVariableBoundsHold(variableLowerBounds, variableUpperBounds, solution);
 
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
@@ -1560,127 +1301,14 @@ public class JavaQuadProgSolverTest
          // Equality constraints usually do not hold. Sometimes they do, so if you run with lots of numberOfTests, comment out the following:
          verifyInequalityConstraintsDoNotHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
 
-         int activeInequalitiesSize = 0;
-         for (int i = 0; i < numberOfInequalityConstraints; i++)
-         {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
 
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               activeInequalitiesSize++;
-            }
-         }
-         */
-
-         /* //todo
-         int activeLowerBoundsSize = 0;
-         for (int i = 0; i < variableLowerBounds.getNumRows(); i++)
-         {
-            double lagrangeMultiplier = lagrangeLowerBoundMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               activeLowerBoundsSize++;
-            }
-         }
-         */
-
-         //// TODO: 5/15/17
-         /*
-         int activeUpperBoundsSize = 0;
-         for (int i = 0; i < variableUpperBounds.getNumRows(); i++)
-         {
-            double lagrangeMultiplier = lagrangeUpperBoundMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               activeUpperBoundsSize++;
-            }
-         }
-         */
-
-   /*
-         //augmentedLinearEqualityConstraintsAMatrix.reshape(numberOfEqualityConstraints + activeInequalitiesSize + activeLowerBoundsSize + activeUpperBoundsSize, numberOfVariables); //// TODO: 5/15/17
-         //augmentedLinearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints + activeInequalitiesSize + activeLowerBoundsSize + activeUpperBoundsSize, 1); //// TODO: 5/15/17
-         augmentedLinearEqualityConstraintsAMatrix.reshape(numberOfEqualityConstraints + activeInequalitiesSize, numberOfVariables);
-         augmentedLinearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints + activeInequalitiesSize, 1);
          augmentedLinearEqualityConstraintsAMatrix.zero();
          augmentedLinearEqualityConstraintsBVector.zero();
 
          CommonOps.extract(linearEqualityConstraintsAMatrix, 0, numberOfEqualityConstraints, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, 0, 0);
          CommonOps.extract(linearEqualityConstraintsBVector, 0, numberOfEqualityConstraints, 0, 1, augmentedLinearEqualityConstraintsBVector, 0, 0);
 
-         int index = 0;
-         for (int i = 0; i < numberOfInequalityConstraints; i++)
-         {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier < 0.0)
-            {
-               throw new RuntimeException();
-            }
-            if (lagrangeMultiplier > 0.0)
-            {
-               CommonOps.extract(linearInequalityConstraintsCMatrix, i, i + 1, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, numberOfEqualityConstraints + index, 0);
-               CommonOps.extract(linearInequalityConstraintsDVector, i, i + 1, 0, 1, augmentedLinearEqualityConstraintsBVector, numberOfEqualityConstraints + index, 0);
-               index++;
-            }
-         }
-         */
-
-         //// TODO: 5/15/17
-         /*
-         for (int i = 0; i < variableLowerBounds.getNumRows(); i++)
-         {
-            double lagrangeMultiplier = lagrangeLowerBoundMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier > 0.0)
-            {
-               augmentedLinearEqualityConstraintsAMatrix.set(numberOfEqualityConstraints + index, i, -1.0);
-               augmentedLinearEqualityConstraintsBVector.set(numberOfEqualityConstraints + index, -variableLowerBounds.get(i));
-               index++;
-            }
-         }
-
-         for (int i = 0; i < variableUpperBounds.getNumRows(); i++)
-         {
-            double lagrangeMultiplier = lagrangeUpperBoundMultipliers.get(i, 0);
-
-            if (lagrangeMultiplier > 0.0)
-            {
-               augmentedLinearEqualityConstraintsAMatrix.set(numberOfEqualityConstraints + index, i, 1.0);
-               augmentedLinearEqualityConstraintsBVector.set(numberOfEqualityConstraints + index, variableUpperBounds.get(i));
-               index++;
-            }
-         }
-         */
-
-   /*
-         //assertTrue(index == activeInequalitiesSize + activeLowerBoundsSize + activeUpperBoundsSize); //// TODO: 5/15/17
-         assertTrue(index == activeInequalitiesSize);
-
          DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solution, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector);
-         */
-         //// TODO: 5/15/17
-         /*
-         verifyEqualityConstraintsHold(numberOfEqualityConstraints + activeInequalitiesSize + activeLowerBoundsSize + activeUpperBoundsSize, augmentedLinearEqualityConstraintsAMatrix,
-               augmentedLinearEqualityConstraintsBVector, solutionMatrixProjectedOntoEqualityConstraints);
-               */
-   /*
-         verifyEqualityConstraintsHold(numberOfEqualityConstraints + activeInequalitiesSize, augmentedLinearEqualityConstraintsAMatrix,
-               augmentedLinearEqualityConstraintsBVector, solutionMatrixProjectedOntoEqualityConstraints);
 
          double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
 
@@ -1701,34 +1329,30 @@ public class JavaQuadProgSolverTest
 
       }
    }
-*/
 
    /**
     *  Test with dataset from sim that revealed a bug with the variable lower/upper bounds handling.
     */
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindValidSolutionForDataset20160319()
    {
       ActualDatasetFrom20160319 dataset = new ActualDatasetFrom20160319();
-      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
       solver.clear();
       solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
       solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
       DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
       solver.solve(solution);
 
-      assertFalse(MatrixTools.containsNaN(solution));
+      assertTrue(!MatrixTools.containsNaN(solution));
    }
-   */
 
-   /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      SimpleActiveSetQPSolverInterface solver = new JavaQuadProgSolver();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z
       solver.clear();
@@ -1749,13 +1373,9 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(new double[] { -5.0, 6.0, 11.0 }, new double[] { 5.0, 10.0, Double.POSITIVE_INFINITY });
 
       double[] solution = new double[3];
-      double[] lagrangeEqualityMultipliers = new double[1];
-      double[] lagrangeInequalityMultipliers = new double[1];
-      double[] lagrangeLowerBoundMultipliers = new double[3];
-      double[] lagrangeUpperBoundMultipliers = new double[3];
 
       solver.setMaxNumberOfIterations(2);
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      int numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertTrue(Double.isNaN(solution[0]));
@@ -1763,30 +1383,20 @@ public class JavaQuadProgSolverTest
       assertTrue(Double.isNaN(solution[2]));
 
       solver.setMaxNumberOfIterations(3);
-      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      numberOfIterations = solver.solve(solution);
       assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], 1e-7);
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
 
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
-
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(248.0, objectiveCost, 1e-7);
    }
-   */
 
    /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
