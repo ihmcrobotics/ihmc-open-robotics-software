@@ -118,9 +118,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel();
 
       FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
-      
+
       ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
-      
+
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameOrientation tempFrameOrientation = new FrameOrientation();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
@@ -134,17 +134,16 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
          tempFrameOrientation.getQuaternion(footstepData.getOrientation());
       }
-      
+
       vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
-      
+
       ArrayList<Footstep> corruptedFootstepList = new ArrayList<>();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
          RigidBody endEffector = fullRobotModel.getFoot(robotSide);
-         ReferenceFrame trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(footstepData.getTrajectoryReferenceFrameId());
-         FramePose pose = new FramePose(trajectoryFrame);
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
          pose.setPose(footstepData.getLocation(), footstepData.getOrientation());
          corruptedFootstepList.add(new Footstep(endEffector, robotSide, pose));
       }
@@ -184,20 +183,18 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       double maskSafetyBuffer = 0.01;
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
- 
+
       FootstepDataListMessage snappedFootstepDataList = new FootstepDataListMessage();
       for (int i = 0; i < corruptedFootstepList.size(); i++)
       {
          Footstep footstep = corruptedFootstepList.get(i);
          footstepSnapper.snapFootstep(footstep, heightMap);
-         
+
          RobotSide robotSide = footstep.getRobotSide();
          FramePoint position = new FramePoint();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
-         ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
-         footstepData.setTrajectoryReferenceFrameId(trajectoryFrame);
          snappedFootstepDataList.add(footstepData);
       }
 

@@ -5,19 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
 {
    private ArrayList<Point2DReadOnly> points = new ArrayList<>();
    private boolean FILL_POLYGON = false;
    
-   private final ConvexPolygon2d tempPolygon = new ConvexPolygon2d();
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final Point2D tempPoint = new Point2D();
    private final Vector2D tempRadii = new Vector2D();
 
@@ -51,7 +51,7 @@ public class PolygonArtifact extends Artifact
       setPoints(points);
    }
 
-   public PolygonArtifact(String id, boolean fill, Color color, ConvexPolygon2d convexPolygon2d)
+   public PolygonArtifact(String id, boolean fill, Color color, ConvexPolygon2D convexPolygon2d)
    {
       super(id);
       setLevel(2);
@@ -61,7 +61,7 @@ public class PolygonArtifact extends Artifact
       setPoints(convexPolygon2d);
    }
 
-   public PolygonArtifact(String id, boolean fill, Color color, int level, ConvexPolygon2d convexPolygon2d)
+   public PolygonArtifact(String id, boolean fill, Color color, int level, ConvexPolygon2D convexPolygon2d)
    {
       super(id);
       setLevel(level);
@@ -97,7 +97,7 @@ public class PolygonArtifact extends Artifact
       this.points.addAll(points);
    }
 
-   public void setPoints(ConvexPolygon2d polygon)
+   public void setPoints(ConvexPolygon2D polygon)
    {
       this.points.clear();
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)

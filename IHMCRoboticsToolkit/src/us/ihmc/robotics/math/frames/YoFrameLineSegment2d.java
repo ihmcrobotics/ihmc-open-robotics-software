@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -9,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -240,27 +240,6 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
       return frameLineSegment.distance(point);
    }
 
-   public double distance(FrameLine2d line)
-   {
-      putYoValuesIntoFrameLineSegment();
-
-      return frameLineSegment.distance(line);
-   }
-
-   public double distance(FrameLineSegment2d secondLineSegment)
-   {
-      putYoValuesIntoFrameLineSegment();
-
-      return frameLineSegment.distance(secondLineSegment);
-   }
-
-   public double distance(FrameConvexPolygon2d convexPolygon)
-   {
-      putYoValuesIntoFrameLineSegment();
-
-      return frameLineSegment.distance(convexPolygon);
-   }
-
    public FramePoint2d pointBetweenEndPointsGivenParameter(double parameter)
    {
       putYoValuesIntoFrameLineSegment();
@@ -270,7 +249,7 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
    
    public boolean areEndpointsTheSame()
    {
-      return LineSegment2d.areEndpointsTheSame(getFirstEndpointX(), getFirstEndpointY(), getSecondEndpointX(), getSecondEndpointY());
+      return firstEndpointX.getDoubleValue() == secondEndpointX.getDoubleValue() && firstEndpointY.getDoubleValue() == secondEndpointY.getDoubleValue();
    }
 
    public void setToNaN()
@@ -293,7 +272,7 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 
    private void getYoValuesFromFrameLineSegment()
    {
-      LineSegment2d lineSegment2d = frameLineSegment.getLineSegment2d();
+      LineSegment2D lineSegment2d = frameLineSegment.getLineSegment2d();
       firstEndpointX.set(lineSegment2d.getFirstEndpointX());
       firstEndpointY.set(lineSegment2d.getFirstEndpointY());
       secondEndpointX.set(lineSegment2d.getSecondEndpointX());

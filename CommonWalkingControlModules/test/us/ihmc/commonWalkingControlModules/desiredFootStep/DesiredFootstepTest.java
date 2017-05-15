@@ -442,7 +442,7 @@ public class DesiredFootstepTest
    private RigidBody createRigidBody(String name)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      SixDoFJoint joint = new SixDoFJoint("joint", elevator, elevator.getBodyFixedFrame());
+      SixDoFJoint joint = new SixDoFJoint("joint", elevator);
       return ScrewTools.addRigidBody(name, joint, new Matrix3D(), 0.0, new Vector3D());
    }
 

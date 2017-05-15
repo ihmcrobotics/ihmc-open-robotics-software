@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -1452,7 +1452,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          vertexPoints.add(point2d);
       }
 
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, rockAppearance);
       combinedTerrainObject.addTerrainObject(rock);
    }
@@ -1469,7 +1469,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          vertexPoints.add(point2d);
       }
 
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
       combinedTerrainObject.addTerrainObject(rock);
    }

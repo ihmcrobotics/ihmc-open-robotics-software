@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -19,7 +19,6 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class QuadrupedTaskSpaceEstimator
 {
@@ -184,7 +183,6 @@ public class QuadrupedTaskSpaceEstimator
    // solvers
    private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final CenterOfMassJacobian comJacobian;
-   private final TwistCalculator twistCalculator;
    private final Twist twistStorage;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
@@ -240,7 +238,6 @@ public class QuadrupedTaskSpaceEstimator
       // solvers
       soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
       twistStorage = new Twist();
 
       parentRegistry.addChild(registry);
@@ -251,13 +248,12 @@ public class QuadrupedTaskSpaceEstimator
       // update solvers
       referenceFrames.updateFrames();
       soleForceEstimator.compute();
-      twistCalculator.compute();
       comJacobian.compute();
 
       // compute sole poses, twists, and forces
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         twistCalculator.getTwistOfBody(footRigidBody.get(robotQuadrant), twistStorage);
+         footRigidBody.get(robotQuadrant).getBodyFixedFrame().getTwistOfFrame(twistStorage);
          twistStorage.changeFrame(soleFrame.get(robotQuadrant));
          twistStorage.getAngularPart(estimates.getSoleAngularVelocity().get(robotQuadrant));
          twistStorage.getLinearPart(estimates.getSoleLinearVelocity().get(robotQuadrant));
@@ -268,7 +264,7 @@ public class QuadrupedTaskSpaceEstimator
       }
 
       // compute body pose and twist
-      twistCalculator.getTwistOfBody(pelvisRigidBody, twistStorage);
+      pelvisRigidBody.getBodyFixedFrame().getTwistOfFrame(twistStorage);
       twistStorage.changeFrame(bodyFrame);
       twistStorage.getAngularPart(estimates.getBodyAngularVelocity());
       twistStorage.getLinearPart(estimates.getBodyLinearVelocity());

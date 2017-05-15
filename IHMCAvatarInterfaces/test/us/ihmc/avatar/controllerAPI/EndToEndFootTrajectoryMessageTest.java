@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
@@ -17,7 +18,9 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -25,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -33,7 +37,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -137,6 +143,61 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 41.5)
+   @Test
+   public void testCustomControlPoint() throws Exception
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(4.0, 0.0, 0.0), new Point3D(10.0, 0.0, -0.1));
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      RobotSide robotSide = RobotSide.LEFT;
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames.updateFrames();
+
+      ReferenceFrame ankleFrame = referenceFrames.getFootFrame(robotSide);
+      ReferenceFrame footFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
+
+      RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
+      controlFrameTransform.setRotationEuler(Math.PI / 4.0, 0.0, Math.PI / 2.0);
+      controlFrameTransform.setTranslation(-0.2, 0.2, -0.1);
+      ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("ControlFrame", footFixedFrame, controlFrameTransform);
+
+      RigidBodyTransform controlFrameToWorldFrame = controlFrame.getTransformToWorldFrame();
+      Graphics3DObject controlFrameGraphics = new Graphics3DObject();
+      controlFrameGraphics.transform(controlFrameToWorldFrame);
+      controlFrameGraphics.addCoordinateSystem(0.2);
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addStaticLinkGraphics(controlFrameGraphics);
+
+      ReferenceFrame trajectoryFrame = referenceFrames.getSoleFrame(robotSide.getOppositeSide());
+      FramePose desiredPose = new FramePose(controlFrame);
+      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPose.setZ(desiredPose.getZ() + 0.15);
+      desiredPose.changeFrame(trajectoryFrame);
+
+      double trajectoryTime = 0.5;
+      FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPose);
+      footTrajectoryMessage.setUseCustomControlFrame(true);
+      footTrajectoryMessage.setControlFrameOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
+      footTrajectoryMessage.setControlFramePosition(new Point3D(controlFrameTransform.getTranslationVector()));
+      footTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
+
+      drcSimulationTestHelper.send(footTrajectoryMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime));
+
+      // Since the control frame is moved down below the foot this assert makes sure the singularity escape uses the desired ankle position, not the desired control point position.
+      String namePrefix = fullRobotModel.getFoot(robotSide).getName();
+      String className = LegSingularityAndKneeCollapseAvoidanceControlModule.class.getSimpleName();
+      BooleanYoVariable singularityEscape = (BooleanYoVariable) scs.getVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
+      assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 46.8)

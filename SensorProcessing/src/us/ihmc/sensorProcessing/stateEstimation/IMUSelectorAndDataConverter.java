@@ -17,7 +17,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -154,9 +153,8 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private void convertAngularVelocityAndSetOnOutputPort()
    {
       Vector3D measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
-      TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
 
-      twistCalculator.getRelativeTwist(angularVelocityMeasurementLink, estimationLink, tempRelativeTwistOrientationMeasFrameToEstFrame);
+      estimationLink.getBodyFixedFrame().getTwistRelativeToOther(angularVelocityMeasurementLink.getBodyFixedFrame(), tempRelativeTwistOrientationMeasFrameToEstFrame);
       tempRelativeTwistOrientationMeasFrameToEstFrame.getAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(estimationFrame);
 

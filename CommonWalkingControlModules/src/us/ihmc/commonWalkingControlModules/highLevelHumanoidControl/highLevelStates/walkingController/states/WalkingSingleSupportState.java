@@ -44,7 +44,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FeetManager feetManager;
    private final KneeAngleManager kneeAngleManager;
 
-   private final DoubleYoVariable fractionOfSwingToStraightenLeg = new DoubleYoVariable("fractionOfSwingToStraightenLeg", registry);
+   private final DoubleYoVariable fractionOfSwingToStraightenSwingLeg = new DoubleYoVariable("fractionOfSwingToStraightenSwingLeg", registry);
    private final DoubleYoVariable fractionOfSwingToCollapseStanceLeg = new DoubleYoVariable("fractionOfSwingToCollapseStanceLeg", registry);
 
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
@@ -69,7 +69,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager = managerFactory.getOrCreateFeetManager();
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
-      fractionOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
+      fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
       fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToCollapseStanceLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
@@ -146,7 +146,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
-      if (getTimeInCurrentState() > fractionOfSwingToStraightenLeg.getDoubleValue() * swingTime)
+      if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
       {
          kneeAngleManager.straightenLegDuringSwing(swingSide);
       }

@@ -64,11 +64,11 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       taskspaceControlState.doAction();
    }
 
-   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameOrientation initialOrientation)
+   public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameOrientation initialOrientation)
    {
       tempPose.setToNaN(initialOrientation.getReferenceFrame());
       tempPose.setOrientation(initialOrientation);
-      taskspaceControlState.handleOrientationTrajectoryCommand(command, tempPose);
+      return taskspaceControlState.handleOrientationTrajectoryCommand(command, tempPose);
    }
 
    public ReferenceFrame getControlFrame()

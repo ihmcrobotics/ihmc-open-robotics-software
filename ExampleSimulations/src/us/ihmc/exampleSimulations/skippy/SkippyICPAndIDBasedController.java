@@ -14,7 +14,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -35,7 +34,6 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final TwistCalculator twistCalculator;
 
    private final Wrench endEffectorWrench = new Wrench();
    private final FrameVector errorVector = new FrameVector();
@@ -49,8 +47,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    {
       this.skippy = skippy;
 
-      twistCalculator = new TwistCalculator(worldFrame, skippy.getElevator());
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -skippy.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(skippy.getElevator(), -skippy.getGravityZ());
 
       setupGraphics(graphicsListRegistry);
       totalMass.set(skippy.computeCenterOfMass(new Point3D()));
@@ -115,14 +112,12 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       inverseDynamicsCalculator.setExternalWrench(endEffectorBody, endEffectorWrench);
       // ---
 
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
       skippy.updateSimulationFromInverseDynamicsTorques();
 
       skippy.updateInverseDynamicsStructureFromSimulation();
 
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       skippy.updateSimulationFromInverseDynamicsTorques();
 

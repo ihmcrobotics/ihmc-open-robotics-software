@@ -17,9 +17,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectory;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
@@ -267,8 +267,8 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          anklePosition.setX(kneePosition.getX() - length2 * Math.sin(jointAngleSet[0] + jointAngleSet[1]));
          anklePosition.setY(kneePosition.getY() - length2 * Math.cos(jointAngleSet[0] + jointAngleSet[1]));
 
-         p.createAndAddLineArtifact("Femur" + index, new Line2d(hipPosition, kneePosition), Color.black);
-         p.createAndAddLineArtifact("Shin" + index, new Line2d(kneePosition, anklePosition), Color.gray);
+         p.createAndAddLineArtifact("Femur" + index, new Line2D(hipPosition, kneePosition), Color.black);
+         p.createAndAddLineArtifact("Shin" + index, new Line2D(kneePosition, anklePosition), Color.gray);
          p.createAndAddPointArtifact("Ankle" + index, new Point2D(anklePosition), Color.blue);
 
          index++;

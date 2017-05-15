@@ -137,30 +137,6 @@ public class FrameLineTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testConstructorA()
-   {
-      Point3D origin = new Point3D(1.0, 2.0, 3.0);
-      Vector3D direction = new Vector3D();
-
-      FrameLine frameLine = new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
-      
-      assertTrue(frameLine.containsNaN());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testConstructorB()
-   {
-      FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
-
-      FrameLine frameLine = new FrameLine(origin, direction);
-      
-      assertTrue(frameLine.containsNaN());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorC()
    {

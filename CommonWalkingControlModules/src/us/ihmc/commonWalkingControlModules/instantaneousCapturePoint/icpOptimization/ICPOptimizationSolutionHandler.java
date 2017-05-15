@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,6 +22,8 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+
 public class ICPOptimizationSolutionHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -44,6 +44,7 @@ public class ICPOptimizationSolutionHandler
    private final BooleanYoVariable footstepWasAdjusted;
    private final YoFrameVector2d footstepAdjustment;
 
+   private final DoubleYoVariable residualCostToGo;
    private final DoubleYoVariable costToGo;
    private final DoubleYoVariable footstepCostToGo;
    private final DoubleYoVariable feedbackCostToGo;
@@ -91,6 +92,7 @@ public class ICPOptimizationSolutionHandler
          nominalReferenceICPVelocity = new YoFrameVector2d(yoNamePrefix + "NominalReferenceICPVelocity", worldFrame, registry);
          nominalReferenceCMP = new YoFramePoint2d(yoNamePrefix + "NominalReferenceCMP", worldFrame, registry);
 
+         residualCostToGo = new DoubleYoVariable(yoNamePrefix + "ResidualCostToGo", registry);
          costToGo = new DoubleYoVariable(yoNamePrefix + "CostToGo", registry);
          footstepCostToGo = new DoubleYoVariable(yoNamePrefix + "FootstepCostToGo", registry);
          feedbackCostToGo = new DoubleYoVariable(yoNamePrefix + "FeedbackCostToGo", registry);
@@ -104,6 +106,7 @@ public class ICPOptimizationSolutionHandler
          nominalReferenceICPVelocity = null;
          nominalReferenceCMP = null;
 
+         residualCostToGo = null;
          costToGo = null;
          footstepCostToGo = null;
          feedbackCostToGo = null;
@@ -161,10 +164,11 @@ public class ICPOptimizationSolutionHandler
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void updateCostsToGo(ICPOptimizationSolver solver)
+   public void updateCostsToGo(ICPQPOptimizationSolver solver)
    {
       if (debug)
       {
+         residualCostToGo.set(solver.getCostToGo());
          costToGo.set(solver.getCostToGo());
          footstepCostToGo.set(solver.getFootstepCostToGo());
          feedbackCostToGo.set(solver.getFeedbackCostToGo());
@@ -175,7 +179,7 @@ public class ICPOptimizationSolutionHandler
 
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
          ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
-         ICPOptimizationSolver solver)
+         ICPQPOptimizationSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)

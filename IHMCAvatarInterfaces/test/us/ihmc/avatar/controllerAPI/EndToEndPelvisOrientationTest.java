@@ -150,8 +150,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       initialOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(numberOfPoints);
-      message.setTrajectoryReferenceFrameId(worldFrame);
-      message.setDataReferenceFrameId(worldFrame);
+      message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       Quaternion previousOrientation = initialOrientation.getQuaternionCopy();
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
@@ -204,9 +203,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
 
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredOrientation);
-      message.setTrajectoryReferenceFrameId(midFootZUpGroundFrame);
-      message.setDataReferenceFrameId(midFootZUpGroundFrame);
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredOrientation, midFootZUpGroundFrame);
       message.setEnableUserPelvisControlDuringWalking(true);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
@@ -238,9 +235,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       // now hold the pelvis in chest frame
-      PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredOrientation);
-      holdPelvisInChestMessage.setTrajectoryReferenceFrameId(chestFrame);
-      holdPelvisInChestMessage.setDataReferenceFrameId(chestFrame);
+      PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredOrientation, chestFrame);
       drcSimulationTestHelper.send(holdPelvisInChestMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 

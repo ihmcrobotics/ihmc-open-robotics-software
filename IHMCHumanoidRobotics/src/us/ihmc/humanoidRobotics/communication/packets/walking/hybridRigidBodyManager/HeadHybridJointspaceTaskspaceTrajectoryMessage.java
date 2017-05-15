@@ -7,9 +7,9 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
@@ -17,9 +17,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
                   topic = "/control/hybrid_head_trajectory")
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
-   public HeadTrajectoryMessage headTrajectoryMessage; 
+   public HeadTrajectoryMessage headTrajectoryMessage;
    public NeckTrajectoryMessage neckTrajectoryMessage;
-   
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -46,7 +46,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    {
       this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
    }
-   
+
    /**
     * Typical constructor to use, pack the two taskspace and joint space commands.
     * If these messages conflict, the qp weights and gains will dictate the desireds
@@ -79,24 +79,10 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    {
       this.neckTrajectoryMessage = neckTrajectoryMessage;
    }
-   
-   public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
-   {
-      headTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
-   }
 
-   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   @Override
+   public FrameInformation getFrameInformation()
    {
-      headTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
-   }
-
-   public void setDataReferenceFrameId(long expressedInReferenceFrameId)
-   {
-      headTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
-   }
-
-   public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
-   {
-      headTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
+      return headTrajectoryMessage.getFrameInformation();
    }
 }

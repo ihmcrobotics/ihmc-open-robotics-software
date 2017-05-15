@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class FootControlHelper
@@ -69,9 +68,8 @@ public class FootControlHelper
       if (walkingControllerParameters.enableToeOffSlippingDetection())
       {
          double controlDT = controllerToolbox.getControlDT();
-         TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
          FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
-         toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, twistCalculator, footSwitch, registry);
+         toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, footSwitch, registry);
          walkingControllerParameters.configureToeSlippingDetector(toeSlippingDetector);
       }
       else
