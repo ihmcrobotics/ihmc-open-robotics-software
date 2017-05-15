@@ -106,7 +106,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 
       computeRootJointTwist(rootJoint, tempRootJointTwist, tempRootJointAngularVelocity, tempRootJointLinearVelocity);
       rootJoint.setJointTwist(tempRootJointTwist);
-
+      rootJoint.updateFramesRecursively();
       computeRootJointAcceleration(rootJoint, tempRootJointAcceleration, tempRootJointAngularAcceleration, tempRootJointLinearAcceleration);
       rootJoint.setAcceleration(tempRootJointAcceleration);
    }
