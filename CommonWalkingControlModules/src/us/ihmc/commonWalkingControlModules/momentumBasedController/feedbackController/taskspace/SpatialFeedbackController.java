@@ -103,6 +103,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
+   private ReferenceFrame controlBaseFrame;
 
    private final RigidBody endEffector;
    private final YoSE3OffsetFrame controlFrame;
@@ -200,6 +201,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
+      controlBaseFrame = command.getControlBaseFrame();
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
@@ -403,7 +405,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     */
    private void computeDerivativeTerm(FrameVector linearFeedbackTermToPack, FrameVector angularFeedbackTermToPack)
    {
-      controlFrame.getTwistRelativeToOther(base.getBodyFixedFrame(), currentTwist);
+      controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentTwist.getLinearPart(currentLinearVelocity);
       currentTwist.getAngularPart(currentAngularVelocity);
       currentLinearVelocity.changeFrame(worldFrame);
