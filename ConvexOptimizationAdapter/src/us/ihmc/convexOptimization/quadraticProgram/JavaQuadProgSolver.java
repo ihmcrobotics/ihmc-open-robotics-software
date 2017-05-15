@@ -9,6 +9,8 @@ import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class JavaQuadProgSolver
 {
@@ -139,7 +141,6 @@ public class JavaQuadProgSolver
       // compute the trace of the original matrix quadraticCostQMatrix
       c1 = CommonOps.trace(quadraticCostQMatrix);
 
-
       // decompose the matrix quadraticCostQMatrix in the form L^T L
       decomposer.decompose(quadraticCostQMatrix);
 
@@ -162,8 +163,7 @@ public class JavaQuadProgSolver
       numberOfActiveConstraints = 0;
       for (int i = 0; i < numberOfEqualityConstraints; i++)
       {
-         for (int j = 0; j < problemSize; j++)
-            np.set(j, linearEqualityConstraintsAMatrix.get(j, i));
+         MatrixTools.setMatrixBlock(np, 0, 0, linearEqualityConstraintsAMatrix, 0, i, problemSize, 1, 1.0);
 
          compute_d();
          updateStepDirectionInPrimalSpace();
@@ -181,8 +181,7 @@ public class JavaQuadProgSolver
 
          // set u = u+
          lagrangeMultipliers.set(numberOfActiveConstraints, minimumStepInPrimalSpace);
-         for (int k = 0; k < numberOfActiveConstraints; k++)
-            lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStepInPrimalSpace * stepDirectionInDualSpace.get(k));
+         MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStepInPrimalSpace);
 
          // compute the new solution value
          activeSetIndices.set(i, -i - 1);
@@ -231,20 +230,15 @@ public class JavaQuadProgSolver
             }
 
             if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
-            {
-               // numerically there are not infeasibilities anymore
+            { // numerically there are not infeasibilities anymore
                return numberOfIterations;
             }
 
             // save old values for u, x, and A
+            MatrixTools.setMatrixBlock(previousLagrangeMultipliers, 0, 0, lagrangeMultipliers, 0, 0, numberOfActiveConstraints, 1, 1.0);
+            previousSolution.set(solutionToPack);
             for (int i = 0; i < numberOfActiveConstraints; i++)
-            {
-               previousLagrangeMultipliers.set(i, lagrangeMultipliers.get(i));
                previousActiveSetIndices.set(i, activeSetIndices.get(i));
-            }
-            // and for x
-            for (int i = 0; i < problemSize; i++)
-               previousSolution.set(i, solutionToPack.get(i));
 
             currentStep = QuadProgStep.step2;
             continue;
@@ -252,8 +246,7 @@ public class JavaQuadProgSolver
          case step2:
             // Step 2: check for feasibility and determine a new S-pair
             for (int i = 0; i < numberOfInequalityConstraints; i++)
-            {
-               // select the constraint from the inactive set that is most violated
+            { // select the constraint from the inactive set that is most violated
                if (inequalityConstraintViolations.get(i) < solutionPairConstraintViolation && inactiveSetIndices.get(i) != -1 && excludeConstraintFromActiveSet.get(i) == TRUE)
                {
                   solutionPairConstraintViolation = inequalityConstraintViolations.get(i);
@@ -266,8 +259,7 @@ public class JavaQuadProgSolver
             }
 
             // set np = n(solutionPairConstraintIndex)
-            for (int i = 0; i < problemSize; i++)
-               np.set(i, linearInequalityConstraintsCMatrix.get(i, solutionPairConstraintIndex));
+            MatrixTools.setMatrixBlock(np, 0, 0, linearInequalityConstraintsCMatrix, 0, solutionPairConstraintIndex, problemSize, 1, 1.0);
             // set u = [u 0]^T
             lagrangeMultipliers.set(numberOfActiveConstraints, 0.0);
             // add the violated constraint to the active set A
@@ -335,8 +327,7 @@ public class JavaQuadProgSolver
             if (!Double.isFinite(minimumStepInPrimalSpace))
             {
                // set u = u + t * [r 1] and drop constraintIndexForMinimumStepLength from the active set
-               for (int k = 0; k < numberOfActiveConstraints; k++)
-                  lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStep * stepDirectionInDualSpace.get(k));
+               MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStep);
                lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
                inactiveSetIndices.set(constraintIndexForMinimumStepLength, constraintIndexForMinimumStepLength);
                deleteConstraint(J, activeSetIndices, lagrangeMultipliers);
@@ -346,12 +337,10 @@ public class JavaQuadProgSolver
             }
 
             // case (iii): step in primal and dual space.
-            for (int k = 0; k < problemSize; k++)
-               solutionToPack.set(k, solutionToPack.get(k) + minimumStep * stepDirectionInPrimalSpace.get(k));
+            CommonOps.addEquals(solutionToPack, minimumStep, stepDirectionInPrimalSpace);
 
             // u = u + t * [r 1]
-            for (int k = 0; k < numberOfActiveConstraints; k++)
-               lagrangeMultipliers.set(k, lagrangeMultipliers.get(k) + minimumStep * stepDirectionInDualSpace.get(k));
+            MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, stepDirectionInDualSpace, 0, 0, numberOfActiveConstraints, 1, minimumStep);
             lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + minimumStep);
 
             currentStep = QuadProgStep.step3;
@@ -359,9 +348,8 @@ public class JavaQuadProgSolver
 
          case step3:
 
-            if (Math.abs(minimumStep - minimumStepInPrimalSpace) < epsilon)
-            {
-               // full step has been taken, using the minimumStepInPrimalSpace
+            if (MathTools.epsilonEquals(minimumStep, minimumStepInPrimalSpace, epsilon))
+            { // full step has been taken, using the minimumStepInPrimalSpace
                // add the violated constraint to the active set
                if (!addConstraint())
                {
@@ -375,10 +363,9 @@ public class JavaQuadProgSolver
                   {
                      activeSetIndices.set(i, previousActiveSetIndices.get(i));
                      inactiveSetIndices.set(activeSetIndices.get(i), -1);
-                     lagrangeMultipliers.set(i, previousLagrangeMultipliers.get(i));
                   }
-                  for (int i = 0; i < problemSize; i++)
-                     solutionToPack.set(i, previousSolution.get(i));
+                  MatrixTools.setMatrixBlock(lagrangeMultipliers, 0, 0, previousLagrangeMultipliers, 0, 0, numberOfActiveConstraints, 1, 1.0);
+                  solutionToPack.set(previousSolution);
 
                   currentStep = QuadProgStep.step2;
                   continue;
