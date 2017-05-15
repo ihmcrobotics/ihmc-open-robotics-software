@@ -63,7 +63,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
-            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator, ReferenceFrame.getWorldFrame());
+            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);

@@ -17,6 +17,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -151,7 +152,7 @@ public class FootSpoof implements ContactablePlaneBody
       return ret;
    }
 
-   public ReferenceFrame getFrameAfterParentJoint()
+   public MovingReferenceFrame getFrameAfterParentJoint()
    {
       return ankle.getFrameAfterJoint();
    }

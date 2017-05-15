@@ -82,9 +82,8 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    public DenseMatrix64F computeResidual()
    {
       Vector3D measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
-      TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
-      twistCalculator.getRelativeTwist(orientationEstimationLink, measurementLink, tempTwist);
+      measurementLink.getBodyFixedFrame().getTwistRelativeToOther(orientationEstimationLink.getBodyFixedFrame(), tempTwist);
       tempTwist.getAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);
 

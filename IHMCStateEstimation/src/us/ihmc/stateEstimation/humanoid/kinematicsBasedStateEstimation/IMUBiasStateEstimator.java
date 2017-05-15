@@ -23,7 +23,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.FormattingTools;
@@ -59,21 +58,18 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final Map<IMUSensorReadOnly, Integer> imuToIndexMap = new HashMap<>();
    private final List<RigidBody> feet;
 
-   private final TwistCalculator twistCalculator;
-
    private final Vector3D gravityVectorInWorld = new Vector3D();
    private final Vector3D zUpVector = new Vector3D();
 
    private final boolean isAccelerationIncludingGravity;
    private final double updateDT;
 
-   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, TwistCalculator twistCalculator,
-         double gravitationalAcceleration, boolean isAccelerationIncludingGravity, double updateDT, YoVariableRegistry parentRegistry)
+   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
+         boolean isAccelerationIncludingGravity, double updateDT, YoVariableRegistry parentRegistry)
    {
       this.imuProcessedOutputs = imuProcessedOutputs;
       this.updateDT = updateDT;
       this.feet = new ArrayList<>(feet);
-      this.twistCalculator = twistCalculator;
       this.isAccelerationIncludingGravity = isAccelerationIncludingGravity;
 
       imuBiasEstimationThreshold.set(0.015);
@@ -193,7 +189,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          {
             RigidBody trustedFoot = trustedFeet.get(footIndex);
 
-            twistCalculator.getRelativeTwist(trustedFoot, measurementLink, twist);
+            measurementLink.getBodyFixedFrame().getTwistRelativeToOther(trustedFoot.getBodyFixedFrame(), twist);
             feetToIMUAngularVelocityMagnitude += twist.getAngularPartMagnitude();
             feetToIMULinearVelocityMagnitude += twist.getLinearPartMagnitude();
          }

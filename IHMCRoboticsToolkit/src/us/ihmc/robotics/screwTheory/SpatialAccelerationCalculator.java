@@ -18,9 +18,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * {@code RigidBody} composing a rigid-body system.
  * <p>
  * A new spatial acceleration calculator can be constructed via the constructor
- * {@link #SpatialAccelerationCalculator(SpatialAccelerationVector, TwistCalculator, boolean, boolean, boolean)}.
- * Every time the system's state is changing, the spatial acceleration calculator can be notified
- * via {@link #compute()}. Finally, the spatial acceleration of any rigid-body can be obtained as
+ * {@link #SpatialAccelerationCalculator(SpatialAccelerationVector, boolean, boolean)}. Every time
+ * the system's state is changing, the spatial acceleration calculator can be notified via
+ * {@link #compute()}. Finally, the spatial acceleration of any rigid-body can be obtained as
  * follows:
  * <ul>
  * <li>{@link #getAccelerationOfBody(RigidBody, SpatialAccelerationVector)} provides the spatial
@@ -47,10 +47,6 @@ public class SpatialAccelerationCalculator
     * that the effect of the gravity is naturally propagated to the entire system.
     */
    private final SpatialAccelerationVector rootAcceleration;
-   /**
-    * A {@code TwistCalculator} is needed to account for the centrifugal and Coriolis accelerations.
-    */
-   private final TwistCalculator twistCalculator;
    /**
     * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are
     * considered or ignored.
@@ -96,52 +92,46 @@ public class SpatialAccelerationCalculator
     * 
     * @param body a body that belongs to the system this spatial acceleration calculator will be
     *           available for.
-    * @param twistCalculator a twist calculator for the same system and the same inertial frame as
-    *           this calculator is used to account for the centrifugal and Coriolis effects on the
-    *           rigid-body accelerations.
     * @param gravity the magnitude of the gravitational acceleration. It is positive and the gravity
     *           field is assumed to be pulling the system down (toward z negative).
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, TwistCalculator twistCalculator, double gravity, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBody body, double gravity, boolean useDesiredAccelerations)
    {
-      this(createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), twistCalculator, true, useDesiredAccelerations);
+      this(body, createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), true, useDesiredAccelerations);
    }
 
    /**
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     * 
+    * @param body a body that belongs to the system this spatial acceleration calculator will be
+    *           available for.
     * @param rootAcceleration the spatial acceleration of the root. Even though the root is assumed
     *           to be non-moving, the {@code rootAcceleration} is usually set to the opposite of the
     *           gravitational acceleration, such the effect of the gravity is naturally propagated
     *           to the entire system.
-    * @param twistCalculator a twist calculator for the same system and the same inertial frame as
-    *           this calculator is used to account for the centrifugal and Coriolis effects on the
-    *           rigid-body accelerations.
     * @param doVelocityTerms whether the centrifugal and Coriolis are considered or ignored in the
     *           computation of the rigid-body accelerations.
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(SpatialAccelerationVector rootAcceleration, TwistCalculator twistCalculator, boolean doVelocityTerms,
-                                        boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, boolean doVelocityTerms, boolean useDesiredAccelerations)
    {
-      this(rootAcceleration, twistCalculator, doVelocityTerms, true, useDesiredAccelerations);
+      this(body, rootAcceleration, doVelocityTerms, true, useDesiredAccelerations);
    }
 
    /**
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     * 
+    * @param body a body that belongs to the system this spatial acceleration calculator will be
+    *           available for.
     * @param rootAcceleration the spatial acceleration of the root. Even though the root is assumed
     *           to be non-moving, the {@code rootAcceleration} is usually set to the opposite of the
     *           gravitational acceleration, such the effect of the gravity is naturally propagated
     *           to the entire system.
-    * @param twistCalculator a twist calculator for the same system and the same inertial frame as
-    *           this calculator is used to account for the centrifugal and Coriolis effects on the
-    *           rigid-body accelerations.
     * @param doVelocityTerms whether the centrifugal and Coriolis are considered or ignored in the
     *           computation of the rigid-body accelerations.
     * @param doAccelerationTerms whether the joint accelerations are considered or ignored in the
@@ -149,15 +139,13 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(SpatialAccelerationVector rootAcceleration, TwistCalculator twistCalculator, boolean doVelocityTerms,
-                                        boolean doAccelerationTerms, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
+                                        boolean useDesiredAccelerations)
    {
-      this.inertialFrame = twistCalculator.getInertialFrame();
-      this.rootBody = twistCalculator.getRootBody();
+      this.inertialFrame = rootAcceleration.getBaseFrame();
+      this.rootBody = ScrewTools.getRootBody(body);
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
       setRootAcceleration(rootAcceleration);
-      this.twistCalculator = twistCalculator;
-      inertialFrame.checkReferenceFrameMatch(twistCalculator.getInertialFrame());
       this.doVelocityTerms = doVelocityTerms;
       this.doAccelerationTerms = doAccelerationTerms;
       this.useDesiredAccelerations = useDesiredAccelerations;
@@ -197,10 +185,6 @@ public class SpatialAccelerationCalculator
     * the methods {@link #getAccelerationOfBody(RigidBody, SpatialAccelerationVector)} and
     * {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAccelerationVector)}.
     * </p>
-    * <p>
-    * WARNING: the {@link TwistCalculator} used in this has also to be notified every time the
-    * system changes state.
-    * </p>
     */
    // TODO rename to reset
    public void compute()
@@ -221,10 +205,9 @@ public class SpatialAccelerationCalculator
     * {@code inertialFrame}, expressed in the {@code body.getBodyFixedFrame()}.
     * </p>
     * <p>
-    * WARNING: This method assumes that the internal memory of this and {@code twistCalculator} is
-    * up-to-date. The user has to notify this calculator every time the system state has changed,
-    * this is done through the method {@link #compute()} and notify the {@link TwistCalculator} the
-    * same way.
+    * WARNING: This method assumes that the internal memory of this and
+    * {@code spatialAccelerationCalculator} is up-to-date. The user has to notify this calculator
+    * every time the system state has changed, this is done through the method {@link #compute()}.
     * </p>
     * <p>
     * In the case the acceleration of the given {@code body} has been computed already no extra
@@ -291,17 +274,17 @@ public class SpatialAccelerationCalculator
     */
    public void getRelativeAcceleration(RigidBody base, RigidBody body, SpatialAccelerationVector accelerationToPack)
    {
-      ReferenceFrame baseFrame = base.getBodyFixedFrame();
-      ReferenceFrame bodyFrame = body.getBodyFixedFrame();
+      MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
+      MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
       getAccelerationOfBody(base, baseAcceleration);
       getAccelerationOfBody(body, accelerationToPack);
 
       if (doVelocityTerms)
       {
-         twistCalculator.getRelativeTwist(body, base, twistOfCurrentWithRespectToNew);
+         baseFrame.getTwistRelativeToOther(bodyFrame, twistOfCurrentWithRespectToNew);
          twistOfCurrentWithRespectToNew.changeFrame(baseFrame);
-         twistCalculator.getTwistOfBody(base, twistOfBodyWithRespectToBase);
+         baseFrame.getTwistOfFrame(twistOfBodyWithRespectToBase);
 
          baseAcceleration.changeFrame(bodyFrame, twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
       }
@@ -355,14 +338,15 @@ public class SpatialAccelerationCalculator
       FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
       SpatialAccelerationVector localAcceleration = accelerationForGetLinearAccelerationOfBodyFixedPoint;
-      ReferenceFrame baseFrame = base.getBodyFixedFrame();
+      MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
+      MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
 
       localPoint.setIncludingFrame(bodyFixedPoint);
       localPoint.changeFrame(baseFrame);
 
       if (doVelocityTerms)
       {
-         twistCalculator.getRelativeTwist(base, body, localTwist);
+         bodyFrame.getTwistRelativeToOther(baseFrame, localTwist);
          localTwist.changeFrame(baseFrame);
       }
       else
@@ -404,6 +388,7 @@ public class SpatialAccelerationCalculator
       FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
       SpatialAccelerationVector localAcceleration = accelerationForGetLinearAccelerationOfBodyFixedPoint;
+      MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
       getAccelerationOfBody(body, localAcceleration);
 
@@ -412,12 +397,12 @@ public class SpatialAccelerationCalculator
 
       if (doVelocityTerms)
       {
-         twistCalculator.getTwistOfBody(body, localTwist);
+         bodyFrame.getTwistOfFrame(localTwist);
          localTwist.changeFrame(inertialFrame);
       }
       else
       {
-         localTwist.setToZero(body.getBodyFixedFrame(), inertialFrame, inertialFrame);
+         localTwist.setToZero(bodyFrame, inertialFrame, inertialFrame);
       }
 
       /*
@@ -538,15 +523,17 @@ public class SpatialAccelerationCalculator
          Twist localPredecessorTwist = twistForComputeOrGetTwistOfBody2;
          SpatialAccelerationVector localJointAcceleration = accelerationForComputeOrGetAccelerationOfBody;
 
+         MovingReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
+
          if (doVelocityTerms)
          {
             parentJoint.getPredecessorTwist(localJointTwist);
-            twistCalculator.getTwistOfBody(predecessor, localPredecessorTwist);
+            predecessorFrame.getTwistOfFrame(localPredecessorTwist);
          }
          else
          {
-            localJointTwist.setToZero(predecessor.getBodyFixedFrame(), bodyFrame, predecessor.getBodyFixedFrame());
-            localPredecessorTwist.setToZero(predecessor.getBodyFixedFrame(), inertialFrame, predecessor.getBodyFixedFrame());
+            localJointTwist.setToZero(predecessorFrame, bodyFrame, predecessorFrame);
+            localPredecessorTwist.setToZero(predecessorFrame, inertialFrame, predecessorFrame);
          }
 
          if (doAccelerationTerms)
@@ -558,7 +545,7 @@ public class SpatialAccelerationCalculator
          }
          else
          {
-            localJointAcceleration.setToZero(bodyFrame, predecessor.getBodyFixedFrame(), bodyFrame);
+            localJointAcceleration.setToZero(bodyFrame, predecessorFrame, bodyFrame);
          }
 
          acceleration.set(accelerationOfPredecessor);

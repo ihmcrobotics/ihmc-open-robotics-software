@@ -49,6 +49,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -235,7 +236,7 @@ public class VirtualModelControllerTestHelper
 
       FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3D(), robotLeg);
       robotLeg.addRootJoint(floatingJoint);
-      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator, elevatorFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator);
       jointMap.put(rootJoint, floatingJoint);
 
       Link pelvisLink = pelvis();
@@ -384,15 +385,15 @@ public class VirtualModelControllerTestHelper
             toFootCenterY, -ankleHeight);
       RigidBodyTransform rightSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
             -toFootCenterY, -ankleHeight);
-      ReferenceFrame leftSoleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("Left_Sole",
+      MovingReferenceFrame leftSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Left_Sole",
             leftFootBody.getBodyFixedFrame(), leftSoleToAnkleFrame);
-      ReferenceFrame rightSoleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("Right_Sole",
+      MovingReferenceFrame rightSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Right_Sole",
             rightFootBody.getBodyFixedFrame(), rightSoleToAnkleFrame);
 
       SideDependentList<RigidBody> feet = new SideDependentList<>();
       feet.put(RobotSide.LEFT, leftFootBody);
       feet.put(RobotSide.RIGHT, rightFootBody);
-      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       soleFrames.put(RobotSide.LEFT, leftSoleFrame);
       soleFrames.put(RobotSide.RIGHT, rightSoleFrame);
 
@@ -607,7 +608,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -694,13 +695,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -905,7 +900,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -999,13 +994,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1227,7 +1216,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1358,13 +1347,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1590,7 +1573,7 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final ReferenceFrame elevatorFrame;
+      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
@@ -1710,13 +1693,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
       }
@@ -1926,7 +1903,7 @@ public class VirtualModelControllerTestHelper
       private RigidBody pelvis;
 
       private SideDependentList<RigidBody> feet = new SideDependentList<>();
-      private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      private SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       private SixDoFJoint rootJoint;
       private OneDoFJoint[] joints;
 
@@ -2000,7 +1977,7 @@ public class VirtualModelControllerTestHelper
          this.feet.set(feet);
       }
 
-      public void setSoleFrames(SideDependentList<ReferenceFrame> soleFrames)
+      public void setSoleFrames(SideDependentList<MovingReferenceFrame> soleFrames)
       {
          this.soleFrames.set(soleFrames);
       }
@@ -2022,13 +1999,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override
-      public ReferenceFrame getElevatorFrame()
+      public MovingReferenceFrame getElevatorFrame()
       {
          return elevator.getBodyFixedFrame();
       }
@@ -2210,13 +2181,13 @@ public class VirtualModelControllerTestHelper
 
    private static class LegReferenceFrames implements CommonHumanoidReferenceFrames
    {
-      private final ReferenceFrame pelvisFrame;
+      private final MovingReferenceFrame pelvisFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final SideDependentList<ReferenceFrame> footReferenceFrames = new SideDependentList<>();
-      private final SideDependentList<ReferenceFrame> soleReferenceFrames = new SideDependentList<>();
+      private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
+      private final SideDependentList<MovingReferenceFrame> soleReferenceFrames = new SideDependentList<>();
 
-      public LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames)
+      public LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<MovingReferenceFrame> soleFrames)
       {
          pelvisFrame = pelvis.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
@@ -2240,73 +2211,73 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getABodyAttachedZUpFrame()
+      public MovingReferenceFrame getABodyAttachedZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFeetZUpFrame()
+      public MovingReferenceFrame getMidFeetZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFeetUnderPelvisFrame()
+      public MovingReferenceFrame getMidFeetUnderPelvisFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getMidFootZUpGroundFrame()
+      public MovingReferenceFrame getMidFootZUpGroundFrame()
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames()
+      public SideDependentList<MovingReferenceFrame> getAnkleZUpReferenceFrames()
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getFootReferenceFrames()
+      public SideDependentList<MovingReferenceFrame> getFootReferenceFrames()
       {
          return footReferenceFrames;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getSoleFrames()
+      public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleReferenceFrames;
       }
 
       @Override
-      public ReferenceFrame getPelvisFrame()
+      public MovingReferenceFrame getPelvisFrame()
       {
          return pelvisFrame;
       }
 
       @Override
-      public ReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
+      public MovingReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getFootFrame(RobotSide robotSide)
+      public MovingReferenceFrame getFootFrame(RobotSide robotSide)
       {
          return footReferenceFrames.get(robotSide);
       }
 
       @Override
-      public ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
+      public MovingReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
       {
          return null;
       }
 
       @Override
-      public EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide)
+      public EnumMap<LegJointName, MovingReferenceFrame> getLegJointFrames(RobotSide robotSide)
       {
          return null;
       }
@@ -2324,31 +2295,31 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getPelvisZUpFrame()
+      public MovingReferenceFrame getPelvisZUpFrame()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getSoleFrame(RobotSide robotSide)
+      public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
       {
          return soleReferenceFrames.get(robotSide);
       }
 
       @Override
-      public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+      public MovingReferenceFrame getSoleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
       @Override
-      public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+      public SideDependentList<MovingReferenceFrame> getSoleZUpFrames()
       {
          return null;
       }
 
       @Override
-      public ReferenceFrame getChestFrame()
+      public MovingReferenceFrame getChestFrame()
       {
          return null;
       }
