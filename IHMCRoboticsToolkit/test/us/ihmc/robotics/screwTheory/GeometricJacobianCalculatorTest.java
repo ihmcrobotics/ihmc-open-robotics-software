@@ -252,10 +252,8 @@ public class GeometricJacobianCalculatorTest
          RigidBody body = joints.get(0).getPredecessor();
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
-         TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
 
-         twistCalculator.compute();
          spatialAccelerationCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfRevoluteJoints + 1);
@@ -288,10 +286,8 @@ public class GeometricJacobianCalculatorTest
          rootBody.updateFramesRecursively();
 
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
-         TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
 
-         twistCalculator.compute();
          spatialAccelerationCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfRevoluteJoints + 1);
@@ -471,16 +467,13 @@ public class GeometricJacobianCalculatorTest
                                                                  double epsilon)
          throws AssertionError
    {
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, base);
-      twistCalculator.compute();
-
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
 
       DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
       ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
 
-      twistCalculator.getRelativeTwist(base, endEffector, expectedTwist);
+      endEffector.getBodyFixedFrame().getTwistRelativeToOther(base.getBodyFixedFrame(), expectedTwist);
       expectedTwist.changeFrame(jacobianCalculator.getJacobianFrame());
 
       jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
@@ -492,9 +485,6 @@ public class GeometricJacobianCalculatorTest
                                                                                       GeometricJacobianCalculator jacobianCalculator, double epsilon)
          throws AssertionError
    {
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, base);
-      twistCalculator.compute();
-
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, 0.0, true);
       spatialAccelerationCalculator.compute();
 

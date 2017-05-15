@@ -264,8 +264,7 @@ public class SpatialAccelerationCalculatorTest
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
-            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
-                                                                                                           twistCalculatorInFuture, rootAcceleration);
+            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, rootAcceleration);
 
             assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-5);
          }
@@ -344,8 +343,7 @@ public class SpatialAccelerationCalculatorTest
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
-            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
-                                                                                                           twistCalculatorInFuture, rootAcceleration);
+            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, rootAcceleration);
 
             assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-4);
 
@@ -436,8 +434,7 @@ public class SpatialAccelerationCalculatorTest
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
-            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
-                                                                                                           twistCalculatorInFuture, rootAcceleration);
+            SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, rootAcceleration);
 
             assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-4);
 
@@ -685,8 +682,6 @@ public class SpatialAccelerationCalculatorTest
    }
 
    private static SpatialAccelerationVector computeExpectedAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture,
-                                                                                          TwistCalculator twistCalculator,
-                                                                                          TwistCalculator twistCalculatorInFuture,
                                                                                           SpatialAccelerationVector rootAcceleration)
    {
       SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector(body.getBodyFixedFrame(), worldFrame, body.getBodyFixedFrame());
@@ -694,8 +689,8 @@ public class SpatialAccelerationCalculatorTest
       Twist bodyTwist = new Twist();
       Twist bodyTwistInFuture = new Twist();
 
-      twistCalculator.getTwistOfBody(body, bodyTwist);
-      twistCalculatorInFuture.getTwistOfBody(bodyInFuture, bodyTwistInFuture);
+      body.getBodyFixedFrame().getTwistOfFrame(bodyTwist);
+      bodyInFuture.getBodyFixedFrame().getTwistOfFrame(bodyTwistInFuture);
 
       Vector3D angularAcceleration = firstOrderFiniteDifference(dt, bodyTwist.getAngularPart(), bodyTwistInFuture.getAngularPart());
       Vector3D linearAcceleration = firstOrderFiniteDifference(dt, bodyTwist.getLinearPart(), bodyTwistInFuture.getLinearPart());

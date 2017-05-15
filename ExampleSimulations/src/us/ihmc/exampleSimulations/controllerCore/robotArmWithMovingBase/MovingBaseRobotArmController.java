@@ -46,7 +46,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
 public class MovingBaseRobotArmController implements RobotController
@@ -60,7 +59,6 @@ public class MovingBaseRobotArmController implements RobotController
    private final MovingBaseRobotArm robotArm;
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
-   private final TwistCalculator twistCalculator;
 
    public enum FeedbackControlType
    {
@@ -124,7 +122,6 @@ public class MovingBaseRobotArmController implements RobotController
       RigidBody elevator = robotArm.getElevator();
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      twistCalculator = new TwistCalculator(worldFrame, elevator);
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
@@ -233,7 +230,6 @@ public class MovingBaseRobotArmController implements RobotController
       robotArm.updateControlFrameAcceleration();
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
-      twistCalculator.compute();
 
       updateBaseTrajectoryAndCommands();
       updateHandTrajectory();

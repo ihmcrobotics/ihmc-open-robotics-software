@@ -53,7 +53,6 @@ public class CentroidalMomentumRateTermCalculator
    private final Vector3D zero = new Vector3D();
    private final double robotMass;
    private final boolean[][] isAncestorMapping;
-   private final TwistCalculator twistCalculator;
 
    public CentroidalMomentumRateTermCalculator(RigidBody rootBody, ReferenceFrame centerOfMassFrame, DenseMatrix64F v, double robotMass)
    {
@@ -69,8 +68,6 @@ public class CentroidalMomentumRateTermCalculator
       {
          unitMomenta[i] = new Momentum(centerOfMassFrame);
       }
-
-      this.twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootBody);
 
       this.tempSpatialAcceleration = new SpatialAccelerationVector();
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
@@ -116,7 +113,6 @@ public class CentroidalMomentumRateTermCalculator
    public void compute()
    {
 
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
       precomputeAdjointTimesInertia();
@@ -161,7 +157,7 @@ public class CentroidalMomentumRateTermCalculator
          }
 
          // Pack twist of body j w.r.t. elevator expressed in body j com
-         twistCalculator.getRelativeTwist(rootBody, rigidBodies[j], bodyTwists[j]);
+         rigidBodies[j].getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), bodyTwists[j]);
          // Change expressed in frame to center of mass frame
          bodyTwists[j].changeFrame(centerOfMassFrame);
 

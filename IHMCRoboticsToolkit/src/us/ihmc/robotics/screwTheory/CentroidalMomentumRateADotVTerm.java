@@ -11,7 +11,6 @@ public class CentroidalMomentumRateADotVTerm
 {
    private final InverseDynamicsJoint[] jointsInOrder;
    private final ReferenceFrame centerOfMassFrame;
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationVector rootAcceleration;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final SpatialAccelerationVector tempSpatialAcceleration;
@@ -40,7 +39,6 @@ public class CentroidalMomentumRateADotVTerm
       this.rootBody = rootBody;
       this.v = v;
 
-      this.twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootBody);
       this.centroidalMomentumMatrix = centroidalMomentumMatrix;
 
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
@@ -63,7 +61,6 @@ public class CentroidalMomentumRateADotVTerm
    {
       DenseMatrix64F centroidalMomentumMatrixDense = centroidalMomentumMatrix.getMatrix();
 
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       computeCoMVelocity(centroidalMomentumMatrixDense);
 
@@ -76,7 +73,7 @@ public class CentroidalMomentumRateADotVTerm
 
          RigidBodyInertia inertia = rigidBody.getInertia(); // I
 
-         twistCalculator.getRelativeTwist(rootBody, rigidBody, tempTwist);
+         rigidBody.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), tempTwist);
 
          tempTwist.changeFrame(inertia.getExpressedInFrame());
 

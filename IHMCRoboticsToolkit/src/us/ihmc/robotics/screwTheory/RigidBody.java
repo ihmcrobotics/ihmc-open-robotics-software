@@ -23,10 +23,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * Here are a few examples of useful screw tools:
  * <ul>
  * <li>The {@link GeometricJacobian} can compute the Jacobian matrix of a kinematic chain.
- * <li>The {@link TwistCalculator} can compute all the {@code Twist} (angular and linear velocity)
- * of all the {@code RigidBody}s of a kinematic chain/tree.
- * <li>Similar to the {@code TwistCalculator}, the {@link SpatialAccelerationCalculator} can compute
- * all the spatial accelerations of all the {@code RigidBody}s of a kinematic chain/tree.
+ * <li>The {@link SpatialAccelerationCalculator} can compute all the spatial accelerations of all
+ * the {@code RigidBody}s of a kinematic chain/tree.
  * <li>Based on the recursive Newton-Euler algorithm, the {@link InverseDynamicsCalculator} computes
  * the desired joint torques {@code tau} from the joint configurations {@code q}, velocities
  * {@code qd}, desired accelerations {@code qddDesired}, and the list of external {@code Wrench}es

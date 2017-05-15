@@ -20,7 +20,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class LinearAccelerationMeasurementModelElement extends AbstractMeasurementModelElement
@@ -125,7 +124,6 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    public void computeMatrixBlocks()
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       
       computeUnbiasedEstimatedMeasurement(spatialAccelerationCalculator, estimatedMeasurement);
@@ -139,27 +137,27 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       tempTransform.getRotation(rotationFromEstimationToMeasurement);
 
       // T_{i}^{p,p}
-      twistCalculator.getRelativeTwist(estimationLink, measurementLink, twistOfMeasurementFrameWithRespectToEstimation);
+      measurementLink.getBodyFixedFrame().getTwistRelativeToOther(estimationLink.getBodyFixedFrame(), twistOfMeasurementFrameWithRespectToEstimation);
 
       // r^{p} 
       rPTemp.setIncludingFrame(centerOfMassPositionPort.getData());
       rPTemp.changeFrame(estimationFrame);
 
       rdTemp.setIncludingFrame(centerOfMassVelocityPort.getData());
-      computeRpd(rPdTemp, twistCalculator, rPTemp, rdTemp);
+      computeRpd(rPdTemp, rPTemp, rdTemp);
       jacobianAssembler.preCompute(estimatedMeasurement.getVector());
 
       computeCenterOfMassVelocityBlock();
       computeCenterOfMassAccelerationBlock();
-      computeOrientationBlock(twistCalculator, spatialAccelerationCalculator, rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rPTemp, rPdTemp);
+      computeOrientationBlock(spatialAccelerationCalculator, rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rPTemp, rPdTemp);
       computeAngularVelocityBlock(rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rPTemp, rdTemp, rPdTemp);
       computeAngularAccelerationBlock(rotationFromEstimationToMeasurement);
    }
 
-   private void computeRpd(FrameVector rPdToPack, TwistCalculator twistCalculator, FramePoint rP, FrameVector rd)
+   private void computeRpd(FrameVector rPdToPack, FramePoint rP, FrameVector rd)
    {
       // T_{p}^{p,w}
-      twistCalculator.getTwistOfBody(estimationLink, twistOfEstimationLink);
+      estimationLink.getBodyFixedFrame().getTwistOfFrame(twistOfEstimationLink);
       twistOfEstimationLink.changeFrame(estimationFrame);
       
       // \dot{r}^{p} = R_{w}^{p} \dot{r} - \tilde{\omega}r^{p} - v_{p}^{p,w}
@@ -174,13 +172,13 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
    private final FrameVector s = new FrameVector();
 
-   private void computeOrientationBlock(TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator,
+   private void computeOrientationBlock(SpatialAccelerationCalculator spatialAccelerationCalculator,
          RotationMatrix rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint rP, FrameVector rPd)
    {
       // TODO: code and computation repeated in LinearAccelerationMeasurementModelJacobianAssembler
-      RigidBody elevator = twistCalculator.getRootBody();
+      RigidBody elevator = spatialAccelerationCalculator.getRootBody();
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
-      twistCalculator.getRelativeTwist(elevator, measurementLink, twistOfMeasurementLink);
+      measurementLink.getBodyFixedFrame().getTwistRelativeToOther(elevatorFrame, twistOfMeasurementLink);
       spatialAccelerationCalculator.getRelativeAcceleration(elevator, measurementLink, spatialAccelerationOfMeasurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
 
