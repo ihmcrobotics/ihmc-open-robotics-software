@@ -16,7 +16,7 @@ public class JavaQuadProgSolverTest
 {
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
-   public void testSolveContrainedQP() throws NoConvergenceException
+   public void testSolveConstrainedQP() throws NoConvergenceException
    {
       int numberOfInequalityConstraints = 1;
       int numberOfEqualityConstraints = 1;
@@ -34,7 +34,11 @@ public class JavaQuadProgSolverTest
       for (int repeat = 0; repeat < 10000; repeat++)
       {
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
-         solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         solver.clear();
+         solver.setQuadraticCostFunction(Q, f, 0.0);
+         solver.setLinearInequalityConstraints(Ain, bin);
+         solver.setLinearEqualityConstraints(Aeq, beq);
+         solver.solve(x);
          Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
 
@@ -52,7 +56,11 @@ public class JavaQuadProgSolverTest
       for (int repeat = 0; repeat < 10000; repeat++)
       {
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
-         solver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         solver.clear();
+         solver.setQuadraticCostFunction(Q, f, 0.0);
+         solver.setLinearInequalityConstraints(Ain, bin);
+         solver.setLinearEqualityConstraints(Aeq, beq);
+         int numberOfIterations = solver.solve(x);
 
          DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
          CommonOps.mult(Aeq, x, bEqualityVerify);
@@ -70,7 +78,7 @@ public class JavaQuadProgSolverTest
          }
 
          // Verify solution is as expected
-         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + solver.getNumberOfIterations(), x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
+         Assert.assertArrayEquals("repeat = " + repeat + ", iterations = " + numberOfIterations, x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
       }
    }
 
@@ -100,7 +108,11 @@ public class JavaQuadProgSolverTest
 
          JavaQuadProgSolver javaSolver = new JavaQuadProgSolver();
          javaSolverTimer.startMeasurement();
-         javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         javaSolver.clear();
+         javaSolver.setQuadraticCostFunction(Q, f, 0.0);
+         javaSolver.setLinearInequalityConstraints(Ain, bin);
+         javaSolver.setLinearEqualityConstraints(Aeq, beq);
+         javaSolver.solve(x);
          javaSolverTimer.stopMeasurement();
 
          QuadProgSolver solver = new QuadProgSolver();
@@ -152,7 +164,11 @@ public class JavaQuadProgSolverTest
       for (int repeat = 0; repeat < 10000; repeat++)
       {
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
-         javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         javaSolver.clear();
+         javaSolver.setQuadraticCostFunction(Q, f, 0.0);
+         javaSolver.setLinearInequalityConstraints(Ain, bin);
+         javaSolver.setLinearEqualityConstraints(Aeq, beq);
+         javaSolver.solve(x);
          Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
 
@@ -172,7 +188,11 @@ public class JavaQuadProgSolverTest
          DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
          DenseMatrix64F xWrapper = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
 
-         javaSolver.solve(Q, f, Aeq, beq, Ain, bin, x, false);
+         javaSolver.clear();
+         javaSolver.setQuadraticCostFunction(Q, f, 0.0);
+         javaSolver.setLinearInequalityConstraints(Ain, bin);
+         javaSolver.setLinearEqualityConstraints(Aeq, beq);
+         javaSolver.solve(x);
          solver.solve(Q, f, Aeq, beq, Ain, bin, xWrapper, false);
 
          DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
@@ -219,7 +239,11 @@ public class JavaQuadProgSolverTest
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
-      solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
+      solver.clear();
+      solver.setQuadraticCostFunction(Q, f, 0.0);
+      solver.setLinearInequalityConstraints(Ain, bin);
+      solver.setLinearEqualityConstraints(Aeq, beq);
+      solver.solve(x);
       boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
       if (!correct)
          PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
