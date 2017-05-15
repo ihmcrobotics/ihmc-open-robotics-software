@@ -7,11 +7,12 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -219,8 +220,12 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
-      pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, controllerToolbox, registry);
-      pelvisOrientationManager.setWeights(momentumOptimizationSettings.getPelvisAngularWeight());
+      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
+      Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
+
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
+      pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }
 
@@ -269,6 +274,8 @@ public class HighLevelControlManagerFactory
          centerOfMassHeightManager.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
+      if (pelvisOrientationManager != null)
+         pelvisOrientationManager.initialize();
 
       Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
       for (RigidBodyControlManager bodyManager : bodyManagers)
@@ -303,7 +310,7 @@ public class HighLevelControlManagerFactory
 
       if (pelvisOrientationManager != null)
       {
-         ret.addCommand(pelvisOrientationManager.getFeedbackControlCommand());
+         ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());
       }
 
       return ret;

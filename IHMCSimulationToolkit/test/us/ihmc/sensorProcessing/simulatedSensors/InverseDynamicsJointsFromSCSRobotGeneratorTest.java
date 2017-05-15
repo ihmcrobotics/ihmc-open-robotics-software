@@ -31,7 +31,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -42,9 +41,9 @@ import us.ihmc.simulationconstructionset.RandomRobotGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -269,7 +268,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       private final ArrayList<DoubleYoVariable> wrenchLinearPartErrors = new ArrayList<DoubleYoVariable>();
       private final ArrayList<DoubleYoVariable> wrenchAngularPartErrors = new ArrayList<DoubleYoVariable>();
       
-      private final TwistCalculator twistCalculator;
       private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
 
@@ -285,8 +283,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          this.floatingJoints.addAll(scsToInverseDynamicsJointMap.getFloatingJoints());
          this.pinJoints.addAll(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
          
-         this.twistCalculator = new TwistCalculator(inertialFrame, elevator);
-         this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
+         this.inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -robot.getGravityZ());
 
          for (FloatingJoint floatingJoint : floatingJoints)
          {
@@ -376,7 +373,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          generator.updateInverseDynamicsRobotModelFromRobot(true, true);
          
          // Compute the inverse dynamics:
-         twistCalculator.compute();
          inverseDynamicsCalculator.compute();
          
          // Next, extract the inverse dynamics torques and compare to the applied torques:
@@ -413,7 +409,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
-                  twistCalculator.getTwistOfBody(revoluteJoint.getSuccessor(), revoluteJointTwist);
+                  revoluteJoint.getSuccessor().getBodyFixedFrame().getTwistOfFrame(revoluteJointTwist);
                   revoluteJointTwist.changeFrame(revoluteJoint.getSuccessor().getBodyFixedFrame());
                   
                   Vector3D revoluteJointAngularVelocityInBody = revoluteJointTwist.getAngularPartCopy();

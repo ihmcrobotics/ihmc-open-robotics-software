@@ -9,10 +9,10 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -116,8 +116,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
-
    private final BooleanYoVariable hasICPPlannerBeenInitializedAtStart = new BooleanYoVariable("hasICPPlannerBeenInitializedAtStart", registry);
 
    private final BooleanYoVariable enablePushRecoveryOnFailure = new BooleanYoVariable("enablePushRecoveryOnFailure", registry);
@@ -208,8 +206,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       this.statusOutputManager = statusOutputManager;
 
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
-
-      hasWalkingControllerBeenInitialized.set(false);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
@@ -490,18 +486,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double stepTime = walkingMessageHandler.getDefaultStepTime();
       pelvisOrientationManager.setTrajectoryTime(stepTime);
 
-      if (!hasWalkingControllerBeenInitialized.getBooleanValue())
-      {
-         pelvisOrientationManager.resetOrientationOffset();
-         pelvisOrientationManager.setToZeroInMidFeetZUpFrame();
-         hasWalkingControllerBeenInitialized.set(true);
-      }
-      else
-      {
-         pelvisOrientationManager.resetOrientationOffset();
-         pelvisOrientationManager.setToHoldCurrentInWorldFrame();
-      }
-
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
@@ -509,6 +493,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             bodyManager.initialize();
       }
 
+      pelvisOrientationManager.initialize();
       balanceManager.initialize();
       feetManager.initialize();
       //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
@@ -517,9 +502,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       hasICPPlannerBeenInitializedAtStart.set(false);
       stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
 
-      hasWalkingControllerBeenInitialized.set(true);
-      
-      commandConsumer.setTimeOfLastManipulationAbortToCurrent();
+      commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
    public void initializeDesiredHeightToCurrent()
@@ -749,7 +732,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void reinitializePelvisOrientation(boolean reinitialize)
    {
-      hasWalkingControllerBeenInitialized.set(!reinitialize);
+      pelvisOrientationManager.initialize();
    }
 
    @Override
@@ -787,42 +770,42 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       return registry;
    }
-   
+
    /**
     * Get defined states for the walking high level humanoid controller
-    * 
+    *
     * Inefficient, use only in construction
-    * 
+    *
     * @param states return list of walking states
     */
    public void getOrderedWalkingStatesForWarmup(List<WalkingStateEnum> states)
    {
-      
+
       states.add(WalkingStateEnum.TO_STANDING);
       states.add(WalkingStateEnum.STANDING);
-      
+
       states.add(WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
       states.add(WalkingStateEnum.WALKING_LEFT_SUPPORT);
-      
+
 //      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
 //      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
-      
+
       states.add(WalkingStateEnum.TO_FLAMINGO_LEFT_SUPPORT);
       states.add(WalkingStateEnum.FLAMINGO_LEFT_SUPPORT);
-      
+
 //      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
 //      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
-      
+
    }
-   
+
    /**
     * Run one set of doTransitionIntoAction, doAction and doTransitionOutOfAction for a given state.
-    * 
+    *
     * The balance manager is updated, but no commands are consumed.
-    * 
+    *
     * This can be used to warmup the JIT compiler.
-    * 
-    * 
+    *
+    *
     * @param state
     */
    public void warmupStateIteration(WalkingStateEnum state)
@@ -848,13 +831,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
          footStepCommand.setSwingHeight(0);
          cmd.addFootstep(footStepCommand);
-         
+
          walkingMessageHandler.handleFootstepDataListCommand(cmd);
          break;
-         
+
       case FLAMINGO_LEFT_SUPPORT:
       case FLAMINGO_RIGHT_SUPPORT:
-         
+
          ArrayList<FootTrajectoryCommand> commands = new ArrayList<>();
          FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
          trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
@@ -866,18 +849,18 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       default:
          break;
       }
-      
+
       currentState.doTransitionIntoAction();
-      
+
       currentState.doAction();
-      
+
       updateManagers(currentState);
 
       submitControllerCoreCommands();
-      
+
       currentState.doTransitionOutOfAction();
-      
+
       walkingMessageHandler.clearFootsteps();
-      
+
    }
 }

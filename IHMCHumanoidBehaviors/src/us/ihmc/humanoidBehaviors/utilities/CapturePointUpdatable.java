@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -201,14 +201,14 @@ public class CapturePointUpdatable implements Updatable
    {
       yoCapturePoint.get(icp);
 
-      ConvexPolygon2d supportPolygon = yoSupportPolygon.getConvexPolygon2d();
+      ConvexPolygon2D supportPolygon = yoSupportPolygon.getConvexPolygon2d();
 
       double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
 
       minIcpDistanceToSupportPolygon.set(distanceToClosestEdgeOfSupportPolygon);
    }
 
-   private double computeDistanceToClosestEdge(Point2D pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
+   private double computeDistanceToClosestEdge(Point2D pointInsideConvexPolygon, ConvexPolygon2D convexPolygon)
    {
       double minDistanceToEdge = Double.POSITIVE_INFINITY;
 

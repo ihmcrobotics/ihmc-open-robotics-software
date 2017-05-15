@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -167,6 +168,7 @@ public class BalanceManager
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
       linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
+      ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
@@ -174,7 +176,7 @@ public class BalanceManager
 
       if (ENABLE_DYN_REACHABILITY)
       {
-         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame,
+         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, icpOptimizationController, fullRobotModel, centerOfMassFrame,
                walkingControllerParameters.getDynamicReachabilityParameters(), registry, yoGraphicsListRegistry);
       }
       else
@@ -491,7 +493,7 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
+      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInSwing();
          
@@ -525,7 +527,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
+      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInTransfer();
          
@@ -553,7 +555,7 @@ public class BalanceManager
       controllerToolbox.getCapturePoint(capturePoint2d);
 
       // signed distance returns a negative number if the point is inside the polygon.
-      return supportPolygonInWorld.getSignedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
+      return supportPolygonInWorld.signedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
    }
 
    public double getICPErrorMagnitude()

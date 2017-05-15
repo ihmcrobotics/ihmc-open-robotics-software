@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
@@ -98,6 +99,20 @@ public class AdditionalSimulationContactPoints implements FootContactPoints
 
       for (RobotSide robotSide : RobotSide.values)
          ret.put(robotSide, new Point2D(footLength / 2.0, 0.0));
+
+      return ret;
+   }
+
+   @Override
+   public SideDependentList<LineSegment2D> getToeOffContactLines(double footLength, double footWidth, double toeWidth)
+   {
+      SideDependentList<LineSegment2D> ret = new SideDependentList<>();
+
+      double footForward = footLength / 2.0;
+      double halfToeWidth = toeWidth / 2.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+         ret.put(robotSide, new LineSegment2D(new Point2D(footForward, -halfToeWidth), new Point2D(footForward, halfToeWidth)));
 
       return ret;
    }

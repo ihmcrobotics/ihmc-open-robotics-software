@@ -10,6 +10,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
@@ -25,11 +26,8 @@ public interface FullRobotModel
    /** Update all the {@link ReferenceFrame}s attached to this robot. */
    public abstract void updateFrames();
 
-   /** Same as {@link ReferenceFrame#getWorldFrame()}. */
-   public abstract ReferenceFrame getWorldFrame();
-
    /** Returns the {@link ReferenceFrame} attached to the elevator (see {@link FullHumanoidRobotModel#getElevator()}).*/
-   public abstract ReferenceFrame getElevatorFrame();
+   public abstract MovingReferenceFrame getElevatorFrame();
 
    /**
     * Returns the root joint of this robot. It is a six degrees of freedom joint.

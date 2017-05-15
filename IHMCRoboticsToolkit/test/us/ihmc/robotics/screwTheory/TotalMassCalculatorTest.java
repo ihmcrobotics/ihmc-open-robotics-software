@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,8 +23,7 @@ public class TotalMassCalculatorTest
       Random random = new Random(100L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("body", elevatorFrame);
+      RigidBody elevator = new RigidBody("body", worldFrame);
       int numberOfJoints = 100;
       double addedMass = createRandomRigidBodyTreeAndReturnTotalMass(worldFrame, elevator, numberOfJoints, random);
 

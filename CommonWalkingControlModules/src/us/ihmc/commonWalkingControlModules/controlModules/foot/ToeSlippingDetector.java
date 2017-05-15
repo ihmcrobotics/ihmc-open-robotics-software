@@ -10,7 +10,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -35,15 +35,13 @@ public class ToeSlippingDetector
 
    private final double dt;
    private final RigidBody foot;
-   private final TwistCalculator twistCalculator;
    private final FootSwitchInterface footSwitch;
 
-   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBody foot, TwistCalculator twistCalculator, FootSwitchInterface footSwitch,
+   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBody foot, FootSwitchInterface footSwitch,
                               YoVariableRegistry parentRegistry)
    {
       dt = controlDT;
       this.foot = foot;
-      this.twistCalculator = twistCalculator;
       this.footSwitch = footSwitch;
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
@@ -110,6 +108,7 @@ public class ToeSlippingDetector
    }
 
    private final Wrench footWrench = new Wrench();
+   private final Twist footTwist = new Twist();
    private final FrameVector toeLinearVelocity = new FrameVector();
    private final FramePoint currentToePosition = new FramePoint();
 
@@ -118,7 +117,8 @@ public class ToeSlippingDetector
       footSwitch.computeAndPackFootWrench(footWrench);
       toeForceFiltered.update(footWrench.getLinearPartMagnitude());
 
-      twistCalculator.getLinearVelocityOfBodyFixedPoint(foot, toeContactPointPosition, toeLinearVelocity);
+      foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
+      footTwist.getLinearVelocityOfPointFixedInBodyFrame(toeLinearVelocity, toeContactPointPosition);
       toeLinearVelocity.changeFrame(worldFrame);
       toeLinearVelocityFiltered.update(toeLinearVelocity);
 

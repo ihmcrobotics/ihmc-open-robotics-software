@@ -23,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -42,7 +43,6 @@ import us.ihmc.graphicsDescription.plotting.frames.PlotterFrameSpace;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.FormattingTools;
 
@@ -92,7 +92,7 @@ public class Plotter implements PlotterInterface
    
    private double screenRotation = 0.0;
    private final Vector3D tempTranslation = new Vector3D();
-   private final Line2d tempGridLine = new Line2d();
+   private final Line2D tempGridLine = new Line2D();
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
    private final PlotterPoint2d lowerRightCorner;
@@ -907,7 +907,7 @@ public class Plotter implements PlotterInterface
       notifyArtifactsChangedListeners();
    }
 
-   public LineArtifact createAndAddLineArtifact(String name, Line2d line, Color color)
+   public LineArtifact createAndAddLineArtifact(String name, Line2D line, Color color)
    {
       LineArtifact lineArtifact = new LineArtifact(name, line);
       lineArtifact.setColor(color);

@@ -22,7 +22,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {
-   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
    private final Quaternion jointRotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
    private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
@@ -33,19 +32,23 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public SixDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public SixDoFJoint(String name, RigidBody predecessor)
    {
-      super(name, predecessor, beforeJointFrame);
-      afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
+      this(name, predecessor, null);
+   }
+
+   public SixDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   {
+      super(name, predecessor, transformToParent);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
 
    @Override
-   public FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint()
+   protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      return afterJointFrame;
+      jointTransform.set(jointRotation, jointTranslation);
    }
 
    @Override
@@ -156,50 +159,42 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointRotation.checkIfUnitary();
 
       transform.getTranslation(jointTranslation);
-      afterJointFrame.setRotation(jointRotation);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override
    public void setRotation(double yaw, double pitch, double roll)
    {
       jointRotation.setYawPitchRoll(yaw, pitch, roll);
-      afterJointFrame.setRotation(jointRotation);
    }
 
    @Override
    public void setRotation(QuaternionReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
-      afterJointFrame.setRotation(jointRotation);
    }
 
    @Override
    public void setRotation(double x, double y, double z, double w)
    {
       jointRotation.set(x, y, z, w);
-      afterJointFrame.setRotation(jointRotation);
    }
 
    @Override
    public void setRotation(RotationMatrixReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
-      afterJointFrame.setRotation(this.jointRotation);
    }
 
    @Override
    public void setPosition(Tuple3DReadOnly jointTranslation)
    {
       this.jointTranslation.set(jointTranslation);
-      afterJointFrame.setTranslation(this.jointTranslation);
    }
 
    @Override
    public void setPosition(double x, double y, double z)
    {
       jointTranslation.set(x, y, z);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override
@@ -339,8 +334,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       jointRotation.set(rowStart, matrix);
       jointTranslation.set(rowStart + 4, matrix);
-      afterJointFrame.setRotation(jointRotation);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override

@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -132,7 +132,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);
@@ -141,7 +141,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    public void createAndAttachSCSListenerToPlanner()
    {
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithSimulationConstructionSet(0.01,
                                                                                                                                                       footPolygonsInSoleFrame);
 
@@ -155,7 +155,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
    {
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                              fullRobotModel,
                                                                                                                                              logModelProvider,
@@ -374,13 +374,13 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       return foundPlan.getBooleanValue();
    }
 
-   private static ConvexPolygon2d createDefaultFootPolygon()
+   private static ConvexPolygon2D createDefaultFootPolygon()
    {
       //TODO: Get this from the robot model itself.
       double footLength = 0.26;
       double footWidth = 0.18;
 
-      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
@@ -390,9 +390,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       return footPolygon;
    }
 
-   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   private static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons()
    {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createDefaultFootPolygon());
       return footPolygons;

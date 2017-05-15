@@ -101,7 +101,6 @@ public class FrameBox3dTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            setTransformToParent(transformToParent);
          }
       };
       frame.update();

@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -15,7 +16,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -44,7 +44,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final YoGraphicPolygon swingEndGraphic;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap;
 
-   private final ConvexPolygon2d footPolygon;
+   private final ConvexPolygon2D footPolygon;
    private final FramePose stanceFootPose;
    private final FramePose swingStartPose;
    private final FramePose swingEndPose;
@@ -57,7 +57,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       this.registry = registry;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      footPolygon = new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(RobotSide.LEFT));
+      footPolygon = new ConvexPolygon2D(contactPointParameters.getFootContactPoints().get(RobotSide.LEFT));
 
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
       swingOverPlanarRegionsTrajectoryExpander.attachVisualizer(this::update);

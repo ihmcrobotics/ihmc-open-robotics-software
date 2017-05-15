@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
@@ -46,7 +44,6 @@ public class LogDataProcessorHelper
    private final HumanoidReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final LogDataRawSensorMap rawSensorMap;
-   private final TwistCalculator twistCalculator;
    private final SideDependentList<ContactableFoot> contactableFeet;
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
@@ -71,7 +68,6 @@ public class LogDataProcessorHelper
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       rawSensorMap = new LogDataRawSensorMap(fullRobotModel, scs);
-      twistCalculator = new TwistCalculator(fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
 
       inverseDynamicsStructure = new FullInverseDynamicsStructure(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getRootJoint());
 
@@ -122,7 +118,7 @@ public class LogDataProcessorHelper
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches,
-            null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null, null);
+            null, null, yoTime, gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
 
    }
 
@@ -207,7 +203,6 @@ public class LogDataProcessorHelper
    public void update()
    {
       sensorReader.read();
-      twistCalculator.compute();
       controllerToolbox.update();
    }
 
@@ -224,11 +219,6 @@ public class LogDataProcessorHelper
    public HumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public LogDataRawSensorMap getRawSensorMap()

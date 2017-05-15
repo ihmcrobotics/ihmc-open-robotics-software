@@ -162,6 +162,11 @@ public class AvatarSimulationFactory
    {
       simulationOutputWriter = new DRCSimulationOutputWriter(humanoidFloatingRootJointRobot);
 
+      DRCOutputWriter customOutputWriter = robotModel.get().getCustomSimulationOutputWriter(simulationOutputWriter);
+
+      if (customOutputWriter != null)
+         simulationOutputWriter = customOutputWriter;
+
       if (doSmoothJointTorquesAtControllerStateChanges.get())
       {
          DRCOutputWriterWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputWriterWithStateChangeSmoother(simulationOutputWriter);

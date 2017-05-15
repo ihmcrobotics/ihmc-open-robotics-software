@@ -11,6 +11,7 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
@@ -23,7 +24,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    private final FramePose desiredPose = new FramePose();
    private final FramePose controlFramePose = new FramePose();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(6, 1);
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
 
    @Override
    public void clear()
@@ -33,7 +34,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       desiredPose.setToNaN(ReferenceFrame.getWorldFrame());
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
-      weightVector.zero();
+      weightMatrix.clear();
    }
 
    @Override
@@ -44,7 +45,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       desiredPose.setIncludingFrame(other.desiredPose);
       controlFramePose.setIncludingFrame(other.controlFramePose);
       selectionMatrix.set(other.selectionMatrix);
-      weightVector.set(other.weightVector);
+      weightMatrix.set(other.weightMatrix);
    }
 
    @Override
@@ -62,7 +63,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
          endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
       message.getDesiredPose(desiredPose);
       message.getControlFramePose(endEffector, controlFramePose);
-      message.getWeightVector(weightVector);
+      message.getWeightMatrix(weightMatrix);
 
       message.getSelectionMatrix(selectionMatrix);
 
@@ -79,9 +80,9 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       return endEffector;
    }
 
-   public DenseMatrix64F getWeightVector()
+   public WeightMatrix6D getWeightMatrix()
    {
-      return weightVector;
+      return weightMatrix;
    }
 
    public SelectionMatrix6D getSelectionMatrix()

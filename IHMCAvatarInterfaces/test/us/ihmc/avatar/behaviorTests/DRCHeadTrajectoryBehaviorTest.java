@@ -1,6 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -26,9 +27,9 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -139,7 +140,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
       double trajectoryTime = 4.0;
       Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
+      message.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -150,11 +152,12 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       desiredAxisAngle.set(axis, rotationAngle);
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
-      
+
       FullHumanoidRobotModel controllerFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
 
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
+      message.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       return message;
    }
 

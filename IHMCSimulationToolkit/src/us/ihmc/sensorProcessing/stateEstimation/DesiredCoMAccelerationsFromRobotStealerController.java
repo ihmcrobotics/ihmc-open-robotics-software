@@ -63,7 +63,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       RigidBody elevator = generator.getElevator();
 
       perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, perfectTwistCalculator, 0.0, false);
+      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
 
       perfectCenterOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
       perfectCenterOfMassJacobian = new CenterOfMassJacobian(elevator);

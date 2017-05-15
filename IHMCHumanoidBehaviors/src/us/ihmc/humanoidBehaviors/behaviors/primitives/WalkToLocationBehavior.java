@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
@@ -256,13 +255,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
          else
          {
             footsteps.addAll(footstepsNominalOrientation);
-         }
-
-         Vector3D footlocation = new Vector3D();
-         referenceFrames.getAnkleZUpFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(footlocation);
-         for (Footstep footstep : footsteps)
-         {
-            footstep.setZ(footlocation.getZ());
          }
       }
 

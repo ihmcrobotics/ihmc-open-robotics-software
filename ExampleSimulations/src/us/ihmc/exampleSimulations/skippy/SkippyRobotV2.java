@@ -87,11 +87,11 @@ public class SkippyRobotV2 extends Robot
       super("SkippyV2");
 
       // --- id robot ---
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       bodyMap.put(SkippyBody.ELEVATOR, elevator);
 
-      rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+      rootJoint = new SixDoFJoint("rootJoint", elevator);
       Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
       RigidBody torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
       bodyMap.put(SkippyBody.TORSO, torso);

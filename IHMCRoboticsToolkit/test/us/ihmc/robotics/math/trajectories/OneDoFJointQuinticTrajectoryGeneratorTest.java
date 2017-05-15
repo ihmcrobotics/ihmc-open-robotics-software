@@ -1,16 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -26,8 +23,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
    private ReferenceFrame parentFrame = ReferenceFrame.constructARootFrame("rootFrame");
 
    private RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-   private FrameVector jointAxis = new FrameVector(parentFrame);
-   private OneDoFJoint joint = new RevoluteJoint("revoluteJoint", elevator, parentFrame, jointAxis);
+   private OneDoFJoint joint = new RevoluteJoint("revoluteJoint", elevator, new Vector3D());
 
    private DoubleProvider trajectoryTimeProvider;
 

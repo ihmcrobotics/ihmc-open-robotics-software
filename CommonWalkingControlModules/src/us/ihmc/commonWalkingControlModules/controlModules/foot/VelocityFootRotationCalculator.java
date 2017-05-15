@@ -28,7 +28,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 /**
  * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.
@@ -114,7 +113,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final FrameVector pointingBackwardVector = new FrameVector();
 
    private final ContactablePlaneBody rotatingBody;
-   private final TwistCalculator twistCalculator;
 
    private final ReferenceFrame soleFrame;
 
@@ -123,10 +121,9 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final FrameConvexPolygon2d footPolygonInWorldFrame = new FrameConvexPolygon2d();
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public VelocityFootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot, TwistCalculator twistCalculator,
+   public VelocityFootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot,
          ExplorationParameters explorationParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.twistCalculator = twistCalculator;
       this.rotatingBody = rotatingFoot;
       this.soleFrame = rotatingFoot.getSoleFrame();
       this.controllerDt = dt;
@@ -213,7 +210,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
-      twistCalculator.getTwistOfBody(rotatingBody.getRigidBody(), bodyTwist);
+      rotatingBody.getRigidBody().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
       bodyTwist.getAngularPart(angularVelocity);
 
       angularVelocity.changeFrame(soleFrame);

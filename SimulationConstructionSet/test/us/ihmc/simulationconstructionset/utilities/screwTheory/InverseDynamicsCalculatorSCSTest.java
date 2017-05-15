@@ -28,14 +28,21 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsMechanismExplorer;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -67,13 +74,13 @@ public class InverseDynamicsCalculatorSCSTest
       robot.setGravity(gravity);
 
       ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", inertialFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       FloatingJoint rootJoint = new FloatingJoint("root", new Vector3D(0.1, 0.2, 0.3), robot);
       robot.addRootJoint(rootJoint);
 
-      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
+      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator);
 
       Link link = createRandomLink("link", false);
       rootJoint.setLink(link);
@@ -84,9 +91,9 @@ public class InverseDynamicsCalculatorSCSTest
       RigidBody body = copyLinkAsRigidBody(link, rootInverseDynamicsJoint, "body");
 
       setRandomPosition(rootJoint, rootInverseDynamicsJoint);
-      elevator.updateFramesRecursively();
 
       setRandomVelocity(rootJoint, rootInverseDynamicsJoint);
+      elevator.updateFramesRecursively();
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       
@@ -110,9 +117,7 @@ public class InverseDynamicsCalculatorSCSTest
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
-      TwistCalculator twistCalculator = new TwistCalculator(inertialFrame, elevator);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
-      twistCalculator.compute();
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -gravity);
       inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
@@ -131,8 +136,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       Vector3D[] jointAxes = {X, Y, Z, X};
       
       double gravity = 0.0;
@@ -151,8 +155,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       double gravity = 0.0;
 
       int numberOfJoints = 3;
@@ -177,8 +180,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       double gravity = -9.8;
 
       int numberOfJoints = 100;
@@ -206,8 +208,7 @@ public class InverseDynamicsCalculatorSCSTest
       LinkedHashMap<RevoluteJoint, Double> tau_gravity = new LinkedHashMap<RevoluteJoint, Double>();
       LinkedHashMap<RevoluteJoint, Double> tau_cc = new LinkedHashMap<RevoluteJoint, Double>();
       LinkedHashMap<RevoluteJoint, Double> tau_qdd = new LinkedHashMap<RevoluteJoint, Double>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       double gravity = -9.8;
 
       int numberOfJoints = 100;
@@ -247,8 +248,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       double gravity = -9.8;
 
       int numberOfJoints = 100;
@@ -277,8 +277,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       Vector3D[] jointAxes = {X, Y, Z, X};
       double gravity = -9.8;
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, false, false, random);
@@ -296,8 +295,7 @@ public class InverseDynamicsCalculatorSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       Vector3D[] jointAxes = {X, Y, Z, X};
       
       double gravity = -9.8;
@@ -330,14 +328,11 @@ public class InverseDynamicsCalculatorSCSTest
    
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
-      ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
-      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), -gravity);
+      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
       LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(inertialFrame, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration, twistCalculator);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration);
 //      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       return inverseDynamicsCalculator;
    }
@@ -542,12 +537,8 @@ public class InverseDynamicsCalculatorSCSTest
       link.getComOffset(comOffset);
       Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
-      ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, bodyName);
-      nextFrame.update();
-      RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, link.getMass());
-      RigidBody rigidBody = new RigidBody(bodyName, inertia, currentInverseDynamicsJoint);
 
-      return rigidBody;
+      return ScrewTools.addRigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
    private void setRandomPosition(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
@@ -608,16 +599,6 @@ public class InverseDynamicsCalculatorSCSTest
       
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
-   }
-
-   private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3D offset, String frameName)
-   {
-      ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslationAndIdentityRotation(offset);
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-
-      return beforeJointFrame;
    }
 
    private static class RobotExplorer

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.FOOT_SWING_WEIGHT;
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.FOOT_SWING_WEIGHT;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -32,8 +32,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-
-   protected boolean trajectoryWasReplanned;
 
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
@@ -206,7 +204,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       super.doTransitionOutOfAction();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
-      trajectoryWasReplanned = false;
    }
 
    @Override

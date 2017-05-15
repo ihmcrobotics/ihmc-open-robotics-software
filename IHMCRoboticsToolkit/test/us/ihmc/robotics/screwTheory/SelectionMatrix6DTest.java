@@ -37,9 +37,11 @@ public class SelectionMatrix6DTest
       assertTrue(selectionMatrix6D.isAngularXSelected());
       assertTrue(selectionMatrix6D.isAngularYSelected());
       assertTrue(selectionMatrix6D.isAngularZSelected());
+      assertTrue(selectionMatrix6D.isAngularPartActive());
       assertTrue(selectionMatrix6D.isLinearXSelected());
       assertTrue(selectionMatrix6D.isLinearYSelected());
       assertTrue(selectionMatrix6D.isLinearZSelected());
+      assertTrue(selectionMatrix6D.isLinearPartActive());
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -54,9 +56,12 @@ public class SelectionMatrix6DTest
          assertEquals(xAngularSelected, selectionMatrix6D.isAngularXSelected());
          assertEquals(yAngularSelected, selectionMatrix6D.isAngularYSelected());
          assertEquals(zAngularSelected, selectionMatrix6D.isAngularZSelected());
+         assertEquals(xAngularSelected || yAngularSelected || zAngularSelected, selectionMatrix6D.isAngularPartActive());
          assertEquals(xLinearSelected, selectionMatrix6D.isLinearXSelected());
          assertEquals(yLinearSelected, selectionMatrix6D.isLinearYSelected());
          assertEquals(zLinearSelected, selectionMatrix6D.isLinearZSelected());
+         assertEquals(xLinearSelected || yLinearSelected || zLinearSelected, selectionMatrix6D.isLinearPartActive());
+         
 
          xAngularSelected = random.nextBoolean();
          yAngularSelected = random.nextBoolean();
@@ -82,25 +87,31 @@ public class SelectionMatrix6DTest
          assertTrue(selectionMatrix6D.isAngularXSelected());
          assertTrue(selectionMatrix6D.isAngularYSelected());
          assertTrue(selectionMatrix6D.isAngularZSelected());
+         assertTrue(selectionMatrix6D.isAngularPartActive());
          assertTrue(selectionMatrix6D.isLinearXSelected());
          assertTrue(selectionMatrix6D.isLinearYSelected());
          assertTrue(selectionMatrix6D.isLinearZSelected());
+         assertTrue(selectionMatrix6D.isLinearPartActive());
 
          selectionMatrix6D.setToLinearSelectionOnly();
          assertFalse(selectionMatrix6D.isAngularXSelected());
          assertFalse(selectionMatrix6D.isAngularYSelected());
          assertFalse(selectionMatrix6D.isAngularZSelected());
+         assertFalse(selectionMatrix6D.isAngularPartActive());
          assertTrue(selectionMatrix6D.isLinearXSelected());
          assertTrue(selectionMatrix6D.isLinearYSelected());
          assertTrue(selectionMatrix6D.isLinearZSelected());
+         assertTrue(selectionMatrix6D.isLinearPartActive());
 
          selectionMatrix6D.setToAngularSelectionOnly();
          assertTrue(selectionMatrix6D.isAngularXSelected());
          assertTrue(selectionMatrix6D.isAngularYSelected());
          assertTrue(selectionMatrix6D.isAngularZSelected());
+         assertTrue(selectionMatrix6D.isAngularPartActive());
          assertFalse(selectionMatrix6D.isLinearXSelected());
          assertFalse(selectionMatrix6D.isLinearYSelected());
          assertFalse(selectionMatrix6D.isLinearZSelected());
+         assertFalse(selectionMatrix6D.isLinearPartActive());
 
          assertNull(selectionMatrix6D.getAngularSelectionFrame());
          assertNull(selectionMatrix6D.getLinearSelectionFrame());
