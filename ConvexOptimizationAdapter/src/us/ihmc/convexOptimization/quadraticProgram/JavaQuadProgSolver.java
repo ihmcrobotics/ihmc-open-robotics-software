@@ -8,11 +8,37 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
+/**
+ * Solves a Quadratic Program using an active set solver based on the
+ * Goldfarb-Idnani method. Should work where some other simple active
+ * set solvers do not.
+ * This is the same algorithm in the QuadProg++ and uQuadProg++ algorithms.
+ *
+ *  Algorithm is fairly fast when it can find a solution.
+ *
+ * Uses the algorithm found in the Paper
+ * "A numerically stable dual method for solving strictly convex quadratic
+ * programs" by D. Goldfarb and A. Idnani.
+ *
+ * @author Robert Griffin
+ *
+ *
+ * The problem stored in the solver is of the form:
+ * min 0.5 * x G x + g0 x
+ * s.t.
+ *     CE^T x + ce0 = 0
+ *     CI^T x + ci0 >= 0
+ *
+ * To interface with the solver, however, use the standard form:
+ * min 0.5 * x G x + g0 x
+ * s.t.
+ *     CE^T x = ce0
+ *     CI^T x <= ci0
+ */
 public class JavaQuadProgSolver
 {
    private enum QuadProgStep {step1, step2, step2a, step2b};
@@ -80,14 +106,6 @@ public class JavaQuadProgSolver
 
 
 
-   // The solving function, implementing the Goldfarb-Idani method
-   /**
-    * The problem is of the form:
-    * min 0.5 * x G x + g0 x
-    * s.t.
-    *     CE^T x + ce0 = 0
-    *     CI^T x + ci0 >= 0
-    */
 
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
@@ -550,7 +568,6 @@ public class JavaQuadProgSolver
    // compute z = H np: the step direction in the primal space (through J, see the paper)
    private void updateStepDirectionInPrimalSpace()
    {
-      // // TODO: 5/15/17 make block operations
       // setting of z = J * d
       for (int i = 0; i < problemSize; i++)
       {
@@ -565,7 +582,6 @@ public class JavaQuadProgSolver
    // compute -N* np (if activeSetSize > 0): the step direction in the dual space
    private void updateStepDirectionInDualSpace()
    {
-      // // TODO: 5/15/17  make block operations
       // setting of r = -R^-1 * d
       for (int i = numberOfActiveConstraints - 1; i >= 0; i--)
       {
