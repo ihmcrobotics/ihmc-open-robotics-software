@@ -171,7 +171,6 @@ public class JavaQuadProgSolverTest
       DenseMatrix64F Ain = new DenseMatrix64F(2, 1);
       DenseMatrix64F bin = new DenseMatrix64F(2, 1);
       DenseMatrix64F x = new DenseMatrix64F(1, 1);
-      DenseMatrix64F xOringal = new DenseMatrix64F(1, 1);
 
       Q.set(0, 0, 1.0);
       Ain.set(0, 0, 1.0);
@@ -219,9 +218,9 @@ public class JavaQuadProgSolverTest
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
       double[] solution = new double[1];
-      int numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution); // Make sure ok to solve twice in a row without changing stuff.
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      solver.solve(solution);
+      int numberOfIterations = solver.solve(solution); // Make sure ok to solve twice in a row without changing stuff.
+      assertEquals(0, numberOfIterations);
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], epsilon);
 
@@ -234,7 +233,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(0, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(5.0, solution[0], epsilon);
@@ -252,7 +251,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(0, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(5.0, solution[0], epsilon);
@@ -275,7 +274,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(0, numberOfIterations);
 
       assertEquals(0.5, solution[0], epsilon);
       assertEquals(0.5, solution[1], epsilon);
@@ -297,7 +296,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(0, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -330,7 +329,7 @@ public class JavaQuadProgSolverTest
       double[] solution = new double[1];
 
       int numberOfIterations = solver.solve(solution);
-      assertEquals(1, numberOfIterations);
+      assertEquals(0, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], 1e-7);
@@ -348,7 +347,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], 1e-7);
@@ -366,7 +365,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(3.0, solution[0], epsilon);
@@ -389,7 +388,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(2, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(1, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(5.0, solution[0], epsilon);
@@ -417,7 +416,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(2, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(1, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(0.0, solution[0], epsilon);
@@ -445,7 +444,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[2];
       numberOfIterations = solver.solve(solution);
-      //assertEquals(1, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(0, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -475,9 +474,9 @@ public class JavaQuadProgSolverTest
 
       double[] solution = new double[1];
 
+      solver.solve(solution);
       int numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      assertEquals(1, numberOfIterations);
+      assertEquals(0, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], epsilon);
@@ -495,7 +494,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -513,7 +512,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(-1.0, solution[0], epsilon);
@@ -531,7 +530,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -549,7 +548,7 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(-1.0, solution[0], epsilon);
@@ -575,7 +574,7 @@ public class JavaQuadProgSolverTest
       {
          caughtException = true;
       }
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(1, numberOfIterations);
 
       assertTrue(caughtException);
       assertEquals(1, solution.length);
@@ -601,9 +600,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
@@ -638,7 +637,7 @@ public class JavaQuadProgSolverTest
       caughtException = false;
       try
       {
-         numberOfIterations = solver.solve(solution);
+         solver.solve(solution);
       }
       catch (NoConvergenceException e)
       {
@@ -653,9 +652,10 @@ public class JavaQuadProgSolverTest
       catch (NoConvergenceException e)
       {
          caughtException = true;
+         numberOfIterations = e.getIter();
       }
       assertTrue(caughtException);
-      //assertEquals(2, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(2, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -695,9 +695,9 @@ public class JavaQuadProgSolverTest
 
       double[] solution = new double[3];
 
+      solver.solve(solution);
       int numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
@@ -726,9 +726,9 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       solution = new double[3];
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(4.0, solution[0], epsilon);
@@ -754,9 +754,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(0, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -778,9 +778,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(0, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(0.0, solution[0], epsilon);
@@ -799,9 +799,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(0, numberOfIterations); //// TODO: 5/15/17
+      assertEquals(0, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(1.0, solution[0], epsilon);
@@ -820,9 +820,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(4.0, solution[0], epsilon);
@@ -839,9 +839,9 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
+      solver.solve(solution);
       numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
-      //assertEquals(3, numberOfIterations);
+      assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], epsilon);
@@ -888,7 +888,7 @@ public class JavaQuadProgSolverTest
       int numberOfIterations = solver.solve(solutionMatrix);
       originalSolver.solve(G, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
 
-      //assertEquals(2, numberOfIterations); // // FIXME: 5/15/17
+      assertEquals(1, numberOfIterations);
 
       assertEquals(-1.0, solutionMatrix.get(0), 1e-7);
       assertEquals(3.0, solutionMatrix.get(1), 1e-7);
@@ -906,7 +906,7 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
       numberOfIterations = solver.solve(solution);
 
-      //assertEquals(2, numberOfIterations); //// FIXME: 5/15/17 
+      assertEquals(1, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(-1.0, solution[0], 1e-7);
@@ -929,7 +929,7 @@ public class JavaQuadProgSolverTest
       DenseMatrix64F solutionMatrix64F = new DenseMatrix64F(quadraticCostMatrix64F.getNumRows(), 1);
       numberOfIterations = solver.solve(solutionMatrix64F);
 
-      //assertEquals(2, numberOfIterations); //// FIXME: 5/15/17 
+      assertEquals(1, numberOfIterations);
 
       assertEquals(2, solutionMatrix64F.getNumRows());
       assertEquals(-1.0, solutionMatrix64F.get(0, 0), 1e-7);
@@ -952,7 +952,7 @@ public class JavaQuadProgSolverTest
       solutionMatrix64F.zero();
       numberOfIterations = solver.solve(solutionMatrix64F);
 
-      assertEquals(2, numberOfIterations);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(2, solutionMatrix64F.getNumRows());
       assertEquals(-1.0, solutionMatrix64F.get(0, 0), 1e-7);
@@ -993,9 +993,8 @@ public class JavaQuadProgSolverTest
       int numberOfIterations = solver.solve(solutionMatrix);
       originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
 
-      //assertEquals(2, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(2, numberOfIterations);
 
-      //assertEquals(2, solution.length);
       assertEquals(3.0, solutionMatrixAlt.get(0), 1e-7);
       assertEquals(2.0, solutionMatrixAlt.get(1), 1e-7);
       assertEquals(3.0, solutionMatrix.get(0), 1e-7);
@@ -1023,7 +1022,7 @@ public class JavaQuadProgSolverTest
       solver.setLinearEqualityConstraints(Aeq, beq);
       numberOfIterations = solver.solve(solutionMatrix);
       originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
-      //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1.0, solutionMatrixAlt.get(0), 1e-7);
       assertEquals(1.0, solutionMatrixAlt.get(1), 1e-7);
@@ -1412,7 +1411,7 @@ public class JavaQuadProgSolverTest
       {
          numberOfIterations = e.getIter();
       }
-      assertEquals(4, numberOfIterations);
+      assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], 1e-7);

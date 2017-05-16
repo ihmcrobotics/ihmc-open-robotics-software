@@ -291,7 +291,6 @@ public class JavaQuadProgSolver
       double maximumStepInDualSpace = 0.0;
       double minimumStepInPrimalSpace = 0.0;
       int solutionPairConstraintIndex = 0; // this is the index of the constraint to be added to the active set
-      int numberOfIterations = 0;
 
       J.reshape(problemSize, problemSize);
       tempMatrix.reshape(problemSize, 1);
@@ -348,10 +347,7 @@ public class JavaQuadProgSolver
          activeSetIndices.set(i, -i - 1);
 
          if (!addConstraint())
-         {
-            PrintTools.info("Constraints are linearly dependent.");
-            return numberOfIterations;
-         }
+            throw new RuntimeException("Constraints are linearly dependent.");
       }
 
       // set iai = K \ A
@@ -361,6 +357,7 @@ public class JavaQuadProgSolver
       double solutionPairConstraintViolation = 0.0;
       constraintIndexForMinimumStepLength = 0;
 
+      int numberOfIterations = -1;
       while (numberOfIterations < maxNumberOfIterations)
       {
          switch(currentStep)
