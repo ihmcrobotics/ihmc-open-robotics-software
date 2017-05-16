@@ -25,7 +25,7 @@ public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
 
    public ROSHeadTransformFrame(ReferenceFrame headFrame, RosMainNode rosMainNode, DRCRobotSensorParameters cameraParameters)
    {
-      super("rosHeadToCameraFrame", headFrame, true, false, false);
+      super("rosHeadToCameraFrame", headFrame);
       this.cameraParameters = cameraParameters;
       this.client = new RosServiceClient<TransformProviderRequest, TransformProviderResponse>(TransformProvider._TYPE);
       rosMainNode.attachServiceClient("transform_provider", client);

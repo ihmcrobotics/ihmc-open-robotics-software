@@ -72,7 +72,7 @@ public class KinematicsToolboxHelper
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());
       feedbackControlCommand.setGains(gains);
-      feedbackControlCommand.setWeightsForSolver(command.getWeightVector());
+      feedbackControlCommand.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
       feedbackControlCommand.set(command.getDesiredPose());
       feedbackControlCommand.setControlFrameFixedInEndEffector(command.getControlFramePose());
@@ -304,7 +304,8 @@ public class KinematicsToolboxHelper
 
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
       accelerationCommand.getSelectionMatrix(controlFrame, selectionMatrix);
-      DenseMatrix64F weightVector = accelerationCommand.getWeightVector();
+      DenseMatrix64F weightVector = new DenseMatrix64F(6, 6);
+      accelerationCommand.getWeightMatrix(controlFrame, weightVector);
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
       rotationError.get(0, error);

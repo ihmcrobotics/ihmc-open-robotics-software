@@ -179,7 +179,7 @@ public abstract class ICPOptimizationPushRecoveryTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
-      ReferenceFrame referenceFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
+      ReferenceFrame referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
 
       setupTest(getYawscript(), referenceFrame);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);

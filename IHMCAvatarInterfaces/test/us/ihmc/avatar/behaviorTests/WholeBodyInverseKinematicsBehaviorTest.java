@@ -1,6 +1,9 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -11,7 +14,6 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
-import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
@@ -24,6 +26,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -119,12 +122,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
-      RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
+      ReferenceFrame pelvisControlFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -139,14 +143,15 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
       FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
-      ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
+      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       desiredHandPoseCopy.changeFrame(chestFrame);
 
       drcBehaviorTestHelper.dispatchBehavior(ik);
 
       while (!ik.isDone())
       {
-         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -154,15 +159,16 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      String pelvisName = fullRobotModel.getPelvis().getName();
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
-      Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+      Quaternion controllerDesiredPelvisOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(pelvisName, scs);
 
       double angleEpsilon = Math.toRadians(1.0);
 
       EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
       EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
 
-      String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
+      String handName = fullRobotModel.getHand(robotSide).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
       Point3D handPosition = new Point3D();
@@ -221,7 +227,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -309,7 +316,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -409,7 +417,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -496,7 +505,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -559,7 +569,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -613,7 +624,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());

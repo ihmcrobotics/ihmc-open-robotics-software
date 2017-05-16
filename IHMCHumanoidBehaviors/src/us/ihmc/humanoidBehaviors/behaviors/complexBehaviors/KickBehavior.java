@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class KickBehavior extends AbstractBehavior
@@ -39,7 +40,7 @@ public class KickBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
    private final DoubleYoVariable trajectoryTime;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
    public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)

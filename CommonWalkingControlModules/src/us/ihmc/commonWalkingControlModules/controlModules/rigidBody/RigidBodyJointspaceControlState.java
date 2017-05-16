@@ -26,7 +26,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
-   public static final int maxPoints = 200;
+   public static final int maxPoints = 1000;
    public static final int maxPointsInGenerator = 5;
 
    private final List<MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new ArrayList<>();

@@ -72,7 +72,6 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
@@ -349,7 +348,6 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
 
-   private final TwistCalculator twistCalculator;
    private final Twist bodyTwist = new Twist();
 
    public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedPostureInputProvider postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
@@ -399,7 +397,6 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
 
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), actualFullRobotModel.getElevator());
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -932,8 +929,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     */
    private void updateEstimates()
    {
-      twistCalculator.compute();
-      twistCalculator.getTwistOfBody(actualFullRobotModel.getPelvis(), bodyTwist);
+      actualFullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
 
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
@@ -1615,7 +1611,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             FramePoint2d midpoint = lineSegment.midpoint();
             double bisectorLengthDesired = 0.1;
             FrameVector2d perpendicularBisector = new FrameVector2d();
-            lineSegment.getPerpendicularBisector(perpendicularBisector, bisectorLengthDesired);
+            lineSegment.getPerpendicular(true, perpendicularBisector);
+            perpendicularBisector.scale(-bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
             if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
             {

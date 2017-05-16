@@ -3,8 +3,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -30,6 +31,7 @@ public class StandingState extends WalkingState
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
+   private final KneeAngleManager kneeAngleManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
@@ -61,6 +63,7 @@ public class StandingState extends WalkingState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
+      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
@@ -85,8 +88,14 @@ public class StandingState extends WalkingState
 
       walkingMessageHandler.reportWalkingComplete();
 
+      if (pelvisOrientationManager != null)
+         pelvisOrientationManager.initializeStanding();
+
       failureDetectionControlModule.setNextFootstep(null);
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
+
+      for (RobotSide robotSide : RobotSide.values)
+         kneeAngleManager.setStraight(robotSide);
    }
 
    @Override

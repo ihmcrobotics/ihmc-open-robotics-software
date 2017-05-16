@@ -185,7 +185,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          desiredFootsteps.add(desiredFootStep);
       }
       assertTrue(!areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps));
-      
+
       PrintTools.debug(this, "Initializing Behavior");
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
@@ -257,15 +257,13 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       for (int i = 0; i < desiredFootsteps.size(); i++)
       {
          Footstep footstep = desiredFootsteps.get(i);
-         ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
-         
+
          FramePoint position = new FramePoint();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
-         footstepData.setTrajectoryReferenceFrameId(trajectoryFrame);
          ret.add(footstepData);
       }
 
@@ -282,9 +280,9 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       {
          PrintTools.debug(this, "foot step length : " + footStepLength);
       }
-      
+
       boolean footStepsAreTooFarApart = footstepListBehavior.areFootstepsTooFarApart(createFootstepDataList(desiredFootsteps), fullRobotModel, getRobotModel().getWalkingControllerParameters());
-      
+
       return footStepsAreTooFarApart;
    }
 
@@ -349,7 +347,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          footPosesFinal.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
       }
 
-      // Foot position and orientation may change after stop command if the robot is currently in single support, 
+      // Foot position and orientation may change after stop command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually stopping
       double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;

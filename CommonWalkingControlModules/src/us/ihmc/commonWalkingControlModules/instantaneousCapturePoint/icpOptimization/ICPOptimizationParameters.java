@@ -25,13 +25,13 @@ public abstract class ICPOptimizationParameters
 
    /**
     * The weight for tracking the desired footsteps.
-    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CMP control authority has been saturated.
+    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
    public abstract double getForwardFootstepWeight();
 
    /**
     * The weight for tracking the desired footsteps.
-    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CMP control authority has been saturated.
+    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
    public abstract double getLateralFootstepWeight();
 
@@ -74,10 +74,11 @@ public abstract class ICPOptimizationParameters
 
    /**
     * Weight on the slack variable introduced for the ICP dynamics.
-    * This slack variable is required for the CMP to be constrained inside the support polygon when not using step adjustment,
+    * This slack variable is required for the CoP to be constrained inside the support polygon when not using step adjustment,
     * and the step lengths to be constrained when allowing step adjustment.
     */
    public abstract double getDynamicRelaxationWeight();
+
 
    /**
     * Modifier to reduce the dynamic relaxation penalization when in double support.
@@ -86,20 +87,27 @@ public abstract class ICPOptimizationParameters
    public abstract double getDynamicRelaxationDoubleSupportWeightModifier();
 
    /**
+    * Weight on the use of angular momentum minimization.
+    * This is only utilized when it is specified to use angular momentum in the feedback controller.
+    */
+   public abstract double getAngularMomentumMinimizationWeight();
+
+   /**
     * Enabling this boolean causes the {@link #getFootstepRegularizationWeight()} to be increased when approaching the end of the step.
     * This acts as a way to cause the solution to "lock in" near the step end.
     */
    public abstract boolean scaleStepRegularizationWeightWithTime();
 
    /**
-    * Enabling this boolean causes the {@link #getFeedbackWeight()} to be decreased with an increasing feedback weight.
-    * This allows tuning of the tendency to use feedback vs. step adjustment to be separated from the feedback controller.
+    * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be decreased
+    * with an increasing feedback weight. This allows tuning of the tendency to use feedback vs. step adjustment to be separated from
+    * the feedback controller.
     */
    public abstract boolean scaleFeedbackWeightWithGain();
 
    /**
-    * Enabling this boolean causes {@link #getFootstepWeight()} to be decreased sequentially for upcoming steps.
-    * Using this increases the likelihood of adjusting future steps, as well.
+    * Enabling this boolean causes {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be decreased
+    * sequentially for upcoming steps. Using this increases the likelihood of adjusting future steps, as well.
     */
    public abstract boolean scaleUpcomingStepWeights();
 
@@ -114,18 +122,24 @@ public abstract class ICPOptimizationParameters
    public abstract boolean useStepAdjustment();
 
    /**
+    * Enabling this boolean allows the CMP to exit the support polygon.
+    * The CoP will still be constrained to lie inside the support polygon, however.
+    */
+   public abstract boolean useAngularMomentum();
+
+   /**
     * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
     */
    public abstract boolean useFootstepRegularization();
 
    /**
-    * The minimum value to allow the footstep weight {@link #getFootstepWeight()} to be set to.
+    * The minimum value to allow the footstep weight {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be set to.
     * Ensures that the costs remain positive-definite, and improves the solution numerics.
     */
    public abstract double getMinimumFootstepWeight();
 
    /**
-    * The minimum value to allow the feedback weight {@link #getFeedbackWeight()} to be set to.
+    * The minimum value to allow the feedback weight {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be set to.
     * Ensures that the costs remain positive-definite, and improves the solution numerics.
     */
    public abstract double getMinimumFeedbackWeight();
@@ -137,36 +151,36 @@ public abstract class ICPOptimizationParameters
    public abstract double getMinimumTimeRemaining();
 
    /**
-    * Maximum forward distance the CMP is allowed to exit the support polygon.
+    * Maximum forward distance the CoP is allowed to exit the support polygon.
     * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
     * Exiting the support polygon is achieved by using angular momentum.
     * This should be used sparingly.
     */
-   public abstract double getDoubleSupportMaxCMPForwardExit();
+   public abstract double getDoubleSupportMaxCoPForwardExit();
 
    /**
-    * Maximum lateral distance the CMP is allowed to exit the support polygon.
+    * Maximum lateral distance the CoP is allowed to exit the support polygon.
     * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
     * Exiting the support polygon is achieved by using angular momentum.
     * This should be used sparingly.
     */
-
-   public abstract double getDoubleSupportMaxCMPLateralExit();
-   /**
-    * Maximum forward distance the CMP is allowed to exit the support polygon.
-    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
-    * Exiting the support polygon is achieved by using angular momentum.
-    * This should be used sparingly.
-    */
-   public abstract double getSingleSupportMaxCMPForwardExit();
+   public abstract double getDoubleSupportMaxCoPLateralExit();
 
    /**
-    * Maximum lateral distance the CMP is allowed to exit the support polygon.
+    * Maximum forward distance the CoP is allowed to exit the support polygon.
     * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
     * Exiting the support polygon is achieved by using angular momentum.
     * This should be used sparingly.
     */
-   public abstract double getSingleSupportMaxCMPLateralExit();
+   public abstract double getSingleSupportMaxCoPForwardExit();
+
+   /**
+    * Maximum lateral distance the CoP is allowed to exit the support polygon.
+    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
+    * Exiting the support polygon is achieved by using angular momentum.
+    * This should be used sparingly.
+    */
+   public abstract double getSingleSupportMaxCoPLateralExit();
 
    /**
     * Deadband on the step adjustment.
@@ -259,5 +273,50 @@ public abstract class ICPOptimizationParameters
    public boolean useWarmStartInSolver()
    {
       return false;
+   }
+
+
+
+
+
+
+   public double getVariationSizeToComputeTimingGradient()
+   {
+      return 0.001;
+   }
+
+   public double getTimingAdjustmentGradientDescentWeight()
+   {
+      return 1.0;
+   }
+
+   public double getGradientThresholdForTimingAdjustment()
+   {
+      return 0.1;
+   }
+
+   public double getGradientDescentGain()
+   {
+      return 0.035;
+   }
+
+   public double getTimingAdjustmentAttenuation()
+   {
+      return 0.5;
+   }
+
+   public double getMaximumDurationForOptimization()
+   {
+      return 0.0008;
+   }
+
+   public int getMaximumNumberOfGradientIterations()
+   {
+      return 15;
+   }
+
+   public int getMaximumNumberOfGradientReductions()
+   {
+      return 5;
    }
 }

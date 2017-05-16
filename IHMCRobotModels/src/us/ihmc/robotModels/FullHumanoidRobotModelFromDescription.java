@@ -6,21 +6,19 @@ import java.util.EnumMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -39,8 +37,8 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    private boolean initialized = false;
 
-   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
    private final ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private HumanoidJointNameMap humanoidJointNameMap;
@@ -66,20 +64,20 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       {
          RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+         MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame);
 
          RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
 
          if (handAttachmentPlaeToWristTransform != null)
          {
-            ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM),
+            MovingReferenceFrame attachmentPlateFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM),
                   handAttachmentPlaeToWristTransform);
-            attachmentPlateFrames.put(robotSide, attachmentPlateFrame);
+            handControlFrames.put(robotSide, attachmentPlateFrame);
          }
          else
          {
-            attachmentPlateFrames.put(robotSide, null);
+            handControlFrames.put(robotSide, null);
          }
       }
 
@@ -178,7 +176,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
+   public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return getLegJoint(robotSide, legJointName).getFrameAfterJoint();
    }
@@ -228,37 +226,29 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
+   public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
    {
       return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
    }
 
    /** {@inheritDoc} */
    @Override
-   public FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public ReferenceFrame getSoleFrame(RobotSide robotSide)
+   public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
    {
       return soleFrames.get(robotSide);
    }
 
    @Override
-   public SideDependentList<ReferenceFrame> getSoleFrames()
+   public SideDependentList<MovingReferenceFrame> getSoleFrames()
    {
       return soleFrames;
    }
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getHandControlFrame(RobotSide robotSide)
+   public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
    {
-      return attachmentPlateFrames.get(robotSide);
+      return handControlFrames.get(robotSide);
    }
 
    //   private void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )

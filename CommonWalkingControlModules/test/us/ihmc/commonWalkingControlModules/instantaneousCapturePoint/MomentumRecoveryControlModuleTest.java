@@ -431,7 +431,7 @@ public class MomentumRecoveryControlModuleTest
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = robotSide.getLowerCaseName();
-         SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator, worldFrame);
+         SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator);
          RigidBody foot = ScrewTools.addRigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
          ReferenceFrame ankleFrame = foot.getBodyFixedFrame();
          ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(prefix + "Sole", ankleFrame, new RigidBodyTransform());

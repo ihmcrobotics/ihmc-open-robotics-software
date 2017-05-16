@@ -8,6 +8,7 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -126,10 +127,24 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    {
       quaternion.setYawPitchRoll(yaw, pitch, roll);
    }
-
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+   }
+
+   public void appendYawRotation(double yawToAppend)
+   {
+      quaternion.appendYawRotation(yawToAppend);
+   }
+
+   public void appendPitchRotation(double pitchToAppend)
+   {
+      quaternion.appendPitchRotation(pitchToAppend);
+   }
+
+   public void appendRollRotation(double rollToAppend)
+   {
+      quaternion.appendRollRotation(rollToAppend);
    }
 
    @Override
@@ -341,6 +356,17 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
       this.quaternion.multiply(quaternion);
    }
 
+   public void preMultiply(FrameOrientation frameOrientation)
+   {
+      checkReferenceFrameMatch(frameOrientation);
+      preMultiply(frameOrientation.quaternion);
+   }
+
+   public void preMultiply(QuaternionReadOnly quaternion)
+   {
+      this.quaternion.preMultiply(quaternion);
+   }
+
    /**
     * Sets this {@code FrameOrientation} to the difference of {@code q1} and {@code q2}.
     * <p>
@@ -447,6 +473,22 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    {
       checkReferenceFrameMatch(frameRotationVectorToPack);
       quaternion.get(frameRotationVectorToPack.getVector());
+   }
+   
+   /**
+    * Computes and packs the orientation described by this {@code FrameOrientation} as a rotation
+    * vector.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param rotationVectorToPack the vector in which the rotation vector is stored. Modified.
+    */
+   public void getRotationVector(Vector3D rotationVectorToPack)
+   {
+      quaternion.get(rotationVectorToPack);
    }
 
    /**

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -16,7 +16,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
     * @param massMomentOfInertia the mass moment of inertia matrix in ReferenceFrame frame
     * @param mass the mass of the rigid body to which this RigidBodyInertia corresponds
     */
-   public RigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass)
+   public RigidBodyInertia(ReferenceFrame frame, Matrix3DReadOnly massMomentOfInertia, double mass)
    {
       super(frame, massMomentOfInertia, mass);
       this.bodyFrame = frame;
@@ -28,7 +28,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       this.bodyFrame = frame;
    }
 
-   public RigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass, Vector3D crossPart)
+   public RigidBodyInertia(ReferenceFrame frame, Matrix3DReadOnly massMomentOfInertia, double mass, Vector3D crossPart)
    {
       super(frame, massMomentOfInertia, mass, crossPart);
       this.bodyFrame = frame;
@@ -59,7 +59,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       checkIsCrossPartZero();    // otherwise this operation would be a lot less efficient
 
       acceleration.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
-      acceleration.getBaseFrame().checkIsWorldFrame();
+      acceleration.getBaseFrame().checkIsAStationaryFrame();
       acceleration.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       twist.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
@@ -100,7 +100,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
    {
       this.expressedInframe.checkReferenceFrameMatch(twist.getExpressedInFrame());
       this.bodyFrame.checkReferenceFrameMatch(twist.getBodyFrame());
-      twist.getBaseFrame().checkIsWorldFrame();
+      twist.getBaseFrame().checkIsAStationaryFrame();
 
       double ret = 0.0;
 

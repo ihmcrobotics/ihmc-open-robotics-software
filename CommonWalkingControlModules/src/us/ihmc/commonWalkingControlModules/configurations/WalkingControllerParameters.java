@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
@@ -35,8 +36,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 {
    private StraightLegWalkingParameters straightLegWalkingParameters;
 
-   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   protected DynamicReachabilityParameters dynamicReachabilityParameters;
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private DynamicReachabilityParameters dynamicReachabilityParameters;
+   private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -170,6 +172,40 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Whether or not to use a line contact during the swing state. If false, will use a point contact instead.
+    */
+   public boolean useToeOffLineContactInSwing()
+   {
+      return true;
+   }
+
+   /**
+    * Whether or not to use a line contact during the transfer state. If false, will use a point contact instead.
+    */
+   public boolean useToeOffLineContactInTransfer()
+   {
+      return false;
+   }
+
+   /**
+    * Whether or not to update the line contact points when performing toe off. If false, the line is only calculated
+    * when toe-off is first started using a line, and not updated.
+    */
+   public boolean updateLineContactDuringToeOff()
+   {
+      return false;
+   }
+
+   /**
+    * Whether or not to update the point contact points when performing toe off. If false, the point is only calculated
+    * when toe-off is first started using a point, and not updated.
+    */
+   public boolean updatePointContactDuringToeOff()
+   {
+      return false;
+   }
+
+   /**
     * To enable that feature, {@link WalkingControllerParameters#doToeOffIfPossible()} return true is required. John parameter
     */
    public abstract boolean doToeOffWhenHittingAnkleLimit();
@@ -193,9 +229,48 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getToeTouchdownAngle();
 
+   /**
+    * When stepping down, and we want to do toe strike, this ratio is used to determine the toe touchdown angle. This ratio is used to multiply the stepping
+    * depth to determine the toe touchdown angle. This touchdown angle is then clipped to above and below the value returned by {@link #getToeTouchdownAngle()}.
+    * @return touchdown depth ratio
+    */
+   public double getToeTouchdownDepthRatio()
+   {
+      return 5.0;
+   }
+
+   /**
+    * Returns the minimum distance stepping down that will be used to do toe touchdown if {@link #doToeTouchdownIfPossible()} is enabled.
+    * @return minimum step down height (m).
+    */
+   public double getStepDownHeightForToeTouchdown()
+   {
+      return -0.05;
+   }
+
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
+
+   /**
+    * When stepping over terrain of the correct height, and we want to do heel strike, this ratio is used to determine the heel touchdown angle.
+    * This ratio is used to multiply the step length to determine the heel touchdown angle. This touchdown angle is then clipped to above and
+    * below the value returned by {@link #getHeelTouchdownAngle()}.
+    * @return touchdown length ratio.
+    */
+   public double getHeelTouchdownLengthRatio()
+   {
+      return 0.35;
+   }
+
+   /**
+    * Returns the maximum height that heel touchdown will be used if {@link #doHeelTouchdownIfPossible()} is enabled.
+    * @return maximum height (m).
+    */
+   public double getMaximumHeightForHeelTouchdown()
+   {
+      return 0.10;
+   }
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
@@ -582,6 +657,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints.
+    */
+   public double[] getSwingWaypointProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
     * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
     * (new feature to be tested with Atlas)
     */
@@ -697,5 +780,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
+   }
+
+   /**
+    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
+    */
+   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+   {
+      if (pelvisOffsetWhileWalkingParameters == null)
+         pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
+
+      return pelvisOffsetWhileWalkingParameters;
    }
 }

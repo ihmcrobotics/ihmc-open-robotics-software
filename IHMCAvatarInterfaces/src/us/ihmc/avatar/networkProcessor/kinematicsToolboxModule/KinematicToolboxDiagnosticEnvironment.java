@@ -85,11 +85,11 @@ public class KinematicToolboxDiagnosticEnvironment
       }, 1, TimeUnit.MILLISECONDS);
 
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
+      parameters.enableNetworkProcessor(true);
       parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
-      parameters.enableMocapModule(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 

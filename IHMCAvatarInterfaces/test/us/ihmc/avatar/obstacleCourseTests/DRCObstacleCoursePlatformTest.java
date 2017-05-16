@@ -29,16 +29,15 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierWithStackTracing;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -170,7 +169,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FloatingInverseDynamicsJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      ReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
@@ -488,14 +487,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.40, -5.03, .24), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.22, -4.85, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.50, -5.13, .24), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.37, -5.00, .24), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.67, -5.30, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.50, -5.13, .24), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.84, -5.47, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.67, -5.30, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.418, -5.012, 0.156), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.238, -4.832, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.388, -4.982, 0.156), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.858, -5.452, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 
@@ -505,14 +504,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.30, -3.93, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.18, -3.81, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.58, -4.21, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.30, -3.93, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.71, -4.34, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.58, -4.21, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.84, -4.47, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.67, -4.30, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.198, -3.792, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.728, -4.322, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.858, -4.452, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.688, -4.282, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 

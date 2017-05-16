@@ -46,7 +46,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
 public class FixedBaseRobotArmController implements RobotController
@@ -60,7 +59,6 @@ public class FixedBaseRobotArmController implements RobotController
    private final FixedBaseRobotArm robotArm;
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
-   private final TwistCalculator twistCalculator;
 
    public enum FeedbackControlType
    {
@@ -118,12 +116,11 @@ public class FixedBaseRobotArmController implements RobotController
       RigidBody elevator = robotArm.getElevator();
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      twistCalculator = new TwistCalculator(worldFrame, elevator);
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
-                                                                                       twistCalculator, optimizationSettings, yoGraphicsListRegistry, registry);
+                                                                                       optimizationSettings, yoGraphicsListRegistry, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
          controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -211,7 +208,6 @@ public class FixedBaseRobotArmController implements RobotController
       robotArm.updateControlFrameAcceleration();
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
-      twistCalculator.compute();
 
       updateTrajectory();
       updateFeedbackCommands();

@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
@@ -59,6 +60,13 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    */
+   private ReferenceFrame controlBaseFrame = null;
+
+   /**
     * Creates an empty command.
     */
    public OrientationFeedbackControlCommand()
@@ -80,6 +88,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       gains.set(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
+      controlBaseFrame = other.controlBaseFrame;
    }
 
    /**
@@ -120,6 +129,21 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void setPrimaryBase(RigidBody primaryBase)
    {
       spatialAccelerationCommand.setPrimaryBase(primaryBase);
+   }
+
+   /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    * 
+    * @param controlBaseFrame the new control base frame.
+    */
+   public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
+   {
+      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+         this.controlBaseFrame = controlBaseFrame;
+      else
+         throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
    }
 
    /**
@@ -280,6 +304,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public RigidBody getEndEffector()
    {
       return spatialAccelerationCommand.getEndEffector();
+   }
+
+   public ReferenceFrame getControlBaseFrame()
+   {
+      if (controlBaseFrame != null)
+         return controlBaseFrame;
+      else
+         return spatialAccelerationCommand.getBase().getBodyFixedFrame();
    }
 
    public SpatialAccelerationCommand getSpatialAccelerationCommand()

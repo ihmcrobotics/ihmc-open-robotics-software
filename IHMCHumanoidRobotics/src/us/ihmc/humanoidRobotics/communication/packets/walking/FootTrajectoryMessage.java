@@ -9,9 +9,12 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -60,9 +63,9 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     * @param desiredPosition desired foot position expressed in world frame.
     * @param desiredOrientation desired foot orientation expressed in world frame.
     */
-   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
+   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
       this.robotSide = robotSide;
    }
 
@@ -77,8 +80,11 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    {
       super(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
-      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
-      super.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+   }
+
+   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose desiredPose)
+   {
+      this(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
    }
 
    @Override

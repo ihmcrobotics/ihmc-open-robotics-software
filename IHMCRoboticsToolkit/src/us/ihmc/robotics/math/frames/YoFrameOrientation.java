@@ -239,6 +239,13 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder implements 
       roll.add(orientation.getRoll());
    }
 
+   public void add(double yaw, double pitch, double roll)
+   {
+      this.yaw.add(yaw);
+      this.pitch.add(pitch);
+      this.roll.add(roll);
+   }
+
    public double[] getYawPitchRoll()
    {
       return new double[] { yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue() };

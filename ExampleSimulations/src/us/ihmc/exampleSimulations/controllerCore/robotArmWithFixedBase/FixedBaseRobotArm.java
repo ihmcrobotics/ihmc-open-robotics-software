@@ -41,7 +41,6 @@ public class FixedBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final ReferenceFrame elevatorFrame;
    private final RigidBody elevator;
    private final Vector3D shoulderYawOffset = new Vector3D(0.0, 0.0, 0.3);
    private final Vector3D shoulderRollOffset = new Vector3D(0.0, 0.0, 0.0);
@@ -100,8 +99,7 @@ public class FixedBaseRobotArm extends Robot
       super(FixedBaseRobotArm.class.getSimpleName());
       this.setGravity(0.0, 0.0, -gravity);
 
-      elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
 
       shoulderYaw = ScrewTools.addRevoluteJoint("shoulderYaw", elevator, shoulderYawOffset, Z_AXIS);
       shoulderYawLink = ScrewTools.addRigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
@@ -123,7 +121,7 @@ public class FixedBaseRobotArm extends Robot
 
       hand = ScrewTools.addRigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
-      handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
+      handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
       controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
                                                                            controlFrameTracker.getYoVelocity());

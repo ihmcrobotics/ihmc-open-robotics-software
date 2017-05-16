@@ -786,11 +786,11 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {
-         lineForFindingClosestLineSegment.getLine2d().getNormalizedVector().set(sidewaysMidLine.getLine2d().getNormalizedVector());
+         lineForFindingClosestLineSegment.getLine2d().setDirection(sidewaysMidLine.getLine2d().getDirection());
       }
       else
       {
-         lineForFindingClosestLineSegment.getLine2d().getNormalizedVector().set(lengthwiseMidLine.getLine2d().getNormalizedVector());
+         lineForFindingClosestLineSegment.getLine2d().setDirection(lengthwiseMidLine.getLine2d().getDirection());
       }
 
       FramePoint2d closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();

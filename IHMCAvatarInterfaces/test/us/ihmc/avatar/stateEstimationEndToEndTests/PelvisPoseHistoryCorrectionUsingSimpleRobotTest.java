@@ -261,7 +261,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       
 
       floatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
-      refFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame())
+      refFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
@@ -272,7 +272,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          }
       };
       RigidBody rigidBody = new RigidBody("pelvis", refFrame);
-      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody, refFrame);
+      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
    private void setupSim()

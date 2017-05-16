@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -68,6 +69,8 @@ public class WalkingMessageHandler
    private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
    private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
    private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
+
+   private final BooleanYoVariable isWalking = new BooleanYoVariable("isWalking", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -159,10 +162,10 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         Footstep newFootstep = createFootstep(command.getFootstep(i));
-         upcomingFootsteps.add(newFootstep);
          FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
+         Footstep newFootstep = createFootstep(command.getFootstep(i), newFootstepTiming.getSwingTime());
+         upcomingFootsteps.add(newFootstep);
       }
 
       if (!checkTimings(upcomingFootstepTimings))
@@ -367,6 +370,7 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
       statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      isWalking.set(true);
    }
 
    public void reportWalkingComplete()
@@ -374,6 +378,7 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+      isWalking.set(false);
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
@@ -525,7 +530,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataCommand footstepData)
+   private Footstep createFootstep(FootstepDataCommand footstepData, double swingTime)
    {
       FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
 
@@ -559,6 +564,24 @@ public class WalkingMessageHandler
             footstep.setCustomPositionWaypoints(positionWaypoints);
          }
       }
+      if (trajectoryType == TrajectoryType.WAYPOINTS)
+      {
+         RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = footstepData.getSwingTrajectory();
+         if (swingTrajectory == null)
+         {
+            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
+         if (swingTrajectory.getLast().getTime() >= swingTime)
+         {
+            PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
+         else
+         {
+            footstep.setSwingTrajectory(swingTrajectory);
+         }
+      }
 
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
@@ -576,7 +599,7 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         if (upcomingFootstepTimings.isEmpty())
+         if (upcomingFootstepTimings.isEmpty() && !isWalking.getBooleanValue())
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
