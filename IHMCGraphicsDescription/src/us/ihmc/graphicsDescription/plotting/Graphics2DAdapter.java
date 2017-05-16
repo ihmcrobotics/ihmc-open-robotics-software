@@ -4,11 +4,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.Line2D;
-import us.ihmc.robotics.geometry.LineSegment2d;
 
 /**
  * This is a public interface for drawing geometry in the Plotter.
@@ -83,12 +83,12 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawRotatedCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawPolygon(ConvexPolygon2d polygon)
+   public void drawPolygon(ConvexPolygon2D polygon)
    {
       plotter2dAdapter.drawPolygon(plotter2dAdapter.getMetersFrame(), polygon);
    }
 
-   public void drawPolygonFilled(ConvexPolygon2d polygon)
+   public void drawPolygonFilled(ConvexPolygon2D polygon)
    {
       plotter2dAdapter.drawPolygonFilled(plotter2dAdapter.getMetersFrame(), polygon);
    }
@@ -103,7 +103,7 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawLine(plotter2dAdapter.getMetersFrame(), line);
    }
 
-   public void drawLineSegment(LineSegment2d lineSegment)
+   public void drawLineSegment(LineSegment2D lineSegment)
    {
       plotter2dAdapter.drawLineSegment(plotter2dAdapter.getMetersFrame(), lineSegment);
    }

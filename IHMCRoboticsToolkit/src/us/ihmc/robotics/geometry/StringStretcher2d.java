@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 

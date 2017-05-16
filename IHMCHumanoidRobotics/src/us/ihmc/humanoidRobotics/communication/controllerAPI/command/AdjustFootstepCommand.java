@@ -6,23 +6,19 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>, FrameBasedCommand<AdjustFootstepMessage>
+public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>
 {
    private RobotSide robotSide;
    private final FramePoint adjustedPosition = new FramePoint();
    private final FrameOrientation adjustedOrientation = new FrameOrientation();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
-
-   private ReferenceFrame trajectoryFrame;
 
    public AdjustFootstepCommand()
    {
@@ -42,8 +38,8 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    public void set(AdjustFootstepMessage message)
    {
       robotSide = message.getRobotSide();
-      adjustedPosition.setIncludingFrame(trajectoryFrame, message.getLocation());
-      adjustedOrientation.setIncludingFrame(trajectoryFrame, message.getOrientation());
+      adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());
+      adjustedOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getOrientation());
       List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
@@ -63,13 +59,6 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
-   }
-
-   @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, AdjustFootstepMessage message)
-   {
-      trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getTrajectoryReferenceFrameId());
-      set(message);
    }
 
    public void setRobotSide(RobotSide robotSide)

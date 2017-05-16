@@ -29,6 +29,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -216,6 +217,11 @@ public class PelvisICPBasedTranslationManager
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
+      SelectionMatrix3D linearSelectionMatrix = command.getSelectionMatrix().getLinearPart();
+
+      if (!linearSelectionMatrix.isXSelected() && !linearSelectionMatrix.isYSelected())
+         return; // The user does not want to control the x and y of the pelvis, do nothing.
+
       switch (command.getExecutionMode())
       {
       case OVERRIDE:

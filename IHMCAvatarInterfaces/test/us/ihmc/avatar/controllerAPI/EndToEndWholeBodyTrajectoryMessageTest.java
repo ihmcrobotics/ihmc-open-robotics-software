@@ -110,7 +110,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
-         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame, worldFrame));
+         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
       }
 
 
@@ -131,7 +131,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredChestOrientation.changeFrame(worldFrame);
       desiredOrientation = new Quaternion();
       desiredChestOrientation.getQuaternion(desiredOrientation);
-      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, worldFrame, pelvisZUpFrame));
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
+      chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
 
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
 
@@ -183,8 +185,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(5);
-      chestTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
-      chestTrajectoryMessage.setTrajectoryReferenceFrameId(pelvisZUpFrame);
+      chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(pelvisZUpFrame);
+      chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());

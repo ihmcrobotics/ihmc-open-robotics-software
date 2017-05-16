@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -13,11 +15,11 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public class Point2dInConvexPolygon2d extends Point2D
 {
    private static final long serialVersionUID = 5818978949209007789L;
-   protected  ConvexPolygon2d polygon;
+   protected  ConvexPolygon2D polygon;
    private final Point2D origin = new Point2D(0,0);
 
 
-   public Point2dInConvexPolygon2d(ConvexPolygon2d polygon, double x, double y)
+   public Point2dInConvexPolygon2d(ConvexPolygon2D polygon, double x, double y)
    {
       super(x,y);
       this.polygon = polygon;

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -86,7 +86,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       }
    }
 
-   public void setConvexPolygon2d(ConvexPolygon2d polygon)
+   public void setConvexPolygon2d(ConvexPolygon2D polygon)
    {
       if (polygon == null)
       {
@@ -225,7 +225,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       polygonToPack.setAndUpdate(convexPolygon2dForReading);
    }
 
-   public ConvexPolygon2d getConvexPolygon2d()
+   public ConvexPolygon2D getConvexPolygon2d()
    {
       putYoValuesIntoFrameConvexPolygon2d();
       return this.convexPolygon2dForReading.getConvexPolygon2d();

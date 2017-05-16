@@ -3,6 +3,7 @@ package us.ihmc.ihmcPerception.terrainEmulator;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
@@ -1409,7 +1409,7 @@ public class BasicEnvironment{
             vertexPoints.add(point2d);
          }
 
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
          RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
          combinedTerrainObject.addTerrainObject(rock);
       }
@@ -1426,7 +1426,7 @@ public class BasicEnvironment{
             vertexPoints.add(point2d);
          }
 
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
          RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
          combinedTerrainObject.addTerrainObject(rock);
       }

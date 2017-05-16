@@ -5,12 +5,12 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,14 +22,14 @@ public class ContactableBodiesFactory
 {
    private SideDependentList<? extends List<Point2D>> footContactPoints = null;
    private SideDependentList<? extends Point2D> toeContactPoints = null;
-   private SideDependentList<? extends LineSegment2d> toeContactLines = null;
+   private SideDependentList<? extends LineSegment2D> toeContactLines = null;
 
    private final ArrayList<String> rigidBodyNames = new ArrayList<>();
    private final ArrayList<String> contactNames = new ArrayList<>();
    private final ArrayList<RigidBodyTransform> contactPointFrameTransforms = new ArrayList<>();
 
    public void addFootContactParameters(SideDependentList<? extends List<Point2D>> footContactPoints, SideDependentList<? extends Point2D> toeContactPoints,
-         SideDependentList<? extends LineSegment2d> toeContactLines)
+         SideDependentList<? extends LineSegment2D> toeContactLines)
    {
       this.footContactPoints = footContactPoints;
       this.toeContactPoints = toeContactPoints;
@@ -50,7 +50,7 @@ public class ContactableBodiesFactory
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          List<Point2D> contactPointsInSoleFrame = footContactPoints.get(robotSide);
          Point2D toeOffContactPoint = toeContactPoints.get(robotSide);
-         LineSegment2d toeOffContactLine = toeContactLines.get(robotSide);
+         LineSegment2D toeOffContactLine = toeContactLines.get(robotSide);
          ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, toeOffContactPoint,
                toeOffContactLine);
          footContactableBodies.put(robotSide, footContactableBody);

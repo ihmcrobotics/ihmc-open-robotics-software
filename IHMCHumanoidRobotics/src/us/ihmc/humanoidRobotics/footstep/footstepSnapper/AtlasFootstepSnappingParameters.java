@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 
 public class AtlasFootstepSnappingParameters extends FootstepSnappingParameters
 {
@@ -25,14 +25,14 @@ public class AtlasFootstepSnappingParameters extends FootstepSnappingParameters
 
       double footOffset = (footLengthForControl - 2 * footBackForControl) / 2.0;
 
-      collisionPolygon = new ConvexPolygon2d();
+      collisionPolygon = new ConvexPolygon2D();
       collisionPolygon.addVertex(actualFootLength / 2.0 + footOffset, actualFootWidth / 2.0);
       collisionPolygon.addVertex(actualFootLength / 2.0 + footOffset, -actualFootWidth / 2.0);
       collisionPolygon.addVertex(-actualFootLength / 2.0 + footOffset, -actualFootWidth / 2.0);
       collisionPolygon.addVertex(-actualFootLength / 2.0 + footOffset, actualFootWidth / 2.0);
       collisionPolygon.update();
 
-      supportPolygon = new ConvexPolygon2d();
+      supportPolygon = new ConvexPolygon2D();
       supportPolygon.addVertex(footLengthForControl - footBackForControl, toeWidthForControl / 2.0);
       supportPolygon.addVertex(footLengthForControl - footBackForControl, -toeWidthForControl / 2.0);
       supportPolygon.addVertex(-footBackForControl, footWidthForControl / 2.0);

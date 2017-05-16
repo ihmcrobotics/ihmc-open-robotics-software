@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -44,7 +44,7 @@ public class PlanarRegionMessageConverter
 
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
-         ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
+         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
          Point2D32[] vertices = new Point2D32[convexPolygon.getNumberOfVertices()];
          for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
          {
@@ -80,11 +80,11 @@ public class PlanarRegionMessageConverter
          concaveHullsVertices.add(hullVertices);
       }
 
-      List<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
+      List<ConvexPolygon2D> planarRegionConvexPolygons = new ArrayList<>();
       List<Point2D32[]> convexPolygonsVertices = planarRegionMessage.getConvexPolygonsVertices();
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)
       {
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d(convexPolygonsVertices.get(polygonIndex));
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(convexPolygonsVertices.get(polygonIndex));
          planarRegionConvexPolygons.add(convexPolygon);
       }
 
