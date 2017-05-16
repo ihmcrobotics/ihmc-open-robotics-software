@@ -1207,9 +1207,8 @@ public class JavaQuadProgSolverTest
 
          double objectiveCost = solver.getObjectiveCost(solution);
 
-         // Verify constraints hold:
+         // Verify equality constraints hold:
          verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
-         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
 
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
@@ -1311,10 +1310,8 @@ public class JavaQuadProgSolverTest
             continue;
          }
 
-         // Verify constraints hold:
+         // Verify equality constraints hold:
          verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
-         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution); //// FIXME: 5/15/17
-         verifyVariableBoundsHold(variableLowerBounds, variableUpperBounds, solution);
 
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
