@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.LineSegment1d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -116,8 +116,8 @@ public class DynamicReachabilityCalculator
    private Footstep nextFootstep;
    private boolean isInTransfer;
 
-   private final LineSegment1d stanceHeightLine = new LineSegment1d();
-   private final LineSegment1d stepHeightLine = new LineSegment1d();
+   private final LineSegment1D stanceHeightLine = new LineSegment1D();
+   private final LineSegment1D stepHeightLine = new LineSegment1D();
 
    private final ReferenceFrame predictedCoMFrame;
    private final TranslationReferenceFrame predictedPelvisFrame;

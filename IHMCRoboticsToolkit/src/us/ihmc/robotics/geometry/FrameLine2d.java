@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -66,7 +67,7 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
 
    public FrameLine2d(FrameLineSegment2d frameLineSegment2d)
    {
-      this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.endpoints[0], frameLineSegment2d.lineSegment.endpoints[1]);
+      this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.getFirstEndpoint(), frameLineSegment2d.lineSegment.getSecondEndpoint());
    }
 
    public Line2D getLine2d()
@@ -103,12 +104,12 @@ public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
 
    public FramePoint2d getFramePoint2dGivenParameter(double t)
    {
-      return new FramePoint2d(referenceFrame, line.getPointGivenParameter(t));
+      return new FramePoint2d(referenceFrame, line.pointOnLineGivenParameter(t));
    }
 
    public double getParameterGivenPointEpsilon(FramePoint2d point, double epsilon)
    {
-      return line.getParameterGivenPointEpsilon(point.getPoint(), epsilon);
+      return line.parameterGivenPointOnLine(point.getPoint(), epsilon);
    }
 
    public boolean containsEpsilon(FramePoint2d framePoint, double epsilon)

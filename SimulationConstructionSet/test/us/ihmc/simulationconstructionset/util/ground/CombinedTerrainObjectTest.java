@@ -3,10 +3,10 @@ package us.ihmc.simulationconstructionset.util.ground;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class CombinedTerrainObjectTest
 {
@@ -40,12 +40,12 @@ public class CombinedTerrainObjectTest
    {
       Vector3D normalVector = new Vector3D(0.0, 0.0, 1.0);
       double[][] firstVertices = {{0.0,0.0},{1.0,0.0},{1.0,1.0},{0.0,1.0}};
-      ConvexPolygon2d firstConvexPolygon = new ConvexPolygon2d(firstVertices);
+      ConvexPolygon2D firstConvexPolygon = new ConvexPolygon2D(firstVertices);
       RotatableConvexPolygonTerrainObject firstBox = new RotatableConvexPolygonTerrainObject(normalVector, firstConvexPolygon, 1.0);
       combinedTerrainObject.addTerrainObject(firstBox);
 
       double[][] secondVertices = {{-0.5,-0.5},{0.5,-0.5},{-0.5,0.5},{0.5,0.5}};
-      ConvexPolygon2d secondConvexPolygon = new ConvexPolygon2d(secondVertices);
+      ConvexPolygon2D secondConvexPolygon = new ConvexPolygon2D(secondVertices);
       RotatableConvexPolygonTerrainObject secondBox = new RotatableConvexPolygonTerrainObject(normalVector, secondConvexPolygon, 0.5);
       combinedTerrainObject.addTerrainObject(secondBox);
    }

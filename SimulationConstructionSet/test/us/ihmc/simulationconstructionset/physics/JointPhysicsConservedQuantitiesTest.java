@@ -59,7 +59,7 @@ public class JointPhysicsConservedQuantitiesTest
 
    private ScrewTestTools.RandomFloatingChain getRandomFloatingChain(int minNumberOfAxes, int maxNumberOfAxes)
    {
-      Random random = new Random();
+      Random random = new Random(519651L);
       int numberOfAxes = RandomNumbers.nextInt(random, minNumberOfAxes, maxNumberOfAxes);
       Vector3D[] jointAxes = new Vector3D[numberOfAxes];
 

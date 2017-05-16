@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.testTools;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,7 +23,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -45,12 +45,12 @@ public class PlanningTestTools
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final AppearanceDefinition[] appearances = { YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray() };
 
-   public static ConvexPolygon2d createDefaultFootPolygon()
+   public static ConvexPolygon2D createDefaultFootPolygon()
    {
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
@@ -60,9 +60,9 @@ public class PlanningTestTools
       return footPolygon;
    }
 
-   public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons()
    {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, PlanningTestTools.createDefaultFootPolygon());
       return footPolygons;
@@ -125,7 +125,7 @@ public class PlanningTestTools
                YoGraphicPolygon fullFootstepViz = new YoGraphicPolygon("fullFootstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, YoAppearance.Glass(0.7));
                vizGraphicsListRegistry.registerYoGraphic("viz", fullFootstepViz);
 
-               ConvexPolygon2d foothold = new ConvexPolygon2d();
+               ConvexPolygon2D foothold = new ConvexPolygon2D();
                footstep.getFoothold(foothold);
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
                YoFrameConvexPolygon2d yoFoothold = new YoFrameConvexPolygon2d("Foothold" + i, worldFrame, 4, vizRegistry);

@@ -22,6 +22,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -39,12 +41,10 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -285,11 +285,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       soleVertices.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
-      ConvexPolygon2d solePolygon = new ConvexPolygon2d(soleVertices);
+      ConvexPolygon2D solePolygon = new ConvexPolygon2D(soleVertices);
       solePolygon.update();
 
       // shrink polygon and project line origin inside
-      ConvexPolygon2d shrunkSolePolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkSolePolygon = new ConvexPolygon2D();
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
       shrinker.shrinkConstantDistanceInto(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
 

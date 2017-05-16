@@ -3,10 +3,10 @@ package us.ihmc.graphicsDescription.yoGraphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
 
 public class YoArtifactLine2d extends YoArtifact

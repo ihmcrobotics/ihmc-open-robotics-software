@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -16,7 +18,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
    private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>();
    private final RecyclingArrayList<MutableBoolean> removeRay = new RecyclingArrayList<MutableBoolean>(MutableBoolean.class);
    
-   public boolean constructFromInteriorOfRays(List<Line2D> rays, ConvexPolygon2d polygonToPack)
+   public boolean constructFromInteriorOfRays(List<Line2D> rays, ConvexPolygon2D polygonToPack)
    {      
       removeRay.clear();
       

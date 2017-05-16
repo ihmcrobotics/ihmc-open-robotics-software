@@ -8,6 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.Line2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;

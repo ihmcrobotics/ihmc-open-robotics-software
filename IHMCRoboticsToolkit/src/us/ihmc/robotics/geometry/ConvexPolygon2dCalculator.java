@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 
 /**
@@ -15,7 +16,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
-   public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, double epsilon, ConvexPolygon2d polygon)
+   public static boolean isPolygonInside(ConvexPolygon2D polygonToTest, double epsilon, ConvexPolygon2D polygon)
    {
       for (int i = 0; i < polygonToTest.getNumberOfVertices(); i++)
       {
@@ -29,24 +30,9 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
-   public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, ConvexPolygon2d polygon)
+   public static boolean isPolygonInside(ConvexPolygon2D polygonToTest, ConvexPolygon2D polygon)
    {
       return isPolygonInside(polygonToTest, 0.0, polygon);
-   }
-
-   /**
-    * Translates the given polygon.
-    */
-   public static void translatePolygon(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
-   {
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2D vertex = polygon.getVertexUnsafe(i);
-         vertex.add(translation);
-      }
-
-      polygon.updateBoundingBox();
-      polygon.updateCentroidAndArea();
    }
 
    /**
@@ -54,7 +40,7 @@ public class ConvexPolygon2dCalculator
     * E.g. in a polygon with 6 vertices given indices 0 and 2 (in this order) the method will return the
     * middle of the range [0 5 4 3 2]: 4
     */
-   public static int getMiddleIndexCounterClockwise(int firstIndex, int secondIndex, ConvexPolygon2d polygon)
+   public static int getMiddleIndexCounterClockwise(int firstIndex, int secondIndex, ConvexPolygon2D polygon)
    {
       int numberOfVertices = polygon.getNumberOfVertices();
       if (secondIndex >= firstIndex)
@@ -66,7 +52,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs a vector that is orthogonal to the given edge, facing towards the outside of the polygon
     */
-   public static void getEdgeNormal(int edgeIndex, Vector2DBasics normalToPack, ConvexPolygon2d polygon)
+   public static void getEdgeNormal(int edgeIndex, Vector2DBasics normalToPack, ConvexPolygon2D polygon)
    {
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
       Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
@@ -84,9 +70,9 @@ public class ConvexPolygon2dCalculator
     * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
     * only pack the edge before the vertex, not both edges.
     */
-   public static int getIntersectingEdges(Line2D line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
+   public static int getIntersectingEdges(Line2D line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2D polygon)
    {
-      if (polygon.hasExactlyOneVertex())
+      if (polygon.getNumberOfVertices() == 1)
          return 0;
 
       int foundEdges = 0;
@@ -98,7 +84,7 @@ public class ConvexPolygon2dCalculator
          // edge is on the line
          if (line.isPointOnLine(startVertex) && line.isPointOnLine(endVertex))
          {
-            if (polygon.hasExactlyTwoVertices())
+            if (polygon.getNumberOfVertices() == 2)
                return 0;
             // set the edges to be the previous and the next edge
             edgeToPack1.set(polygon.getPreviousVertex(i), startVertex);
@@ -127,9 +113,9 @@ public class ConvexPolygon2dCalculator
    /**
     * Checks if a line intersects the edge with the given index.
     */
-   public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2d polygon)
+   public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2D polygon)
    {
-      if (!polygon.hasAtLeastTwoVertices())
+      if (polygon.getNumberOfVertices() < 2)
          return false;
 
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
@@ -147,23 +133,16 @@ public class ConvexPolygon2dCalculator
    }
 
    // --- Methods that generate garbage ---
-   public static ConvexPolygon2d translatePolygonCopy(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
+   public static LineSegment2D[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2D polygon)
    {
-      ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
-      translatePolygon(translation, ret);
-      return ret;
-   }
-
-   public static LineSegment2d[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2d polygon)
-   {
-      LineSegment2d edge1 = new LineSegment2d();
-      LineSegment2d edge2 = new LineSegment2d();
+      LineSegment2D edge1 = new LineSegment2D();
+      LineSegment2D edge2 = new LineSegment2D();
 
       int edges = getIntersectingEdges(line, edge1, edge2, polygon);
       if (edges == 2)
-         return new LineSegment2d[] {edge1, edge2};
+         return new LineSegment2D[] {edge1, edge2};
       if (edges == 1)
-         return new LineSegment2d[] {edge1};
+         return new LineSegment2D[] {edge1};
       return null;
    }
 }

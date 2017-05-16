@@ -10,6 +10,7 @@ import java.util.List;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -35,7 +35,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
    protected final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
 
-   protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   protected SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    protected RobotSide initialSide;
    protected RigidBodyTransform initialFootPose = new RigidBodyTransform();
@@ -84,19 +84,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.exitAfterInitialSolution.set(exitAfterInitialSolution);
    }
 
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
    }
 
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, controllerPolygonsInSoleFrame);
    }
 
-   public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()
+   public SideDependentList<ConvexPolygon2D> getFootPolygonsInSoleFrame()
    {
       return footPolygonsInSoleFrame;
    }
