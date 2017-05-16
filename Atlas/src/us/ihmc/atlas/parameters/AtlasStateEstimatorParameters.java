@@ -141,8 +141,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, TORQUE_SENSOR, wristForceSensorNames.get(robotSide));
          }
       }
-
-      sensorProcessing.computeJointVelocityFromFiniteDifference(new DoubleYoVariable("bloppyAlpha", registry), true);
    }
 
    private String[] createArmJointNames()
@@ -365,7 +363,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public double getAlphaIMUsForSpineJointPositionEstimation()
    {
       // 04/24/2017 get rid of pelvis shaking
-      return 0.995;
+      return runningOnRealRobot ? 0.995 : 0.0;
    }
 
    @Override

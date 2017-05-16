@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.exampleContact;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -220,7 +220,7 @@ public class ExampleRockContactSimulation
          vertexPoints.add(point2d);
       }
       
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
       AppearanceDefinition appearance = YoAppearance.Red();
       YoAppearance.makeTransparent(appearance, 0.7f);
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, appearance);
@@ -242,7 +242,7 @@ public class ExampleRockContactSimulation
       pointList.add(wallPoint2);
       pointList.add(wallPoint3);
       
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(pointList);
       RotatableConvexPolygonTerrainObject rightWall = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Brown());
       combinedTerrainObject.addTerrainObject(rightWall);
    }
@@ -279,7 +279,7 @@ public class ExampleRockContactSimulation
          points.add(localTopLeft);
          points.add(localTopRight);
          
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d(points);
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(points);
          AppearanceDefinition appearance = YoAppearance.Brown();
          YoAppearance.makeTransparent(appearance, 0.7f);
          RotatableConvexPolygonTerrainObject pillar = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, appearance);

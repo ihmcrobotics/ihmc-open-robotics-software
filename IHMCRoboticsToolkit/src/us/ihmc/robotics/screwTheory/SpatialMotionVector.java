@@ -18,12 +18,17 @@ public abstract class SpatialMotionVector implements Clearable
    protected ReferenceFrame bodyFrame;
    protected ReferenceFrame baseFrame;
    protected ReferenceFrame expressedInFrame;
-   protected Vector3D linearPart;
-   protected Vector3D angularPart;
+   protected final Vector3D linearPart = new Vector3D();
+   protected final Vector3D angularPart = new Vector3D();
 
    public SpatialMotionVector()
    {
       this(null, null, null);
+   }
+
+   protected SpatialMotionVector(SpatialMotionVector other)
+   {
+      set(other);
    }
 
    /**
@@ -38,8 +43,6 @@ public abstract class SpatialMotionVector implements Clearable
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
    }
 
    /**
@@ -52,8 +55,6 @@ public abstract class SpatialMotionVector implements Clearable
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart,
                               Vector3DReadOnly angularPart)
    {
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
       set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
    }
 
@@ -71,8 +72,6 @@ public abstract class SpatialMotionVector implements Clearable
    {
       linearPart.checkReferenceFrameMatch(angularPart);
 
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
       set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), linearPart, angularPart);
    }
 
@@ -82,8 +81,6 @@ public abstract class SpatialMotionVector implements Clearable
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       MatrixTools.checkMatrixDimensions(matrix, SIZE, 1);
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
       set(bodyFrame, baseFrame, expressedInFrame, matrix, 0);
    }
 
@@ -96,8 +93,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
-      this.angularPart = new Vector3D(array[0], array[1], array[2]);
-      this.linearPart = new Vector3D(array[3], array[4], array[5]);
+      this.angularPart.set(0, array);
+      this.linearPart.set(3, array);
    }
 
    /**
@@ -122,6 +119,24 @@ public abstract class SpatialMotionVector implements Clearable
    public ReferenceFrame getExpressedInFrame()
    {
       return expressedInFrame;
+   }
+
+   protected void checkAndSet(SpatialMotionVector other)
+   {
+      this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
+      this.baseFrame.checkReferenceFrameMatch(other.baseFrame);
+      this.expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
+      set(other);
+   }
+
+   protected void set(SpatialMotionVector other)
+   {
+      this.bodyFrame = other.bodyFrame;
+      this.baseFrame = other.baseFrame;
+      this.expressedInFrame = other.expressedInFrame;
+
+      this.linearPart.set(other.linearPart);
+      this.angularPart.set(other.angularPart);
    }
 
    /**

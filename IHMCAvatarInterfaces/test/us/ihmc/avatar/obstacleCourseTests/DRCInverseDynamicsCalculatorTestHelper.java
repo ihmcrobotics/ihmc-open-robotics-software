@@ -24,13 +24,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -42,9 +40,9 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
@@ -61,7 +59,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final HumanoidFloatingRootJointRobot robot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
-   private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
@@ -122,9 +119,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       double gravity = -robot.getGravityZ();
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator(), gravity);
 
       robot.addYoVariableRegistry(registry);
 
@@ -767,7 +763,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void copyAccelerationFromForwardToInverseBroken(FloatingJoint floatingJoint, FloatingInverseDynamicsJoint sixDoFJoint)
    {
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       FrameVector angularAccelerationInBody = new FrameVector();
       floatingJoint.getAngularAcceleration(angularAccelerationInBody, bodyFrame);
@@ -787,7 +783,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -806,7 +802,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -828,7 +824,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -856,7 +852,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void computeTwistCalculatorAndInverseDynamicsCalculator()
    {
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
    }
 

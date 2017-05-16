@@ -23,7 +23,8 @@ public enum HumanoidBehaviorType
    WALK_OVER_TERRAIN_TO_VALVE,
    DEBUG_PARTIAL_FOOTHOLDS,
    WALK_TO_GOAL_ANYTIME_PLANNER,
-   TEST_ICP_OPTIMIZATION;
+   TEST_ICP_OPTIMIZATION,
+   SOLARPANEL_BEHAVIOR;
 
    public static final HumanoidBehaviorType[] values = values();
 }

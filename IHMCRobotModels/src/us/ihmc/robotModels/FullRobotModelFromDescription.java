@@ -30,6 +30,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -98,9 +99,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
       /*
        * Create root object
        */
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
-      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator, elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator);
       if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");
@@ -185,14 +185,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getWorldFrame()
-   {
-      return worldFrame;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public ReferenceFrame getElevatorFrame()
+   public MovingReferenceFrame getElevatorFrame()
    {
       return elevator.getBodyFixedFrame();
    }

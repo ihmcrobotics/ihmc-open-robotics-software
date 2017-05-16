@@ -1,9 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,8 +42,8 @@ public class ScrewToolsTest
    private ArrayList<RevoluteJoint> joints;
 
    protected static final double epsilon = 1e-10;
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", false, true, true);
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
 
    @Before
    public void setUp()
@@ -165,7 +162,7 @@ public class ScrewToolsTest
    public void testAddRevoluteJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -181,7 +178,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Vector3d_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -196,7 +193,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", null);
+      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -212,7 +209,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
@@ -228,7 +225,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
@@ -237,19 +234,6 @@ public class ScrewToolsTest
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testCreateOffsetFrame_ReferenceFrame_Transform3D_String()
-   {
-      ReferenceFrame parentFrame = theFrame;
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      String frameName = "woof";
-      ReferenceFrame frame = ScrewTools.createOffsetFrame(parentFrame, transformToParent, frameName);
-
-      parentFrame.checkReferenceFrameMatch(frame.getRootFrame());
-      assertEquals("Should be equal", frameName, frame.getName());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

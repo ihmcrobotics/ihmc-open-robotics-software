@@ -370,6 +370,9 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
       int index = 0;
       int currentNumberOfVariables = 0;
 
+      if (XMLData == null)
+         return;
+         
       while ((XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") <= XMLData.length())
              && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") > 0))
       {

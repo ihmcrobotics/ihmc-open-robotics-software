@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -15,7 +16,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 
@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.shapes.Plane3d;
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
-   private final ConvexPolygon2d convexPolygon;
+   private final ConvexPolygon2D convexPolygon;
    private final Plane3d topPlane;
    private final List<Plane3d> sidePlanes = new ArrayList<Plane3d>();
 
@@ -33,16 +33,16 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    private static final double EPSILON = Double.MIN_VALUE;
    private static final boolean VISUALIZE_SURFACE_NORMALS = false;
 
-   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2d convexPolygon, double centroidHeight)
+   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2D convexPolygon, double centroidHeight)
    {
       this(normal, convexPolygon, centroidHeight, YoAppearance.StoneTexture());
    }
 
-   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2d convexPolygon, double centroidHeight, AppearanceDefinition appearance)
+   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2D convexPolygon, double centroidHeight, AppearanceDefinition appearance)
    {
       if (normal.getZ() <= 0.0)
          throw new RuntimeException("Top surface normal must have a positive z-value. Normal.z = " + normal.getZ());
-      this.convexPolygon = new ConvexPolygon2d(convexPolygon);
+      this.convexPolygon = new ConvexPolygon2D(convexPolygon);
       Point3D centroid = new Point3D(convexPolygon.getCentroid().getX(), convexPolygon.getCentroid().getY(), centroidHeight);
       this.topPlane = new Plane3d(centroid, normal);
 
@@ -75,7 +75,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       addLinkGraphics(convexPolygon, boundingBox);
    }
 
-   private void addLinkGraphics(ConvexPolygon2d convexPolygon, BoundingBox3D boundingBox)
+   private void addLinkGraphics(ConvexPolygon2D convexPolygon, BoundingBox3D boundingBox)
    {
       double lowValue = boundingBox.getMinZ();
 
@@ -230,7 +230,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       Point2D pointToCheck = new Point2D(u, v);
 
       // Check if it is inside
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(faceVertices2d);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(faceVertices2d);
 
       return convexPolygon.isPointInside(pointToCheck);
    }
@@ -323,7 +323,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
 
@@ -336,7 +336,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
       }

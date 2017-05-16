@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -13,11 +15,11 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public class Point2dInConvexPolygon2d extends Point2D
 {
    private static final long serialVersionUID = 5818978949209007789L;
-   protected  ConvexPolygon2d polygon;
+   protected  ConvexPolygon2D polygon;
    private final Point2D origin = new Point2D(0,0);
 
 
-   public Point2dInConvexPolygon2d(ConvexPolygon2d polygon, double x, double y)
+   public Point2dInConvexPolygon2d(ConvexPolygon2D polygon, double x, double y)
    {
       super(x,y);
       this.polygon = polygon;
@@ -64,8 +66,8 @@ public class Point2dInConvexPolygon2d extends Point2D
    {
       if (x==0 && y==0)
          x=1; //as eccentricity=0
-      Line2d ray = new Line2d(new Point2D(0,0), new Vector2D(x,y));
-      Point2D[] edgePoints = polygon.intersectionWithRayCopy(ray);
+      Line2D ray = new Line2D(new Point2D(0,0), new Vector2D(x,y));
+      Point2D[] edgePoints = polygon.intersectionWithRay(ray);
       if(edgePoints.length!=1)
          throw new RuntimeException("intersecting points should be 1, but we get" + edgePoints.length);
       return edgePoints[0];

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -62,6 +62,7 @@ public class WalkingCommandConsumer
    private final DoubleYoVariable minimumDurationBetweenTwoManipulationAborts = new DoubleYoVariable("minimumDurationBetweenTwoManipulationAborts", registry);
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
+   private final DoubleYoVariable allowManipulationAbortAfterThisTime = new DoubleYoVariable("allowManipulationAbortAfterThisTime", registry);
 
    private final DoubleYoVariable yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
@@ -117,13 +118,14 @@ public class WalkingCommandConsumer
       minimumDurationBetweenTwoManipulationAborts.set(5.0);
       manipulationIgnoreInputsDurationAfterAbort.set(2.0);
       timeOfLastManipulationAbortRequest.set(Double.NEGATIVE_INFINITY);
+      allowManipulationAbortAfterThisTime.set(Double.NEGATIVE_INFINITY);
 
       parentRegistry.addChild(registry);
    }
-   
-   public void setTimeOfLastManipulationAbortToCurrent()
+
+   public void avoidManipulationAbortForDuration(double durationToAvoidAbort)
    {
-      timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
+      allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
 
    public void consumeHeadCommands()
@@ -216,7 +218,8 @@ public class WalkingCommandConsumer
          PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
          if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
          {
-            pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
+            if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
+               return;
             balanceManager.handlePelvisTrajectoryCommand(command);
             comHeightManager.handlePelvisTrajectoryCommand(command);
          }
@@ -258,7 +261,7 @@ public class WalkingCommandConsumer
             if (handManagers.get(robotSide) != null)
                handManagers.get(robotSide).handleJointspaceTrajectoryCommand(command);
          }
-         
+
          for (int i = 0; i < handHybridCommands.size(); i++)
          {
             HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
@@ -295,6 +298,9 @@ public class WalkingCommandConsumer
          return;
 
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < minimumDurationBetweenTwoManipulationAborts.getDoubleValue())
+         return;
+
+      if (yoTime.getDoubleValue() < allowManipulationAbortAfterThisTime.getDoubleValue())
          return;
 
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortManipulation.getDoubleValue())

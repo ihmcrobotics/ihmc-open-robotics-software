@@ -22,7 +22,7 @@ public class ZUpFrame extends ReferenceFrame
 
    public ZUpFrame(ReferenceFrame worldFrame, FramePoint origin, String name)
    {
-      super(name, worldFrame, false, false, true);
+      super(name, worldFrame, false, true);
       this.worldFrame = worldFrame;
       this.origin = new FramePoint(origin);
       

@@ -105,7 +105,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
 
       public DesiredHeadingFrame()
       {
-         super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
+         super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, true);
       }
 
       private final RotationMatrix rotation = new RotationMatrix();

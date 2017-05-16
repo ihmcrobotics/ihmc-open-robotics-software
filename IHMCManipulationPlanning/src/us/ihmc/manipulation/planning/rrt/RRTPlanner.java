@@ -46,7 +46,7 @@ public class RRTPlanner
             if (rrtTree.newNode.getDistance(goalNode) < rrtTree.getStepLength())
             {
                rrtTree.newNode.addChildNode(goalNode);
-               rrtTree.updatePath(goalNode);
+               rrtTree.updatePathNode(goalNode);
                optimalPath = rrtTree.pathNode;
 
                return true;

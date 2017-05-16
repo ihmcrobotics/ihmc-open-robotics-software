@@ -2,25 +2,28 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class ConvexPolygonShrinker
 {
-   private final LineSegment2d polygonAsLineSegment = new LineSegment2d();
+   private final LineSegment2D polygonAsLineSegment = new LineSegment2D();
    private final ArrayList<Point2D> newVertices = new ArrayList<Point2D>();
    private final Point2D newVertex0 = new Point2D();
    private final Point2D newVertex1 = new Point2D();
-   private final ArrayList<Line2d> rays = new ArrayList<Line2d>();
+   private final ArrayList<Line2D> rays = new ArrayList<Line2D>();
 
-   private final Line2d edgeOnQ = new Line2d();
+   private final Line2D edgeOnQ = new Line2D();
    private final Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D();
-   private final Line2d LinePerpendicularToEdgeOnQ = new Line2d();
+   private final Line2D LinePerpendicularToEdgeOnQ = new Line2D();
    private final Point2D referencePoint = new Point2D();
    private final Vector2D normalizedVector = new Vector2D();
    
-   private final ArrayList<Line2d> edgePool = new ArrayList<Line2d>();
+   private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>();
    
    private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
@@ -28,17 +31,17 @@ public class ConvexPolygonShrinker
    {
       for (int i=0; i<8; i++)
       {
-         edgePool.add(new Line2d());
+         edgePool.add(new Line2D());
       }
    }
    
-   private Line2d getARay(int index)
+   private Line2D getARay(int index)
    {
       if (edgePool.size() <= index)
       {
          for (int i=0; i<index - edgePool.size() + 1; i++)
          {
-            edgePool.add(new Line2d());
+            edgePool.add(new Line2D());
          }
       }
       
@@ -46,7 +49,7 @@ public class ConvexPolygonShrinker
    }
    
    
-   public boolean shrinkConstantDistanceInto(ConvexPolygon2d polygonQ, double distance, ConvexPolygon2d polygonToPack)
+   public boolean shrinkConstantDistanceInto(ConvexPolygon2D polygonQ, double distance, ConvexPolygon2D polygonToPack)
    {
       if (Math.abs(distance) < 1.0e-10)
       {
@@ -54,7 +57,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyTwoVertices())
+      if (polygonQ.getNumberOfVertices() == 2)
       {
          Point2DReadOnly vertex0 = polygonQ.getVertex(0);
          Point2DReadOnly vertex1 = polygonQ.getVertex(1);
@@ -73,8 +76,8 @@ public class ConvexPolygonShrinker
          polygonAsLineSegment.set(vertex0, vertex1);
          double percentageAlongSegment = distance / polygonAsLineSegment.length();
 
-         polygonAsLineSegment.pointBetweenEndPointsGivenParameter(percentageAlongSegment, newVertex0);
-         polygonAsLineSegment.pointBetweenEndPointsGivenParameter(1 - percentageAlongSegment, newVertex1);
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
 
          newVertices.clear();
          newVertices.add(newVertex0);
@@ -85,7 +88,7 @@ public class ConvexPolygonShrinker
          return true;
       }
 
-      if (polygonQ.hasExactlyOneVertex())
+      if (polygonQ.getNumberOfVertices() == 1)
       {
          polygonToPack.setAndUpdate(polygonQ);
          
@@ -103,12 +106,13 @@ public class ConvexPolygonShrinker
       {
          edgeOnQ.set(vertexQ, nextVertexQ);
          edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
+         vectorPerpendicularToEdgeOnQ.negate();
          LinePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
-         LinePerpendicularToEdgeOnQ.getPointGivenParameter(distance, referencePoint);
-         edgeOnQ.getNormalizedVector(normalizedVector);
+         LinePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
+         edgeOnQ.getDirection(normalizedVector);
          
          
-         Line2d newEdge = getARay(rays.size());
+         Line2D newEdge = getARay(rays.size());
          newEdge.set(referencePoint, normalizedVector);
          rays.add(newEdge);
 
@@ -139,7 +143,7 @@ public class ConvexPolygonShrinker
       
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
-      ConvexPolygon2d polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
+      ConvexPolygon2D polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
       shrinkConstantDistanceInto(polygonQ.getConvexPolygon2dCopy(), distance, polygon2dToPack);
 //      framePolygonToPack.updateFramePoints();
       framePolygonToPack.update();

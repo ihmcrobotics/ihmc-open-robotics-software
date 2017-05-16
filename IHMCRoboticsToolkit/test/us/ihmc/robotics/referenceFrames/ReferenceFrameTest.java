@@ -1,9 +1,6 @@
 package us.ihmc.robotics.referenceFrames;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-//import us.ihmc.utilities.math.geometry.Transform3D;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,15 +12,12 @@ import org.junit.Test;
 import us.ihmc.commons.Assertions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameTest
@@ -106,7 +100,7 @@ public class ReferenceFrameTest
 
       public RandomlyChangingFrame(String frameName, ReferenceFrame parentFrame)
       {
-         super(frameName, parentFrame, false, false, false);
+         super(frameName, parentFrame);
       }
 
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -440,131 +434,6 @@ public class ReferenceFrameTest
          ReferenceFrame frameB = ReferenceFrame.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
 
          verifyTransformsAreEpsilonEqual(frameA.getTransformToWorldFrame(), frameB.getTransformToWorldFrame());
-      }
-      tearDown();
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
-   public void testCopyAndAlignAxisWithVector()
-   {
-      setUp();
-      Random random = new Random(1776L);
-      updateAllFrames();
-
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      RigidBodyTransform transformA = new RigidBodyTransform();
-      RigidBodyTransform transformB = new RigidBodyTransform();
-      
-      FrameVector zAxisFrameA = new FrameVector();
-      FrameVector zAxisFrameB = new FrameVector();
-      
-      int numberOfTests = 100000;
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
-
-         ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
-         ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);
-
-         frameB = frameB.copyAndAlignAxisWithVector(Axis.Z, new FrameVector(frameA, 0.0, 0.0, 1.0));
-         
-         zAxisFrameA.setIncludingFrame(frameA, 0.0, 0.0, 1.0);
-         zAxisFrameB.setIncludingFrame(frameB, 0.0, 0.0, 1.0);
-         zAxisFrameB.changeFrame(frameA);
-
-         assertTrue(zAxisFrameA.isEpsilonParallel(zAxisFrameB, Math.toRadians(0.1)));
-         assertEquals("zAxis in FrameB is not aligned with zAxis in FrameA!", 1.0, zAxisFrameA.dot(zAxisFrameB) / (zAxisFrameA.length() * zAxisFrameB.length()), 1e-7);
-      }
-      tearDown();
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
-   public void testCopyAndAlignTwoAxesWithTwoVectors()
-   {
-      setUp();
-      Random random = new Random(1776L);
-      updateAllFrames();
-
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      RigidBodyTransform transformA = new RigidBodyTransform();
-      RigidBodyTransform transformB = new RigidBodyTransform();
-      
-      FrameVector xAxisFrameA = new FrameVector();
-      FrameVector xAxisFrameB = new FrameVector();
-      FrameVector zAxisFrameA = new FrameVector();
-      FrameVector zAxisFrameB = new FrameVector();
-      
-      int numberOfTests = 100000;
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
-
-         ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
-         ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);
-
-         frameB = frameB.copyAndAlignAxisWithVector(Axis.Z, new FrameVector(frameA, 0.0, 0.0, 1.0));
-         frameB = frameB.copyAndAlignAxisWithVector(Axis.X, new FrameVector(frameA, 1.0, 0.0, 0.0));
-                  
-         xAxisFrameA.setIncludingFrame(frameA, 1.0, 0.0, 0.0);
-         xAxisFrameB.setIncludingFrame(frameB, 1.0, 0.0, 0.0);
-         xAxisFrameB.changeFrame(frameA);
-
-         assertTrue(xAxisFrameA.isEpsilonParallel(xAxisFrameB, Math.toRadians(0.1)));
-         
-         zAxisFrameA.setIncludingFrame(frameA, 0.0, 0.0, 1.0);
-         zAxisFrameB.setIncludingFrame(frameB, 0.0, 0.0, 1.0);
-         zAxisFrameB.changeFrame(frameA);
-
-         assertTrue(zAxisFrameA.isEpsilonParallel(zAxisFrameB, Math.toRadians(0.1)));
-      }
-      tearDown();
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testCopyAndAimAxisAtPoint()
-   {
-      setUp();
-      Random random = new Random(1776L);
-      updateAllFrames();
-
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      RigidBodyTransform transformA = new RigidBodyTransform();
-      
-      Point3D frameOriginInWorld = new Point3D();
-      
-      FrameVector xAxis = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
-      Vector3D xAxisInWorld = new Vector3D(1.0, 0.0, 0.0);
-      FramePoint aimAxisAtThis = new FramePoint();
-      
-      FrameVector axisToAlign = new FrameVector();
-      
-      int numberOfTests = 100000;
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         transformA.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
-
-         transformA.getTranslation(frameOriginInWorld);
-         aimAxisAtThis.setIncludingFrame(worldFrame, frameOriginInWorld);
-         aimAxisAtThis.add(xAxisInWorld);
-
-         ReferenceFrame frameB = frameA.copyAndAimAxisAtPoint(Axis.X, aimAxisAtThis);
-         
-         axisToAlign.setIncludingFrame(frameB, 1.0, 0.0, 0.0);
-         axisToAlign.changeFrame(worldFrame);
-
-         assertTrue(xAxis.isEpsilonParallel(axisToAlign, Math.toRadians(0.1)));
       }
       tearDown();
    }

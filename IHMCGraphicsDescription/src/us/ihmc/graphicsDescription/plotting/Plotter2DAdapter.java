@@ -26,14 +26,14 @@ import java.util.Map;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.Line2d;
-import us.ihmc.robotics.geometry.LineSegment2d;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
 /**
@@ -200,7 +200,7 @@ public class Plotter2DAdapter
       drawOvalFilled(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), pixelate(2.0 * radiiFrameVector.getY()));
    }
 
-   public void drawLineSegment(PlotterReferenceFrame frame, LineSegment2d lineSegment)
+   public void drawLineSegment(PlotterReferenceFrame frame, LineSegment2D lineSegment)
    {
       PlotterPoint2d firstEndpoint = pointBin[0];
       PlotterPoint2d secondEndpoint = pointBin[1];
@@ -230,12 +230,12 @@ public class Plotter2DAdapter
       drawLineSegment(pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()), pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()));
    }
 
-   public void drawLine(PlotterReferenceFrame frame, Line2d line)
+   public void drawLine(PlotterReferenceFrame frame, Line2D line)
    {
       PlotterPoint2d start = pointBin[0];
       PlotterVector2d direction = vectorBin[0];
       start.setIncludingFrame(frame, line.getPoint());
-      direction.setIncludingFrame(frame, line.getNormalizedVector());
+      direction.setIncludingFrame(frame, line.getDirection());
       start.changeFrame(screenFrame);
       direction.changeFrame(screenFrame);
       direction.normalize();
@@ -251,13 +251,13 @@ public class Plotter2DAdapter
       drawLineSegment(pixelate(farPointNegative.getX()), pixelate(farPointNegative.getY()), pixelate(farPointPositive.getX()), pixelate(farPointPositive.getY()));
    }
 
-   public void drawPolygonFilled(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   public void drawPolygonFilled(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       if (setupForDrawPolygon(frame, convexPolygon2d))
          drawPolygonFilled(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
    }
 
-   public void drawPolygon(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   public void drawPolygon(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       if (setupForDrawPolygon(frame, convexPolygon2d))
          drawPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
@@ -287,7 +287,7 @@ public class Plotter2DAdapter
       drawString(string, pixelate(plotStart.getX()), pixelate(plotStart.getY()));
    }
 
-   private boolean setupForDrawPolygon(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)
+   private boolean setupForDrawPolygon(PlotterReferenceFrame frame, ConvexPolygon2D convexPolygon2d)
    {
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {

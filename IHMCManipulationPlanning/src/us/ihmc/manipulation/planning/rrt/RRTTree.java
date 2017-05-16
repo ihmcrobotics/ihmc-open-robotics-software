@@ -167,12 +167,12 @@ public class RRTTree
       return false;
    }
 
-   public void updatePath(RRTNode endNode)
+   public void updatePathNode(RRTNode endNodeOfPath)
    {
       this.pathNode.clear();
 
       ArrayList<RRTNode> pathNodeOne = new ArrayList<RRTNode>();
-      RRTNode singleNode = endNode;
+      RRTNode singleNode = endNodeOfPath;
       while (true)
       {
          pathNodeOne.add(singleNode);

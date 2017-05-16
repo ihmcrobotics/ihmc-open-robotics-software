@@ -13,7 +13,6 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -34,8 +33,7 @@ public class ScrewTestTools
    public static List<RevoluteJoint> createRandomChainRobot(String prefix, Vector3D[] jointAxes, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody(prefix + "RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody(prefix + "RootBody", worldFrame);
       return createRandomChainRobot(prefix, rootBody, jointAxes, random);
    }
 
@@ -72,8 +70,7 @@ public class ScrewTestTools
    public static List<PrismaticJoint> createRandomChainRobotWithPrismaticJoints(String prefix, Vector3D[] jointAxes, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody(prefix + "RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody(prefix + "RootBody", worldFrame);
       return createRandomChainRobotWithPrismaticJoints(prefix, rootBody, jointAxes, random);
    }
 
@@ -110,8 +107,7 @@ public class ScrewTestTools
    public static List<OneDoFJoint> createRandomChainRobotWithOneDoFJoints(String prefix, Vector3D[] jointAxes, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody(prefix + "RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody(prefix + "RootBody", worldFrame);
       return createRandomChainRobotWithOneDoFJoints(prefix, rootBody, jointAxes, random);
    }
 
@@ -142,8 +138,7 @@ public class ScrewTestTools
    public static List<RevoluteJoint> createRandomTreeRobot(int numberOfJoints, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody("RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody("RootBody", worldFrame);
       return createRandomTreeRobot(rootBody, numberOfJoints, random);
    }
 
@@ -202,8 +197,7 @@ public class ScrewTestTools
    public static List<PrismaticJoint> createRandomTreeRobotWithPrismaticJoints(String prefix, int numberOfJoints, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody(prefix + "RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody(prefix + "RootBody", worldFrame);
       return createRandomTreeRobotWithPrismaticJoints(prefix, rootBody, numberOfJoints, random);
    }
 
@@ -233,8 +227,7 @@ public class ScrewTestTools
    public static List<OneDoFJoint> createRandomTreeRobotWithOneDoFJoints(String prefix, int numberOfJoints, Random random)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame rootBodyFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("rootBodyFrame", worldFrame, new RigidBodyTransform());
-      RigidBody rootBody = new RigidBody(prefix + "RootBody", rootBodyFrame);
+      RigidBody rootBody = new RigidBody(prefix + "RootBody", worldFrame);
       return createRandomTreeRobotWithOneDoFJoints(prefix, rootBody, numberOfJoints, random);
    }
 
@@ -337,11 +330,13 @@ public class ScrewTestTools
    public static void setRandomVelocity(OneDoFJoint joint, Random random)
    {
       joint.setQd(random.nextDouble());
+      joint.updateFramesRecursively();
    }
 
    public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
    {
       joint.setQd(RandomNumbers.nextDouble(random, min, max));
+      joint.updateFramesRecursively();
    }
 
    public static void setRandomAcceleration(OneDoFJoint joint, Random random, double min, double max)
@@ -619,11 +614,9 @@ public class ScrewTestTools
 
       public RandomFloatingChain(Random random, Vector3D[] jointAxes)
       {
-         ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(),
-                                                                                                     new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
-         rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+         rootJoint = new SixDoFJoint("rootJoint", elevator);
          RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
          revoluteJoints = new ArrayList<RevoluteJoint>();

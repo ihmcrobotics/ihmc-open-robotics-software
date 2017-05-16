@@ -96,9 +96,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
-      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getMinSwingHeightFromStanceFoot(),
-                                                                walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry,
-                                                                graphicsListRegistry);
+      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getSwingWaypointProportions(),
+            walkingControllerParameters.getMinSwingHeightFromStanceFoot(), walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry,
+            graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
       soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;

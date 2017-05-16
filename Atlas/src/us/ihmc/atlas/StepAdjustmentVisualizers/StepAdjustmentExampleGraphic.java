@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -124,7 +124,7 @@ public class StepAdjustmentExampleGraphic
 
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPAdjustmentOptimizationController icpOptimizationController;
    private final ICPPlanner icpPlanner;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -168,7 +168,7 @@ public class StepAdjustmentExampleGraphic
       icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
-      icpOptimizationController = new ICPOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
+      icpOptimizationController = new ICPAdjustmentOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
             contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
@@ -1469,6 +1469,11 @@ public class StepAdjustmentExampleGraphic
             return 5.0;
          }
 
+         @Override public double getAngularMomentumMinimizationWeight()
+         {
+            return 500.0;
+         }
+
          @Override public boolean useFeedbackRegularization()
          {
             return true;
@@ -1477,6 +1482,11 @@ public class StepAdjustmentExampleGraphic
          @Override public boolean useStepAdjustment()
          {
             return true;
+         }
+
+         @Override public boolean useAngularMomentum()
+         {
+            return false;
          }
 
          @Override public boolean useFootstepRegularization()
@@ -1515,25 +1525,25 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getDoubleSupportMaxCMPForwardExit()
+         public double getDoubleSupportMaxCoPForwardExit()
          {
             return 0;
          }
 
          @Override
-         public double getDoubleSupportMaxCMPLateralExit()
+         public double getDoubleSupportMaxCoPLateralExit()
          {
             return 0;
          }
 
          @Override
-         public double getSingleSupportMaxCMPForwardExit()
+         public double getSingleSupportMaxCoPForwardExit()
          {
             return 0;
          }
 
          @Override
-         public double getSingleSupportMaxCMPLateralExit()
+         public double getSingleSupportMaxCoPLateralExit()
          {
             return 0;
          }
