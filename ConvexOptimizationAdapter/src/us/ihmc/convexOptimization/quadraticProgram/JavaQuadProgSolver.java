@@ -193,9 +193,7 @@ public class JavaQuadProgSolver
    private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
    {
       temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
-      tempMatrix.reshape(xVector.numCols, QMatrix.numCols);
-      CommonOps.multTransA(xVector, QMatrix, tempMatrix);
-      CommonOps.multTransB(tempMatrix, QMatrix, temporaryMatrix);
+      CommonOps.multTransA(xVector, QMatrix, temporaryMatrix);
       CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
    }
 
@@ -542,7 +540,8 @@ public class JavaQuadProgSolver
          }
       }
 
-      return maxNumberOfIterations;
+      CommonOps.fill(solutionToPack, Double.NaN);
+      throw new NoConvergenceException(maxNumberOfIterations);
    }
 
    private void compute_d()
@@ -725,6 +724,9 @@ public class JavaQuadProgSolver
 
    public void reshape()
    {
+      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
+      int numberOfLowerBounds = lowerBoundsDVector.getNumRows();
+      int numberOfUpperBounds = upperBoundsDVector.getNumRows();
       int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
 
       R.reshape(problemSize, problemSize);
@@ -736,7 +738,6 @@ public class JavaQuadProgSolver
       lagrangeMultipliers.reshape(numberOfConstraints, 1);
       previousSolution.reshape(problemSize, 1);
       previousLagrangeMultipliers.reshape(numberOfConstraints, 1);
-
 
       activeSetIndices.fill(0, numberOfConstraints, 0);
       previousActiveSetIndices.fill(0, numberOfConstraints, 0);
@@ -756,8 +757,7 @@ public class JavaQuadProgSolver
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints + numberOfLowerBounds, upperBoundsCMatrix, 0, 0, problemSize, numberOfUpperBounds, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, numberOfInequalityConstraints + numberOfLowerBounds, 0, upperBoundsDVector, 0, 0, numberOfUpperBounds, 1, 1.0);
 
-      numberOfInequalityConstraints += numberOfLowerBounds + numberOfUpperBounds;
-
+      this.numberOfInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
    }
 
    private void zero()

@@ -279,7 +279,6 @@ public class JavaQuadProgSolverTest
 
       assertEquals(0.5, solution[0], epsilon);
       assertEquals(0.5, solution[1], epsilon);
-      //assertEquals(-1.0, lagrangeEqualityMultipliers[0], epsilon); // Lagrange multiplier is -1.0; //// TODO: 5/15/17
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
@@ -375,7 +374,7 @@ public class JavaQuadProgSolverTest
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      //assertEquals(4.0, objectiveCost, epsilon);
+      assertEquals(4.0, objectiveCost, epsilon);
 
       // Minimize (x-5) * (x-5) + (y-3) * (y-3) = 1/2 * (2x^2 + 2y^2) - 10x -6y + 34 subject to x <= 7 y <= 1
       solver.clear();
@@ -476,9 +475,9 @@ public class JavaQuadProgSolverTest
 
       double[] solution = new double[1];
 
-      //int numberOfIterations = solver.solve(solution);
-      //numberOfIterations = solver.solve(solution);
-      //assertEquals(1, numberOfIterations);
+      int numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
+      assertEquals(1, numberOfIterations);
 
       assertEquals(1, solution.length);
       assertEquals(0.0, solution[0], epsilon);
@@ -495,7 +494,7 @@ public class JavaQuadProgSolverTest
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
-      int numberOfIterations = solver.solve(solution);
+      numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertEquals(1, solution.length);
@@ -636,8 +635,26 @@ public class JavaQuadProgSolverTest
 
       solution = new double[3];
 
-      numberOfIterations = solver.solve(solution);
-      numberOfIterations = solver.solve(solution);
+      caughtException = false;
+      try
+      {
+         numberOfIterations = solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         caughtException = true;
+      }
+      assertTrue(caughtException);
+      caughtException = false;
+      try
+      {
+         numberOfIterations = solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         caughtException = true;
+      }
+      assertTrue(caughtException);
       //assertEquals(2, numberOfIterations); //// TODO: 5/15/17
 
       assertEquals(3, solution.length);
@@ -690,7 +707,7 @@ public class JavaQuadProgSolverTest
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      assertEquals(248.0, objectiveCost, epsilon); //// TODO: 5/15/17
+      assertEquals(248.0, objectiveCost, epsilon);
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8  (Remove -5 <= x <= 5, 6 <= y <= 10, 11 <= z)
       solver.clear();
@@ -721,7 +738,7 @@ public class JavaQuadProgSolverTest
       solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
-      assertEquals(56.0, objectiveCost, epsilon); //// TODO: 5/15/17
+      assertEquals(56.0, objectiveCost, epsilon);
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, (Remove y - z <= -8)
       solver.clear();
@@ -1008,7 +1025,6 @@ public class JavaQuadProgSolverTest
       originalSolver.solve(Q, f, Aeq, beq, Ain, bin, solutionMatrixAlt, false);
       //assertEquals(3, numberOfIterations); //// TODO: 5/15/17  
 
-      //assertEquals(2, solution.length);
       assertEquals(1.0, solutionMatrixAlt.get(0), 1e-7);
       assertEquals(1.0, solutionMatrixAlt.get(1), 1e-7);
       assertEquals(1.0, solutionMatrix.get(0), 1e-7);
@@ -1118,11 +1134,20 @@ public class JavaQuadProgSolverTest
       solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
 
       double[] solution = new double[2];
-      solver.solve(solution);
+      boolean caughtException = false;
+      try
+      {
+         solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         caughtException = true;
+      }
+      assertTrue(caughtException);
 
       assertEquals(2, solution.length);
-      assertEquals(2.5, solution[0], 1e-7);
-      assertEquals(2.5, solution[1], 1e-7);
+      assertTrue(Double.isNaN(solution[0]));
+      assertTrue(Double.isNaN(solution[1]));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
@@ -1366,16 +1391,31 @@ public class JavaQuadProgSolverTest
       double[] solution = new double[3];
 
       solver.setMaxNumberOfIterations(2);
-      int numberOfIterations = solver.solve(solution);
+      int numberOfIterations;
+      try
+      {
+         numberOfIterations = solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         numberOfIterations = e.getIter();
+      }
       assertEquals(2, numberOfIterations);
 
       assertTrue(Double.isNaN(solution[0]));
       assertTrue(Double.isNaN(solution[1]));
       assertTrue(Double.isNaN(solution[2]));
 
-      solver.setMaxNumberOfIterations(3);
-      numberOfIterations = solver.solve(solution);
-      assertEquals(3, numberOfIterations);
+      solver.setMaxNumberOfIterations(4);
+      try
+      {
+         numberOfIterations = solver.solve(solution);
+      }
+      catch (NoConvergenceException e)
+      {
+         numberOfIterations = e.getIter();
+      }
+      assertEquals(4, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertEquals(-4.0, solution[0], 1e-7);
