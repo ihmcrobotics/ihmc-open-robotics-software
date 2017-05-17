@@ -26,8 +26,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -145,28 +148,30 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.RIGHT;
+      RobotSide robotSide = RobotSide.LEFT;
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      fullRobotModel.updateFrames();
+      RigidBody hand = fullRobotModel.getHand(robotSide);
+      FramePoint tipPosition = new FramePoint(hand.getParentJoint().getFrameAfterJoint(), new Point3D(0.0, 0.0, -0.4183));
+      tipPosition.changeFrame(hand.getBodyFixedFrame());
 
       // position the contact point on the ground
-      Quaternion handOrientation = new Quaternion();
-      handOrientation.appendYawRotation(Math.PI / 4.0);
-      handOrientation.appendPitchRotation(-Math.PI / 2.0);
-      handOrientation.appendRollRotation(Math.PI / 4.0);
-      handOrientation.inverse();
-
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
+      handTrajectoryMessage.setControlFramePosition(tipPosition.getPoint());
       handTrajectoryMessage.setUseCustomControlFrame(true);
-      handTrajectoryMessage.setControlFramePosition(new Point3D(-0.307, -0.027, -0.022)); // hard coded to be at the simulation contact point.
-      handTrajectoryMessage.setControlFrameOrientation(handOrientation);
+      SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
+      selectionMatrix6D.setToLinearSelectionOnly();
+      handTrajectoryMessage.setSelectionMatrix(selectionMatrix6D);
 
-      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, -0.125, 0.05), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, -0.125, -0.01), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, 0.125, 0.05), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, 0.125, -0.01), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       // Activate load bearing
       RigidBodyTransform transformToContactFrame = new RigidBodyTransform();
-      transformToContactFrame.setTranslation(-0.307, -0.027, -0.022); // hard coded to be at the simulation contact point.
+      transformToContactFrame.setTranslation(tipPosition.getPoint());
 
       HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(robotSide);
       loadBearingMessage.setLoad(true);
@@ -201,8 +206,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Return to safe stance and lift hand
       footOrientation.setToZero();
       FootTrajectoryMessage putDownFoot = new FootTrajectoryMessage(robotSide, 2);
-      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
-      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, 0.075, 0.05), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, 0.075, -0.01), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(putDownFoot);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
       assertTrue(success);
@@ -213,11 +218,12 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
+      liftHand.setControlFramePosition(tipPosition.getPoint());
       liftHand.setUseCustomControlFrame(true);
-      liftHand.setControlFrameOrientation(handOrientation);
-      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
+      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.175, 0.125, 0.1), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(liftHand);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
