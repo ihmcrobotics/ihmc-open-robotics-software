@@ -363,7 +363,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentPose.setToZero(controlFrame);
       currentPose.changeFrame(worldFrame);
       yoCurrentPose.set(currentPose);
-      yoCurrentPose.getOrientation().getRotationVector(yoCurrentRotationVector);
+      yoCurrentRotationVector.setAsRotationVector(yoCurrentPose.getOrientation());
 
       yoDesiredPose.getFramePoseIncludingFrame(desiredPose);
       desiredPose.changeFrame(controlFrame);

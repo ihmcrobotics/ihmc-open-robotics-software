@@ -297,10 +297,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       pelvisZUpFrame.update();
 
-      midFeetZUpFrame.update();
-      midFootZUpGroundFrame.update();
-      midFeetUnderPelvisWalkDirectionFrame.update();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
@@ -313,6 +309,10 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          soleFrames.get(robotSide).update();
          soleZUpFrames.get(robotSide).update();
       }
+
+      midFeetZUpFrame.update();
+      midFootZUpGroundFrame.update();
+      midFeetUnderPelvisWalkDirectionFrame.update();
 
       centerOfMassFrame.update();
    }
