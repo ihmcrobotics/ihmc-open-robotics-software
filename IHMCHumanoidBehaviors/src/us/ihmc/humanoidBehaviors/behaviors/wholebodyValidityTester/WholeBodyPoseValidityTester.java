@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -33,7 +34,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected final HumanoidReferenceFrames referenceFrames;
    private static boolean DEBUG = true;
    
    private final DoubleYoVariable solutionQualityThreshold;
@@ -87,6 +88,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       
       this.fullRobotModel = fullRobotModel;
       
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.05);
       solutionStableThreshold = new DoubleYoVariable(behaviorName + "solutionStableThreshold", registry);
@@ -104,15 +109,15 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFramePoint desiredHandPosition = new YoFramePoint(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
+         YoFramePoint desiredHandPosition = new YoFramePoint(behaviorName + "Desired" + side + "Hand", midFeetFrame, registry);
          yoDesiredHandPositions.put(robotSide, desiredHandPosition);
-         YoFrameQuaternion desiredHandOrientation = new YoFrameQuaternion(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
+         YoFrameQuaternion desiredHandOrientation = new YoFrameQuaternion(behaviorName + "Desired" + side + "Hand", midFeetFrame, registry);
          yoDesiredHandOrientations.put(robotSide, desiredHandOrientation);
       }
 
-      yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
-      yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", worldFrame, registry);
-      yoDesiredPelvisPosition = new YoFramePoint(behaviorName + "DesiredPelvis", worldFrame, registry);
+      yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", midFeetFrame, registry);
+      yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", midFeetFrame, registry);
+      yoDesiredPelvisPosition = new YoFramePoint(behaviorName + "DesiredPelvis", midFeetFrame, registry);
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
@@ -222,26 +227,35 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    // Pelvis ---------------------------------------------------
    public void holdCurrentPelvisHeight()
    {
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       yoDesiredPelvisPosition.setFromReferenceFrame(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
-      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
+      pelvisSelectionMatrix.setSelectionFrame(midFeetFrame);
    }
 
    public void setDesiredPelvisHeight(FramePoint pointContainingDesiredHeight)
    {
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       yoDesiredPelvisPosition.setAndMatchFrame(pointContainingDesiredHeight);
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
-      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
+      pelvisSelectionMatrix.setSelectionFrame(midFeetFrame);
    }
 
    public void setDesiredPelvisHeight(double desiredHeightInWorld)
    {
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       yoDesiredPelvisPosition.setZ(desiredHeightInWorld);
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
-      pelvisSelectionMatrix.setSelectionFrame(worldFrame);
+      pelvisSelectionMatrix.setSelectionFrame(midFeetFrame);
    }
    
 

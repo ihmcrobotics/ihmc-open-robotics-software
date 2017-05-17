@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.CollisionModelBox;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
@@ -21,10 +22,12 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
    private SolarPanel solarPanel;
    
+   
    public SolarPanelPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, 
                                        FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModelFactory, outgoingCommunicationBridge, fullRobotModel);
+      
    }
    
    public void setSolarPanel(SolarPanel solarPanel)
@@ -35,9 +38,12 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    
    public void setWholeBodyPose(Pose desiredHandPose, double pelvisYaw, double pelvisHeight)
    {
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(ReferenceFrame.getWorldFrame(), desiredHandPose.getPoint());
-      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), desiredHandPose.getOrientation());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
@@ -52,7 +58,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);
-      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), desiredChestOrientation);
+      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       
    }
@@ -68,9 +74,12 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    
    public void setWholeBodyPose(Pose desiredHandPose, double pelvisYaw)
    {
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(ReferenceFrame.getWorldFrame(), desiredHandPose.getPoint());
-      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), desiredHandPose.getOrientation());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
@@ -79,7 +88,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);
-      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), desiredChestOrientation);
+      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       
       // Pelvis Orientation
