@@ -65,6 +65,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
         networkModuleParams.enableFootstepPlanningToolbox(true);
+        networkModuleParams.enableKinematicsToolbox(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
