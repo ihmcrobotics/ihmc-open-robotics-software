@@ -390,7 +390,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
-            if(false)
+            if(true)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
                                +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
             
@@ -449,17 +449,22 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
       float[] privilegedJointAngles = new float[oneDoFJoints.length];
 
+      PrintTools.info("");
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
          privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
       }
+      PrintTools.info("");
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       Point3D privilegedRootJointPosition = new Point3D();
       rootJoint.getTranslation(privilegedRootJointPosition);
       Quaternion privilegedRootJointOrientation = new Quaternion();
       rootJoint.getRotation(privilegedRootJointOrientation);
+      PrintTools.info(""+ privilegedRootJointPosition.getX()+""+privilegedRootJointPosition.getY()+" "+privilegedRootJointPosition.getZ());
+      
 
       privilegedMessage.setPrivilegedRobotConfiguration(privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
       privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
