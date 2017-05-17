@@ -9,7 +9,8 @@ public class SecondOrderFilteredYoVariableParameters
    private final DoubleYoVariable dampingRatio;
    private final SecondOrderFilterType filterType;
 
-   public SecondOrderFilteredYoVariableParameters(String name, YoVariableRegistry registry, double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType)
+   public SecondOrderFilteredYoVariableParameters(String name, YoVariableRegistry registry, double naturalFrequencyInHz, double dampingRatio,
+         SecondOrderFilterType filterType)
    {
       this.naturalFrequencyInHz = new DoubleYoVariable(name + "NaturalFrequency", registry);
       this.naturalFrequencyInHz.set(naturalFrequencyInHz);

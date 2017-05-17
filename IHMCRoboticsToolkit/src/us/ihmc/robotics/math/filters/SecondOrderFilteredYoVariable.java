@@ -92,7 +92,7 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
       if (inputVariable == null)
       {
          throw new NullPointerException(
-               "SecondOrderFilteredYoVariable must be constructed with a non null " + "position variable to call update(), otherwise use update(double)");
+               "SecondOrderFilteredYoVariable must be constructed with a non null position variable to call update(), otherwise use update(double)");
       }
 
       update(inputVariable.getDoubleValue());
@@ -133,13 +133,13 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
 
    public void setNaturalFrequencyInHz(double naturalFrequencyInHz)
    {
-      parameters.getNaturalFrequencyInHz().set(Math.min(Math.max(naturalFrequencyInHz, 0), 1.0 / (2.0 * dt)));
+      parameters.getNaturalFrequencyInHz().set(Math.min(Math.max(naturalFrequencyInHz, 0.0), 1.0 / (2.0 * dt)));
       computeCoefficients();
    }
 
    public void setDampingRatio(double dampingRatio)
    {
-      parameters.getDampingRatio().set(Math.max(dampingRatio, 0));
+      parameters.getDampingRatio().set(Math.max(dampingRatio, 0.0));
       computeCoefficients();
    }
 
@@ -175,23 +175,23 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
       {
       case LOW_PASS:
          b[0] = omega * omega;
-         b[1] = 2 * omega * omega;
+         b[1] = 2.0 * omega * omega;
          b[2] = omega * omega;
          break;
       case NOTCH:
-         b[0] = 4 / (dt * dt) + omega * omega;
-         b[1] = 2 * omega * omega - 8 / (dt * dt);
-         b[2] = 4 / (dt * dt) + omega * omega;
+         b[0] = 4.0 / (dt * dt) + omega * omega;
+         b[1] = 2.0 * omega * omega - 8.0 / (dt * dt);
+         b[2] = 4.0 / (dt * dt) + omega * omega;
          break;
       case HIGH_PASS:
-         b[0] = 4 / (dt * dt);
-         b[1] = -8 / (dt * dt);
-         b[2] = 4 / (dt * dt);
+         b[0] = 4.0 / (dt * dt);
+         b[1] = -8.0 / (dt * dt);
+         b[2] = 4.0 / (dt * dt);
          break;
       }
 
-      a[0] = 4 / (dt * dt) + 4 / dt * xi * omega + omega * omega;
-      a[1] = 2 * omega * omega - 8 / (dt * dt);
-      a[2] = 4 / (dt * dt) - 4 / dt * xi * omega + omega * omega;
+      a[0] = 4.0 / (dt * dt) + 4.0 / dt * xi * omega + omega * omega;
+      a[1] = 2.0 * omega * omega - 8.0 / (dt * dt);
+      a[2] = 4.0 / (dt * dt) - 4.0 / dt * xi * omega + omega * omega;
    }
 }

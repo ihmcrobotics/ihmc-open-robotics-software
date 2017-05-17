@@ -21,7 +21,8 @@ public class SecondOrderFilteredYoVariableTest
       double[] bAssert = {3947.8417604357433, 7895.6835208714865, 3947.8417604357433};
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
-      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("lowPass", registry, dt, naturalFrequencyInHz, dampingRatio, SecondOrderFilterType.LOW_PASS);
+      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("lowPass", registry, dt, naturalFrequencyInHz, dampingRatio,
+            SecondOrderFilterType.LOW_PASS);
 
       double[] b = new double[3];
       double[] a = new double[3];
@@ -40,7 +41,8 @@ public class SecondOrderFilteredYoVariableTest
       double[] bAssert = {4003947.8417604356, -7992104.316479129, 4003947.8417604356};
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
-      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("notch", registry, dt, naturalFrequencyInHz, dampingRatio, SecondOrderFilterType.NOTCH);
+      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("notch", registry, dt, naturalFrequencyInHz, dampingRatio,
+            SecondOrderFilterType.NOTCH);
 
       double[] b = new double[3];
       double[] a = new double[3];
@@ -59,7 +61,8 @@ public class SecondOrderFilteredYoVariableTest
       double[] bAssert = {4000000.0, -8000000.0, 4000000.0};
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
-      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("highPass", registry, dt, naturalFrequencyInHz, dampingRatio, SecondOrderFilterType.HIGH_PASS);
+      SecondOrderFilteredYoVariable filteredYoVariable = new SecondOrderFilteredYoVariable("highPass", registry, dt, naturalFrequencyInHz, dampingRatio,
+            SecondOrderFilterType.HIGH_PASS);
 
       double[] b = new double[3];
       double[] a = new double[3];

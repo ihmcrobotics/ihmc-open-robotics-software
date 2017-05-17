@@ -11,7 +11,8 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements P
 {
    private final SecondOrderFilteredYoVariable x, y, z;
 
-   private SecondOrderFilteredYoFrameVector(SecondOrderFilteredYoVariable x, SecondOrderFilteredYoVariable y, SecondOrderFilteredYoVariable z, ReferenceFrame referenceFrame)
+   private SecondOrderFilteredYoFrameVector(SecondOrderFilteredYoVariable x, SecondOrderFilteredYoVariable y, SecondOrderFilteredYoVariable z,
+         ReferenceFrame referenceFrame)
    {
       super(x, y, z, referenceFrame);
 
@@ -20,15 +21,16 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements P
       this.z = z;
    }
 
-   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, ReferenceFrame referenceFrame)
+   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         double dt, double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, ReferenceFrame referenceFrame)
    {
-      SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyInHz, dampingRatio, filterType);
+      SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyInHz,
+            dampingRatio, filterType);
       return createSecondOrderFilteredYoFrameVector(namePrefix, nameSuffix, registry, dt, parameters, referenceFrame);
    }
 
-   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         SecondOrderFilteredYoVariableParameters parameters, ReferenceFrame referenceFrame)
+   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         double dt, SecondOrderFilteredYoVariableParameters parameters, ReferenceFrame referenceFrame)
    {
       SecondOrderFilteredYoVariable x, y, z;
       x = new SecondOrderFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, parameters);
@@ -37,15 +39,16 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements P
       return new SecondOrderFilteredYoFrameVector(x, y, z, referenceFrame);
    }
 
-   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, YoFrameVector unfilteredVector)
+   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         double dt, double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, YoFrameVector unfilteredVector)
    {
-      SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyInHz, dampingRatio, filterType);
+      SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyInHz,
+            dampingRatio, filterType);
       return createSecondOrderFilteredYoFrameVector(namePrefix, nameSuffix, registry, dt, parameters, unfilteredVector);
    }
 
-   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         SecondOrderFilteredYoVariableParameters parameters, YoFrameVector unfilteredVector)
+   public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+         double dt, SecondOrderFilteredYoVariableParameters parameters, YoFrameVector unfilteredVector)
    {
       SecondOrderFilteredYoVariable x, y, z;
       x = new SecondOrderFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, parameters, unfilteredVector.getYoX());
