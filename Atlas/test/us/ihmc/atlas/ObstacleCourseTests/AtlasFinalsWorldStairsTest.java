@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -190,7 +190,7 @@ public class AtlasFinalsWorldStairsTest
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
 
-      Point3D startingLocation = new Point3D(1.0, -13.5, 0.02);
+      Point3D startingLocation = new Point3D(1.0, -13.53, 0.0);
       double directionYaw = -90.0;
       RotationTools.computeQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
@@ -214,34 +214,34 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.83, startingLocation.getZ() + 0.0),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.10, startingLocation.getZ() + 0.30),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.10, startingLocation.getZ() + 0.25),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.18, startingLocation.getZ() + 0.30),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.18, startingLocation.getZ() + 0.25),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.40, startingLocation.getZ() + 0.55),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.40, startingLocation.getZ() + 0.45),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.45, startingLocation.getZ() + 0.55),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.45, startingLocation.getZ() + 0.45),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.75),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.65),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.75),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.65),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 1.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 0.85),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 1.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 0.85),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 1.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.85),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 1.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.85),
               new Quaternion(orientation), rightFootPoint2ds));
 
       return footstepDataList;

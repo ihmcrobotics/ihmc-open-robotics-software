@@ -308,6 +308,7 @@ public class YoVariableClient implements LogPacketHandler
    {
       if (state == ClientState.RUNNING)
       {
+         variableChangedProducer.disconnect();
          dataConsumerParticipant.remove();
          yoVariablesUpdatedListener.disconnected();
 
