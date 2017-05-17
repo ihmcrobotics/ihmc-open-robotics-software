@@ -260,7 +260,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
      
    }
    
-   //@Test
+   @Test
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
 //      ThreadTools.sleep(15000);
@@ -282,31 +282,15 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
-      TimeDomain1DNode.cleaningPath = cleaningPath;
-      TimeDomain1DNode rootNode = new TimeDomain1DNode();
-      TimeDomainTree rrtTree = new TimeDomainTree(rootNode);
-
-      
-//      ArrayList<SolarPanelLinearPath> linearPath = cleaningPath.getLinearPath();
-//      double treeMaximumTime = linearPath.get(0).getMotionEndTime();
-//      double treeTimeInterval = linearPath.get(0).getMotionEndTime() - linearPath.get(0).getMotionStartTime();
-//      
-//      TimeDomain1DNode nodeLowerBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime(), -35/180*Math.PI);
-//      TimeDomain1DNode nodeUpperBound = new TimeDomain1DNode(linearPath.get(0).getMotionStartTime()+treeTimeInterval*1.5, 35/180*Math.PI);
-//      rrtTree.setMaximumMotionTime(treeMaximumTime);
-//      rrtTree.setUpperBound(nodeUpperBound);
-//      rrtTree.setLowerBound(nodeLowerBound);
-      
-
-      
+      TimeDomain1DNode.cleaningPath = cleaningPath;   
       
       ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
       
-      nodes.add(new TimeDomain1DNode(0.0, 0.0));
-      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));
-      nodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.1));
-      nodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));
-      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.2));
+      nodes.add(new TimeDomain1DNode(0.0, 0.0));            // true
+      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));    // true
+      nodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.2));   // false
+      nodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));    // ture
+      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.2));    // ture
       nodes.add(new TimeDomain1DNode(0.0, 0.0));
       
       ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
@@ -314,7 +298,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       testNodesBehavior.setSolarPanel(solarPanel);
       
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
-      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       PrintTools.info("behavior Out " + testNodesBehavior.getNodesValdity());
    }
          
@@ -383,7 +367,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test
+   //@Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);

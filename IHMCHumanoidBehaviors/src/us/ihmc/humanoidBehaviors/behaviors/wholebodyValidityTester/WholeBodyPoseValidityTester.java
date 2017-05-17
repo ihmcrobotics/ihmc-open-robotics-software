@@ -34,7 +34,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
    
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;
@@ -65,6 +65,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    private int numberOfCntForTimeExpire = 150;
    private int cnt = 0;
+   private int numberOfCntForJointLimitExpire = 80;
    
    private boolean isSendingPacket = false;   
    private boolean isReceived = false;   
@@ -345,7 +346,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             }
             FramePose desiredPoseToPack = new FramePose();
             handMessages.get(RobotSide.RIGHT).getDesiredPose(desiredPoseToPack);
-            //PrintTools.info(""+numberOfTest+" "+desiredPoseToPack.getX()+" "+desiredPoseToPack.getY()+" "+desiredPoseToPack.getZ());
 
             if (chestMessage != null)
             {
@@ -390,7 +390,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
-            if(true)
+            if(false)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
                                +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
             
@@ -509,7 +509,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       else
          cntOfSeries = 0;
       
-      if(cntOfSeries > 80)
+      
+      if(cntOfSeries > numberOfCntForJointLimitExpire)
       {         
          return true;
       }
