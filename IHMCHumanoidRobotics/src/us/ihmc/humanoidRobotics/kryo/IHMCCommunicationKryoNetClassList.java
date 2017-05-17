@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
+import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -302,6 +303,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SE3TrajectoryPointMessage.class);
       registerPacketField(SE3TrajectoryPointMessage[].class);
       registerPacketField(SelectionMatrix3DMessage.class);
+      registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
 
       // Controller failure
