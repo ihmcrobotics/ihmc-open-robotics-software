@@ -102,7 +102,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumTransferDuration()
    {
-      return 0.15;
+      return 0.20;
    }
 
    /**
@@ -134,7 +134,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumInitialTransferDuration()
    {
-      return 0.05;
+      return 0.4 * getMinimumTransferDuration();
    }
 
    /**
@@ -142,7 +142,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumEndTransferDuration()
    {
-      return 0.05;
+      return 0.08;
    }
 
    /**
