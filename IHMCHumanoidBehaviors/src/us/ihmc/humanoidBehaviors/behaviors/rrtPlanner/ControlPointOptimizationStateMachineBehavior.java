@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior.ControlPointOptimizationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -13,12 +15,14 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ControlPointOptimizationStateMachineBehavior extends StateMachineBehavior<ControlPointOptimizationStates>
 {
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
             
    private ValidNodesStateMachineBehavior validNodesStateMachineBehavior;
 
@@ -33,13 +37,13 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 20;
+   private int numberOfCandidates = 2;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.4;
    
    private int currentIndexOfCandidate;
    
-   private int numberOfRetry = 10;
+   private int numberOfRetry = 2;
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
@@ -56,6 +60,37 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       super("ControlPointOptimizationStateMachineBehavior", ControlPointOptimizationStates.class, yoTime, communicationBridge);
       
       PrintTools.info("ControlPointOptimizationStateMachineBehavior ");
+      
+      
+      
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
+      float[] privilegedJointAngles = new float[oneDoFJoints.length];
+
+      PrintTools.info("");
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
+         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
+      }
+      PrintTools.info("");
+
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      Point3D privilegedRootJointPosition = new Point3D();
+      rootJoint.getTranslation(privilegedRootJointPosition);
+      Quaternion privilegedRootJointOrientation = new Quaternion();
+      rootJoint.getRotation(privilegedRootJointOrientation);
+      PrintTools.info(""+ privilegedRootJointPosition.getX()+""+privilegedRootJointPosition.getY()+" "+privilegedRootJointPosition.getZ());
+      
+      
+      
+      
+      
+      
+      
+      
       
       this.rootNode = startNode;
                   
@@ -173,7 +208,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                PrintTools.info("No solution .. Retry! " + currentIndexOfRetry);
                currentIndexOfRetry++;
                currentIndexOfCandidate = 0;
-               numberOfCandidates = 3;   
+               numberOfCandidates = 1;   
             }
             return b;
          }
