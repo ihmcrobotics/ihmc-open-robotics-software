@@ -61,9 +61,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private KinematicsToolboxRigidBodyMessage pelvisMessage;
    private SideDependentList<KinematicsToolboxRigidBodyMessage> handMessages = new SideDependentList<>();   
 
-   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(10);   
+   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(50);   
    
-   private int numberOfCntForTimeExpire = 50;
+   private int numberOfCntForTimeExpire = 150;
    private int cnt = 0;
    
    private boolean isSendingPacket = false;   
@@ -78,6 +78,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    protected RobotCollisionModel robotCollisionModel;
    
    public static int numberOfTest = 0;
+   
    
    public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
@@ -339,9 +340,12 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                {
                   handMessages.get(robotSide).setSelectionMatrix(handSelectionMatrices.get(robotSide));
                   handMessages.get(robotSide).setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-                  sendPacket(handMessages.get(robotSide));
+                  sendPacket(handMessages.get(robotSide));                  
                }
             }
+            FramePose desiredPoseToPack = new FramePose();
+            handMessages.get(RobotSide.RIGHT).getDesiredPose(desiredPoseToPack);
+            //PrintTools.info(""+numberOfTest+" "+desiredPoseToPack.getX()+" "+desiredPoseToPack.getY()+" "+desiredPoseToPack.getZ());
 
             if (chestMessage != null)
             {
@@ -461,10 +465,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       
       sendPacket(privilegedMessage);
-      
-      message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      sendPacket(message);
+
+//      message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
+//      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+//      sendPacket(message);
    }
       
    static int cntOfSeries = 0;
@@ -500,7 +504,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       else
          cntOfSeries = 0;
       
-      if(cntOfSeries > 20)
+      if(cntOfSeries > 80)
       {         
          return true;
       }

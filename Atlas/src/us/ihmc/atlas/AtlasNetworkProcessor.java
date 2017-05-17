@@ -13,6 +13,7 @@ import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -54,7 +55,7 @@ public class AtlasNetworkProcessor
     	  DRCRobotModel model;
 
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
-
+    	  
         networkModuleParams.enableUiModule(true);
         networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
         networkModuleParams.enableSensorModule(true);
@@ -62,8 +63,9 @@ public class AtlasNetworkProcessor
         networkModuleParams.setDrillDetectionModuleEnabled(true);
         networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
         networkModuleParams.enableHeightQuadTreeToolbox(true);
-        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
+        networkModuleParams.enableKinematicsToolbox(true);
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
+        networkModuleParams.enableKinematicsToolboxVisualizer(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
