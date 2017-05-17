@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import us.ihmc.commons.PrintTools;
@@ -26,8 +27,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.AnytimePlannerStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -43,7 +43,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -234,7 +234,8 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
                                                                                                              fiducialDetectorBehaviorService));
     
-      dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR, new CleaningMotionStateMachineBehavior(behaviorCommunicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel));
+      //dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR, new CleaningMotionStateMachineBehavior(behaviorCommunicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel));
+      dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR, new ValidNodesStateMachineBehavior(new ArrayList<RRTNode>(), behaviorCommunicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel));
 
       if (objectDetectorBehaviorService != null)
       {
