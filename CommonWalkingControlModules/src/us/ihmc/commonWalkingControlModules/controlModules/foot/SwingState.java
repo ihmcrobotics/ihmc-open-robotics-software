@@ -509,7 +509,14 @@ public class SwingState extends AbstractUnconstrainedState
       if (replanTrajectory.getBooleanValue())
          return;
 
-      activeTrajectoryType.set(footstep.getTrajectoryType());
+      if (footstep.getTrajectoryType() == null)
+      {
+         activeTrajectoryType.set(TrajectoryType.DEFAULT);
+      }
+      else
+      {
+         activeTrajectoryType.set(footstep.getTrajectoryType());
+      }
       this.positionWaypointsForSole.clear();
       this.swingWaypoints.clear();
       lastFootstepPose.changeFrame(worldFrame);

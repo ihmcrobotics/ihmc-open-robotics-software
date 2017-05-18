@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -109,7 +110,7 @@ public class CenterOfMassHeightManager
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
-      
+
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
       double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
@@ -201,6 +202,8 @@ public class CenterOfMassHeightManager
 
    private final Twist currentPelvisTwist = new Twist();
 
+   private boolean icpVelocityContainedNaN = false;
+
    public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager)
    {
@@ -228,11 +231,14 @@ public class CenterOfMassHeightManager
       comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
       if (desiredICPVelocity.containsNaN())
       {
-         System.err.println("Desired ICP velocity contains NaN");
+         if (!icpVelocityContainedNaN)
+            PrintTools.error("Desired ICP velocity contains NaN, setting it to zero - only showing this error once");
+         icpVelocityContainedNaN = true;
          comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
       }
       else
       {
+         icpVelocityContainedNaN = false;
          comXYAcceleration.setIncludingFrame(desiredICPVelocity);
       }
       comXYAcceleration.sub(comXYVelocity);
