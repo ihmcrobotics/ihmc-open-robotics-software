@@ -76,19 +76,6 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       }
    }
    
-   public static int getNumberOfVariables(byte[] handShake)
-   {
-      YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
-      
-      int jointStateVariables = 0;
-      for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
-      {
-         jointStateVariables += JointState.getNumberOfVariables(convertJointType(yoProtoHandshake.getJoint(i).getType()));
-      }
-      
-      return 1 + yoProtoHandshake.getVariableList().size() + jointStateVariables;
-   }
-   
    public void parseFrom(byte[] handShake)
    {
       YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
@@ -111,7 +98,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
 
       int numberOfVariables = yoProtoHandshake.getVariableCount();
       int numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
-      this.bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
+      this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
    }
 
    private static List<YoVariableRegistry> parseRegistries(YoProtoHandshake yoProtoHandshake, String registryPrefix)
