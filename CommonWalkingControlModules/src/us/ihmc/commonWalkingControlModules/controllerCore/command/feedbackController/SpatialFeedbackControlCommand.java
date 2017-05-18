@@ -106,6 +106,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       feedForwardAngularAccelerationInWorld.set(other.feedForwardAngularAccelerationInWorld);
 
       controlBaseFrame = other.controlBaseFrame;
+
+      gains.set(other.gains);
    }
 
    /**
