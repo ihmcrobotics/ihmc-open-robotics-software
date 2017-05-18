@@ -46,7 +46,9 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
       this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
-            
+      
+//      PrintTools.info(""+desiredHandFramePoint.getX()+" "+desiredHandFramePoint.getY()+" "+desiredHandFramePoint.getZ());
+      
       // Pelvis Orientation
       this.holdCurrentPelvisOrientation();
       
@@ -64,8 +66,6 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    public void setWholeBodyPose(SolarPanelPath cleaningPath, double time, double pelvisYaw)
    {
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-      
-      PrintTools.info("setWholeBodyPose");
             
       Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisYaw);
@@ -83,7 +83,9 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
       this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
-            
+      
+//      PrintTools.info(""+desiredHandFramePoint.getX()+" "+desiredHandFramePoint.getY()+" "+desiredHandFramePoint.getZ());
+      
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);

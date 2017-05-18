@@ -40,7 +40,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    protected final HumanoidReferenceFrames referenceFrames;
    protected ReferenceFrame midFeetFrame;
    
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
    
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;
@@ -162,7 +162,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       return hasSolverFailed.getBooleanValue();
    }
    
-   public void deactivateKinematicsToolboxModule()
+   private void deactivateKinematicsToolboxModule()
    {
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.SLEEP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
@@ -478,7 +478,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       FramePoint pelvisPosition = new FramePoint();
       pelvisPosition.setToZero(pelvisFrame);
       pelvisPosition.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
-//      System.out.println(pelvisPosition);      
+//      System.out.println(pelvisPosition);
+      
 //      PrintTools.info(""+ privilegedRootJointPosition.getX()+" "+privilegedRootJointPosition.getY()+" "+privilegedRootJointPosition.getZ());
 
       privilegedMessage.setPrivilegedRobotConfiguration(privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
@@ -572,8 +573,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 
       deactivateKinematicsToolboxModule();
       
-      if(DEBUG)
-         PrintTools.info("IK out.");
    }
 
    @Override
@@ -610,7 +609,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    {
       double score = 0;
       
-      int numberOfJoints = fullRobotModel.getOneDoFJoints().length;
+      int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
       
       int rightArmStart = 12;
       int rightArmEnd = 18;
@@ -619,7 +618,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       {              
          if(i<3 || (i>=rightArmStart && i<=rightArmEnd))
          {
-            OneDoFJoint aJoint = fullRobotModel.getOneDoFJoints()[i];
+            OneDoFJoint aJoint = getFullHumanoidRobotModel().getOneDoFJoints()[i];
             double aJointValue = newestSolution.getJointAngles()[i];
             double upperValue = aJoint.getJointLimitUpper();
             double lowerValue = aJoint.getJointLimitLower();               
@@ -630,12 +629,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             if(diffUpper > diffLower)
                score = diffLower;
             else
-               score = diffUpper;
-            
-            PrintTools.info("the ik Score is " + getScroe() +" "+aJointValue+" "+upperValue+" " + diffUpper +" " + diffLower);
+               score = diffUpper;           
          }
       } 
-      
       
       return score;
    }
