@@ -11,7 +11,7 @@ import com.google.common.io.Files;
 
 import us.ihmc.robotDataLogger.LogIndex;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableLogReader
@@ -92,7 +92,7 @@ public class YoVariableLogReader
             byte[] handshakeData = new byte[(int) handshake.length()];
             handshakeStream.readFully(handshakeData);
             handshakeStream.close();
-            logLineLength = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
+            logLineLength = YoVariableHandshakeParser.getNumberOfStateVariables(logProperties.getVariables().getHandshakeFileType(), handshakeData);
 
             File logdata = new File(logDirectory, logProperties.getVariables().getDataAsString());
             if (!logdata.exists())
