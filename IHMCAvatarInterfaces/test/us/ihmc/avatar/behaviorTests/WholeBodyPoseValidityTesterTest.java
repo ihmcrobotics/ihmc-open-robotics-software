@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -172,7 +173,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
 
       CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.STAIRS, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
@@ -199,7 +200,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
             
       RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(getRobotModel(), 
                                                                                 drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                sdfFullRobotModel);
+                                                                                sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       
       RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
       
@@ -260,7 +261,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
      
    }
    
-   @Test
+   //@Test
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
 //      ThreadTools.sleep(15000);
@@ -294,7 +295,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       nodes.add(new TimeDomain1DNode(0.0, 0.0));
       
       ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                                    drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+                                                                                                    drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       testNodesBehavior.setSolarPanel(solarPanel);
       
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
@@ -358,7 +359,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
             
       ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       
       drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
 
@@ -367,9 +368,12 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
+   @Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
+      if(isKinematicsToolboxVisualizerEnabled)
+         ThreadTools.sleep(10000);
+      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -382,7 +386,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
             
       CleaningMotionStateMachineBehavior cleaningStateMachineBehavior
-      = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel);
+      = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       

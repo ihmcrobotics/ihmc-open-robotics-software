@@ -3,8 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior.ControlPointOptimizationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -12,11 +10,10 @@ import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WholeBodyPose
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -37,13 +34,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 2;
+   private int numberOfCandidates = 30;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.4;
    
    private int currentIndexOfCandidate;
    
-   private int numberOfRetry = 2;
+   private int numberOfRetry = 5;
+   private int numberOfCandidatesForRetry = 5;
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
@@ -55,46 +53,15 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    }
    
    public ControlPointOptimizationStateMachineBehavior(RRTNode startNode, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel)
+                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("ControlPointOptimizationStateMachineBehavior", ControlPointOptimizationStates.class, yoTime, communicationBridge);
       
       PrintTools.info("ControlPointOptimizationStateMachineBehavior ");
       
-      
-      
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
-
-      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
-      float[] privilegedJointAngles = new float[oneDoFJoints.length];
-
-      PrintTools.info("");
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
-         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
-      }
-      PrintTools.info("");
-
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      Point3D privilegedRootJointPosition = new Point3D();
-      rootJoint.getTranslation(privilegedRootJointPosition);
-      Quaternion privilegedRootJointOrientation = new Quaternion();
-      rootJoint.getRotation(privilegedRootJointOrientation);
-      PrintTools.info(""+ privilegedRootJointPosition.getX()+""+privilegedRootJointPosition.getY()+" "+privilegedRootJointPosition.getZ());
-      
-      
-      
-      
-      
-      
-      
-      
-      
       this.rootNode = startNode;
                   
-      validNodesStateMachineBehavior = new ValidNodesStateMachineBehavior(new ArrayList<RRTNode>(), communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel);
+      validNodesStateMachineBehavior = new ValidNodesStateMachineBehavior(new ArrayList<RRTNode>(), communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
       candidateBehavior = new CandidateBehavior(communicationBridge);
       doneBehavior = new TestDoneBehavior(communicationBridge);
             
@@ -161,7 +128,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          @Override
          protected void setBehaviorInput()
          {
-            if(DEBUG)
+            if(true)
                PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
@@ -181,7 +148,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             validNodesStateMachineBehavior.setNodes(randomSelectedNodes);               
             validNodesStateMachineBehavior.setSolarPanel(TimeDomain1DNode.cleaningPath.getSolarPanel());
             
-            currentIndexOfCandidate++;  
+            currentIndexOfCandidate++;
          }
       };
       
@@ -208,7 +175,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                PrintTools.info("No solution .. Retry! " + currentIndexOfRetry);
                currentIndexOfRetry++;
                currentIndexOfCandidate = 0;
-               numberOfCandidates = 1;   
+               numberOfCandidates = numberOfCandidatesForRetry;   
             }
             return b;
          }

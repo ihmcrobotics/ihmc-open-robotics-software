@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior.RRTExpandingStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -11,13 +10,11 @@ import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPos
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -34,8 +31,8 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    private double nodesScore;
    private boolean nodesValidity;
    
-   private boolean DEBUG = true;
-   private boolean NONSTOP = true;
+   private boolean DEBUG = false;
+   private boolean NONSTOP = false;
    
    public enum RRTExpandingStates
    {
@@ -43,52 +40,18 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    }
    
    public ValidNodesStateMachineBehavior(ArrayList<RRTNode> nodes, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel)
+                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("RRTExpandingStateMachineBehavior", RRTExpandingStates.class, yoTime, communicationBridge);
-
-      
-      // ************************************************* for test....
-      
-      Pose poseSolarPanel = new Pose();
-      Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
-      quaternionSolarPanel.appendRollRotation(0.0);
-      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
-      poseSolarPanel.setOrientation(quaternionSolarPanel);
-      
-      SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
-      
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
-      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      
-      TimeDomain1DNode.cleaningPath = cleaningPath;
-      
-      ArrayList<RRTNode> testNodes = new ArrayList<RRTNode>();
-      
-      testNodes.add(new TimeDomain1DNode(0.0, 0.0));            // true
-      testNodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));    // true
-      testNodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.2));   // false
-      testNodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));    // ture
-      testNodes.add(new TimeDomain1DNode(0.3, Math.PI*0.2));    // ture
-      testNodes.add(new TimeDomain1DNode(0.0, 0.0));      
-      this.nodes = testNodes;
-      
-      // ************************************************* for test....      
             
       if(DEBUG)
          PrintTools.info("number Of nodes "+nodes.size());
-      //this.nodes = nodes;
+      this.nodes = nodes;
                   
-      testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel);
+      testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel, referenceFrames);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
       testDoneBehavior = new TestDoneBehavior(communicationBridge);
-      
-      this.setSolarPanel(solarPanel);
-      
+            
       nodesValidity = true;
       nodesScore = 0;
       
@@ -104,7 +67,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    {
       indexOfCurrentNode = 0;
       nodesScore = 0;
-      nodesValidity = true;;
+      nodesValidity = true;
    }
    
    public boolean getNodesValdity()
@@ -173,10 +136,10 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             if(NONSTOP)
                b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size());
             else
-               b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size()) && nodesValidity == true;
+               b = (waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size()) && nodesValidity == true);
             
             if(DEBUG && b)
-               PrintTools.info("Check :: keepDoingCondition " + b);
+               PrintTools.info("Check :: keepDoingCondition " + b);               
             return b;
          }
       };
@@ -188,9 +151,10 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          {
             boolean b;
             if(NONSTOP)
-               b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size());
+               b = waitingResultBehavior.isDone() && (indexOfCurrentNode == nodes.size());
             else
-               b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size()) && nodesValidity == false;
+               b = ((waitingResultBehavior.isDone() && (indexOfCurrentNode == nodes.size())) || nodesValidity == false);
+            
             
             if(DEBUG && b)
                PrintTools.info("Check :: doneCondition " + b);
@@ -238,12 +202,13 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          double curScore = testValidityBehavior.getScroe();
          
          nodesScore = nodesScore + curScore;
-         //PrintTools.info(" "+ nodesScore +" "+curScore +" "+testValidityBehavior.isValid());
          
+         if(DEBUG)
+            PrintTools.info(" "+ nodesScore +" "+curScore +" "+testValidityBehavior.isValid() +" cur nodes "+nodesValidity);         
          if(DEBUG)
             PrintTools.info("Check :: Waiting Behavior ");
          if(DEBUG)
-            PrintTools.info(""+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
+            PrintTools.info(" "+ nodes.size() +" "+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
          
          if(testValidityBehavior.isValid() == false)
          {
