@@ -31,7 +31,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    private double nodesScore;
    private boolean nodesValidity;
    
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
    private boolean NONSTOP = false;
    
    public enum RRTExpandingStates
@@ -110,7 +110,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
              * override suitable node data for node.
              */
             if(DEBUG)
-               PrintTools.info("Check :: Tester Set Behavior Input ");
+               PrintTools.info("Check :: Tester Set Behavior Input "+indexOfCurrentNode +" "+nodes.size());
             
             if(indexOfCurrentNode < nodes.size())
             {
@@ -201,14 +201,14 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       {
          double curScore = testValidityBehavior.getScroe();
          
-         nodesScore = nodesScore + curScore;
-         
          if(DEBUG)
             PrintTools.info(" "+ nodesScore +" "+curScore +" "+testValidityBehavior.isValid() +" cur nodes "+nodesValidity);         
          if(DEBUG)
             PrintTools.info("Check :: Waiting Behavior ");
          if(DEBUG)
             PrintTools.info(" "+ nodes.size() +" "+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
+         
+         nodesScore = nodesScore + curScore;
          
          if(testValidityBehavior.isValid() == false)
          {

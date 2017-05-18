@@ -129,7 +129,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          protected void setBehaviorInput()
          {
             if(true)
-               PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");
+               PrintTools.info("getScoreAction "+currentIndexOfCandidate + " candidate ");
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
             currentControlPointNodePath.add(rootNode);
@@ -149,6 +149,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             validNodesStateMachineBehavior.setSolarPanel(TimeDomain1DNode.cleaningPath.getSolarPanel());
             
             currentIndexOfCandidate++;
+            
+            PrintTools.info(""+ currentControlPointNodePath.size() +" "+ randomSelectedNodes.size()+" ");            
          }
       };
       
