@@ -629,9 +629,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             if(diffUpper > diffLower)
                score = diffLower;
             else
-               score = diffUpper;           
+               score = diffUpper;
+            
+            PrintTools.info(""+score +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
          }
       } 
+      PrintTools.info("");
+      PrintTools.info("");
       
       return score;
    }
