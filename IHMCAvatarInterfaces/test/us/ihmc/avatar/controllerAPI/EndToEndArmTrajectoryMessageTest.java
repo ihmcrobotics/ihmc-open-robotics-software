@@ -16,6 +16,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -770,7 +771,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    public static int findNumberOfTrajectoryPoints(String bodyName, OneDoFJoint armJoint, SimulationConstructionSet scs)
    {
-      String namespace = bodyName + "JointspaceControlModule";
+      String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPoints";
       return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
    }
@@ -800,7 +801,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    public static int findNumberOfQueuedPoints(String bodyName, OneDoFJoint armJoint, SimulationConstructionSet scs)
    {
-      String namespace = bodyName + "JointspaceControlModule";
+      String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPointsInQueue";
       return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
    }
