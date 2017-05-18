@@ -8,9 +8,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -19,9 +21,15 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
    private SolarPanelPath cleaningPath;
    
-   public SolarPanelWholeBodyTrajectoryMessageFacotry()
+   private ReferenceFrame midFeetFrame;
+   
+   public SolarPanelWholeBodyTrajectoryMessageFacotry(FullHumanoidRobotModel fullRobotModel)
    {
       this.wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+            
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames.updateFrames();
+      midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
    }
    
    public void setCleaningPath(SolarPanelPath cleaningPath)
@@ -37,14 +45,14 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
    public void setMessage(SolarPanelCleaningPose cleaningPose, double pelvisYaw, double pelvisHeight, double motionTime)
    {
       this.wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      //HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-      HandTrajectoryMessage handTrajectoryMessage = cleaningPose.getHandTrajectoryMessage(motionTime);
+            
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), midFeetFrame);
       
       //PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(motionTime, pelvisHeight);
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);      
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, midFeetFrame);
       
       wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
       wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);    
@@ -71,18 +79,22 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
          handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, numberOfWayPoints);
          chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfWayPoints);
          
+         handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
+         handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
+         
+         chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
+         chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
+         
          for(int i=1;i<rrtPath.size();i++)
          {
             double time = rrtPath.get(i).getNodeData(0);
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-                                    
-//            handTrajectoryMessage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
-//            handTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
-            handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());            
+            
+            handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), midFeetFrame);            
             
             Quaternion desiredChestOrientation = new Quaternion();
             desiredChestOrientation.appendYawRotation(rrtPath.get(i).getNodeData(1));
-            chestTrajectoryMessage.setTrajectoryPoint(i-1, time, desiredChestOrientation, new Vector3D(), ReferenceFrame.getWorldFrame());
+            chestTrajectoryMessage.setTrajectoryPoint(i-1, time, desiredChestOrientation, new Vector3D(), midFeetFrame);
          }
          
          wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);

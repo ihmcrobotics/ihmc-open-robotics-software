@@ -13,12 +13,14 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -31,7 +33,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private TestDoneBehavior doneBehavior;
    
-   SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry();
+   private SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory;
    
    DoubleYoVariable yoTime;
    FullHumanoidRobotModel fullRobotModel;
@@ -43,7 +45,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    }
    
    public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel)
+                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("CleaningMotionStateMachineBehavior", CleaningMotionState.class, yoTime, communicationBridge);
       
@@ -54,6 +56,15 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       doneBehavior = new TestDoneBehavior(communicationBridge);
       
       
+      motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry(fullRobotModel);
+      
+      
+//      HumanoidReferenceFrames referenceFramesPlus;
+//      ReferenceFrame midFeetFrame;
+//         
+//      referenceFramesPlus.updateFrames();
+//      midFeetFrame = referenceFramesPlus.getMidFootZUpGroundFrame();
+//      
       
       
       Pose poseSolarPanel = new Pose();
@@ -70,9 +81,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      //cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      //cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-      //cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
       TimeDomain1DNode.cleaningPath = cleaningPath;
       
@@ -87,7 +98,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       TimeDomain1DNode rootNode = new TimeDomain1DNode(0.0, 0);
       
       controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel);
+      = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
       
       setUpStateMachine();
    }
