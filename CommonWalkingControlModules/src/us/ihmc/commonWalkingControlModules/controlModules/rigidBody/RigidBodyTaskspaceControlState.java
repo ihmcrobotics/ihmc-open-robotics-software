@@ -245,14 +245,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public void doAction()
    {
       double timeInTrajectory = getTimeInTrajectory();
-      if (!trajectoryDone.getBooleanValue() && orientationTrajectoryGenerator.isDone())
-         fillAndReinitializeTrajectories();
 
       if (!trajectoryStopped.getBooleanValue())
       {
          positionTrajectoryGenerator.compute(timeInTrajectory);
          orientationTrajectoryGenerator.compute(timeInTrajectory);
       }
+      
+      if (!trajectoryDone.getBooleanValue() && orientationTrajectoryGenerator.isDone())
+         fillAndReinitializeTrajectories();
 
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
