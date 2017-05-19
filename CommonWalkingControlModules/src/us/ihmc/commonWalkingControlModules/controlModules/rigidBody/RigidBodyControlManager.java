@@ -97,7 +97,8 @@ public class RigidBodyControlManager
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
-         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
+                                                                        graphicsListRegistry, registry);
       else
          loadBearingControlState = null;
 
@@ -402,7 +403,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {
@@ -414,6 +415,13 @@ public class RigidBodyControlManager
       {
          hold();
          return;
+      }
+
+      if (jointspaceCommand != null)
+      {
+         computeDesiredJointPositions(initialJointPositions);
+         if (!loadBearingControlState.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+            return;
       }
 
       loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
