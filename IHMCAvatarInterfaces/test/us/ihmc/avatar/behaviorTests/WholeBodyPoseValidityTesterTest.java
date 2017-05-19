@@ -35,13 +35,14 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavio
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomainTree;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain3DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFacotry;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -261,7 +262,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("END");     
    }   
    
-   @Test
+   //@Test
    public void showUpRobotCollisionModel() throws SimulationExceededMaximumTimeException, IOException
    {  
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -283,14 +284,14 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("Out " );      
    }
    
-   //@Test
+   @Test
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
-//      ThreadTools.sleep(15000);
+      if(isKinematicsToolboxVisualizerEnabled)
+         ThreadTools.sleep(13000);
+      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
       
@@ -306,17 +307,27 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
       TimeDomain1DNode.cleaningPath = cleaningPath;   
+      TimeDomain3DNode.cleaningPath = cleaningPath;   
       
-      ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
+      ArrayList<RRTNode> nodes1D = new ArrayList<RRTNode>();
       
-      nodes.add(new TimeDomain1DNode(0.0, 0.0));            // true
-      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.1));    // true
-      nodes.add(new TimeDomain1DNode(0.4, -Math.PI*0.2));   // false
-      nodes.add(new TimeDomain1DNode(1.7, Math.PI*0.2));    // ture
-      nodes.add(new TimeDomain1DNode(0.3, Math.PI*0.2));    // ture
-      nodes.add(new TimeDomain1DNode(0.0, 0.0));
+      nodes1D.add(new TimeDomain1DNode(0.0, 0.0));            // true
+      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI*0.1));    // true
+      nodes1D.add(new TimeDomain1DNode(0.4, -Math.PI*0.2));   // false
+      nodes1D.add(new TimeDomain1DNode(1.7, Math.PI*0.2));    // ture
+      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI*0.2));    // ture
+      nodes1D.add(new TimeDomain1DNode(0.0, 0.0));
       
-      ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      ArrayList<RRTNode> nodes3D = new ArrayList<RRTNode>();
+      
+      nodes3D.add(new TimeDomain3DNode(0.0, 0.7, Math.PI*0.1, Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(3.0, 0.75, -Math.PI*0.1, -Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.73, Math.PI*0.15, -Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(2.0, 0.70, Math.PI*0.0, Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.78, -Math.PI*0.1, -Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(1.0, 0.60, Math.PI*0.13, Math.PI*0.1));            // true      
+      
+      ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes3D, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                     drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       testNodesBehavior.setSolarPanel(solarPanel);
       
@@ -331,12 +342,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
       drcBehaviorTestHelper.updateRobotModel();
-      
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
+                  
       //HandTrajectoryBehavior handBehavior = new HandTrajectoryBehavior("rigthHand", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
@@ -345,8 +352,35 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       chestOrientation.appendYawRotation(Math.PI*0.3);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(3.0, chestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       //PelvisHeightTrajectoryMessage pelvisHeightMessage = new PelvisHeightTrajectoryMessage(3.0, 0.6);
+      
       wholebodyMessage.setHandTrajectoryMessage(handMessage);
       wholebodyMessage.setChestTrajectoryMessage(chestMessage);
+      wholebodyBehavior.setInput(wholebodyMessage);
+            
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
+      
+      PrintTools.info("behavior Out " );      
+   }
+   
+   //@Test
+   public void threeDimensionalNodeBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      
+      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());      
+      WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
+      
+      SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry(sdfFullRobotModel);
+      motionFactory.setMessage(new SolarPanelCleaningPose(solarPanel, 0.4, 0.2, 0.0), 0.65, Math.PI*0.0, -Math.PI*0.1, 3.0);
+      
+      wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
       wholebodyBehavior.setInput(wholebodyMessage);
             
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
@@ -361,8 +395,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
       
@@ -394,7 +426,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
-         ThreadTools.sleep(10000);
+         ThreadTools.sleep(13000);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);

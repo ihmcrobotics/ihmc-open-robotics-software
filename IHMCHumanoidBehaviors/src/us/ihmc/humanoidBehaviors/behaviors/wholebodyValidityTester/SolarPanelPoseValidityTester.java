@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -48,7 +49,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
          setWholeBodyPose(desiredHandPose, chestYaw);
       }
       else if(node.getDimensionOfNodeData() == 4)
-      {         
+      {
          double pelvisHeight = node.getNodeData(1);
          double chestYaw = node.getNodeData(2);
          double chestPitch = node.getNodeData(3);
