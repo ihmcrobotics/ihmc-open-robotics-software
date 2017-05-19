@@ -8,6 +8,7 @@ import java.util.List;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakeFileType;
+import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -36,11 +37,18 @@ public abstract class YoVariableHandshakeParser
       }
    }
    
+   public static int getNumberOfStateVariables(HandshakeFileType type, byte[] data) throws IOException
+   {
+      YoVariableHandshakeParser parser = create(type, "dummy");
+      parser.parseFrom(data);
+      return parser.getNumberOfVariables();
+   }
+   
    protected final String registryPrefix;
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final ArrayList<JointState> jointStates = new ArrayList<>();
    protected double dt;
-   protected int bufferSize;
+   protected int stateVariables;
    protected List<YoVariableRegistry> registries = new ArrayList<>();
    protected List<YoVariable<?>> variables = new ArrayList<>();
 
@@ -79,7 +87,12 @@ public abstract class YoVariableHandshakeParser
 
    public int getBufferSize()
    {
-      return bufferSize;
+      return stateVariables * 8;
    }
 
+   public int getNumberOfVariables()
+   {
+      return stateVariables;
+
+   }
 }

@@ -101,7 +101,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
       int numberOfVariables = handshake.getVariables().size();
       int numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
-      this.bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
+      this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
    }
 
    private static List<YoVariableRegistry> parseRegistries(Handshake handshake, String registryPrefix)
