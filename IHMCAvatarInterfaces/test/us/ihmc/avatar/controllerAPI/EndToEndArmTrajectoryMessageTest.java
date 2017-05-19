@@ -620,8 +620,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      Random random = new Random(564654L);
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
@@ -641,10 +639,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          int numberOfJoints = armJoints.length;
          double[] desiredJointPositions = new double[numberOfJoints];
 
-         generateRandomJointPositions(random, armJoints);
-
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
-
          drcSimulationTestHelper.send(armTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime / 2.0);
