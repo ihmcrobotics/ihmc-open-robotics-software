@@ -128,7 +128,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          @Override
          protected void setBehaviorInput()
          {
-            if(true)
+            if(DEBUG)
                PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
