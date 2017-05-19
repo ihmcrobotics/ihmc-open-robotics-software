@@ -180,14 +180,10 @@ public class RigidBodyControlManager
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
 
-//      // Cleanup the state. Don't cleanup if switching to hybrid.
-//      if (stateSwitched.getBooleanValue())
-//      {
-//         if (stateMachine.getCurrentStateEnum() != RigidBodyControlMode.HYBRID)
-//         {
-//            stateMachine.getPreviousState().clear();
-//         }
-//      }
+      if (stateSwitched.getBooleanValue())
+      {
+         stateMachine.getPreviousState().clear();
+      }
 
       stateMachine.doAction();
 
