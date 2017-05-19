@@ -84,8 +84,6 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
       
-//      PrintTools.info(""+desiredHandFramePoint.getX()+" "+desiredHandFramePoint.getY()+" "+desiredHandFramePoint.getZ());
-      
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);
@@ -97,11 +95,34 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       // Pelvis Height
       this.holdCurrentPelvisHeight();
-      
-      
-      
    }
 
+   public void setWholeBodyPose(Pose desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
+   {
+      referenceFrames.updateFrames();
+      midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      // Hand
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
+      
+      FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
+      
+      this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
+      
+      // Chest Orientation
+      Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendYawRotation(chestYaw);
+      desiredChestOrientation.appendYawRotation(chestPitch);
+      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
+      this.setDesiredChestOrientation(desiredChestFrameOrientation);
+      
+      // Pelvis Orientation
+      this.holdCurrentPelvisOrientation();
+      
+      // Pelvis Height
+      this.setDesiredPelvisHeight(pelvisHeight);
+   }
    
    
    @Override

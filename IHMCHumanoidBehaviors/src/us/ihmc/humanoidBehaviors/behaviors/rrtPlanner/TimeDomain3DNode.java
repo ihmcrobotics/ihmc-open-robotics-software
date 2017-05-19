@@ -11,8 +11,9 @@ public class TimeDomain3DNode extends RRTNode
    public static SolarPanelPath cleaningPath;
    
    // pelvisHeight
-   public static double upperBound1D = Math.PI*0.2;
-   public static double lowerBound1D = -Math.PI*0.2;
+   public static double defaultPelvisHeight;
+   public static double upperBound1D = defaultPelvisHeight + 0.1;
+   public static double lowerBound1D = defaultPelvisHeight - 0.1;
    
    // chestYaw
    public static double upperBound2D = Math.PI*0.2;
@@ -21,6 +22,8 @@ public class TimeDomain3DNode extends RRTNode
    // chestPitch
    public static double upperBound3D = Math.PI*0.2;
    public static double lowerBound3D = -Math.PI*0.2;
+   
+   
    
    public TimeDomain3DNode()
    {

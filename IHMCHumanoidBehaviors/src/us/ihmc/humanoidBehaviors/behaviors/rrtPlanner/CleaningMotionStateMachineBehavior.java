@@ -180,7 +180,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("cleaningAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             motionFactory.setCleaningPath(TimeDomain1DNode.cleaningPath);         
-            motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
+            motionFactory.setMessage1D(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
             
