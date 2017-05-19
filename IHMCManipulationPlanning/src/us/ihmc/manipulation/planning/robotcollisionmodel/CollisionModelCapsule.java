@@ -53,8 +53,8 @@ public class CollisionModelCapsule extends AbstractCollisionModel
 
    public void updateRighdBodyTransform()
    {
-      RigidBodyTransform currentTransform = currentJoint.getFrameAfterJoint().getTransformToWorldFrame();
-      RigidBodyTransform nextTransform = nextJoint.getFrameAfterJoint().getTransformToWorldFrame();
+      RigidBodyTransform currentTransform = currentJoint.getFrameBeforeJoint().getTransformToWorldFrame();
+      RigidBodyTransform nextTransform = nextJoint.getFrameBeforeJoint().getTransformToWorldFrame();
       currentTransform.getTranslation(currentLocation);
       nextTransform.getTranslation(nextLocation);
 
