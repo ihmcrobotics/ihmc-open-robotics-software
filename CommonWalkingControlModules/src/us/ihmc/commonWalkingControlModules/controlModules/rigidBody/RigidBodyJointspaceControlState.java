@@ -22,10 +22,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final double[] jointsHomeConfiguration;
 
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
-         DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         DoubleYoVariable yoTime, RigidBodyJointControlHelper jointControlHelper, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
-      jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, parentRegistry);
+      this.jointControlHelper = jointControlHelper;
 
       numberOfJoints = jointsToControl.length;
       jointsHomeConfiguration = new double[numberOfJoints];

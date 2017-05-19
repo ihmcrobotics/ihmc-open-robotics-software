@@ -23,7 +23,7 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
 
    public RigidBodyHybridTaskSpaceJointspaceControlState(String bodyName, RigidBodyJointspaceControlState jointSpaceState, RigidBodyTaskspaceControlState taskspaceControlState, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.HYBRID, bodyName, yoTime, parentRegistry);
+      super(RigidBodyControlMode.TASKSPACE /*RigidBodyControlMode.HYBRID*/, bodyName, yoTime, parentRegistry);
       this.bodyName = bodyName;
       this.jointspaceControlState = jointSpaceState;
       this.taskspaceControlState = taskspaceControlState;
