@@ -46,6 +46,7 @@ import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPos
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
@@ -257,8 +258,29 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       // ************************************* //
       // show
       // ************************************* //
-      PrintTools.info("END");
-     
+      PrintTools.info("END");     
+   }   
+   
+   @Test
+   public void showUpRobotCollisionModel() throws SimulationExceededMaximumTimeException, IOException
+   {  
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+            
+      RobotCollisionModel robotCollisionModel;
+      robotCollisionModel = new RobotCollisionModel(sdfFullRobotModel);
+      
+      scs.addStaticLinkGraphics(robotCollisionModel.getCollisionGraphics());
+      
+      PrintTools.info("Out " );      
    }
    
    //@Test
@@ -368,7 +390,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test
+   //@Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
