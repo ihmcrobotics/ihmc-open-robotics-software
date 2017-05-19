@@ -40,7 +40,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    protected final HumanoidReferenceFrames referenceFrames;
    protected ReferenceFrame midFeetFrame;
    
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
    
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;
@@ -249,6 +249,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
 
    public void setDesiredPelvisHeight(double desiredHeightInWorld)
    {      
+      yoDesiredPelvisPosition.setX(1.0);
+      yoDesiredPelvisPosition.setY(1.0);
       yoDesiredPelvisPosition.setZ(desiredHeightInWorld);
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
@@ -335,6 +337,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          pelvisMessage.setDesiredPosition(desiredPelvisPosition);
          pelvisMessage.setWeight(10.0);
       }
+      Point3D desiredPelvisPosition = new Point3D();
+      yoDesiredPelvisPosition.get(desiredPelvisPosition);
    }
    
    
