@@ -248,22 +248,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (!trajectoryDone.getBooleanValue() && orientationTrajectoryGenerator.isDone())
          fillAndReinitializeTrajectories();
 
-      if (!trajectoryStopped.getBooleanValue())
-      {
-         positionTrajectoryGenerator.compute(timeInTrajectory);
-         orientationTrajectoryGenerator.compute(timeInTrajectory);
-      }
+      positionTrajectoryGenerator.compute(timeInTrajectory);
+      orientationTrajectoryGenerator.compute(timeInTrajectory);
 
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
-      if (trajectoryStopped.getBooleanValue())
-      {
-         desiredLinearVelocity.setToZero(baseFrame);
-         feedForwardLinearAcceleration.setToZero(baseFrame);
-         desiredAngularVelocity.setToZero(baseFrame);
-         feedForwardAngularAcceleration.setToZero(baseFrame);
-      }
+      desiredLinearVelocity.setToZero(baseFrame);
+      feedForwardLinearAcceleration.setToZero(baseFrame);
+      desiredAngularVelocity.setToZero(baseFrame);
+      feedForwardAngularAcceleration.setToZero(baseFrame);
 
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
@@ -369,7 +363,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
       {
          selectionMatrix.resetSelection();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(true);
@@ -377,7 +370,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       else if (hasOrientaionGains.getBooleanValue())
       {
          selectionMatrix.setToAngularSelectionOnly();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(false);
@@ -402,7 +394,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
       {
          selectionMatrix.resetSelection();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(true);
@@ -410,7 +401,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       else if (hasOrientaionGains.getBooleanValue())
       {
          selectionMatrix.setToAngularSelectionOnly();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(false);
@@ -435,7 +425,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
       {
          selectionMatrix.resetSelection();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(true);
@@ -443,7 +432,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       else if (hasOrientaionGains.getBooleanValue())
       {
          selectionMatrix.setToAngularSelectionOnly();
-         trajectoryStopped.set(false);
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(false);

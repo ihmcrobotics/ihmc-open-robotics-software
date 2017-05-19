@@ -27,7 +27,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected final YoVariableRegistry registry;
    protected final String warningPrefix;
 
-   protected final BooleanYoVariable trajectoryStopped;
    protected final BooleanYoVariable trajectoryDone;
 
    private final LongYoVariable lastCommandId;
@@ -48,7 +47,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
       trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
 
@@ -88,7 +86,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
          setTrajectoryStartTimeToCurrentTime();
       }
 
-      trajectoryStopped.set(false);
       trajectoryDone.set(false);
       return true;
    }
