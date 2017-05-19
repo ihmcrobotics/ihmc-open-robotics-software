@@ -113,7 +113,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(chestYaw);
-      desiredChestOrientation.appendYawRotation(chestPitch);
+      desiredChestOrientation.appendPitchRotation(chestPitch);
       FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       

@@ -72,7 +72,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(chestYaw);      
-      desiredChestOrientation.appendYawRotation(chestPitch);      
+      desiredChestOrientation.appendPitchRotation(chestPitch);      
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, midFeetFrame);
       
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(motionTime, new Point3D(0, 0, pelvisHeight), new Quaternion());
