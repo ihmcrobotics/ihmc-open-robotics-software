@@ -69,7 +69,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       jointControlHelper.queueInitialPointsAtCurrent();
 
       jointControlHelper.startTrajectoryExecution();
-      trajectoryStopped.set(false);
       trajectoryDone.set(false);
    }
 
@@ -84,7 +83,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       jointControlHelper.queuePointsAtTimeWithZeroVelocity(trajectoryTime, jointsHomeConfiguration);
 
       jointControlHelper.startTrajectoryExecution();
-      trajectoryStopped.set(false);
       trajectoryDone.set(false);
    }
 
@@ -99,18 +97,14 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       jointControlHelper.queuePointsAtTimeWithZeroVelocity(trajectoryTime, jointsHomeConfiguration);
 
       jointControlHelper.startTrajectoryExecution();
-      trajectoryStopped.set(false);
       trajectoryDone.set(false);
    }
 
    @Override
    public void doAction()
    {
-      if (!trajectoryStopped.getBooleanValue())
-      {
-         double timeInTrajectory = getTimeInTrajectory();
-         trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
-      }
+      double timeInTrajectory = getTimeInTrajectory();
+      trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
    }
 
    public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
