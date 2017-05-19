@@ -10,6 +10,8 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
 {
    public RobotSide robotSide;
 
+   public ArmTrajectoryMessage armTrajectoryMessage;
+
    public HandLoadBearingMessage()
    {
       super();
@@ -25,11 +27,22 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    {
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      armTrajectoryMessage = new ArmTrajectoryMessage(random);
+   }
+
+   public void setArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   {
+      this.armTrajectoryMessage = armTrajectoryMessage;
+   }
+
+   public ArmTrajectoryMessage getArmTrajectoryMessage()
+   {
+      return armTrajectoryMessage;
    }
 
    @Override
    public boolean epsilonEquals(HandLoadBearingMessage other, double epsilon)
    {
-      return robotSide == other.robotSide && super.epsilonEquals(other, epsilon);
+      return robotSide == other.robotSide && armTrajectoryMessage.epsilonEquals(other.armTrajectoryMessage, epsilon) && super.epsilonEquals(other, epsilon);
    }
 }

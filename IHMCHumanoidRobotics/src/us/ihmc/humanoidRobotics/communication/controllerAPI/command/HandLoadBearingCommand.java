@@ -7,6 +7,8 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
 {
    private RobotSide robotSide;
 
+   private ArmTrajectoryCommand armTrajectoryCommand = null;
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -17,6 +19,12 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       super.set(other);
       robotSide = other.robotSide;
+      if (other.armTrajectoryCommand != null)
+      {
+         if (armTrajectoryCommand == null)
+            armTrajectoryCommand = new ArmTrajectoryCommand();
+         armTrajectoryCommand.set(other.armTrajectoryCommand);
+      }
    }
 
    @Override
@@ -24,6 +32,17 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       super.set(message);
       robotSide = message.robotSide;
+      if (message.getArmTrajectoryMessage() != null)
+      {
+         if (armTrajectoryCommand == null)
+            armTrajectoryCommand = new ArmTrajectoryCommand();
+         armTrajectoryCommand.set(message.getArmTrajectoryMessage());
+      }
+   }
+
+   public ArmTrajectoryCommand getArmTrajectoryCommand()
+   {
+      return armTrajectoryCommand;
    }
 
    @Override
