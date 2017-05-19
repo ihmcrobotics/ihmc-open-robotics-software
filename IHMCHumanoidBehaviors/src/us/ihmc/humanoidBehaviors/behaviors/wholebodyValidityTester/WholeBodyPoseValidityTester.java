@@ -601,8 +601,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       
       robotCollisionModel.update();
       isCollisionFree = robotCollisionModel.getCollisionResult();
-
-//      isGoodIKSolution = true;
    }
    
    public double getScroe()
@@ -631,11 +629,12 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             else
                score = diffUpper;
             
-            PrintTools.info(""+score +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
+            if(DEBUG)
+               PrintTools.info(""+score +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
          }
       } 
-      PrintTools.info("");
-      PrintTools.info("");
+      if(DEBUG)
+         PrintTools.info("");      
       
       return score;
    }
