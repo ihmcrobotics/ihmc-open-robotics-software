@@ -50,7 +50,7 @@ public class RigidBodyJointControlHelper
    private final OneDoFJoint[] joints;
    private final int numberOfJoints;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJoint[] jointsToControl, YoVariableRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(bodyName + shortName);
