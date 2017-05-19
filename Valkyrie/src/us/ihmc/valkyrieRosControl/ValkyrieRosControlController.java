@@ -59,11 +59,16 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    //         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
    //         "rightWristPitch" };
 
-   private static final String[] allValkyrieJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
-         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
-         "rightWristPitch" };
+   private static final String[] allValkyrieJoints = {
+		   "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
+         "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
+         //"leftForearmYaw", "leftWristRoll", "leftWristPitch", 
+         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
+         //"rightForearmYaw", "rightWristRoll", "rightWristPitch"
+         };
 
    private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
@@ -71,8 +76,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          "rightElbowPitch" };
 
    private static final String[] positionControlledJoints = { "lowerNeckPitch", "neckYaw", "upperNeckPitch",
-         "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-         "leftForearmYaw", "leftWristRoll", "leftWristPitch"
+         //"rightForearmYaw", "rightWristRoll", "rightWristPitch",
+         //"leftForearmYaw", "leftWristRoll", "leftWristPitch"
    };
 
    public static final boolean USE_YOVARIABLE_DESIREDS = true;
