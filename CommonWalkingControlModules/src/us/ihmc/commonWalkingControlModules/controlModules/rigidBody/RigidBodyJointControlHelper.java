@@ -304,6 +304,7 @@ public class RigidBodyJointControlHelper
          }
       }
 
+      trajectoryDone.set(false);
       return true;
    }
 
