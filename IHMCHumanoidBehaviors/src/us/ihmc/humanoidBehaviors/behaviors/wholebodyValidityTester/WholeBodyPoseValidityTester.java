@@ -40,7 +40,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    protected final HumanoidReferenceFrames referenceFrames;
    protected ReferenceFrame midFeetFrame;
    
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
    
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;

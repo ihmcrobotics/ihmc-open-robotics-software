@@ -8,7 +8,6 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 public class TimeDomain1DNode extends RRTNode
 {
    private boolean isValidNode = false;
-   public static SolarPanelPath cleaningPath;
    
    public static double upperBound1D = Math.PI*0.2;
    public static double lowerBound1D = -Math.PI*0.2;
@@ -30,6 +29,7 @@ public class TimeDomain1DNode extends RRTNode
       isValidNode = setValue;
    }
    
+   @Override
    public void setRandomNodeData()
    {
       Random randomManager = new Random();

@@ -53,6 +53,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
          double pelvisHeight = node.getNodeData(1);
          double chestYaw = node.getNodeData(2);
          double chestPitch = node.getNodeData(3);
+         
          setWholeBodyPose(desiredHandPose, pelvisHeight, chestYaw, chestPitch);
       }      
    }
