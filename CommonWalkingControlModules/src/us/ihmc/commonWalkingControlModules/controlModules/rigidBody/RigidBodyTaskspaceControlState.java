@@ -263,11 +263,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
-      desiredLinearVelocity.setToZero(baseFrame);
-      feedForwardLinearAcceleration.setToZero(baseFrame);
-      desiredAngularVelocity.setToZero(baseFrame);
-      feedForwardAngularAcceleration.setToZero(baseFrame);
-
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       if (orientationGains != null)
@@ -536,12 +531,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose,
+   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose,
                                               JointspaceTrajectoryCommand<?, ?> jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {
          PrintTools.warn(warningPrefix + "Can not use hybrid mode. Was not created with a jointspace helper.");
+         return false;
       }
 
       if (!jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))

@@ -345,7 +345,13 @@ public class WalkingCommandConsumer
          HandLoadBearingCommand command = handLoadBearingCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).handleLoadBearingCommand(command, command.getArmTrajectoryCommand());
+         {
+            ArmTrajectoryCommand armTrajectoryCommand = null;
+            if (command.isUseJointspaceCommand())
+               armTrajectoryCommand = command.getArmTrajectoryCommand();
+
+            handManagers.get(robotSide).handleLoadBearingCommand(command, armTrajectoryCommand);
+         }
       }
    }
 

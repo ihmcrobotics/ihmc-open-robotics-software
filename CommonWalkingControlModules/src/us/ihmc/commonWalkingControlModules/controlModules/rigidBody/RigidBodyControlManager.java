@@ -279,7 +279,7 @@ public class RigidBodyControlManager
       computeDesiredJointPositions(initialJointPositions);
       computeDesiredPose(initialPose);
 
-      if (taskspaceControlState.handlePoseTrajectoryCommand(taskspaceCommand, initialPose, jointSpaceCommand, initialJointPositions))
+      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, initialPose, jointSpaceCommand, initialJointPositions))
       {
          requestState(taskspaceControlState.getStateEnum());
       }
@@ -420,14 +420,14 @@ public class RigidBodyControlManager
       if (jointspaceCommand != null)
       {
          computeDesiredJointPositions(initialJointPositions);
-         if (!loadBearingControlState.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+         if (!loadBearingControlState.handleJointTrajectoryCommand(jointspaceCommand, initialJointPositions))
             return;
       }
 
-      loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
-      loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
-      loadBearingControlState.setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
-      requestState(loadBearingControlState.getStateEnum());
+      if (loadBearingControlState.handleLoadbearingCommand(command))
+      {
+         requestState(loadBearingControlState.getStateEnum());
+      }
    }
 
    public boolean isLoadBearing()
