@@ -249,6 +249,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          return false;
       }
 
+      hybridModeActive.set(true);
       return true;
    }
 
