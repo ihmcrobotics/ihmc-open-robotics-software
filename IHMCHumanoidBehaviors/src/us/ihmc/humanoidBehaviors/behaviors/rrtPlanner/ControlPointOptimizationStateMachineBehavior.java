@@ -20,6 +20,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 public class ControlPointOptimizationStateMachineBehavior extends StateMachineBehavior<ControlPointOptimizationStates>
 {
    private boolean DEBUG = true;
+   private int numberOfValidCandidates = 0;
             
    private ValidNodesStateMachineBehavior validNodesStateMachineBehavior;
 
@@ -34,7 +35,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 30;
+   private int numberOfCandidates = 50;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.4;
    
@@ -65,7 +66,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       candidateBehavior = new CandidateBehavior(communicationBridge);
       doneBehavior = new TestDoneBehavior(communicationBridge);
             
-      //numberOfLinearPath = TimeDomain1DNode.cleaningPath.getNumerOfLinearPath();
       numberOfLinearPath = SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();
       PrintTools.info("## number of linear path "+ numberOfLinearPath);
       
@@ -109,7 +109,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       RRTNode aNode = SolarPanelCleaningInfo.getNode();
       
       double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(indexOfControlPoint).getMotionEndTime();
-      //double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getArrivalTime().get(indexOfControlPoint+1);
             
       aNode.setNodeData(0, timeOfEndNode);
       
@@ -198,11 +197,18 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             else
             {               
                isSolved = true;
-               PrintTools.info("Planner get solution!! "+isSolved);
+               PrintTools.info("Planner get solution!! "+numberOfValidCandidates);
                PrintTools.info("isSolved() "+isSolved());
                
-            for(int i =0;i<optimalControlPointNodePath.size();i++)
-               PrintTools.info("optimalControlPointNodePath "+i+" "+ optimalControlPointNodePath.get(i).getNodeData(0)+" "+ optimalControlPointNodePath.get(i).getNodeData(1));
+            for(int i=0;i<optimalControlPointNodePath.size();i++)
+            {
+               PrintTools.info("optimal Path is "+i);
+               for(int j=0;j<optimalControlPointNodePath.get(0).getDimensionOfNodeData();j++)
+                  PrintTools.info(" "+ optimalControlPointNodePath.get(i).getNodeData(j));
+               
+               PrintTools.info("");
+            }
+               
             }
             return b;
          }
@@ -265,6 +271,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                   PrintTools.info("");
                optimalControlPointNodePath = currentControlPointNodePath;
                optimalScoreOfControlPoint = validNodesStateMachineBehavior.getScore();
+               numberOfValidCandidates++;
             }
          }
          
