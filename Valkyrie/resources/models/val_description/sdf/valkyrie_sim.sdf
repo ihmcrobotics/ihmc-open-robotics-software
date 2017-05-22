@@ -405,7 +405,7 @@
       </physics>
     </joint>
     <link name='leftFoot'>
-      <pose frame=''>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
@@ -802,7 +802,7 @@
       </physics>
     </joint>
     <link name='rightFoot'>
-      <pose frame=''>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
