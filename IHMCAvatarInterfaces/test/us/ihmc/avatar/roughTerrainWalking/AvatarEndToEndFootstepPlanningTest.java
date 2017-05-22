@@ -219,8 +219,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 600.0)
+   @Test
    public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
