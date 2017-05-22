@@ -44,6 +44,11 @@ public class SolarPanelCleaningInfo
       cleaningPoseDegrees = degrees;
    }
    
+   public static DegreesOfRedundancy getDegreesOfRedundancy()
+   {
+      return cleaningPoseDegrees;
+   }
+   
    public static RRTNode getNode()
    {
       switch(cleaningPoseDegrees)
