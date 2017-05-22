@@ -80,6 +80,11 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.1), 4.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.1), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.15, -Math.PI*0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.15, -Math.PI*0.1), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI*0.1), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.3), 1.0);
+      
             
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
@@ -87,8 +92,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       PrintTools.info("cur Height is "+ fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23() +" "+ yoTime);
       TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       // *********************************** get Cleaning Path *********************************** //
-      
-      
+            
       // for re-initializing ControlPointOptimizationStateMachineBehavior after saving solarpanel information.
       // 170512
       this.yoTime = yoTime;
@@ -180,7 +184,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("cleaningAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             motionFactory.setCleaningPath(SolarPanelCleaningInfo.getCleaningPath());         
-            motionFactory.setMessage1D(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
+            motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
             
