@@ -15,6 +15,7 @@ import org.junit.Before;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -333,7 +334,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPoints", prefix + "ControlModule");
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPoints", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
@@ -342,7 +343,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInGenerator", prefix + "ControlModule");
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInGenerator", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
@@ -351,7 +352,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInQueue", prefix + "ControlModule");
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInQueue", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
