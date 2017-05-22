@@ -7,7 +7,9 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
 {
    private RobotSide robotSide;
 
-   private ArmTrajectoryCommand armTrajectoryCommand = null;
+   private boolean useJointspaceCommand = false;
+
+   private ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
 
    public RobotSide getRobotSide()
    {
@@ -19,12 +21,8 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       super.set(other);
       robotSide = other.robotSide;
-      if (other.armTrajectoryCommand != null)
-      {
-         if (armTrajectoryCommand == null)
-            armTrajectoryCommand = new ArmTrajectoryCommand();
-         armTrajectoryCommand.set(other.armTrajectoryCommand);
-      }
+      useJointspaceCommand = other.isUseJointspaceCommand();
+      armTrajectoryCommand.set(other.getArmTrajectoryCommand());
    }
 
    @Override
@@ -32,10 +30,9 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       super.set(message);
       robotSide = message.robotSide;
+      useJointspaceCommand = message.isUseJointspaceCommand();
       if (message.getArmTrajectoryMessage() != null)
       {
-         if (armTrajectoryCommand == null)
-            armTrajectoryCommand = new ArmTrajectoryCommand();
          armTrajectoryCommand.set(message.getArmTrajectoryMessage());
       }
    }
@@ -45,11 +42,18 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       return armTrajectoryCommand;
    }
 
+   public boolean isUseJointspaceCommand()
+   {
+      return useJointspaceCommand;
+   }
+
    @Override
    public void clear()
    {
       super.clear();
       robotSide = null;
+      useJointspaceCommand = false;
+      armTrajectoryCommand.clear();
    }
 
    @Override
@@ -61,6 +65,16 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && super.isCommandValid();
+      boolean armTrajectoryValid = true;
+      if (useJointspaceCommand && armTrajectoryCommand == null)
+      {
+         armTrajectoryValid = false;
+      }
+      else if (useJointspaceCommand)
+      {
+         armTrajectoryValid = armTrajectoryCommand.isCommandValid();
+      }
+
+      return armTrajectoryValid && robotSide != null && super.isCommandValid();
    }
 }

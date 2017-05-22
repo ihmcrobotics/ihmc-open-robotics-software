@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -232,11 +233,20 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
    }
 
-   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleLoadbearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   {
+      setCoefficientOfFriction(command.getCoefficientOfFriction());
+      setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
+      setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
+      return true;
+   }
+
+   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {
          PrintTools.warn(warningPrefix + "Can not use hybrid mode. Was not created with a jointspace helper.");
+         return false;
       }
 
       if (!handleCommandInternal(command))
