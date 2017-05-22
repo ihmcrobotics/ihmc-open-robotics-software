@@ -11,16 +11,16 @@ public class TimeDomain3DNode extends RRTNode
    
    // pelvisHeight
    public static double defaultPelvisHeight;
-   public static double upperShiftedBound1D = 0.000;
-   public static double lowerShiftedBound1D = 0.000;
+   public static double upperShiftedBound1D = 0.10;
+   public static double lowerShiftedBound1D = -0.100;
    
    // chestYaw
    public static double upperBound2D = Math.PI*0.2;
    public static double lowerBound2D = -Math.PI*0.2;
    
    // chestPitch
-   public static double upperBound3D = Math.PI*0.000;
-   public static double lowerBound3D = -Math.PI*0.000;
+   public static double upperBound3D = Math.PI*0.100;
+   public static double lowerBound3D = -Math.PI*0.100;
    
    
    
