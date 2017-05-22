@@ -2,32 +2,32 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 
 public class TimeDomain3DNode extends RRTNode
 {
    private boolean isValidNode = false;
-   public static SolarPanelPath cleaningPath;
    
    // pelvisHeight
    public static double defaultPelvisHeight;
-   public static double upperBound1D = defaultPelvisHeight + 0.1;
-   public static double lowerBound1D = defaultPelvisHeight - 0.1;
+   public static double upperShiftedBound1D = 0.000;
+   public static double lowerShiftedBound1D = 0.000;
    
    // chestYaw
    public static double upperBound2D = Math.PI*0.2;
    public static double lowerBound2D = -Math.PI*0.2;
    
    // chestPitch
-   public static double upperBound3D = Math.PI*0.2;
-   public static double lowerBound3D = -Math.PI*0.2;
+   public static double upperBound3D = Math.PI*0.000;
+   public static double lowerBound3D = -Math.PI*0.000;
    
    
    
    public TimeDomain3DNode()
    {
       super(4);
+      super.setNodeData(1, defaultPelvisHeight);
    }
    
    public TimeDomain3DNode(double time, double pelvisHeight, double chestYaw, double chestPitch)
@@ -44,14 +44,18 @@ public class TimeDomain3DNode extends RRTNode
       isValidNode = setValue;
    }
    
+   @Override
    public void setRandomNodeData()
    {
       Random randomManager = new Random();
 
+      double upperBound1D = defaultPelvisHeight + upperShiftedBound1D;
+      double lowerBound1D = defaultPelvisHeight - lowerShiftedBound1D;
+      
       double randonValue;
       randonValue = randomManager.nextDouble() * (upperBound1D - lowerBound1D) + lowerBound1D;
       setNodeData(1, randonValue);
-      
+           
       randonValue = randomManager.nextDouble() * (upperBound2D - lowerBound2D) + lowerBound2D;
       setNodeData(2, randonValue);
       

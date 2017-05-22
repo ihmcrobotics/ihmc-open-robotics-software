@@ -34,6 +34,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain3DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
@@ -175,7 +176,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
 
       CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.STAIRS, simulationTestingParameters, getRobotModel());
+      //drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.STAIRS, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
@@ -268,6 +270,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
@@ -281,10 +285,15 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       scs.addStaticLinkGraphics(robotCollisionModel.getCollisionGraphics());
       
+      PrintTools.info("cur Height is "+ sdfFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23());
+      
+      PrintTools.info("cur Height is "+ sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23());
+      
+      
       PrintTools.info("Out " );      
    }
    
-   @Test
+   //@Test
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -306,8 +315,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
-      TimeDomain1DNode.cleaningPath = cleaningPath;   
-      TimeDomain3DNode.cleaningPath = cleaningPath;   
+      SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       
       ArrayList<RRTNode> nodes1D = new ArrayList<RRTNode>();
       
@@ -409,7 +417,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
       
-      TimeDomain1DNode.cleaningPath = cleaningPath;
+      SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
             
       ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
@@ -422,7 +430,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
+   @Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -434,7 +442,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
-      
       
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();

@@ -65,7 +65,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       candidateBehavior = new CandidateBehavior(communicationBridge);
       doneBehavior = new TestDoneBehavior(communicationBridge);
             
-      numberOfLinearPath = TimeDomain1DNode.cleaningPath.getNumerOfLinearPath();
+      //numberOfLinearPath = TimeDomain1DNode.cleaningPath.getNumerOfLinearPath();
+      numberOfLinearPath = SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();
       PrintTools.info("## number of linear path "+ numberOfLinearPath);
       
       currentIndexOfCandidate = 0;
@@ -91,7 +92,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       
       for(int i=0;i<numberOfWayPoints;i++)
       {
-         RRTNode aNode = new TimeDomain1DNode();
+         RRTNode aNode = SolarPanelCleaningInfo.getNode();
          for(int j=0;j<aNode.getDimensionOfNodeData();j++)
          {
             double nodeData = startNode.getNodeData(j) + (endNode.getNodeData(j) - startNode.getNodeData(j))*(i+1)/(numberOfWayPoints);
@@ -105,9 +106,10 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    
    private RRTNode getRandomControlPoint(int indexOfControlPoint)
    {
-      TimeDomain1DNode aNode = new TimeDomain1DNode();
+      RRTNode aNode = SolarPanelCleaningInfo.getNode();
       
-      double timeOfEndNode = TimeDomain1DNode.cleaningPath.getArrivalTime().get(indexOfControlPoint+1);
+      double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(indexOfControlPoint).getMotionEndTime();
+      //double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getArrivalTime().get(indexOfControlPoint+1);
             
       aNode.setNodeData(0, timeOfEndNode);
       
@@ -146,7 +148,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             }
                                           
             validNodesStateMachineBehavior.setNodes(randomSelectedNodes);               
-            validNodesStateMachineBehavior.setSolarPanel(TimeDomain1DNode.cleaningPath.getSolarPanel());
+            validNodesStateMachineBehavior.setSolarPanel(SolarPanelCleaningInfo.getCleaningPath().getSolarPanel());
             
             currentIndexOfCandidate++;
          }
@@ -187,7 +189,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          public boolean checkCondition()
          {
             boolean b = (candidateBehavior.isDone() && currentIndexOfCandidate == numberOfCandidates && optimalControlPointNodePath != null) || (currentIndexOfRetry == numberOfRetry);
-//            PrintTools.info("Yes solution !" + currentIndexOfRetry + " "+numberOfRetry);
+            
             if(currentIndexOfRetry == numberOfRetry)
             {               
                isSolved = false;
@@ -207,10 +209,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       };
       
       BehaviorAction<ControlPointOptimizationStates> doneAction = new BehaviorAction<ControlPointOptimizationStates>(ControlPointOptimizationStates.DONE, doneBehavior);
-      
-      
-      
-      
       
       statemachine.addStateWithDoneTransition(getScoreAction, ControlPointOptimizationStates.CANDIDATE_CONTROLPOINTS);
       
@@ -254,8 +252,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             PrintTools.info("CandidateBehavior");
          if(DEBUG)
             PrintTools.info(""+currentIndexOfCandidate+" nodesValidity is " + validNodesStateMachineBehavior.getNodesValdity() +" score is "+ validNodesStateMachineBehavior.getScore());
-         
-         
+                  
          if(validNodesStateMachineBehavior.getNodesValdity() == true)
          {
             if(optimalScoreOfControlPoint > validNodesStateMachineBehavior.getScore())

@@ -32,7 +32,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    private boolean nodesValidity;
    
    private boolean DEBUG = false;
-   private boolean NONSTOP = true;
+   private boolean NONSTOP = false;
    
    public enum RRTExpandingStates
    {
@@ -96,8 +96,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             /*
              * override suitable node data for node.
              */
-            //testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, new TimeDomain1DNode());
-            testValidityBehavior.setWholeBodyPose(TimeDomain3DNode.cleaningPath, new TimeDomain3DNode());
+            testValidityBehavior.setWholeBodyPose(SolarPanelCleaningInfo.getCleaningPath(), SolarPanelCleaningInfo.getNode());
             testValidityBehavior.setUpHasBeenDone();
          }
       };
@@ -115,8 +114,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             
             if(indexOfCurrentNode < nodes.size())
             {
-               //testValidityBehavior.setWholeBodyPose(TimeDomain1DNode.cleaningPath, nodes.get(indexOfCurrentNode));
-               testValidityBehavior.setWholeBodyPose(TimeDomain3DNode.cleaningPath, nodes.get(indexOfCurrentNode));
+               testValidityBehavior.setWholeBodyPose(SolarPanelCleaningInfo.getCleaningPath(), nodes.get(indexOfCurrentNode));
                testValidityBehavior.setUpHasBeenDone();
                indexOfCurrentNode++;   
             }

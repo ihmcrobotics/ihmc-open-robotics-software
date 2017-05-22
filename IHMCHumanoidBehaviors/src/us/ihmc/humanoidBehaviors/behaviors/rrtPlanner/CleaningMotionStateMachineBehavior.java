@@ -4,9 +4,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior.CleaningMotionState;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFacotry;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -14,13 +14,13 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -38,7 +38,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    DoubleYoVariable yoTime;
    FullHumanoidRobotModel fullRobotModel;
    WholeBodyControllerParameters wholeBodyControllerParameters;
-   
+      
    public enum CleaningMotionState
    {
       GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, DONE
@@ -53,19 +53,12 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 
       getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
-      doneBehavior = new TestDoneBehavior(communicationBridge);
-      
+      doneBehavior = new TestDoneBehavior(communicationBridge);      
       
       motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry(fullRobotModel);
       
-      
-//      HumanoidReferenceFrames referenceFramesPlus;
-//      ReferenceFrame midFeetFrame;
-//         
-//      referenceFramesPlus.updateFrames();
-//      midFeetFrame = referenceFramesPlus.getMidFootZUpGroundFrame();
-//      
-      
+    
+      // ********************************** get SolarPanel Info ********************************** //     
       
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
@@ -76,17 +69,24 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
       
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+      // ********************************** get SolarPanel Info ********************************** //
+      // *********************************** get Cleaning Path *********************************** //
+      
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.1);
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
       
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.1), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.1), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
+            
+      SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
+      SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
       
-      TimeDomain1DNode.cleaningPath = cleaningPath;
-      
+      PrintTools.info("cur Height is "+ fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23() +" "+ yoTime);
+      TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      // *********************************** get Cleaning Path *********************************** //
       
       
       // for re-initializing ControlPointOptimizationStateMachineBehavior after saving solarpanel information.
@@ -94,8 +94,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
-      
-      TimeDomain1DNode rootNode = new TimeDomain1DNode(0.0, 0);
+                  
+      RRTNode rootNode = SolarPanelCleaningInfo.getNode();
       
       controlPointOptimizationBehavior
       = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
@@ -162,7 +162,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("gotoReadyPoseAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             
-            SolarPanelCleaningPose readyPose = TimeDomain1DNode.cleaningPath.getStartPose();
+            SolarPanelCleaningPose readyPose = SolarPanelCleaningInfo.getCleaningPath().getStartPose();
             motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, 3.0);
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
@@ -179,7 +179,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             
             PrintTools.info("cleaningAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-            motionFactory.setCleaningPath(TimeDomain1DNode.cleaningPath);         
+            motionFactory.setCleaningPath(SolarPanelCleaningInfo.getCleaningPath());         
             motionFactory.setMessage1D(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
@@ -221,30 +221,6 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
    private void setUpSolarPanel()
    {
-//      Pose poseSolarPanel = new Pose();
-//      Quaternion quaternionSolarPanel = new Quaternion();
-//      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
-//      quaternionSolarPanel.appendRollRotation(0.0);
-//      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
-//      poseSolarPanel.setOrientation(quaternionSolarPanel);
-//      
-//      SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
-//      
-//      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
-//      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-//      
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-//      
-//      TimeDomain1DNode.cleaningPath = cleaningPath;
-//      
-//      TimeDomain1DNode rootNode = new TimeDomain1DNode(0.0, 0);
-//      
-//      controlPointOptimizationBehavior
-//      = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel);
    }
    
    private class GetSolarPanelBehavior extends AbstractBehavior
