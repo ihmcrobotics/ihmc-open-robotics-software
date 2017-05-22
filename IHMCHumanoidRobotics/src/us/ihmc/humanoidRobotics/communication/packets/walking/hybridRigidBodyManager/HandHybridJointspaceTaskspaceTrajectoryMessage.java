@@ -27,6 +27,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**

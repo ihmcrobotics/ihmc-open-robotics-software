@@ -54,7 +54,6 @@ public class RigidBodyControlManager
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
-   private final RigidBodyHybridTaskSpaceJointspaceControlState hybridControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
@@ -90,15 +89,16 @@ public class RigidBodyControlManager
       initialJointPositions = new double[jointsToControl.length];
 
       positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
+      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
-      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, registry);
+      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime,
-            graphicsListRegistry, registry);
+                                                                 jointControlHelper, graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
-      hybridControlState = new RigidBodyHybridTaskSpaceJointspaceControlState(bodyName, jointspaceControlState, taskspaceControlState, yoTime, registry);
 
       if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
-         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
+                                                                        graphicsListRegistry, registry);
       else
          loadBearingControlState = null;
 
@@ -120,7 +120,6 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
-      states.add(hybridControlState);
       if (loadBearingControlState != null)
          states.add(loadBearingControlState);
 
@@ -182,13 +181,9 @@ public class RigidBodyControlManager
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
 
-      // Cleanup the state. Don't cleanup if switching to hybrid.
       if (stateSwitched.getBooleanValue())
       {
-         if (stateMachine.getCurrentStateEnum() != RigidBodyControlMode.HYBRID)
-         {
-            stateMachine.getPreviousState().clear();
-         }
+         stateMachine.getPreviousState().clear();
       }
 
       stateMachine.doAction();
@@ -284,9 +279,9 @@ public class RigidBodyControlManager
       computeDesiredJointPositions(initialJointPositions);
       computeDesiredPose(initialPose);
 
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions, initialPose))
+      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, initialPose, jointSpaceCommand, initialJointPositions))
       {
-         requestState(hybridControlState.getStateEnum());
+         requestState(taskspaceControlState.getStateEnum());
       }
       else
       {
@@ -297,28 +292,29 @@ public class RigidBodyControlManager
 
    public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
-      if (taskspaceCommand.useCustomControlFrame())
-      {
-         taskspaceCommand.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      computeDesiredJointPositions(initialJointPositions);
-      computeDesiredPose(initialPose);
-
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialPose))
-      {
-         requestState(hybridControlState.getStateEnum());
-      }
-      else
-      {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
-         hold();
-      }
+      throw new RuntimeException("Should not send these messages anymore. Switch to SE3 message with selection matrix.");
+//      if (taskspaceCommand.useCustomControlFrame())
+//      {
+//         taskspaceCommand.getControlFramePose(controlFrameTransform);
+//         taskspaceControlState.setControlFramePose(controlFrameTransform);
+//      }
+//      else
+//      {
+//         taskspaceControlState.setDefaultControlFrame();
+//      }
+//
+//      computeDesiredJointPositions(initialJointPositions);
+//      computeDesiredPose(initialPose);
+//
+//      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialPose))
+//      {
+//         requestState(hybridControlState.getStateEnum());
+//      }
+//      else
+//      {
+//         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
+//         hold();
+//      }
    }
 
    public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
@@ -407,7 +403,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {
@@ -421,10 +417,17 @@ public class RigidBodyControlManager
          return;
       }
 
-      loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
-      loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
-      loadBearingControlState.setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
-      requestState(loadBearingControlState.getStateEnum());
+      if (jointspaceCommand != null)
+      {
+         computeDesiredJointPositions(initialJointPositions);
+         if (!loadBearingControlState.handleJointTrajectoryCommand(jointspaceCommand, initialJointPositions))
+            return;
+      }
+
+      if (loadBearingControlState.handleLoadbearingCommand(command))
+      {
+         requestState(loadBearingControlState.getStateEnum());
+      }
    }
 
    public boolean isLoadBearing()
