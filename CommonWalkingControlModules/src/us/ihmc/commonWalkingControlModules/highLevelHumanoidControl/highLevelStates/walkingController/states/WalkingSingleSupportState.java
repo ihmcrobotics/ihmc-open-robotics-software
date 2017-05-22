@@ -131,12 +131,15 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
-            footstepTiming.setTimings(swingTime, walkingMessageHandler.getDefaultTransferTime());
+
+            double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+            double swingDuration = footstepTiming.getSwingTime();
+            double transferDuration = footstepTiming.getTransferTime();
 
             balanceManager.clearICPPlan();
-            balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-            balanceManager.updateCurrentICPPlan();
+            balanceManager.setICPPlanSupportSide(supportSide);
+            balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
          }
       }
 
