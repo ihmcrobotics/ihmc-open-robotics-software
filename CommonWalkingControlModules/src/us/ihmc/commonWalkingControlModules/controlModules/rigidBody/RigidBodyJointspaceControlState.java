@@ -162,6 +162,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
+   @Override
    public void clear()
    {
    }

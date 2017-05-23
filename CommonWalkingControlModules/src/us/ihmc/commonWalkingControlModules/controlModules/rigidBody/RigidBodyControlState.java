@@ -114,6 +114,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
+
    public abstract boolean isEmpty();
 
    public abstract double getLastTrajectoryPointTime();
@@ -139,6 +141,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
    protected void hideGraphics()
    {
+      // TODO: make a hide method in the YoGraphic or find some other way to avoid this mess.
       for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
       {
          YoGraphic yoGraphic = graphics.get(graphicsIdx);
