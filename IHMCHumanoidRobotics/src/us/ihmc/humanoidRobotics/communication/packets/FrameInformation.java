@@ -18,9 +18,10 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
    private long trajectoryReferenceFrameId;
 
    /**
-    * The ID of the reference frame that trajectory data in a packet is expressed in. If set to the
-    * value {@link NameBasedHashCodeTools#DEFAULT_HASHCODE} it will be assumed that this is the same
-    * frame as the trajectory frame.
+    * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
+    * trajectory data will be switched to the trajectory frame immediately when the message is received
+    * by the controller. If set to the value {@link NameBasedHashCodeTools#DEFAULT_HASHCODE} it will be
+    * assumed that this is the same frame as the trajectory frame.
     * </p>
     * It is recommended that this should be the same frame as the {@link #trajectoryReferenceFrameId} to
     * avoid unexpected behavior. Setting this frame to something different then the trajectory execution

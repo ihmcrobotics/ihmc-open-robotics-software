@@ -23,10 +23,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
@@ -69,7 +69,7 @@ public class ProvidedMassMatrixToolRigidBody
 
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
 
-      this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
+      this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator());
       this.toolBody = new RigidBody(name + "Body", toolJoint, new Matrix3D(), 0.0, new RigidBodyTransform());
 
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);
@@ -99,15 +99,13 @@ public class ProvidedMassMatrixToolRigidBody
    {
       hasBeenInitialized = true;
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, twistCalculator, gravity, false);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, gravity, false);
 
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
+      jointsToIgnore.addAll(ScrewTools.getRootBody(toolBody).getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore,
-                                                                spatialAccelerationCalculator, twistCalculator);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, spatialAccelerationCalculator);
    }
 
    private final FramePoint toolFramePoint = new FramePoint();

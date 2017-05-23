@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PartialFootholdControlModule
 {
@@ -168,10 +167,9 @@ public class PartialFootholdControlModule
       expectingLineContact.set(false);
 
       double dt = controllerToolbox.getControlDT();
-      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
 
       FootRotationCalculator velocityFootRotationCalculator =
-            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, explorationParameters, yoGraphicsListRegistry, registry);
+            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       FootRotationCalculator geometricFootRotationCalculator =
             new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);

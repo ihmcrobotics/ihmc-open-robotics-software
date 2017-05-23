@@ -1,9 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -212,7 +209,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
@@ -228,7 +225,7 @@ public class ScrewToolsTest
    {
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
-      PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
+      PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
@@ -237,19 +234,6 @@ public class ScrewToolsTest
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testCreateOffsetFrame_ReferenceFrame_Transform3D_String()
-   {
-      ReferenceFrame parentFrame = theFrame;
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      String frameName = "woof";
-      ReferenceFrame frame = ScrewTools.createOffsetFrame(parentFrame, transformToParent, frameName);
-
-      parentFrame.checkReferenceFrameMatch(frame.getRootFrame());
-      assertEquals("Should be equal", frameName, frame.getName());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

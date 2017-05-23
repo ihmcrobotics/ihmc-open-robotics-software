@@ -84,6 +84,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -150,8 +151,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final YoFrameVector2d pelvisShiftScaleFactor;
 

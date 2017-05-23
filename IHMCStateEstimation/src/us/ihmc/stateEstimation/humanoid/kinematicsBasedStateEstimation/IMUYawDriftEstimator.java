@@ -21,7 +21,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -67,8 +66,6 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final BooleanYoVariable enableCompensation = new BooleanYoVariable("enableIMUDriftYawCompensation", registry);
    private final BooleanYoVariable integrateDriftRate = new BooleanYoVariable("integrateDriftRate", registry);
 
-   private final TwistCalculator twistCalculator;
-
    private final FramePoint footPosition = new FramePoint();
    private final FramePoint averagePosition = new FramePoint();
    private final FrameVector referenceAverageToFootPosition = new FrameVector();
@@ -82,7 +79,6 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          Map<RigidBody, ? extends ContactablePlaneBody> feet, final double estimatorDT, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = estimatorDT;
-      this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       this.footSwitches = footSwitches;
       allFeet = new ArrayList<>(footSwitches.keySet());
       numberOfFeet = allFeet.size();
@@ -194,7 +190,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
-         twistCalculator.getTwistOfBody(foot, footTwist);
+         foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
          footTwist.getLinearPart(footLinearVelocity);
          currentFootLinearVelocities.get(foot).set(footLinearVelocity.length());
       }

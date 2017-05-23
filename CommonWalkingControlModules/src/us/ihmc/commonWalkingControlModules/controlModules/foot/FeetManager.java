@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -46,7 +47,7 @@ public class FeetManager
    private final SideDependentList<ContactableFoot> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 

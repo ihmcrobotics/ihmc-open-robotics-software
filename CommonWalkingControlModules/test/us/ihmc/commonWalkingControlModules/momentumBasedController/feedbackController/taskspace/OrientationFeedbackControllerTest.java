@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.RandomNumbers;
@@ -34,7 +33,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class OrientationFeedbackControllerTest
 {
@@ -54,12 +52,11 @@ public class OrientationFeedbackControllerTest
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+                                                                            registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
       OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
@@ -89,7 +86,6 @@ public class OrientationFeedbackControllerTest
          ScrewTestTools.setRandomVelocities(joints, random);
          joints.get(0).getPredecessor().updateFramesRecursively();
          centerOfMassFrame.update();
-         twistCalculator.compute();
 
          double proportionalGain = RandomNumbers.nextDouble(random, 10.0, 200.0);
          double derivativeGain = RandomNumbers.nextDouble(random, 0.0, 100.0);

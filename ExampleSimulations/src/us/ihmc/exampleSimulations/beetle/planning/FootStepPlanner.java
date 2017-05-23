@@ -28,7 +28,6 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class FootStepPlanner
 {
@@ -36,7 +35,6 @@ public class FootStepPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private FullRobotModel fullRobotModel;
    private HexapodReferenceFrames referenceFrames;
-   private TwistCalculator twistCalculator;
 
    private SegmentDependentList<RobotSextant, YoFrameVector> nominalOffsetsFromBodyToFeet = new SegmentDependentList<>(RobotSextant.class);
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -64,12 +62,11 @@ public class FootStepPlanner
    private final CircleArtifact bodyFrameProjectedInFutureCircleArtifact = new CircleArtifact("bodyFrameProjectedInFutureArtifact", 0.0, 0.0, 0.03, false);
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
-   public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames, TwistCalculator twistCalculator,
+   public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
-      this.twistCalculator = twistCalculator;
       pelvis = fullRobotModel.getPelvis();
       swingTimeScalar.set(1.1);
 
@@ -214,8 +211,7 @@ public class FootStepPlanner
 
    public void getDesiredFootPosition(RobotSextant robotSextant, double swingTime, FramePoint framePointToPack)
    {
-      twistCalculator.compute();
-      twistCalculator.getTwistOfBody(pelvis, twistToPack);
+      pelvis.getBodyFixedFrame().getTwistOfFrame(twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
       twistToPack.getAngularPart(angularVelocity);
 

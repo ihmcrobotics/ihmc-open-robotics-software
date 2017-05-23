@@ -1486,11 +1486,21 @@ public class ICPPlanner
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
+      {
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      }
+      else if (entryCornerPoints.get(1).containsNaN())
+      {
+         tempFinalICP.setToZero(midFeetZUpFrame);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
       else
+      {
          entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
-      tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
    }
 
    private final FramePoint2d tempFinalCoM = new FramePoint2d();

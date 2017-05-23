@@ -118,7 +118,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       positionToPack.set(position);
    }
 
-   public void setPosition(Point3D position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
@@ -128,7 +128,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       orientationToPack.set(orientation);
    }
 
-   public void setOrientation(Quaternion orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }

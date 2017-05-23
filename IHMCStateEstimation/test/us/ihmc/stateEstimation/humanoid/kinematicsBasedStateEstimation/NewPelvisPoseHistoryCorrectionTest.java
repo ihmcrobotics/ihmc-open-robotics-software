@@ -93,7 +93,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       robot = new Robot("dummy");
 
-      pelvisReferenceFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame())
+      pelvisReferenceFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
@@ -104,7 +104,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          }
       };
       RigidBody rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
-      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody, worldFrame);
+      sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
    private void setupSim()
@@ -321,7 +321,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
    @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {
