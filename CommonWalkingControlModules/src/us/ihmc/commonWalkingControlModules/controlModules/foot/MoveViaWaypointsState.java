@@ -69,7 +69,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       ankleFrame = foot.getParentJoint().getFrameAfterJoint();
       controlFrame = ankleFrame;
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
+      taskspaceControlState = new RigidBodyTaskspaceControlState("", foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
             graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
 
