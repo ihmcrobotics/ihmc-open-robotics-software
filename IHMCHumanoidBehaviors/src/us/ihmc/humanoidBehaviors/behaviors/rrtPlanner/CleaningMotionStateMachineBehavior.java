@@ -62,7 +62,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
+      poseSolarPanel.setPosition(0.7, -0.05, 0.9);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
@@ -83,7 +83,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.15, -Math.PI*0.3), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.15, -Math.PI*0.1), 1.0);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI*0.1), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.2), 1.0);
       
             
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);

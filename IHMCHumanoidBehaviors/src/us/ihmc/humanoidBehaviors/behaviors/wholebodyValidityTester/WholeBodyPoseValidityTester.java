@@ -490,10 +490,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       
       sendPacket(privilegedMessage);
-
-//      message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
-//      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-//      sendPacket(message);
    }
       
    static int cntOfSeries = 0;
