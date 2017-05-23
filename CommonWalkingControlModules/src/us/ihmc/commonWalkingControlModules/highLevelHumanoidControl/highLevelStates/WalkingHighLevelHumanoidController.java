@@ -644,6 +644,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
+      
+      comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
             isRecoveringFromPush, feetManager));
 
@@ -710,7 +712,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
+      controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
+      controllerCoreCommand.addInverseDynamicsCommand(comHeightManager.getInverseDynamicsCommand());
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
       if (accelerationIntegrationCommand != null)
