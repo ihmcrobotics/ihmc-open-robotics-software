@@ -156,8 +156,15 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
                b = ((waitingResultBehavior.isDone() && (indexOfCurrentNode == nodes.size())) || nodesValidity == false);
             
             
-            if(DEBUG && b)
-               PrintTools.info("Check :: doneCondition " + b);
+            if(true && b)
+            {
+               PrintTools.info("Check :: doneCondition " + b +" "+indexOfCurrentNode +" "+ nodes.size());
+               RRTNode rrtNode = nodes.get(indexOfCurrentNode-1);
+               PrintTools.info("Fail Node Info :: time "+ rrtNode.getNodeData(0)+" height " + rrtNode.getNodeData(1)+" yaw "+ rrtNode.getNodeData(2)/Math.PI +" pitch "+ rrtNode.getNodeData(3)/Math.PI);
+            }
+               
+            
+            
             return b;
          }
       };

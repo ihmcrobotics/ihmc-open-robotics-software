@@ -38,6 +38,7 @@ import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain3DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
@@ -328,12 +329,26 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       ArrayList<RRTNode> nodes3D = new ArrayList<RRTNode>();
       
-      nodes3D.add(new TimeDomain3DNode(0.0, 0.7, Math.PI*0.1, Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(3.0, 0.75, -Math.PI*0.1, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(5.0, 0.73, Math.PI*0.15, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(2.0, 0.70, Math.PI*0.0, Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(5.0, 0.78, -Math.PI*0.1, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(1.0, 0.60, Math.PI*0.13, Math.PI*0.1));            // true      
+//      nodes3D.add(new TimeDomain3DNode(0.0, 0.7, Math.PI*0.1, Math.PI*0.1));            // true
+//      nodes3D.add(new TimeDomain3DNode(3.0, 0.75, -Math.PI*0.1, -Math.PI*0.1));            // true
+//      nodes3D.add(new TimeDomain3DNode(5.0, 0.73, Math.PI*0.15, -Math.PI*0.1));            // true
+//      nodes3D.add(new TimeDomain3DNode(2.0, 0.70, Math.PI*0.0, Math.PI*0.1));            // true
+//      nodes3D.add(new TimeDomain3DNode(5.0, 0.78, -Math.PI*0.1, -Math.PI*0.1));            // true
+//      nodes3D.add(new TimeDomain3DNode(1.0, 0.60, Math.PI*0.13, Math.PI*0.1));            // true
+      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
+      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
+      nodes3D.add(new TimeDomain3DNode(13.6363, 0.88741055727005, Math.PI*-0.008876263572709467, Math.PI*0.0447894649324294));
+      nodes3D.add(new TimeDomain3DNode(4.6666, 0.88741055727005, Math.PI*0.0189915162899471, Math.PI*0.07676682998650916));
+      nodes3D.add(new TimeDomain3DNode(2.90909, 0.8601378299973228, Math.PI*-0.04484725263727767, Math.PI*-0.016660109836832714));
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.011037102032582896, Math.PI*0.033562347578461264));
+      nodes3D.add(new TimeDomain3DNode(3.6363, 0.8783196481791409, Math.PI*-0.03202401766345228, Math.PI*0.007099954451470068));
+      nodes3D.add(new TimeDomain3DNode(14.0, 0.88741055727005, Math.PI*-0.0375297411695563, Math.PI*0.1006749515083037));
+      
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*0.0026458019986451225, Math.PI*0.10201097518861175));
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.04747080426433124, Math.PI*0.09189569454291491));
+      
+      SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
+      SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
       
       ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes3D, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                     drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
@@ -438,17 +453,17 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      
+            
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
             
       CleaningMotionStateMachineBehavior cleaningStateMachineBehavior
       = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       
+      scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(150);
