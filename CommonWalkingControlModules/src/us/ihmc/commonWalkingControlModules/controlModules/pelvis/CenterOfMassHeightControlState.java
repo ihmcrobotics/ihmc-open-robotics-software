@@ -60,6 +60,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
    
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   
+   private final BooleanYoVariable controlHeightWithMomentum = new BooleanYoVariable("controlHeightWithMomentum", registry);
 
    private final PDController centerOfMassHeightController;
 
@@ -87,6 +89,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
+      
+      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -324,6 +328,10 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    
    public MomentumRateCommand getMomentumRateCommand()
    {
-      return momentumRateCommand;
+      if(controlHeightWithMomentum.getBooleanValue())
+      {
+         return momentumRateCommand;
+      }
+      return null;
    }
 }
