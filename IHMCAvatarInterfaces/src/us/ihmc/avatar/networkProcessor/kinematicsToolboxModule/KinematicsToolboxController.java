@@ -59,7 +59,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -112,10 +111,6 @@ public class KinematicsToolboxController extends ToolboxController
     * such as the center of frame.
     */
    private final CommonHumanoidReferenceFrames referenceFrames;
-   /**
-    * The twist calculator is used in the controller core and has to be updated every control tick.
-    */
-   private final TwistCalculator twistCalculator;
 
    /** The same set of gains is used for controlling any part of the desired robot body. */
    private final YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("genericGains", registry);
@@ -301,7 +296,6 @@ public class KinematicsToolboxController extends ToolboxController
       referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       rootBody = desiredFullRobotModel.getElevator();
       rootJoint = desiredFullRobotModel.getRootJoint();
-      twistCalculator = new TwistCalculator(worldFrame, rootBody);
 
       populateJointLimitReductionFactors();
       populateListOfControllableRigidBodies();
@@ -389,8 +383,8 @@ public class KinematicsToolboxController extends ToolboxController
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, twistCalculator,
-                                                                            null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null,
+                                                                            null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate();
@@ -572,7 +566,6 @@ public class KinematicsToolboxController extends ToolboxController
    {
       desiredFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      twistCalculator.compute();
    }
 
    /**

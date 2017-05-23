@@ -63,7 +63,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
-            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator, ReferenceFrame.getWorldFrame());
+            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
@@ -204,6 +204,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
             sixDoFJoint.setJointTwist(bodyTwist);
+            sixDoFJoint.updateFramesRecursively();
 
             // Acceleration:
             //Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.

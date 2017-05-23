@@ -18,7 +18,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -36,20 +35,7 @@ public class ScrewTools
 
    public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-      RevoluteJoint joint = new RevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis));
-
-      return joint;
+      return new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
    public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis,
@@ -61,19 +47,7 @@ public class ScrewTools
    public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis,
                                                               boolean isPartOfClosedKinematicLoop)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-
-      return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
+      return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
    }
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
@@ -83,20 +57,7 @@ public class ScrewTools
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-      PrismaticJoint joint = new PrismaticJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis));
-
-      return joint;
+      return new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
    public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
@@ -119,13 +80,6 @@ public class ScrewTools
    public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
       return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
-   }
-
-   public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)
-   {
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-
-      return beforeJointFrame;
    }
 
    public static RigidBody[] computeSuccessors(InverseDynamicsJoint... joints)
@@ -506,7 +460,7 @@ public class ScrewTools
             originalToClonedRigidBodies.put(rootBody, rootBodyCopy);
 
             String jointNameOriginal = jointOriginal.getName();
-            SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy, rootBodyFrame);
+            SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy);
             cloned[i] = jointCopy;
          }
          else

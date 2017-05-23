@@ -20,10 +20,11 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -70,6 +71,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
    private final FrameVector achievedAngularAcceleration = new FrameVector();
 
+   private final Twist currentTwist = new Twist();
    private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
@@ -78,13 +80,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoOrientationPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
+   private ReferenceFrame controlBaseFrame;
 
    private final RigidBody endEffector;
-   private final ReferenceFrame endEffectorFrame;
+   private final MovingReferenceFrame endEffectorFrame;
 
    private final double dt;
 
@@ -93,7 +95,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    {
       this.endEffector = endEffector;
 
-      twistCalculator = toolbox.getTwistCalculator();
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
@@ -171,6 +172,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
+      controlBaseFrame = command.getControlBaseFrame();
 
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
@@ -179,7 +181,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
-      desiredOrientation.getRotationVector(yoDesiredRotationVector.getFrameTuple());
+      yoDesiredRotationVector.setAsRotationVector(desiredOrientation);
 
       yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
 
@@ -331,7 +333,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     */
    public void computeDerivativeTerm(FrameVector feedbackTermToPack)
    {
-      twistCalculator.getAngularVelocityOfBody(endEffector, currentAngularVelocity);
+      endEffectorFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
+      currentTwist.getAngularPart(currentAngularVelocity);
       currentAngularVelocity.changeFrame(worldFrame);
       yoCurrentAngularVelocity.set(currentAngularVelocity);
 

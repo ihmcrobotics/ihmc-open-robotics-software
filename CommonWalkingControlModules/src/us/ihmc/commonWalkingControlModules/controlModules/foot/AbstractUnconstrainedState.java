@@ -50,10 +50,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
 
+   private final YoSE3PIDGainsInterface gains;
+
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper);
+      this.gains = gains;
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -177,6 +180,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.get(tempLinearWeightVector);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
+      spatialFeedbackControlCommand.setGains(gains);
 
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);

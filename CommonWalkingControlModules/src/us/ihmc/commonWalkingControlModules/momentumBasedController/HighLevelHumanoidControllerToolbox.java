@@ -58,7 +58,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -80,7 +79,6 @@ public class HighLevelHumanoidControllerToolbox
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
-   private final TwistCalculator twistCalculator;
 
    protected final SideDependentList<ContactableFoot> feet;
    protected final List<ContactablePlaneBody> contactableBodies;
@@ -158,7 +156,7 @@ public class HighLevelHumanoidControllerToolbox
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
-                                             double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
+                                             double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
                                              ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies,
                                              YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
@@ -167,9 +165,9 @@ public class HighLevelHumanoidControllerToolbox
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>(referenceFrames.getAnkleZUpReferenceFrames());
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      SideDependentList<ReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
+      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
 
       this.footSwitches = footSwitches;
@@ -183,7 +181,6 @@ public class HighLevelHumanoidControllerToolbox
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      this.twistCalculator = twistCalculator;
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
@@ -359,7 +356,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCenterOfPressure.setToNaN();
 
       this.totalMass.set(totalMass);
-      momentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
+      momentumCalculator = new MomentumCalculator(ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
       yoAngularMomentum = new YoFrameVector("AngularMomentum", centerOfMassFrame, registry);
       DoubleYoVariable alpha = new DoubleYoVariable("filteredAngularMomentumAlpha", registry);
       alpha.set(0.95); // switch to break frequency and move to walking parameters
@@ -408,7 +405,6 @@ public class HighLevelHumanoidControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      twistCalculator.compute();
       centerOfMassJacobian.compute();
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -803,11 +799,6 @@ public class HighLevelHumanoidControllerToolbox
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public CenterOfMassJacobian getCenterOfMassJacobian()

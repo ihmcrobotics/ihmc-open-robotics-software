@@ -3,23 +3,17 @@ package us.ihmc.robotics.trajectories.providers;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class CurrentRigidBodyStateProvider
 {
-   private final ReferenceFrame frameOfInterest;
-   private final RigidBody rigidBody;
-   private final TwistCalculator twistCalculator;
+   private final MovingReferenceFrame frameOfInterest;
    private final Twist twist = new Twist();
 
-   public CurrentRigidBodyStateProvider(ReferenceFrame frameOfInterest, RigidBody rigidBody, TwistCalculator twistCalculator)
+   public CurrentRigidBodyStateProvider(MovingReferenceFrame frameOfInterest)
    {
       this.frameOfInterest = frameOfInterest;
-      this.rigidBody = rigidBody;
-      this.twistCalculator = twistCalculator;
    }
    
    public void getPosition(FramePoint positionToPack)
@@ -29,8 +23,7 @@ public class CurrentRigidBodyStateProvider
    
    public void getLinearVelocity(FrameVector linearVelocityToPack)
    {
-      twistCalculator.getTwistOfBody(rigidBody, twist);
-      twist.changeFrame(frameOfInterest);
+      frameOfInterest.getTwistOfFrame(twist);
       twist.getLinearPart(linearVelocityToPack);
    }
    
@@ -41,8 +34,7 @@ public class CurrentRigidBodyStateProvider
    
    public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
-      twistCalculator.getTwistOfBody(rigidBody, twist);
-      twist.changeFrame(frameOfInterest);
+      frameOfInterest.getTwistOfFrame(twist);
       twist.getAngularPart(angularVelocityToPack);
    }
 }

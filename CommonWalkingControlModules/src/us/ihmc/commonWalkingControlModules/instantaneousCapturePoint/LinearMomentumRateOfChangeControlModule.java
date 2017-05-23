@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -88,7 +89,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected RobotSide supportSide = null;
    protected RobotSide transferToSide = null;
 
-   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, 
+   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ,
          double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -272,6 +273,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       return groundReactionForce;
    }
 
+   private boolean desiredCMPcontainedNaN = false;
+
    public void compute(FramePoint2d desiredCMPPreviousValue, FramePoint2d desiredCMPToPack)
    {
       computeCMPInternal(desiredCMPPreviousValue);
@@ -280,8 +283,14 @@ public abstract class LinearMomentumRateOfChangeControlModule
       desiredCMP.changeFrame(worldFrame);
       if (desiredCMP.containsNaN())
       {
+         if (!desiredCMPcontainedNaN)
+            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
          desiredCMP.set(capturePoint);
-         System.err.println(getClass().getSimpleName() + ": desiredCMP contained NaN. Set it to capturePoint.");
+         desiredCMPcontainedNaN = true;
+      }
+      else
+      {
+         desiredCMPcontainedNaN = false;
       }
 
       desiredCMPToPack.setIncludingFrame(desiredCMP);

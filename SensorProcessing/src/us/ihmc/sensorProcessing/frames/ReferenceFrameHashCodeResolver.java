@@ -104,7 +104,7 @@ public class ReferenceFrameHashCodeResolver
       Method[] declaredMethods = clazz.getMethods();
       for (Method method : declaredMethods)
       {
-         if (method.getReturnType() == ReferenceFrame.class)
+         if (ReferenceFrame.class.isAssignableFrom(method.getReturnType()))
          {
             if (method.getParameterCount() == 0)
             {

@@ -41,7 +41,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public final class PointFeedbackControllerTest
 {
@@ -76,13 +75,11 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
-      twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+                                                                            registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -113,8 +110,6 @@ public final class PointFeedbackControllerTest
 
       for (int i = 0; i < 100; i++)
       {
-         twistCalculator.compute();
-
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
@@ -168,13 +163,11 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
-      twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+                                                                            registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -223,8 +216,6 @@ public final class PointFeedbackControllerTest
 
       for (int i = 0; i < 100; i++)
       {
-         twistCalculator.compute();
-
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
@@ -280,12 +271,11 @@ public final class PointFeedbackControllerTest
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+                                                                            registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
@@ -315,7 +305,6 @@ public final class PointFeedbackControllerTest
          ScrewTestTools.setRandomVelocities(joints, random);
          joints.get(0).getPredecessor().updateFramesRecursively();
          centerOfMassFrame.update();
-         twistCalculator.compute();
 
          double proportionalGain = RandomNumbers.nextDouble(random, 10.0, 200.0);
          double derivativeGain = RandomNumbers.nextDouble(random, 0.0, 100.0);

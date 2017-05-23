@@ -105,7 +105,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
@@ -117,7 +117,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final DoubleYoVariable yoTime,
+         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final DoubleYoVariable yoTime,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;

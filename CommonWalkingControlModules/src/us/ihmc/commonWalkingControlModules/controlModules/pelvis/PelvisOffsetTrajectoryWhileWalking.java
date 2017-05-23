@@ -56,7 +56,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final YoFrameOrientation desiredWalkingPelvisOffsetOrientation = new YoFrameOrientation("desiredWalkingPelvisOffset", worldFrame, registry);
    private final RateLimitedYoFrameOrientation limitedDesiredWalkingPelvisOffsetOrientation;
 
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
    private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
@@ -80,7 +80,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       this(yoTime, referenceFrames.getSoleZUpFrames(), referenceFrames.getPelvisFrame(), pelvisOffsetWhileWalkingParameters, controlDT, parentRegistry);
    }
 
-   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
+   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<? extends ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
          PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;

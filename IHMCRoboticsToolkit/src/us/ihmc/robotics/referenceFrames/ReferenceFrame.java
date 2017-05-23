@@ -301,7 +301,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    /**
     * Creates a reference frame with an immutable transform to its parent.
     * <p>
-    * The {@code transformFromParent} should describe the pose of the new frame expressed in its
+    * The {@code transformToParent} should describe the pose of the new frame expressed in its
     * parent frame.
     * </p>
     *

@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
@@ -99,7 +98,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       elevator = new RigidBody("elevator", worldFrame);
       elevatorFrame = elevator.getBodyFixedFrame();
 
-      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
+      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -31,7 +32,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class CenterOfMassHeightManager
@@ -66,7 +66,6 @@ public class CenterOfMassHeightManager
 
    private final double gravity;
    private final RigidBody pelvis;
-   private final TwistCalculator twistCalculator;
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -78,7 +77,6 @@ public class CenterOfMassHeightManager
 
       gravity = controllerToolbox.getGravityZ();
       pelvis = controllerToolbox.getFullRobotModel().getPelvis();
-      twistCalculator = controllerToolbox.getTwistCalculator();
 
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
@@ -112,7 +110,7 @@ public class CenterOfMassHeightManager
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
-      
+
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
       double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
@@ -121,7 +119,7 @@ public class CenterOfMassHeightManager
       double doubleSupportPercentageIn = 0.3;
       boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      SideDependentList<? extends ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
@@ -204,6 +202,8 @@ public class CenterOfMassHeightManager
 
    private final Twist currentPelvisTwist = new Twist();
 
+   private boolean icpVelocityContainedNaN = false;
+
    public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager)
    {
@@ -222,7 +222,7 @@ public class CenterOfMassHeightManager
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         twistCalculator.getTwistOfBody(pelvis, currentPelvisTwist);
+         pelvis.getBodyFixedFrame().getTwistOfFrame(currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
@@ -231,11 +231,14 @@ public class CenterOfMassHeightManager
       comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
       if (desiredICPVelocity.containsNaN())
       {
-         System.err.println("Desired ICP velocity contains NaN");
+         if (!icpVelocityContainedNaN)
+            PrintTools.error("Desired ICP velocity contains NaN, setting it to zero - only showing this error once");
+         icpVelocityContainedNaN = true;
          comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
       }
       else
       {
+         icpVelocityContainedNaN = false;
          comXYAcceleration.setIncludingFrame(desiredICPVelocity);
       }
       comXYAcceleration.sub(comXYVelocity);
