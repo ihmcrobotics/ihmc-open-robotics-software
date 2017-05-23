@@ -167,7 +167,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
-      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
+      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(false); //this is done with the center of mass height manager now
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
