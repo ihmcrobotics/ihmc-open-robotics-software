@@ -538,8 +538,8 @@ public class RigidBodyControlManager
       for (RigidBodyControlMode mode : RigidBodyControlMode.values())
       {
          RigidBodyControlState state = stateMachine.getState(mode);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         if (state != null && state.createFeedbackControlTemplate() != null)
+            ret.addCommand(state.createFeedbackControlTemplate());
       }
       return ret;
    }

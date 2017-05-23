@@ -644,17 +644,35 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-
       if (hybridModeActive.getBooleanValue())
       {
+         feedbackControlCommandList.clear();
+         feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
          feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+         return feedbackControlCommandList;
       }
+      else
+      {
+         return spatialFeedbackControlCommand;
+      }
+   }
 
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      feedbackControlCommandList.clear();
+      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       return feedbackControlCommandList;
    }
 
+   /**
+    * Returns the spatial feedback control command from this state only. This is used if the control
+    * state is not used inside a {@link RigidBodyControlManager} but by itself (this is the case for
+    * the feet or the pelvis).
+    *
+    * @return {@link SpatialFeedbackControlCommand}
+    */
    public SpatialFeedbackControlCommand getSpatialFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
@@ -802,5 +820,4 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       return success;
    }
-
 }

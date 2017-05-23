@@ -291,14 +291,23 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-
       if (hybridModeActive.getBooleanValue())
       {
+         feedbackControlCommandList.clear();
+         feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
          feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+         return feedbackControlCommandList;
       }
 
+      return spatialFeedbackControlCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      feedbackControlCommandList.clear();
+      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       return feedbackControlCommandList;
    }
 
@@ -329,5 +338,4 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       hybridModeActive.set(false);
    }
-
 }
