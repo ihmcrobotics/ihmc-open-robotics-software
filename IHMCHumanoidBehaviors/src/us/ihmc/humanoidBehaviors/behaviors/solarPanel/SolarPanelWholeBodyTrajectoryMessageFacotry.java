@@ -16,6 +16,8 @@ import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -26,6 +28,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
    private SolarPanelPath cleaningPath;
    
    private ReferenceFrame midFeetFrame;
+   private ReferenceFrame worldFrame;
    
    public SolarPanelWholeBodyTrajectoryMessageFacotry(FullHumanoidRobotModel fullRobotModel)
    {
@@ -34,6 +37,8 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      worldFrame = referenceFrames.getWorldFrame();
    }
    
    private void clearWholeBodyTrajectoryMessage()
@@ -182,12 +187,29 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
          pelvisTrajectorySelectionMatrix.selectLinearZ(true);
          pelvisTrajectoryMessage.setSelectionMatrix(pelvisTrajectorySelectionMatrix);
          
+//         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();         
+         for (int i=1; i<rrtPath.size(); i++)
+         {
+            double time = rrtPath.get(i).getNodeData(0);
+            SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
+            
+            FramePoint tempPoint = new FramePoint(midFeetFrame, cleaningPose.getPose().getPoint());            
+            tempPoint.changeFrame(midFeetFrame);
+            PrintTools.info("hand X "+cleaningPose.getDesiredHandPosition().getX() +" "+ tempPoint.getX());
+            
+//            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+         }
+
+//         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
+//         euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
+         
          for(int i=1;i<rrtPath.size();i++)
          {
             double time = rrtPath.get(i).getNodeData(0);
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-            handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), midFeetFrame);            
+            handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), midFeetFrame);
+            PrintTools.info("hand X "+cleaningPose.getDesiredHandPosition().getX());
             
             Quaternion desiredChestOrientation = new Quaternion();
             desiredChestOrientation.appendYawRotation(rrtPath.get(i).getNodeData(2));
