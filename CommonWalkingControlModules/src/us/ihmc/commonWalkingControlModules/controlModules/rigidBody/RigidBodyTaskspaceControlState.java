@@ -105,12 +105,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FramePoint desiredPoint = new FramePoint();
    private final YoFramePoint yoDesiredPoint;
 
-   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+   public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
-      String bodyName = bodyToControl.getName();
+      String bodyName = bodyToControl.getName() + postfix;
       String prefix = bodyName + "Taskspace";
 
       this.baseFrame = baseFrame;
@@ -537,9 +537,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
    {
-      if (!checkPoseGainsAndWeights())
-         return false;
-
       if (!handleCommandInternal(command))
          return false;
 
@@ -553,10 +550,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (override || isEmpty())
       {
          clear();
-         trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
-            queueInitialPoint(initialPose);
-
+         
          selectionMatrix.set(command.getSelectionMatrix());
 
          WeightMatrix6D weightMatrix = command.getWeightMatrix();
@@ -578,6 +572,20 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
          trackingOrientation.set(selectionMatrix.isAngularPartActive());
          trackingPosition.set(selectionMatrix.isLinearPartActive());
+         
+         if(trackingOrientation.getBooleanValue() && !checkOrientationGainsAndWeights())
+         {
+            return false;
+         }
+
+         if(trackingPosition.getBooleanValue() && !checkPositionGainsAndWeights())
+         {
+            return false;
+         }
+         
+         trajectoryFrame = command.getTrajectoryFrame();
+         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+            queueInitialPoint(initialPose);
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
