@@ -72,8 +72,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final FrameVector finalAngularVelocity = new FrameVector();
    private final FramePoint stanceFootPosition = new FramePoint();
 
-   private final RecyclingArrayList<FramePoint> positionWaypointsForSole = new RecyclingArrayList<>(FramePoint.class);
-   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints = new RecyclingArrayList<>(FrameSE3TrajectoryPoint.class);
+   private final RecyclingArrayList<FramePoint> positionWaypointsForSole;
+   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
 
    private final DoubleYoVariable swingDuration;
    private final DoubleYoVariable swingHeight;
@@ -139,6 +139,9 @@ public class SwingState extends AbstractUnconstrainedState
 
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
+      swingWaypoints = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
+      positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint.class);
+
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
 
@@ -197,7 +200,7 @@ public class SwingState extends AbstractUnconstrainedState
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
-      swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", 12, registry);
+      swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
