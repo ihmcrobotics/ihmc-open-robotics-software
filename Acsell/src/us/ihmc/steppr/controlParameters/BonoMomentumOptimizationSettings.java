@@ -25,6 +25,7 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
    private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 4;
@@ -326,5 +327,11 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
    public Map<String, Vector3D> getTaskspaceLinearWeights()
    {
       return taskspaceLinearWeights;
+   }
+
+   @Override
+   public Vector3D getPelvisLinearWeight()
+   {
+      return pelvisLinearWeight;
    }
 }
