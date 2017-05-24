@@ -269,7 +269,7 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Sets whether or not to use a warm start in the active set solver. This epxloits that the active set doesn't change often.
+    * Sets whether or not to use a warm start in the active set solver. This exploits that the active set doesn't change often.
     * @return Whether or not to use a warm start in the solver
     */
    public boolean useWarmStartInSolver()
@@ -289,7 +289,7 @@ public abstract class ICPOptimizationParameters
 
    public double getTimingAdjustmentGradientDescentWeight()
    {
-      return 1.0;
+      return 0.1;
    }
 
    public double getGradientThresholdForTimingAdjustment()
