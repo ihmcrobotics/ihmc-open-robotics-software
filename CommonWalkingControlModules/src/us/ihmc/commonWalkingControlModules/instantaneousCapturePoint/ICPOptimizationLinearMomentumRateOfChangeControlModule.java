@@ -168,6 +168,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    @Override
    public double getOptimizedTimeRemaining()
    {
-      throw new RuntimeException("This has not yet been implemented.");
+      return icpOptimizationController.getOptimizedTimeRemaining();
    }
 }

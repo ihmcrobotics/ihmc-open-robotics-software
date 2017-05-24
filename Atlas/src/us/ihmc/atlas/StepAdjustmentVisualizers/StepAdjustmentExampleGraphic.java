@@ -1489,6 +1489,11 @@ public class StepAdjustmentExampleGraphic
             return false;
          }
 
+         @Override public boolean useTimingOptimization()
+         {
+            return false;
+         }
+
          @Override public boolean useFootstepRegularization()
          {
             return true;

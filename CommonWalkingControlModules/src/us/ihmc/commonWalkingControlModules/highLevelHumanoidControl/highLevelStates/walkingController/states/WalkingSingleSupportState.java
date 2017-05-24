@@ -288,7 +288,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (balanceManager.useICPTimingOptimization())
       {
          remainingTime = balanceManager.getOptimizedTimeRemaining();
-         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
+         optimizedRemainingSwingTime.set(remainingTime);
       }
       else
       {
@@ -298,7 +298,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (remainingTime > 1.0e-3)
       {
-         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
+         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / remainingTime;
          return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
       }
       else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)

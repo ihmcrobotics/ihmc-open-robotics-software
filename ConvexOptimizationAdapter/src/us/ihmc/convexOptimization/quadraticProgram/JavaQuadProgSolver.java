@@ -47,7 +47,7 @@ public class JavaQuadProgSolver
    private static final int FALSE = 0;
 
    private static final int defaultSize = 100;
-   private static final double epsilon = 0.00001;
+   private static final double epsilon = Double.MIN_VALUE;
 
    private final DenseMatrix64F R = new DenseMatrix64F(defaultSize, defaultSize);
 

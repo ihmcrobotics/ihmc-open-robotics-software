@@ -385,4 +385,10 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
       return solverCostToGo + timingCostToGo;
    }
+
+   public double getOptimizedTimeRemaining()
+   {
+      computeTimeRemainingInState();
+      return timeRemainingInState.getDoubleValue();
+   }
 }
