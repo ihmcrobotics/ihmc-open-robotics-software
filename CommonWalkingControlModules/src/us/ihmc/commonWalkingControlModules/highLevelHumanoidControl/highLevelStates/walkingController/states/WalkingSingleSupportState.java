@@ -76,6 +76,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+
+      setYoVariablesToNaN();
+   }
+
+   private void setYoVariablesToNaN()
+   {
+      optimizedRemainingSwingTime.setToNaN();
+      estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
+      remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
 
@@ -246,6 +255,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.changeFrame(worldFrame);
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
+
+      setYoVariablesToNaN();
    }
 
    private final FramePoint2d filteredDesiredCoP = new FramePoint2d(worldFrame);
