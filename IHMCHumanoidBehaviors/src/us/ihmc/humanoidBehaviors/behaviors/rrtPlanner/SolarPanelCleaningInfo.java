@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 
@@ -29,7 +28,8 @@ public class SolarPanelCleaningInfo
    {
       for(int i=0;i<path.getNumerOfLinearPath();i++)
       {
-         PrintTools.info(""+i+" "+path.getLinearPath().get(i).getMotionStartTime() +" "+path.getLinearPath().get(i).getMotionEndTime());
+//         PrintTools.info(""+i+" "+path.getLinearPath().get(i).getMotionStartTime() +" "+path.getLinearPath().get(i).getMotionEndTime());
+//         PrintTools.info(""+i+" "+path.getArrivalTime().get(i)+" "+path.getArrivalTime().get(i+1));
       }
       cleaningPath = path;
    }

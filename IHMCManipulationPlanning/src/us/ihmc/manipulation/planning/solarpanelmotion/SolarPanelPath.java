@@ -2,20 +2,11 @@ package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-
 public class SolarPanelPath
 {
    private ArrayList<SolarPanelCleaningPose> wayPoses = new ArrayList<SolarPanelCleaningPose>();
    private ArrayList<Double> arrivalTime = new ArrayList<Double>();
    private ArrayList<SolarPanelLinearPath> linearPath = new ArrayList<SolarPanelLinearPath>();
-
-   private WholeBodyTrajectoryMessage wholebodyMessageForPath;
 
    public SolarPanelPath(SolarPanelCleaningPose startPose)
    {
@@ -37,6 +28,7 @@ public class SolarPanelPath
    {
       return linearPath.size();
    }
+   
    public ArrayList<Double> getArrivalTime()
    {
       return arrivalTime;
@@ -58,35 +50,6 @@ public class SolarPanelPath
 
       this.wayPoses.add(cleaningPose);
       this.arrivalTime.add(endTime);
-   }
-
-   public WholeBodyTrajectoryMessage getWholeBodyMessage()
-   {
-      return wholebodyMessageForPath;
-   }
-
-   public WholeBodyTrajectoryMessage getWholeBodyMessageForValidityTest(double zRotation, double pelvisYaw, double pelvisHeight, double time)
-   {
-      WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
-      SolarPanelCleaningPose cleaningPose = getCleaningPose(time);
-      cleaningPose.setZRotation(zRotation);
-
-      double defaultMotionTime = 3.0;
-
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, defaultMotionTime,
-                                                                              cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(),
-                                                                              ReferenceFrame.getWorldFrame());
-      //PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(defaultMotionTime, pelvisHeight);
-
-      Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(pelvisYaw);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(defaultMotionTime, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-
-      message.setHandTrajectoryMessage(handTrajectoryMessage);
-      message.setChestTrajectoryMessage(chestTrajectoryMessage);
-      //message.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);
-
-      return message;
    }
 
    public SolarPanelCleaningPose getCleaningPose(double time)
@@ -113,5 +76,28 @@ public class SolarPanelPath
       return cleaningPose;
    }
 
-
+   public void reArrangementArrivalTime()
+   {
+      double totalPathTime = arrivalTime.get(arrivalTime.size()-1);
+      
+      arrivalTime.clear();
+      arrivalTime.add(0.0);      
+      
+      double totalPathLength = 0;
+      
+      for(int i=0;i<getNumerOfLinearPath();i++)
+      {
+         double subPathLength = linearPath.get(i).getPathLength();
+         totalPathLength = totalPathLength + subPathLength;
+      }
+      
+      for(int i=0;i<getNumerOfLinearPath();i++)
+      {
+         double subPathLength = linearPath.get(i).getPathLength();
+         double subPathTime = subPathLength/totalPathLength * totalPathTime;
+         double previousArrivalTime = arrivalTime.get(arrivalTime.size()-1);
+         double newArrivalTime = previousArrivalTime + subPathTime;
+         arrivalTime.add(newArrivalTime);
+      }
+   }
 }

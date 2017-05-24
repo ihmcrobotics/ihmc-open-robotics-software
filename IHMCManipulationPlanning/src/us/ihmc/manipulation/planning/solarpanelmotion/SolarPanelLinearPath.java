@@ -1,7 +1,5 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
-import us.ihmc.commons.PrintTools;
-
 public class SolarPanelLinearPath
 {
    private SolarPanelCleaningPose startPose;
@@ -66,5 +64,11 @@ public class SolarPanelLinearPath
    public double getMotionEndTime()
    {
       return motionEndTime;
+   }
+   
+   public double getPathLength()
+   {
+      double length = startPose.getDesiredHandPosition().distance(endPose.getDesiredHandPosition());
+      return length;
    }
 }
