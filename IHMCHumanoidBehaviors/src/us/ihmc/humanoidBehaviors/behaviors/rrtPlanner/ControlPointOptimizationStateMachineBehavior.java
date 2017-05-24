@@ -108,7 +108,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    {
       RRTNode aNode = SolarPanelCleaningInfo.getNode();
       
-      double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(indexOfControlPoint).getMotionEndTime();
+      //double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(indexOfControlPoint).getMotionEndTime();
+      double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getArrivalTime().get(indexOfControlPoint+1);
             
       aNode.setNodeData(0, timeOfEndNode);
       
