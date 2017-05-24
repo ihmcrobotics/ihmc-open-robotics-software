@@ -85,6 +85,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI*0.1), 1.5);
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.2), 4.0);
       
+      cleaningPath.reArrangementArrivalTime();
             
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
