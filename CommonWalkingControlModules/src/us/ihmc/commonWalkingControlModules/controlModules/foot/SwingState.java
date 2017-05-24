@@ -217,6 +217,8 @@ public class SwingState extends AbstractUnconstrainedState
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
+      swingTimeSpeedUpFactor.setToNaN();
+
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
       FramePose controlFramePose = new FramePose(controlFrame);

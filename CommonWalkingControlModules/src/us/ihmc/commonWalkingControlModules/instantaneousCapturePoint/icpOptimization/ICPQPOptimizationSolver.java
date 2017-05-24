@@ -108,8 +108,7 @@ public class ICPQPOptimizationSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private static final boolean useQuadProg = false;
-   private final JavaQuadProgSolver activeSetSolver = new JavaQuadProgSolver();
+   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
@@ -250,9 +249,10 @@ public class ICPQPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
+      //// TODO: 5/24/17  
       /*
       if (!useQuadProg)
-         activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
+         solver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
          */
    }
 
@@ -635,9 +635,10 @@ public class ICPQPOptimizationSolver
     */
    public void resetOnContactChange()
    {
+      //// TODO: 5/24/17  
       /*
       if (!useQuadProg)
-         activeSetSolver.resetActiveConstraints();
+         solver.resetActiveConstraints();
          */
    }
 
@@ -867,21 +868,12 @@ public class ICPQPOptimizationSolver
             throw new RuntimeException("Hey this is bad.");
       }
 
-      if (!useQuadProg)
-      {
-         activeSetSolver.clear();
-         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
-         activeSetSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-         activeSetSolver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
+      solver.clear();
+      solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
+      solver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
-         numberOfIterations = activeSetSolver.solve(solutionToPack);
-      }
-      else
-      {
-         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Aineq, solverInput_bineq, solverInput_Lb, solverInput_Ub,
-               solutionToPack, false);
-         numberOfIterations = 1;
-      }
+      numberOfIterations = solver.solve(solutionToPack);
 
 
       if (MatrixTools.containsNaN(solutionToPack))
