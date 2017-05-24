@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -60,6 +61,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
    
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final DoubleYoVariable linearZMomentumRateWeight;
+   private final Vector3D tempVector = new Vector3D();
    
    private final BooleanYoVariable controlHeightWithMomentum = new BooleanYoVariable("controlHeightWithMomentum", registry);
 
@@ -97,6 +100,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
       DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
       DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
+      
+      linearZMomentumRateWeight = new DoubleYoVariable("CoMHeightLinearMomentumZRateWeight", registry);
 
       double controlDT = controllerToolbox.getControlDT();
       // TODO Need to extract the maximum velocity parameter.
@@ -301,6 +306,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
 
       linearMomentumRateOfChange.setZ(zddDesired);
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+      tempVector.set(linearZMomentumRateWeight.getDoubleValue(), linearZMomentumRateWeight.getDoubleValue(), linearZMomentumRateWeight.getDoubleValue());
+      momentumRateCommand.setLinearWeights(tempVector);
       selectionMatrix6D.clearLinearSelection();
       selectionMatrix6D.clearAngularSelection();
       selectionMatrix6D.selectLinearZ(true);
@@ -333,5 +340,10 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
          return momentumRateCommand;
       }
       return null;
+   }
+
+   public void setWeight(Vector3D linearMomentumWeight)
+   {
+      linearZMomentumRateWeight.set(linearMomentumWeight.getZ());
    }
 }

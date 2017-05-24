@@ -115,9 +115,14 @@ public class CenterOfMassHeightManager
     * set the weights for user mode, CenterOfMassHeightControlState does not use this weight
     * @param weight
     */
-   public void setWeights(Vector3D weight)
+   public void setPelvisTaskspaceWeights(Vector3D weight)
    {
       pelvisHeightControlState.setWeights(weight);
+   }
+   
+   public void setMomentumWeight(Vector3D linearMomentumWeight)
+   {
+      centerOfMassHeightControlState.setWeight(linearMomentumWeight);
    }
 
    public void compute()
