@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
-import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -20,9 +17,7 @@ public class TimeAdjustmentSolver
    private static final int nextInitialTransferIndex = 4;
    private static final int nextEndTransferIndex = 5;
 
-   private static final boolean useQuadProg = true;
-   private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
-   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
+   private final JavaQuadProgSolver javaSolver = new JavaQuadProgSolver();
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
 
@@ -52,14 +47,8 @@ public class TimeAdjustmentSolver
    private final DenseMatrix64F equalAdjustment_J;
    private final DenseMatrix64F tempTrans_J;
 
-   private final DenseMatrix64F solverInput_Lb;
-   private final DenseMatrix64F solverInput_Ub;
-
    private final DenseMatrix64F solverInput_Ain;
    private final DenseMatrix64F solverInput_bin;
-
-   private final DenseMatrix64F solverInput_Aeq;
-   private final DenseMatrix64F solverInput_beq;
 
    private final DenseMatrix64F solution;
 
@@ -90,14 +79,8 @@ public class TimeAdjustmentSolver
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_h = new DenseMatrix64F(problemSize, 1);
 
-      solverInput_Lb = new DenseMatrix64F(problemSize, 1);
-      solverInput_Ub = new DenseMatrix64F(problemSize, 1);
-
       solverInput_Ain = new DenseMatrix64F(12, problemSize);
       solverInput_bin = new DenseMatrix64F(12, 1);
-
-      solverInput_Aeq = new DenseMatrix64F(0, problemSize);
-      solverInput_beq = new DenseMatrix64F(0, 1);
 
       solution = new DenseMatrix64F(problemSize, 1);
 
@@ -168,14 +151,8 @@ public class TimeAdjustmentSolver
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
 
-      solverInput_Lb.reshape(problemSize, 1);
-      solverInput_Ub.reshape(problemSize, 1);
-
       solverInput_Ain.reshape(problemSize + 6, problemSize);
       solverInput_bin.reshape(problemSize + 6, 1);
-
-      solverInput_Aeq.reshape(0, problemSize);
-      solverInput_beq.reshape(0, 1);
 
       solution.zero();
 
@@ -191,8 +168,6 @@ public class TimeAdjustmentSolver
 
       solverInput_H.zero();
       solverInput_h.zero();
-      solverInput_Lb.zero();
-      solverInput_Ub.zero();
 
       solverInput_Ain.zero();
       solverInput_bin.zero();
@@ -447,25 +422,14 @@ public class TimeAdjustmentSolver
       CommonOps.addEquals(solverInput_h, parallelObjective_h);
 
       // define bounds and timing constraints
-      CommonOps.fill(solverInput_Ub, Double.POSITIVE_INFINITY);
-      CommonOps.fill(solverInput_Lb, Double.NEGATIVE_INFINITY);
       assembleTimingConstraints();
 
-      if (!useQuadProg)
-      {
-         activeSetSolver.clear();
+      javaSolver.clear();
 
-         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
-         activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      javaSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
+      javaSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
 
-         numberOfIterations = activeSetSolver.solve(solution);
-      }
-      else
-      {
-         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_Lb, solverInput_Ub,
-               solution, false);
-         numberOfIterations = 1;
-      }
+      numberOfIterations = javaSolver.solve(solution);
 
       if (MatrixTools.containsNaN(solution))
       {
