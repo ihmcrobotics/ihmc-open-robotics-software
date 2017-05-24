@@ -24,8 +24,6 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
-   private static final boolean USE_TIMING_OPTIMIZATION = false;
-
    private final ICPOptimizationController icpOptimizationController;
    private final DoubleYoVariable yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -64,7 +62,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
 
-      if (USE_TIMING_OPTIMIZATION)
+      if (icpOptimizationParameters.useTimingOptimization())
       {
          icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
                bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
@@ -165,5 +163,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public ICPOptimizationController getICPOptimizationController()
    {
       return icpOptimizationController;
+   }
+
+   @Override
+   public double getOptimizedTimeRemaining()
+   {
+      throw new RuntimeException("This has not yet been implemented.");
    }
 }

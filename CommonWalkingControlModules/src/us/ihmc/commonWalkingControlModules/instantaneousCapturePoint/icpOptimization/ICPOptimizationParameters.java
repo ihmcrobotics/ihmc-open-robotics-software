@@ -127,6 +127,8 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean useAngularMomentum();
 
+   public abstract boolean useTimingOptimization();
+
    /**
     * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
     */

@@ -49,6 +49,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
+   private final DoubleYoVariable optimizedRemainingSwingTime = new DoubleYoVariable("optimizedRemainingSwingTime", registry);
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final BooleanYoVariable finishSingleSupportWhenICPPlannerIsDone = new BooleanYoVariable("finishSingleSupportWhenICPPlannerIsDone", registry);
@@ -282,9 +283,20 @@ public class WalkingSingleSupportState extends SingleSupportState
    private double requestSwingSpeedUpIfNeeded()
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
-      estimatedRemainingSwingTimeUnderDisturbance.set(balanceManager.estimateTimeRemainingForSwingUnderDisturbance());
+      
+      double remainingTime;
+      if (balanceManager.useICPTimingOptimization())
+      {
+         remainingTime = balanceManager.getOptimizedTimeRemaining();
+         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
+      }
+      else
+      {
+         remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
+      }
 
-      if (estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue() > 1.0e-3)
+      if (remainingTime > 1.0e-3)
       {
          double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
          return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
