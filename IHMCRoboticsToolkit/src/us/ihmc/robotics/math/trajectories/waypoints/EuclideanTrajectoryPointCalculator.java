@@ -1,10 +1,12 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
@@ -113,6 +115,21 @@ public class EuclideanTrajectoryPointCalculator
       maxWeight = Double.NaN;
    }
 
+   public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, ArrayList<Double> trajectoryTimes)
+   {
+      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
+      
+      trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
+      trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTimes.get(numberOfTrajectoryPoints-1));
+      
+      for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
+      {
+         double time = 0;         
+         time = firstTrajectoryPointTime + trajectoryTimes.get(i);
+         trajectoryPoints.get(i).setTime(time);
+      }
+   }
+   
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
    {
       int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
