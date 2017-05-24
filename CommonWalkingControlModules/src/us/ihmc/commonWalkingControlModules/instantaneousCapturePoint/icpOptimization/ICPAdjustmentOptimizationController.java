@@ -114,6 +114,11 @@ public class ICPAdjustmentOptimizationController extends ICPOptimizationControll
 
       controllerTimer.stopMeasurement();
    }
+
+   public double getOptimizedTimeRemaining()
+   {
+      throw new RuntimeException("This is not implemented in this solver.");
+   }
 }
 
 
