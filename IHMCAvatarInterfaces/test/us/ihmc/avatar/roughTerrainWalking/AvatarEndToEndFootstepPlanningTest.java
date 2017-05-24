@@ -171,8 +171,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 200.0)
+   @Test
    public void testAnytimePlannerBehaviorOverRoughTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -219,7 +219,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 600.0)
+   @ContinuousIntegrationTest(estimatedDuration = 400.0)
    @Test
    public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
