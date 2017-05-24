@@ -124,6 +124,7 @@ public class BalanceManager
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    private final boolean useICPOptimizationControl;
+   private final boolean useICPTimingOptimization;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry)
@@ -155,6 +156,7 @@ public class BalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
+      useICPTimingOptimization = useICPOptimizationControl && icpOptimizationParameters.useTimingOptimization();
 
       if (useICPOptimizationControl)
       {
@@ -407,9 +409,15 @@ public class BalanceManager
       pushRecoveryControlModule.setIsEnabled(true);
    }
 
+   public double getOptimizedTimeRemaining()
+   {
+      return linearMomentumRateOfChangeControlModule.getOptimizedTimeRemaining();
+   }
+
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
+
       return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
@@ -590,6 +598,11 @@ public class BalanceManager
    public boolean useICPOptimization()
    {
       return useICPOptimizationControl;
+   }
+
+   public boolean useICPTimingOptimization()
+   {
+      return useICPTimingOptimization;
    }
 
    public boolean isRecovering()

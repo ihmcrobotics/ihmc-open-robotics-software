@@ -261,6 +261,11 @@ public class ICPAdjustmentOptimizationControllerTest
          return true;
       }
 
+      @Override public boolean useTimingOptimization()
+      {
+         return false;
+      }
+
       @Override public boolean useAngularMomentum()
       {
          return true;
