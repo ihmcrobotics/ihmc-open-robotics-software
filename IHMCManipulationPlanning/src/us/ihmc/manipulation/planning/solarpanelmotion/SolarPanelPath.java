@@ -2,6 +2,8 @@ package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
+
 public class SolarPanelPath
 {
    private ArrayList<SolarPanelCleaningPose> wayPoses = new ArrayList<SolarPanelCleaningPose>();
@@ -98,6 +100,13 @@ public class SolarPanelPath
          double previousArrivalTime = arrivalTime.get(arrivalTime.size()-1);
          double newArrivalTime = previousArrivalTime + subPathTime;
          arrivalTime.add(newArrivalTime);
+         PrintTools.info(""+i+" "+newArrivalTime);
+      }
+      
+      for(int i=0;i<getNumerOfLinearPath()-1;i++)
+      {
+         linearPath.get(i).setMotionStartTime(arrivalTime.get(i));
+         linearPath.get(i).setMotionEndTime(arrivalTime.get(i+1));
       }
    }
 }

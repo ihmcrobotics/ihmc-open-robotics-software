@@ -66,6 +66,16 @@ public class SolarPanelLinearPath
       return motionEndTime;
    }
    
+   public void setMotionStartTime(double time)
+   {
+      motionStartTime = time;
+   }
+   
+   public void setMotionEndTime(double time)
+   {
+      motionEndTime = time;
+   }
+   
    public double getPathLength()
    {
       double length = startPose.getDesiredHandPosition().distance(endPose.getDesiredHandPosition());
