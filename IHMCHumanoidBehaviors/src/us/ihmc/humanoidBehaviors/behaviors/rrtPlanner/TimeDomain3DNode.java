@@ -50,7 +50,7 @@ public class TimeDomain3DNode extends RRTNode
       Random randomManager = new Random();
 
       double upperBound1D = defaultPelvisHeight + upperShiftedBound1D;
-      double lowerBound1D = defaultPelvisHeight - lowerShiftedBound1D;
+      double lowerBound1D = defaultPelvisHeight + lowerShiftedBound1D;
       
       double randonValue;
       randonValue = randomManager.nextDouble() * (upperBound1D - lowerBound1D) + lowerBound1D;

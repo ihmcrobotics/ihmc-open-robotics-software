@@ -62,7 +62,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.75, -0.05, 0.9);
+      poseSolarPanel.setPosition(0.75, -0.1, 0.9);
+      quaternionSolarPanel.appendYawRotation(Math.PI*0.1);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
