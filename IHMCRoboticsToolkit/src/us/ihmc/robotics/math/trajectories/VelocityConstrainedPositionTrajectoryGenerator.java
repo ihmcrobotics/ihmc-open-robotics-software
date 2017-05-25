@@ -197,7 +197,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
       currentPosition.set(initialPosition);
       currentVelocity.set(initialVelocity);
-      currentAcceleration.setToZero();
+      
+      // Originally set acceleration to zero. This was wrong, so we use the internals of the yoPolynomial. C is getCoefficient(0) so xdd at t = 0.0 is c(2)
+      currentAcceleration.setX(2.0 * xPolynomial.getCoefficient(2));
+      currentAcceleration.setY(2.0 * yPolynomial.getCoefficient(2));
+      currentAcceleration.setZ(2.0 * zPolynomial.getCoefficient(2));
    }
 
    private void initializePolynomials()
