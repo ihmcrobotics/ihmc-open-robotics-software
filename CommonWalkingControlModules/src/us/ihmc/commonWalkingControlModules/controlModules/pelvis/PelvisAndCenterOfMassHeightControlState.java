@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -50,6 +49,4 @@ public abstract class PelvisAndCenterOfMassHeightControlState extends Finishable
 
    public abstract double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager);
-
-   public abstract MomentumRateCommand getMomentumRateCommand();
 }

@@ -645,10 +645,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
       
-      comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
-            isRecoveringFromPush, feetManager));
-
       feetManager.compute();
       kneeAngleManager.compute();
 
@@ -667,9 +663,15 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
+      
+      comHeightManager.compute();
+      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
+            isRecoveringFromPush, feetManager));
 
+      // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
+      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
-      balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);
+      balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, controlHeightWithMomentum);
    }
 
    private void submitControllerCoreCommands()
@@ -714,7 +716,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
-      controllerCoreCommand.addInverseDynamicsCommand(comHeightManager.getInverseDynamicsCommand());
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
       if (accelerationIntegrationCommand != null)

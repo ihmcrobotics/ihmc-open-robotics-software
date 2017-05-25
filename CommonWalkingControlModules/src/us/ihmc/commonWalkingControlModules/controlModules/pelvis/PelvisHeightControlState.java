@@ -270,13 +270,4 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       
       return pointFeedbackCommand;
    }
-
-   /**
-    * returns a null command, this state doesn't compute a momentum rate command
-    */
-   @Override
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return null;
-   }
 }

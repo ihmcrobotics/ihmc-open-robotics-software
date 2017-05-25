@@ -319,7 +319,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
 
@@ -369,6 +369,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
+      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       linearMomentumRateOfChangeControlModule.setOmega0(omega0);
