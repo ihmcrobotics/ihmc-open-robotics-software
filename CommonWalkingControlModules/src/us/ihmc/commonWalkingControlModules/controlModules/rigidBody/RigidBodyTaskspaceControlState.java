@@ -111,7 +111,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final BooleanYoVariable hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
-   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+   public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, RigidBodyJointControlHelper jointControlHelper,
          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -254,7 +254,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public void doAction()
    {
       double timeInTrajectory = getTimeInTrajectory();
-      if (!trajectoryDone.getBooleanValue() && orientationTrajectoryGenerator.isDone())
+      
+      if (!trajectoryDone.getBooleanValue() && (orientationTrajectoryGenerator.isDone() || positionTrajectoryGenerator.isDone()))
          fillAndReinitializeTrajectories();
 
       positionTrajectoryGenerator.compute(timeInTrajectory);
@@ -491,8 +492,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 0.0)
+         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         {
             queueInitialPoint(initialPose);
+         }
 
          selectionMatrix.setToAngularSelectionOnly();
          selectionMatrix.setAngularPart(command.getSelectionMatrix());
@@ -555,9 +558,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
    {
-      if (!checkPoseGainsAndWeights())
-         return false;
-
       if (!handleCommandInternal(command))
          return false;
 
@@ -571,10 +571,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (override || isEmpty())
       {
          clear();
-         trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
-            queueInitialPoint(initialPose);
-
+         
          selectionMatrix.set(command.getSelectionMatrix());
 
          WeightMatrix6D weightMatrix = command.getWeightMatrix();
@@ -596,6 +593,22 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
          trackingOrientation.set(selectionMatrix.isAngularPartActive());
          trackingPosition.set(selectionMatrix.isLinearPartActive());
+         
+         if(trackingOrientation.getBooleanValue() && !checkOrientationGainsAndWeights())
+         {
+            return false;
+         }
+
+         if(trackingPosition.getBooleanValue() && !checkPositionGainsAndWeights())
+         {
+            return false;
+         }
+         
+         trajectoryFrame = command.getTrajectoryFrame();
+         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         {
+            queueInitialPoint(initialPose);
+         }
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
@@ -644,35 +657,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      if (hybridModeActive.getBooleanValue())
-      {
-         feedbackControlCommandList.clear();
-         feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-         return feedbackControlCommandList;
-      }
-      else
-      {
-         return spatialFeedbackControlCommand;
-      }
+      return spatialFeedbackControlCommand;
    }
 
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
-   {
-      feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
-      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
-      return feedbackControlCommandList;
-   }
-
-   /**
-    * Returns the spatial feedback control command from this state only. This is used if the control
-    * state is not used inside a {@link RigidBodyControlManager} but by itself (this is the case for
-    * the feet or the pelvis).
-    *
-    * @return {@link SpatialFeedbackControlCommand}
-    */
    public SpatialFeedbackControlCommand getSpatialFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
@@ -781,7 +768,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       numberOfPoints.set(0);
       trackingOrientation.set(false);
       trackingPosition.set(false);
-      hybridModeActive.set(false);
    }
 
    private boolean checkPoseGainsAndWeights()
@@ -820,4 +806,5 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       return success;
    }
+
 }
