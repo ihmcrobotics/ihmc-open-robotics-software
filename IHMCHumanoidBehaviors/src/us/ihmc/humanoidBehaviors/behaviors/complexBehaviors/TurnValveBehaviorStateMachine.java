@@ -34,7 +34,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    {
       STOPPED,
       SETUP_ROBOT,
-      SEARCHING_FOR_VAVLE,
+      SEARCHING_FOR_VALVE,
       WALKING_TO_VALVE,
       SEARCHING_FOR_VALVE_FINAL,
       TURNING_VALVE,
@@ -105,7 +105,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       };
 
       //TODO setup search for ball behavior
-      BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VAVLE,
+      BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VALVE,
             searchForValveBehavior)
       {
          @Override
@@ -200,7 +200,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
+      statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VALVE);
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
       statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
       statemachine.addStateWithDoneTransition(searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);

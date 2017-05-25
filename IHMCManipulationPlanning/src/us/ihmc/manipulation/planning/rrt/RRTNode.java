@@ -158,5 +158,7 @@ public abstract class RRTNode implements RRTInterface
          return ret;
       }
    }
+   
+   public abstract void setRandomNodeData();
 
 }
