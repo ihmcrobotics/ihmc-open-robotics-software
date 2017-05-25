@@ -131,24 +131,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
       return centerOfMassTrajectoryGenerator;
    }
-   // Temporary objects to reduce garbage collection.
-   private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
-   private final FramePoint comPosition = new FramePoint();
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FrameVector2d comXYVelocity = new FrameVector2d();
-   private final FrameVector2d comXYAcceleration = new FrameVector2d();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
-   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
-   private final FramePoint pelvisPosition = new FramePoint();
-   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
-
-   private final Twist currentPelvisTwist = new Twist();
-
-   private final FrameVector linearMomentumRateOfChange = new FrameVector(ReferenceFrame.getWorldFrame());
-   private SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
-   
    
    public void setCoMHeightGains(double kp, double kd)
    {
@@ -167,11 +149,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    {
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
-
-//   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
-//   {
-//      centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command);
-//   }
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
@@ -203,6 +180,20 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    {
       centerOfMassTrajectoryGenerator.solve(coMHeightPartialDerivativesToPack, isInDoubleSupport);
    }
+   
+   // Temporary objects to reduce garbage collection.
+   private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
+   private final FramePoint comPosition = new FramePoint();
+   private final FrameVector comVelocity = new FrameVector(worldFrame);
+   private final FrameVector2d comXYVelocity = new FrameVector2d();
+   private final FrameVector2d comXYAcceleration = new FrameVector2d();
+   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
+   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
+   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
+   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
+   private final FramePoint pelvisPosition = new FramePoint();
+   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
+   private final Twist currentPelvisTwist = new Twist();
    
    @Override
    public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
@@ -308,7 +299,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    @Override
    public void getCurrentDesiredHeight(FramePoint positionToPack)
    {
-//      centerOfMassTrajectoryGenerator.getCurrentDesiredHeight(positionToPack);
       positionToPack.set(desiredCenterOfMassHeightPoint);
    }
 }
