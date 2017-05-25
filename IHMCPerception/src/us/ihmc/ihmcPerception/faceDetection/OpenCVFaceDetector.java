@@ -36,7 +36,14 @@ public class OpenCVFaceDetector
 {
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error("Failed to load the OpenCV library.");
+      }
    }
    
    private static final boolean DEBUG = false;

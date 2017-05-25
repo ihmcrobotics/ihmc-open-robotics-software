@@ -26,10 +26,6 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    private boolean useCustomControlFrame = false;
    private final RigidBodyTransform controlFramePoseInBodyFrame = new RigidBodyTransform();
 
-   public SE3TrajectoryControllerCommand()
-   {
-   }
-
    public SE3TrajectoryControllerCommand(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       clear(dataFrame);

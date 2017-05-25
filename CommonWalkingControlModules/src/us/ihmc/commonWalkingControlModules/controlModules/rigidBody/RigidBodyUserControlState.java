@@ -135,6 +135,12 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
+   @Override
    public boolean abortState()
    {
       return abortUserControlMode.getBooleanValue();
@@ -157,7 +163,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    @Override
    public void clear()
    {
-      
+
    }
 
 }

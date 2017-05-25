@@ -28,8 +28,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
@@ -52,12 +51,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          + "If a value smaller then the minumal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.")
    public double swingHeight = 0.0;
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
-   		+ "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
-   		+ "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
+         + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
+         + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
    public Point3D[] positionWaypoints = new Point3D[0];
-   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, up to ten swing waypoints can be specified here. The waypoints do not include the"
+   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The waypoints do not include the"
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
-         + "All waypoints are for the sole frame and expressed in the trajectory frame.")
+         + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
    public SE3TrajectoryPointMessage[] swingTrajectory = null;
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
@@ -95,7 +94,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-         TrajectoryType trajectoryType, double swingHeight)
+                              TrajectoryType trajectoryType, double swingHeight)
    {
       this.robotSide = robotSide;
       this.location = location;
@@ -234,13 +233,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3D();
+      if (this.location == null)
+         this.location = new Point3D();
       this.location.set(location);
    }
 
    public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quaternion();
+      if (this.orientation == null)
+         this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
@@ -331,7 +332,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       ret += trajectoryType.name() + "\n";
 
-      if(positionWaypoints != null)
+      if (positionWaypoints != null)
       {
          ret += "waypoints = " + positionWaypoints.length + "\n";
       }

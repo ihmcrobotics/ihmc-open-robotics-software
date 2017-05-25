@@ -70,7 +70,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       controlFrame = ankleFrame;
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("", foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
-            graphicsListRegistry, registry);
+            null, graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
