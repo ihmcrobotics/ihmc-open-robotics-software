@@ -15,7 +15,7 @@ public class SolarPanelMotionPlanner
    private SolarPanel solarPanel;
    
    WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();   
-   SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry();
+   //SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry();
    
    public RRTPlannerSolarPanelCleaning rrtPlanner;
    
@@ -55,8 +55,8 @@ public class SolarPanelMotionPlanner
       case ReadyPose:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
          this.motionTime = 3.0;
-         motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, this.motionTime);
-         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
+         //motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, this.motionTime);
+         //wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          
          debugPose.add(readyPose.getPose());
          
@@ -97,14 +97,14 @@ public class SolarPanelMotionPlanner
          rrtPlanner.expandingTreesAndShortCut(200);
          
         
-         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.numberOfTest);
 
          // *** message *** //
          PrintTools.info("Putting on Message");
-         motionFactory.setCleaningPath(cleaningPath);         
-         motionFactory.setMessage(rrtPlanner.getRRTPath());
+         //motionFactory.setCleaningPath(cleaningPath);         
+         //motionFactory.setMessage(rrtPlanner.getRRTPath());
          
-         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
+         //wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          PrintTools.info("Complete putting on message");
          
          break;
