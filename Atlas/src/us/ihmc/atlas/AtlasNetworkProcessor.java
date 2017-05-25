@@ -64,6 +64,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableHeightQuadTreeToolbox(true);
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
+        networkModuleParams.enableKinematicsToolboxVisualizer(true);
         networkModuleParams.enableFootstepPlanningToolbox(true);
         networkModuleParams.enableKinematicsToolbox(true);
 

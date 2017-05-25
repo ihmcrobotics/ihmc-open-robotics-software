@@ -1,13 +1,12 @@
-package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
+package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
-import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
-public class RRTTreeTimeDomain extends RRTTree
+public class TimeDomainTree extends RRTTree
 {
    protected double motionMaximumTime;
    protected double timeScaleForMatric = 0.5;
@@ -15,7 +14,7 @@ public class RRTTreeTimeDomain extends RRTTree
    protected double maximumDisplacementOfStep = 0.5;   
    protected double maximumTimeGapOfStep = 0.8;
 
-   public RRTTreeTimeDomain(RRTNode rootNode)
+   public TimeDomainTree(RRTNode rootNode)
    {
       super(rootNode);
    }
@@ -119,36 +118,6 @@ public class RRTTreeTimeDomain extends RRTTree
       return matric;
    }
    
-   public boolean expandTreeTimeDomain()
-   {
-      RRTNode node = getRandomNode();
-      updateNearNodeForTargetNode(node);
-      this.newNode = getNewNode(node);
-      return addNewNodeTimeDomain();
-   }   
-   
-   public boolean addNewNodeTimeDomain()
-   {
-      if (this.newNode.isValidNode() == true)
-      {
-         RRTValidConnection rrtValidConnection = new RRTValidConnection(this.nearNode, this.newNode);
-         rrtValidConnection.reInitialize(3);
-         if (rrtValidConnection.isValidConnection())
-         {
-              nearNode.addChildNode(this.newNode);
-              wholeNodes.add(newNode);
-              PrintTools.info("Node Added");
-              return true;
-         }
-      }
-      else
-      {
-         failNodes.add(newNode);
-         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
-      }
-      return false;
-   }
-   
    @Override
    public RRTNode getNewNode(RRTNode targetNode)
    {
@@ -202,8 +171,4 @@ public class RRTTreeTimeDomain extends RRTTree
       
       return newNode;
    }
-   
-   
-   
-   
 }
