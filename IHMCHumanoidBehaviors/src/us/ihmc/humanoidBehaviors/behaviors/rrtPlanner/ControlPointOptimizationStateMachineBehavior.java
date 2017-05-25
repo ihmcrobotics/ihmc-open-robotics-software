@@ -46,7 +46,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
-   
+   FullHumanoidRobotModel fullRobotModel;
    
    public enum ControlPointOptimizationStates
    {
@@ -73,7 +73,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       currentIndexOfRetry = 0;
       
       optimalScoreOfControlPoint = Double.MAX_VALUE;
-      
+      this.fullRobotModel = fullRobotModel;
       setUpStateMachine();
    }
    
@@ -135,8 +135,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");               
             }
             
+            TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+            
+            rootNode = SolarPanelCleaningInfo.getNode();
+            
             currentControlPointNodePath = new ArrayList<RRTNode>();
             currentControlPointNodePath.add(rootNode);
+            
+            
             
             ArrayList<RRTNode> randomSelectedNodes = new ArrayList<RRTNode>();
             randomSelectedNodes.add(rootNode);
