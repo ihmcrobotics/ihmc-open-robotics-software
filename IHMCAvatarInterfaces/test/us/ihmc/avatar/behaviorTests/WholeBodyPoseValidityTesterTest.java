@@ -466,7 +466,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(150);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(200);
       
       PrintTools.info("behavior Out " );      
    }

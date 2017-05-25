@@ -35,7 +35,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 15;
+   private int numberOfCandidates = 10;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.4;
    
@@ -108,7 +108,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    {
       RRTNode aNode = SolarPanelCleaningInfo.getNode();
       
-      //double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(indexOfControlPoint).getMotionEndTime();
       double timeOfEndNode = SolarPanelCleaningInfo.getCleaningPath().getArrivalTime().get(indexOfControlPoint+1);
             
       aNode.setNodeData(0, timeOfEndNode);
@@ -131,7 +130,10 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          protected void setBehaviorInput()
          {
             if(DEBUG)
-               PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");
+            {
+               PrintTools.info("");
+               PrintTools.info("getScoreAction "+currentIndexOfCandidate + " ");               
+            }
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
             currentControlPointNodePath.add(rootNode);
@@ -258,10 +260,11 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
          if(DEBUG)
             PrintTools.info("CandidateBehavior");
          if(DEBUG)
-            PrintTools.info(""+currentIndexOfCandidate+" nodesValidity is " + validNodesStateMachineBehavior.getNodesValdity() +" score is "+ validNodesStateMachineBehavior.getScore());
+            PrintTools.info(""+(currentIndexOfCandidate-1)+" nodesValidity is " + validNodesStateMachineBehavior.getNodesValdity() +" score is "+ validNodesStateMachineBehavior.getScore());
                   
          if(validNodesStateMachineBehavior.getNodesValdity() == true)
          {
+            numberOfValidCandidates++;
             if(optimalScoreOfControlPoint > validNodesStateMachineBehavior.getScore())
             {
                if(DEBUG)
@@ -271,9 +274,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                if(DEBUG)
                   PrintTools.info("");
                optimalControlPointNodePath = currentControlPointNodePath;
-               optimalScoreOfControlPoint = validNodesStateMachineBehavior.getScore();
-               numberOfValidCandidates++;
-            }
+               optimalScoreOfControlPoint = validNodesStateMachineBehavior.getScore();               
+            }            
          }
          
       }

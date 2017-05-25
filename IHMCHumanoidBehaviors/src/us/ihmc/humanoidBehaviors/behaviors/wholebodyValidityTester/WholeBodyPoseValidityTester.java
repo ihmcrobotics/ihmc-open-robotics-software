@@ -77,6 +77,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private boolean isReceived = false;   
    private boolean isSolved = false;   
    private boolean isJointLimit = false;
+   private boolean isTimeExpired = false;
    
    private KinematicsToolboxOutputStatus newestSolution;   
    
@@ -409,7 +410,12 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
                                +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
             
-            if(isSolved == true || isJointLimit == true || cnt == numberOfCntForTimeExpire)
+            if(cnt == numberOfCntForTimeExpire)
+               isTimeExpired = true;
+            else
+               isTimeExpired = false;
+            
+            if(isSolved == true || isJointLimit == true || isTimeExpired == true)
             {               
                cntOfSeries = 0;
                if(isSolved == true)
@@ -469,7 +475,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
          privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
 //         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
-      }
+      }      
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       Point3D privilegedRootJointPosition = new Point3D();
@@ -482,9 +488,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       FramePoint pelvisPosition = new FramePoint();
       pelvisPosition.setToZero(pelvisFrame);
       pelvisPosition.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
-//      System.out.println(pelvisPosition);
-      
-//      PrintTools.info(""+ privilegedRootJointPosition.getX()+" "+privilegedRootJointPosition.getY()+" "+privilegedRootJointPosition.getZ());
 
       privilegedMessage.setPrivilegedRobotConfiguration(privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
       privilegedMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
@@ -578,6 +581,19 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public boolean isDone()
    {
+      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      if(isDone.getBooleanValue())
+      {
+         if(true)
+         {
+            if(isCollisionFree == false)
+               PrintTools.warn("col ");
+            if(isGoodIKSolution == false)
+               PrintTools.warn("ik "+oneDoFJoints[indexOfLimit].getName());   
+            if(isTimeExpired == true)
+               PrintTools.warn("isTimeExpired ");
+         }
+      }
       return isDone.getBooleanValue();
    }
    
