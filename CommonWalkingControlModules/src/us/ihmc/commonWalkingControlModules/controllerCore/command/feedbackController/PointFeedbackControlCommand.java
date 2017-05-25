@@ -15,6 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 /**
  * {@link PointFeedbackControlCommand} is a command meant to be submit to the
@@ -280,6 +281,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setWeightForSolver(double weight)
    {
       spatialAccelerationCommand.setWeight(weight);
+   }
+
+   /**
+    * Sets the linear weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      spatialAccelerationCommand.setLinearPartOfWeightMatrix(weightMatrix);
    }
 
    /**
