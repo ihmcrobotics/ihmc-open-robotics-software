@@ -38,4 +38,11 @@ public class RRTNode2D extends RRTNode
       return new RRTNode2D();
    }
 
+   @Override
+   public void setRandomNodeData()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }

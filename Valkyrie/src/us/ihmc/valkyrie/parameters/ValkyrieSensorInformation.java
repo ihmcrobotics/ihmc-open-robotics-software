@@ -136,7 +136,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private static final String lidarPoseLink = "hokuyo_link";
    private static final String lidarJointName = "hokuyo_joint";
-   private static final String lidarBaseFrame = multisense_namespace + "/head_root";
+   private static final String lidarBaseFrame = multisense_namespace + "/head";
    private static final String lidarEndFrame = "/head_hokuyo_frame";
    private static final String baseTfName = "upperNeckPitchLink";
 
@@ -367,7 +367,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       Vector3D translation = new Vector3D(0.183585961, 0.0, 0.075353826);
       orientation.setYawPitchRoll(0.0, 0.130899694, -Math.PI);
       RigidBodyTransform staticTransform = new RigidBodyTransform(orientation, translation);
-      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head_root",
+      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head",
             staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
    }

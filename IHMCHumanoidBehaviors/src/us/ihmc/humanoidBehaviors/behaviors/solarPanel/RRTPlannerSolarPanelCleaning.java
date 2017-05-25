@@ -31,8 +31,8 @@ public class RRTPlannerSolarPanelCleaning
          double treeMaximumTime = linearPath.get(i).getMotionEndTime();
          double treeTimeInterval = linearPath.get(i).getMotionEndTime() - linearPath.get(i).getMotionStartTime();
          
-         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(linearPath.get(i).getMotionStartTime(), -Math.PI*0.4);
-         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(linearPath.get(i).getMotionStartTime()+treeTimeInterval*1.5, Math.PI*0.4);
+         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(linearPath.get(i).getMotionStartTime(), -Math.PI*0.2);
+         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(linearPath.get(i).getMotionStartTime()+treeTimeInterval*1.5, Math.PI*0.2);
          
          aPlanner.getTree().setMaximumMotionTime(treeMaximumTime);
          aPlanner.getTree().setUpperBound(nodeUpperBound);

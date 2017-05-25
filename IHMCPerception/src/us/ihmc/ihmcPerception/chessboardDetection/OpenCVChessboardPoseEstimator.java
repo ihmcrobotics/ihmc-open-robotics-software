@@ -17,6 +17,7 @@ import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -30,7 +31,14 @@ public class OpenCVChessboardPoseEstimator
    private static final boolean DEBUG = true;
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error("Failed to load the OpenCV library.");
+      }
    }
 
    private Size boardInnerCrossPattern;
