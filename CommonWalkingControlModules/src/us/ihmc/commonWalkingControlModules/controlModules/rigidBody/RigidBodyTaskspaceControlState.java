@@ -495,8 +495,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 0.0)
+         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         {
             queueInitialPoint(initialPose);
+         }
 
          selectionMatrix.setToAngularSelectionOnly();
          selectionMatrix.setAngularPart(command.getSelectionMatrix());
@@ -585,7 +587,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         {
             queueInitialPoint(initialPose);
+         }
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {

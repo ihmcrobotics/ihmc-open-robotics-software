@@ -120,11 +120,6 @@ public class CenterOfMassHeightManager
       pelvisHeightControlState.setWeights(weight);
    }
    
-   public void setMomentumWeight(Vector3D linearMomentumWeight)
-   {
-      centerOfMassHeightControlState.setWeight(linearMomentumWeight);
-   }
-
    public void compute()
    {
       stateMachine.checkTransitionConditions();
@@ -232,11 +227,6 @@ public class CenterOfMassHeightManager
       return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
    }
    
-   public MomentumRateCommand getInverseDynamicsCommand()
-   {
-      return stateMachine.getCurrentState().getMomentumRateCommand();
-   }
-   
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
@@ -252,5 +242,17 @@ public class CenterOfMassHeightManager
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+
+   /** 
+    * The center of mass height manager can control the pelvis in taskspace or the height of the Center of mass. When controlling
+    * the pelvis height we don't need to control the height with a momentum command. If we are using the center of mass height control state
+    * we do. When used in conjunction with the balance manager this will enable the Z component of the MomentumRateCommand that is sent 
+    * to the controller core
+    * @return
+    */
+   public boolean getControlHeightWithMomentum()
+   {
+      return stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 }

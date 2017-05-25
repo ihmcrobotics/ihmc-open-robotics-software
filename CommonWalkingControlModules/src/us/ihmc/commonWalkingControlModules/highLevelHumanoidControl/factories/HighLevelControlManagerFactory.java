@@ -118,8 +118,6 @@ public class HighLevelControlManagerFactory
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
-      Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
-      centerOfMassHeightManager.setMomentumWeight(linearMomentumWeight);
       return centerOfMassHeightManager;
    }
 
