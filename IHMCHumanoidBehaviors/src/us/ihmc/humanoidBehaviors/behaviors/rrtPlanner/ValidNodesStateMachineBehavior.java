@@ -39,14 +39,13 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       INITIALIZE, VALIDITY_TEST, WAITING_RESULT, DONE
    }
    
-   public ValidNodesStateMachineBehavior(ArrayList<RRTNode> nodes, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
+   public ValidNodesStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("RRTExpandingStateMachineBehavior", RRTExpandingStates.class, yoTime, communicationBridge);
             
       if(DEBUG)
          PrintTools.info("number Of nodes "+nodes.size());
-      this.nodes = nodes;
                   
       testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel, referenceFrames);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
@@ -85,7 +84,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       testValidityBehavior.setSolarPanel(solarPanel); 
    }
    
-   private void setUpStateMachine()
+   public void setUpStateMachine()
    {    
       BehaviorAction<RRTExpandingStates> intializePrivilegedConfigurationAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.INITIALIZE, testValidityBehavior)
       {
@@ -93,9 +92,6 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          protected void setBehaviorInput()
          {
             resultInitialize();
-            /*
-             * override suitable node data for node.
-             */
             testValidityBehavior.setWholeBodyPose(SolarPanelCleaningInfo.getCleaningPath(), SolarPanelCleaningInfo.getNode());
             testValidityBehavior.setUpHasBeenDone();
          }
@@ -106,9 +102,6 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          @Override
          protected void setBehaviorInput()
          {
-            /*
-             * override suitable node data for node.
-             */
             if(DEBUG)
                PrintTools.info("Check :: Tester Set Behavior Input ");
             

@@ -350,8 +350,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
       
-      ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(nodes3D, drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                     drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+      testNodesBehavior.setNodes(nodes3D);
       testNodesBehavior.setSolarPanel(solarPanel);
       
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
@@ -436,7 +437,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
             
       ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(rootNode, drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+      = new ControlPointOptimizationStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+      
+      controlPointOptimizationBehavior.setRootNode(rootNode);
       
       drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
 
@@ -462,9 +465,11 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
             
       CleaningMotionStateMachineBehavior cleaningStateMachineBehavior
       = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+            
+      PrintTools.info("behavior In " );  
+      drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
       scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
-      drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(200);
       

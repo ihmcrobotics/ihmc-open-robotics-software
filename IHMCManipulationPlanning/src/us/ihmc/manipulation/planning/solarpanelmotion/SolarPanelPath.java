@@ -109,4 +109,5 @@ public class SolarPanelPath
          linearPath.get(i).setMotionEndTime(arrivalTime.get(i+1));
       }
    }
+   
 }
