@@ -53,28 +53,28 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       GET_SCORE, CANDIDATE_CONTROLPOINTS, DONE
    }
    
-   public ControlPointOptimizationStateMachineBehavior(RRTNode startNode, CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
+   public ControlPointOptimizationStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("ControlPointOptimizationStateMachineBehavior", ControlPointOptimizationStates.class, yoTime, communicationBridge);
       
       PrintTools.info("ControlPointOptimizationStateMachineBehavior ");
-      
-      this.rootNode = startNode;
-                  
-      validNodesStateMachineBehavior = new ValidNodesStateMachineBehavior(new ArrayList<RRTNode>(), communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
+                        
+      validNodesStateMachineBehavior = new ValidNodesStateMachineBehavior(communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
       candidateBehavior = new CandidateBehavior(communicationBridge);
       doneBehavior = new TestDoneBehavior(communicationBridge);
             
-      numberOfLinearPath = SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();
-      PrintTools.info("## number of linear path "+ numberOfLinearPath);
-      
       currentIndexOfCandidate = 0;
       currentIndexOfRetry = 0;
       
       optimalScoreOfControlPoint = Double.MAX_VALUE;
       this.fullRobotModel = fullRobotModel;
       setUpStateMachine();
+   }
+   
+   public void setRootNode(RRTNode rootNode)
+   {
+      this.rootNode = rootNode;
    }
    
    public ArrayList<RRTNode> getOptimalControlPointNodePath()
@@ -122,13 +122,16 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       return isSolved;
    }
    
-   private void setUpStateMachine()
+   public void setUpStateMachine()
    {    
       BehaviorAction<ControlPointOptimizationStates> getScoreAction = new BehaviorAction<ControlPointOptimizationStates>(ControlPointOptimizationStates.GET_SCORE, validNodesStateMachineBehavior)
       {         
          @Override
          protected void setBehaviorInput()
          {
+            numberOfLinearPath = SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();
+            PrintTools.info("## number of linear path "+ numberOfLinearPath);
+            
             if(DEBUG)
             {
                PrintTools.info("");
@@ -141,8 +144,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
             currentControlPointNodePath.add(rootNode);
-            
-            
             
             ArrayList<RRTNode> randomSelectedNodes = new ArrayList<RRTNode>();
             randomSelectedNodes.add(rootNode);
