@@ -37,7 +37,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    
    private int numberOfCandidates = 10;
    private int numberOfLinearPath;
-   private double minimumTimeGapOfWayPoints = 0.4;
+   private double minimumTimeGapOfWayPoints = 0.8;
    
    private int currentIndexOfCandidate;
    

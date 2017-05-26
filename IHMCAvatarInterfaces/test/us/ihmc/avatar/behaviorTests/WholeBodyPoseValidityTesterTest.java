@@ -489,7 +489,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
+      poseSolarPanel.setPosition(0.75, -0.1, 0.9);
+      quaternionSolarPanel.appendYawRotation(Math.PI*0.1);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
@@ -605,7 +606,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private ArrayList<Graphics3DObject> getPrintLinearPath(SolarPanelLinearPath linearPath)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-
       
       Graphics3DObject nodeOneSphere = new Graphics3DObject();
       Graphics3DObject nodeTwoSphere = new Graphics3DObject();
