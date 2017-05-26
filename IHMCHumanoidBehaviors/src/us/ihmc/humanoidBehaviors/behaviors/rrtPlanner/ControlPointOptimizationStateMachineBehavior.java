@@ -143,7 +143,8 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             rootNode = SolarPanelCleaningInfo.getNode();
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
-            currentControlPointNodePath.add(rootNode);
+            //currentControlPointNodePath.add(rootNode);
+            currentControlPointNodePath.add(getRandomControlPoint(-1));
             
             ArrayList<RRTNode> randomSelectedNodes = new ArrayList<RRTNode>();
             randomSelectedNodes.add(rootNode);

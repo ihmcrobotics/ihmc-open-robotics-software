@@ -76,6 +76,7 @@ public class SolarPanelCleaningInfo
             cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, radiusOfTowel, radiusOfTowel, -0.15, -Math.PI*0.3), 6.0);
                         
             int numberOfHorizonalLine = (int) ((solarPanel.getSizeY()-radiusOfTowel*2)/radiusOfTowel) + 2;
+            
             for(int i=2;i<(numberOfHorizonalLine+1);i++)
             {               
                if(i != numberOfHorizonalLine)
