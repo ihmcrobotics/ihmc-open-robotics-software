@@ -49,6 +49,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PositionPIDGains gains = new PositionPIDGains();
+   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame linearGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -154,6 +156,19 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setGains(PositionPIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   /**
+    * Sets the reference frame in which the gains should be applied.
+    * <p>
+    * If the reference frame is {@code null}, the gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param linearGainsFrame the reference frame to use for the position gains.
+    */
+   public void setGainsFrame(ReferenceFrame linearGainsFrame)
+   {
+      this.linearGainsFrame = linearGainsFrame;
    }
 
    /**
@@ -358,6 +373,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public PositionPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getLinearGainsFrame()
+   {
+      return linearGainsFrame;
    }
 
    @Override

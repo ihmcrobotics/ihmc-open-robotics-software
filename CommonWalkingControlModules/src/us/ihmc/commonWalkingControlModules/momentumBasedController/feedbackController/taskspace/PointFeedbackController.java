@@ -80,6 +80,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private RigidBody base;
    private ReferenceFrame controlBaseFrame;
+   private ReferenceFrame linearGainsFrame;
 
    private final RigidBody endEffector;
 
@@ -166,6 +167,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
       controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
@@ -298,8 +300,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kp.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -329,8 +337,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kd.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -363,8 +377,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       ki.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**

@@ -49,6 +49,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final OrientationPIDGains gains = new OrientationPIDGains();
+   /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame angularGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -154,6 +156,19 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void setGains(OrientationPIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   /**
+    * Sets the reference frame in which the gains should be applied.
+    * <p>
+    * If the reference frame is {@code null}, the gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param angularGainsFrame the reference frame to use for the orientation gains.
+    */
+   public void setGainsFrame(ReferenceFrame angularGainsFrame)
+   {
+      this.angularGainsFrame = angularGainsFrame;
    }
 
    /**
@@ -328,6 +343,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public OrientationPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getAngularGainsFrame()
+   {
+      return angularGainsFrame;
    }
 
    @Override
