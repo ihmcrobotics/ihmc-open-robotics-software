@@ -127,8 +127,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("gotoReadyPoseAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             
-            SolarPanelCleaningPose readyPose = SolarPanelCleaningInfo.getCleaningPath().getStartPose();
-            motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, 3.0);
+            SolarPanelCleaningPose pose = SolarPanelCleaningInfo.getReadyPose();
+            motionFactory.setMessage(pose, Math.PI*0.0, 0.0, 3.0);
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
          }
@@ -241,24 +241,10 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
-         SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.1);
-         SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-         
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 5.0);         
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 2.5);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.1), 5.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.1), 2.5);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 5.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.15, -Math.PI*0.3), 2.5);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.15, -Math.PI*0.1), 5.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI*0.1), 2.5);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.1), 5.0);      
-         cleaningPath.reArrangementArrivalTime();
-               
-         SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
          
          
-         SolarPanelCleaningInfo.setSolarPanel(solarPanel);      
+         
+         SolarPanelCleaningInfo.setSolarPanel(solarPanel);
          SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          

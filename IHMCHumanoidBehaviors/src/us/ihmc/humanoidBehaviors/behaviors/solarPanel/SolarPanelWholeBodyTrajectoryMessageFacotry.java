@@ -213,7 +213,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
             
             Point3D desiredPosition = new Point3D();
             Vector3D desiredLinearVelocity = new Vector3D();
-            trajectoryPoints.get(i-1).get(desiredPosition, desiredLinearVelocity);
+            //trajectoryPoints.get(i-1).get(desiredPosition, desiredLinearVelocity);
             
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             PrintTools.info(""+i+" time "+time+" "+ cleaningPose.getU()+" "+ cleaningPose.getV());
