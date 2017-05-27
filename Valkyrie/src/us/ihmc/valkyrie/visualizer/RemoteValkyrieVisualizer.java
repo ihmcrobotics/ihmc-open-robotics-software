@@ -99,6 +99,6 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 
    public static void main(String[] args)
    {
-      new RemoteValkyrieWalkingVisualizer();
+      new RemoteValkyrieVisualizer(ValkyrieSliderBoardType.WALKING);
    }
 }
