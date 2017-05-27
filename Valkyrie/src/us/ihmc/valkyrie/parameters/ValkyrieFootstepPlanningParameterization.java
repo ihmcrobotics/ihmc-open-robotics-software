@@ -6,6 +6,6 @@ public class ValkyrieFootstepPlanningParameterization extends FootstepPlanningPa
 {
    public ValkyrieFootstepPlanningParameterization()
    {
-      turningStepWidth = 0.25;
+      turningStepWidth = 0.30;
    }
 }
