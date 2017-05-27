@@ -6,13 +6,16 @@ import us.ihmc.commons.Conversions;
 
 /**
  * <p>Minimal stopwatch with a friendly API. Measures durations of time.
- * Ability to suspend and resume measurement of the current lap.</p>
+ * Features the ability to suspend and resume measurement of the current lap.</p>
  * 
  * <p>Alternative to {@link org.apache.commons.lang3.time.StopWatch StopWatch} in
  * Apache Commons Lang with the following functional differences:</p>
  * 
- * <li>Provides a more fluent interface</li>
- * <li>Keeps track of average lap</li>
+ * <li>Uses double precision instead of long.</p>
+ * <li>Uses seconds as the default unit instead of milliseconds.</li>
+ * <li>Provides a more fluent interface with the concept of laps.</li>
+ * <li>Keeps track of average lap.</li>
+ * <li>API is safe. No exceptions are ever thrown.</li>
  */
 public class Stopwatch
 {
