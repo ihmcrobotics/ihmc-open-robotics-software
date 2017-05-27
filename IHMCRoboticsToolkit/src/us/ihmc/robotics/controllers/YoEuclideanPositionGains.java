@@ -2,8 +2,10 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 {
@@ -12,6 +14,7 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3];
    private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
    private final DoubleYoVariable[] integralGains = new DoubleYoVariable[3];
+   private final DoubleYoVariable[] dampingRatios;
 
    private final DoubleYoVariable maxIntegralError;
    private final DoubleYoVariable maxDerivativeError;
@@ -24,6 +27,11 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 
    public YoEuclideanPositionGains(String prefix, YoVariableRegistry registry)
    {
+      this(prefix, false, registry);
+   }
+
+   public YoEuclideanPositionGains(String prefix, boolean createDampingRatio, YoVariableRegistry registry)
+   {
       String baseProportionalGainName = prefix + "PositionProportionalGain";
       String baseDerivativeGainName = prefix + "PositionDerivativeGain";
       String baseIntegralGainName = prefix + "PositionIntegralGain";
@@ -33,6 +41,21 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
          proportionalGains[i] = new DoubleYoVariable(baseProportionalGainName + directionNames[i], registry);
          derivativeGains[i] = new DoubleYoVariable(baseDerivativeGainName + directionNames[i], registry);
          integralGains[i] = new DoubleYoVariable(baseIntegralGainName + directionNames[i], registry);
+      }
+
+      if (createDampingRatio)
+      {
+         String baseDampingRatioName = prefix + "PositionZeta";
+
+         dampingRatios = new DoubleYoVariable[3];
+         for (int i = 0; i < 3; i++)
+         {
+            dampingRatios[i] = new DoubleYoVariable(baseDampingRatioName + directionNames[i], registry);
+         }
+      }
+      else
+      {
+         dampingRatios = null;
       }
 
       maxIntegralError = new DoubleYoVariable(prefix + "PositionMaxIntegralError", registry);
@@ -58,6 +81,12 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
          proportionalGains[i].set(0.0);
          derivativeGains[i].set(0.0);
          integralGains[i].set(0.0);
+      }
+
+      if (dampingRatios != null)
+      {
+         for (int i = 0; i < 3; i++)
+            dampingRatios[i].set(0.0);
       }
 
       maxIntegralError.set(0.0);
@@ -165,6 +194,18 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
       }
 
       this.maxIntegralError.set(maxIntegralError);
+   }
+
+   public void setDampingRatio(double dampingRatio)
+   {
+      setDampingRatios(dampingRatio, dampingRatio, dampingRatio);
+   }
+
+   public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
+   {
+      dampingRatios[0].set(dampingRatioX);
+      dampingRatios[1].set(dampingRatioY);
+      dampingRatios[2].set(dampingRatioZ);
    }
 
    @Override
@@ -306,4 +347,27 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
       return maxProportionalError.getDoubleValue();
    }
 
+   public void createDerivativeGainUpdater(boolean updateNow)
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         int index = i;
+
+         VariableChangedListener kdUpdater = new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               derivativeGains[index].set(GainCalculator.computeDerivativeGain(proportionalGains[index].getDoubleValue(),
+                                                                               dampingRatios[index].getDoubleValue()));
+            }
+         };
+
+         proportionalGains[i].addVariableChangedListener(kdUpdater);
+         dampingRatios[i].addVariableChangedListener(kdUpdater);
+
+         if (updateNow)
+            kdUpdater.variableChanged(null);
+      }
+   }
 }
