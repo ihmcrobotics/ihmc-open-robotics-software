@@ -27,7 +27,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected final YoVariableRegistry registry;
    protected final String warningPrefix;
 
-   protected final BooleanYoVariable trajectoryStopped;
    protected final BooleanYoVariable trajectoryDone;
 
    private final LongYoVariable lastCommandId;
@@ -48,7 +47,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
       trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
 
@@ -88,7 +86,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
          setTrajectoryStartTimeToCurrentTime();
       }
 
-      trajectoryStopped.set(false);
       trajectoryDone.set(false);
       return true;
    }
@@ -117,6 +114,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
+
    public abstract boolean isEmpty();
 
    public abstract double getLastTrajectoryPointTime();
@@ -142,6 +141,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
    protected void hideGraphics()
    {
+      // TODO: make a hide method in the YoGraphic or find some other way to avoid this mess.
       for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
       {
          YoGraphic yoGraphic = graphics.get(graphicsIdx);

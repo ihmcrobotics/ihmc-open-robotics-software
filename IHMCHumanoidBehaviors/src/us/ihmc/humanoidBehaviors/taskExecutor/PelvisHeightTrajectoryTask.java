@@ -16,7 +16,6 @@ public class PelvisHeightTrajectoryTask<E extends Enum<E>> extends BehaviorActio
 
    public PelvisHeightTrajectoryTask(E stateEnum, double heightInWorld, PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior, double trajectoryTime)
    {
-
       super(stateEnum, pelvisHeightTrajectoryBehavior);
       this.pelvisHeightTrajectoryBehavior = pelvisHeightTrajectoryBehavior;
       pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, heightInWorld);

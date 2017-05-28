@@ -117,6 +117,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
+      centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
       return centerOfMassHeightManager;
    }
 
@@ -308,6 +309,8 @@ public class HighLevelControlManagerFactory
             ret.addCommand(bodyManager.createFeedbackControlTemplate());
       }
 
+      ret.addCommand(centerOfMassHeightManager.createFeedbackControlTemplate());
+      
       if (pelvisOrientationManager != null)
       {
          ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());

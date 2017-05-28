@@ -56,7 +56,11 @@ public class DrillDetectionAlgorithmOriginal extends DrillDetectionAlgorithm
 
       double[][] fftData = BodePlotConstructor.computeFreqMagPhase(time, input);
       double[] frequency = fftData[0];
-      double[] magnitude = Conversions.convertMagnitudeToDecibels(fftData[1]);
+      double[] magnitude = new double[fftData[1].length];
+      for (int i = 0; i < fftData[1].length; i++)
+      {
+         magnitude[i] = Conversions.amplitudeToDecibels(fftData[1][i]);
+      }
 
       //Peak detection math
       int dominantFrequencyBandLowerBoundIndex = 0;

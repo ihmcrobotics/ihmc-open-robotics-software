@@ -184,7 +184,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          @Override
          public void run()
          {
-            ThreadTools.sleep(Conversions.secondsToMilliseconds(180));
+            ThreadTools.sleep((long) Conversions.secondsToMilliseconds(180));
             timeNotElapsed.set(false);
          }
       };

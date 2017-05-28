@@ -8,10 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.BehaviorStatus;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -115,7 +115,14 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       BehaviorAction<E> behaviorStateToAdd = new BehaviorAction<E>(E, behaviorToAdd);
 
       this.stateMachine.addState(behaviorStateToAdd);
-      this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
+      try
+      {
+         this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
+      }
+      catch (Exception e)
+      {
+         PrintTools.info(e.getMessage());
+      }
 
       ArrayList<BehaviorAction<E>> allOtherBehaviorStates = new ArrayList<BehaviorAction<E>>();
 
@@ -166,8 +173,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       stateMachine.doAction();
 
       //a behavior has finished or has aborted and has transitioned to STOP
-      
-      
+
+
       if (stateMachine.getCurrentStateEnum().equals(stopBehavior) && currentBehavior!=null && !currentBehavior.equals(stopBehavior))
       {
          communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
