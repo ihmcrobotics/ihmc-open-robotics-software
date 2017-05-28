@@ -275,8 +275,8 @@ public class Plotter2DAdapter
                          pixelate(plotCenter.getY()),
                          pixelate(2.0 * plotRadii.getX()),
                          pixelate(2.0 * plotRadii.getY()),
-                         pixelate(Conversions.convertRadianToDegrees(startAngle)),
-                         pixelate(Conversions.convertRadianToDegrees(arcAngle)));
+                         pixelate(Math.toDegrees(startAngle)),
+                         pixelate(Math.toDegrees(arcAngle)));
    }
 
    public void drawString(PlotterReferenceFrame frame, String string, Point2D startPoint)

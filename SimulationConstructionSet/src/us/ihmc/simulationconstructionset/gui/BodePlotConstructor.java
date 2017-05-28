@@ -16,8 +16,16 @@ public class BodePlotConstructor
       double[][] freqMagPhase = computeFreqMagPhase(time, data);
 
       double[] frequency = freqMagPhase[0];
-      double[] magnitude = Conversions.convertMagnitudeToDecibels(freqMagPhase[1]);
-      double[] phase = Conversions.convertRadianToDegrees(freqMagPhase[2]);
+      double[] magnitude = new double[freqMagPhase[1].length];
+      for (int i = 0; i < freqMagPhase[1].length; i++)
+      {
+         magnitude[i] = Conversions.amplitudeToDecibels(freqMagPhase[1][i]);
+      }
+      double[] phase = new double[freqMagPhase[2].length];
+      for (int i = 0; i < freqMagPhase[2].length; i++)
+      {
+         phase[i] = Conversions.amplitudeToDecibels(freqMagPhase[2][i]);
+      }
 
       double[][] bodeData = new double[][]
       {
@@ -49,12 +57,22 @@ public class BodePlotConstructor
    public static void plotBodeForTransferFunction(String name, TransferFunction transferFunction, double[] omega)
    {
       double[] bodeMagnitude = transferFunction.getMagnitude(omega);
-      bodeMagnitude = Conversions.convertMagnitudeToDecibels(bodeMagnitude);
+      for (int i = 0; i < bodeMagnitude.length; i++)
+      {
+         bodeMagnitude[i] = Conversions.amplitudeToDecibels(bodeMagnitude[i]);
+      }
 
       double[] bodePhase = transferFunction.getPhase(omega);
-      bodePhase = Conversions.convertRadianToDegrees(bodePhase);
+      for (int i = 0; i < bodePhase.length; i++)
+      {
+         bodePhase[i] = Math.toDegrees(bodePhase[i]);
+      }
 
-      double[] bodeFrequency = Conversions.convertRadPerSecondToHz(omega);
+      double[] bodeFrequency = new double[omega.length];
+      for (int i = 0; i < omega.length; i++)
+      {
+         bodeFrequency[i] = Conversions.radiansPerSecondToHertz(omega[i]);
+      }
 
       double[][] bodeData = new double[][]
       {
@@ -84,10 +102,16 @@ public class BodePlotConstructor
       double[] outputPhase = outputFreqMagPhase[2];
 
       double[] bodeMagnitude = divide(outputMagnitude, inputMagnitude);
-      bodeMagnitude = Conversions.convertMagnitudeToDecibels(bodeMagnitude);
+      for (int i = 0; i < bodeMagnitude.length; i++)
+      {
+         bodeMagnitude[i] = Conversions.amplitudeToDecibels(bodeMagnitude[i]);
+      }
 
       double[] bodePhase = subtractMod2PI(outputPhase, inputPhase);
-      bodePhase = Conversions.convertRadianToDegrees(bodePhase);
+      for (int i = 0; i < bodePhase.length; i++)
+      {
+         bodePhase[i] = Math.toDegrees(bodePhase[i]);
+      }
 
       return new double[][]
       {

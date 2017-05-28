@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -715,33 +716,40 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public void getTransformToDesiredFrame(RigidBodyTransform transformToPack, ReferenceFrame desiredFrame)
    {
-      verifySameRoots(desiredFrame);
-
-      efficientComputeTransform();
-      desiredFrame.efficientComputeTransform();
-
-      if (desiredFrame.inverseTransformToRoot != null)
+      try
       {
-         if (transformToRoot != null)
+         verifySameRoots(desiredFrame);
+         
+         efficientComputeTransform();
+         desiredFrame.efficientComputeTransform();
+         
+         if (desiredFrame.inverseTransformToRoot != null)
          {
-            transformToPack.set(desiredFrame.inverseTransformToRoot);
-            transformToPack.multiply(transformToRoot);
+            if (transformToRoot != null)
+            {
+               transformToPack.set(desiredFrame.inverseTransformToRoot);
+               transformToPack.multiply(transformToRoot);
+            }
+            else
+            {
+               transformToPack.set(desiredFrame.inverseTransformToRoot);
+            }
          }
          else
          {
-            transformToPack.set(desiredFrame.inverseTransformToRoot);
+            if (transformToRoot != null)
+            {
+               transformToPack.set(transformToRoot);
+            }
+            else
+            {
+               transformToPack.setIdentity();
+            }
          }
       }
-      else
+      catch (NotARotationMatrixException e)
       {
-         if (transformToRoot != null)
-         {
-            transformToPack.set(transformToRoot);
-         }
-         else
-         {
-            transformToPack.setIdentity();
-         }
+         throw new NotARotationMatrixException("Caught exception, this frame: " + frameName + ", other frame: " + desiredFrame.getName() + ", exception:/n" + e.getMessage());
       }
    }
 

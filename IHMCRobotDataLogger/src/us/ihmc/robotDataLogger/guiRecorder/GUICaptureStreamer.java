@@ -89,7 +89,7 @@ public class GUICaptureStreamer
       {
          throw new RuntimeException(e);
       }
-      scheduler.scheduleAtFixedRate(captureRunner, 10, Conversions.nano / fps, TimeUnit.NANOSECONDS);
+      scheduler.scheduleAtFixedRate(captureRunner, 10, 1000000000 / fps, TimeUnit.NANOSECONDS);
    }
 
    public synchronized void stop()

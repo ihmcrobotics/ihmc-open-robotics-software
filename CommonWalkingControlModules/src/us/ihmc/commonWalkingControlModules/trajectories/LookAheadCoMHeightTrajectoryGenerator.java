@@ -1023,4 +1023,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
             + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getQuaternion().getS() + ", " + orientation.getQuaternion().getX()
             + ", " + orientation.getQuaternion().getY() + ", " + orientation.getQuaternion().getZ() + ")));");
    }
+
+   public void getCurrentDesiredHeight(FramePoint positionToPack)
+   {
+      desiredCoMPosition.getFrameTupleIncludingFrame(positionToPack);
+   }
 }

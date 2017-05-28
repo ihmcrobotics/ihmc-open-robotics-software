@@ -123,7 +123,7 @@ public class RRTTreeTimeDomain extends RRTTree
    {
       RRTNode node = getRandomNode();
       updateNearNodeForTargetNode(node);
-      this.newNode = getNewNodeTimeDomain(node);
+      this.newNode = getNewNode(node);
       return addNewNodeTimeDomain();
    }   
    
@@ -137,19 +137,20 @@ public class RRTTreeTimeDomain extends RRTTree
          {
               nearNode.addChildNode(this.newNode);
               wholeNodes.add(newNode);
-//              PrintTools.info("Node Added");
+              PrintTools.info("Node Added");
               return true;
          }
       }
       else
       {
          failNodes.add(newNode);
-//         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
+         PrintTools.info("The newly created node is invalid "+ newNode.getNodeData(0)+" "+ newNode.getNodeData(1));
       }
       return false;
    }
    
-   public RRTNode getNewNodeTimeDomain(RRTNode targetNode)
+   @Override
+   public RRTNode getNewNode(RRTNode targetNode)
    {
       RRTNode newNode = nodeCreator.createNode();
       
