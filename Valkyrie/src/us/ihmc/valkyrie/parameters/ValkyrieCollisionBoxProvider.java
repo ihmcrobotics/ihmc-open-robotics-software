@@ -17,6 +17,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * There is no collision provided in Valkyrie's SDF/URDF models, so it is created and hardcoded here.
@@ -28,17 +29,20 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
    public ValkyrieCollisionBoxProvider(FullHumanoidRobotModel robotModel)
    {
+      collisions.put(robotModel.getRootJoint().getName(), new ArrayList<>());
+      for (OneDoFJoint joint : robotModel.getOneDoFJoints())
+         collisions.put(joint.getName(), new ArrayList<>());
+
       for (RobotSide robotSide : RobotSide.values)
       {
          { // Shoulder roll
             String jointName = robotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL).getName();
-            collisions.put(jointName, new ArrayList<>());
 
             { // Shoulder
                AxisAngle rotation = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
                Vector3D translation = new Vector3D(-0.01, 0.0, 0.0);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-               collisions.get(jointName).add(new CollisionCylinder(pose, 0.09, 0.23));
+               collisions.get(jointName).add(new CollisionCylinder(pose, 0.09, 1.3 * 0.23));
             }
             { // Upper-arm
                AxisAngle rotation = new AxisAngle(1.0, 0.0, 0.0, Math.PI / 2.0);
@@ -50,7 +54,6 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
          { // Elbow
             String jointName = robotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getName();
-            collisions.put(jointName, new ArrayList<>());
 
             { // Elbow
                AxisAngle rotation = new AxisAngle();
@@ -69,19 +72,17 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
          { // Wrist
             String jointName = robotModel.getHand(robotSide).getParentJoint().getName();
-            collisions.put(jointName, new ArrayList<>());
 
             { // Conservative sphere to wrap the hand plus fingers. Can be improved
                AxisAngle rotation = new AxisAngle();
                Vector3D translation = new Vector3D(0.0, robotSide.negateIfRightSide(0.07), 0.02);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-               collisions.get(jointName).add(new CollisionSphere(pose, 0.12));
+               collisions.get(jointName).add(new CollisionSphere(pose, 1.3 * 0.12));
             }
          }
 
          { // Hip yaw
             String jointName = robotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName();
-            collisions.put(jointName, new ArrayList<>());
 
             { // The coconut shells
                AxisAngle rotation = new AxisAngle();
@@ -93,7 +94,6 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
          { // Hip pitch
             String jointName = robotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName();
-            collisions.put(jointName, new ArrayList<>());
 
             { // Thigh
                AxisAngle rotation = new AxisAngle();
@@ -105,21 +105,19 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
          { // Knee
             String jointName = robotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getName();
-            collisions.put(jointName, new ArrayList<>());
 
-            { // Thigh
+            { // Shin
                AxisAngle rotation = new AxisAngle();
-               Vector3D translation = new Vector3D(0.0, robotSide.negateIfRightSide(0.0), -0.18);
+               Vector3D translation = new Vector3D(-0.01, robotSide.negateIfRightSide(0.0), -0.18);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-               collisions.get(jointName).add(new CollisionBox(pose, 0.11, 0.1, 0.20));
+               collisions.get(jointName).add(new CollisionBox(pose, 0.12, 0.1, 0.20));
             }
          }
 
          { // Ankle
             String jointName = robotModel.getFoot(robotSide).getParentJoint().getName();
-            collisions.put(jointName, new ArrayList<>());
 
-            { // Thigh
+            { // Foot
                AxisAngle rotation = new AxisAngle();
                Vector3D translation = new Vector3D(0.05, robotSide.negateIfRightSide(0.0), -0.04);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
@@ -130,7 +128,6 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
       { // Head
          String jointName = robotModel.getHead().getParentJoint().getName();
-         collisions.put(jointName, new ArrayList<>());
 
          { // Head
             AxisAngle rotation = new AxisAngle();
@@ -142,25 +139,30 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
       { // Torso
          String jointName = robotModel.getChest().getParentJoint().getName();
-         collisions.put(jointName, new ArrayList<>());
 
          { // Torso
             AxisAngle rotation = new AxisAngle();
             Vector3D translation = new Vector3D(-0.08, 0.0, 0.2);
             RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-            collisions.get(jointName).add(new CollisionBox(pose, 0.23, 0.2, 0.22));
+            collisions.get(jointName).add(new CollisionBox(pose, 1.3 * 0.23, 1.3 * 0.2, 0.22));
+         }
+
+         { // Cylinder to remove the ropes from the hoist.
+            AxisAngle rotation = new AxisAngle();
+            Vector3D translation = new Vector3D(-0.05, 0.0, 0.54);
+            RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
+            collisions.get(jointName).add(new CollisionCylinder(pose, 0.22, 0.60));
          }
       }
 
       { // Pelvis
          String jointName = robotModel.getPelvis().getParentJoint().getName();
-         collisions.put(jointName, new ArrayList<>());
 
          { // Pelvis pt1: The upper part
             AxisAngle rotation = new AxisAngle();
             Vector3D translation = new Vector3D(0.0, 0.0, -0.08);
             RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-            collisions.get(jointName).add(new CollisionBox(pose, 0.13, 0.18, 0.08));
+            collisions.get(jointName).add(new CollisionBox(pose, 1.3 * 0.13, 0.18, 0.08));
          }
 
          { // Pelvis pt2: The crotch part
