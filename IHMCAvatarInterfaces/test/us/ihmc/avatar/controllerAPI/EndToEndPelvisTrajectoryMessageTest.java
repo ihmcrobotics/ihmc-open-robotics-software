@@ -975,7 +975,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 //      String pelvisPrefix = "pelvisHeight";
 //      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
 //      String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
-      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable("pelvisTaskspaceControlModule", "pelvisHeightTaskspaceNumberOfPoints")).getIntegerValue();
+      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable("pelvisHeightTaskspaceControlModule", "pelvisHeightTaskspaceNumberOfPoints")).getIntegerValue();
       return numberOfWaypoints;
    }
 
