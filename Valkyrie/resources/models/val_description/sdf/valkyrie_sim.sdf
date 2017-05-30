@@ -405,7 +405,7 @@
       </physics>
     </joint>
     <link name='leftFoot'>
-      <pose frame=''>-0.0101259 0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0 0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
@@ -802,7 +802,7 @@
       </physics>
     </joint>
     <link name='rightFoot'>
-      <pose frame=''>-0.0101259 -0.137705 -1.08343 0 -0 0</pose>
+      <pose frame=''>-0.0 -0.137705 -1.08343 0 -0 0</pose>
       <inertial>
         <pose frame=''>0.0369087 0.00494324 -0.0489279 0 -0 0</pose>
         <mass>2.37</mass>
@@ -2765,7 +2765,7 @@
         </surface>
       </collision>
       <visual name='hokuyo_link_visual'>
-        <pose frame=''>0.045 -0.0261018 -0.0834237 -0.314 0 0</pose>
+        <pose frame=''>0.045 -0.0261018 -0.0834237 -0.314 0.1309 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2807,7 +2807,7 @@
       <child>hokuyo_link</child>
       <parent>upperNeckPitchLink</parent>
       <axis>
-        <xyz>0.991445 2.64698e-23 -0.130526</xyz>
+        <xyz>1.0 0 0</xyz>
         <limit>
           <lower>-1e+16</lower>
           <upper>1e+16</upper>

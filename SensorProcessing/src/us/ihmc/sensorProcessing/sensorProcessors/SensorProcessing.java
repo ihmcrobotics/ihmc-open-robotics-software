@@ -30,6 +30,7 @@ import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -56,6 +57,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 {
    private static final String RAW = "raw";
    private static final String BACKLASH = "bl";
+   private static final String POLYNOMIAL = "poly";
    private static final String CONSTANT = "cst";
    private static final String ALPHA_FILTER = "filt";
    private static final String FINITE_DIFFERENCE = "fd";
@@ -625,6 +627,65 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             outputJointPositions.put(oneDoFJoint, yoConstantPosition);
             outputJointVelocities.put(oneDoFJoint, yoConstantVelocity);
          }
+      }
+   }
+
+   /**
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param polynomialToApply the polynomial to apply on the joint position signals.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addJointPositionPolynomialProcessor(YoPolynomial polynomialToApply, boolean forVizOnly)
+   {
+      addJointPositionPolynomialProcessorWithJointsToIgnore(polynomialToApply, forVizOnly);
+   }
+
+   /**
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param polynomialToApply the polynomial to apply on the joint position signals.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    */
+   public void addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(YoPolynomial polynomialToApply, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointPositionPolynomialProcessorWithJointsToIgnore(polynomialToApply, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
+   /**
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param polynomialToApply the polynomial to apply on the joint position signals.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointPositionPolynomialProcessorWithJointsToIgnore(YoPolynomial polynomialToApply, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
+         String prefix = JOINT_POSITION.getProcessorNamePrefix(POLYNOMIAL);
+         String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
+         PolynomialProcessorYoVariable filteredJointPosition = new PolynomialProcessorYoVariable(prefix + suffix, intermediateJointPosition, polynomialToApply, registry);
+         processors.add(filteredJointPosition);
+
+         if (!forVizOnly)
+            outputJointPositions.put(oneDoFJoint, filteredJointPosition);
       }
    }
 

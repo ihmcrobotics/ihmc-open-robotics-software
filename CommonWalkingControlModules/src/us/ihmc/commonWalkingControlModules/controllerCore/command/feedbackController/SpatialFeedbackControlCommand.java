@@ -60,6 +60,10 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final SE3PIDGains gains = new SE3PIDGains();
+   /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame angularGainsFrame = null;
+   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame linearGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -106,6 +110,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       feedForwardAngularAccelerationInWorld.set(other.feedForwardAngularAccelerationInWorld);
 
       controlBaseFrame = other.controlBaseFrame;
+
+      gains.set(other.gains);
    }
 
    /**
@@ -240,6 +246,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setGains(PositionPIDGainsInterface positionGains)
    {
       this.gains.set(positionGains);
+   }
+
+   /**
+    * Sets the reference frames in which the gains should be applied.
+    * <p>
+    * If a reference frame is {@code null}, the corresponding gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param angularGainsFrame the reference frame to use for the orientation gains.
+    * @param linearGainsFrame the reference frame to use for the position gains.
+    */
+   public void setGainsFrames(ReferenceFrame angularGainsFrame, ReferenceFrame linearGainsFrame)
+   {
+      this.angularGainsFrame = angularGainsFrame;
+      this.linearGainsFrame = linearGainsFrame;
    }
 
    /**
@@ -682,6 +703,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public SE3PIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getAngularGainsFrame()
+   {
+      return angularGainsFrame;
+   }
+
+   public ReferenceFrame getLinearGainsFrame()
+   {
+      return linearGainsFrame;
    }
 
    @Override

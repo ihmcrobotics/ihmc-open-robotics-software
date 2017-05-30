@@ -29,8 +29,16 @@ public abstract class DrillDetectionAlgorithm
       double[][] freqMagPhase = BodePlotConstructor.computeFreqMagPhase(time, data);
 
       double[] frequency = freqMagPhase[0];
-      double[] magnitude = Conversions.convertMagnitudeToDecibels(freqMagPhase[1]);
-      double[] phase = Conversions.convertRadianToDegrees(freqMagPhase[2]);
+      double[] magnitude = new double[freqMagPhase[1].length];
+      for (int i = 0; i < freqMagPhase[1].length; i++)
+      {
+         magnitude[i] = Conversions.amplitudeToDecibels(freqMagPhase[1][i]);
+      }
+      double[] phase = new double[freqMagPhase[2].length];
+      for (int i = 0; i < freqMagPhase[2].length; i++)
+      {
+         phase[i] = Math.toDegrees(freqMagPhase[2][i]);
+      }
 
       double[][] bodeData = new double[][] { frequency, magnitude, phase };
       return bodeData;

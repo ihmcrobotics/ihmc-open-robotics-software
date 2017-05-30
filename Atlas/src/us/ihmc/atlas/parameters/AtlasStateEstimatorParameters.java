@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -55,6 +56,8 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
    private final ImmutablePair<String, String> imusForSpineJointEstimation;
 
+   private final boolean applyJointPositionPolynomialApproximation;
+
    public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
    {
       this.jointMap = jointMap;
@@ -71,6 +74,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
+      applyJointPositionPolynomialApproximation = runningOnRealRobot;
       doElasticityCompensation = runningOnRealRobot;
       defaultJointStiffness = 20000.0;
       for (RobotSide robotSide : RobotSide.values)
@@ -88,6 +92,14 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
+
+      if (applyJointPositionPolynomialApproximation)
+      {
+         YoPolynomial backZPolynomial = new YoPolynomial("q_poly_back_bkz", 2, registry);
+         // This was obtained using LIDAR by observing the variation in the back z position error. It does not correct for a possible absolute position error.
+         backZPolynomial.setDirectly(new double[]{0.00305, 1.04087});
+         sensorProcessing.addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(backZPolynomial, false, jointMap.getSpineJointName(SpineJointName.SPINE_YAW));
+      }
 
       String[] armJointNames = createArmJointNames();
 
