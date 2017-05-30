@@ -57,7 +57,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private final boolean visualize = true;
+   private final boolean visualize = false;
 
    private enum Planners
    {
