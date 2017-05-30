@@ -115,7 +115,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, RigidBodyJointControlHelper jointControlHelper,
          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName() + postfix, yoTime, parentRegistry);
       String bodyName = bodyToControl.getName() + postfix;
       String prefix = bodyName + "Taskspace";
 
