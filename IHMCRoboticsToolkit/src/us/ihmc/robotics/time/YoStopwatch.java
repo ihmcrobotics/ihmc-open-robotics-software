@@ -1,6 +1,7 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 
@@ -8,35 +9,37 @@ public class YoStopwatch
 {
    private final DoubleYoVariable timeProviderYoVariable;
 
-   private DoubleYoVariable currentTimeYoVariable;
-   private DoubleYoVariable lastTimeYoVariable;
-   private DoubleYoVariable deltaTimeYoVariable;
-   private DoubleYoVariable startTimeYoVariable;
-   private LongYoVariable numLapsYoVariable;
-   private DoubleYoVariable deltaSumYoVariable;
+   private DoubleYoVariable yoLapStart;
+   private LongYoVariable yoLapCount;
+   private DoubleYoVariable yoRecordedLapTotal;
+   private BooleanYoVariable yoSuspended;
+   private DoubleYoVariable yoSuspendStart;
+   private DoubleYoVariable yoResumedSuspensionTotal;
 
-   private double currentTime;
-   private double lastTime;
-   private double deltaTime;
-   private double startTime;
-   private long numLaps;
-   private double deltaSum;
+   private double lapStart;
+   private long lapCount;
+   private double recordedLapTotal;
+   private boolean suspended;
+   private double suspendStart;
+   private double resumedSuspensionTotal;
 
    public YoStopwatch(String name, DoubleYoVariable timeYoVariable, YoVariableRegistry registry)
    {
       this(timeYoVariable);
 
-      currentTimeYoVariable = new DoubleYoVariable(name + "CurrentTime", registry);
-      lastTimeYoVariable = new DoubleYoVariable(name + "LastTime", registry);
-      deltaTimeYoVariable = new DoubleYoVariable(name + "DeltaTime", registry);
-      startTimeYoVariable = new DoubleYoVariable(name + "StartTime", registry);
-      numLapsYoVariable = new LongYoVariable(name + "NumLaps", registry);
-      deltaSumYoVariable = new DoubleYoVariable(name + "DeltaSum", registry);
+      yoLapStart = new DoubleYoVariable(name + "LapStart", registry);
+      yoLapCount = new LongYoVariable(name + "LapCount", registry);
+      yoRecordedLapTotal = new DoubleYoVariable(name + "RecordedLapTotal", registry);
+      yoSuspended = new BooleanYoVariable(name + "Suspended", registry);
+      yoSuspendStart = new DoubleYoVariable(name + "SuspendStart", registry);
+      yoResumedSuspensionTotal = new DoubleYoVariable(name + "ResumedSuspensionTotal", registry);
+      yoLapStart.setToNaN();
    }
 
    public YoStopwatch(DoubleYoVariable timeYoVariable)
    {
       this.timeProviderYoVariable = timeYoVariable;
+      lapStart = Double.NaN;
    }
 
    public YoStopwatch start()
@@ -48,97 +51,176 @@ public class YoStopwatch
 
    public void resetLap()
    {
-      if (currentTimeYoVariable == null)
+      if (yoLapStart == null)
       {
-         lastTime = timeProviderYoVariable.getDoubleValue();
+         lapStart = now();
       }
       else
       {
-         lastTimeYoVariable.set(timeProviderYoVariable.getDoubleValue());
+         yoLapStart.set(now());
       }
+
+      resetSuspension();
    }
 
    public void reset()
    {
-      if (currentTimeYoVariable == null)
+      if (yoLapStart == null)
       {
-         startTime = timeProviderYoVariable.getDoubleValue();
-         lastTime = startTime;
+         lapStart = now();
 
-         numLaps = 0;
-         deltaSum = 0.0;
+         resetSuspension();
+
+         lapCount = 0;
+         recordedLapTotal = 0.0;
       }
       else
       {
-         startTimeYoVariable.set(timeProviderYoVariable.getDoubleValue());
-         lastTimeYoVariable.set(startTimeYoVariable.getDoubleValue());
+         yoLapStart.set(now());
 
-         numLapsYoVariable.set(0);
-         deltaSumYoVariable.set(0.0);
+         resetSuspension();
+
+         yoLapCount.set(0);
+         yoRecordedLapTotal.set(0.0);
       }
    }
 
    public double lap()
    {
-      if (currentTimeYoVariable == null)
+      double now = now();
+      double lapDuration = lapElapsed(now);
+      if (yoLapStart == null)
       {
-         currentTime = timeProviderYoVariable.getDoubleValue();
-         deltaTime = currentTime - lastTime;
-         lastTime = currentTime;
+         lapStart = now;
+
+         resetSuspension();
 
          // for average lap
-         numLaps++;
-         deltaSum += deltaTime;
-
-         return deltaTime;
+         lapCount++;
+         recordedLapTotal += lapDuration;
       }
       else
       {
-         currentTimeYoVariable.set(timeProviderYoVariable.getDoubleValue());
-         deltaTimeYoVariable.set(currentTimeYoVariable.getDoubleValue() - lastTimeYoVariable.getDoubleValue());
-         lastTimeYoVariable.set(currentTimeYoVariable.getDoubleValue());
+         yoLapStart.set(now);
+
+         resetSuspension();
 
          // for average lap
-         numLapsYoVariable.set(numLapsYoVariable.getLongValue() + 1);
-         deltaSumYoVariable.set(deltaSumYoVariable.getDoubleValue() + deltaTimeYoVariable.getDoubleValue());
-
-         return deltaTimeYoVariable.getDoubleValue();
+         yoLapCount.add(1);
+         yoRecordedLapTotal.add(lapDuration);
       }
+      return lapDuration;
    }
 
    public double averageLap()
    {
-      if (currentTimeYoVariable == null)
+      if (yoLapStart == null)
       {
-         return deltaSum / numLaps;
+         return recordedLapTotal / lapCount;
       }
       else
       {
-         return deltaSumYoVariable.getDoubleValue() / numLapsYoVariable.getLongValue();
-      }
-   }
-
-   public double totalElapsed()
-   {
-      if (currentTimeYoVariable == null)
-      {
-         return timeProviderYoVariable.getDoubleValue() - startTime;
-      }
-      else
-      {
-         return timeProviderYoVariable.getDoubleValue() - startTimeYoVariable.getDoubleValue();
+         return yoRecordedLapTotal.getDoubleValue() / yoLapCount.getLongValue();
       }
    }
 
    public double lapElapsed()
    {
-      if (currentTimeYoVariable == null)
+      return lapElapsed(now());
+   }
+
+   public double totalElapsed()
+   {
+      if (yoLapStart == null)
       {
-         return timeProviderYoVariable.getDoubleValue() - lastTime;
+         return recordedLapTotal + lapElapsed(now());
       }
       else
       {
-         return timeProviderYoVariable.getDoubleValue() - lastTimeYoVariable.getDoubleValue();
+         return yoRecordedLapTotal.getDoubleValue() + lapElapsed(now());
+      }
+   }
+
+   public void suspend()
+   {
+      if (yoLapStart == null)
+      {
+         if (!suspended)
+         {
+            suspended = true;
+            suspendStart = now();
+         }
+      }
+      else
+      {
+         if (!yoSuspended.getBooleanValue())
+         {
+            yoSuspended.set(true);
+            yoSuspendStart.set(now());
+         }
+      }
+   }
+
+   public void resume()
+   {
+      if (yoLapStart == null)
+      {
+         if (suspended)
+         {
+            suspended = false;
+            resumedSuspensionTotal += now() - suspendStart;
+         }
+      }
+      else
+      {
+         if (yoSuspended.getBooleanValue())
+         {
+            yoSuspended.set(false);
+            yoResumedSuspensionTotal.add(now() - yoSuspendStart.getDoubleValue());
+         }
+      }
+   }
+
+   private double lapElapsed(double now)
+   {
+      if (yoLapStart == null)
+      {
+         double lapElapsed = now - lapStart;
+         lapElapsed -= resumedSuspensionTotal;
+         if (suspended)
+         {
+            lapElapsed -= (now - suspendStart);
+         }
+         return lapElapsed;
+      }
+      else
+      {
+         double lapElapsed = now - yoLapStart.getDoubleValue();
+         lapElapsed -= yoResumedSuspensionTotal.getDoubleValue();
+         if (yoSuspended.getBooleanValue())
+         {
+            lapElapsed -= (now - yoSuspendStart.getDoubleValue());
+         }
+         return lapElapsed;
+      }
+   }
+
+   private double now()
+   {
+      return timeProviderYoVariable.getDoubleValue();
+   }
+
+   private void resetSuspension()
+   {
+      if (yoLapStart == null)
+      {
+         suspended = false;
+         resumedSuspensionTotal = 0.0;
+      }
+      else
+      {
+         yoSuspended.set(false);
+         yoResumedSuspensionTotal.set(0.0);
       }
    }
 }

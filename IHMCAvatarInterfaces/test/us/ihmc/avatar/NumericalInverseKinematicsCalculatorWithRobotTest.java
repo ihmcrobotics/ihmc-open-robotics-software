@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -208,7 +208,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
-      double errorThreshold = 0.01; 
+      double errorThreshold = 0.01;
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
       assertTrue(success);
    }
@@ -260,12 +260,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          System.out.println("Average Solving Time: " + averageTimeMillis + " ms");
          System.out.println("Maximal Solving Time: " + maximumTimeMillis + " ms");
       }
-      
+
       final double maximumTimeMillisMax = 600.0;
-      final double averageTimeMillisMax = 4.0;
+      final double averageTimeMillisMax = 8.0;
       assertTrue("Average Solving Time > " + averageTimeMillisMax + " ms", averageTimeMillis < averageTimeMillisMax);
       assertTrue("Maximal Solving Time > " + maximumTimeMillisMax + " ms", maximumTimeMillis < maximumTimeMillisMax);
-      
+
       //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
 //      assertTrue(averageTimeMillis < 0.04);
 //      assertTrue(maximumTimeMillis < 16.0);
@@ -306,14 +306,14 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          scs.tickAndUpdate();
 
       boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
-      
+
       if (!positionErrorAcceptable)
       {
          PrintTools.error("Position error not acceptable: positionError: " + positionError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
       }
-      
+
       boolean orientationErrorAcceptable = (orientationError.getDoubleValue() < errorThreshold);
-      
+
       if (!orientationErrorAcceptable)
       {
          PrintTools.error("Orientation error not acceptable: orientationError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
@@ -348,7 +348,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       long end = System.nanoTime();
 
-      solvingTime.add((long) (((double) (end - start)) * 1e-6));
+      solvingTime.add((long) ((end - start) * 1e-6));
    }
 
    private void createInitialGuess(Random random, InitialGuessForTests initialGuessForTests)
