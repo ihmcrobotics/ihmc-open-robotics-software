@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
-import com.badlogic.gdx.math.collision.BoundingBox;
-import com.jme3.bounding.BoundingVolume;
+import com.jme3.math.Matrix4f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 
@@ -218,11 +217,22 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       planarRegion.getTransformToWorld(transformToWorld);
       ModifiableMeshDataHolder modifiableMeshDataHolder = new ModifiableMeshDataHolder();
 
+      PrintTools.info("getNumberOfConvexPolygons "+planarRegion.getNumberOfConvexPolygons());
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
          MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
-         modifiableMeshDataHolder.add(polygon, true);
+         
+         PrintTools.info("polygonIndex "+polygonIndex);
+         if(polygon != null)
+         {
+            PrintTools.info("Vectices "+polygon.getVertices().length);
+            for(int i=0;i<polygon.getVertices().length;i++)
+               PrintTools.info(""+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
+            
+            modifiableMeshDataHolder.add(polygon, true);   
+         }
+         
       }
 
       Mesh regionMesh = JMEMeshDataInterpreter.interpretMeshData(modifiableMeshDataHolder.createMeshDataHolder());
@@ -240,15 +250,31 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private void sortOutSolarPanel(PlanarRegionsList planarRegionsList)
    {
+      PrintTools.info("getNumberOfPlanarRegions");
+      PrintTools.info(""+planarRegionsList.getNumberOfPlanarRegions());
+      
       for(int i=0;i<planarRegionsList.getNumberOfPlanarRegions();i++)
       {
+         PrintTools.info("Planar Region "+i);         
+         
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
          Geometry geometryOfPlanarRegion = createRegionGeometry(planarRegion, null);
-         BoundingVolume bound = geometryOfPlanarRegion.getMesh().getBound();
-         //bound.
+         
+//         geometryOfPlanarRegion.updateGeometricState();
+//         geometryOfPlanarRegion.updateModelBound();
+//         geometryOfPlanarRegion.computeWorldMatrix();
+//         Matrix4f matrix4fOfPlanarRegion = geometryOfPlanarRegion.getWorldMatrix();
          
          
-         PrintTools.info("i ");
+//         PrintTools.info(""+matrix4fOfPlanarRegion.get(0, 0)+" "+matrix4fOfPlanarRegion.get(0, 1)+" "+matrix4fOfPlanarRegion.get(0, 2)+" "+matrix4fOfPlanarRegion.get(0, 3));
+//         PrintTools.info(""+matrix4fOfPlanarRegion.get(1, 0)+" "+matrix4fOfPlanarRegion.get(1, 1)+" "+matrix4fOfPlanarRegion.get(1, 2)+" "+matrix4fOfPlanarRegion.get(1, 3));
+//         PrintTools.info(""+matrix4fOfPlanarRegion.get(2, 0)+" "+matrix4fOfPlanarRegion.get(2, 1)+" "+matrix4fOfPlanarRegion.get(2, 2)+" "+matrix4fOfPlanarRegion.get(2, 3));
+//         PrintTools.info(""+matrix4fOfPlanarRegion.get(3, 0)+" "+matrix4fOfPlanarRegion.get(3, 1)+" "+matrix4fOfPlanarRegion.get(3, 2)+" "+matrix4fOfPlanarRegion.get(3, 3));
+         
+//         BoundingVolume bound = geometryOfPlanarRegion.getMesh().getBound();
+         
+         
+         
       }
    }
    
@@ -270,6 +296,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListQueue.getLatestPacket();
             planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
             receivedPlanarRegionsList.set(true);
+            
+            
+            
             
             
             
