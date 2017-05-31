@@ -280,43 +280,93 @@ public abstract class ICPOptimizationParameters
 
 
 
-
-
+   /**
+    * This is the size used to vary the QP duration by, and allow us to compute the gradient of the cost with respect to the
+    * swing time duration. This is only used if {@link #useTimingOptimization()} returns true.
+    *
+    * @return variation size
+    */
    public double getVariationSizeToComputeTimingGradient()
    {
       return 0.001;
    }
 
+   /**
+    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
+    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
+    * quadratic program to compute the total cost to go.
+    *
+    * @return weight
+    */
    public double getTimingAdjustmentGradientDescentWeight()
    {
       return 0.1;
    }
 
+   /**
+    * This is the gradient threshold at which the gradient descent algorithm is terminated. Once the gradient falls below
+    * a certain value, we know that the cost is near a minimum. This value defines how close we have to be to the minimum
+    * to terminate the algorithm.
+    *
+    * @return gradient threshold
+    */
    public double getGradientThresholdForTimingAdjustment()
    {
       return 0.1;
    }
 
+   /**
+    * This is the gain used in the gradient descent algorithm. It multiplies the current gradient estimate, and adds this
+    * value to the current duration.
+    *
+    * @return gradient gain
+    */
    public double getGradientDescentGain()
    {
       return 0.035;
    }
 
+   /**
+    * If, after the gradient descent update, the cost increased instead of decreased, we know we overshot the actual minimum location.
+    * This variable is then used to scale the duration adjustment that was just used in an attempt to not overshoot the minimum.
+    *
+    * @return scaling factor
+    */
    public double getTimingAdjustmentAttenuation()
    {
       return 0.5;
    }
 
+   /**
+    * <p>
+    * This is the maximum allowable solve duration for the entire gradient descent algorithm. Once it has surpassed this duration, the
+    * algorithm is terminated. On the next control tick, the algorithm resumes attempting to solve at this point.
+    * </p>
+    * <p>
+    * This should be used to set the control deadlines to ensure the algorithm does not take too long on every tick.
+    * </p>
+    * @return duration
+    */
    public double getMaximumDurationForOptimization()
    {
       return 0.0008;
    }
 
+   /**
+    * This is the maximum number of total iterations allowed by the gradient descent algorithm before terminating the current control tick.
+    * This includes the number of attenuation iterations, as well as total loops.
+    * @return number of iterations
+    */
    public int getMaximumNumberOfGradientIterations()
    {
       return 15;
    }
 
+   /**
+    * This is the maximum number of times the gradient will attempt to reduce its adjustment due to overshoot before continuing to the next gradient
+    * descent iteration.
+    * @return number of iterations
+    */
    public int getMaximumNumberOfGradientReductions()
    {
       return 5;
