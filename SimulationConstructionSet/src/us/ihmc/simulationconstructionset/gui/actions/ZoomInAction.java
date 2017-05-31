@@ -6,9 +6,10 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
 
-public class ZoomInAction extends AbstractAction
+public class ZoomInAction extends SCSAction
 {
    private static final long serialVersionUID = -7575893287036365108L;
 
@@ -16,19 +17,17 @@ public class ZoomInAction extends AbstractAction
 
    public ZoomInAction(ZoomGraphCommandExecutor executor)
    {
-      super("Zoom In");
-      this.executor = executor;
+      super("Zoom In",
+              "icons/ZoomIn24.gif",
+              KeyEvent.VK_I,
+              "Zoom In",
+              "Zoom In"
+      );
 
-      String iconFilename = "icons/ZoomIn24.gif";
-      int shortKey = KeyEvent.VK_I;
-      String longDescription = "Zoom In";
-      String shortDescription = "Zoom In";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = executor;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       executor.zoomIn();
    }

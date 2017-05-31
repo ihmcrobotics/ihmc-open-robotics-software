@@ -6,9 +6,10 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 
 import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
 
-public class StepForwardAction extends AbstractAction
+public class StepForwardAction extends SCSAction
 {
    private static final long serialVersionUID = -4007043816767478116L;
 
@@ -16,19 +17,17 @@ public class StepForwardAction extends AbstractAction
 
    public StepForwardAction(StepForwardCommandExecutor executor)
    {
-      super("Step Forward");
-      this.executor = executor;
+      super("Step Forward",
+              "icons/StepForward24.gif",
+              KeyEvent.VK_F,
+      "Step Forward",
+      "Step Forward"
+      );
 
-      String iconFilename = "icons/StepForward24.gif";
-      int shortKey = KeyEvent.VK_F;
-      String longDescription = "Step Forward";
-      String shortDescription = "Step Forward";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = executor;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.stepForward();
    }

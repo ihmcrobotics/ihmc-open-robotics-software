@@ -7,26 +7,26 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 
-public class ToggleCameraKeyModeAction extends AbstractAction
+public class ToggleCameraKeyModeAction extends SCSAction
 {
    private static final long serialVersionUID = -5162293334622550111L;
    private ToggleCameraKeyModeCommandExecutor executor;
 
    public ToggleCameraKeyModeAction(ToggleCameraKeyModeCommandExecutor executor)
    {
-      super("Toggle Camera Keys");
+      super("Toggle Camera Keys",
+              "",
+              KeyEvent.VK_T,
+              "Turns on and off",
+              "Turns Camera Keying on and off."
+      );
 
       this.executor = executor;
-
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_T));
-      this.putValue(Action.LONG_DESCRIPTION, "Turns Camera Keying on and on.");
-      this.putValue(Action.SHORT_DESCRIPTION, "turns on and off");
    }
 
-
-   @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.toggleCameraKeyMode();
    }

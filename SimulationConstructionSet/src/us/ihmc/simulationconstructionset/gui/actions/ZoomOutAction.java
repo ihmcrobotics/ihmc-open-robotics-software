@@ -6,9 +6,10 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
 
-public class ZoomOutAction extends AbstractAction
+public class ZoomOutAction extends SCSAction
 {
    private static final long serialVersionUID = 5487975503056238066L;
 
@@ -16,19 +17,17 @@ public class ZoomOutAction extends AbstractAction
 
    public ZoomOutAction(ZoomGraphCommandExecutor executor)
    {
-      super("Zoom Out");
-      this.executor = executor;
+      super("Zoom Out",
+              "icons/ZoomOut24.gif",
+              KeyEvent.VK_O,
+              "Zoom Out",
+              "Zoom Out"
+      );
 
-      String iconFilename = "icons/ZoomOut24.gif";
-      int shortKey = KeyEvent.VK_O;
-      String longDescription = "Zoom Out";
-      String shortDescription = "Zoom Out";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = executor;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.zoomOut();
    }
