@@ -8,26 +8,28 @@ import javax.swing.Action;
 
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 
-public class HideShowViewportAction extends AbstractAction implements ViewportSelectorCommandListener
+public class HideShowViewportAction extends SCSAction implements ViewportSelectorCommandListener
 {
    private static final long serialVersionUID = 1774088226210361744L;
    private ViewportSelectorCommandExecutor viewportSelector;
 
    public HideShowViewportAction(ViewportSelectorCommandExecutor viewportSelector)
    {
-      super("Hide Viewport");
-      this.viewportSelector = viewportSelector;
+      super("Hide Viewport",
+              "",
+              KeyEvent.VK_V,
+              "Short Description", // TODO
+              "Long Description" // TODO
+      );
 
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_V));
-      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
-      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
+      this.viewportSelector = viewportSelector;
 
       viewportSelector.registerViewportSelectorCommandListener(this);
    }
 
-   @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       if (viewportSelector.isViewportHidden())
       {

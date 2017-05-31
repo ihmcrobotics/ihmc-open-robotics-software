@@ -6,9 +6,10 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 
 import us.ihmc.simulationconstructionset.commands.SimulateCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
 
-public class SimulateAction extends AbstractAction
+public class SimulateAction extends SCSAction
 {
    private static final long serialVersionUID = 2609814986889034283L;
 
@@ -16,19 +17,17 @@ public class SimulateAction extends AbstractAction
 
    public SimulateAction(SimulateCommandExecutor listener)
    {
-      super("Simulate");
-      this.executor = listener;
+      super("Simulate",
+              "icons/YoSimulate32.gif",
+              KeyEvent.VK_S,
+              "Simulate",
+              "Start simulating"
+      );
 
-      String iconFilename = "icons/YoSimulate32.gif";
-      int shortKey = KeyEvent.VK_S;
-      String longDescription = "Start simulating.";
-      String shortDescription = "Simulate";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = listener;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.simulate();
    }

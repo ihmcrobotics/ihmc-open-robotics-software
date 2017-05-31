@@ -6,9 +6,10 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ImportDataDialogConstructor;
 
-public class ImportDataAction extends AbstractAction
+public class ImportDataAction extends SCSAction
 {
    private static final long serialVersionUID = 7296204170538611841L;
 
@@ -16,15 +17,14 @@ public class ImportDataAction extends AbstractAction
 
    public ImportDataAction(ImportDataDialogConstructor constructor)
    {
-      super("Import Data...");
-      this.constructor = constructor;
+      super("Import Data...",
+              "icons/Import24.gif",
+              KeyEvent.VK_I,
+              "Import Data",
+              "Import simulation data to a file."
+      );
 
-      String iconFilename = "icons/Import24.gif";
-      int shortKey = KeyEvent.VK_I;
-      String longDescription = "Import simulation data to a file.";
-      String shortDescription = "Import Data";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void setCurrentDirectory(File directory)
@@ -37,9 +37,7 @@ public class ImportDataAction extends AbstractAction
       constructor.setCurrentDirectory(directory);
    }
 
-
-   @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }

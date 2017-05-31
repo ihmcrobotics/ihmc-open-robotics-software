@@ -6,24 +6,24 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.MediaCaptureDialogConstructor;
 
-public class MediaCaptureAction extends AbstractAction
+public class MediaCaptureAction extends SCSAction
 {
    private static final long serialVersionUID = 772924943132573130L;
    private MediaCaptureDialogConstructor constructor;
 
    public MediaCaptureAction(MediaCaptureDialogConstructor constructor)
    {
-      super("Media Capture...");
-      this.constructor = constructor;
+      super("Media Capture...",
+              "icons/Video24.gif",
+              KeyEvent.VK_M,
+              "Capture Media",
+              "Capture media to a file."
+      );
 
-      String iconFilename = "icons/Video24.gif";
-      int shortKey = KeyEvent.VK_M;
-      String longDescription = "Capture media to a file.";
-      String shortDescription = "Capture Media";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void createVideoFromFile(File file)
@@ -31,8 +31,7 @@ public class MediaCaptureAction extends AbstractAction
       constructor.createVideo(file);
    }
 
-   @Override
-   public void actionPerformed(ActionEvent event)
+   public void doAction()
    {
       constructor.constructDialog();
    }

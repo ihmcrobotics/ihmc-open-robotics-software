@@ -7,24 +7,26 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 
-public class PackBufferAction extends AbstractAction
+public class PackBufferAction extends SCSAction
 {
    private static final long serialVersionUID = 3740016405361627977L;
    private PackBufferCommandExecutor executor;
 
    public PackBufferAction(PackBufferCommandExecutor executor)
    {
-      super("Pack Buffer to In/Out");
-      this.executor = executor;
+      super("Pack Buffer to In/Out",
+              "",
+              KeyEvent.VK_C,
+              "Short Description",
+              "Long Description"
+      );
 
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_C));
-      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
-      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
+      this.executor = executor;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       executor.packBuffer();
    }

@@ -7,10 +7,11 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.CameraPropertiesDialogConstructor;
 
-public class CameraPropertiesAction extends AbstractAction
+public class CameraPropertiesAction extends SCSAction
 {
    private static final long serialVersionUID = 2728147089395054885L;
 
@@ -20,19 +21,19 @@ public class CameraPropertiesAction extends AbstractAction
    
    public CameraPropertiesAction(CameraPropertiesDialogConstructor constructor, TrackCheckBox trackCheckBox, DollyCheckBox dollyCheckBox)
    {
-      super("Camera Properties...");
-
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_C));
-      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
-      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
+      super("Camera Properties...",
+              "",
+              KeyEvent.VK_C,
+              "Short Description", // TODO
+              "Long Description" // TODO
+      );
       
       this.constructor = constructor;
       this.trackCheckBox = trackCheckBox;
       this.dollyCheckBox = dollyCheckBox;
    }
-   
-   @Override
-   public void actionPerformed(ActionEvent actionEvent)
+
+   public void doAction()
    {
       constructor.constructCameraPropertiesDialog(trackCheckBox, dollyCheckBox);
    }

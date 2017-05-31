@@ -5,9 +5,10 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
 
-public class ExportGraphsToFileAction extends AbstractAction
+public class ExportGraphsToFileAction extends SCSAction
 {
    /**
     * 
@@ -17,15 +18,14 @@ public class ExportGraphsToFileAction extends AbstractAction
 
    public ExportGraphsToFileAction(ExportGraphsToFileConstructor constructor)
    {
-      super("Export Graphs To File");
-      this.constructor = constructor;
+      super("Export Graphs To File",
+              "icons/exportGraph.png",
+              KeyEvent.VK_UNDEFINED,
+              "Export Graphs To File",
+              "Export Graphs To File"
+      );
 
-      String iconFilename = "icons/exportGraph.png";
-      int shortKey = KeyEvent.VK_UNDEFINED;
-      String longDescription = "Export Graphs To File";
-      String shortDescription = "Export Graphs To File";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void closeAndDispose()
@@ -34,10 +34,9 @@ public class ExportGraphsToFileAction extends AbstractAction
       constructor = null;
    }
 
-   @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }
-   
+
 }
