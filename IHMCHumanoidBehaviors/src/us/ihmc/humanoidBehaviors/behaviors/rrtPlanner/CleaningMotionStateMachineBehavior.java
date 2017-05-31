@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
-import com.jme3.math.Matrix4f;
+import java.util.ArrayList;
+
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 
@@ -12,6 +13,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -211,13 +213,14 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    {
    }
    
-   private Geometry createRegionGeometry(PlanarRegion planarRegion, String geometryName)
+   private boolean isPlanarRegionWithinVolume(PlanarRegion planarRegion)
    {
+      boolean isAllNullPolygon = true;
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
-      ModifiableMeshDataHolder modifiableMeshDataHolder = new ModifiableMeshDataHolder();
 
       PrintTools.info("getNumberOfConvexPolygons "+planarRegion.getNumberOfConvexPolygons());
+      
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
@@ -228,17 +231,37 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          {
             PrintTools.info("Vectices "+polygon.getVertices().length);
             for(int i=0;i<polygon.getVertices().length;i++)
+            {
                PrintTools.info(""+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
-            
-            modifiableMeshDataHolder.add(polygon, true);   
-         }
-         
+               if(!isOutsideOftheVolume(polygon.getVertices()[i]))
+               {
+                  return false;
+               }                  
+            }
+            isAllNullPolygon = false;
+         }         
       }
-
-      Mesh regionMesh = JMEMeshDataInterpreter.interpretMeshData(modifiableMeshDataHolder.createMeshDataHolder());
-      return new Geometry(geometryName, regionMesh);
+      if(isAllNullPolygon == true)
+      {
+         PrintTools.info("All polygons are null ");
+         return false;
+      }
+         
+      
+      return true;
    }
    
+   private boolean isOutsideOftheVolume(Point3D32 pointOfVertex)
+   {
+      if(pointOfVertex.getX() > 1.5 || pointOfVertex.getX() < 0.5 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 1.5 || pointOfVertex.getZ() < 0.5)
+      {
+         PrintTools.info("This polygon is on outside of the volume ");
+         return false;
+      } 
+      
+      return true;
+   }
+      
    private void requestPlanarRegions()
    {
       RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(
@@ -253,27 +276,23 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       PrintTools.info("getNumberOfPlanarRegions");
       PrintTools.info(""+planarRegionsList.getNumberOfPlanarRegions());
       
+      ArrayList<PlanarRegion> planarRegionsWithinVolume = new ArrayList<PlanarRegion>();
+      
       for(int i=0;i<planarRegionsList.getNumberOfPlanarRegions();i++)
       {
+         PrintTools.info("");
          PrintTools.info("Planar Region "+i);         
          
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         Geometry geometryOfPlanarRegion = createRegionGeometry(planarRegion, null);
-         
-//         geometryOfPlanarRegion.updateGeometricState();
-//         geometryOfPlanarRegion.updateModelBound();
-//         geometryOfPlanarRegion.computeWorldMatrix();
-//         Matrix4f matrix4fOfPlanarRegion = geometryOfPlanarRegion.getWorldMatrix();
-         
-         
-//         PrintTools.info(""+matrix4fOfPlanarRegion.get(0, 0)+" "+matrix4fOfPlanarRegion.get(0, 1)+" "+matrix4fOfPlanarRegion.get(0, 2)+" "+matrix4fOfPlanarRegion.get(0, 3));
-//         PrintTools.info(""+matrix4fOfPlanarRegion.get(1, 0)+" "+matrix4fOfPlanarRegion.get(1, 1)+" "+matrix4fOfPlanarRegion.get(1, 2)+" "+matrix4fOfPlanarRegion.get(1, 3));
-//         PrintTools.info(""+matrix4fOfPlanarRegion.get(2, 0)+" "+matrix4fOfPlanarRegion.get(2, 1)+" "+matrix4fOfPlanarRegion.get(2, 2)+" "+matrix4fOfPlanarRegion.get(2, 3));
-//         PrintTools.info(""+matrix4fOfPlanarRegion.get(3, 0)+" "+matrix4fOfPlanarRegion.get(3, 1)+" "+matrix4fOfPlanarRegion.get(3, 2)+" "+matrix4fOfPlanarRegion.get(3, 3));
-         
-//         BoundingVolume bound = geometryOfPlanarRegion.getMesh().getBound();
-         
-         
+         //Geometry geometryOfPlanarRegion = createRegionGeometry(planarRegion, null);
+         if(isPlanarRegionWithinVolume(planarRegion))
+            planarRegionsWithinVolume.add(planarRegion);
+      }
+      
+      PrintTools.info("");
+      PrintTools.info("The number Of planar regions with in volume is "+planarRegionsWithinVolume.size());
+      for(int i=0;i<planarRegionsWithinVolume.size();i++)
+      {
          
       }
    }
