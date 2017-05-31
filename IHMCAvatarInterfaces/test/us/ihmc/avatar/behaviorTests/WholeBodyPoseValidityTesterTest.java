@@ -33,7 +33,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.GetSolarPanelBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
@@ -482,25 +481,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
-   public void getSolarPanelBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
-   {  
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-      
-      drcBehaviorTestHelper.updateRobotModel();
-                
-      GetSolarPanelBehavior getSolarPanelBehavior = new GetSolarPanelBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
-            
-      PrintTools.info("behavior In " );  
-      
-      drcBehaviorTestHelper.dispatchBehavior(getSolarPanelBehavior);            
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
-      
-      
-      PrintTools.info("behavior Out " );      
-   }
   
 
    private void setupKinematicsToolboxModule() throws IOException

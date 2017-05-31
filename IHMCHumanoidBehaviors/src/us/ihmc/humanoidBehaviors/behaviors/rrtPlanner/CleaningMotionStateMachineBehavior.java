@@ -2,9 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import java.util.ArrayList;
 
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -17,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior.CleaningMotionState;
@@ -31,7 +27,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEMeshDataInterpreter;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -45,7 +40,10 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<CleaningMotionState>
 {   
+   private int numberOfPlanar = 0;
    private GetSolarPanelBehavior getSolarPanelBehavior;
+   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
    private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
@@ -75,6 +73,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
       getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
       
@@ -95,12 +95,6 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    public void setUpStateMachine()
    {    
-      // condition check for the case that no solution is exist in the CONTROLPOINT_OPTIMIZATION state.
-      // In that case, the state transition should be to the DONE state.
-      
-      // In CONTROLPOINT_OPTIMIZATION, manually selected cleaning motion is put for test.
-      
-      
       BehaviorAction<CleaningMotionState> getSolarPanelAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.GET_SOLARPANEL, getSolarPanelBehavior)
       {
          @Override
@@ -187,19 +181,46 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             sendPacket(p1);
          }
       };
-            
-      statemachine.addStateWithDoneTransition(getSolarPanelAction, CleaningMotionState.CONTROLPOINT_OPTIMIZATION);
-            
-      statemachine.addStateWithDoneTransition(gotoReadyPoseAction, CleaningMotionState.CLEANING_MOTION);
-      statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.DONE);
       
+      
+      StateTransitionCondition yesPlanarRegion = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {            
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
+            return b;
+         }
+      };
+      
+      StateTransitionCondition noPlanarRegion = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {            
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            return b;
+         }
+      };
+      
+      
+      statemachine.addState(getSolarPanelAction);
+      getSolarPanelAction.addStateTransition(CleaningMotionState.CONTROLPOINT_OPTIMIZATION, yesPlanarRegion);
+      getSolarPanelAction.addStateTransition(CleaningMotionState.DONE, noPlanarRegion);
+      
+//      statemachine.addStateWithDoneTransition(getSolarPanelAction, CleaningMotionState.CONTROLPOINT_OPTIMIZATION);
+            
       statemachine.addState(controlPointOptimizationAction);            
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.GOTO_READYPOSE, yesSolutionCondition);
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.DONE, noSolutionCondition);
       
+      statemachine.addStateWithDoneTransition(gotoReadyPoseAction, CleaningMotionState.CLEANING_MOTION);
+      statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.DONE);
+      
       statemachine.addState(doneAction);
       
       statemachine.setStartState(CleaningMotionState.GET_SOLARPANEL);
+            
       PrintTools.info("setUpStateMachine done ");
    }
 
@@ -253,22 +274,13 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private boolean isOutsideOftheVolume(Point3D32 pointOfVertex)
    {
-      if(pointOfVertex.getX() > 1.5 || pointOfVertex.getX() < 0.5 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 1.5 || pointOfVertex.getZ() < 0.5)
+      if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
       {
-         PrintTools.info("This polygon is on outside of the volume ");
+         PrintTools.info("@@ This polygon is on outside of the volume ");
          return false;
       } 
       
       return true;
-   }
-      
-   private void requestPlanarRegions()
-   {
-      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(
-            RequestPlanarRegionsListMessage.RequestType.SINGLE_UPDATE);
-      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
-      sendPacket(requestPlanarRegionsListMessage);
-      sendPacket(requestPlanarRegionsListMessage);
    }
    
    private void sortOutSolarPanel(PlanarRegionsList planarRegionsList)
@@ -284,17 +296,27 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          PrintTools.info("Planar Region "+i);         
          
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         //Geometry geometryOfPlanarRegion = createRegionGeometry(planarRegion, null);
          if(isPlanarRegionWithinVolume(planarRegion))
             planarRegionsWithinVolume.add(planarRegion);
       }
       
+      numberOfPlanar = planarRegionsWithinVolume.size();
       PrintTools.info("");
-      PrintTools.info("The number Of planar regions with in volume is "+planarRegionsWithinVolume.size());
+      PrintTools.info("The number Of planar regions with in volume is " + numberOfPlanar);
       for(int i=0;i<planarRegionsWithinVolume.size();i++)
       {
+         PlanarRegion planarRegion = planarRegionsWithinVolume.get(i);
          
       }
+   }
+   
+   private void requestPlanarRegions()
+   {
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(
+            RequestPlanarRegionsListMessage.RequestType.SINGLE_UPDATE);
+      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+      sendPacket(requestPlanarRegionsListMessage);
+      sendPacket(requestPlanarRegionsListMessage);
    }
    
    private class GetSolarPanelBehavior extends AbstractBehavior
@@ -316,14 +338,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
             receivedPlanarRegionsList.set(true);
             
-            
-            
-            
-            
-            
             sortOutSolarPanel(planarRegionsList);
             
-            PrintTools.info("!!!!!!!!!!!!! "+ planarRegionsList.getNumberOfPlanarRegions());
+            PrintTools.info("getNumberOfPlanarRegions "+ planarRegionsList.getNumberOfPlanarRegions());
          }
          else
          {
@@ -361,6 +378,78 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
+         poseSolarPanel.setPosition(1.75, -1.1, 1.9);
+         quaternionSolarPanel.appendYawRotation(Math.PI*0.05);
+         quaternionSolarPanel.appendRollRotation(0.0);
+         quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+         poseSolarPanel.setOrientation(quaternionSolarPanel);
+         
+         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+         
+         // ********************************** get SolarPanel Info ********************************** //
+         // *********************************** get Cleaning Path *********************************** //
+
+         SolarPanelCleaningInfo.setSolarPanel(solarPanel);
+         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL);
+         SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
+         
+         TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+         // *********************************** get Cleaning Path *********************************** //
+         controlPointOptimizationBehavior.setRootNode(SolarPanelCleaningInfo.getNode());
+
+         PrintTools.info("Exit GetSolarPanelBehavior ");
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return receivedPlanarRegionsList.getBooleanValue();
+      }
+   }
+   
+   private class ManuallyPutSolarPanelBehavior extends AbstractBehavior
+   {
+      private boolean isDone = false;
+      
+      public ManuallyPutSolarPanelBehavior(CommunicationBridgeInterface communicationBridge)
+      {
+         super(communicationBridge);
+      }
+
+      @Override
+      public void doControl()
+      {            
+         isDone = true;
+      }
+
+      @Override
+      public void onBehaviorEntered()
+      {   
+         PrintTools.info("ManuallyPutSolarPanelBehavior");
+         
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+         // ********************************** get SolarPanel Info ********************************** //  
+         Pose poseSolarPanel = new Pose();
+         Quaternion quaternionSolarPanel = new Quaternion();
          poseSolarPanel.setPosition(0.75, -0.1, 0.9);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.05);
          quaternionSolarPanel.appendRollRotation(0.0);
@@ -371,26 +460,22 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
-         
-         
-         
+
          SolarPanelCleaningInfo.setSolarPanel(solarPanel);
          SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
-         PrintTools.info("cur Height is "+ fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23() +" "+ yoTime);
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
          // *********************************** get Cleaning Path *********************************** //
          controlPointOptimizationBehavior.setRootNode(SolarPanelCleaningInfo.getNode());
          
-
-         PrintTools.info("Exit GetSolarPanelBehavior ");
+         PrintTools.info("ManuallyPutSolarPanelBehavior Exited");
       }
 
       @Override
       public boolean isDone()
       {
-         return receivedPlanarRegionsList.getBooleanValue();
+         return isDone;
       }
    }
    
