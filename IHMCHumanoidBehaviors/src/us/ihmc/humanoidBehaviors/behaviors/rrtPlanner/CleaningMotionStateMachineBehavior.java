@@ -1,8 +1,22 @@
 package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
+import com.badlogic.gdx.math.collision.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior.CleaningMotionState;
@@ -12,15 +26,18 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFacotry;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEMeshDataInterpreter;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -36,10 +53,14 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory;
    
-   DoubleYoVariable yoTime;
-   FullHumanoidRobotModel fullRobotModel;
-   WholeBodyControllerParameters wholeBodyControllerParameters;
+   private DoubleYoVariable yoTime;
+   private FullHumanoidRobotModel fullRobotModel;
+   private WholeBodyControllerParameters wholeBodyControllerParameters;
       
+   
+   
+   private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
+   
    public enum CleaningMotionState
    {
       GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, DONE
@@ -64,6 +85,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       controlPointOptimizationBehavior
       = new ControlPointOptimizationStateMachineBehavior(communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
+      
+      
+      attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
       
       setUpStateMachine();
    }
@@ -188,10 +212,51 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    {
    }
    
+   private Geometry createRegionGeometry(PlanarRegion planarRegion, String geometryName)
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+      ModifiableMeshDataHolder modifiableMeshDataHolder = new ModifiableMeshDataHolder();
+
+      for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
+      {
+         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
+         MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
+         modifiableMeshDataHolder.add(polygon, true);
+      }
+
+      Mesh regionMesh = JMEMeshDataInterpreter.interpretMeshData(modifiableMeshDataHolder.createMeshDataHolder());
+      return new Geometry(geometryName, regionMesh);
+   }
+   
+   private void requestPlanarRegions()
+   {
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(
+            RequestPlanarRegionsListMessage.RequestType.SINGLE_UPDATE);
+      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+      sendPacket(requestPlanarRegionsListMessage);
+      sendPacket(requestPlanarRegionsListMessage);
+   }
+   
+   private void sortOutSolarPanel(PlanarRegionsList planarRegionsList)
+   {
+      for(int i=0;i<planarRegionsList.getNumberOfPlanarRegions();i++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+         Geometry geometryOfPlanarRegion = createRegionGeometry(planarRegion, null);
+         BoundingVolume bound = geometryOfPlanarRegion.getMesh().getBound();
+         //bound.
+         
+         
+         PrintTools.info("i ");
+      }
+   }
+   
    private class GetSolarPanelBehavior extends AbstractBehavior
    {
-      private boolean isDone = false;
-      
+      private final BooleanYoVariable receivedPlanarRegionsList = new BooleanYoVariable("ReceivedPlanarRegionsList", registry);
+      private PlanarRegionsList planarRegionsList;
+
       public GetSolarPanelBehavior(CommunicationBridgeInterface communicationBridge)
       {
          super(communicationBridge);
@@ -200,14 +265,31 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       @Override
       public void doControl()
       {            
-         setUpSolarPanel();
-         isDone = true;
+         if (planarRegionsListQueue.isNewPacketAvailable())
+         {
+            PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListQueue.getLatestPacket();
+            planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+            receivedPlanarRegionsList.set(true);
+            
+            
+            
+            sortOutSolarPanel(planarRegionsList);
+            
+            PrintTools.info("!!!!!!!!!!!!! "+ planarRegionsList.getNumberOfPlanarRegions());
+         }
+         else
+         {
+            requestPlanarRegions();
+         }
       }
 
       @Override
       public void onBehaviorEntered()
       {   
-         PrintTools.info("GetSolarPanelBehavior");
+         receivedPlanarRegionsList.set(false);
+         requestPlanarRegions();
+
+         PrintTools.info("Entered GetSolarPanelBehavior ");
       }
 
       @Override
@@ -252,14 +334,18 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
          // *********************************** get Cleaning Path *********************************** //
          controlPointOptimizationBehavior.setRootNode(SolarPanelCleaningInfo.getNode());
+         
+
+         PrintTools.info("Exit GetSolarPanelBehavior ");
       }
 
       @Override
       public boolean isDone()
       {
-         return isDone;
+         return receivedPlanarRegionsList.getBooleanValue();
       }
    }
+   
    
    private class TestDoneBehavior extends AbstractBehavior
    {

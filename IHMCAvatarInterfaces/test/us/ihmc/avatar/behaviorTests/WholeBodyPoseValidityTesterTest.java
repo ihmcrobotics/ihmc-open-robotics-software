@@ -16,7 +16,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -34,11 +33,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.GetSolarPanelBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.TimeDomain3DNode;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ValidNodesStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
@@ -63,6 +63,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
+import us.ihmc.simulationConstructionSetTools.util.environments.SolarPanelEnvironment;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -81,6 +82,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
    
+   private PacketCommunicator reaModuleCommunicator;
+   
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    SolarPanel solarPanel;
@@ -88,7 +91,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    public class SolarPanelCleaningEnvironment implements CommonAvatarEnvironmentInterface
    {
       private final CombinedTerrainObject3D EnvSet;
-
+      
       public SolarPanelCleaningEnvironment()
       {
          setUpSolarPanel();
@@ -136,7 +139,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");      
    }
 
    @After
@@ -175,10 +178,13 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
+      //CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
+      CommonAvatarEnvironmentInterface envrionment = new SolarPanelEnvironment();
 
       //drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.STAIRS, simulationTestingParameters, getRobotModel());
+      //drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
+      reaModuleCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.REA_MODULE_PORT, PacketDestination.REA_MODULE);
 
       setupKinematicsToolboxModule();
    }
@@ -454,7 +460,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       if(isKinematicsToolboxVisualizerEnabled)
          ThreadTools.sleep(13000);
       
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);
       
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -475,13 +481,33 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       PrintTools.info("behavior Out " );      
    }
+   
+   //@Test
+   public void getSolarPanelBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   {  
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();
+                
+      GetSolarPanelBehavior getSolarPanelBehavior = new GetSolarPanelBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+            
+      PrintTools.info("behavior In " );  
+      
+      drcBehaviorTestHelper.dispatchBehavior(getSolarPanelBehavior);            
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      
+      
+      
+      PrintTools.info("behavior Out " );      
+   }
   
 
    private void setupKinematicsToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
+      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
    }
    
    
