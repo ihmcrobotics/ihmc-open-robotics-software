@@ -166,9 +166,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 		addFootstep(new Point3D((radius + side.negateIfLeftSide(stepWidth/2)), 0.0, 0.0), new Quaternion(0.0, 0.0, Math.sin(Math.PI/4), Math.sin(Math.PI/4)), side, footMessage);
 		
 		controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-		drcSimulationTestHelper.send(footMessage);
+		drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 		drcSimulationTestHelper.send(leftHandMessage);
 		drcSimulationTestHelper.send(rightHandMessage);
+		drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+		drcSimulationTestHelper.send(footMessage);
 		double simulationTime = 1 * footMessage.footstepDataList.size() + 2.0;
 		
 		assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
