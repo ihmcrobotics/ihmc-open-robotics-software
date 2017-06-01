@@ -10,17 +10,21 @@ public class SwingStateEndMatrix extends DenseMatrix64F
    private final List<DoubleYoVariable> swingSplitFractions;
    private final List<DoubleYoVariable> transferSplitFractions;
 
+   private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
+   private final boolean blendFromInitial;
 
    public SwingStateEndMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable endOfSplineTime)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial)
    {
       super(4, 1);
 
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
+      this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
+      this.blendFromInitial = blendFromInitial;
    }
 
    public void reset()
@@ -45,6 +49,16 @@ public class SwingStateEndMatrix extends DenseMatrix64F
 
       set(2, 0, projection);
       set(3, 0, omega0 * projection);
+
+      if (blendFromInitial)
+      { // recurse backward from the upcoming corner point to the current corner point, then recurse back to the start of spline location
+         double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
+
+         projection = Math.exp(-omega0 * (timeOnExitCMP + splineDurationOnEntryCMP));
+
+         set(0, 0, projection);
+         set(1, 0, omega0 * projection);
+      }
    }
 }
 

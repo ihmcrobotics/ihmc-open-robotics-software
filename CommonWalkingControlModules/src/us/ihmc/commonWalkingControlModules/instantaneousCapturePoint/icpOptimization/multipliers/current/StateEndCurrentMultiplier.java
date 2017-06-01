@@ -34,16 +34,17 @@ public class StateEndCurrentMultiplier
    private final DoubleYoVariable velocityMultiplier;
 
    private final boolean clipTime;
+   private final boolean blendFromInitial;
 
    public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, boolean blendFromInitial, YoVariableRegistry registry)
    {
-      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, blendFromInitial, registry);
    }
 
    public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix, EfficientCubicDerivativeMatrix cubicDerivativeMatrix,
-         String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         String yoNamePrefix, boolean clipTime, boolean blendFromInitial, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "StateEndCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "StateEndCurrentVelocityMultiplier", registry);
@@ -55,6 +56,7 @@ public class StateEndCurrentMultiplier
       this.endOfSplineTime = endOfSplineTime;
 
       this.clipTime = clipTime;
+      this.blendFromInitial = blendFromInitial;
 
       if (cubicMatrix == null)
       {
@@ -79,7 +81,7 @@ public class StateEndCurrentMultiplier
       }
 
       transferStateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
-      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, endOfSplineTime);
+      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial);
    }
 
    public void reset()

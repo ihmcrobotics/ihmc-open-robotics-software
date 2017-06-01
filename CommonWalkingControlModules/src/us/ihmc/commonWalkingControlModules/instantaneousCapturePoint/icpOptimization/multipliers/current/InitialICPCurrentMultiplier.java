@@ -45,13 +45,14 @@ public class InitialICPCurrentMultiplier
    /** multiplier of the initial ICP to compute the current ICP velocity. */
    private final DoubleYoVariable velocityMultiplier;
 
-   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, YoVariableRegistry registry)
+   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial,
+         String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, registry);
+      this(startOfSplineTime, endOfSplineTime, null, null, blendFromInitial, yoNamePrefix, registry);
    }
 
    public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix,
-         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, boolean blendFromInitial, String yoNamePrefix, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentVelocityMultiplier", registry);
@@ -82,7 +83,7 @@ public class InitialICPCurrentMultiplier
       }
 
       transferInitialICPMatrix = new TransferInitialICPMatrix();
-      swingInitialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime);
+      swingInitialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, blendFromInitial);
    }
 
    /**

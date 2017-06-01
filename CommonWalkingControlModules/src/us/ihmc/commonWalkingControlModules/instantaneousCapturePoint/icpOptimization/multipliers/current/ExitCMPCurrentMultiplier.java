@@ -51,14 +51,15 @@ public class ExitCMPCurrentMultiplier
    private final boolean clipTime;
 
    public ExitCMPCurrentMultiplier( List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, boolean blendFromInitial,
+         YoVariableRegistry registry)
    {
-      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, blendFromInitial, registry);
    }
 
    public ExitCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix,
-         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, boolean blendFromInitial, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentVelocityMultiplier", registry);
@@ -93,7 +94,7 @@ public class ExitCMPCurrentMultiplier
       }
 
       transferExitCMPMatrix = new TransferExitCMPMatrix(swingSplitFractions, transferSplitFractions);
-      swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, endOfSplineTime);
+      swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial);
    }
 
    /**
