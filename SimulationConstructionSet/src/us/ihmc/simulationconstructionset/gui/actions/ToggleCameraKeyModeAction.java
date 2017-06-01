@@ -31,3 +31,4 @@ public class ToggleCameraKeyModeAction extends SCSAction
       executor.toggleCameraKeyMode();
    }
 }
+

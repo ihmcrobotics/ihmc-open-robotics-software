@@ -14,8 +14,6 @@ import us.ihmc.simulationconstructionset.gui.SCSAction;
 public class AddKeyPointAction extends SCSAction
 {
    private static final long serialVersionUID = -2830335620118067620L;
-   private URL iconURL = AddKeyPointAction.class.getClassLoader().getResource("icons/setKey.gif");
-   private ImageIcon icon = new ImageIcon(iconURL);
    private AddKeyPointCommandExecutor executor;
 
    public AddKeyPointAction(AddKeyPointCommandExecutor executor)
@@ -28,8 +26,6 @@ public class AddKeyPointAction extends SCSAction
       );
 
       this.executor = executor;
-      
-      this.putValue(Action.SMALL_ICON, icon);
    }
 
    public void doAction()
