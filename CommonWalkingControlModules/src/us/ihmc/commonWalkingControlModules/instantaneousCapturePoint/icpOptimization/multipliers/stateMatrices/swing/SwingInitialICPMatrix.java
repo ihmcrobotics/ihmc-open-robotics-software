@@ -1,19 +1,23 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SwingInitialICPMatrix extends DenseMatrix64F
 {
    private final DoubleYoVariable startOfSplineTime;
-   private final boolean blendFromInitial;
 
-   public SwingInitialICPMatrix(DoubleYoVariable startOfSplineTime, boolean blendFromInitial)
+   private final boolean blendFromInitial;
+   private final double minimumBlendingTime;
+
+   public SwingInitialICPMatrix(DoubleYoVariable startOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
       this.startOfSplineTime = startOfSplineTime;
       this.blendFromInitial = blendFromInitial;
+      this.minimumBlendingTime = minimumBlendingTime;
    }
 
    public void reset()
@@ -26,6 +30,19 @@ public class SwingInitialICPMatrix extends DenseMatrix64F
       if (blendFromInitial)
       {
          zero();
+
+         if (startOfSplineTime.getDoubleValue() < minimumBlendingTime)
+         { // haven't phased in completely yet, so its a combination of both recursion and projection
+            double phaseAtStart = startOfSplineTime.getDoubleValue() / minimumBlendingTime;
+
+            double recursionMultiplier = 0.0;
+            double projectionMultiplier = Math.exp(omega0 * startOfSplineTime.getDoubleValue());
+
+            double projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseAtStart);
+
+            set(0, 0, projection);
+            set(1, 0, omega0 * projection);
+         }
       }
       else
       {

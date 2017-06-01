@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.List;
@@ -12,10 +13,12 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
 
    private final DoubleYoVariable endOfSplineTime;
    private final DoubleYoVariable startOfSplineTime;
+
    private final boolean blendFromInitial;
+   private final double minimumBlendingTime;
 
    public SwingExitCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
@@ -25,6 +28,7 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
       this.blendFromInitial = blendFromInitial;
+      this.minimumBlendingTime = minimumBlendingTime;
    }
 
    public void reset()
@@ -54,7 +58,19 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
       {
          double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
 
-         projection = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+         if (startOfSplineTime.getDoubleValue() >= minimumBlendingTime)
+         {
+            projection = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+         }
+         else
+         { // haven't phased in completely yet, so its a combination of both recursion and projection
+            double phaseAtStart = startOfSplineTime.getDoubleValue() / minimumBlendingTime;
+
+            double recursionMultiplier = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+            double projectionMultiplier = 0.0;
+
+            projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseAtStart);
+         }
 
          set(0, 0, projection);
          set(1, 0, omega0 * projection);

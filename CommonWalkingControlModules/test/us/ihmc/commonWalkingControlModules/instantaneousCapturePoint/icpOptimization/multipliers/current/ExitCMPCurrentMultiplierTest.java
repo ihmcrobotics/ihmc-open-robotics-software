@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingExitCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferExitCMPMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -19,6 +21,7 @@ import java.util.Random;
 public class ExitCMPCurrentMultiplierTest
 {
    private static final double blendingFraction = 0.5;
+   private static final double minimumBlendingTime = 0.05;
    private static final double epsilon = 0.0001;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -58,7 +61,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       TransferExitCMPMatrix exitCMPMatrix = new TransferExitCMPMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -144,7 +147,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       TransferExitCMPMatrix exitCMPMatrix = new TransferExitCMPMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -227,7 +230,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -292,7 +295,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -360,7 +363,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, doubleSupportDurations, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -440,8 +443,8 @@ public class ExitCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, doubleSupportDurations, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -478,8 +481,22 @@ public class ExitCMPCurrentMultiplierTest
 
          exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
-         Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         double nextTransferOnExit = nextTransferRatio * doubleSupportDurations.get(1).getDoubleValue();
+         double swingOnExit = (1.0 - currentSwingRatio) * currentSingleSupportDuration;
+         double timeOnExit = nextTransferOnExit + swingOnExit;
+
+         double swingOnEntry = currentSwingRatio * currentSingleSupportDuration;
+
+         double recursion = Math.exp(omega * (timeInCurrentState - swingOnEntry)) * (1.0 - Math.exp(-omega * timeOnExit));
+
+         double blendingTime = Math.max(blendingFraction * startOfSpline, minimumBlendingTime);
+         double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
+
+         double positionMultiplier = InterpolationTools.linearInterpolate(0.0, recursion, alpha);
+
+
+         Assert.assertEquals(positionMultiplier, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * positionMultiplier, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(exitCMPCurrentMultiplier.getPositionMultiplier()));
          Assert.assertFalse(Double.isNaN(exitCMPCurrentMultiplier.getVelocityMultiplier()));
       }
@@ -523,9 +540,9 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
-      SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false, minimumBlendingTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
@@ -620,9 +637,9 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
-      SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true);
+      SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true, minimumBlendingTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
@@ -717,7 +734,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -804,7 +821,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -888,7 +905,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -964,7 +981,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
