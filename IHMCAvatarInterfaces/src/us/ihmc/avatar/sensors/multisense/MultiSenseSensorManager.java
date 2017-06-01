@@ -62,7 +62,6 @@ public class MultiSenseSensorManager
 
    public void initializeParameterListeners()
    {
-      System.out.println("initialise parameteres--------------------------------------------------------------------------------");
       if (multiSenseParameterSetter != null)
       {
          multiSenseParameterSetter.initializeParameterListeners();
