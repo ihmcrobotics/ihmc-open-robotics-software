@@ -572,7 +572,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       
       pelvisPosition.setToZero(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
-      assertEquals(finalHeight, pelvisPosition.getZ(), 1e-3);
+      assertEquals(finalHeight, pelvisPosition.getZ(), 0.006);
       assertCenterOfMassHeightManagerIsInState(scs, PelvisHeightControlMode.USER);
    }
    
