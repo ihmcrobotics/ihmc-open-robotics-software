@@ -24,15 +24,17 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends QueueableMessage<T>
       implements Transformable, FrameBasedMessage
 {
-   @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
+   @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
+   /** the selection matrix for each axis **/
    @RosIgnoredField
    public SelectionMatrix3DMessage linearSelectionMatrix;
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
+   /** the weight matrix for each axis **/
    @RosIgnoredField
    public WeightMatrix3DMessage linearWeightMatrix;
 
@@ -61,22 +63,31 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       }
    }
 
-   public AbstractEuclideanTrajectoryMessage(T se3TrajectoryMessage)
+   public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
    {
-      int numberOfPoints = se3TrajectoryMessage.getNumberOfTrajectoryPoints();
+      int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(se3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
+         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(trajectoryMessage.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(se3TrajectoryMessage.getExecutionMode(), se3TrajectoryMessage.getPreviousMessageId());
-      setUniqueId(se3TrajectoryMessage.getUniqueId());
-      setDestination(se3TrajectoryMessage.getDestination());
-      frameInformation.set(se3TrajectoryMessage);
-
+      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
+      setUniqueId(trajectoryMessage.getUniqueId());
+      setDestination(trajectoryMessage.getDestination());
+      linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
+      frameInformation.set(trajectoryMessage);
+      linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
+      useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
+      controlFramePose.set(trajectoryMessage.controlFramePose);
    }
 
+   /**
+    * set a single point
+    * @param trajectoryTime the duration of the trajectory
+    * @param desiredPosition the desired end position
+    * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
+    */
    public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -86,27 +97,56 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
    }
 
+   /**
+    * set a single point
+    * @param trajectoryTime the duration of the trajectory
+    * @param desiredPosition the desired end position
+    * @param trajectoryReferenceFrameId the frame the trajectory will be executed in
+    */
    public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
    }
 
+   /**
+    * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
+    * @param the number of trajectory points in this message
+    */
    public AbstractEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
+   /** 
+    * set this message to the have the same contents of the other message
+    * @param other the other message
+    */
    public void set(T other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      int numberOfPoints = other.getNumberOfTrajectoryPoints();
+      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
+      for (int i = 0; i < numberOfPoints; i++)
+      {
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
+      }
+
       setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
+      linearSelectionMatrix.set(other.linearSelectionMatrix);
       frameInformation.set(other);
+      linearWeightMatrix.set(other.linearWeightMatrix);
+      useCustomControlFrame = other.useCustomControlFrame;
+      controlFramePose.set(other.controlFramePose);
    }
 
+   /**
+    * Get the trajectory points from this message
+    * @param trajectoryPointListToPack
+    */
    public void getTrajectoryPoints(FrameEuclideanTrajectoryPointList trajectoryPointListToPack)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
@@ -167,6 +207,9 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new EuclideanTrajectoryPointMessage(time, position, linearVelocity);
    }
 
+   /**
+    * transform all the points
+    */
    @Override
    public void applyTransform(Transform transform)
    {
@@ -229,6 +272,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       return taskspaceTrajectoryPoints.length;
    }
 
+   /**
+    * Returns the internal mutable list of points, modifying this list changes the internal message
+    * @return
+    */
    public final EuclideanTrajectoryPointMessage[] getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
