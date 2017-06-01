@@ -525,7 +525,7 @@ public class StateEndCurrentMultiplierTest
 
          double recursion = Math.exp(omega * (timeInCurrentState - timeOnExit - currentSwingOnEntry));
 
-         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double blendingTime = Math.max(blendingFraction * startOfSpline, minimumBlendingTime);
          double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
 
          double positionMultiplier = InterpolationTools.linearInterpolate(0.0, recursion, alpha);

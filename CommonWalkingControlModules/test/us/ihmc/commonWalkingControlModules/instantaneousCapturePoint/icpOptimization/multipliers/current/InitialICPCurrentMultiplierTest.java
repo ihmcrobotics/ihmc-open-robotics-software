@@ -541,7 +541,7 @@ public class InitialICPCurrentMultiplierTest
 
          initialICPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
-         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double blendingTime = Math.max(blendingFraction * startOfSpline, minimumBlendingTime);
          double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
 
          double projection = Math.exp(omega * timeInCurrentState);
