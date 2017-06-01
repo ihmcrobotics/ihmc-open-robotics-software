@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.config.EntryBoxGroupSelector;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class SelectEntryBoxGroupAction extends SCSAction
 {
    private String name;

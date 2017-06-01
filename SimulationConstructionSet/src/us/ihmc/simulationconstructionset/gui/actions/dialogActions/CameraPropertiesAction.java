@@ -4,9 +4,9 @@ import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.CameraPropertiesDialogConstructor;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class CameraPropertiesAction extends SCSAction
 {
    private final CameraPropertiesDialogConstructor constructor;

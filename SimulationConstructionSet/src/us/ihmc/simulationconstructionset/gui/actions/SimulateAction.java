@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import us.ihmc.simulationconstructionset.commands.SimulateCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+@SuppressWarnings("serial")
 public class SimulateAction extends SCSAction
 {
    private final SimulateCommandExecutor executor;

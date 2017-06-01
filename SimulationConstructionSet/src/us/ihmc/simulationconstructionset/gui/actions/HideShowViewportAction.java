@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset.gui.actions;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class HideShowViewportAction extends SCSAction implements ViewportSelectorCommandListener
 {
    private ViewportSelectorCommandExecutor viewportSelector;

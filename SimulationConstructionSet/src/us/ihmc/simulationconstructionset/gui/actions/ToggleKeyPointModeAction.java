@@ -3,11 +3,11 @@ package us.ihmc.simulationconstructionset.gui.actions;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.net.URL;
 
+@SuppressWarnings("serial")
 public class ToggleKeyPointModeAction extends SCSAction implements ToggleKeyPointModeCommandListener
 {
    private URL iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKey.gif");
