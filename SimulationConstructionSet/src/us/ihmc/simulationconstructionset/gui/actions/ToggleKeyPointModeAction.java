@@ -67,6 +67,4 @@ public class ToggleKeyPointModeAction extends SCSAction implements ToggleKeyPoin
       if (executor != null) executor.closeAndDispose();
       executor = null;
    }
-
-
 }
