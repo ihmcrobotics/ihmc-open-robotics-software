@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-import java.awt.Container;
-
-import javax.swing.JFrame;
-
 import javafx.application.Platform;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 import us.ihmc.simulationconstructionset.gui.dialogs.DataBufferPropertiesDialog;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class DataBufferPropertiesDialogGenerator implements DataBufferPropertiesDialogConstructor
 {
