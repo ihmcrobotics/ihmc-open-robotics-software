@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingEntryCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferEntryCMPMatrix;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -29,6 +31,8 @@ public class EntryCMPCurrentMultiplier
 
    /** List of transfer split fractions that repartition the transfer phase around the corner point. */
    private final List<DoubleYoVariable> transferSplitFractions;
+   /** List of swing split fractions that repartition the swing phase around the corner point. */
+   private final List<DoubleYoVariable> swingSplitFractions;
 
    /** time in swing state for the start of using the spline */
    public final DoubleYoVariable startOfSplineTime;
@@ -52,21 +56,27 @@ public class EntryCMPCurrentMultiplier
    /** whether or not to clip the time remaining to always be position */
    private final boolean clipTime;
 
+   private final boolean blendFromInitial;
+   private final double blendingFraction;
+   private final double minimumBlendingTime;
+
    public EntryCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, String yoNamePrefix, boolean clipTime,
-         YoVariableRegistry registry)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, String yoNamePrefix,
+         boolean clipTime, boolean blendFromInitial, double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
-      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, null, null, yoNamePrefix, clipTime, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, null, null, yoNamePrefix, clipTime,
+            blendFromInitial, blendingFraction, minimumBlendingTime, registry);
    }
 
    public EntryCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, EfficientCubicMatrix cubicMatrix,
-         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime,
-         YoVariableRegistry registry)
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, boolean blendFromInitial, double blendingFraction,
+         double minimumBlendingTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "EntryCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "EntryCMPCurrentVelocityMultiplier", registry);
 
+      this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
       this.startOfSplineTime = startOfSplineTime;
@@ -74,6 +84,9 @@ public class EntryCMPCurrentMultiplier
       this.totalTrajectoryTime = totalTrajectoryTime;
 
       this.clipTime = clipTime;
+      this.blendFromInitial = blendFromInitial;
+      this.blendingFraction = blendingFraction;
+      this.minimumBlendingTime = minimumBlendingTime;
 
       if (cubicMatrix == null)
       {
@@ -98,7 +111,7 @@ public class EntryCMPCurrentMultiplier
       }
 
       transferEntryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
-      swingEntryCMPMatrix = new SwingEntryCMPMatrix(startOfSplineTime);
+      swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, blendFromInitial, minimumBlendingTime);
    }
 
    /**
@@ -152,7 +165,7 @@ public class EntryCMPCurrentMultiplier
       else
       {
          if (useTwoCMPs)
-            computeSegmentedSwing(timeInState, omega0);
+            computeSegmentedSwing(singleSupportDurations, timeInState, omega0);
          else
             computeInSwingOneCMP(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       }
@@ -247,7 +260,22 @@ public class EntryCMPCurrentMultiplier
       if (clipTime)
          timeRemaining = Math.max(timeRemaining, 0.0);
 
-      positionMultiplier.set(1.0 - Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining)));
+      if (blendFromInitial)
+      {
+         double recursionMultiplier = 1.0 - Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining));
+         double projectionMultiplier = 1.0 - Math.exp(omega0 * timeInState);
+
+         double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
+         double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
+
+         double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
+         positionMultiplier.set(multiplier);
+      }
+      else
+      {
+         positionMultiplier.set(1.0 - Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining)));
+      }
    }
 
    /**
@@ -269,14 +297,14 @@ public class EntryCMPCurrentMultiplier
     * @param timeInState time in the swing state.
     * @param omega0 natural frequency of the inverted pendulum
     */
-   public void computeSegmentedSwing(double timeInState, double omega0)
+   public void computeSegmentedSwing(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         computeSwingFirstSegment(timeInState, omega0);
+         computeSwingFirstSegment(singleSupportDurations, timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          computeSwingThirdSegment();
       else
-         computeSwingSecondSegment(timeInState, omega0);
+         computeSwingSecondSegment(singleSupportDurations, timeInState, omega0);
    }
 
 
@@ -289,9 +317,25 @@ public class EntryCMPCurrentMultiplier
     * @param timeInState time in the swing state
     * @param omega0 natural frequency of the inverted pendulum.
     */
-   public void computeSwingFirstSegment(double timeInState, double omega0)
+   public void computeSwingFirstSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
-      positionMultiplier.set(1.0 - Math.exp(omega0 * timeInState));
+      if (blendFromInitial)
+      {
+         double projectionMultiplier = 1.0 - Math.exp(omega0 * timeInState);
+         double swingTimeOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+         double recursionMultiplier = 1.0 - Math.exp(omega0 * (timeInState - swingTimeOnEntryCMP));
+
+         double blendingTime = blendingFraction * startOfSplineTime.getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
+         double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
+
+         double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
+         positionMultiplier.set(multiplier);
+      }
+      else
+      {
+         positionMultiplier.set(1.0 - Math.exp(omega0 * timeInState));
+      }
    }
 
    /**
@@ -302,9 +346,9 @@ public class EntryCMPCurrentMultiplier
     * @param timeInState time in the swing state.
     * @param omega0 natural frequency of the inverted pendulum.
     */
-   public void computeSwingSecondSegment(double timeInState, double omega0)
+   public void computeSwingSecondSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
-      swingEntryCMPMatrix.compute(omega0);
+      swingEntryCMPMatrix.compute(singleSupportDurations, omega0);
 
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();

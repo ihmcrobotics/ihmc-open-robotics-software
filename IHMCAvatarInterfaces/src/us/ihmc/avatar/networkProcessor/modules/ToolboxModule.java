@@ -95,10 +95,8 @@ public abstract class ToolboxModule
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
 
-      if (startYoVariableServer)
-         executorService = Executors.newScheduledThreadPool(2, threadFactory);
-      else
-         executorService = Executors.newScheduledThreadPool(1, threadFactory);
+
+      executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
       activeMessageSource.set(null);
       timeWithoutInputsBeforeGoingToSleep.set(0.5);

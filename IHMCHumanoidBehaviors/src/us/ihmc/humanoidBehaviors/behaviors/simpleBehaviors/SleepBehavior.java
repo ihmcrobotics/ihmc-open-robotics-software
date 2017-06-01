@@ -8,7 +8,7 @@ import us.ihmc.robotics.time.YoStopwatch;
 public class SleepBehavior extends AbstractBehavior
 {
    private final DoubleYoVariable sleepTime;
-   private final YoStopwatch timer;
+   private final YoStopwatch stopwatch;
 
    public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -22,7 +22,7 @@ public class SleepBehavior extends AbstractBehavior
       this.sleepTime = new DoubleYoVariable("sleepTime", registry);
       this.sleepTime.set(sleepTime);
 
-      timer = new YoStopwatch(yoTime);
+      stopwatch = new YoStopwatch(yoTime);
    }
 
    @Override
@@ -43,13 +43,13 @@ public class SleepBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return (timer.totalElapsed() > sleepTime.getDoubleValue());
+      return (stopwatch.totalElapsed() > sleepTime.getDoubleValue());
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      timer.reset();
+      stopwatch.reset();
    }
 
    @Override
@@ -60,10 +60,12 @@ public class SleepBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
+      stopwatch.suspend();
    }
 
    @Override
    public void onBehaviorResumed()
    {
+      stopwatch.resume();
    }
 }

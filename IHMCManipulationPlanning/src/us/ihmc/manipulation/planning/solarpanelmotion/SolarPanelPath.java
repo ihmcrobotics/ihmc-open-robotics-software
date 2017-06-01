@@ -22,7 +22,21 @@ public class SolarPanelPath
       wayPoses.add(startPose);
       arrivalTime.add(0.0);
    }
-
+   
+   public SolarPanelCleaningPose getStartPose()
+   {
+      return wayPoses.get(0);
+   }
+   
+   public SolarPanel getSolarPanel()
+   {
+      return wayPoses.get(0).getSolarPanel();
+   }
+   
+   public int getNumerOfLinearPath()
+   {
+      return linearPath.size();
+   }
    public ArrayList<Double> getArrivalTime()
    {
       return arrivalTime;

@@ -55,8 +55,13 @@ public class SolarPanelCleaningPose
       this.wCoordinate = w;
       this.zRotation = zRotation;
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   } 
+   
+   public SolarPanel getSolarPanel()
+   {
+      return solarPanel;
    }
-
+   
    public void setUcoordinate(double u)
    {
       this.uCoordinate = u;
@@ -119,15 +124,15 @@ public class SolarPanelCleaningPose
       return pose;
    }
 
-   public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
-   {
-      Point3D positionToWorld = new Point3D(getDesiredHandPosition());
-      Quaternion orientationToWorld = new Quaternion(getDesiredHandOrientation());
-
-      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld, ReferenceFrame.getWorldFrame());
-
-      return handMessage;
-   }
+//   public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
+//   {
+//      Point3D positionToWorld = new Point3D(getDesiredHandPosition());
+//      Quaternion orientationToWorld = new Quaternion(getDesiredHandOrientation());
+//
+//      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld, ReferenceFrame.getWorldFrame());
+//
+//      return handMessage;
+//   }
 
    public Point3D getDesiredHandPosition()
    {

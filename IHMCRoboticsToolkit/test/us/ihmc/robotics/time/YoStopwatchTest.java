@@ -66,6 +66,10 @@ public class YoStopwatchTest
       double sleepTime3 = 0.3;
       yoTime.add(sleepTime3);
       
+      stopwatch.suspend();
+      yoTime.add(1000.0);
+      stopwatch.resume();
+      
       lapElapsed = stopwatch.lapElapsed();
       totalElapsed = stopwatch.totalElapsed();
       assertEquals("lapElapsed incorrect", sleepTime3, lapElapsed, 1e-2);

@@ -74,8 +74,9 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      EndToEndTestTools.assertNumberOfPoints(pelvisName, 2, scs);
-      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, scs, epsilon);
+      String postFix = "Orientation";
+      EndToEndTestTools.assertNumberOfPoints(pelvisName + postFix, 2, scs);
+      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName + postFix, 1, waypoint, scs, epsilon);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
@@ -184,11 +185,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      EndToEndTestTools.assertNumberOfPoints(pelvisName, numberOfPoints + 1, scs);
+      String postFix = "Orientation";
+      EndToEndTestTools.assertNumberOfPoints(pelvisName + postFix, numberOfPoints + 1, scs);
       for (int point = 1; point < RigidBodyTaskspaceControlState.maxPointsInGenerator; point++)
       {
          SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(point - 1);
-         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, point, waypoint, scs, epsilon);
+         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName + postFix, point, waypoint, scs, epsilon);
       }
 
       double simulationTime = timePerPoint * numberOfPoints + 0.5;
