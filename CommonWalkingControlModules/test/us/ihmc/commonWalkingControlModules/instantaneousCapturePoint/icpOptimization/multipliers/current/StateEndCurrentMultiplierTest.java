@@ -18,6 +18,7 @@ import java.util.Random;
 
 public class StateEndCurrentMultiplierTest
 {
+   private static final double blendingFraction = 0.5;
    private static final double epsilon = 0.0001;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -57,7 +58,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions,
-            startOfSplineTime, endOfSplineTime, "", true, false, registry);
+            startOfSplineTime, endOfSplineTime, "", true, false, blendingFraction, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -145,7 +146,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions,
-            startOfSplineTime, endOfSplineTime, "", true, true, registry);
+            startOfSplineTime, endOfSplineTime, "", true, true, blendingFraction, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -230,7 +231,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, registry);
+            endOfSplineTime, "", true, false, blendingFraction, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -313,7 +314,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, registry);
+            endOfSplineTime, "", true, true, blendingFraction, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -399,7 +400,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, registry);
+            endOfSplineTime, "", true, false, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -478,7 +479,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, registry);
+            endOfSplineTime, "", true, true, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -558,7 +559,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, registry);
+            endOfSplineTime, "", true, false, blendingFraction, registry);
 
       SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -655,7 +656,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, registry);
+            endOfSplineTime, "", true, true, blendingFraction, registry);
 
       SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -752,7 +753,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, registry);
+            endOfSplineTime, "", true, false, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -836,7 +837,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, registry);
+            endOfSplineTime, "", true, true, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -917,7 +918,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, registry);
+            endOfSplineTime, "", true, false, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -996,7 +997,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, registry);
+            endOfSplineTime, "", true, true, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
