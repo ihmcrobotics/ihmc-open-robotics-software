@@ -14,6 +14,7 @@ import javax.swing.*;
  *
  * @author Carson Wilber
  */
+@SuppressWarnings("serial")
 abstract public class SCSAction extends AbstractAction implements EventHandler<javafx.event.ActionEvent> {
     String iconFilename;
 
