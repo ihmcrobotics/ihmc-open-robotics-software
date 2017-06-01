@@ -194,13 +194,19 @@ public class SwingStateEndMatrixTest
          double nextTransferOnExit = transferRatio2 * doubleSupportDuration2;
          double timeOnExit = currentSwingOnExit + nextTransferOnExit;
          double currentSplineOnExit = endOfSpline - currentSwingOnEntry;
+         double currentSplineOnEntry = currentSwingOnEntry - startOfSpline;
 
          double projectionTime = currentSplineOnExit - timeOnExit;
          double projection = Math.exp(omega0 * projectionTime);
 
+         double initialProjectionTime = timeOnExit + currentSplineOnEntry;
+         double initialProjection = Math.exp(-omega0 * initialProjectionTime);
+
          swingStateEndMatrix.compute(singleSupportDurations, doubleSupportDurations, omega0);
 
          shouldBe.zero();
+         shouldBe.set(0, 0, initialProjection);
+         shouldBe.set(1, 0, omega0 * initialProjection);
          shouldBe.set(2, 0, projection);
          shouldBe.set(3, 0, omega0 * projection);
 
