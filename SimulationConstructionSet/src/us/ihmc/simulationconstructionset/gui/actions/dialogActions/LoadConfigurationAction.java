@@ -41,6 +41,5 @@ public class LoadConfigurationAction extends SCSAction
    public void loadGUIConfigurationFile(File file)
    {
       constructor.loadGUIConfigurationFile(file);
-      
    }
 }
