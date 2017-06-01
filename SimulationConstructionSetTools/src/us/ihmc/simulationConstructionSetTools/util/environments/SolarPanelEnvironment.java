@@ -19,12 +19,13 @@ public class SolarPanelEnvironment implements CommonAvatarEnvironmentInterface
    private final float SOLAR_WIDTH = 0.635f;
    private final float SOLAR_LENGTH = 0.635f;
    private final float SOLAR_HEIGHT = 0.025f;
-   private final float SOLAR_GROUND_HEIGHT = 1f;
+   private final float SOLAR_GROUND_HEIGHT = 0.9f;
    
    private final float PITCH = -0.523598667f;   
    private final float YAW = 0.174532889f;
    
-   private final float FORWARD_OFFSET = 1f;
+   private final float FORWARD_OFFSET_X = 0.76f;
+   private final float FORWARD_OFFSET_Y = -0.05f;
    
 
 
@@ -40,7 +41,7 @@ public class SolarPanelEnvironment implements CommonAvatarEnvironmentInterface
       //    linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
      //
     
-      linkGraphics.translate(new Vector3D(FORWARD_OFFSET, 0, SOLAR_GROUND_HEIGHT));
+      linkGraphics.translate(new Vector3D(FORWARD_OFFSET_X, FORWARD_OFFSET_Y, SOLAR_GROUND_HEIGHT));
       linkGraphics.rotate(YAW, new Vector3D(0, 0, 1));
       linkGraphics.rotate(PITCH, new Vector3D(0, 1, 0));
       linkGraphics.scale(new Vector3D(SOLAR_WIDTH,SOLAR_LENGTH,SOLAR_HEIGHT));

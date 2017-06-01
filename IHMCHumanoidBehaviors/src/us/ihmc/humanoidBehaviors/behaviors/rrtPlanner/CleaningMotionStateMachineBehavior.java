@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SquareFittingFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -41,6 +42,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<CleaningMotionState>
 {   
    private int numberOfPlanar = 0;
+   private PlanarRegion planarRegion;
    private GetSolarPanelBehavior getSolarPanelBehavior;
    //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
@@ -229,11 +231,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    {
       // TODO Auto-generated method stub
    }
-      
-   private void setUpSolarPanel()
-   {
-   }
-   
+     
    private boolean isPlanarRegionWithinVolume(PlanarRegion planarRegion)
    {
       boolean isAllNullPolygon = true;
@@ -301,13 +299,15 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       }
       
       numberOfPlanar = planarRegionsWithinVolume.size();
+      
       PrintTools.info("");
       PrintTools.info("The number Of planar regions with in volume is " + numberOfPlanar);
-      for(int i=0;i<planarRegionsWithinVolume.size();i++)
+      
+      if(numberOfPlanar == 1)
       {
-         PlanarRegion planarRegion = planarRegionsWithinVolume.get(i);
-         
+         planarRegion = planarRegionsWithinVolume.get(0);                  
       }
+
    }
    
    private void requestPlanarRegions()
@@ -376,15 +376,23 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       public void onBehaviorExited()
       {           
          // ********************************** get SolarPanel Info ********************************** //  
+         
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(1.75, -1.1, 1.9);
+         poseSolarPanel.setPosition(0.75, -0.1, 0.9);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.05);
          quaternionSolarPanel.appendRollRotation(0.0);
          quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
          poseSolarPanel.setOrientation(quaternionSolarPanel);
          
          SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+         
+         System.out.println(solarPanel.getCenterPose());
+         
+         
+         SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
+         solarPanel = squareFittingFactory.getSolarPanel();
+         System.out.println(solarPanel.getCenterPose());
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
@@ -394,7 +402,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+         
          // *********************************** get Cleaning Path *********************************** //
+         
          controlPointOptimizationBehavior.setRootNode(SolarPanelCleaningInfo.getNode());
 
          PrintTools.info("Exit GetSolarPanelBehavior ");
