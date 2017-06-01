@@ -4,6 +4,7 @@ import java.awt.Container;
 
 import javax.swing.JFrame;
 
+import javafx.application.Platform;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 import us.ihmc.simulationconstructionset.gui.dialogs.DataBufferPropertiesDialog;
@@ -26,7 +27,9 @@ public class DataBufferPropertiesDialogGenerator implements DataBufferProperties
    @Override
    public void constructDialog()
    {
-      new DataBufferPropertiesDialog(parentContainer, frame, dataBuffer, listener);
+      Platform.runLater(() -> {
+         new DataBufferPropertiesDialog(parentContainer, frame, dataBuffer, listener);
+      });
    }
 
    @Override

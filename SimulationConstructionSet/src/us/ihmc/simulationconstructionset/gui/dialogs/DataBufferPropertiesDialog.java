@@ -1,260 +1,193 @@
 package us.ihmc.simulationconstructionset.gui.dialogs;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-
-import javafx.embed.swing.JFXPanel;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
+import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
+import javafx.stage.Stage;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 
-public class DataBufferPropertiesDialog extends JDialog implements ActionListener, EventHandler {
-    private static final long serialVersionUID = 3689240296926827447L;
-    private JTextField maxTextField, currentTextField;
-    private JRadioButton wrapButton, enlargeButton;
+import javax.swing.*;
+import java.awt.*;
+
+public class DataBufferPropertiesDialog extends Stage implements EventHandler {
+    private TextField maxTextField, currentTextField;
+    private RadioButton wrapButton, enlargeButton;
 
     private int newMaxVal, newCurrentVal;
 
-    // private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
-
     private Button okButton, applyButton, cancelButton;
-    private BufferPropertiesPanel bufferPropertiesPanel;
+    private BufferPropertiesPanel bufferPropertiesPane;
 
     private DataBufferChangeListener listener;
     private DataBuffer dataBuffer;
 
-
     public DataBufferPropertiesDialog(Container parentContainer, JFrame frame, DataBuffer dataBuffer, DataBufferChangeListener listener) {
-        super(frame, "Data Buffer Properties", false);
+        super();
+
+        this.setTitle("Data Buffer Properties");
 
         this.listener = listener;
         this.dataBuffer = dataBuffer;
 
-        Container contentPane = this.getContentPane();
-        bufferPropertiesPanel = new BufferPropertiesPanel();
+        GridPane pane = new GridPane();
 
-        contentPane.add(bufferPropertiesPanel);
+        RowConstraints properties = new RowConstraints();
+        properties.setPercentHeight(75.00);
+        RowConstraints buttons = new RowConstraints();
+        buttons.setPercentHeight(25.00);
 
-        // Buttons:
+        pane.getRowConstraints().addAll(
+                properties,
+                buttons
+        );
+
+        bufferPropertiesPane = new BufferPropertiesPanel();
+        GridPane.setConstraints(bufferPropertiesPane, 1, 0);
+        GridPane.setMargin(bufferPropertiesPane, new Insets(10,10,5,10));
 
         okButton = new Button("OK");
-        okButton.addEventHandler(EventType.ROOT, this);
+        okButton.addEventHandler(ActionEvent.ACTION, this);
+
         applyButton = new Button("Apply");
-        applyButton.addEventHandler(EventType.ROOT, this);
+        applyButton.addEventHandler(ActionEvent.ACTION, this);
+        HBox.setMargin(applyButton, new Insets(0,5,0,5));
+
         cancelButton = new Button("Cancel");
-        cancelButton.addEventHandler(EventType.ROOT, this);
-        JFXPanel buttonPanel = new JFXPanel();
-        FlowPane pane = new FlowPane();
-        pane.setAlignment(Pos.BOTTOM_CENTER);
-        pane.getChildren().add(okButton);
-        pane.getChildren().add(applyButton);
-        pane.getChildren().add(cancelButton);
-        Scene scene = new Scene(pane);
-        buttonPanel.setScene(scene);
-        buttonPanel.setPreferredSize(new Dimension((int)scene.getWidth(), (int)scene.getHeight()));
+        cancelButton.addEventHandler(ActionEvent.ACTION, this);
 
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(
+                okButton,
+                applyButton,
+                cancelButton
+        );
+        hbox.setPrefSize(200,okButton.getHeight());
+        GridPane.setConstraints(hbox, 1, 1);
 
-        Point point = parentContainer.getLocation();
+        pane.getChildren().addAll(
+                bufferPropertiesPane,
+                hbox
+        );
+
         Dimension frameSize = parentContainer.getSize();
 
-        point.translate(frameSize.width / 2, frameSize.height / 4);
-        this.setLocation(point);
-
+        this.setScene(new Scene(pane));
+        this.setX(frameSize.width / 2);
+        this.setY(frameSize.height / 4);
         this.setResizable(false);
-        this.pack();
-
-        Dimension size = maxTextField.getSize();
-        size.width = size.width * 5 / 4;
-        maxTextField.setSize(size);
-        maxTextField.setPreferredSize(size);
-        maxTextField.setMinimumSize(size);
-
-        size = currentTextField.getSize();
-        size.width = size.width * 5 / 4;
-        currentTextField.setSize(size);
-        currentTextField.setPreferredSize(size);
-        currentTextField.setMinimumSize(size);
-
-        this.pack();
-        this.setVisible(true);
-
-        // parentFrame.repaint(); // This is a horrible way to get the graphs to repaint...
+        this.show();
     }
 
-    /**
-     * <p>Handles Swing events from JButtons, as opposed to JavaFX's Buttons.</p>
-     * <p>
-     * <p>Immediately calls <code>doAction</code> using the <code>event</code>'s
-     * source (<code>.getSource()</code>).</p>
-     *
-     * @param event the Swing event
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        doAction(event.getSource());
-    }
-
-    /**
-     * <p>Handles JavaFX events from Buttons, as opposed to Swing's JButtons.</p>
-     * <p>
-     * <p>Checks to make sure the event is a JavaFX ActionEvent, meaning that
-     * the button was clicked and not merely entered/exited. If so, calls
-     * <code>doAction</code> using the <code>event</code>'s source
-     * (<code>.getSource()</code>).</p>
-     *
-     * @param event the JavaFX event
-     */
     @Override
     public void handle(Event event) {
-        if (event.getEventType().equals(javafx.event.ActionEvent.ACTION)) {
-            doAction(event.getSource());
-        }
-    }
-
-    /**
-     * <p>Wrapper for Swing and JavaFX events. Takes a <code>source</code>
-     * from either and performs the associated action.</p>
-     *
-     * @param source triggered the event handler from either Swing or JavaFX
-     */
-    private void doAction(Object source) {
-        if (source == cancelButton) {
-            this.setVisible(false);
-        } else if (source == applyButton) {
-            bufferPropertiesPanel.commitChanges();
-        } else if (source == okButton) {
-            bufferPropertiesPanel.commitChanges();
-            this.setVisible(false);
+        if (event.getSource() == cancelButton) {
+            this.close();
+        } else if (event.getSource() == applyButton) {
+            bufferPropertiesPane.commitChanges();
+        } else if (event.getSource() == okButton) {
+            bufferPropertiesPane.commitChanges();
+            this.close();
         }
 
-        // if (myGUI != null) myGUI.zoomFullView();
         if (listener != null) {
             listener.dataBufferChanged();
         }
-
-        // parentFrame.repaint(); // This is a horrible way to get the graphs to repaint...
     }
 
-    public class BufferPropertiesPanel extends JFXPanel implements ActionListener, EventHandler {
+    public class BufferPropertiesPanel extends GridPane implements EventHandler {
         public BufferPropertiesPanel() {
             super();
 
+            // Constraints to balance rows
+            RowConstraints radios = new RowConstraints();
+            radios.setPercentHeight(34.00);
+            RowConstraints max = new RowConstraints();
+            max.setPercentHeight(33.00);
+            RowConstraints current = new RowConstraints();
+            current.setPercentHeight(33.00);
+
+            // Add all to this (since this is a GridPane)
+            this.getRowConstraints().addAll(
+                    radios,
+                    max,
+                    current
+            );
+
             newMaxVal = dataBuffer.getMaxBufferSize();
             newCurrentVal = dataBuffer.getBufferSize();
-            GridBagLayout gridbag = new GridBagLayout();
 
-            this.setLayout(gridbag);
+            // RadioButton toggling group for Wrap and Enlarge
+            ToggleGroup group = new ToggleGroup();
 
-            Border blackLine = BorderFactory.createLineBorder(Color.black);
+            // RadioButtons:
+            // Wrap
+            wrapButton = new RadioButton("Wrap");
+            wrapButton.addEventHandler(ActionEvent.ACTION, this);
+            wrapButton.setToggleGroup(group);
+            GridPane.setConstraints(wrapButton, 1, 0);
+            GridPane.setHalignment(wrapButton, HPos.CENTER);
 
-            // TitledBorder title = BorderFactory.createTitledBorder(blackLine,selectedVariable.getName());
-            // this.setBorder(title);
-            this.setBorder(blackLine);
+            // Enlarge
+            enlargeButton = new RadioButton("Enlarge");
+            enlargeButton.addEventHandler(ActionEvent.ACTION, this);
+            enlargeButton.setToggleGroup(group);
+            GridPane.setConstraints(enlargeButton, 2, 0);
+            GridPane.setHalignment(enlargeButton, HPos.CENTER);
 
-            GridBagConstraints constraints = new GridBagConstraints();
+            // Max Settings:
+            // Label
+            Label maxSettingsLabel = new Label("Max Size:");
+            GridPane.setConstraints(maxSettingsLabel, 1, 1);
+            GridPane.setHalignment(maxSettingsLabel, HPos.RIGHT);
 
-            // Row 0:
-
-            JLabel policyLabel = new JLabel("   Filled Policy:  ");
-            constraints.gridx = 0;
-            constraints.gridy = 0;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.EAST;
-            gridbag.setConstraints(policyLabel, constraints);
-            this.add(policyLabel);
-
-            wrapButton = new JRadioButton("Wrap", dataBuffer.getWrapBuffer());
-            wrapButton.addActionListener(this);
-            constraints.gridx = 1;
-            constraints.gridy = 0;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.WEST;
-            gridbag.setConstraints(wrapButton, constraints);
-            this.add(wrapButton);
-
-            enlargeButton = new JRadioButton("Enlarge", !dataBuffer.getWrapBuffer());
-            enlargeButton.addActionListener(this);
-            constraints.gridx = 2;
-            constraints.gridy = 0;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.WEST;
-            gridbag.setConstraints(enlargeButton, constraints);
-            this.add(enlargeButton);
-
-            ButtonGroup group = new ButtonGroup();
-            group.add(wrapButton);
-            group.add(enlargeButton);
-
-            // Row 1:
-
-            JLabel maxSettingsLabel = new JLabel("  Max Size:  ");
-            constraints.gridx = 0;
-            constraints.gridy = 1;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.EAST;
-            gridbag.setConstraints(maxSettingsLabel, constraints);
-            this.add(maxSettingsLabel);
-
+            // TextField
             String maxValString = String.valueOf(newMaxVal);
-            maxTextField = new JTextField(maxValString);
-            maxTextField.addActionListener(this);
-            if (dataBuffer.getWrapBuffer())
-                maxTextField.setEnabled(false);
-            constraints.gridx = 1;
-            constraints.gridy = 1;
-            constraints.gridwidth = 2;
-            constraints.anchor = GridBagConstraints.WEST;
-            gridbag.setConstraints(maxTextField, constraints);
-            this.add(maxTextField);
+            maxTextField = new TextField(maxValString);
+            maxTextField.addEventHandler(ActionEvent.ACTION, this);
+            GridPane.setConstraints(maxTextField, 2, 1);
+            GridPane.setHalignment(maxTextField, HPos.LEFT);
+            GridPane.setMargin(maxTextField, new Insets(5,5,5,5));
 
+            // Current Settings:
+            // Label
+            Label currentSettingsLabel = new Label("Current Size:");
+            GridPane.setConstraints(currentSettingsLabel, 1, 2);
+            GridPane.setHalignment(currentSettingsLabel, HPos.RIGHT);
 
-            // Row 2:
-
-            JLabel currentSettingsLabel = new JLabel("  Current Size:  ");
-            constraints.gridx = 0;
-            constraints.gridy = 2;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.EAST;
-            gridbag.setConstraints(currentSettingsLabel, constraints);
-            this.add(currentSettingsLabel);
-
-
+            // TextField
             String currentValString = String.valueOf(newCurrentVal);
-            currentTextField = new JTextField(currentValString);
+            currentTextField = new TextField(currentValString);
+            currentTextField.addEventHandler(ActionEvent.ACTION, this);
+            GridPane.setConstraints(currentTextField, 2, 2);
+            GridPane.setHalignment(currentTextField, HPos.LEFT);
+            GridPane.setMargin(currentTextField, new Insets(5,5,5,5));
 
-            // currentTextField.setText(currentValString);
-            // size = currentTextField.getSize();
-            // size.width = size.width*2;
-            // currentTextField.setSize(size);
-            currentTextField.addActionListener(this);
-            currentTextField.setEnabled(true);
-            constraints.gridx = 1;
-            constraints.gridy = 2;
-            constraints.gridwidth = 2;
-            constraints.anchor = GridBagConstraints.WEST;
-            gridbag.setConstraints(currentTextField, constraints);
-            this.add(currentTextField);
+            // Set Wrap as default selected RadioButton and disable max TextField
+            group.selectToggle(wrapButton);
+            maxTextField.setDisable(true);
 
+            // Add all to this (since this is a GridPane)
+            this.getChildren().addAll(
+                    wrapButton,
+                    enlargeButton,
+                    maxSettingsLabel,
+                    maxTextField,
+                    currentSettingsLabel,
+                    currentTextField
+            );
         }
 
         public void commitChanges() {
@@ -268,26 +201,15 @@ public class DataBufferPropertiesDialog extends JDialog implements ActionListene
         }
 
         @Override
-        public void actionPerformed(ActionEvent event) {
-            doAction(event.getSource());
-        }
-
-        @Override
         public void handle(Event event) {
-            if (event.getEventType().equals(javafx.event.ActionEvent.ACTION)) {
-                doAction(event.getSource());
-            }
-        }
-
-        private void doAction(Object source) {
-            if (source == maxTextField) {
+            if (event.getSource() == maxTextField) {
                 updateMaxTextField();
-            } else if (source == currentTextField) {
+            } else if (event.getSource() == currentTextField) {
                 updateCurrentTextField();
-            } else if (source == wrapButton) {
-                maxTextField.setEnabled(false);
-            } else if (source == enlargeButton) {
-                maxTextField.setEnabled(true);
+            } else if (event.getSource() == wrapButton) {
+                maxTextField.setDisable(true);
+            } else if (event.getSource() == enlargeButton) {
+                maxTextField.setDisable(false);
             }
         }
 
