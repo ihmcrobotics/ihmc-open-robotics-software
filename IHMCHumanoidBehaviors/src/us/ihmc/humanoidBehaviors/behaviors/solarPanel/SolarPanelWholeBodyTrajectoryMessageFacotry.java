@@ -202,7 +202,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
          }
          
-         double firstTime = 3.0;
+         double firstTime = 4.0;
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTime, SolarPanelCleaningInfo.getCleaningPath().getArrivalTime());
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
