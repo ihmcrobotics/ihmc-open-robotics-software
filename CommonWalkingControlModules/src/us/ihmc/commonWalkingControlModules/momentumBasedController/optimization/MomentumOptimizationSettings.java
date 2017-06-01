@@ -58,6 +58,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
    public abstract Vector3D getHeadAngularWeight();
    public abstract Vector3D getChestAngularWeight();
    public abstract Vector3D getPelvisAngularWeight();
+   public abstract Vector3D getPelvisLinearWeight();
    public abstract Vector3D getHandAngularTaskspaceWeight();
    public abstract Vector3D getHandLinearTaskspaceWeight();
 

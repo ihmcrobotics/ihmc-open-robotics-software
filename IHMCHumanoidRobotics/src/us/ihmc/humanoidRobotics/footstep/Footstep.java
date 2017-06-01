@@ -21,22 +21,24 @@ public class Footstep
 {
    public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP}
 
+   public static final int maxNumberOfSwingWaypoints = 10;
+
    private static int counter = 0;
    private final String id;
    private final RigidBody endEffector;
    private RobotSide robotSide;
    private FootstepType footstepType = FootstepType.FULL_FOOTSTEP;
-   
+
    private final FramePose footstepPose = new FramePose();
-   
+
    private final FramePose tempPose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
-   
+
    private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
-   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(10, FrameSE3TrajectoryPoint.class);
+   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -117,7 +119,7 @@ public class Footstep
       for (int i = 0; i < customPositionWaypoints.size(); i++)
          this.customPositionWaypoints.add().set(customPositionWaypoints.get(i));
    }
-   
+
    public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
       return swingTrajectory;
@@ -252,7 +254,7 @@ public class Footstep
    {
       footstepPose.setZ(z);
    }
-   
+
    public double getX()
    {
       return footstepPose.getX();
@@ -320,17 +322,17 @@ public class Footstep
    {
       this.robotSide = robotSide;
    }
-   
+
    public FramePose getFootstepPose()
    {
       return footstepPose;
    }
-   
+
    public void getPose(FramePose poseToPack)
    {
       poseToPack.setIncludingFrame(footstepPose);
    }
-   
+
    public void getPose(FramePoint positionToPack, FrameOrientation orientationToPack)
    {
       footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
@@ -340,12 +342,12 @@ public class Footstep
    {
       footstepPose.getPositionIncludingFrame(positionToPack);
    }
-   
+
    public void getOrientation(FrameOrientation orientationToPack)
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
    }
-   
+
    public ReferenceFrame getTrajectoryFrame()
    {
       return footstepPose.getReferenceFrame();

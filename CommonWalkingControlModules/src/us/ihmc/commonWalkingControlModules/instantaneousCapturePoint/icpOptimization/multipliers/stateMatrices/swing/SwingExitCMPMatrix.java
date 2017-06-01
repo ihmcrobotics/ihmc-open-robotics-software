@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.List;
@@ -11,16 +12,23 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
    private final List<DoubleYoVariable> transferSplitFractions;
 
    private final DoubleYoVariable endOfSplineTime;
+   private final DoubleYoVariable startOfSplineTime;
+
+   private final boolean blendFromInitial;
+   private final double minimumBlendingTime;
 
    public SwingExitCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable endOfSplineTime)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
+      this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
+      this.blendFromInitial = blendFromInitial;
+      this.minimumBlendingTime = minimumBlendingTime;
    }
 
    public void reset()
@@ -32,7 +40,6 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
          double omega0)
    {
       // recurse backward from upcoming corner point to current corner point, then project forward to end of spline
-
       double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
       double nextTransferOnExitCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
       double timeOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
@@ -46,5 +53,27 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
 
       set(2, 0, 1.0 - projection);
       set(3, 0, -omega0 * projection);
+
+      if (blendFromInitial)
+      {
+         double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
+
+         if (startOfSplineTime.getDoubleValue() >= minimumBlendingTime)
+         {
+            projection = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+         }
+         else
+         { // haven't phased in completely yet, so its a combination of both recursion and projection
+            double phaseAtStart = startOfSplineTime.getDoubleValue() / minimumBlendingTime;
+
+            double recursionMultiplier = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+            double projectionMultiplier = 0.0;
+
+            projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseAtStart);
+         }
+
+         set(0, 0, projection);
+         set(1, 0, omega0 * projection);
+      }
    }
 }

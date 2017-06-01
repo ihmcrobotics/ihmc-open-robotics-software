@@ -15,6 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 /**
  * {@link PointFeedbackControlCommand} is a command meant to be submit to the
@@ -48,6 +49,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PositionPIDGains gains = new PositionPIDGains();
+   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame linearGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -153,6 +156,19 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setGains(PositionPIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   /**
+    * Sets the reference frame in which the gains should be applied.
+    * <p>
+    * If the reference frame is {@code null}, the gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param linearGainsFrame the reference frame to use for the position gains.
+    */
+   public void setGainsFrame(ReferenceFrame linearGainsFrame)
+   {
+      this.linearGainsFrame = linearGainsFrame;
    }
 
    /**
@@ -283,6 +299,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
+    * Sets the linear weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      spatialAccelerationCommand.setLinearPartOfWeightMatrix(weightMatrix);
+   }
+
+   /**
     * Sets the weights to use in the optimization problem for each individual degree of freedom.
     * <p>
     * WARNING: It is not the value of each individual command's weight that is relevant to how the
@@ -341,6 +373,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public PositionPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getLinearGainsFrame()
+   {
+      return linearGainsFrame;
    }
 
    @Override

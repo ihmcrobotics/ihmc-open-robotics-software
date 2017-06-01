@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
@@ -38,5 +37,12 @@ public class RRTNode1DTimeDomain extends RRTNode
    public RRTNode createNode()
    {
       return new RRTNode1DTimeDomain();
+   }
+
+   @Override
+   public void setRandomNodeData()
+   {
+      // TODO Auto-generated method stub
+      
    }
 }

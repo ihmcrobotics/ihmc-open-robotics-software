@@ -205,7 +205,7 @@ public class RobotCollisionModel
 //            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
             
          }
-         PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());
+//         PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());
          return false;
       }
       return true;
