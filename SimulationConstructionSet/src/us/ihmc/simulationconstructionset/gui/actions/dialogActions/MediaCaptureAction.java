@@ -1,17 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.MediaCaptureDialogConstructor;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class MediaCaptureAction extends SCSAction
 {
-   private static final long serialVersionUID = 772924943132573130L;
    private MediaCaptureDialogConstructor constructor;
 
    public MediaCaptureAction(MediaCaptureDialogConstructor constructor)
@@ -31,6 +27,7 @@ public class MediaCaptureAction extends SCSAction
       constructor.createVideo(file);
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructDialog();

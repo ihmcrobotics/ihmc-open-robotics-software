@@ -1,16 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSimulationTo3DMaxDialogConstructor;
 
+import java.awt.event.KeyEvent;
+
 public class ExportSimulationTo3DMaxAction extends SCSAction
 {
-   private static final long serialVersionUID = 7582935737436636441L;
    private ExportSimulationTo3DMaxDialogConstructor constructor;
    
 
@@ -22,9 +18,11 @@ public class ExportSimulationTo3DMaxAction extends SCSAction
               "", // TODO
               "" // TODO
       );
+
       this.constructor = constructor;
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructDialog();

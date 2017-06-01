@@ -1,18 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class HideShowViewportAction extends SCSAction implements ViewportSelectorCommandListener
 {
-   private static final long serialVersionUID = 1774088226210361744L;
    private ViewportSelectorCommandExecutor viewportSelector;
 
    public HideShowViewportAction(ViewportSelectorCommandExecutor viewportSelector)
@@ -29,6 +24,7 @@ public class HideShowViewportAction extends SCSAction implements ViewportSelecto
       viewportSelector.registerViewportSelectorCommandListener(this);
    }
 
+   @Override
    public void doAction()
    {
       if (viewportSelector.isViewportHidden())

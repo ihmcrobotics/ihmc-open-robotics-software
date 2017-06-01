@@ -1,20 +1,14 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.CameraPropertiesDialogConstructor;
 
+import java.awt.event.KeyEvent;
+
 public class CameraPropertiesAction extends SCSAction
 {
-   private static final long serialVersionUID = 2728147089395054885L;
-
    private final CameraPropertiesDialogConstructor constructor;
    private final TrackCheckBox trackCheckBox;
    private final DollyCheckBox dollyCheckBox;
@@ -33,6 +27,7 @@ public class CameraPropertiesAction extends SCSAction
       this.dollyCheckBox = dollyCheckBox;
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructCameraPropertiesDialog(trackCheckBox, dollyCheckBox);

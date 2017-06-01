@@ -1,18 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportDataDialogConstructor;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class ExportDataAction extends SCSAction
 {
-   private static final long serialVersionUID = -5481556236530603500L;
-
    private ExportDataDialogConstructor constructor;
 
    public ExportDataAction(ExportDataDialogConstructor constructor)
@@ -27,6 +22,7 @@ public class ExportDataAction extends SCSAction
       this.constructor = constructor;
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructDialog();

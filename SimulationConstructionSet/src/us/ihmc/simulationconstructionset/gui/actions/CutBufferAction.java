@@ -1,17 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class CutBufferAction extends SCSAction
 {
-   private static final long serialVersionUID = 5039888169851613916L;
    private CutBufferCommandExecutor executor;
 
    public CutBufferAction(CutBufferCommandExecutor executor)
@@ -26,6 +21,7 @@ public class CutBufferAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.cutBuffer();

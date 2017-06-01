@@ -1,17 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class CreateNewGraphWindowAction extends SCSAction
 {
-   private static final long serialVersionUID = 5063019587274426802L;
    private CreateNewGraphWindowCommandExecutor executor;
 
    public CreateNewGraphWindowAction(CreateNewGraphWindowCommandExecutor executor)
@@ -26,6 +21,7 @@ public class CreateNewGraphWindowAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.createNewGraphWindow();

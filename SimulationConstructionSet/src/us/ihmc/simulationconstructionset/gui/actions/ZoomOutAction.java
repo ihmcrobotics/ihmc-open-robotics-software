@@ -11,8 +11,6 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActio
 
 public class ZoomOutAction extends SCSAction
 {
-   private static final long serialVersionUID = 5487975503056238066L;
-
    private ZoomGraphCommandExecutor executor;
 
    public ZoomOutAction(ZoomGraphCommandExecutor executor)
@@ -27,6 +25,7 @@ public class ZoomOutAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.zoomOut();

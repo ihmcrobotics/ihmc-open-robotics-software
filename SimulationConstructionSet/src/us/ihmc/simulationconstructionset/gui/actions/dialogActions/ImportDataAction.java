@@ -1,18 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ImportDataDialogConstructor;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class ImportDataAction extends SCSAction
 {
-   private static final long serialVersionUID = 7296204170538611841L;
-
    private ImportDataDialogConstructor constructor;
 
    public ImportDataAction(ImportDataDialogConstructor constructor)
@@ -37,6 +32,7 @@ public class ImportDataAction extends SCSAction
       constructor.setCurrentDirectory(directory);
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructDialog();

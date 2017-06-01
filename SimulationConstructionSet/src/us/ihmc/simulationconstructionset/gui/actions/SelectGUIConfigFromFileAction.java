@@ -1,16 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class SelectGUIConfigFromFileAction extends SCSAction
 {
-   private static final long serialVersionUID = -8579530834957317679L;
    private final String fullPath;
 
    private final SelectGUIConfigFromFileCommandExecutor executor;
@@ -28,6 +24,7 @@ public class SelectGUIConfigFromFileAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.selectGUIConfigFromFile(fullPath);

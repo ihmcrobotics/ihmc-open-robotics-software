@@ -1,17 +1,11 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.KeyEvent;
 
 public class AddCameraKeyAction extends SCSAction
 {
-   private static final long serialVersionUID = -5162293334622550111L;
    private final AddCameraKeyCommandExecutor executor;
 
    public AddCameraKeyAction(AddCameraKeyCommandExecutor listener)
@@ -24,9 +18,9 @@ public class AddCameraKeyAction extends SCSAction
       );
 
       this.executor = listener;
-
    }
 
+   @Override
    public void doAction()
    {
       executor.addCameraKey();
