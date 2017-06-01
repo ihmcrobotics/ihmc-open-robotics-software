@@ -49,15 +49,16 @@ public class InitialICPCurrentMultiplier
 
    private final boolean blendFromInitial;
    private final double blendingFraction;
+   private final double minimumBlendingTime;
 
    public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial, double blendingFraction,
-         String yoNamePrefix, YoVariableRegistry registry)
+         double minimumBlendingTime, String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(startOfSplineTime, endOfSplineTime, null, null, blendFromInitial, blendingFraction, yoNamePrefix, registry);
+      this(startOfSplineTime, endOfSplineTime, null, null, blendFromInitial, blendingFraction, minimumBlendingTime, yoNamePrefix, registry);
    }
 
    public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix,
-         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, boolean blendFromInitial, double blendingFraction, String yoNamePrefix, YoVariableRegistry registry)
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, boolean blendFromInitial, double blendingFraction, double minimumBlendingTime, String yoNamePrefix, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentVelocityMultiplier", registry);
@@ -67,7 +68,7 @@ public class InitialICPCurrentMultiplier
 
       this.blendFromInitial = blendFromInitial;
       this.blendingFraction = blendingFraction;
-
+      this.minimumBlendingTime = minimumBlendingTime;
 
       if (cubicMatrix == null)
       {
@@ -92,7 +93,7 @@ public class InitialICPCurrentMultiplier
       }
 
       transferInitialICPMatrix = new TransferInitialICPMatrix();
-      swingInitialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, blendFromInitial);
+      swingInitialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, blendFromInitial, minimumBlendingTime);
    }
 
    /**
@@ -158,7 +159,7 @@ public class InitialICPCurrentMultiplier
          if (useTwoCMPs)
             computeSwingSegmentedVelocity(timeInState, omega0);
          else
-            computeInSwingOneCMPVelocity();
+            computeInSwingOneCMPVelocity(omega0);
       }
    }
 
@@ -220,6 +221,7 @@ public class InitialICPCurrentMultiplier
          double recursionMultiplier = 0.0;
 
          double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
          double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
 
          double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
@@ -235,9 +237,9 @@ public class InitialICPCurrentMultiplier
     * Computes the velocity multiplier in the swing phase when using one CMP in each foot. The desired
     * ICP position computed from the stance entry CMP and the next corner point, not the initial ICP location.
     */
-   public void computeInSwingOneCMPVelocity()
+   public void computeInSwingOneCMPVelocity(double omega0)
    {
-      velocityMultiplier.set(0.0);
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 
 
@@ -276,6 +278,7 @@ public class InitialICPCurrentMultiplier
          double recursionMultiplier = 0.0;
 
          double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
          double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
 
          double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);

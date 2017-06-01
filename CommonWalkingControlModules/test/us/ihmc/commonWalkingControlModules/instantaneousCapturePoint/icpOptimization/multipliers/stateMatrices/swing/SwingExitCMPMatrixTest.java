@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -15,6 +16,7 @@ import java.util.Random;
 public class SwingExitCMPMatrixTest
 {
    private static final double epsilon = 0.00001;
+   private static final double minimumBlendingTime = 0.05;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -33,7 +35,8 @@ public class SwingExitCMPMatrixTest
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
 
-      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false,
+            minimumBlendingTime);
 
       Assert.assertEquals("", 4, swingExitCMPMatrix.numRows);
       Assert.assertEquals("", 1, swingExitCMPMatrix.numCols);
@@ -70,7 +73,8 @@ public class SwingExitCMPMatrixTest
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false,
+            minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -160,7 +164,8 @@ public class SwingExitCMPMatrixTest
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true);
+      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true,
+            minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -202,7 +207,17 @@ public class SwingExitCMPMatrixTest
          double projectionTime = currentSplineOnExit - timeOnExit;
          double projection = Math.exp(omega0 * projectionTime);
 
-         double initialProjection = Math.exp(-omega0 * currentSplineOnEntry) * (1.0 - Math.exp(-omega0 * timeOnExit));
+         double initialProjection;
+
+         if (startOfSpline >= minimumBlendingTime)
+            initialProjection = Math.exp(-omega0 * currentSplineOnEntry) * (1.0 - Math.exp(-omega0 * timeOnExit));
+         else
+         {
+            double recursionMultiplier = Math.exp(-omega0 * currentSplineOnEntry) * (1.0 - Math.exp(-omega0 * timeOnExit));
+            double projectionMultiplier = 0.0;
+
+            initialProjection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, startOfSpline / minimumBlendingTime);
+         }
 
          swingExitCMPMatrix.compute(singleSupportDurations, doubleSupportDurations, omega0);
 

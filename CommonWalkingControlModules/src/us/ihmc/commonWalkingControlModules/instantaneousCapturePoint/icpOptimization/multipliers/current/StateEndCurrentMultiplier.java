@@ -38,18 +38,19 @@ public class StateEndCurrentMultiplier
    private final boolean clipTime;
    private final boolean blendFromInitial;
    private final double blendingFraction;
+   private final double minimumBlendingTime;
 
    public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, boolean blendFromInitial,
-         double blendingFraction, YoVariableRegistry registry)
+         double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
       this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, blendFromInitial,
-            blendingFraction, registry);
+            blendingFraction, minimumBlendingTime, registry);
    }
 
    public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix, EfficientCubicDerivativeMatrix cubicDerivativeMatrix,
-         String yoNamePrefix, boolean clipTime, boolean blendFromInitial, double blendingFraction, YoVariableRegistry registry)
+         String yoNamePrefix, boolean clipTime, boolean blendFromInitial, double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "StateEndCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "StateEndCurrentVelocityMultiplier", registry);
@@ -63,6 +64,7 @@ public class StateEndCurrentMultiplier
       this.clipTime = clipTime;
       this.blendFromInitial = blendFromInitial;
       this.blendingFraction = blendingFraction;
+      this.minimumBlendingTime = minimumBlendingTime;
 
       if (cubicMatrix == null)
       {
@@ -87,7 +89,8 @@ public class StateEndCurrentMultiplier
       }
 
       transferStateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
-      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial);
+      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial,
+            minimumBlendingTime);
    }
 
    public void reset()
@@ -186,6 +189,7 @@ public class StateEndCurrentMultiplier
          double projectionMultiplier = 0.0;
 
          double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
          double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
 
          double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
@@ -231,6 +235,7 @@ public class StateEndCurrentMultiplier
          double projectionMultiplier = 0.0;
 
          double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
          double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
 
          double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
@@ -283,16 +288,16 @@ public class StateEndCurrentMultiplier
    public void computeSwingSegmentedVelocity(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         computeSwingFirstSegmentVelocity();
+         computeSwingFirstSegmentVelocity(omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          computeSwingThirdSegmentVelocity(omega0);
       else
          computeSwingSecondSegmentVelocity();
    }
 
-   public void computeSwingFirstSegmentVelocity()
+   public void computeSwingFirstSegmentVelocity(double omega0)
    {
-      velocityMultiplier.set(0.0);
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 
    public void computeSwingSecondSegmentVelocity()

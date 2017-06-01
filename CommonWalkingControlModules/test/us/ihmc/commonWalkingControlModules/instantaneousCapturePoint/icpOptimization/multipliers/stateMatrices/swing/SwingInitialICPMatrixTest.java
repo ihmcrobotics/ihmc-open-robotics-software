@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -14,6 +15,7 @@ import java.util.Random;
 public class SwingInitialICPMatrixTest
 {
    private static final double epsilon = 0.00001;
+   private static final double minimumBlendingTime = 0.05;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -23,7 +25,7 @@ public class SwingInitialICPMatrixTest
 
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
-      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false, minimumBlendingTime);
 
       Assert.assertEquals("", 4, initialICPMatrix.numRows);
       Assert.assertEquals("", 1, initialICPMatrix.numCols);
@@ -48,7 +50,7 @@ public class SwingInitialICPMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false, minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -104,7 +106,7 @@ public class SwingInitialICPMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, true);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, true, minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -127,6 +129,15 @@ public class SwingInitialICPMatrixTest
          initialICPMatrix.compute(omega0);
 
          shouldBe.zero();
+
+         if (startOfSpline < minimumBlendingTime )
+         {
+            double projection = Math.exp(omega0 * startOfSpline);
+            projection = InterpolationTools.linearInterpolate(projection, 0.0, startOfSpline / minimumBlendingTime);
+            shouldBe.set(0, 0, projection);
+            shouldBe.set(1, 0, omega0 * projection);
+         }
+
          JUnitTools.assertMatrixEquals(name, shouldBe, initialICPMatrix, epsilon);
 
          shouldBe.zero();

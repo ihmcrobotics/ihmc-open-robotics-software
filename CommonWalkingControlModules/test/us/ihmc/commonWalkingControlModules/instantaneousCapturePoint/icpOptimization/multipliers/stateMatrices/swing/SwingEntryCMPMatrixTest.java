@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -15,6 +16,7 @@ import java.util.Random;
 public class SwingEntryCMPMatrixTest
 {
    private static final double epsilon = 0.00001;
+   private static final double minimumBlendingTime = 0.05;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -25,7 +27,7 @@ public class SwingEntryCMPMatrixTest
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
-      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false);
+      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false, minimumBlendingTime);
 
       Assert.assertEquals("", 4, swingEntryCMPMatrix.numRows);
       Assert.assertEquals("", 1, swingEntryCMPMatrix.numCols);
@@ -52,7 +54,7 @@ public class SwingEntryCMPMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false);
+      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false, minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -110,7 +112,7 @@ public class SwingEntryCMPMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, true);
+      SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, true, minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -129,13 +131,26 @@ public class SwingEntryCMPMatrixTest
 
          double swingOnEntry = splitRatio * singleSupportDuration;
          double splineOnEntry = swingOnEntry - startOfSpline;
-         double projection = Math.exp(omega0 * -splineOnEntry);
+
+         double recursionMultiplier = 1.0 - Math.exp(-omega0 * splineOnEntry);
+         double projectionMultiplier = 1.0 - Math.exp(omega0 * startOfSpline);
+
+         double projection;
+
+         if (startOfSpline >= minimumBlendingTime)
+         {
+            projection = recursionMultiplier;
+         }
+         else
+         {
+            projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, startOfSpline / minimumBlendingTime);
+         }
 
          swingEntryCMPMatrix.compute(singleSupportDurations, omega0);
 
          shouldBe.zero();
-         shouldBe.set(0, 0, 1.0 - projection);
-         shouldBe.set(1, 0, -omega0 * projection);
+         shouldBe.set(0, 0, projection);
+         shouldBe.set(1, 0, omega0 * (projection - 1.0));
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPMatrix, epsilon);
 

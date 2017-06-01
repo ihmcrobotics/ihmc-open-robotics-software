@@ -46,6 +46,7 @@ public class StateMultiplierCalculator
 
    private static final boolean blendFromInitial = true;
    private static final double blendingFraction = 0.5;
+   private static final double minimumBlendingTime = 0.05;
 
    public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, List<DoubleYoVariable> doubleSupportDurations,
          List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> transferSplitFractions,
@@ -80,14 +81,14 @@ public class StateMultiplierCalculator
       boolean clipTime = true;
 
       exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix,
-            cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, registry);
+            cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, minimumBlendingTime, registry);
       entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, registry);
+            totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, minimumBlendingTime, registry);
       initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, blendFromInitial,
-            blendingFraction, yoNamePrefix, registry);
+            blendingFraction, minimumBlendingTime, yoNamePrefix, registry);
       initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
       stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, registry);
+            cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, blendingFraction, minimumBlendingTime, registry);
 
       recursionMultipliers = new RecursionMultipliers(yoNamePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions,
             registry);
@@ -227,7 +228,7 @@ public class StateMultiplierCalculator
 
          exitCMPCurrentMultiplier.computeInSwingOneCMPVelocity();
          entryCMPCurrentMultiplier.computeInSwingOneCMPVelocity(omega0);
-         initialICPCurrentMultiplier.computeInSwingOneCMPVelocity();
+         initialICPCurrentMultiplier.computeInSwingOneCMPVelocity(omega0);
          initialICPVelocityCurrentMultiplier.computeInSwingOneCMPVelocity();
          stateEndCurrentMultiplier.computeInSwingOneCMPVelocity(omega0);
       }
@@ -241,11 +242,11 @@ public class StateMultiplierCalculator
          initialICPVelocityCurrentMultiplier.computeSwingFirstSegment();
          stateEndCurrentMultiplier.computeSwingFirstSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
 
-         exitCMPCurrentMultiplier.computeSwingFirstSegmentVelocity();
+         exitCMPCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
          entryCMPCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
          initialICPCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
          initialICPVelocityCurrentMultiplier.computeSwingFirstSegmentVelocity();
-         stateEndCurrentMultiplier.computeSwingFirstSegmentVelocity();
+         stateEndCurrentMultiplier.computeSwingFirstSegmentVelocity(omega0);
       }
       else if (timeInState >= endOfSplineTime.getDoubleValue())
       {

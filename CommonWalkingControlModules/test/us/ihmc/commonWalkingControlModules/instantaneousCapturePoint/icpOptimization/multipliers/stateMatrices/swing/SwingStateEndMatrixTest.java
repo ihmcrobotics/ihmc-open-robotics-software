@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -15,6 +16,7 @@ import java.util.Random;
 public class SwingStateEndMatrixTest
 {
    private static final double epsilon = 0.00001;
+   private static final double minimumBlendingTime = 0.05;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -34,7 +36,8 @@ public class SwingStateEndMatrixTest
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
 
 
-      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false,
+            minimumBlendingTime);
 
       Assert.assertEquals("", 4, swingStateEndMatrix.numRows);
       Assert.assertEquals("", 1, swingStateEndMatrix.numCols);
@@ -71,7 +74,8 @@ public class SwingStateEndMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
 
-      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false,
+            minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -157,7 +161,8 @@ public class SwingStateEndMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
 
-      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true);
+      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true,
+            minimumBlendingTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -200,7 +205,18 @@ public class SwingStateEndMatrixTest
          double projection = Math.exp(omega0 * projectionTime);
 
          double initialProjectionTime = timeOnExit + currentSplineOnEntry;
-         double initialProjection = Math.exp(-omega0 * initialProjectionTime);
+         double initialProjection;
+
+         if (startOfSpline >= minimumBlendingTime)
+         {
+            initialProjection = Math.exp(-omega0 * initialProjectionTime);
+         }
+         else
+         {
+            double recursion =  Math.exp(-omega0 * initialProjectionTime);
+
+            initialProjection = InterpolationTools.linearInterpolate(0.0, recursion, startOfSpline / minimumBlendingTime);
+         }
 
          swingStateEndMatrix.compute(singleSupportDurations, doubleSupportDurations, omega0);
 

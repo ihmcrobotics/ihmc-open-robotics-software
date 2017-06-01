@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingStateEndMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferStateEndMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -19,6 +21,7 @@ import java.util.Random;
 public class StateEndCurrentMultiplierTest
 {
    private static final double blendingFraction = 0.5;
+   private static final double minimumBlendingTime = 0.05;
    private static final double epsilon = 0.0001;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -58,7 +61,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions,
-            startOfSplineTime, endOfSplineTime, "", true, false, blendingFraction, registry);
+            startOfSplineTime, endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -146,7 +149,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions,
-            startOfSplineTime, endOfSplineTime, "", true, true, blendingFraction, registry);
+            startOfSplineTime, endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -231,7 +234,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -314,7 +317,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -400,7 +403,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -479,7 +482,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -514,8 +517,21 @@ public class StateEndCurrentMultiplierTest
 
          stateEndCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
-         Assert.assertEquals(0.0, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals(0.0, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         double nextTransferOnExitCMP = nextTransferRatio * doubleSupportDurations.get(1).getDoubleValue();
+         double currentSwingOnExit = (1.0 - currentSwingRatio) * singleSupportDuration;
+         double timeOnExit = currentSwingOnExit + nextTransferOnExitCMP;
+
+         double currentSwingOnEntry = currentSwingRatio * singleSupportDuration;
+
+         double recursion = Math.exp(omega * (timeInCurrentState - timeOnExit - currentSwingOnEntry));
+
+         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
+
+         double positionMultiplier = InterpolationTools.linearInterpolate(0.0, recursion, alpha);
+
+         Assert.assertEquals(positionMultiplier, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * positionMultiplier, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
          Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
@@ -559,9 +575,9 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
-      SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false);
+      SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false, minimumBlendingTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
@@ -656,9 +672,9 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
-      SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true);
+      SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, true, minimumBlendingTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
@@ -753,7 +769,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -837,7 +853,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -918,7 +934,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, false, blendingFraction, registry);
+            endOfSplineTime, "", true, false, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -997,7 +1013,7 @@ public class StateEndCurrentMultiplierTest
       }
 
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, "", true, true, blendingFraction, registry);
+            endOfSplineTime, "", true, true, blendingFraction, minimumBlendingTime, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -1033,10 +1049,16 @@ public class StateEndCurrentMultiplierTest
          double timeRemaining = singleSupportDuration - timeInCurrentState;
          double projectionTime = timeRemaining + nextTransferOnCurrentCMP;
 
-         double projection = Math.exp(-omega * projectionTime);
+         double projection = 0.0;
+         double recursion = Math.exp(-omega * projectionTime);
 
-         Assert.assertEquals(projection, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals(omega * projection, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
+
+         double positionMultiplier = InterpolationTools.linearInterpolate(projection, recursion, alpha);
+
+         Assert.assertEquals(positionMultiplier, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * positionMultiplier, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
          Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }

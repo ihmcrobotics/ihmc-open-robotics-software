@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingInitialICPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -20,6 +22,7 @@ public class InitialICPCurrentMultiplierTest
 {
    private static final double epsilon = 0.0001;
    private static final double blendingFraction = 0.5;
+   private static final double minimumBlendingTime = 0.05;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -57,7 +60,7 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, "", registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, minimumBlendingTime, "", registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
 
@@ -148,7 +151,7 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "",
             registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
@@ -238,7 +241,7 @@ public class InitialICPCurrentMultiplierTest
       }
 
       InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction,
-            "", registry);
+            minimumBlendingTime, "", registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
 
@@ -324,7 +327,7 @@ public class InitialICPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "",
             registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
@@ -414,7 +417,7 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -498,7 +501,7 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -538,9 +541,16 @@ public class InitialICPCurrentMultiplierTest
 
          initialICPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
+         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
+
          double projection = Math.exp(omega * timeInCurrentState);
-         Assert.assertEquals(projection, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals(omega * projection, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         double recursion = 0.0;
+         double positionMultiplier = InterpolationTools.linearInterpolate(projection, recursion, alpha);
+
+
+         Assert.assertEquals(positionMultiplier, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * positionMultiplier, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(initialICPCurrentMultiplier.getPositionMultiplier()));
          Assert.assertFalse(Double.isNaN(initialICPCurrentMultiplier.getVelocityMultiplier()));
       }
@@ -583,10 +593,10 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, minimumBlendingTime, "",
             registry);
 
-      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false, minimumBlendingTime);
 
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -682,9 +692,9 @@ public class InitialICPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "", registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "", registry);
 
-      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, true);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, true, minimumBlendingTime);
 
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -781,7 +791,7 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = true;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -865,7 +875,7 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = true;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -945,7 +955,7 @@ public class InitialICPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, false, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -1022,7 +1032,7 @@ public class InitialICPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, "",
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, true, blendingFraction, minimumBlendingTime, "",
             registry);
 
       for (int iter = 0; iter < iters; iter++)
@@ -1053,14 +1063,23 @@ public class InitialICPCurrentMultiplierTest
          totalTrajectoryTime.set(singleSupportDuration);
 
          boolean isInTransfer = false;
-         boolean useTwoCMPs = true;
+         boolean useTwoCMPs = false;
 
          double timeInCurrentState = random.nextDouble() * (singleSupportDuration - endOfSpline) + endOfSpline;
 
          initialICPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
-         Assert.assertEquals(0.0, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals(0.0, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         double projection = Math.exp(omega * timeInCurrentState);
+         double recursion = 0.0;
+
+         double blendingTime = Math.max(blendingFraction * singleSupportDuration, minimumBlendingTime);
+         double alpha = MathTools.clamp(timeInCurrentState / blendingTime, 0.0, 1.0);
+
+         double positionMultiplier = InterpolationTools.linearInterpolate(projection, recursion, alpha);
+         double velocityMultiplier = omega * positionMultiplier;
+
+         Assert.assertEquals(positionMultiplier, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(velocityMultiplier, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(initialICPCurrentMultiplier.getPositionMultiplier()));
          Assert.assertFalse(Double.isNaN(initialICPCurrentMultiplier.getVelocityMultiplier()));
       }
