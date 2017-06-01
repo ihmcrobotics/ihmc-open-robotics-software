@@ -18,6 +18,7 @@ import java.util.Random;
 
 public class EntryCMPCurrentMultiplierTest
 {
+   private static final double blendingFraction = 0.5;
    private static final double epsilon = 0.0001;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -58,7 +59,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
       TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -146,7 +147,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
       TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -230,7 +231,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
       TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -312,7 +313,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
       TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -397,7 +398,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -481,7 +482,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -564,7 +565,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
       SwingEntryCMPMatrix entryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -661,7 +662,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
       SwingEntryCMPMatrix entryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, true);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -758,7 +759,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -839,7 +840,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -917,7 +918,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, false, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, false, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -1002,7 +1003,7 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", true, true, registry);
+            endOfSplineTime, totalTrajectoryTime, "", true, true, blendingFraction, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
