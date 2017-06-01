@@ -35,13 +35,13 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 10;
+   private int numberOfCandidates = 20;
    private int numberOfLinearPath;
    private double minimumTimeGapOfWayPoints = 0.8;
    
    private int currentIndexOfCandidate;
    
-   private int numberOfRetry = 5;
+   private int numberOfRetry = 0;
    private int numberOfCandidatesForRetry = 5;
    private int currentIndexOfRetry;
    
@@ -143,11 +143,10 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
             rootNode = SolarPanelCleaningInfo.getNode();
             
             currentControlPointNodePath = new ArrayList<RRTNode>();
-            //currentControlPointNodePath.add(rootNode);
             currentControlPointNodePath.add(getRandomControlPoint(-1));
             
             ArrayList<RRTNode> randomSelectedNodes = new ArrayList<RRTNode>();
-            randomSelectedNodes.add(rootNode);
+            randomSelectedNodes.add(currentControlPointNodePath.get(currentControlPointNodePath.size()-1));
             
             for(int i=0;i<numberOfLinearPath;i++)
             {
@@ -155,6 +154,13 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
                
                randomSelectedNodes.addAll(getWayPointsNodes(currentControlPointNodePath.get(i), randomControlPoint));
                currentControlPointNodePath.add(randomControlPoint);
+            }
+            
+            for(int i=0;i<currentControlPointNodePath.size();i++)
+            {
+//               PrintTools.info(""+i+" ");
+//               for(int j=0;j<currentControlPointNodePath.get(i).getDimensionOfNodeData();j++)
+//                  PrintTools.info(""+currentControlPointNodePath.get(i).getNodeData(j));
             }
                                           
             validNodesStateMachineBehavior.setNodes(randomSelectedNodes);               

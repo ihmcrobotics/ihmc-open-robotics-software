@@ -7,22 +7,22 @@ import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SolarPanel
 {
-   private double sizeX;
-   private double sizeY;
+   private double sizeU;
+   private double sizeV;
    private double sizeZ = 0.05;
    private Pose centerPose;
     
    public SolarPanel()
    {
       this.centerPose = new Pose();
-      this.sizeX = 0;
-      this.sizeY = 0;      
+      this.sizeU = 0;
+      this.sizeV = 0;      
    }
    
-   public SolarPanel(Pose pose, double sizeX, double sizeY)
+   public SolarPanel(Pose pose, double sizeU, double sizeV)
    {
-      this.sizeX = sizeX;
-      this.sizeY = sizeY;
+      this.sizeU = sizeU;
+      this.sizeV = sizeV;
       this.centerPose = pose;      
    }
    
@@ -31,14 +31,14 @@ public class SolarPanel
       return centerPose;
    }
    
-   public double getSizeX()
+   public double getSizeU()
    {
-      return sizeX;
+      return sizeU;
    }
    
-   public double getSizeY()
+   public double getSizeV()
    {
-      return sizeY;
+      return sizeV;
    }
    
    public double getSizeZ()

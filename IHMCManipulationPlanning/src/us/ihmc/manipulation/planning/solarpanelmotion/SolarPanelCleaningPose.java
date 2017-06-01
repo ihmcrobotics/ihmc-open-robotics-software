@@ -106,7 +106,7 @@ public class SolarPanelCleaningPose
       RigidBodyTransform poseTransform = solarPanel.getRigidBodyTransform();
 
       Point3D translation;
-      translation = new Point3D(solarPanel.getSizeX()/2, solarPanel.getSizeY()/2, 0);
+      translation = new Point3D(solarPanel.getSizeU()/2, solarPanel.getSizeV()/2, 0);
       poseTransform.appendTranslation(translation);
 
       poseTransform.appendPitchRotation(Math.PI);
