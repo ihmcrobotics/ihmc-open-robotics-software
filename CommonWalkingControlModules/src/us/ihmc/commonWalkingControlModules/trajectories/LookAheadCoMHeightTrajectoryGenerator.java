@@ -34,8 +34,8 @@ import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -883,10 +883,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         SimpleTrajectoryPoint1D waypoint = command.getTrajectoryPoint(trajectoryPointIndex);
+         FrameEuclideanTrajectoryPoint waypoint = command.getTrajectoryPoint(trajectoryPointIndex);
          double time = waypoint.getTime();
-         double z = waypoint.getPosition();
-         double zDot = waypoint.getVelocity();
+         double z = waypoint.getPositionZ();
+         double zDot = waypoint.getLinearVelocityZ();
 
          // TODO (Sylvain) Check if that's the right way to do it
          desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
