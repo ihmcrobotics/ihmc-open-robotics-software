@@ -1,84 +1,110 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public class PelvisHeightTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>
+public class PelvisHeightTrajectoryCommand extends EuclideanTrajectoryControllerCommand<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>
 {
-   private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
-   private long previousCommandId = Packet.INVALID_MESSAGE_ID;
-
+   private boolean enableUserPelvisControl = false;
+   private boolean enableUserPelvisControlDuringWalking = false;
+   
+   private Point3D tempPoint = new Point3D();
+   private Vector3D tempVector = new Vector3D();
+   
    public PelvisHeightTrajectoryCommand()
    {
+      super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
 
    @Override
    public void clear()
    {
       super.clear();
-
-      commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-      executionMode = ExecutionMode.OVERRIDE;
-      previousCommandId = Packet.INVALID_MESSAGE_ID;
+      enableUserPelvisControl = false;
+      enableUserPelvisControlDuringWalking = false;
+   }
+   
+   public void clear(ReferenceFrame referenceFrame)
+   {
+      super.clear(referenceFrame);
+      enableUserPelvisControl = false;
+      enableUserPelvisControlDuringWalking = false;
    }
 
    @Override
-   public void set(PelvisHeightTrajectoryCommand other)
+   public void set(PelvisHeightTrajectoryCommand command)
    {
-      super.set(other);
-
-      setPropertiesOnly(other);
+      super.set(command);
+      enableUserPelvisControl = command.enableUserPelvisControl;
+      enableUserPelvisControlDuringWalking = command.enableUserPelvisControlDuringWalking;
    }
-
-   /**
-    * Same as {@link #set(PelvisHeightTrajectoryCommand)} but does not change the trajectory points.
-    * 
-    * @param other
-    */
-   public void setPropertiesOnly(PelvisHeightTrajectoryCommand other)
-   {
-      commandId = other.commandId;
-      executionMode = other.executionMode;
-      previousCommandId = other.previousCommandId;
-   }
-
+   
    @Override
    public void set(PelvisHeightTrajectoryMessage message)
    {
-      message.getTrajectoryPoints(this);
-      commandId = message.getUniqueId();
-      executionMode = message.getExecutionMode();
-      previousCommandId = message.getPreviousMessageId();
+      super.set(message);
+      enableUserPelvisControl = message.isEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+   }
+   
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, PelvisHeightTrajectoryMessage message)
+   {
+      clear(dataFrame);
+      set(message);
+      enableUserPelvisControl = message.isEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
    }
 
    public void set(PelvisTrajectoryCommand command)
    {
-      command.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      clear();
-
+      clear(command.getDataFrame());
+      setQueueqableCommandVariables(command);
+      
+      WeightMatrix3D weightMatrix = command.getWeightMatrix().getLinearPart();
+      double zAxisWeight = weightMatrix.getZAxisWeight();
+      WeightMatrix3D currentWeightMatrix = getWeightMatrix();
+      currentWeightMatrix.setZAxisWeight(zAxisWeight);
+      currentWeightMatrix.setWeightFrame(weightMatrix.getWeightFrame());
+      
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          FrameSE3TrajectoryPoint trajectoryPoint = command.getTrajectoryPoint(i);
          double time = trajectoryPoint.getTime();
          double position = trajectoryPoint.getPositionZ();
          double velocity = trajectoryPoint.getLinearVelocityZ();
-         addTrajectoryPoint(time, position, velocity);
+         tempPoint.setToZero();
+         tempPoint.setZ(position);
+         tempVector.setToZero();
+         tempVector.setZ(velocity);
+         addTrajectoryPoint(time, tempPoint, tempVector);
       }
 
-      commandId = command.getCommandId();
-      executionMode = command.getExecutionMode();
-      previousCommandId = command.getPreviousCommandId();
+      enableUserPelvisControl = true;
+      enableUserPelvisControlDuringWalking = command.isEnableUserPelvisControlDuringWalking();
+   }
+   
+   public boolean isEnableUserPelvisControlDuringWalking()
+   {
+      return enableUserPelvisControlDuringWalking;
    }
 
-   public void setExecutionMode(ExecutionMode executionMode)
+   public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
-      this.executionMode = executionMode;
+      this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
+   public boolean isEnableUserPelvisControl()
+   {
+      return enableUserPelvisControl;
+   }
+
+   public void setEnableUserPelvisControl(boolean enableUserPelvisControl)
+   {
+      this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
    @Override
@@ -87,24 +113,16 @@ public class PelvisHeightTrajectoryCommand extends SimpleTrajectoryPoint1DList i
       return PelvisHeightTrajectoryMessage.class;
    }
 
-   public long getCommandId()
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
+    * {@link #getTrajectoryPointList()}.
+    */
+   public void addTrajectoryPoint(double time, double zHeight, double velocity)
    {
-      return commandId;
-   }
-
-   public ExecutionMode getExecutionMode()
-   {
-      return executionMode;
-   }
-
-   public long getPreviousCommandId()
-   {
-      return previousCommandId;
-   }
-
-   @Override
-   public boolean isCommandValid()
-   {
-      return getNumberOfTrajectoryPoints() > 0;
+      tempPoint.setToZero();
+      tempPoint.setZ(zHeight);
+      tempVector.setToZero();
+      tempVector.setZ(velocity);
+      addTrajectoryPoint(time, tempPoint, tempVector);
    }
 }
