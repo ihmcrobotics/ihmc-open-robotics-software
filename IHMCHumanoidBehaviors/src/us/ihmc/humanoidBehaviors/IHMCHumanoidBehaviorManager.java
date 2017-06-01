@@ -228,7 +228,7 @@ public class IHMCHumanoidBehaviorManager
             new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
 
       dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK,
-                             new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, walkingControllerParameters, yoGraphicsListRegistry));
+                             new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, walkingControllerParameters, yoGraphicsListRegistry));
 
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
