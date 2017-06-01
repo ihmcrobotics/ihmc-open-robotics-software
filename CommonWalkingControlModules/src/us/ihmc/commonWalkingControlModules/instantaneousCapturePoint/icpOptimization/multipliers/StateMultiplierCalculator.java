@@ -44,6 +44,8 @@ public class StateMultiplierCalculator
 
    private final int maxNumberOfFootstepsToConsider;
 
+   private static final boolean blendFromInitial = true;
+
    public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, List<DoubleYoVariable> doubleSupportDurations,
          List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> transferSplitFractions,
          List<DoubleYoVariable> swingSplitFractions, int maxNumberOfFootstepsToConsider, String yoNamePrefix, YoVariableRegistry parentRegistry)
@@ -77,14 +79,14 @@ public class StateMultiplierCalculator
       boolean clipTime = true;
 
       exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix,
-            cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
+            cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, registry);
       entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
-      initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix,
-            registry);
+            totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, registry);
+      initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, blendFromInitial,
+            yoNamePrefix, registry);
       initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
       stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
+            cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, blendFromInitial, registry);
 
       recursionMultipliers = new RecursionMultipliers(yoNamePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions,
             registry);
@@ -269,7 +271,7 @@ public class StateMultiplierCalculator
          cubicDerivativeMatrix.update(timeInSpline);
 
          exitCMPCurrentMultiplier.computeSwingSecondSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
-         entryCMPCurrentMultiplier.computeSwingSecondSegment(timeInState, omega0);
+         entryCMPCurrentMultiplier.computeSwingSecondSegment(singleSupportDurations, timeInState, omega0);
          initialICPCurrentMultiplier.computeSwingSecondSegment(timeInState, omega0);
          initialICPVelocityCurrentMultiplier.computeSwingSecondSegment();
          stateEndCurrentMultiplier.computeSwingSecondSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);

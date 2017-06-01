@@ -6,12 +6,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 public class SwingInitialICPMatrix extends DenseMatrix64F
 {
    private final DoubleYoVariable startOfSplineTime;
+   private final boolean blendFromInitial;
 
-   public SwingInitialICPMatrix(DoubleYoVariable startOfSplineTime)
+   public SwingInitialICPMatrix(DoubleYoVariable startOfSplineTime, boolean blendFromInitial)
    {
       super(4, 1);
 
       this.startOfSplineTime = startOfSplineTime;
+      this.blendFromInitial = blendFromInitial;
    }
 
    public void reset()
@@ -21,12 +23,19 @@ public class SwingInitialICPMatrix extends DenseMatrix64F
 
    public void compute(double omega0)
    {
-      // project forward from the initial ICP state
-      double projection = Math.exp(omega0 * startOfSplineTime.getDoubleValue());
+      if (blendFromInitial)
+      {
+         zero();
+      }
+      else
+      {
+         // project forward from the initial ICP state
+         double projection = Math.exp(omega0 * startOfSplineTime.getDoubleValue());
 
-      zero();
-      set(0, 0, projection);
-      set(1, 0, omega0 * projection);
+         zero();
+         set(0, 0, projection);
+         set(1, 0, omega0 * projection);
+      }
    }
 }
 
