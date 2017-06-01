@@ -583,13 +583,13 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] runActions = new Action[] { simulateAction, playAction, stopAction };
       Action[] stepActions = new Action[] { setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction };
       Action[] keyActions = new Action[] { setKeyAction, toggleKeyPointModeAction };
-      Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
+      //Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
       Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction, exportGraphsToFileAction };
-      Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
-      Action[] windowActions = new Action[] {};
-      Action[] helpActions = new Action[] {};
-      Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, playbackPropertiesActions, graphsActions, cameraActions,
-            windowActions, helpActions };
+      //Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
+      //Action[] windowActions = new Action[] {};
+      //Action[] helpActions = new Action[] {};
+      Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, /*playbackPropertiesActions,*/ graphsActions/*, cameraActions,
+            windowActions, helpActions*/ };
       ToolBar[] toolBars = new ToolBar[allActions.length];
 
       // System.out.println(allActions.length);
