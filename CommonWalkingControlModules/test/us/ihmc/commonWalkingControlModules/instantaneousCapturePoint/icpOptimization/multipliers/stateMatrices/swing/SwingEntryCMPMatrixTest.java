@@ -42,8 +42,6 @@ public class SwingEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
       ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
@@ -59,11 +57,8 @@ public class SwingEntryCMPMatrixTest
       for (int i = 0; i < iters; i++)
       {
          double splitRatio = 0.5 * random.nextDouble();
-         double exitRatio = 0.5 * random.nextDouble();
          double startOfSpline = 0.2 * random.nextDouble();
 
-         doubleSupportSplitRatio.set(splitRatio);
-         exitCMPDurationInPercentOfStepTime.set(exitRatio);
          startOfSplineTime.set(startOfSpline);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();
@@ -71,7 +66,7 @@ public class SwingEntryCMPMatrixTest
          doubleSupportDurations.get(0).set(doubleSupportDuration);
          singleSupportDurations.get(0).set(singleSupportDuration);
 
-         String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
+         String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
          double projectionTime = startOfSpline;
          double projection = Math.exp(omega0 * projectionTime);
@@ -105,8 +100,6 @@ public class SwingEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
       ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
@@ -122,11 +115,9 @@ public class SwingEntryCMPMatrixTest
       for (int i = 0; i < iters; i++)
       {
          double splitRatio = 0.5 * random.nextDouble();
-         double exitRatio = 0.5 * random.nextDouble();
          double startOfSpline = 0.2 * random.nextDouble();
 
-         doubleSupportSplitRatio.set(splitRatio);
-         exitCMPDurationInPercentOfStepTime.set(exitRatio);
+         swingSplitFractions.get(0).set(splitRatio);
          startOfSplineTime.set(startOfSpline);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();
@@ -134,10 +125,11 @@ public class SwingEntryCMPMatrixTest
          doubleSupportDurations.get(0).set(doubleSupportDuration);
          singleSupportDurations.get(0).set(singleSupportDuration);
 
-         String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
+         String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
-         double projectionTime = startOfSpline;
-         double projection = Math.exp(omega0 * projectionTime);
+         double swingOnEntry = splitRatio * singleSupportDuration;
+         double splineOnEntry = swingOnEntry - startOfSpline;
+         double projection = Math.exp(omega0 * -splineOnEntry);
 
          swingEntryCMPMatrix.compute(singleSupportDurations, omega0);
 

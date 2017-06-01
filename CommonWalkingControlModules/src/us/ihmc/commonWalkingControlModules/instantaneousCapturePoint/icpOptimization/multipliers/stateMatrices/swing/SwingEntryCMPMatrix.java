@@ -40,7 +40,6 @@ public class SwingEntryCMPMatrix extends DenseMatrix64F
          double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
 
          projection = Math.exp(-omega0 * splineDurationOnEntryCMP);
-
       }
       else
       { // project forward from the initial ICP state

@@ -40,8 +40,6 @@ public class SwingInitialICPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
@@ -54,12 +52,6 @@ public class SwingInitialICPMatrixTest
 
       for (int i = 0; i < iters; i++)
       {
-         double splitRatio = 0.5 * random.nextDouble();
-         double exitRatio = 0.5 * random.nextDouble();
-
-         doubleSupportSplitRatio.set(splitRatio);
-         exitCMPDurationInPercentOfStepTime.set(exitRatio);
-
          double doubleSupportDuration = 2.0 * random.nextDouble();
          double upcomingDoubleSupportDuration = 2.0 * random.nextDouble();
          double singleSupportDuration = 5.0 * random.nextDouble();
@@ -74,7 +66,7 @@ public class SwingInitialICPMatrixTest
             startOfSpline = 0.0;
 
          startOfSplineTime.set(startOfSpline);
-         String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
+         String name = "doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
 
          double projection = Math.exp(omega0 * startOfSpline);
@@ -104,8 +96,6 @@ public class SwingInitialICPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
@@ -118,12 +108,6 @@ public class SwingInitialICPMatrixTest
 
       for (int i = 0; i < iters; i++)
       {
-         double splitRatio = 0.5 * random.nextDouble();
-         double exitRatio = 0.5 * random.nextDouble();
-
-         doubleSupportSplitRatio.set(splitRatio);
-         exitCMPDurationInPercentOfStepTime.set(exitRatio);
-
          double doubleSupportDuration = 2.0 * random.nextDouble();
          double upcomingDoubleSupportDuration = 2.0 * random.nextDouble();
          double singleSupportDuration = 5.0 * random.nextDouble();
@@ -138,17 +122,11 @@ public class SwingInitialICPMatrixTest
             startOfSpline = 0.0;
 
          startOfSplineTime.set(startOfSpline);
-         String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
-
-
-         double projection = Math.exp(omega0 * startOfSpline);
+         String name = "doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
          initialICPMatrix.compute(omega0);
 
          shouldBe.zero();
-         shouldBe.set(0, 0, projection);
-         shouldBe.set(1, 0, omega0 * projection);
-
          JUnitTools.assertMatrixEquals(name, shouldBe, initialICPMatrix, epsilon);
 
          shouldBe.zero();

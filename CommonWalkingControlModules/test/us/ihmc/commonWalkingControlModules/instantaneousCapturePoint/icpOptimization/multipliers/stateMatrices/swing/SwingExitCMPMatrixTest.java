@@ -197,13 +197,18 @@ public class SwingExitCMPMatrixTest
          double nextTransferOnExit = transferRatio2 * nextDoubleSupportDuration;
          double timeOnExit = currentSwingOnExit + nextTransferOnExit;
          double currentSplineOnExit = endOfSpline - currentSwingOnEntry;
+         double currentSplineOnEntry = currentSwingOnEntry - startOfSpline;
 
          double projectionTime = currentSplineOnExit - timeOnExit;
          double projection = Math.exp(omega0 * projectionTime);
 
+         double initialProjection = Math.exp(-omega0 * currentSplineOnEntry) * (1.0 - Math.exp(-omega0 * timeOnExit));
+
          swingExitCMPMatrix.compute(singleSupportDurations, doubleSupportDurations, omega0);
 
          shouldBe.zero();
+         shouldBe.set(0, 0, initialProjection);
+         shouldBe.set(1, 0, omega0 * initialProjection);
          shouldBe.set(2, 0, 1.0 - projection);
          shouldBe.set(3, 0, -omega0 * projection);
 
