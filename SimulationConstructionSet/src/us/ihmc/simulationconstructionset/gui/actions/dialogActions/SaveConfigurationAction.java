@@ -1,18 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class SaveConfigurationAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
    private SaveConfigurationDialogConstructor constructor;
 
    public SaveConfigurationAction(SaveConfigurationDialogConstructor constructor)
@@ -27,6 +22,12 @@ public class SaveConfigurationAction extends SCSAction
       this.constructor = constructor;
    }
 
+   @Override
+   public void doAction()
+   {
+      constructor.constructDialog();
+   }
+
    public void setCurrentDirectory(File directory)
    {
       constructor.setCurrentDirectory(directory);
@@ -37,8 +38,4 @@ public class SaveConfigurationAction extends SCSAction
       constructor.setCurrentDirectory(directory);
    }
 
-   public void doAction()
-   {
-      constructor.constructDialog();
-   }
 }

@@ -1,18 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.config.EntryBoxGroupSelector;
 
+import java.awt.event.KeyEvent;
 
 public class SelectEntryBoxGroupAction extends SCSAction
 {
-   private static final long serialVersionUID = 2957716760331114426L;
    private String name;
    private EntryBoxGroupSelector selector;
 
@@ -29,6 +23,7 @@ public class SelectEntryBoxGroupAction extends SCSAction
       this.name = name;
    }
 
+   @Override
    public void doAction()
    {
       selector.selectEntryBoxGroup(name);

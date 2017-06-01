@@ -1,13 +1,9 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+import java.awt.event.KeyEvent;
 
 public class ZoomInAction extends SCSAction
 {
@@ -27,6 +23,7 @@ public class ZoomInAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.zoomIn();

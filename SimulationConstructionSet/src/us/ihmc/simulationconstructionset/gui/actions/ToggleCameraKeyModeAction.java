@@ -1,17 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class ToggleCameraKeyModeAction extends SCSAction
 {
-   private static final long serialVersionUID = -5162293334622550111L;
    private ToggleCameraKeyModeCommandExecutor executor;
 
    public ToggleCameraKeyModeAction(ToggleCameraKeyModeCommandExecutor executor)
@@ -26,6 +21,7 @@ public class ToggleCameraKeyModeAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.toggleCameraKeyMode();

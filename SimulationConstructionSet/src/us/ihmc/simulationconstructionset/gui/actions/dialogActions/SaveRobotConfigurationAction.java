@@ -1,18 +1,13 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
 
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class SaveRobotConfigurationAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
    private SaveRobotConfigurationDialogConstructor constructor;
 
    public SaveRobotConfigurationAction(SaveRobotConfigurationDialogConstructor constructor) 
@@ -27,6 +22,12 @@ public class SaveRobotConfigurationAction extends SCSAction
       this.constructor = constructor;
    }
 
+   @Override
+   public void doAction()
+   {
+      constructor.constructDialog();
+   }
+
    public void setCurrentDirectory(File directory)
    {
       constructor.setCurrentDirectory(directory);
@@ -37,8 +38,4 @@ public class SaveRobotConfigurationAction extends SCSAction
       constructor.setCurrentDirectory(directory);
    }
 
-   public void doAction()
-   {
-      constructor.constructDialog();
-   }
 }

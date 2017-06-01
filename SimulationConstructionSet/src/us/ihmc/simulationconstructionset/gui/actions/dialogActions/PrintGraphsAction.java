@@ -1,16 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
 
+import java.awt.event.KeyEvent;
+
 public class PrintGraphsAction extends SCSAction
 {
-   private static final long serialVersionUID = -4403022630360741566L;
    private PrintGraphsDialogConstructor constructor;
 
    public PrintGraphsAction(PrintGraphsDialogConstructor constructor)
@@ -31,9 +27,9 @@ public class PrintGraphsAction extends SCSAction
       constructor = null;
    }
 
+   @Override
    public void doAction()
    {
       constructor.constructDialog();
    }
-   
 }

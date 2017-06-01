@@ -1,18 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions.configActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupSelector;
 
+import java.awt.event.KeyEvent;
 
 public class SelectVarGroupAction extends SCSAction
 {
-   private static final long serialVersionUID = 7027661415555951268L;
    private String name;
    private VarGroupSelector varGroupSelector;
 
@@ -29,6 +23,7 @@ public class SelectVarGroupAction extends SCSAction
       this.name = name;
    }
 
+   @Override
    public void doAction()
    {
       varGroupSelector.selectVarGroup(name);

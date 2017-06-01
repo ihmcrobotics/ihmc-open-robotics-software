@@ -1,17 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class CropBufferAction extends SCSAction
 {
-   private static final long serialVersionUID = 5039888169851613916L;
    private CropBufferCommandExecutor executor;
 
    public CropBufferAction(CropBufferCommandExecutor executor)
@@ -26,6 +21,7 @@ public class CropBufferAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.cropBuffer();

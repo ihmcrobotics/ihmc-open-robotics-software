@@ -1,19 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.net.URL;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 
+import java.awt.event.KeyEvent;
+
 public class AddKeyPointAction extends SCSAction
 {
-   private static final long serialVersionUID = -2830335620118067620L;
    private AddKeyPointCommandExecutor executor;
 
    public AddKeyPointAction(AddKeyPointCommandExecutor executor)
@@ -28,6 +21,7 @@ public class AddKeyPointAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.addKeyPoint();

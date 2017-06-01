@@ -1,18 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.commands.GotoInPointCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+import java.awt.event.KeyEvent;
 
 public class GotoInPointAction extends SCSAction
 {
-   private static final long serialVersionUID = -9080927302316708389L;
-
    private final GotoInPointCommandExecutor executor;
 
    public GotoInPointAction(GotoInPointCommandExecutor executor)
@@ -27,6 +21,7 @@ public class GotoInPointAction extends SCSAction
       this.executor = executor;
    }
 
+   @Override
    public void doAction()
    {
       executor.gotoInPoint();
