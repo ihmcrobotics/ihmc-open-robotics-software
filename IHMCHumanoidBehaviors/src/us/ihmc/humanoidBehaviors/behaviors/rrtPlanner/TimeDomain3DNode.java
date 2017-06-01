@@ -10,16 +10,16 @@ public class TimeDomain3DNode extends RRTNode
    
    // pelvisHeight
    public static double defaultPelvisHeight;
-   public static double upperShiftedBound1D = 0.06;
+   public static double upperShiftedBound1D = 0.0;
    public static double lowerShiftedBound1D = -0.100;
    
    // chestYaw
    public static double upperBound2D = Math.PI*0.2;
-   public static double lowerBound2D = -Math.PI*0.0;
+   public static double lowerBound2D = -Math.PI*0.01;
    
    // chestPitch
    public static double upperBound3D = Math.PI*0.15;
-   public static double lowerBound3D = -Math.PI*0.05;
+   public static double lowerBound3D = -Math.PI*0.02;
    
    
    
@@ -48,8 +48,11 @@ public class TimeDomain3DNode extends RRTNode
    {
       Random randomManager = new Random();
 
-      double upperBound1D = defaultPelvisHeight + upperShiftedBound1D;
-      double lowerBound1D = defaultPelvisHeight + lowerShiftedBound1D;
+//      double upperBound1D = defaultPelvisHeight + upperShiftedBound1D;
+//      double lowerBound1D = defaultPelvisHeight + lowerShiftedBound1D;
+      
+      double upperBound1D = 0.95;
+      double lowerBound1D = 0.8;
       
       double randonValue;
       randonValue = randomManager.nextDouble() * (upperBound1D - lowerBound1D) + lowerBound1D;

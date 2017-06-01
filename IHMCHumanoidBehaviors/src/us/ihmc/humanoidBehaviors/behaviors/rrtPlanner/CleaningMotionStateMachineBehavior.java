@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachine
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.CleaningPathType;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFacotry;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFactory;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -43,8 +43,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 {   
    private int numberOfPlanar = 0;
    private PlanarRegion planarRegion;
-   private GetSolarPanelBehavior getSolarPanelBehavior;
-   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   //private GetSolarPanelBehavior getSolarPanelBehavior;
+   private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
@@ -52,7 +52,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private TestDoneBehavior doneBehavior;
    
-   private SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory;
+   private SolarPanelWholeBodyTrajectoryMessageFactory motionFactory;
    
    private DoubleYoVariable yoTime;
    private FullHumanoidRobotModel fullRobotModel;
@@ -74,13 +74,13 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
-      getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
-      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
       
-      motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry(fullRobotModel);
+      motionFactory = new SolarPanelWholeBodyTrajectoryMessageFactory(fullRobotModel);
       
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
@@ -190,7 +190,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
+            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
+            boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
@@ -460,13 +461,13 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(0.75, -0.1, 0.9);
-         quaternionSolarPanel.appendYawRotation(Math.PI*0.05);
+         poseSolarPanel.setPosition(0.7, -0.15, 0.95);
+         quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
          quaternionSolarPanel.appendRollRotation(0.0);
-         quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+         quaternionSolarPanel.appendPitchRotation(-0.53);
          poseSolarPanel.setOrientation(quaternionSolarPanel);
          
-         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.63, 0.63);
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //

@@ -24,7 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public class SolarPanelWholeBodyTrajectoryMessageFacotry
+public class SolarPanelWholeBodyTrajectoryMessageFactory
 {
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
    private SolarPanelPath cleaningPath;
@@ -32,7 +32,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
    private ReferenceFrame midFeetFrame;
    private ReferenceFrame worldFrame;
    
-   public SolarPanelWholeBodyTrajectoryMessageFacotry(FullHumanoidRobotModel fullRobotModel)
+   public SolarPanelWholeBodyTrajectoryMessageFactory(FullHumanoidRobotModel fullRobotModel)
    {
       this.wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
             

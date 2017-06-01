@@ -43,7 +43,7 @@ import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleani
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner.CleaningMotion;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFacotry;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTrajectoryMessageFactory;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -97,7 +97,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
                   
-         EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeX(), solarPanel.getSizeY(), solarPanel.getSizeZ(), YoAppearance.Aqua());
+         EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeZ(), YoAppearance.Aqua());
       }
       
       @Override
@@ -406,7 +406,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());      
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
       
-      SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry(sdfFullRobotModel);
+      SolarPanelWholeBodyTrajectoryMessageFactory motionFactory = new SolarPanelWholeBodyTrajectoryMessageFactory(sdfFullRobotModel);
       motionFactory.setMessage(new SolarPanelCleaningPose(solarPanel, 0.4, 0.2, 0.0), 0.65, Math.PI*0.0, -Math.PI*0.1, 3.0);
       
       wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
@@ -475,6 +475,14 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
       scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
+//      for(int i=0;i<SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();i++)
+//      {
+//         double startTime = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(i).getMotionStartTime();
+//         double endTime = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(i).getMotionEndTime();
+//         PrintTools.info(""+i +" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(startTime).getU()+" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(startTime).getV());   
+//         PrintTools.info(""+i +" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(endTime).getU()+" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(endTime).getV());   
+//      }
+      
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(200);
       
