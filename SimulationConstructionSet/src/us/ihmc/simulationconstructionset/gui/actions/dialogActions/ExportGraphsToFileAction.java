@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class ExportGraphsToFileAction extends SCSAction
 {
    private ExportGraphsToFileConstructor constructor;

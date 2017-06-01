@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions.configActions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupSelector;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class SelectVarGroupAction extends SCSAction
 {
    private String name;

@@ -2,10 +2,10 @@ package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSnapshotDialogConstructor;
-
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+@SuppressWarnings("serial")
 public class ExportSnapshotAction extends SCSAction
 {
    private final ExportSnapshotDialogConstructor constructor;

@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class SelectCameraAction extends SCSAction
 {
    private String name;

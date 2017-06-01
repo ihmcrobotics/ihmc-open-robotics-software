@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions.configActions;
 
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class SelectViewportAction extends SCSAction
 {
    private String name;

@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class AboutAction extends SCSAction
 {
    private final AboutDialogConstructor constructor;

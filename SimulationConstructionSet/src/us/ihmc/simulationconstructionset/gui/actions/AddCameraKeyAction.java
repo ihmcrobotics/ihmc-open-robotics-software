@@ -4,6 +4,7 @@ import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class AddCameraKeyAction extends SCSAction
 {
    private final AddCameraKeyCommandExecutor executor;

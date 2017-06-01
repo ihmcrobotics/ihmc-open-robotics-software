@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.actions;
 
 import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
-
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class SetInPointAction extends SCSAction
 {
    private SetInPointCommandExecutor executor;
