@@ -89,6 +89,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
       lidarScanPublisher.setScanFrameToWorldFrame();
+      lidarScanPublisher.enableShadowRemoval();
       lidarScanPublisher.start();
 
       multiSenseSensorManager.initializeParameterListeners();
