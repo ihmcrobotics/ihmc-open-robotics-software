@@ -277,7 +277,7 @@ public class InitialICPCurrentMultiplier
          double projectionMultiplier = Math.exp(omega0 * timeInState);
          double recursionMultiplier = 0.0;
 
-         double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         double blendingTime = blendingFraction * startOfSplineTime.getDoubleValue();
          blendingTime = Math.max(blendingTime, minimumBlendingTime);
          double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
 
