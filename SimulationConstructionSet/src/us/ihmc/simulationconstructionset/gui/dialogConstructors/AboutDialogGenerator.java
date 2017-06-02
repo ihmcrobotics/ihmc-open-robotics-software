@@ -1,15 +1,17 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-import java.awt.Dimension;
-
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
+import javax.swing.*;
 
 public class AboutDialogGenerator implements AboutDialogConstructor
 {
+   // TODO: remove parentJFrame and all uses of it
    private JFrame parentJFrame;
 
    public AboutDialogGenerator(JFrame parentJFrame)
@@ -22,23 +24,36 @@ public class AboutDialogGenerator implements AboutDialogConstructor
    {
       String scsVersionNumber = SimulationConstructionSet.getVersion();
 
-      JEditorPane jEditorPane = new JEditorPane();
-      jEditorPane.setText("SimulationConstructionSet.\n\n Originally developed at Yobotics, Inc. from 2000-2010. \n\n Now developed at IHMC from 2002 to the present. \n\n Website: http://ihmc.us/groups/scs/");
-      JDialog aboutDialog = new JDialog(parentJFrame, "Simulation Construction Set Version: " + scsVersionNumber, false);
+      // Must run on JavaFX application thread - use Platform.runLater()
+      // TODO: make prettier :)
+      Platform.runLater(() ->{
+         Pane pane = new Pane();
+         Scene scene = new Scene(pane);
+         Stage about = new Stage();
+         about.setScene(scene);
 
-      // JScrollPane aboutScrollPane = new JScrollPane(aboutEditorPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+         TextArea ta = new TextArea();
+         ta.setText(
+                 "SimulationConstructionSet.\n\n " +
+                         "Originally developed at Yobotics, Inc. from 2000-2010.\n\n " +
+                         "Now developed at IHMC from 2002 to the present.\n\n " +
+                         "Website: https://www.ihmc.us/simulationconstructionset/"
+         );
+         ta.setEditable(false);
+         ta.setWrapText(true);
+         ta.setPrefSize(500,200);
 
-      // aboutDialog.getContentPane().add(aboutScrollPane);
-      aboutDialog.getContentPane().add(jEditorPane);
+         pane.getChildren().add(ta);
+         pane.setPrefSize(500,200);
 
-      aboutDialog.setSize(new Dimension(450, 300));
-      aboutDialog.validate();
-      aboutDialog.setVisible(true);
+         about.setResizable(false);
+         about.show();
+      });
    }
 
    public void closeAndDispose()
    {
-      parentJFrame = null; 
+      parentJFrame = null;
    }
 
 }
