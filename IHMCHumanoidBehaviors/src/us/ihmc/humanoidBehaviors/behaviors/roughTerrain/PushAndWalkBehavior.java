@@ -56,6 +56,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
    private final AlphaFilteredYoVariable yawFilteredError = new AlphaFilteredYoVariable("YawFilteredError", registry, yawErrorFilterAlpha);
    private final DoubleYoVariable yawMaxAnglePerStep = new DoubleYoVariable("YawMaxAnglePerStep", registry);
    
+   private final DoubleYoVariable[] footWorkSpaceVertex = new DoubleYoVariable[8];
    private final HumanoidReferenceFrames referenceFrames;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -73,10 +74,25 @@ public class PushAndWalkBehavior extends AbstractBehavior
       attachNetworkListeningQueue(statusQueue, CapturabilityBasedStatus.class);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       
+      
+      footWorkSpaceVertex[0] = new DoubleYoVariable("FootWorkSpaceVertex1X", registry);
+      footWorkSpaceVertex[1] = new DoubleYoVariable("FootWorkSpaceVertex1Y", registry);
+      footWorkSpaceVertex[2] = new DoubleYoVariable("FootWorkSpaceVertex2X", registry);
+      footWorkSpaceVertex[3] = new DoubleYoVariable("FootWorkSpaceVertex2Y", registry);
+      footWorkSpaceVertex[4] = new DoubleYoVariable("FootWorkSpaceVertex3X", registry);
+      footWorkSpaceVertex[5] = new DoubleYoVariable("FootWorkSpaceVertex3Y", registry);
+      footWorkSpaceVertex[6] = new DoubleYoVariable("FootWorkSpaceVertex4X", registry);
+      footWorkSpaceVertex[7] = new DoubleYoVariable("FootWorkSpaceVertex4Y", registry);
+      
+      footWorkSpaceVertex[0].set(0.25); footWorkSpaceVertex[1].set(0.18);
+      footWorkSpaceVertex[2].set(0.15); footWorkSpaceVertex[3].set(0.35);
+      footWorkSpaceVertex[4].set(-0.25); footWorkSpaceVertex[5].set(0.18);
+      footWorkSpaceVertex[6].set(-0.15); footWorkSpaceVertex[7].set(0.35);
+      
       errorThreshold.set(0.02);
       errorFilterAlpha.set(0.95);
       
-      yawMaxAnglePerStep.set(Math.toRadians(20));
+      yawMaxAnglePerStep.set(Math.toRadians(10));
       yawErrorThreshold.set(Math.toRadians(2));
       yawErrorFilterAlpha.set(0.95);
       
@@ -237,14 +253,14 @@ public class PushAndWalkBehavior extends AbstractBehavior
    {
       // reachable region in stance frame
       ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
-      reachableRegion.addVertex(0.25, stepSide.negateIfRightSide(0.18));
-      reachableRegion.addVertex(0.15, stepSide.negateIfRightSide(0.5));
-      reachableRegion.addVertex(-0.25, stepSide.negateIfRightSide(0.18));
-      reachableRegion.addVertex(-0.15, stepSide.negateIfRightSide(0.5));
+      reachableRegion.addVertex(footWorkSpaceVertex[0].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[1].getDoubleValue()));
+      reachableRegion.addVertex(footWorkSpaceVertex[2].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[3].getDoubleValue()));
+      reachableRegion.addVertex(footWorkSpaceVertex[4].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[5].getDoubleValue()));
+      reachableRegion.addVertex(footWorkSpaceVertex[6].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[7].getDoubleValue()));
       reachableRegion.update();
       
-      //MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
-      MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
+      MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
+      //MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
       FrameVector localDirection = new FrameVector(direction);
       localDirection.changeFrame(stanceSoleFrame);
       FramePoint stanceLocation = new FramePoint(stanceSoleFrame);
