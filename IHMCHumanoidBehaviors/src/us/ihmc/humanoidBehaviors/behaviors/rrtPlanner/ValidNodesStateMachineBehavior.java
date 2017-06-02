@@ -151,7 +151,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             
             if(true && b)
             {
-               PrintTools.info("Check :: doneCondition " + b +" "+indexOfCurrentNode +" "+ nodes.size());
+               PrintTools.info("Check :: doneCondition       " + indexOfCurrentNode +" "+ nodes.size());
                RRTNode rrtNode = nodes.get(indexOfCurrentNode-1);
                PrintTools.info("Fail Node Info :: time "+ rrtNode.getNodeData(0)+" height " + rrtNode.getNodeData(1)+" yaw "+ rrtNode.getNodeData(2) +" pitch "+ rrtNode.getNodeData(3));               
             }
