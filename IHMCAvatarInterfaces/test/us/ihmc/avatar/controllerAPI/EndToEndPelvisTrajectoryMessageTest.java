@@ -235,12 +235,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       desiredPosition.setY(desiredPosition2d.getY());
       desiredOrientation.set(desiredOrientationCorrected);
       
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      assertTrue(success);
+      
       String pelvisName = fullRobotModel.getPelvis().getName();
       assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
       double walkingTime = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, scs.getRootRegistry());
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0 + walkingTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + walkingTime);
       assertTrue(success);
    }
    
