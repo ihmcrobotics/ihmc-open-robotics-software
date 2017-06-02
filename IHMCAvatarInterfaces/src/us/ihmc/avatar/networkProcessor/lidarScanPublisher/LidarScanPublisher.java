@@ -174,8 +174,8 @@ public class LidarScanPublisher
     * Pat Marion master thesis, section 2.2.1, page 25.</a> 
     * </p>
     * 
-    * @param angleThreshold the threshold used by the removal algorithm.
-    * Expecting a positive value close to zero, the default value is 12 degrees.
+    * @param angleThreshold the angle threshold in radians used by the removal algorithm.
+    * Expecting a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
     */
    public void enableShadowRemoval(double angleThreshold)
    {
