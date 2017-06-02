@@ -8,15 +8,21 @@ import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JToolBar;
 
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Color;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
@@ -514,34 +520,51 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       guiActions.add(createNewViewportWindowAction);
    }
 
-   protected JPanel createWindowButtons(Action[][] allActions, JToolBar[] toolBars, boolean trackAndDolly)
+   protected JPanel createWindowButtons(Action[][] allActions, ToolBar[] toolBars, boolean trackAndDolly)
    {
+      JFXPanel jfxPanel = new JFXPanel();
+      FlowPane root = new FlowPane();
+      ToolBar tb = new ToolBar();
+
       for (int j = 0; j < allActions.length; j++)
       {
-         Action[] actions = allActions[j];
+         if (j > 0) {
+            tb.getItems().add(new Separator());
+         }
 
-         toolBars[j] = new JToolBar();
-         toolBars[j].setBorderPainted(true); // false);
-         toolBars[j].setFloatable(false);
+         Action[] actions = allActions[j];
 
          for (Action action : actions)
          {
             if (action.getValue(Action.SMALL_ICON) != null)
             {
-               JButton button = toolBars[j].add(action);
-               String name = (String) action.getValue(Action.NAME);
-               button.setName(name);
-               button.setToolTipText(name);
+               Button jfxbutton = new Button();
+               jfxbutton.setOnAction((SCSAction) action);
+               jfxbutton.setTooltip(new Tooltip((String) action.getValue(Action.NAME)));
+               if (((SCSAction) action).iconFilename != null) {
+                  jfxbutton.setStyle(
+                          "-fx-background-image: url('" + ((SCSAction) action).iconFilename + "');" +
+                                  "-fx-background-position: center center;" +
+                                  "-fx-background-repeat: no-repeat;" +
+                                  "-fx-background-size: cover"
+                  );
+               }
+               jfxbutton.setPrefWidth(28.00);
+               jfxbutton.setPrefHeight(28.00);
+
+               tb.getItems().add(jfxbutton);
             }
          }
       }
 
+      root.getChildren().add(tb);
+
+      Scene scene = new Scene(root, Color.BLUEVIOLET);
+      jfxPanel.setScene(scene);
+
       JPanel buttonPanel = new JPanel(new FlowLayout());
 
-      for (JToolBar toolBar : toolBars)
-      {
-         buttonPanel.add(toolBar);
-      }
+      buttonPanel.add(jfxPanel);
 
       if (trackAndDolly)
       {
@@ -558,14 +581,14 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] runActions = new Action[] { simulateAction, playAction, stopAction };
       Action[] stepActions = new Action[] { setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction };
       Action[] keyActions = new Action[] { setKeyAction, toggleKeyPointModeAction };
-      Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
+      //Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
       Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction, exportGraphsToFileAction };
-      Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
-      Action[] windowActions = new Action[] {};
-      Action[] helpActions = new Action[] {};
-      Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, playbackPropertiesActions, graphsActions, cameraActions,
-            windowActions, helpActions };
-      JToolBar[] toolBars = new JToolBar[allActions.length];
+      //Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
+      //Action[] windowActions = new Action[] {};
+      //Action[] helpActions = new Action[] {};
+      Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, /*playbackPropertiesActions,*/ graphsActions/*, cameraActions,
+            windowActions, helpActions*/ };
+      ToolBar[] toolBars = new ToolBar[allActions.length];
 
       // System.out.println(allActions.length);
       return createWindowButtons(allActions, toolBars, true);
@@ -741,7 +764,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] helpActions = new Action[] {};
       Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, playbackPropertiesActions, graphsActions, cameraActions,
             windowActions, helpActions };
-      JToolBar[] toolBars = new JToolBar[allActions.length];
+      ToolBar[] toolBars = new ToolBar[allActions.length];
 
       // System.out.println(allActions.length);
       return createWindowButtons(allActions, toolBars, true);
@@ -759,7 +782,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] helpActions = new Action[] {};
       Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, playbackPropertiesActions, graphsActions, cameraActions, windowActions,
             helpActions };
-      JToolBar[] toolBars = new JToolBar[allActions.length];
+      ToolBar[] toolBars = new ToolBar[allActions.length];
 
       // System.out.println(allActions.length);
       return createWindowButtons(allActions, toolBars, true);
@@ -842,7 +865,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] helpActions = new Action[] {};
       Action[][] allActions = new Action[][] { fileActions, runActions, stepActions, keyActions, playbackPropertiesActions, graphsActions, cameraActions,
             windowActions, helpActions };
-      JToolBar[] toolBars = new JToolBar[allActions.length];
+      ToolBar[] toolBars = new ToolBar[allActions.length];
 
       return createWindowButtons(allActions, toolBars, false);
    }
