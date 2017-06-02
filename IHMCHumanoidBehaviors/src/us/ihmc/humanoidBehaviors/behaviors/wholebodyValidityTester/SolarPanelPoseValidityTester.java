@@ -125,8 +125,8 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       CollisionModelBox solarPanelCollisionModel;
       solarPanelCollisionModel = new CollisionModelBox(getRobotCollisionModel().getCollisionShapeFactory(), solarPanel.getRigidBodyTransform(),
                                                        solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeZ());
-      solarPanelCollisionModel.getCollisionShape().setCollisionGroup(0b11111111111111);
-      solarPanelCollisionModel.getCollisionShape().setCollisionMask(0b11111111111111);      
+      solarPanelCollisionModel.getCollisionShape().setCollisionGroup(0b11111111101111);
+      solarPanelCollisionModel.getCollisionShape().setCollisionMask(0b11111111111111);    
    }
    
 

@@ -43,8 +43,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 {   
    private int numberOfPlanar = 0;
    private PlanarRegion planarRegion;
-   //private GetSolarPanelBehavior getSolarPanelBehavior;
-   private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   private GetSolarPanelBehavior getSolarPanelBehavior;
+   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
@@ -74,8 +74,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
-      //getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
-      getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
@@ -461,10 +461,10 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(0.7, -0.15, 0.95);
+         poseSolarPanel.setPosition(0.7, -0.1, 1.05);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
          quaternionSolarPanel.appendRollRotation(0.0);
-         quaternionSolarPanel.appendPitchRotation(-0.53);
+         quaternionSolarPanel.appendPitchRotation(-0.380);
          poseSolarPanel.setOrientation(quaternionSolarPanel);
          
          SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.63, 0.63);
