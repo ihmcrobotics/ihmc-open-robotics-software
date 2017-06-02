@@ -17,7 +17,7 @@ import com.google.common.io.Files;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
@@ -53,7 +53,7 @@ public class LogFileDecompressor extends YoVariableLogReader
       byte[] handshakeData = new byte[(int) handshake.length()];
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
-      int numberOfVariables = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
+      int numberOfVariables = YoVariableHandshakeParser.getNumberOfStateVariables(logProperties.getVariables().getHandshakeFileType(), handshakeData);
 
       CompressionProperties properties = new CompressionProperties();
       FileInputStream propertiesFile = new FileInputStream(new File(compressedDirectory, "robotData.compressed"));
