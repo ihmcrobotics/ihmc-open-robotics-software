@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import org.apache.commons.lang3.Conversion;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,9 +28,12 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PushAndWalkBehavior extends AbstractBehavior
 {
@@ -48,11 +53,12 @@ public class PushAndWalkBehavior extends AbstractBehavior
    
    private final DoubleYoVariable yawErrorThreshold = new DoubleYoVariable("YawErrorThreshold", registry);
    private final DoubleYoVariable yawErrorFilterAlpha = new DoubleYoVariable("YawErrorFilterAlpha", registry);
-   private final DoubleYoVariable yawFilteredError = new AlphaFilteredYoVariable("YawFilteredError", registry, yawErrorFilterAlpha);
+   private final AlphaFilteredYoVariable yawFilteredError = new AlphaFilteredYoVariable("YawFilteredError", registry, yawErrorFilterAlpha);
    private final DoubleYoVariable yawMaxAnglePerStep = new DoubleYoVariable("YawMaxAnglePerStep", registry);
    
    private final HumanoidReferenceFrames referenceFrames;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    public PushAndWalkBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames,
 		   FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
@@ -60,7 +66,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       super(communicationBridge);
       this.referenceFrames = referenceFrames;
       this.walkingControllerParameters = walkingControllerParameters;
-
+      this.fullRobotModel = fullRobotModel;
+      
       statusQueue = new ConcurrentListeningQueue<>(1);
       walkingStatusQueue = new ConcurrentListeningQueue<>(1);
       attachNetworkListeningQueue(statusQueue, CapturabilityBasedStatus.class);
@@ -68,7 +75,10 @@ public class PushAndWalkBehavior extends AbstractBehavior
       
       errorThreshold.set(0.02);
       errorFilterAlpha.set(0.95);
+      
       yawMaxAnglePerStep.set(Math.toRadians(20));
+      yawErrorThreshold.set(Math.toRadians(2));
+      yawErrorFilterAlpha.set(0.95);
       
       if (graphicsListRegistry != null)
       {
@@ -109,6 +119,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
 
          double error = desiredCapturePoint.distance(capturePoint);
          filteredError.update(error);
+         yawFilteredError.update(getSpineYawJointPositionError());
+         
          boolean shouldWalk = filteredError.getDoubleValue() > errorThreshold.getDoubleValue();
 
          if (doubleSupport && shouldWalk && !walking.getBooleanValue())
@@ -127,9 +139,40 @@ public class PushAndWalkBehavior extends AbstractBehavior
             capturePointViz.update();
          }
          statusQueue.clear();
-      }
+      }      
    }
 
+   private double getSpineYawJointPositionError()
+   {
+	   return getSpineYawJointDesiredPosition() - getSpineYawJointCurrentPosition();
+   }
+   
+   private double getSpineYawJointDesiredPosition()
+   {
+	   OneDoFJoint spineYaw = getSpineYawJoint();
+	   return spineYaw.getqDesired();
+   }
+   
+   private double getSpineYawJointCurrentPosition()
+   {
+	   OneDoFJoint spineYaw = getSpineYawJoint();
+	   return spineYaw.getQ();
+   }
+   
+   private OneDoFJoint getSpineYawJoint()
+   {
+	   SpineJointName[] spineJointName = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
+       int spineYawIndex = -1;
+       for (int i = 0; i < spineJointName.length; i++) {
+    	   if(spineJointName[i].getCamelCaseNameForStartOfExpression() == "spineYaw")
+    	   {
+    		   spineYawIndex = i;
+    		   break;
+    	   }
+       }
+       return fullRobotModel.getSpineJoint(spineJointName[spineYawIndex]);       
+   }
+   
    private void takeSteps(Vector2D direction2dInWorld)
    {
       referenceFrames.updateFrames();
