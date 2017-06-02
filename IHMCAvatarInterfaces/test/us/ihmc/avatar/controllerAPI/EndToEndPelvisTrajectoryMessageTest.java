@@ -212,7 +212,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
       
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * robotModel.getControllerDT());
       assertTrue(success);
       
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
