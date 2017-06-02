@@ -1,9 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import org.fxyz3d.geometry.Ray;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -29,7 +26,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameTuple2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -211,15 +207,15 @@ public class PushAndWalkBehavior extends AbstractBehavior
       FramePoint stanceLocation = new FramePoint(stanceSoleFrame);
       FramePoint swingLocation = new FramePoint(referenceFrames.getFootFrame(stepSide));
       
-      System.out.println(swingLocation.toString());
+      //System.out.println(swingLocation.toString());
       swingLocation.changeFrame(stanceSoleFrame);
       
       //Point2D desiredLocation = new Point2D(localDirection.getX(), localDirection.getY());
       //Point2D location2d = reachableRegion.orthogonalProjectionCopy(desiredLocation);
       
-      System.out.println(swingLocation.toString());      
-      System.out.println(localDirection.getX() + " " + localDirection.getY());
-      System.out.println(reachableRegion.toString());
+      //System.out.println(swingLocation.toString());      
+      //System.out.println(localDirection.getX() + " " + localDirection.getY());
+      //System.out.println(reachableRegion.toString());
       Line2D ray = new Line2D(swingLocation.getX(), swingLocation.getY(), localDirection.getX(), localDirection.getY());
       Point2D[] location2d = reachableRegion.intersectionWithRay(ray);
       
