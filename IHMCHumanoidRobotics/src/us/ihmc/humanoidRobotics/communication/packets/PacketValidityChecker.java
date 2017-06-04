@@ -132,6 +132,24 @@ public abstract class PacketValidityChecker
             String errorMessage = messageClassName + "'s swing trajectory has waypoints with time larger then the swing time.";
             return errorMessage;
          }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() < 0.0)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is less than zero.";
+            return errorMessage;
+         }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialLocation() == null)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial location is undefined.";
+            return errorMessage;
+         }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialOrientation() == null)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial orientation is undefined.";
+            return errorMessage;
+         }
       }
 
       return null;
