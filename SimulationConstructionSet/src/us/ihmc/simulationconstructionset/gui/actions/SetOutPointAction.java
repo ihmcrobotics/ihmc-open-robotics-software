@@ -12,7 +12,7 @@ public class SetOutPointAction extends SCSAction
    public SetOutPointAction(SetOutPointCommandExecutor executor)
    {
       super("Set Out Point",
-              "icons/YoSetOutPoint24.gif",
+              "icons/SetOutPoint.png",
               KeyEvent.VK_U,
               "Set Out Point",
               "Set Out Point"

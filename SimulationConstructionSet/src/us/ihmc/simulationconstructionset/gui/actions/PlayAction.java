@@ -12,7 +12,7 @@ public class PlayAction extends SCSAction
    public PlayAction(PlayCommandExecutor executor)
    {
       super("Play",
-              "icons/Play24.gif",
+              "icons/Play.png",
               KeyEvent.VK_P,
               "Play",
               "Start playing simulation."

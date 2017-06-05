@@ -13,7 +13,7 @@ public class ExportSnapshotAction extends SCSAction
    public ExportSnapshotAction(ExportSnapshotDialogConstructor constructor)
    {
       super("Export Snapshot...",
-              "icons/YoExportSnapshot.gif",
+              "icons/Screenshot.png",
               KeyEvent.VK_S,
               "Export Snapshot",
               "Export snapshot to a file."

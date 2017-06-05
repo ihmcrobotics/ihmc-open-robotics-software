@@ -12,7 +12,7 @@ public class StepForwardAction extends SCSAction
    public StepForwardAction(StepForwardCommandExecutor executor)
    {
       super("Step Forward",
-              "icons/StepForward24.gif",
+              "icons/StepForward.png",
               KeyEvent.VK_F,
       "Step Forward",
       "Step Forward"

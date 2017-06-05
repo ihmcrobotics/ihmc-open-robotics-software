@@ -12,7 +12,7 @@ public class ZoomInAction extends SCSAction
    public ZoomInAction(ZoomGraphCommandExecutor executor)
    {
       super("Zoom In",
-              "icons/ZoomIn24.gif",
+              "icons/ZoomIn.png",
               KeyEvent.VK_I,
               "Zoom In",
               "Zoom In"

@@ -17,7 +17,7 @@ public class ToggleKeyPointModeAction extends SCSAction implements ToggleKeyPoin
    public ToggleKeyPointModeAction(ToggleKeyPointModeCommandExecutor executor)
    {
       super("Toggle Key Mode",
-              "icons/toggleKey.gif",
+              "icons/ToggleKeyMode.png",
               KeyEvent.VK_F,
               "Short Description",
               "Long Description"

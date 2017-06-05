@@ -12,7 +12,7 @@ public class StepBackwardAction extends SCSAction
    public StepBackwardAction(StepBackwardCommandExecutor executor)
    {
       super("Step Backward",
-              "icons/StepBack24.gif",
+              "icons/StepBackward.png",
               KeyEvent.VK_B,
               "Step Backward",
               "Step Backward"
