@@ -25,7 +25,7 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    @Override
    public double getEntryCMPInsideOffset()
    {
-      return runningOnRealRobot ? 0.02 : 0.006;
+      return runningOnRealRobot ? 0.01 : 0.006;
    }
 
    /** {@inheritDoc} */
