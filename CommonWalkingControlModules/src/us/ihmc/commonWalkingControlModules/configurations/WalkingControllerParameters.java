@@ -156,6 +156,26 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Whether or not the location of the CoP in the trailing foot must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the CoP location.
+    */
+   public boolean checkCoPLocationToTriggerToeOff()
+   {
+      return false;
+   }
+
+   /**
+    * Maximum distance of the CoP in the trailing foot to the toe off support polygon before allowing toe off.
+    *
+    * @return CoP distance (m).
+    */
+   public double getCoPProximityForToeOff()
+   {
+      return 0.03;
+   }
+
+   /**
     * Minimum stance length in double support to enable toe off.
     * @return threshold stance length in meters
     */
