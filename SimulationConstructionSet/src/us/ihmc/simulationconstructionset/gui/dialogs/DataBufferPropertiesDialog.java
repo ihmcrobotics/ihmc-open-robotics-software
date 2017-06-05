@@ -55,14 +55,14 @@ public class DataBufferPropertiesDialog extends Stage implements EventHandler {
 
         bufferPropertiesPane = new BufferPropertiesPanel();
         GridPane.setConstraints(bufferPropertiesPane, 1, 0);
-        GridPane.setMargin(bufferPropertiesPane, new Insets(10,10,5,10));
+        //GridPane.setMargin(bufferPropertiesPane, new Insets(10, 10, 5, 10));
 
         okButton = new Button("OK");
         okButton.addEventHandler(ActionEvent.ACTION, this);
 
         applyButton = new Button("Apply");
         applyButton.addEventHandler(ActionEvent.ACTION, this);
-        HBox.setMargin(applyButton, new Insets(0,5,0,5));
+        HBox.setMargin(applyButton, new Insets(0, 5, 0, 5));
 
         cancelButton = new Button("Cancel");
         cancelButton.addEventHandler(ActionEvent.ACTION, this);
@@ -74,7 +74,7 @@ public class DataBufferPropertiesDialog extends Stage implements EventHandler {
                 applyButton,
                 cancelButton
         );
-        hbox.setPrefSize(200,okButton.getHeight());
+        hbox.setPrefSize(200, okButton.getHeight());
         GridPane.setConstraints(hbox, 1, 1);
 
         pane.getChildren().addAll(
@@ -159,7 +159,7 @@ public class DataBufferPropertiesDialog extends Stage implements EventHandler {
             maxTextField.addEventHandler(ActionEvent.ACTION, this);
             GridPane.setConstraints(maxTextField, 2, 1);
             GridPane.setHalignment(maxTextField, HPos.LEFT);
-            GridPane.setMargin(maxTextField, new Insets(5,5,5,5));
+            GridPane.setMargin(maxTextField, new Insets(5, 5, 5, 5));
 
             // Current Settings:
             // Label
@@ -173,7 +173,7 @@ public class DataBufferPropertiesDialog extends Stage implements EventHandler {
             currentTextField.addEventHandler(ActionEvent.ACTION, this);
             GridPane.setConstraints(currentTextField, 2, 2);
             GridPane.setHalignment(currentTextField, HPos.LEFT);
-            GridPane.setMargin(currentTextField, new Insets(5,5,5,5));
+            GridPane.setMargin(currentTextField, new Insets(5, 5, 5, 5));
 
             // Set Wrap as default selected RadioButton and disable max TextField
             group.selectToggle(wrapButton);
@@ -232,8 +232,5 @@ public class DataBufferPropertiesDialog extends Stage implements EventHandler {
                 currentTextField.setText(String.valueOf(newCurrentVal));
             }
         }
-
     }
-
-
 }
