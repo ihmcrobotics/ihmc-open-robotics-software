@@ -35,23 +35,23 @@ public class AboutDialogGenerator implements AboutDialogConstructor, EventHandle
         // Must run on JavaFX application thread - use Platform.runLater()
         Platform.runLater(() -> {
             VBox wrapper = new VBox();
-            wrapper.setBackground(new Background(
+            /*wrapper.setBackground(new Background(
                     new BackgroundFill(
                             Color.rgb(26,26,26),
                             CornerRadii.EMPTY,
                             null
                     )
-            ));
+            ));*/
             VBox pane = new VBox();
             pane.setAlignment(Pos.CENTER);
 
-            Image banner = new Image(getClass().getClassLoader().getResourceAsStream("Banner-v1-Transparent.png"));
+            Image banner = new Image(getClass().getClassLoader().getResourceAsStream("Banner-v1-Transparent-Inverted.png"));
             ImageView view = new ImageView(banner);
             view.setPreserveRatio(true);
             view.setFitHeight(200);
 
             Label version = new Label("Version "+scsVersionNumber);
-            version.setTextFill(Color.WHITE);
+            //version.setTextFill(Color.WHITE);
             version.setFont(new Font("DTL Nobel", 32));
 
             Hyperlink github = new Hyperlink("https://ihmcrobotics.github.io/");
@@ -60,13 +60,13 @@ public class AboutDialogGenerator implements AboutDialogConstructor, EventHandle
             github.setBorder(null);
 
             Label yobotics = new Label("Originally developed at Yobotics, Inc. from 2000-2010.");
-            yobotics.setTextFill(Color.WHITE);
+            //yobotics.setTextFill(Color.WHITE);
             yobotics.setFont(new Font("DTL Nobel", 20));
             yobotics.setWrapText(true);
             VBox.setMargin(yobotics, new Insets(20,0,20,0));
 
             Label ihmc = new Label("Now developed at IHMC from 2002 to the present.");
-            ihmc.setTextFill(Color.WHITE);
+            //ihmc.setTextFill(Color.WHITE);
             ihmc.setFont(new Font("DTL Nobel", 20));
             ihmc.setWrapText(true);
             VBox.setMargin(ihmc, new Insets(0,0,20,0));
