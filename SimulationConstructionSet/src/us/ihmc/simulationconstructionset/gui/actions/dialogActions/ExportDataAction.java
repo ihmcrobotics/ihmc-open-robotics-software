@@ -13,7 +13,7 @@ public class ExportDataAction extends SCSAction
    public ExportDataAction(ExportDataDialogConstructor constructor)
    {
       super("Export Data...",
-              "icons/Export24.gif",
+              "icons/ExportData.png",
               KeyEvent.VK_E,
               "Export Data",
               "Export simulation data to a file."

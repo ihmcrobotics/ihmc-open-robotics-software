@@ -12,7 +12,7 @@ public class AddKeyPointAction extends SCSAction
    public AddKeyPointAction(AddKeyPointCommandExecutor executor)
    {
       super("Add Key Point",
-              "icons/setKey.gif",
+              "icons/NewKey.png",
               KeyEvent.VK_F,
               "Short Description", // TODO
               "Long Description" // TODO

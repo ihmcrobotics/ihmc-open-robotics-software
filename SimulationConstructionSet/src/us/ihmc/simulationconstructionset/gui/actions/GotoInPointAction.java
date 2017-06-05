@@ -12,7 +12,7 @@ public class GotoInPointAction extends SCSAction
    public GotoInPointAction(GotoInPointCommandExecutor executor)
    {
       super("Goto In Point",
-              "icons/YoGoInPoint24_2.gif",
+              "icons/GotoInPoint.png",
               KeyEvent.VK_I,
               "Goto In Point",
               "Goto In Point"
