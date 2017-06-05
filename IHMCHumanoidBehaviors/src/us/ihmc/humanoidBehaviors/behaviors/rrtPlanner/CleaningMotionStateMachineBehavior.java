@@ -43,8 +43,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 {   
    private int numberOfPlanar = 0;
    private PlanarRegion planarRegion;
-   private GetSolarPanelBehavior getSolarPanelBehavior;
-   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   //private GetSolarPanelBehavior getSolarPanelBehavior;
+   private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
@@ -74,8 +74,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
-      getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
-      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
@@ -149,7 +149,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             
             SolarPanelCleaningPose pose = SolarPanelCleaningInfo.getReadyPose();
-            motionFactory.setMessage(pose, Math.PI*0.0, 0.0, 3.0);
+            motionFactory.setMessage(pose, Math.PI*0.0, 0.0, 5.0);
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
          }
@@ -461,7 +461,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(0.7, -0.1, 1.05);
+         poseSolarPanel.setPosition(0.75, -0.1, 1.03);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
          quaternionSolarPanel.appendRollRotation(0.0);
          quaternionSolarPanel.appendPitchRotation(-0.380);
