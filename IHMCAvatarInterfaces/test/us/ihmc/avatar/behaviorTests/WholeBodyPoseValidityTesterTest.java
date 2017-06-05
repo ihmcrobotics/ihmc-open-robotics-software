@@ -27,9 +27,11 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.ControlPointOptimizationStateMachineBehavior;
@@ -47,6 +49,9 @@ import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelWholeBodyTraject
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
@@ -56,9 +61,11 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -453,7 +460,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test
+   //@Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -489,7 +496,141 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-  
+   @Test
+   public void dancingBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      
+      // A. step out
+      
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
+      FootstepDataMessage footstepDataMessage = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -0.4, 0.0), new Quaternion());
+      
+      footstepDataList.add(footstepDataMessage);
+      footstepListBehavior.set(footstepDataList);
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(footstepListBehavior, 2.0);
+      
+      
+      drcBehaviorTestHelper.updateRobotModel();
+      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+      
+      drcBehaviorTestHelper.getReferenceFrames().updateFrames();
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+
+      // B. phase 1 ready
+      
+      ReferenceFrame midFeetFrame = drcBehaviorTestHelper.getReferenceFrames().getMidFootZUpGroundFrame();
+                  
+      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
+      
+      Quaternion rightHandOrientation = new Quaternion();
+      rightHandOrientation.appendYawRotation(50*Math.PI/180);
+      Quaternion leftHandOrientation = new Quaternion();
+      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
+      
+      HandTrajectoryMessage rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.00, 1.25), rightHandOrientation, midFeetFrame);
+      HandTrajectoryMessage leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.7, 0.00, 1.0), leftHandOrientation, midFeetFrame);
+      
+      PelvisTrajectoryMessage pelvisMessage = new PelvisTrajectoryMessage(3.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
+      SelectionMatrix6D selectionMatrixPelvis =  new SelectionMatrix6D();
+      selectionMatrixPelvis.clearSelection();
+      selectionMatrixPelvis.selectLinearZ(true);
+      pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
+            
+      wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
+      wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
+      wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
+      wholebodyBehavior.setInput(wholebodyMessage);
+            
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
+
+      
+      // C. phase 1
+      
+      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      wholebodyMessage = new WholeBodyTrajectoryMessage();
+      
+      rightHandOrientation = new Quaternion();
+      rightHandOrientation.appendPitchRotation(-90*Math.PI/180);
+      leftHandOrientation = new Quaternion();
+      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
+      
+      rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 8);
+      leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 8);
+      
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      for(int i=0;i<8;i++)
+      {
+//         rightHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
+//         leftHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
+      }
+      
+      pelvisMessage = new PelvisTrajectoryMessage(5.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
+      selectionMatrixPelvis =  new SelectionMatrix6D();
+      selectionMatrixPelvis.clearSelection();
+      selectionMatrixPelvis.selectLinearZ(true);
+      pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
+            
+      wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
+      wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
+      wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
+      wholebodyBehavior.setInput(wholebodyMessage);
+            
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 5.0);
+      
+      
+      
+      
+      // D. phase 2 ready     
+
+      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      wholebodyMessage = new WholeBodyTrajectoryMessage();
+      
+      rightHandOrientation = new Quaternion();
+      rightHandOrientation.appendPitchRotation(-90*Math.PI/180);
+      leftHandOrientation = new Quaternion();
+      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
+      
+      rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 5.0, new Point3D(0.1, -0.5, 1.8), rightHandOrientation, midFeetFrame);
+      leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 5.0, new Point3D(0.7, 0.00, 1.1), leftHandOrientation, midFeetFrame);
+      
+      pelvisMessage = new PelvisTrajectoryMessage(5.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
+      selectionMatrixPelvis =  new SelectionMatrix6D();
+      selectionMatrixPelvis.clearSelection();
+      selectionMatrixPelvis.selectLinearZ(true);
+      pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
+            
+      wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
+      wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
+      wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
+      wholebodyBehavior.setInput(wholebodyMessage);
+            
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 5.0);
+      
+      
+      
+      // D. phase 2
+      
+      
+      
+      // E. phase 3 ready
+      
+      
+      
+      
+      // F. phase 3
+      
+      
+      PrintTools.info("behavior Out " );      
+   }
+   
 
    private void setupKinematicsToolboxModule() throws IOException
    {
