@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class InverseDynamicsOptimizationControlModule
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
+   private final int rhoSize;
 
    private final OneDoFJoint[] oneDoFJoints;
    private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
@@ -76,7 +78,7 @@ public class InverseDynamicsOptimizationControlModule
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      int rhoSize = toolbox.getRhoSize();
+      rhoSize = toolbox.getRhoSize();
 
       double gravityZ = toolbox.getGravityZ();
 
@@ -136,7 +138,9 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+
       qpSolver.setMinRho(rhoMin.getDoubleValue());
+      qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
 
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
