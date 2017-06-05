@@ -71,12 +71,16 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.doAction();
 
-      double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
-
-      if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration &&
-            !kneeAngleManager.isLegCollapsed(transferToSide.getOppositeSide()))
+      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
+      if (footstepTiming != null)
       {
-         kneeAngleManager.collapseLegDuringTransfer(transferToSide);
+         double transferDuration = footstepTiming.getTransferTime();
+         
+         if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration &&
+               !kneeAngleManager.isLegCollapsed(transferToSide.getOppositeSide()))
+         {
+            kneeAngleManager.collapseLegDuringTransfer(transferToSide);
+         }
       }
    }
 
