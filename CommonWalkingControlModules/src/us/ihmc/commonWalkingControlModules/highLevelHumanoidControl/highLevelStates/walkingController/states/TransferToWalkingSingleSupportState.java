@@ -19,9 +19,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingControllerParameters walkingControllerParameters, WalkingFailureDetectionControlModule failureDetectionControlModule,
-         double minimumTransferTime, YoVariableRegistry parentRegistry)
+                                              HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                              WalkingControllerParameters walkingControllerParameters,
+                                              WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
+                                              YoVariableRegistry parentRegistry)
    {
       super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
@@ -51,7 +52,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
@@ -78,12 +78,16 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.doAction();
 
-      double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
-
-      if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration &&
-            !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
+      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
+      if (footstepTiming != null)
       {
-         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
+         double transferDuration = footstepTiming.getTransferTime();
+
+         if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration
+               && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
+         {
+            legConfigurationManager.collapseLegDuringTransfer(transferToSide);
+         }
       }
    }
 
@@ -94,8 +98,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    /**
-    * This method checks if the upcoming step has a desired absolute start time. If that is the case the transfer time is
-    * adjusted such that the swing starts at the correct time.
+    * This method checks if the upcoming step has a desired absolute start time. If that is the case
+    * the transfer time is adjusted such that the swing starts at the correct time.
     */
    private void adjustTimings()
    {
