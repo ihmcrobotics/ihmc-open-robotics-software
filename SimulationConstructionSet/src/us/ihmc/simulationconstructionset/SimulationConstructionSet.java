@@ -4449,6 +4449,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return null;
    }
 
+   /**
+    * This is where SCS video comes from! 
+    * 
+    * Tags: publisher, communicator, video, viewport
+    */
    public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, RenderedSceneHandler videoDataServer,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
