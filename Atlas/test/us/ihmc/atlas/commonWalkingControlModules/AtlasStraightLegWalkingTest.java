@@ -47,6 +47,25 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                   return gains;
                }
+
+               @Override
+               public double getDefaultTransferTime()
+               {
+                  return 0.15;
+               }
+
+               @Override
+               public double getDefaultSwingTime()
+               {
+                  return 0.9 - getDefaultTransferTime();
+               }
+
+               @Override
+               public boolean checkCoPLocationToTriggerToeOff()
+               {
+                  return true;
+               }
+
                @Override
                public boolean doHeelTouchdownIfPossible()
                {
