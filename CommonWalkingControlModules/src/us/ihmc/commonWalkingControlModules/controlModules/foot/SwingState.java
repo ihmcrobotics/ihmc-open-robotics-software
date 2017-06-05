@@ -95,6 +95,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleYoVariable stepDownHeightForToeTouchdown;
    private final DoubleYoVariable toeTouchdownDepthRatio;
 
+   private final BooleanYoVariable ignoreInitialAngularVelocityZ;
+   private final DoubleYoVariable maxInitialAngularVelocityMagnitude;
 
    private final DoubleYoVariable finalSwingHeightOffset;
    private final double controlDT;
@@ -173,6 +175,11 @@ public class SwingState extends AbstractUnconstrainedState
       toeTouchdownAngle.set(walkingControllerParameters.getToeTouchdownAngle());
       stepDownHeightForToeTouchdown.set(walkingControllerParameters.getStepDownHeightForToeTouchdown());
       toeTouchdownDepthRatio.set(walkingControllerParameters.getToeTouchdownDepthRatio());
+
+      ignoreInitialAngularVelocityZ = new BooleanYoVariable(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
+      maxInitialAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "MaxInitialAngularVelocityMagnitude", registry);
+      ignoreInitialAngularVelocityZ.set(walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
+      maxInitialAngularVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -254,6 +261,12 @@ public class SwingState extends AbstractUnconstrainedState
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
+      if (ignoreInitialAngularVelocityZ.getBooleanValue())
+      {
+         initialAngularVelocity.changeFrame(worldFrame);
+         initialAngularVelocity.setZ(0.0);
+      }
+      initialAngularVelocity.limitLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
       fillAndInitializeTrajectories(true);

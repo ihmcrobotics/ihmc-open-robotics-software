@@ -674,6 +674,35 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Specifies whether or not the z-component of the swing initial angular velocity expressed in world
+    * should be zeroed out.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return whether the z-component swing initial angular velocity should be zeroed out or not.
+    */
+   public boolean ignoreSwingInitialAngularVelocityZ()
+   {
+      return false;
+   }
+
+   /**
+    * Determines the maximum allowable magnitude for the swing initial angular velocity.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return the swing initial angular velocity maximum magnitude.
+    */
+   public double getMaxSwingInitialAngularVelocityMagnitude()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * Returns the parameters used in the privileged configuration handler.
     */
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
