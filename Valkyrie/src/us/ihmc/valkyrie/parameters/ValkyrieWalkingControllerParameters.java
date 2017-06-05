@@ -449,6 +449,18 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
+   public boolean ignoreSwingInitialAngularVelocityZ()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaxSwingInitialAngularVelocityMagnitude()
+   {
+      return 1.5;
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI / 4.0;
