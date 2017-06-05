@@ -26,6 +26,7 @@ import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.AnytimePlannerStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PushAndWalkBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
@@ -45,6 +46,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -57,6 +59,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -137,7 +140,7 @@ public class IHMCHumanoidBehaviorManager
             dispatcher.addUpdatable(wristSensorUpdatable);
          }
       }
-
+      
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
@@ -229,7 +232,9 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK,
                              new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, walkingControllerParameters, yoGraphicsListRegistry));
-
+      DRCRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
+      dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK, new CollaborativeBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters, yoGraphicsListRegistry));
+      
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
