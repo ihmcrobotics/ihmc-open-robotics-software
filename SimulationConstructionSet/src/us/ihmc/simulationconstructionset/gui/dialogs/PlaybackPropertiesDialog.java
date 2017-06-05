@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.dialogs;
 
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -17,12 +18,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import javax.swing.*;
 import java.awt.*;
 
-public class PlaybackPropertiesDialog extends Stage implements EventHandler {
-    private static final long serialVersionUID = -8226475433536336684L;
+public class PlaybackPropertiesDialog extends Stage implements EventHandler<ActionEvent> {
     private Button okButton, applyButton, cancelButton;
     private PlaybackPropertiesPanel playbackPropertiesPanel;
-    @SuppressWarnings("unused")
-    private JFrame ownerFrame;
     private Container parentContainer;
 
     private SimulationConstructionSet sim;
@@ -33,7 +31,6 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
         this.setTitle("Playback Properties");
 
         this.parentContainer = parentContainer;
-        this.ownerFrame = ownerFrame;
         this.sim = sim;
 
         GridPane pane = new GridPane();
@@ -89,15 +86,12 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
     }
 
     @Override
-    public void handle(Event event) {
-        if (event.getSource() == cancelButton)
+    public void handle(ActionEvent event) {
+        if (event.getSource() == cancelButton) {
             this.hide();
-
-        if (event.getSource() == applyButton) {
+        } else if (event.getSource() == applyButton) {
             playbackPropertiesPanel.commitChanges();
-        }
-
-        if (event.getSource() == okButton) {
+        } else if (event.getSource() == okButton) {
             playbackPropertiesPanel.commitChanges();
             this.hide();
         }
@@ -117,31 +111,33 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
         private TextField simulateDurationTextField;
         private CheckBox simulateNoFasterThanRealTimeCheckbox;
 
-        public PlaybackPropertiesPanel() {
+        PlaybackPropertiesPanel() {
             updateGraphsDuringPlaybackCheckbox = new CheckBox("Update Graphs");
+            GridPane.setConstraints(updateGraphsDuringPlaybackCheckbox, 0, 0);
+
             simulateNoFasterThanRealTimeCheckbox = new CheckBox("Simulate No Faster Than Real Time");
+            GridPane.setConstraints(simulateNoFasterThanRealTimeCheckbox, 0, 4);
 
             realTimeRateLabel = new Label("Real Time Rate:");
+            GridPane.setConstraints(realTimeRateLabel, 0, 1);
+
             desiredFrameRateLabel = new Label("Desired Frame Rate:");
+            GridPane.setConstraints(desiredFrameRateLabel, 0, 2);
+
             simulateDurationLabel = new Label("Simulate Duration:");
+            GridPane.setConstraints(simulateDurationLabel, 0, 3);
 
             realTimeTextField = new TextField();
             realTimeTextField.setPrefSize(60, 21);
+            GridPane.setConstraints(realTimeTextField, 1, 1);
 
             frameRateTextField = new TextField();
             frameRateTextField.setPrefSize(60, 21);
+            GridPane.setConstraints(frameRateTextField, 1, 2);
 
             simulateDurationTextField = new TextField();
             simulateDurationTextField.setPrefSize(60, 21);
-
-            GridPane.setConstraints(updateGraphsDuringPlaybackCheckbox, 0, 0);
-            GridPane.setConstraints(realTimeRateLabel, 0, 1);
-            GridPane.setConstraints(realTimeTextField, 1, 1);
-            GridPane.setConstraints(desiredFrameRateLabel, 0, 2);
-            GridPane.setConstraints(frameRateTextField, 1, 2);
-            GridPane.setConstraints(simulateDurationLabel, 0, 3);
             GridPane.setConstraints(simulateDurationTextField, 1, 3);
-            GridPane.setConstraints(simulateNoFasterThanRealTimeCheckbox, 0, 4);
 
             newRealTimeVal = sim.getPlaybackRealTimeRate();
             newFrameRateVal = sim.getPlaybackFrameRate();
@@ -167,7 +163,7 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
             );
         }
 
-        public void commitChanges() {
+        void commitChanges() {
             updateRealTimeTextField();
             updateFrameRateTextField();
             updateSimulateDurationTextField();
@@ -190,8 +186,7 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
             String text = realTimeTextField.getText();
 
             try {
-                double val = Double.parseDouble(text);
-                newRealTimeVal = val;
+                newRealTimeVal = Double.parseDouble(text);
             } catch (NumberFormatException e) {
                 realTimeTextField.setText(String.valueOf(newRealTimeVal));
             }
@@ -202,8 +197,7 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
             String text = frameRateTextField.getText();
 
             try {
-                double val = Double.parseDouble(text);
-                newFrameRateVal = val;
+                newFrameRateVal = Double.parseDouble(text);
             } catch (NumberFormatException e) {
                 frameRateTextField.setText(String.valueOf(newFrameRateVal));
             }
@@ -213,8 +207,7 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler {
             String text = simulateDurationTextField.getText();
 
             try {
-                double val = Double.parseDouble(text);
-                newSimulateDurationVal = val;
+                newSimulateDurationVal = Double.parseDouble(text);
             } catch (NumberFormatException e) {
                 simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
             }

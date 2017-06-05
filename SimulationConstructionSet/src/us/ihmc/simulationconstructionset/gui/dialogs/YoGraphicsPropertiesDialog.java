@@ -17,11 +17,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import javax.swing.*;
 import java.awt.*;
 
-public class YoGraphicsPropertiesDialog extends Stage implements EventHandler {
+public class YoGraphicsPropertiesDialog extends Stage implements EventHandler<ActionEvent> {
     private Button okButton, applyButton, cancelButton;
     private YoGraphicsPropertiesPanel yoGraphicsPropertiesPanel;
-    @SuppressWarnings("unused")
-    private JFrame ownerFrame;
     private Container parentContainer;
 
     private SimulationConstructionSet sim;
@@ -32,7 +30,6 @@ public class YoGraphicsPropertiesDialog extends Stage implements EventHandler {
         this.setTitle("YoGraphics Properties");
 
         this.parentContainer = parentContainer;
-        this.ownerFrame = ownerFrame;
         this.sim = sim;
 
         GridPane pane = new GridPane();
@@ -88,7 +85,7 @@ public class YoGraphicsPropertiesDialog extends Stage implements EventHandler {
     }
 
     @Override
-    public void handle(Event event) {
+    public void handle(ActionEvent event) {
         if (event.getSource() == cancelButton) {
             this.hide();
         } else if (event.getSource() == applyButton) {
