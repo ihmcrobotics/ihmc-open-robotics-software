@@ -64,7 +64,6 @@ public class LocalObjectCommunicator implements ObjectCommunicator
    @Override
    public void disconnect()
    {
-      
    }
 
    @Override
@@ -86,5 +85,4 @@ public class LocalObjectCommunicator implements ObjectCommunicator
 	      globalListeners.remove(listener);
 	   }
 	}
-
 }

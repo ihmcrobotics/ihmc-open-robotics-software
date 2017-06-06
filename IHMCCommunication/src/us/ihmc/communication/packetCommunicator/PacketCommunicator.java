@@ -146,7 +146,6 @@ public class PacketCommunicator implements Connectable
       communicator.closeConnection();
    }
 
-   @Override
    public void disconnect()
    {
       try
@@ -159,7 +158,6 @@ public class PacketCommunicator implements Connectable
       }
    }
 
-   @Override
    public void connect() throws IOException
    {
       communicator.connect();

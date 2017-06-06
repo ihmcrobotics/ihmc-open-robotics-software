@@ -1,5 +1,7 @@
 package us.ihmc.communication.net;
 
+import java.io.IOException;
+
 import us.ihmc.communication.interfaces.Connectable;
 
 public interface ObjectCommunicator extends GlobalObjectConsumer, Connectable
@@ -13,4 +15,8 @@ public interface ObjectCommunicator extends GlobalObjectConsumer, Connectable
    public abstract void attachGlobalListener(GlobalObjectConsumer listener);
 
    public abstract void detachGlobalListener(GlobalObjectConsumer listener);
+   
+   public void disconnect() throws IOException;
+   
+   public void connect() throws IOException;
 }
