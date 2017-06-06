@@ -12,10 +12,10 @@ public class GotoOutPointAction extends SCSAction
    public GotoOutPointAction(GotoOutPointCommandExecutor executor)
    {
       super("Goto Out Point",
-              "icons/YoGoOutPoint24_2.gif",
+              "icons/GotoOutPoint.png",
               KeyEvent.VK_O,
               "Goto Out Point",
-              "Goto Out Point"
+              "Take the simulation to the currently set Out point in the data buffer."
       );
 
       this.executor = executor;

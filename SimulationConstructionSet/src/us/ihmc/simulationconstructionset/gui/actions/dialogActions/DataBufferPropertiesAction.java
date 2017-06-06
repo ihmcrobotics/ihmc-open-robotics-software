@@ -14,8 +14,8 @@ public class DataBufferPropertiesAction extends SCSAction
       super("Data Buffer Properties...",
               "",
               KeyEvent.VK_B,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Open Data Buffer Properties",
+              "Open Data Buffer Properties for in-depth settings adjustment."
       );
 
       this.constructor = constructor;

@@ -13,7 +13,7 @@ public class MediaCaptureAction extends SCSAction
    public MediaCaptureAction(MediaCaptureDialogConstructor constructor)
    {
       super("Media Capture...",
-              "icons/Video24.gif",
+              "icons/Capture.png",
               KeyEvent.VK_M,
               "Capture Media",
               "Capture media to a file."

@@ -14,8 +14,8 @@ public class CutBufferAction extends SCSAction
       super("Cut Buffer Between In/Out",
               "",
               KeyEvent.VK_C,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Cut Buffer Between In/Out",
+              "Cut data buffer so that data between current In and Out points is removed."
       );
 
       this.executor = executor;

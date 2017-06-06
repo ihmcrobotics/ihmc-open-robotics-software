@@ -16,8 +16,8 @@ public class SelectExtraPanelAction extends SCSAction
       super(extraPanelConfiguration.getName(),
               "",
               KeyEvent.VK_E,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Select: "+extraPanelConfiguration.getName(),
+              "Select Extra Panel: "+extraPanelConfiguration.getName()
       );
 
       this.selectExtraPanelAction = selector;

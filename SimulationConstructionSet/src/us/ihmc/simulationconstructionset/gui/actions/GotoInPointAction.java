@@ -12,10 +12,10 @@ public class GotoInPointAction extends SCSAction
    public GotoInPointAction(GotoInPointCommandExecutor executor)
    {
       super("Goto In Point",
-              "icons/YoGoInPoint24_2.gif",
+              "icons/GotoInPoint.png",
               KeyEvent.VK_I,
               "Goto In Point",
-              "Goto In Point"
+              "Take the simulation to the currently set In point in the data buffer."
       );
 
       this.executor = executor;

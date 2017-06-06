@@ -15,8 +15,8 @@ public class SelectVarGroupAction extends SCSAction
       super(name,
               "",
               KeyEvent.VK_E,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Select: "+name,
+              "Select Var Group: "+name
       );
 
       this.varGroupSelector = selector;

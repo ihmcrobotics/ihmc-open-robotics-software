@@ -479,14 +479,15 @@ public class StandardGUIActions implements GUIEnablerAndDisabler {
     protected JPanel createMainWindowButtons() {
         Action[] fileActions = new Action[]{exportAction, importDataAction, mediaCapture, exportSnapshotAction}; // , searchForVariableAction};
         Action[] runActions = new Action[]{simulateAction, playAction, stopAction};
-        Action[] stepActions = new Action[]{setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction};
+        Action[] setActions = new Action[]{setInPointAction, cropBufferAction, setOutPointAction};
+        Action[] stepActions = new Action[]{goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction};
         Action[] keyActions = new Action[]{setKeyAction, toggleKeyPointModeAction};
         //Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
         Action[] graphsActions = new Action[]{zoomInAction, zoomOutAction, printGraphsAction, exportGraphsToFileAction};
         //Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
         //Action[] windowActions = new Action[] {};
         //Action[] helpActions = new Action[] {};
-        Action[][] allActions = new Action[][]{fileActions, runActions, stepActions, keyActions, /*playbackPropertiesActions,*/ graphsActions/*, cameraActions,
+        Action[][] allActions = new Action[][]{fileActions, runActions, setActions, stepActions, keyActions, /*playbackPropertiesActions,*/ graphsActions/*, cameraActions,
             windowActions, helpActions*/};
         ToolBar[] toolBars = new ToolBar[allActions.length];
 

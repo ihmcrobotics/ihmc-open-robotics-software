@@ -16,8 +16,8 @@ public class SelectGUIConfigFromFileAction extends SCSAction
       super(name,
               "",
               KeyEvent.VK_UNDEFINED,
-              "", // TODO
-              "" // TODO
+              "Select: "+fullPath,
+              "Select GUI Configuration: "+fullPath
       );
 
       this.fullPath = fullPath;

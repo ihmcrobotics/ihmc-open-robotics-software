@@ -12,10 +12,10 @@ public class CropBufferAction extends SCSAction
    public CropBufferAction(CropBufferCommandExecutor executor)
    {
       super("Crop Buffer to In/Out",
-              "",
+              "icons/CropBuffer.png",
               KeyEvent.VK_C,
-              "Short Description",
-              "Long Description"
+              "Crop Buffer to In/Out",
+              "Crop the data buffer to between the current In and Out points."
       );
 
       this.executor = executor;

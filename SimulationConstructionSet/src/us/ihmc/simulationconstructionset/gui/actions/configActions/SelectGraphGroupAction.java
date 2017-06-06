@@ -15,8 +15,8 @@ public class SelectGraphGroupAction extends SCSAction
       super(name,
               "",
               KeyEvent.VK_E,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Select: "+name,
+              "Select Graph Group: "+name
       );
 
       this.selector = selector;

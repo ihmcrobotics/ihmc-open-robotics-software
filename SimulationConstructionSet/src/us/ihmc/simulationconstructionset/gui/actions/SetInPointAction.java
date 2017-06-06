@@ -12,10 +12,10 @@ public class SetInPointAction extends SCSAction
    public SetInPointAction(SetInPointCommandExecutor executor)
    {
       super("Set In Point",
-              "icons/YoSetInPoint24.gif",
+              "icons/SetInPoint.png",
               KeyEvent.VK_N,
               "Set In Point",
-              "Set In Point"
+              "Set the current In point in the data buffer."
       );
 
       this.executor = executor;
