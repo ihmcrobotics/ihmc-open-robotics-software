@@ -123,11 +123,6 @@ public class FiducialDetectorFromCameraImagesTest
          {
             return true;
          }
-
-         @Override
-         public void close()
-         {
-         }
       };
 
       TimestampProvider timestampProvider = new AtomicSettableTimestampProvider();

@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -14,7 +15,6 @@ import us.ihmc.tools.TimestampProvider;
 
 public class OffscreenBufferVideoServer
 {
-
    private final VideoDataServer videoDataServer;
 
    private final CameraAdapter camera;
@@ -43,12 +43,14 @@ public class OffscreenBufferVideoServer
 
    public void close()
    {
-      videoDataServer.close();
+      if (videoDataServer instanceof CompressedVideoDataServer)
+      {
+         ((CompressedVideoDataServer) videoDataServer).dispose();
+      }
    }
 
    private class CameraUpdater implements CameraStreamer
    {
-
       @Override
       public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov)
       {

@@ -48,12 +48,6 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    }
 
    @Override
-   public void close()
-   {
-      // TODO
-   }
-
-   @Override
    public boolean isConnected()
    {
       return handler.isConnected();
@@ -63,5 +57,10 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    public void setVideoControlSettings(VideoControlSettings object)
    {
       // TODO
+   }
+
+   @Override
+   public void dispose()
+   {
    }
 }

@@ -143,26 +143,31 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
       prevTimeStamp = timeStamp;
    }
 
-   public synchronized void close()
+   @Override
+   public synchronized void dispose()
    {
       encoder.delete();
    }
 
+   @Override
    public boolean isConnected()
    {
       return handler.isConnected();
    }
 
+   @Override
    public synchronized void connected()
    {
       encoder.sendIntraFrame();
    }
 
+   @Override
    public synchronized void disconnected()
    {
       videoEnabled = false;
    }
 
+   @Override
    public synchronized void setVideoControlSettings(VideoControlSettings object)
    {
       if (object.isSendVideo())
