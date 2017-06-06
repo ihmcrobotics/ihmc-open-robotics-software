@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
@@ -56,7 +56,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       }
 
       @Override
-      public void addNetStateListener(NetStateListener compressedVideoDataServer)
+      public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
       {
       }
 

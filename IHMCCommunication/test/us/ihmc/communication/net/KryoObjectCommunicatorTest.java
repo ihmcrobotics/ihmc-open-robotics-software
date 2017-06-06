@@ -58,7 +58,7 @@ public class KryoObjectCommunicatorTest
       client.setReconnectAutomatically(true);
       
 
-      NetStateListener netStateListener = new NetStateListener()
+      ConnectionStateListener netStateListener = new ConnectionStateListener()
       {
          
          public void disconnected()
@@ -106,7 +106,7 @@ public class KryoObjectCommunicatorTest
       KryoObjectServer server = new KryoObjectServer(TCP_PORT, new NetClassList());
       KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT, new NetClassList());
       
-      NetStateListener netStateListener = new NetStateListener()
+      ConnectionStateListener netStateListener = new ConnectionStateListener()
       {
          
          public void disconnected()
