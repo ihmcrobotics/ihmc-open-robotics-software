@@ -16,7 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class VarPropertiesDialog extends Stage implements EventHandler<javafx.event.ActionEvent> {
     private Button okButton, applyButton, cancelButton;
     private VarPropertiesPanel[] varPropertiesPanels;
