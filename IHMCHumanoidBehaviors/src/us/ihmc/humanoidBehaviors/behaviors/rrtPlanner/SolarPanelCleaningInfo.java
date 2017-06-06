@@ -13,7 +13,7 @@ public class SolarPanelCleaningInfo
    private static DegreesOfRedundancy cleaningPoseDegrees;
    private static CleaningPathType cleaningType;      
    
-   private static double widthOfBezel = 0.05;
+   private static double widthOfBezel = 0.03;
    private static double offsetAlongToZdirection = -0.04;
    private static double offsetReadyPose = -0.15;
    
@@ -73,9 +73,9 @@ public class SolarPanelCleaningInfo
       {
          case HORIZONAL:
          {
-            double radiusOfTowel = 0.1;
+            double radiusOfTowel = 0.08;
             
-            readyPose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU()-radiusOfTowel-widthOfBezel, radiusOfTowel+widthOfBezel, offsetAlongToZdirection + offsetReadyPose, -Math.PI*0.00);          
+            readyPose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU()-radiusOfTowel-widthOfBezel, radiusOfTowel+widthOfBezel+0.1, offsetAlongToZdirection + offsetReadyPose, -Math.PI*0.00);          
             SolarPanelCleaningPose startPose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU()-radiusOfTowel-widthOfBezel, radiusOfTowel+widthOfBezel, offsetAlongToZdirection, -Math.PI*0.2);
             cleaningPath = new SolarPanelPath(startPose);
             

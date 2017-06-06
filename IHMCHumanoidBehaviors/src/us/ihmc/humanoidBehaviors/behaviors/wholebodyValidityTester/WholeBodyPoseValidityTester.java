@@ -626,7 +626,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
       
       int rightArmStart = 12;
-      int rightArmEnd = 18;
+      int rightArmEnd = 17;
             
       for(int i=0;i<numberOfJoints;i++)   
       {              

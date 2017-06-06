@@ -460,7 +460,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
+   @Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -496,7 +496,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test
+   //@Test
    public void dancingBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -644,10 +644,10 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.75, -0.1, 0.9);
-      quaternionSolarPanel.appendYawRotation(Math.PI*0.1);
+      poseSolarPanel.setPosition(0.75, -0.15, 1.03);
+      quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
       quaternionSolarPanel.appendRollRotation(0.0);
-      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      quaternionSolarPanel.appendPitchRotation(-0.380);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
       
       solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);      

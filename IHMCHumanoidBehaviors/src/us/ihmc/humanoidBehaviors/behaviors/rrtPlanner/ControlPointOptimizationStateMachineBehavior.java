@@ -35,14 +35,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private ArrayList<RRTNode> currentControlPointNodePath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> optimalControlPointNodePath;
    
-   private int numberOfCandidates = 15;
+   private int numberOfCandidates = 2;
    private int numberOfLinearPath;
-   private double minimumTimeGapOfWayPoints = 1.0;
+   private double minimumTimeGapOfWayPoints = 2.0;
    
    private int currentIndexOfCandidate;
    
-   private int numberOfRetry = 5;
-   private int numberOfCandidatesForRetry = 5;
+   private int numberOfRetry = 1;
+   private int numberOfCandidatesForRetry = 1;
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
