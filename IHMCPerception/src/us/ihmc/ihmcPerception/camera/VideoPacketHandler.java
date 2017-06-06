@@ -1,7 +1,5 @@
 package us.ihmc.ihmcPerception.camera;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -10,6 +8,8 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public class VideoPacketHandler implements CompressedVideoHandler
@@ -36,7 +36,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
    }
    
    @Override
-   public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
+   public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       if (DEBUG)
       {

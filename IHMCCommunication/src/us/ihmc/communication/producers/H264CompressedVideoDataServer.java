@@ -15,8 +15,8 @@ import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 
 public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
@@ -64,7 +64,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
    }
 
    @Override
-   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3D cameraPosition, final Quaternion cameraOrientation,
+   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition, final QuaternionReadOnly cameraOrientation,
          IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)

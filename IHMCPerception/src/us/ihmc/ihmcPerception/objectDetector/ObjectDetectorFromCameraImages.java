@@ -31,7 +31,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
@@ -205,7 +207,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
       });
    }
 
-   public void detect(BufferedImage bufferedImage, Point3D cameraPositionInWorld, Quaternion cameraOrientationInWorldXForward)
+   public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward)
    {
       synchronized (expectedFiducialSizeChangedConch)
       {
