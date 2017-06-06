@@ -3,8 +3,9 @@ package us.ihmc.robotics.math.frames;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -145,7 +146,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       position.set(framePoint, notifyListeners);
    }
 
-   public void setPosition(Tuple3DBasics position)
+   public void setPosition(Tuple3DReadOnly position)
    {
       this.position.set(position);
    }
@@ -154,14 +155,14 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
    {
       orientation.set(yoFrameQuaternion);
    }
-
+   
    public void setOrientation(FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       orientation.set(frameOrientation, notifyListeners);
    }
 
-   public void setOrientation(Quaternion quaternion)
+   public void setOrientation(QuaternionReadOnly quaternion)
    {
       orientation.set(quaternion);
    }

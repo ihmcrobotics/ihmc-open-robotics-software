@@ -12,10 +12,6 @@ import java.util.Enumeration;
 
 import us.ihmc.tools.thread.ThreadTools;
 
-/**
- * User: Matt
- * Date: 12/7/12
- */
 public class DataObjectServer extends DataObjectTransponder
 {
    private ServerSocket serverSocket = null;
@@ -37,8 +33,6 @@ public class DataObjectServer extends DataObjectTransponder
       init(host, port);
    }
 
-
-
    static DataObjectTransponder initByInterface(String interfaceName, int iPort)
    {
       try
@@ -58,13 +52,12 @@ public class DataObjectServer extends DataObjectTransponder
          NetworkInterface myNetworkInterface = NetworkInterface.getByName(interfaceName);
          printIfDebug("interfaceName = " + myNetworkInterface);
 
-
          // Find IP address category 4 for this network interface
          boolean foundHost = false;
          String host = null;
          if (myNetworkInterface != null)
          {
-            for (Enumeration<InetAddress> myAddresses = myNetworkInterface.getInetAddresses(); myAddresses.hasMoreElements() &&!foundHost; )
+            for (Enumeration<InetAddress> myAddresses = myNetworkInterface.getInetAddresses(); myAddresses.hasMoreElements() && !foundHost;)
             {
                InetAddress currentInetAddress = myAddresses.nextElement();
 
@@ -139,7 +132,6 @@ public class DataObjectServer extends DataObjectTransponder
    {
       printIfDebug(".init: Error Creating Server Socket on port: " + port);
 
-
       xcp.printStackTrace();
       serverSocket = null;
       this.port = -1;
@@ -174,9 +166,10 @@ public class DataObjectServer extends DataObjectTransponder
    // Server Thread - Listens for new connections and add them to the list of connections to handle
    private class ServerConnectionDaemon implements Runnable
    {
+      @Override
       public void run()
       {
-         while ((serverSocket != null) &&!serverSocket.isClosed())
+         while ((serverSocket != null) && !serverSocket.isClosed())
          {
             if (!isConnected())
             {

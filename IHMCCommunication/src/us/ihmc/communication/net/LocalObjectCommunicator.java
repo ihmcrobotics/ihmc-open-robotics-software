@@ -10,6 +10,7 @@ public class LocalObjectCommunicator implements ObjectCommunicator
    
    private final ArrayList<GlobalObjectConsumer> globalListeners = new ArrayList<GlobalObjectConsumer>();
    
+   @Override
    @SuppressWarnings("unchecked")
    public synchronized void consumeObject(Object object)
    {
@@ -24,11 +25,13 @@ public class LocalObjectCommunicator implements ObjectCommunicator
       }
    }
 
-   public void attachStateListener(NetStateListener stateListener)
+   @Override
+   public void attachStateListener(ConnectionStateListener stateListener)
    {
       stateListener.connected();
    }
 
+   @Override
    public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
       if(!listeners.containsKey(clazz))
@@ -38,6 +41,7 @@ public class LocalObjectCommunicator implements ObjectCommunicator
       listeners.get(clazz).add(listener);
    }
    
+   @Override
    public <T> void detachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
       if(listeners.containsKey(clazz))
@@ -51,31 +55,34 @@ public class LocalObjectCommunicator implements ObjectCommunicator
    }
 
 
+   @Override
    public boolean isConnected()
    {
       return true;
    }
 
-   public void close()
+   @Override
+   public void disconnect()
    {
-      
    }
 
+   @Override
    public void connect() throws IOException
    {
    }
 
-	public void attachGlobalListener(GlobalObjectConsumer listener)
+	@Override
+   public void attachGlobalListener(GlobalObjectConsumer listener)
 	{
 		globalListeners.add(listener);
 	}
 	
-	public void detachGlobalListener(GlobalObjectConsumer listener)
+	@Override
+   public void detachGlobalListener(GlobalObjectConsumer listener)
 	{
 	   if (globalListeners.contains(listener))
 	   {
 	      globalListeners.remove(listener);
 	   }
 	}
-
 }
