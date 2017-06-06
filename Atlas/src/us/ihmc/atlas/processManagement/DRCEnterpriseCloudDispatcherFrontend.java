@@ -41,7 +41,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.tcpServer.DisconnectedException;
 import us.ihmc.communication.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.communication.util.NetworkPorts;
@@ -132,7 +132,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private void setupNetProcSocket()
    {
       netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT.getPort());
-      netProcClient.attachStateListener(new NetStateListener()
+      netProcClient.attachStateListener(new ConnectionStateListener()
       {
          public void connected()
          {
@@ -154,7 +154,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private void setupControllerSocket()
    {
       controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT.getPort());
-      controllerClient.attachStateListener(new NetStateListener()
+      controllerClient.attachStateListener(new ConnectionStateListener()
       {
          public void connected()
          {

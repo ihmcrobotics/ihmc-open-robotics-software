@@ -1,13 +1,9 @@
 package us.ihmc.communication.producers;
 
-import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.communication.net.ConnectionStateListener;
+import us.ihmc.communication.video.CompressedVideoCallback;
 
-public interface CompressedVideoDataClient extends NetStateListener
+public interface CompressedVideoDataClient extends ConnectionStateListener, CompressedVideoCallback
 {
-
-   public abstract void consumeObject(byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters);
-
+   
 }

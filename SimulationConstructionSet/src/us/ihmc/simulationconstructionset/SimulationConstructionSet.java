@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 import com.jme3.renderer.Camera;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -48,7 +49,6 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
@@ -4449,7 +4449,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return null;
    }
 
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, RenderedSceneHandler videoDataServer,
+   /**
+    * This is where SCS video comes from! 
+    * 
+    * Tags: publisher, communicator, video, viewport
+    */
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       if (myGUI != null)
