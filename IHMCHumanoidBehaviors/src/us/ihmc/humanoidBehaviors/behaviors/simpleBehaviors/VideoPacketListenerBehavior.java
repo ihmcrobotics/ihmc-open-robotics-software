@@ -29,7 +29,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
       if (cameraData.isNewPacketAvailable())
       {
          VideoPacket packet = cameraData.poll();
-         videoDataClient.consumeObject(packet.getVideoSource(), packet.getData(), packet.getTimeStamp(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
+         videoDataClient.onFrame(packet.getVideoSource(), packet.getData(), packet.getTimeStamp(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
       }
    }
 }

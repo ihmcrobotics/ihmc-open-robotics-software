@@ -57,7 +57,7 @@ public class OffscreenBufferVideoServer
          double f = bufferedImage.getWidth() / 2 / Math.tan(fov / 2);
          IntrinsicParameters intrinsicParameters = new IntrinsicParameters(f, f, 0, (bufferedImage.getWidth() - 1) / 2f, (bufferedImage.getHeight() - 1) / 2f, bufferedImage.getWidth(), bufferedImage.getHeight());
 
-         videoDataServer.updateImage(VideoSource.MULTISENSE_LEFT_EYE, bufferedImage, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
+         videoDataServer.onFrame(VideoSource.MULTISENSE_LEFT_EYE, bufferedImage, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
       }
 
       @Override

@@ -64,7 +64,7 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
    }
 
    @Override
-   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition, final QuaternionReadOnly cameraOrientation,
+   public synchronized void onFrame(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition, final QuaternionReadOnly cameraOrientation,
          IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
@@ -132,7 +132,7 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
             nal.get(data);
-            handler.newVideoPacketAvailable(videoSource, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
+            handler.onFrame(videoSource, data, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
          }
       }
       catch (IOException e)
