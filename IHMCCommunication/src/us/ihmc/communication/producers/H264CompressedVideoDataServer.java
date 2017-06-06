@@ -14,12 +14,12 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
+public class H264CompressedVideoDataServer implements ConnectionStateListener, CompressedVideoDataServer
 {
    private OpenH264Encoder encoder;
 

@@ -24,7 +24,7 @@ public class LocalObjectCommunicator implements ObjectCommunicator
       }
    }
 
-   public void attachStateListener(NetStateListener stateListener)
+   public void attachStateListener(ConnectionStateListener stateListener)
    {
       stateListener.connected();
    }

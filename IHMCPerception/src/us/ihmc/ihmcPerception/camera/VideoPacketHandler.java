@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -48,7 +48,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
    }
 
    @Override
-   public void addNetStateListener(NetStateListener compressedVideoDataServer)
+   public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
    {
       packetCommunicator.attachStateListener(compressedVideoDataServer);
    }

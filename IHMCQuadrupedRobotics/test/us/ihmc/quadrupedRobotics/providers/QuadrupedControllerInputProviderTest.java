@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
@@ -286,7 +286,7 @@ public class QuadrupedControllerInputProviderTest
       }
 
       @Override
-      public void attachStateListener(NetStateListener stateListener)
+      public void attachStateListener(ConnectionStateListener stateListener)
       {
       }
 

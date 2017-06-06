@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
@@ -78,7 +78,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       }
 
       @Override
-      public void addNetStateListener(NetStateListener compressedVideoDataServer)
+      public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
       {
          packetCommunicator.attachStateListener(compressedVideoDataServer);
       }
