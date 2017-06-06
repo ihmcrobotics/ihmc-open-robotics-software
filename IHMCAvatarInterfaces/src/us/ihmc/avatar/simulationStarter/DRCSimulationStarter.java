@@ -564,7 +564,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       if (controllerPacketCommunicator != null)
       {
-         controllerPacketCommunicator.close();
+         controllerPacketCommunicator.disconnect();
       }
    }
 

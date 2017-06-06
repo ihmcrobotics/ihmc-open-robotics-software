@@ -356,13 +356,13 @@ public class DRCSimulationTestHelper
          LocalObjectCommunicator simulatedSensorCommunicator = networkProcessorParameters.getSimulatedSensorCommunicator();
          if (simulatedSensorCommunicator != null)
          {
-            simulatedSensorCommunicator.close();
+            simulatedSensorCommunicator.disconnect();
          }
 
       }
       if (controllerCommunicator != null)
       {
-         controllerCommunicator.close();
+         controllerCommunicator.disconnect();
       }
 
       simulationStarter.close();

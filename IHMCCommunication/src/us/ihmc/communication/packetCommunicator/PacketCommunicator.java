@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.communication.interfaces.Connectable;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.KryoObjectClient;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
@@ -18,7 +19,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 
-public class PacketCommunicator
+public class PacketCommunicator implements Connectable
 {
    public static final int BUFFER_SIZE = 2097152 * 20;
    
@@ -134,6 +135,7 @@ public class PacketCommunicator
       }
    }
 
+   @Override
    public boolean isConnected()
    {
       return communicator.isConnected();
@@ -144,11 +146,20 @@ public class PacketCommunicator
       communicator.closeConnection();
    }
 
-   public void close()
+   @Override
+   public void disconnect()
    {
-      communicator.close();
+      try
+      {
+         communicator.disconnect();
+      }
+      catch (IOException e)
+      {
+         // handle silently for now
+      }
    }
 
+   @Override
    public void connect() throws IOException
    {
       communicator.connect();
