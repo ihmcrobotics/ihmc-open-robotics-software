@@ -67,7 +67,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       }
 
       @Override
-      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation,
+      public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
             IntrinsicParameters intrinsicParameters)
       {
          if(DEBUG)

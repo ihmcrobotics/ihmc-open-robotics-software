@@ -25,7 +25,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public void consumeObject(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
+   public void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       ByteBuffer buffer = byteBufferProvider.getOrCreateBuffer(data.length);
       buffer.put(data);
@@ -33,7 +33,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
       YUVPicture pic = decoder.decode(buffer);
       BufferedImage img = converter.toBufferedImage(pic);
       pic.delete();
-      videoStreamer.updateImage(videoSource, img, timestamp, position, orientation, intrinsicParameters);
+      videoStreamer.onFrame(videoSource, img, timestamp, position, orientation, intrinsicParameters);
    }
 
    @Override

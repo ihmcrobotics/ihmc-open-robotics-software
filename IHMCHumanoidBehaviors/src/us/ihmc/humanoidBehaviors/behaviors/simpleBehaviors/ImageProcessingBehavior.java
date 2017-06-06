@@ -34,17 +34,17 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
 
    @Override
-   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
-      videoDataServer.updateImage(VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
+      videoDataServer.onFrame(VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
    }
 
    class UIVideoHandler implements CompressedVideoHandler
    {
       @Override
-      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation,
+      public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
             IntrinsicParameters intrinsicParameters)
       {
          VideoPacket videoPacket = new VideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);

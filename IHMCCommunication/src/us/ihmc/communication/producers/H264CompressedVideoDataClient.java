@@ -27,7 +27,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public synchronized void consumeObject(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
+   public synchronized void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       nalBuffer.clear();
       nalBuffer.put(data);
@@ -37,7 +37,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
       if(frame != null)
       {
          image = converter.toBufferedImage(frame, image);
-         videoStreamer.updateImage(videoSource, image, timestamp, position, orientation, intrinsicParameters);
+         videoStreamer.onFrame(videoSource, image, timestamp, position, orientation, intrinsicParameters);
          frame.delete();
       }
    }
