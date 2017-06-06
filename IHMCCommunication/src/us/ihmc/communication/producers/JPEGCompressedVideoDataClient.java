@@ -8,8 +8,8 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
 {
@@ -35,7 +35,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public void consumeObject(byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
+   public void consumeObject(byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       ByteBuffer buffer = byteBufferProvider.getOrCreateBuffer(data.length);
       buffer.put(data);

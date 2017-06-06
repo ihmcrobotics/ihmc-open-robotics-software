@@ -9,8 +9,8 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 {
@@ -26,7 +26,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    }
 
    @Override
-   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3D cameraPosition, Quaternion cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
       try

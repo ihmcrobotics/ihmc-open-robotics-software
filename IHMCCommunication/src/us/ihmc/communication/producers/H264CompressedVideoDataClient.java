@@ -7,8 +7,8 @@ import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class H264CompressedVideoDataClient implements CompressedVideoDataClient
 {
@@ -26,7 +26,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public synchronized void consumeObject(byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
+   public synchronized void consumeObject(byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       nalBuffer.clear();
       nalBuffer.put(data);
