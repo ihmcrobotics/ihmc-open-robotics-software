@@ -15,8 +15,8 @@ public class ZoomOutAction extends SCSAction
       super("Zoom Out",
               "icons/ZoomOut.png",
               KeyEvent.VK_O,
-              "Zoom Out",
-              "Zoom Out"
+              "Zoom Out Data Buffer",
+              "Shorten graphs to get rougher detail of data buffer."
       );
 
       this.executor = executor;

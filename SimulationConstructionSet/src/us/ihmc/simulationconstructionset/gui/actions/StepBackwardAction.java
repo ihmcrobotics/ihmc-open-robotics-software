@@ -15,7 +15,7 @@ public class StepBackwardAction extends SCSAction
               "icons/StepBackward.png",
               KeyEvent.VK_B,
               "Step Backward",
-              "Step Backward"
+              "Step backward one frame in the data buffer."
       );
 
       this.executor = executor;

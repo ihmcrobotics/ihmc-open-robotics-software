@@ -14,8 +14,8 @@ public class ResizeViewportAction extends SCSAction
       super("Resize Viewport",
               "",
               KeyEvent.VK_V,
-              "Short Description",
-              "Long Description"
+              "Resize Viewport",
+              "Adjust the size of the viewport for better display."
       );
 
       this.constructor = constructor;

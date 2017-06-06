@@ -11,11 +11,11 @@ public class ThinBufferAction extends SCSAction
 
    public ThinBufferAction(ThinBufferCommandExecutor executor)
    {
-      super("Thin Buffer, Removing Every Other Tick",
+      super("Thin Buffer",
               "",
               KeyEvent.VK_T,
-              "Short Description",
-              "Long Description"
+              "Thin Buffer, Removing Every Other Tick",
+              "Remove every other tick of data in the buffer to thin it out."
       );
 
       this.executor = executor;

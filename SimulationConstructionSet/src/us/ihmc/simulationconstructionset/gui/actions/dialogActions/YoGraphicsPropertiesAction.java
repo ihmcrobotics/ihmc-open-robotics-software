@@ -14,8 +14,8 @@ public class YoGraphicsPropertiesAction extends SCSAction
       super("YoGraphics Properties...",
               "",
               KeyEvent.VK_Y,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Open YoGraphics Properties",
+              "Open YoGraphics Properties for in-depth settings adjustment."
       );
       
       this.constructor = constructor;

@@ -18,8 +18,8 @@ public class CameraPropertiesAction extends SCSAction
       super("Camera Properties...",
               "",
               KeyEvent.VK_C,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Open Camera Properties",
+              "Open Camera Properties dialog for in-depth settings adjustment."
       );
       
       this.constructor = constructor;

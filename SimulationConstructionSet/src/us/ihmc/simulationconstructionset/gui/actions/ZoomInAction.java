@@ -14,8 +14,8 @@ public class ZoomInAction extends SCSAction
       super("Zoom In",
               "icons/ZoomIn.png",
               KeyEvent.VK_I,
-              "Zoom In",
-              "Zoom In"
+              "Zoom In Data Buffer",
+              "Expand graphs to get finer detail of data buffer."
       );
 
       this.executor = executor;
