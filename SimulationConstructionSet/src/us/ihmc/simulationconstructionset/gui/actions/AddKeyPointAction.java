@@ -14,8 +14,8 @@ public class AddKeyPointAction extends SCSAction
       super("Add Key Point",
               "icons/NewKey.png",
               KeyEvent.VK_F,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Add Key Point to graphs",
+              "Add Key Point to graphs to mark a time of interest in the simulation."
       );
 
       this.executor = executor;

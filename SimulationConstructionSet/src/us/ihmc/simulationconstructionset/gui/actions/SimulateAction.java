@@ -15,7 +15,7 @@ public class SimulateAction extends SCSAction
               "icons/Simulate.png",
               KeyEvent.VK_S,
               "Simulate",
-              "Start simulating"
+              "Start simulating."
       );
 
       this.executor = listener;

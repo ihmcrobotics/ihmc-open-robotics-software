@@ -15,8 +15,8 @@ public class SaveGraphConfigurationAction extends SCSAction
       super("Save GraphGroup Configuration",
               "",
               KeyEvent.VK_UNDEFINED,
-              "", // TODO
-              "" // TODO
+              "Save GraphGroup Config",
+              "Save GraphGroup Configuration"
       );
 
       this.constructor = constructor;

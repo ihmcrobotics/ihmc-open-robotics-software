@@ -15,7 +15,7 @@ public class SetOutPointAction extends SCSAction
               "icons/SetOutPoint.png",
               KeyEvent.VK_U,
               "Set Out Point",
-              "Set Out Point"
+              "Set the current Out point in the data buffer."
       );
 
       this.executor = executor;

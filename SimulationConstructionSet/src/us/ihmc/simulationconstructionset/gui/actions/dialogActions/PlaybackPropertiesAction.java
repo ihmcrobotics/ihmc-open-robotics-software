@@ -14,8 +14,8 @@ public class PlaybackPropertiesAction extends SCSAction
       super("Playback Properties...",
               "",
               KeyEvent.VK_B,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Open Playback Properties",
+              "Open Playback Properties for in-depth settings adjustment."
       );
       
       this.constructor = constructor;

@@ -15,8 +15,8 @@ public class HideShowViewportAction extends SCSAction implements ViewportSelecto
       super("Hide Viewport",
               "",
               KeyEvent.VK_V,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Hide Viewport",
+              "Stop displaying this viewport."
       );
 
       this.viewportSelector = viewportSelector;

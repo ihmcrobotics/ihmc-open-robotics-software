@@ -15,8 +15,8 @@ public class SelectCameraAction extends SCSAction
       super(name,
               "",
               KeyEvent.VK_E,
-              "Short Description",
-              "Long Description"
+              "Select: "+name,
+              "Select Camera: "+name
       );
 
       this.cameraSelector = selector;

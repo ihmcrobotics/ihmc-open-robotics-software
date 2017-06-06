@@ -14,8 +14,8 @@ public class PackBufferAction extends SCSAction
       super("Pack Buffer to In/Out",
               "",
               KeyEvent.VK_C,
-              "Short Description",
-              "Long Description"
+              "?",
+              "?"
       );
 
       this.executor = executor;
