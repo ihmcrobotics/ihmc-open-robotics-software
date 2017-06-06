@@ -15,8 +15,8 @@ public class ExportSimulationTo3DMaxAction extends SCSAction
       super("Export Simulation To 3DMax",
               "",
               KeyEvent.VK_UNDEFINED,
-              "", // TODO
-              "" // TODO
+              "Export Simulation To 3DMax",
+              "Export the current simulation to 3DMax for other purposes."
       );
 
       this.constructor = constructor;

@@ -12,10 +12,10 @@ public class SimulateAction extends SCSAction
    public SimulateAction(SimulateCommandExecutor listener)
    {
       super("Simulate",
-              "icons/YoSimulate32.gif",
+              "icons/Simulate.png",
               KeyEvent.VK_S,
               "Simulate",
-              "Start simulating"
+              "Start simulating."
       );
 
       this.executor = listener;

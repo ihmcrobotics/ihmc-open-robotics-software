@@ -12,7 +12,7 @@ public class StopAction extends SCSAction
    public StopAction(StopCommandExecutor executor)
    {
       super("Stop",
-              "icons/Stop24.gif",
+              "icons/Stop.png",
               KeyEvent.VK_T,
               "Stop",
               "Stop playing simulation."

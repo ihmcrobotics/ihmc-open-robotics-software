@@ -14,7 +14,7 @@ public class ToggleCameraKeyModeAction extends SCSAction
       super("Toggle Camera Keys",
               "",
               KeyEvent.VK_T,
-              "Turns on and off",
+              "Toggle Camera Keying Mode",
               "Turns Camera Keying on and off."
       );
 

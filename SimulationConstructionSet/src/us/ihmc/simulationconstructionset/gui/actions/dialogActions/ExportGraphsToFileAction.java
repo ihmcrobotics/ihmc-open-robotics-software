@@ -11,11 +11,11 @@ public class ExportGraphsToFileAction extends SCSAction
 
    public ExportGraphsToFileAction(ExportGraphsToFileConstructor constructor)
    {
-      super("Export Graphs To File",
-              "icons/exportGraph.png",
+      super("Export Graphs",
+              "icons/ExportGraphs.png",
               KeyEvent.VK_UNDEFINED,
               "Export Graphs To File",
-              "Export Graphs To File"
+              "Export Graphs To File "
       );
 
       this.constructor = constructor;

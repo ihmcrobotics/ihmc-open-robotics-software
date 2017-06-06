@@ -13,7 +13,7 @@ public class ImportDataAction extends SCSAction
    public ImportDataAction(ImportDataDialogConstructor constructor)
    {
       super("Import Data...",
-              "icons/Import24.gif",
+              "icons/ImportData.png",
               KeyEvent.VK_I,
               "Import Data",
               "Import simulation data to a file."

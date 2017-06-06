@@ -16,8 +16,8 @@ public class SelectViewportAction extends SCSAction
       super(name,
               "",
               KeyEvent.VK_E,
-              "Short Description",
-              "Long Description"
+              "Select: "+name,
+              "Select Viewport: "+name
       );
 
       this.selector = selector;

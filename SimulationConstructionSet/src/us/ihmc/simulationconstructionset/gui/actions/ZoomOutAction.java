@@ -13,10 +13,10 @@ public class ZoomOutAction extends SCSAction
    public ZoomOutAction(ZoomGraphCommandExecutor executor)
    {
       super("Zoom Out",
-              "icons/ZoomOut24.gif",
+              "icons/ZoomOut.png",
               KeyEvent.VK_O,
-              "Zoom Out",
-              "Zoom Out"
+              "Zoom Out Data Buffer",
+              "Shorten graphs to get rougher detail of data buffer."
       );
 
       this.executor = executor;

@@ -12,7 +12,7 @@ public class PrintGraphsAction extends SCSAction
    public PrintGraphsAction(PrintGraphsDialogConstructor constructor)
    {
       super("Print Graphs",
-              "icons/Print24.gif",
+              "icons/PrintGraphs.png",
               KeyEvent.VK_P,
               "Print Graphs",
               "Print Graphs"

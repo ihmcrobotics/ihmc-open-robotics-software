@@ -10,17 +10,17 @@ import java.net.URL;
 @SuppressWarnings("serial")
 public class ToggleKeyPointModeAction extends SCSAction implements ToggleKeyPointModeCommandListener
 {
-   private URL iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKey.gif");
+   private URL iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/ToggleKeyMode.png");
    private ImageIcon icon = new ImageIcon(iconURL);
    private ToggleKeyPointModeCommandExecutor executor;
 
    public ToggleKeyPointModeAction(ToggleKeyPointModeCommandExecutor executor)
    {
       super("Toggle Key Mode",
-              "icons/toggleKey.gif",
+              "icons/ToggleKeyMode.png",
               KeyEvent.VK_F,
-              "Short Description",
-              "Long Description"
+              "?",
+              "?"
       );
 
       this.executor = executor;
@@ -41,13 +41,13 @@ public class ToggleKeyPointModeAction extends SCSAction implements ToggleKeyPoin
    {
       if (executor.isKeyPointModeToggled())
       {
-         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKeyPressed.gif");
+         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/ToggleKeyModePressed.png");
          ImageIcon tmp = new ImageIcon(iconURL);
          icon.setImage(tmp.getImage());
       }
       else
       {
-         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKey.gif");
+         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/ToggleKeyMode.png");
          ImageIcon tmp = new ImageIcon(iconURL);
          icon.setImage(tmp.getImage());
       }

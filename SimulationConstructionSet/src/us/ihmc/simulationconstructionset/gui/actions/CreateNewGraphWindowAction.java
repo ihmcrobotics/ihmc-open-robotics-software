@@ -14,8 +14,8 @@ public class CreateNewGraphWindowAction extends SCSAction
       super("New Graph Window",
               "",
               KeyEvent.VK_G,
-              "Short Description", // TODO
-              "Long Description" // TODO
+              "Create New Graph Window",
+              "Create a new graph window to hold YoGraphs."
       );
 
       this.executor = executor;
