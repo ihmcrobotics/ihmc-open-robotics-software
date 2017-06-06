@@ -70,8 +70,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoFramePoint desiredCoP;
    private final YoFramePoint previousCoP;
 
-   private final BooleanYoVariable hasReceivedMaxContactForce;
-
    private final BooleanYoVariable hasReceivedCenterOfPressureCommand;
    private final BooleanYoVariable isFootholdAreaLargeEnough;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
@@ -121,8 +119,6 @@ public class PlaneContactStateToWrenchMatrixHelper
       hasReset = new BooleanYoVariable(namePrefix + "HasReset", registry);
       resetRequested = new BooleanYoVariable(namePrefix + "ResetRequested", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
-
-      hasReceivedMaxContactForce = new BooleanYoVariable(namePrefix + "HasReceivedMaxContactForce", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
@@ -174,11 +170,6 @@ public class PlaneContactStateToWrenchMatrixHelper
       desiredCoPCommandInSoleFrame.set(command.getDesiredCoPInSoleFrame());
       desiredCoPCommandWeightInSoleFrame.set(command.getWeightInSoleFrame());
       hasReceivedCenterOfPressureCommand.set(true);
-   }
-
-   public void setMaxContactNormalForce(FramePoint2d contactPoint, double maxNormalForce)
-   {
-      maxContactForces.get(contactPoint).set(maxNormalForce);
    }
 
    public void computeMatrices(double rhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)

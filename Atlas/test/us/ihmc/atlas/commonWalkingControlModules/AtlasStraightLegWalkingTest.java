@@ -170,13 +170,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 0.95;
+                        return 0.92;
                      }
 
                      @Override
                      public double getSupportKneeCollapsingDuration()
                      {
-                        return 0.2;
+                        return 0.15;
                      }
 
                      @Override
@@ -268,7 +268,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                      public double getPelvisPitchRatioOfLegAngle()
                      {
-                        return 0.7;
+                        return 0.4;
                      }
 
                      public double getPelvisYawRatioOfStepAngle()

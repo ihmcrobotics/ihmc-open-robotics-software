@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -11,15 +12,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -44,6 +42,8 @@ public class SupportState extends AbstractFootControlState
 
    private final YoVariableRegistry registry;
 
+   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+
    private final BooleanYoVariable footBarelyLoaded;
    private final BooleanYoVariable copOnEdge;
    private final DoubleYoVariable footLoadThreshold;
@@ -55,7 +55,7 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
-   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
+   private final InverseDynamicsCommandList inverseDynamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
@@ -92,6 +92,12 @@ public class SupportState extends AbstractFootControlState
    // For straight legs with privileged configuration
    private final RigidBody pelvis;
 
+   // Toe contact point loading time
+   private final DoubleYoVariable toeContactPointLoadingTime;
+   private final DoubleYoVariable fullyLoadedMagnitude;
+
+   private final FramePoint tempPoint = new FramePoint();
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -107,6 +113,11 @@ public class SupportState extends AbstractFootControlState
       copOnEdge = new BooleanYoVariable(prefix + "CopOnEdge", registry);
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
+
+      toeContactPointLoadingTime = new DoubleYoVariable(prefix + "ToeContactPointLoadingTime", registry);
+      fullyLoadedMagnitude = new DoubleYoVariable(prefix + "FullyLoadedMagnitude", registry);
+      toeContactPointLoadingTime.set(0.2);
+      fullyLoadedMagnitude.set(1.0e3);
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
@@ -204,6 +215,39 @@ public class SupportState extends AbstractFootControlState
          partialFootholdControlModule.clearCoPGrid();
       explorationHelper.compute(getTimeInCurrentState(), contactStateHasChanged);
 
+      // toe contact point loading //// TODO: 6/5/17
+      double currentTime = getTimeInCurrentState();
+      if (currentTime < toeContactPointLoadingTime.getDoubleValue())
+      {
+         computeFootPolygon();
+
+         double maxContactPointX = footPolygon.getMaxX();
+         double minContactPointX = footPolygon.getMinX();
+
+         double phaseInLoading = currentTime / toeContactPointLoadingTime.getDoubleValue();
+         double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, fullyLoadedMagnitude.getDoubleValue(), phaseInLoading);
+         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
+
+         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
+            contactPoint.getPosition(tempPoint);
+            double percentAlongFoot = (tempPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
+            double contactPointMagnitude = InterpolationTools.linearInterpolate(fullyLoadedMagnitude.getDoubleValue(), leadingToeMagnitude, percentAlongFoot);
+
+            planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
+         }
+      }
+      else
+      {
+         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
+         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
+            planeContactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
+         }
+      }
+
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge());
       footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getDoubleValue());
@@ -275,6 +319,16 @@ public class SupportState extends AbstractFootControlState
       frameViz.setToReferenceFrame(controlFrame);
    }
 
+   
+   private void computeFootPolygon()
+   {
+      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+      footPolygon.clear(soleFrame);
+      for (int i = 0; i < contactableFoot.getTotalNumberOfContactPoints(); i++)
+         footPolygon.addVertex(contactableFoot.getContactPoints2d().get(i));
+      footPolygon.update();
+   }
+
    private void updateHoldPositionSetpoints()
    {
       footPosition.setToZero(contactableFoot.getSoleFrame());
@@ -322,11 +376,11 @@ public class SupportState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      inverseDymamicsCommandsList.clear();
-      inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
-      inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+      inverseDynamicsCommandsList.clear();
+      inverseDynamicsCommandsList.addCommand(spatialAccelerationCommand);
+      inverseDynamicsCommandsList.addCommand(explorationHelper.getCommand());
 
-      return inverseDymamicsCommandsList;
+      return inverseDynamicsCommandsList;
    }
 
 
