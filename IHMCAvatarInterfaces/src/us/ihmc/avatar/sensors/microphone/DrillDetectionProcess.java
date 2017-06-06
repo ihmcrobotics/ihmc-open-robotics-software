@@ -65,7 +65,7 @@ public class DrillDetectionProcess extends DrillDetectionThread implements Conne
    public void terminate() throws InterruptedException
    {
       System.out.println("Disconnection from the network manager...");
-      packetCommunicator.close();
+      packetCommunicator.disconnect();
 
       System.out.println("Shutting down the webcam thread...");
       shutdown();

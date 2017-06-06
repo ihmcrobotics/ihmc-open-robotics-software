@@ -312,28 +312,28 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       if (mockUIPacketCommunicatorServer != null)
       {
-         mockUIPacketCommunicatorServer.close();
+         mockUIPacketCommunicatorServer.disconnect();
       }
       
       if (mockUIPacketCommunicatorClient != null)
       {
-         mockUIPacketCommunicatorClient.close();
+         mockUIPacketCommunicatorClient.disconnect();
       }
       
 
       if (behaviorCommunicatorClient != null)
       {
-         behaviorCommunicatorClient.close();
+         behaviorCommunicatorClient.disconnect();
       }
       
       if (behaviorCommunicatorServer != null)
       {
-         behaviorCommunicatorServer.close();
+         behaviorCommunicatorServer.disconnect();
       }
 
       if (controllerCommunicator != null)
       {
-         controllerCommunicator.close();
+         controllerCommunicator.disconnect();
       }
 
       super.destroySimulation();

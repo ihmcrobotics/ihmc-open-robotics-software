@@ -106,7 +106,7 @@ public class AtlasUIPacketLoader
 
                fileDataInputStream.close();
 
-               packetCommunicator.close();
+               packetCommunicator.disconnect();
             }
             catch (IOException e)
             {

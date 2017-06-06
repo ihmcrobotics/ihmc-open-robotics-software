@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
@@ -137,11 +137,11 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    @Override
    public void closeConnection()
    {
-      close();
+      disconnect();
    }
    
    @Override
-   public void close()
+   public void disconnect()
    {
       IntraprocessCommunicationNetwork.disconnect(this, port);
    }
@@ -173,7 +173,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    {
       if(isConnected())
       {
-         close();         
+         disconnect();         
       }
    }
 

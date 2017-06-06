@@ -262,7 +262,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    }
    
    @Override
-   public final void close()
+   public final void disconnect()
    {
       closeConnection();
       for(ExecutorService executor : listenerExecutors.values())
@@ -283,6 +283,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    /**
     * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a later moment.
     */
+   @Override
    public abstract void closeConnection();
 
    private class TableData

@@ -111,7 +111,7 @@ public class AtlasUIPacketRecorder
       scanner.nextLine();
       scanner.close();
       
-      packetClient.close();
+      packetClient.disconnect();
    }
    
    public static Path getPacketRecordingFilePath()

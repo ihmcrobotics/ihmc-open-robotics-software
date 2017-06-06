@@ -1,5 +1,7 @@
 package us.ihmc.communication.net;
 
+import java.io.IOException;
+
 public interface NetworkedObjectCommunicator extends ObjectCommunicator
 {
    /**
@@ -17,7 +19,13 @@ public interface NetworkedObjectCommunicator extends ObjectCommunicator
 
    /**
     * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a later moment. 
-    * Use close() when you want to shutdown the connection completely. 
+    * Use disconnect() when you want to shutdown the connection completely. 
     */
    void closeConnection();
+   
+   @Override
+   public void disconnect() throws IOException;
+   
+   @Override
+   public void connect() throws IOException;
 }
