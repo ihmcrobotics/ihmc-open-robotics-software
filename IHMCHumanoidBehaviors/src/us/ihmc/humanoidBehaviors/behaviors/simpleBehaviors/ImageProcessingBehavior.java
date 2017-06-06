@@ -34,7 +34,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
 
    @Override
-   public void updateImage(BufferedImage bufferedImage, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 

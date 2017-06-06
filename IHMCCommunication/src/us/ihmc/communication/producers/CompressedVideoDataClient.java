@@ -7,7 +7,5 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface CompressedVideoDataClient extends ConnectionStateListener
 {
-
-   public abstract void consumeObject(byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters);
-
+   public abstract void consumeObject(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters);
 }
