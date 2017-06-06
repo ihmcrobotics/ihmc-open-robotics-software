@@ -6,7 +6,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 
-@SuppressWarnings("serial")
 public class VarPropertiesPanel extends GridPane implements EventHandler<javafx.event.ActionEvent> {
 
     private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");

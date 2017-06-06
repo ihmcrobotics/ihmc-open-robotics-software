@@ -4,7 +4,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
-@SuppressWarnings("serial")
 public class GraphPropertiesPanel extends GridPane implements EventHandler<javafx.event.ActionEvent> {
     private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
 

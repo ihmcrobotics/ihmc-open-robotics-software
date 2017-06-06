@@ -18,7 +18,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class GraphPropertiesDialog extends Stage implements EventHandler<javafx.event.ActionEvent> {
     private final Button okButton, applyButton, cancelButton;
     private final GraphPropertiesPanel graphPropertiesPanel;

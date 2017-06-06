@@ -17,7 +17,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.NumberFormat;
 
-@SuppressWarnings("serial")
 public class CameraPropertiesDialog extends Stage implements EventHandler<javafx.event.ActionEvent> {
     private NumberFormat numFormat;
 

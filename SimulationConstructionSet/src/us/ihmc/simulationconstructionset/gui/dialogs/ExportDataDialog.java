@@ -18,7 +18,6 @@ import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import javax.swing.*;
 import java.awt.*;
 
-@SuppressWarnings("serial")
 public class ExportDataDialog extends Stage implements EventHandler<ActionEvent> {
     public static final int
             STATE = 0, DATA = 1, COMPRESS = 5, NO_COMPRESS = 6;
