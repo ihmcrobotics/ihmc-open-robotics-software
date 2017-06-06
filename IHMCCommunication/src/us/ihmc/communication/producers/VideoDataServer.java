@@ -10,6 +10,4 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 public interface VideoDataServer extends Connectable
 {
    public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters);
-
-   public void close();
 }

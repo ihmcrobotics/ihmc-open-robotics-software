@@ -27,11 +27,6 @@ public class RawVideoDataServer implements VideoDataServer
    }
 
    @Override
-   public void close()
-   {
-   }
-
-   @Override
    public boolean isConnected()
    {
       return objectCommunicator.isConnected();
