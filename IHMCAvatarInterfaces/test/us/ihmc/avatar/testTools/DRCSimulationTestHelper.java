@@ -111,6 +111,14 @@ public class DRCSimulationTestHelper
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+		   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+		   DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
+   {
+	   this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+			   false, false, automaticallySimulate, null);
+   }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters)
    {
