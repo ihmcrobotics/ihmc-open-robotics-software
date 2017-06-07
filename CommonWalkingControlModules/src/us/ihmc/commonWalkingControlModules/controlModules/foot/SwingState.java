@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -55,6 +56,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
+
+   private final LeapOfFaithModule leapOfFaithModule;
 
    private final YoFrameVector yoTouchdownAcceleration;
    private final YoFrameVector yoTouchdownVelocity;
@@ -218,6 +221,8 @@ public class SwingState extends AbstractUnconstrainedState
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
+
+      leapOfFaithModule = new LeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody());
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -422,6 +427,8 @@ public class SwingState extends AbstractUnconstrainedState
       activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
+      leapOfFaithModule.compute(time);
+
       if (footstepWasAdjusted)
       {
          adjustmentVelocityCorrection.set(desiredPosition);
@@ -592,6 +599,12 @@ public class SwingState extends AbstractUnconstrainedState
       }
 
       return computeSwingTimeRemaining();
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return leapOfFaithModule.getInverseDynamicsCommand();
    }
 
    @Override
