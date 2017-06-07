@@ -202,7 +202,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFactory
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
          }
          
-         double firstTime = 4.0;
+         double firstTime = 3.0;
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTime, SolarPanelCleaningInfo.getCleaningPath().getArrivalTime());
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
@@ -216,7 +216,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFactory
             //trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
             
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-            PrintTools.info(""+i+" time "+time+" "+ cleaningPose.getU()+" "+ cleaningPose.getV());
+            PrintTools.info(""+i+" time "+time+" "+ cleaningPose.getU()+" "+ cleaningPose.getV() +"       "+ rrtPath.get(i).getNodeData(1) +" "+ rrtPath.get(i).getNodeData(2) +" "+ rrtPath.get(i).getNodeData(3) +" ");
             time = time + firstTime;
             
             handTrajectoryMessage.setTrajectoryPoint(i, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), desiredLinearVelocity, new Vector3D(), midFeetFrame);

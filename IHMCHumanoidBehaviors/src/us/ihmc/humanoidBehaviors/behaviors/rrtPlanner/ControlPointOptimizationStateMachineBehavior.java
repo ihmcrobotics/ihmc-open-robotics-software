@@ -42,7 +42,7 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    private int currentIndexOfCandidate;
    
    private int numberOfRetry = 1;
-   private int numberOfCandidatesForRetry = 1;
+   private int numberOfCandidatesForRetry = 2;
    private int currentIndexOfRetry;
    
    private boolean isSolved = false;
@@ -70,6 +70,14 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
       optimalScoreOfControlPoint = Double.MAX_VALUE;
       this.fullRobotModel = fullRobotModel;
       setUpStateMachine();
+   }
+   
+   public void reInitialize()
+   {
+      currentIndexOfCandidate = 0;
+      currentIndexOfRetry = 0;
+      optimalScoreOfControlPoint = Double.MAX_VALUE;
+      isSolved = false;
    }
    
    public void setRootNode(RRTNode rootNode)

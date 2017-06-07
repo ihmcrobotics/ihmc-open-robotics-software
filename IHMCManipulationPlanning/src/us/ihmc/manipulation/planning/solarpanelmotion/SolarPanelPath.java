@@ -53,6 +53,23 @@ public class SolarPanelPath
       this.wayPoses.add(cleaningPose);
       this.arrivalTime.add(endTime);
    }
+   
+   public void addCleaningPoseWithNomalizedTime(SolarPanelCleaningPose cleaningPose, double nomalizedTimeRatio)
+   {
+      SolarPanelCleaningPose newStartPose = wayPoses.get(wayPoses.size()-1);      
+      double startTime = arrivalTime.get(arrivalTime.size()-1);
+      
+      double distance = newStartPose.getDesiredHandPosition().distance(cleaningPose.getDesiredHandPosition());
+      double timeToGo = distance * nomalizedTimeRatio;
+      
+      double endTime = startTime + timeToGo;
+
+      SolarPanelLinearPath linearPath = new SolarPanelLinearPath(newStartPose, cleaningPose, startTime, endTime);
+      this.linearPath.add(linearPath);
+
+      this.wayPoses.add(cleaningPose);
+      this.arrivalTime.add(endTime);
+   }
 
    public SolarPanelCleaningPose getCleaningPose(double time)
    {
