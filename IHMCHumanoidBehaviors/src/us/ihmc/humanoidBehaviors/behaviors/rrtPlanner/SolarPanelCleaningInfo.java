@@ -70,6 +70,7 @@ public class SolarPanelCleaningInfo
    
    public static void setCleaningPath(CleaningPathType type)
    {
+      cleaningType = type;
       switch(type)
       {
          case HORIZONAL:
@@ -122,6 +123,7 @@ public class SolarPanelCleaningInfo
          case DIAGONAL:
          {
             PrintTools.info("DIAGONAL");
+            double nomalizedTimeRatio = 15.0;
             double radiusOfTowel = 0.09;
             
             readyPose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU()-radiusOfTowel-widthOfBezel, radiusOfTowel+widthOfBezel+0.1, offsetAlongToZdirection + offsetReadyPose, -Math.PI*0.00);   
@@ -133,25 +135,25 @@ public class SolarPanelCleaningInfo
             double oneStepU =  (solarPanel.getSizeU() - totalBezel*2)/4;
             double oneStepV =  (solarPanel.getSizeV() - totalBezel*2)/4;
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 1) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 2) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 3) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 1) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 2) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 3) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0); // 8
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 0) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio); // 8
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 1) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 2) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 3) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 1) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 2) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 3) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0); // 15
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - (totalBezel + oneStepU * 4) , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio); // 15
             
             break;
          }
@@ -159,6 +161,7 @@ public class SolarPanelCleaningInfo
          case HORIZONAL_FIXED:
          {
             PrintTools.info("HORIZONAL_FIXED");
+            double nomalizedTimeRatio = 15.0;
             double radiusOfTowel = 0.09;
             
             double totalBezel = radiusOfTowel + widthOfBezel;
@@ -169,15 +172,15 @@ public class SolarPanelCleaningInfo
             SolarPanelCleaningPose startPose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel, totalBezel, offsetAlongToZdirection, -Math.PI*0.2);
             cleaningPath = new SolarPanelPath(startPose);
             
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
-            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), 15.0);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 0, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 1, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 2, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 3, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             
             
             

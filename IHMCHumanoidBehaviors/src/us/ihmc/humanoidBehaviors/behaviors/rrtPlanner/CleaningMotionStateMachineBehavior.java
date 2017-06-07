@@ -195,39 +195,48 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             ArrayList<RRTNode> manuallyPutPath = new ArrayList<RRTNode>();
             
             // HORIZONAL_FIXED
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.9302, 0.3501, 0.302));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.9214, 0.5121, 0.253));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.8835, 0.5121, 0.135));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.8742, 0.3512, 0.102));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.8687, 0.3501, 0.079));
-//            
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.8721, 0.5103, 0.050));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.8501, 0.5070, 0.031));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.8420, 0.3054, 0.003));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.8630, 0.3032, 0.002));
-//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.9101, 0.3811, 0.013));
+            if(SolarPanelCleaningInfo.getCleaningType() == CleaningPathType.HORIZONAL_FIXED)
+            {
+               PrintTools.info("manually put HORIZONAL_FIXED");
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.9302, 0.3501, 0.302));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.9214, 0.5121, 0.253));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.8835, 0.5121, 0.135));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.8742, 0.3512, 0.102));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.8687, 0.3501, 0.079));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.8721, 0.5103, 0.050));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.8501, 0.5070, 0.031));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.8420, 0.3054, 0.003));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.8630, 0.3032, 0.002));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.9101, 0.3811, 0.013));
+            }
             
+            else if(SolarPanelCleaningInfo.getCleaningType() == CleaningPathType.DIAGONAL)
+            {
+               PrintTools.info("manually put DIAGONAL");
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.93, 0.35, 0.30));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.92, 0.36, 0.25));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.92, 0.36, 0.13));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.91, 0.38, 0.10));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.91, 0.35, 0.08));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.91, 0.40, 0.05));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.91, 0.35, 0.03));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.86, 0.51, 0.00));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.86, 0.3, 0.00));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.88, 0.51, 0.01));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(10), 0.86, 0.2, 0.01));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(11), 0.87, 0.51, 0.01));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(12), 0.87, 0.38, 0.01));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(13), 0.86, 0.5, 0.01));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(14), 0.88, 0.38, 0.01));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(15), 0.90, 0.38, 0.01));
+            }
             // DIAGONAL
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.93, 0.35, 0.30));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.92, 0.36, 0.25));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.92, 0.36, 0.13));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.91, 0.38, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.91, 0.35, 0.08));
-            
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.91, 0.40, 0.05));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.91, 0.35, 0.03));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.86, 0.51, 0.00));
-            
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.86, 0.3, 0.00));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.88, 0.51, 0.01));
-            
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(10), 0.86, 0.2, 0.01));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(11), 0.87, 0.51, 0.01));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(12), 0.87, 0.38, 0.01));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(13), 0.85, 0.5, 0.01));
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(14), 0.87, 0.38, 0.01));
-            
-            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(15), 0.91, 0.38, 0.01));
+
             
             // ************************* Manually put
             if(manuallyPutControlPoint)
@@ -463,7 +472,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // *********************************** get Cleaning Path *********************************** //
 
          SolarPanelCleaningInfo.setSolarPanel(solarPanel);
-         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.DIAGONAL);
+         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL_FIXED);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
@@ -538,7 +547,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // *********************************** get Cleaning Path *********************************** //
 
          SolarPanelCleaningInfo.setSolarPanel(solarPanel);
-         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.DIAGONAL);
+         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL_FIXED);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
