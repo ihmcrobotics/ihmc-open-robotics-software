@@ -426,11 +426,6 @@ public class InverseDynamicsQPSolver
          solverInput_ub.set(i, 0, rhoMax);
    }
 
-   public void setMaxRho(int rhoIndex, double rhoMax)
-   {
-      solverInput_ub.set(rhoIndex, 0, rhoMax);
-   }
-
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
       CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);

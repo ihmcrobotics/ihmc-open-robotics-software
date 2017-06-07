@@ -33,6 +33,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
    private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
+   private final FramePoint2d desiredCoP = new FramePoint2d();
    private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
@@ -102,8 +103,9 @@ public abstract class TransferState extends WalkingState
          balanceManager.getNextExitCMP(nextExitCMP);
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
 
-         feetManager.updateToeOffStatusDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, filteredDesiredCoP, desiredICPLocal, capturePoint2d);
+         feetManager.updateToeOffStatusDoubleSupport(trailingLeg, nextExitCMP, desiredCMP, desiredCoP, desiredICPLocal, capturePoint2d);
 
          if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
             feetManager.requestPointToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
