@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SquareFittingFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -61,6 +62,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    private DoubleYoVariable yoTime;
    private FullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
+   
+   private boolean manuallyPutControlPoint = true;
       
    
    
@@ -126,8 +129,11 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            //boolean b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() == true;
-            boolean b = controlPointOptimizationAction.isDone();
+            boolean b;
+            if(manuallyPutControlPoint)
+               b = controlPointOptimizationAction.isDone();               
+            else
+               b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() == true;
             return b;
          }
       };
@@ -137,7 +143,11 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() != true;
+            boolean b;
+            if(manuallyPutControlPoint)
+               b = controlPointOptimizationAction.isDone();               
+            else
+               b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() != true;            
             return b;
          }
       };
@@ -178,31 +188,52 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             
             PrintTools.info("cleaningAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-            motionFactory.setCleaningPath(SolarPanelCleaningInfo.getCleaningPath());         
+            SolarPanelPath cleaningPath = SolarPanelCleaningInfo.getCleaningPath();
+            motionFactory.setCleaningPath(cleaningPath);         
             
             // ************************* Manually put 
             ArrayList<RRTNode> manuallyPutPath = new ArrayList<RRTNode>();
             
-            manuallyPutPath.add(new TimeDomain3DNode(0.0, 0.93, 0.35, 0.30));
-            manuallyPutPath.add(new TimeDomain3DNode(6.0, 0.92, 0.51, 0.25));
-            manuallyPutPath.add(new TimeDomain3DNode(9.0, 0.88, 0.51, 0.13));
-            manuallyPutPath.add(new TimeDomain3DNode(15.0, 0.87, 0.35, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(18.0, 0.85, 0.35, 0.08));
+            // HORIZONAL_FIXED
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.9302, 0.3501, 0.302));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.9214, 0.5121, 0.253));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.8835, 0.5121, 0.135));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.8742, 0.3512, 0.102));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.8687, 0.3501, 0.079));
+//            
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.8721, 0.5103, 0.050));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.8501, 0.5070, 0.031));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.8420, 0.3054, 0.003));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.8630, 0.3032, 0.002));
+//            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.9101, 0.3811, 0.013));
             
-            manuallyPutPath.add(new TimeDomain3DNode(24.0, 0.87, 0.51, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(27.0, 0.85, 0.5, 0.11));
-            manuallyPutPath.add(new TimeDomain3DNode(33.0, 0.84, 0.3, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(36.0, 0.84, 0.3, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(42.0, 0.86, 0.5, 0.15));
+            // DIAGONAL
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(0), 0.93, 0.35, 0.30));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(1), 0.92, 0.36, 0.25));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(2), 0.92, 0.36, 0.13));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(3), 0.91, 0.38, 0.10));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(4), 0.91, 0.35, 0.08));
             
-            manuallyPutPath.add(new TimeDomain3DNode(45.0, 0.87, 0.5, 0.15));
-            manuallyPutPath.add(new TimeDomain3DNode(51.0, 0.87, 0.1, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(57.0, 0.88, 0.1, 0.10));
-            manuallyPutPath.add(new TimeDomain3DNode(63.0, 0.88, 0.3, 0.10));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(5), 0.91, 0.40, 0.05));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(6), 0.91, 0.35, 0.03));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.86, 0.51, 0.00));
+            
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.86, 0.3, 0.00));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.88, 0.51, 0.01));
+            
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(10), 0.86, 0.2, 0.01));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(11), 0.87, 0.51, 0.01));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(12), 0.87, 0.38, 0.01));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(13), 0.85, 0.5, 0.01));
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(14), 0.87, 0.38, 0.01));
+            
+            manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(15), 0.91, 0.38, 0.01));
             
             // ************************* Manually put
-            motionFactory.setMessage(manuallyPutPath);
-            //motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
+            if(manuallyPutControlPoint)
+               motionFactory.setMessage(manuallyPutPath);
+            else
+               motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
             
@@ -226,8 +257,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
-            boolean b = getSolarPanelAction.isDone();
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
             return b;
          }
       };
@@ -246,9 +276,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       statemachine.addState(getSolarPanelAction);
       getSolarPanelAction.addStateTransition(CleaningMotionState.CONTROLPOINT_OPTIMIZATION, yesPlanarRegion);
       getSolarPanelAction.addStateTransition(CleaningMotionState.DONE, noPlanarRegion);
-      
-//      statemachine.addStateWithDoneTransition(getSolarPanelAction, CleaningMotionState.CONTROLPOINT_OPTIMIZATION);
-            
+                  
       statemachine.addState(controlPointOptimizationAction);            
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.GOTO_READYPOSE, yesSolutionCondition);
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.DONE, noSolutionCondition);
@@ -435,7 +463,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // *********************************** get Cleaning Path *********************************** //
 
          SolarPanelCleaningInfo.setSolarPanel(solarPanel);
-         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL);
+         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.DIAGONAL);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
@@ -466,6 +494,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       @Override
       public void doControl()
       {            
+         numberOfPlanar = 1;
          isDone = true;
       }
 
@@ -497,24 +526,25 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(0.70, -0.15, 1.03);
+         poseSolarPanel.setPosition(0.72, -0.15, 1.03);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
          quaternionSolarPanel.appendRollRotation(0.0);
          quaternionSolarPanel.appendPitchRotation(-0.380);
          poseSolarPanel.setOrientation(quaternionSolarPanel);
          
-         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.63, 0.63);
+         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.64, 0.64);
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
 
          SolarPanelCleaningInfo.setSolarPanel(solarPanel);
-         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.HORIZONAL);
+         SolarPanelCleaningInfo.setCleaningPath(CleaningPathType.DIAGONAL);
          SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
          
          TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
          // *********************************** get Cleaning Path *********************************** //
          controlPointOptimizationBehavior.setRootNode(SolarPanelCleaningInfo.getNode());
+         
          
          PrintTools.info("ManuallyPutSolarPanelBehavior Exited");
       }

@@ -86,6 +86,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    public static int numberOfTest = 0;   
    
+   private KinematicsToolboxConfigurationMessage privilegedMessage;
+   
    public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(null, outgoingCommunicationBridge);
@@ -463,7 +465,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
             
-      KinematicsToolboxConfigurationMessage privilegedMessage = new KinematicsToolboxConfigurationMessage();
+      privilegedMessage = new KinematicsToolboxConfigurationMessage();
       fullRobotModel.updateFrames();
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
@@ -622,6 +624,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public double getScroe()
    {
       double score = 0;
+      double limitScore = 0;
+      double displacementScore = 0;
       
       int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
       
@@ -637,16 +641,22 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             double upperValue = aJoint.getJointLimitUpper();
             double lowerValue = aJoint.getJointLimitLower();               
             
-            double diffUpper = upperValue - aJointValue;
-            double diffLower = aJointValue - lowerValue;
+            double diffUpper = Math.abs((upperValue - aJointValue)*(upperValue - aJointValue));
+            double diffLower = Math.abs((aJointValue - lowerValue)*(aJointValue - lowerValue));
             
             if(diffUpper > diffLower)
-               score = diffLower;
+               limitScore = diffLower;
             else
-               score = diffUpper;
+               limitScore = diffUpper;
             
             if(DEBUG)
-               PrintTools.info(""+score +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
+               PrintTools.info(""+limitScore +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
+            
+            double aJointValueOfPrivileged = privilegedMessage.getPrivilegedJointAngles()[i];
+            displacementScore = displacementScore + Math.abs((aJointValueOfPrivileged - aJointValue)*(aJointValueOfPrivileged - aJointValue));
+            if(DEBUG)
+               PrintTools.info(""+limitScore+" "+displacementScore);
+            score = limitScore + displacementScore;
          }
       } 
       if(DEBUG)

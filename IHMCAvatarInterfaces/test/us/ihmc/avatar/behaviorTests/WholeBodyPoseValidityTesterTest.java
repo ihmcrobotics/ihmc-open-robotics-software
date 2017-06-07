@@ -481,17 +481,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior In " );  
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
-      scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
-//      for(int i=0;i<SolarPanelCleaningInfo.getCleaningPath().getNumerOfLinearPath();i++)
-//      {
-//         double startTime = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(i).getMotionStartTime();
-//         double endTime = SolarPanelCleaningInfo.getCleaningPath().getLinearPath().get(i).getMotionEndTime();
-//         PrintTools.info(""+i +" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(startTime).getU()+" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(startTime).getV());   
-//         PrintTools.info(""+i +" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(endTime).getU()+" "+SolarPanelCleaningInfo.getCleaningPath().getCleaningPose(endTime).getV());   
-//      }
+      scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));      
       
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(200);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10000);
       
       PrintTools.info("behavior Out " );      
    }
