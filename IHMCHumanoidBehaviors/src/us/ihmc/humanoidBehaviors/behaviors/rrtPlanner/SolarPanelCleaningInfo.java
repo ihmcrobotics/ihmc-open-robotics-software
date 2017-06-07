@@ -15,7 +15,7 @@ public class SolarPanelCleaningInfo
    private static CleaningPathType cleaningType;      
    
    private static double widthOfBezel = 0.03;
-   private static double offsetAlongToZdirection = -0.04;
+   private static double offsetAlongToZdirection = -0.02;
    private static double offsetReadyPose = -0.15;
    
    public enum CleaningPathType
