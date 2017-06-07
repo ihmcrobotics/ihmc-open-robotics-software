@@ -67,6 +67,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
+               public double getCoPProximityForToeOff()
+               {
+                  return 0.04;
+               }
+
+               @Override
                public boolean doHeelTouchdownIfPossible()
                {
                   return true;
@@ -105,7 +111,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.1;
+                  return 0.08;
                }
 
                @Override
@@ -129,7 +135,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public boolean editStepTimingForReachability()
                {
-                  return false; // // TODO: 4/27/17  
+                  return false; // // TODO: 4/27/17
                }
 
                @Override
@@ -268,7 +274,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                      public double getPelvisPitchRatioOfLegAngle()
                      {
-                        return 0.4;
+                        return 0.7;
                      }
 
                      public double getPelvisYawRatioOfStepAngle()

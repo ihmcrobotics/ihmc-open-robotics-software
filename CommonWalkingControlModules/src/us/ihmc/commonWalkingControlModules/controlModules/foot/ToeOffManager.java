@@ -329,6 +329,9 @@ public class ToeOffManager
          isDesiredECMPOKForToeOff.set(false);
          isDesiredECMPOKForToeOffFilt.set(false);
 
+         isDesiredCoPOKForToeOff.set(false);
+         isDesiredCoPOKForToeOffFilt.set(false);
+
          needToSwitchToToeOffForAnkleLimit.set(false);
          computeToePointContact.set(false);
          computeToeLineContact.set(false);
@@ -786,7 +789,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue() && !isDesiredCoPOKForToeOffFilt.getBooleanValue())
          {
             doPointToeOff.set(false);
             computeToePointContact.set(true);
