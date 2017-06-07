@@ -504,6 +504,38 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Ramps up the maximum loading of the normal force of the toe contact points over time, if returns true. If returns false, it simply
+    * immediately sets the normal force maximum to infinity.
+    *
+    * @return whether or not to ramp up.
+    */
+   public boolean rampUpAllowableToeLoadAfterContact()
+   {
+      return false;
+   }
+
+   /**
+    * Defines the duration spent ramping up the allowable normal toe contact force if {@link #rampUpAllowableToeLoadAfterContact()} is true.:w
+    *
+    * @return duration (s)
+    */
+   public double getToeLoadingDuration()
+   {
+      return 0.2;
+   }
+
+   /**
+    * The maximum normal force allowed in the toe if {@link #rampUpAllowableToeLoadAfterContact()} is true at the time returned by
+    * {@link #getToeLoadingDuration()}. After this time, the maximum normal force goes to infinity.
+    * @return
+    */
+   public double getFullyLoadedToeForce()
+   {
+      return 1.0e3;
+   }
+
+
+   /**
     * This is the default transfer time used in the walking controller to shift the weight to the initial stance foot
     * when starting to execute a footstep plan.
     */

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -93,7 +94,8 @@ public class SupportState extends AbstractFootControlState
    private final RigidBody pelvis;
 
    // Toe contact point loading time
-   private final DoubleYoVariable toeContactPointLoadingTime;
+   private final boolean rampUpAllowableToeLoadAfterContact;
+   private final DoubleYoVariable toeLoadingDuration;
    private final DoubleYoVariable fullyLoadedMagnitude;
 
    private final FramePoint tempPoint = new FramePoint();
@@ -114,10 +116,12 @@ public class SupportState extends AbstractFootControlState
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
 
-      toeContactPointLoadingTime = new DoubleYoVariable(prefix + "ToeContactPointLoadingTime", registry);
+      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
+      rampUpAllowableToeLoadAfterContact = walkingControllerParameters.rampUpAllowableToeLoadAfterContact();
+      toeLoadingDuration = new DoubleYoVariable(prefix + "ToeContactPointLoadingTime", registry);
       fullyLoadedMagnitude = new DoubleYoVariable(prefix + "FullyLoadedMagnitude", registry);
-      toeContactPointLoadingTime.set(0.2);
-      fullyLoadedMagnitude.set(1.0e3);
+      toeLoadingDuration.set(walkingControllerParameters.getToeLoadingDuration());
+      fullyLoadedMagnitude.set(walkingControllerParameters.getFullyLoadedToeForce());
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
@@ -144,7 +148,7 @@ public class SupportState extends AbstractFootControlState
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
-      ExplorationParameters explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {
          recoverTime = explorationParameters.getRecoverTime();
@@ -217,14 +221,14 @@ public class SupportState extends AbstractFootControlState
 
       // toe contact point loading //// TODO: 6/5/17
       double currentTime = getTimeInCurrentState();
-      if (currentTime < toeContactPointLoadingTime.getDoubleValue())
+      if (rampUpAllowableToeLoadAfterContact && currentTime < toeLoadingDuration.getDoubleValue())
       {
          computeFootPolygon();
 
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
 
-         double phaseInLoading = currentTime / toeContactPointLoadingTime.getDoubleValue();
+         double phaseInLoading = currentTime / toeLoadingDuration.getDoubleValue();
          double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, fullyLoadedMagnitude.getDoubleValue(), phaseInLoading);
          YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
 
