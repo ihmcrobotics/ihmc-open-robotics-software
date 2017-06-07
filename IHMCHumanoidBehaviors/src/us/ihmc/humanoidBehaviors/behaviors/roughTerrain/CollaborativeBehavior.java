@@ -41,7 +41,7 @@ public class CollaborativeBehavior extends AbstractBehavior {
 		this.robotSensorInfo = robotSensorInfo;
 		DRCRobotCameraParameters[] robotCameraParameters = robotSensorInfo.getCameraParameters();
 		this.cameraName = robotCameraParameters[0].getSensorNameInSdf();
-		System.out.println(cameraName);
+		//System.out.println(cameraName);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class CollaborativeBehavior extends AbstractBehavior {
 		if(cameraData.isNewPacketAvailable())
 		{
 			VideoPacket vidPack = cameraData.getLatestPacket();
-			System.out.println(vidPack.videoSource.toString());
+			//System.out.println(vidPack.videoSource.toString());
 			if(!testImage)
 			{
 				try{
@@ -65,7 +65,7 @@ public class CollaborativeBehavior extends AbstractBehavior {
 		}
 		else
 		{
-			System.out.println("Nothing Works");
+			//System.out.println("Nothing Works");
 		}
 	}
 
@@ -77,7 +77,6 @@ public class CollaborativeBehavior extends AbstractBehavior {
 	@Override
 	public void onBehaviorAborted() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
