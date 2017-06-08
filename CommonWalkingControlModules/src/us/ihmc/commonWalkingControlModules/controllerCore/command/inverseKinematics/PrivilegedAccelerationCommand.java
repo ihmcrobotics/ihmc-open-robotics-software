@@ -21,15 +21,13 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
-   /** internal memory to save the desired configurations in */
+   /** internal memory to save the desired accelerations in */
    private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointAccelerations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
-   /** sets whether or not to utilize the privileged configuration calculator */
+   /** sets whether or not to utilize the privileged acceleration calculator */
    private boolean enable = false;
 
    private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
-
-   private double defaultWeight = Double.NaN;
 
    /**
     * Creates an empty command.
@@ -62,33 +60,23 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
       enable = true;
    }
 
-   /**
-    * Sets the new default weight for all privileged configurations to utilize.
-    *
-    * @param defaultWeight weight to use.
-    */
-   public void setDefaultWeight(double defaultWeight)
-   {
-      this.defaultWeight = defaultWeight;
-   }
-
    public void setWeight(int jointIndex, double weight)
    {
       weights.get(jointIndex).setValue(weight);
    }
 
    /**
-    * Adds a joint to set the privileged configuration for.
+    * Adds a joint to set the privileged acceleration for.
     *
-    * @param joint the joint to set the configuration of.
-    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    * @param joint the joint to set the acceleration of.
+    * @param privilegedAcceleration the desired privileged acceleration for the joint to achieve.
     */
-   public void addJoint(OneDoFJoint joint, double privilegedConfiguration)
+   public void addJoint(OneDoFJoint joint, double privilegedAcceleration)
    {
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
-      privilegedOneDoFJointAccelerations.add().setValue(privilegedConfiguration);
+      privilegedOneDoFJointAccelerations.add().setValue(privilegedAcceleration);
 
       weights.add().setValue(Double.NaN);
    }
@@ -98,7 +86,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
     * Updates the desired privileged acceleration for a joint already registered give its index.
     *
     * @param jointIndex index of the joint to set the acceleration of.
-    * @param privilegedConfiguration the desired privileged acceleration for the joint to achieve.
+    * @param privilegedAcceleration the desired privileged acceleration for the joint to achieve.
     */
    public void setOneDoFJoint(int jointIndex, double privilegedAcceleration)
    {
@@ -118,8 +106,6 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
       clear();
       enable = other.enable;
 
-      defaultWeight = other.defaultWeight;
-
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          OneDoFJoint joint = other.joints.get(i);
@@ -132,9 +118,9 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    }
 
    /**
-    * Checks whether or not the privileged configuration is to be used.
+    * Checks whether or not the privileged acceleration is to be used.
     *
-    * @return whether or not to use the privileged configuration.
+    * @return whether or not to use the privileged acceleration.
     */
    public boolean isEnabled()
    {
@@ -142,7 +128,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    }
 
    /**
-    * Returns whether or not there is a specific weight for this privileged configuration command.
+    * Returns whether or not there is a specific weight for this privileged acceleration command.
     *
     * @return if there is a weight available.
     */
@@ -152,7 +138,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    }
 
    /**
-    * Returns the specific weight for this privileged configuration.
+    * Returns the specific weight for this privileged acceleration.
     *
     * @return Weight.
     */
@@ -162,41 +148,21 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    }
 
    /**
-    * Returns whether or not there is a new default weight for all the privileged configuration to use.
+    * Returns whether or not there is a new acceleration for all the privileged acceleration to use.
     *
-    * @return if there is a new default weight available.
+    * @return if there is a new default acceleration available.
     */
-   public boolean hasNewDefaultWeight()
-   {
-      return !Double.isNaN(defaultWeight);
-   }
-
-   /**
-    * Returns the new default weight.
-    *
-    * @return default weight.
-    */
-   public double getDefaultWeight()
-   {
-      return defaultWeight;
-   }
-
-   /**
-    * Returns whether or not there is a new default configuration for all the privileged configuration to use.
-    *
-    * @return if there is a new default configuration available.
-    */
-   public boolean hasNewPrivilegedConfiguration(int jointIndex)
+   public boolean hasNewPrivilegedAcceleration(int jointIndex)
    {
       return !Double.isNaN(privilegedOneDoFJointAccelerations.get(jointIndex).doubleValue());
    }
 
    /**
-    * Returns the new default configuration.
+    * Returns the new acceleration.
     *
-    * @return default configuration.
+    * @return acceleration.
     */
-   public double getPrivilegedConfiguration(int jointIndex)
+   public double getPrivilegedAcceleration(int jointIndex)
    {
       return privilegedOneDoFJointAccelerations.get(jointIndex).doubleValue();
    }
