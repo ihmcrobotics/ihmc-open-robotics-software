@@ -6,7 +6,6 @@ import java.util.Map;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -183,11 +182,5 @@ public class CommandConsumerWithDelayBuffers
          queueableCommandPriorityQueue.clear();
       }
       commandInputManager.flushCommands(commandClassToFlush);
-   }
-
-   
-   public <C extends CompilableCommand<C, ?>> C pollAndCompileCommands(Class<C> commandClassToPoll)
-   {
-      return commandInputManager.pollAndCompileCommands(commandClassToPoll);
    }
 }
