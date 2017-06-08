@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.PelvisLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -43,6 +44,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private final SimpleOrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
    private final SimpleOrientationTrajectoryGenerator pelvisOrientationOffsetTrajectoryGenerator;
+   private final PelvisLeapOfFaithModule leapOfFaithModule;
 
    private final DoubleYoVariable initialPelvisOrientationTime = new DoubleYoVariable("initialPelvisOrientationTime", registry);
    private final DoubleYoVariable initialPelvisOrientationOffsetTime = new DoubleYoVariable("initialPelvisOrientationOffsetTime", registry);
@@ -127,6 +129,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
+      leapOfFaithModule = new PelvisLeapOfFaithModule(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -185,6 +188,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       offsetTrajectoryWhileWalking.update();
       offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
+
+      leapOfFaithModule.computeAndAddAngularOffset(deltaTime, tempOrientation);
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
@@ -345,11 +350,13 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
       offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      leapOfFaithModule.initializeTransfer();
    }
 
    public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
    {
       offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      leapOfFaithModule.initializeSwing(swingDuration);
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
