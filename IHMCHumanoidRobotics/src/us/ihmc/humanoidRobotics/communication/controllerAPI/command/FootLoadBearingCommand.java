@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.CompilableCommand;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearingCommand, FootLoadBearingMessage>
+public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, FootLoadBearingMessage>
 {
    private final SideDependentList<LoadBearingRequest> footRequests = new SideDependentList<>();
    
@@ -38,12 +38,6 @@ public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearing
    public void set(FootLoadBearingCommand other)
    {
       clear();
-      compile(other);
-   }
-
-   @Override
-   public void compile(FootLoadBearingCommand other)
-   {
       executionDelayTime = other.getExecutionDelayTime();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -51,6 +45,7 @@ public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearing
             footRequests.put(robotSide, other.getRequest(robotSide));
       }
    }
+
 
    public LoadBearingRequest getRequest(RobotSide robotSide)
    {

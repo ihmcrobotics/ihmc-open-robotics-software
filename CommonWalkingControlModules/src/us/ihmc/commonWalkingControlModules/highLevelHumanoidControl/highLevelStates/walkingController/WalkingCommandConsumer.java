@@ -182,25 +182,29 @@ public class WalkingCommandConsumer
    {
       if (!commandInputManager.isNewCommandAvailable(GoHomeCommand.class))
          return;
-
-      GoHomeCommand command = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
-
-      for (RobotSide robotSide : RobotSide.values)
+      
+      List<GoHomeCommand> commands = commandInputManager.pollNewCommands(GoHomeCommand.class);
+      for(int i = 0; i < commands.size(); i++)
       {
-         if (command.getRequest(robotSide, BodyPart.ARM))
-            handManagers.get(robotSide).goHome(command.getTrajectoryTime());
-      }
-
-      if (command.getRequest(BodyPart.PELVIS))
-      {
-         pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
-         balanceManager.goHome();
-         comHeightManager.goHome(command.getTrajectoryTime());
-      }
-
-      if (command.getRequest(BodyPart.CHEST))
-      {
-         chestManager.goHome(command.getTrajectoryTime());
+         GoHomeCommand command = commands.get(i);
+         
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (command.getRequest(robotSide, BodyPart.ARM))
+               handManagers.get(robotSide).goHome(command.getTrajectoryTime());
+         }
+         
+         if (command.getRequest(BodyPart.PELVIS))
+         {
+            pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
+            balanceManager.goHome();
+            comHeightManager.goHome(command.getTrajectoryTime());
+         }
+         
+         if (command.getRequest(BodyPart.CHEST))
+         {
+            chestManager.goHome(command.getTrajectoryTime());
+         }
       }
    }
 
@@ -332,8 +336,12 @@ public class WalkingCommandConsumer
       if (!commandInputManager.isNewCommandAvailable(FootLoadBearingCommand.class))
          return;
 
-      FootLoadBearingCommand command = commandInputManager.pollAndCompileCommands(FootLoadBearingCommand.class);
-      currentState.handleFootLoadBearingCommand(command);
+      List<FootLoadBearingCommand> footLoadBearingCommands = commandInputManager.pollNewCommands(FootLoadBearingCommand.class);
+      for (int i = 0; i < footLoadBearingCommands.size(); i++)
+      {
+         FootLoadBearingCommand command = footLoadBearingCommands.get(i);
+         currentState.handleFootLoadBearingCommand(command);
+      }
    }
 
    public void consumeLoadBearingCommands()
