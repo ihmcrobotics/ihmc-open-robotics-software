@@ -75,6 +75,7 @@ public class Footstep
       this(footstep.endEffector, footstep.robotSide, footstep.footstepPose, footstep.trustHeight);
       this.trajectoryType = footstep.trajectoryType;
       this.swingHeight = footstep.swingHeight;
+      this.swingTrajectoryBlendDuration = footstep.swingTrajectoryBlendDuration;
       this.expectedInitialPose.setIncludingFrame(footstep.expectedInitialPose);
    }
 
