@@ -226,6 +226,7 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
       clearChestTrajectoryMessage();
       clearPelvisTrajectoryMessage();
       clearFootTrajectoryMessages();
+      executionDelayTime = 0.0;
    }
 
    public void clearHandTrajectoryMessages()
