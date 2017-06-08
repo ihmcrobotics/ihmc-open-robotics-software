@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
@@ -57,7 +58,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
 
-   private final LeapOfFaithModule leapOfFaithModule;
+   private final FootLeapOfFaithModule leapOfFaithModule;
 
    private final YoFrameVector yoTouchdownAcceleration;
    private final YoFrameVector yoTouchdownVelocity;
@@ -222,7 +223,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
-      leapOfFaithModule = new LeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody());
+      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody(), registry);
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
