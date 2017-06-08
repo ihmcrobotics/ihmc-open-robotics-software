@@ -20,7 +20,7 @@ public class FootLeapOfFaithModule
    private final FrameVector tempVector = new FrameVector();
    private final DoubleYoVariable swingDuration;
 
-   private final DoubleYoVariable gain = new DoubleYoVariable("leapOfFaithFootGain", registry);
+   private final DoubleYoVariable gain = new DoubleYoVariable("leapOfFaithFootForceGain", registry);
 
    public FootLeapOfFaithModule(DoubleYoVariable swingDuration, RigidBody footBody, YoVariableRegistry parentRegistry)
    {
