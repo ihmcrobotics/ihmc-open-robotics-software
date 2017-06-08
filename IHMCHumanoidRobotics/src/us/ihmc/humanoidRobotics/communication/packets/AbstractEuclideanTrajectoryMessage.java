@@ -73,6 +73,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       }
 
       setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
+      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
       linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
@@ -134,6 +135,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       }
 
       setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
+      setExecutionDelayTime(other.getExecutionDelayTime());
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       linearSelectionMatrix.set(other.linearSelectionMatrix);

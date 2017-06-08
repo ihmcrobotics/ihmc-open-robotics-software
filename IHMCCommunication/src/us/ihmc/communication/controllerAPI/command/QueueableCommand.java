@@ -21,6 +21,8 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
    /** The {@link #ExecutionMode} of this command. */
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    /**
     * Clears all variables associated with command queuing and sets them to their default values.
@@ -30,6 +32,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
+      setExecutionDelayTime(0.0);
    }
 
    /**
@@ -37,6 +40,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     */
    protected void setQueueqableCommandVariables(QueueableCommand<?, ?> other)
    {
+      setExecutionDelayTime(other.getExecutionDelayTime());
       commandId = other.getCommandId();
       executionMode = other.getExecutionMode();
       previousCommandId = other.getPreviousCommandId();
@@ -47,6 +51,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     */
    protected void setQueueqableCommandVariables(QueueableMessage<?> message)
    {
+      setExecutionDelayTime(message.getExecutionDelayTime());
       commandId = message.getUniqueId();
       executionMode = message.getExecutionMode();
       previousCommandId = message.getPreviousMessageId();
@@ -98,6 +103,26 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    public ExecutionMode getExecutionMode()
    {
       return executionMode;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    /**

@@ -1,5 +1,7 @@
 package us.ihmc.communication.controllerAPI.command;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.lists.Settable;
@@ -44,4 +46,22 @@ public interface Command<C extends Command<C, M>, M extends Packet<M>> extends S
     * @return true if this Command is valid.
     */
    public abstract boolean isCommandValid();
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public default double getExecutionDelayTime()
+   {
+      return 0.0;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public default void setExecutionDelayTime(double delayTime)
+   {
+      throw new NotImplementedException(getClass().getSimpleName() + " does not implement setExecutionDelayTime");
+   }
 }

@@ -10,6 +10,9 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    private boolean useJointspaceCommand = false;
 
    private ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public RobotSide getRobotSide()
    {
@@ -21,6 +24,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       super.set(other);
       robotSide = other.robotSide;
+      executionDelayTime = other.getExecutionDelayTime();
       useJointspaceCommand = other.isUseJointspaceCommand();
       armTrajectoryCommand.set(other.getArmTrajectoryCommand());
    }
@@ -29,6 +33,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    public void set(HandLoadBearingMessage message)
    {
       super.set(message);
+      executionDelayTime = message.executionDelayTime;
       robotSide = message.robotSide;
       useJointspaceCommand = message.isUseJointspaceCommand();
       if (message.getArmTrajectoryMessage() != null)
@@ -76,5 +81,25 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       }
 
       return armTrajectoryValid && robotSide != null && super.isCommandValid();
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 }

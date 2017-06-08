@@ -35,6 +35,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -42,6 +43,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getChestTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -55,6 +57,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+      setQueueqableCommandVariables(other);
    }
 
    @Override
