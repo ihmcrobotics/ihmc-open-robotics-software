@@ -67,7 +67,7 @@ public class WalkingCommandConsumer
    private final DoubleYoVariable yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
 
-   private final CommandInputManager commandInputManager;
+   private final CommandConsumerWithDelayBuffers commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final PelvisOrientationManager pelvisOrientationManager;
@@ -85,7 +85,7 @@ public class WalkingCommandConsumer
       this.walkingMessageHandler = walkingMessageHandler;
       yoTime = controllerToolbox.getYoTime();
 
-      this.commandInputManager = commandInputManager;
+      this.commandInputManager = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
       this.statusMessageOutputManager = statusMessageOutputManager;
 
       RigidBody head = controllerToolbox.getFullRobotModel().getHead();
