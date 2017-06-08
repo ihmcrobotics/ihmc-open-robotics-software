@@ -129,7 +129,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
-      leapOfFaithModule = new PelvisLeapOfFaithModule(registry);
+      leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -189,7 +189,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       offsetTrajectoryWhileWalking.update();
       offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
 
-      leapOfFaithModule.computeAndAddAngularOffset(deltaTime, tempOrientation);
+      leapOfFaithModule.update(deltaTime);
+      leapOfFaithModule.addAngularOffset(tempOrientation);
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
@@ -319,6 +320,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame.update();
 
       offsetTrajectoryWhileWalking.setUpcomingFootstep(upcomingFootstep);
+      leapOfFaithModule.setUpcomingFootstep(upcomingFootstep);
    }
 
    public void setTrajectoryFromFootstep()
@@ -345,6 +347,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    public void initializeStanding()
    {
       offsetTrajectoryWhileWalking.initializeStanding();
+      leapOfFaithModule.initializeStanding();
    }
 
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)

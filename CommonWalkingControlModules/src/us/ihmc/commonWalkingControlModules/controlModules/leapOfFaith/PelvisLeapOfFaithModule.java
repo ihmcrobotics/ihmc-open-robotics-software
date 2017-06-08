@@ -1,9 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PelvisLeapOfFaithModule
 {
@@ -13,44 +18,76 @@ public class PelvisLeapOfFaithModule
 
    private final YoFrameOrientation orientationOffset = new YoFrameOrientation("leapOfFaithPelvisOrientationOffset", worldFrame, registry);
 
-   private boolean isInTransfer = true;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
+
+   private boolean isInSwing = true;
+   private RobotSide supportSide;
+   private Footstep upcomingFootstep;
+
    private double swingDuration;
 
-   private final double yawGain = 10.0;
-   private final double rollGain = 10.0;
+   private final DoubleYoVariable yawGain = new DoubleYoVariable("leapOfFaithPelvisYawGain", registry);
+   private final DoubleYoVariable rollGain = new DoubleYoVariable("leapOfFaithPelvisRollGain", registry);
 
-   public PelvisLeapOfFaithModule(YoVariableRegistry parentRegistry)
+   public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
    {
+      this.soleZUpFrames = soleZUpFrames;
+
+      yawGain.set(1.0);
+      rollGain.set(10.0);
+
       parentRegistry.addChild(registry);
+   }
+
+   public void setUpcomingFootstep(Footstep upcomingFootstep)
+   {
+      this.upcomingFootstep = upcomingFootstep;
+      supportSide = upcomingFootstep.getRobotSide().getOppositeSide();
+   }
+
+   public void initializeStanding()
+   {
+      isInSwing = false;
    }
 
    public void initializeTransfer()
    {
-      isInTransfer = true;
+      isInSwing = false;
    }
 
    public void initializeSwing(double swingDuration)
    {
       this.swingDuration = swingDuration;
-      isInTransfer = false;
+
+      isInSwing = true;
    }
 
-   public void computeAndAddAngularOffset(double currentTimeInState, FrameOrientation orientationToPack)
+   private final FramePoint tempPoint = new FramePoint();
+   public void update(double currentTimeInState)
    {
-      //// TODO: 6/8/17 make this side dependent and step length dependent 
       orientationOffset.setToZero();
 
-      if (!isInTransfer)
+      if (isInSwing)
       {
          double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
 
-         double yawAngleOffset = yawGain * exceededTime;
-         double rollAngleOffset = rollGain * exceededTime;
+         tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
+         tempPoint.changeFrame(soleZUpFrames.get(supportSide));
+         double stepLength = tempPoint.getX();
+
+         double yawAngleOffset = yawGain.getDoubleValue() * exceededTime * stepLength;
+         double rollAngleOffset = rollGain.getDoubleValue() * exceededTime;
+
+         yawAngleOffset = supportSide.negateIfRightSide(yawAngleOffset);
+         rollAngleOffset = supportSide.negateIfRightSide(rollAngleOffset);
 
          orientationOffset.setRoll(rollAngleOffset);
          orientationOffset.setYaw(yawAngleOffset);
       }
+   }
 
+   public void addAngularOffset(FrameOrientation orientationToPack)
+   {
       orientationToPack.preMultiply(orientationOffset.getFrameOrientation());
    }
 }
