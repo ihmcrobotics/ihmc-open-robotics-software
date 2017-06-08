@@ -9,6 +9,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearingCommand, FootLoadBearingMessage>
 {
    private final SideDependentList<LoadBearingRequest> footRequests = new SideDependentList<>();
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public FootLoadBearingCommand()
    {
@@ -28,6 +31,7 @@ public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearing
       LoadBearingRequest request = message.getRequest();
       RobotSide robotSide = message.getRobotSide();
       footRequests.put(robotSide, request);
+      executionDelayTime = message.executionDelayTime;
    }
 
    @Override
@@ -40,6 +44,7 @@ public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearing
    @Override
    public void compile(FootLoadBearingCommand other)
    {
+      executionDelayTime = other.getExecutionDelayTime();
       for (RobotSide robotSide : RobotSide.values)
       {
          if (footRequests.get(robotSide) == null)
@@ -62,5 +67,25 @@ public class FootLoadBearingCommand implements CompilableCommand<FootLoadBearing
    public boolean isCommandValid()
    {
       return true;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 }

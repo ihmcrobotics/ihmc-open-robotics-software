@@ -45,6 +45,9 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
    public FootTrajectoryMessage leftFootTrajectoryMessage;
    @RosExportedField(documentation = "Trajectory for the right foot")
    public FootTrajectoryMessage rightFootTrajectoryMessage;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -296,6 +299,24 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
       default:
          throw new RuntimeException("Should not get there.");
       }
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

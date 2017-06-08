@@ -65,6 +65,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -137,6 +140,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = footstepData.swingDuration;
       this.transferDuration = footstepData.transferDuration;
+      this.executionDelayTime = footstepData.executionDelayTime;
    }
 
    @Override
@@ -309,6 +313,24 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double getTransferDuration()
    {
       return transferDuration;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

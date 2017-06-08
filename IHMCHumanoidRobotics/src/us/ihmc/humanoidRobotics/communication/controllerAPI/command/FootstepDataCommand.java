@@ -36,6 +36,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double transferDuration = Double.NaN;
 
    private ReferenceFrame trajectoryFrame;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public FootstepDataCommand()
    {
@@ -97,6 +100,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = message.swingDuration;
       transferDuration = message.transferDuration;
+      
+      this.executionDelayTime = message.executionDelayTime;
    }
 
    @Override
@@ -125,6 +130,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
+      this.executionDelayTime = other.executionDelayTime;
    }
 
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
@@ -226,6 +232,26 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public boolean isCommandValid()
    {
       return robotSide != null;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
 }

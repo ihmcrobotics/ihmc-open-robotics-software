@@ -18,6 +18,9 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public FootstepDataListCommand()
    {
@@ -43,6 +46,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       finalTransferDuration = message.finalTransferDuration;
       executionMode = message.executionMode;
       executionTiming = message.executionTiming;
+      executionDelayTime = message.executionDelayTime;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
@@ -62,6 +66,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       finalTransferDuration = other.finalTransferDuration;
       executionMode = other.executionMode;
       executionTiming = other.executionTiming;
+      executionDelayTime = other.getExecutionDelayTime();
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -150,6 +155,26 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    public boolean isCommandValid()
    {
       return getNumberOfFootsteps() > 0;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
 }

@@ -24,6 +24,9 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
    private double trajectoryTime = 1.0;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    /**
     *
@@ -71,6 +74,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    public void set(GoHomeMessage message)
    {
       clear();
+      executionDelayTime = message.executionDelayTime;
       trajectoryTime = message.getTrajectoryTime();
 
       BodyPart bodyPart = message.getBodyPart();
@@ -98,6 +102,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    public void compile(GoHomeCommand other)
    {
       trajectoryTime = other.trajectoryTime;
+      executionDelayTime = other.getExecutionDelayTime();
 
       for (BodyPart bodyPart : BodyPart.values)
       {
@@ -167,5 +172,25 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    public boolean isCommandValid()
    {
       return true;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 }

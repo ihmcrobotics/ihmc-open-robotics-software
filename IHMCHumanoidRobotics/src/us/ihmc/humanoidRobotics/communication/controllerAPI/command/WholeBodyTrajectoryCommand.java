@@ -24,6 +24,9 @@ public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBo
    private final SideDependentList<FootTrajectoryCommand> footTrajectoryControllerCommands = new SideDependentList<>();
 
    private final ArrayList<Command<?, ?>> allControllerCommands = new ArrayList<>();
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public WholeBodyTrajectoryCommand()
    {
@@ -62,6 +65,7 @@ public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBo
    @Override
    public void set(WholeBodyTrajectoryCommand other)
    {
+      executionDelayTime = other.getExecutionDelayTime();
       for (RobotSide robotSide : RobotSide.values)
       {
          handTrajectoryControllerCommands.get(robotSide).set(other.handTrajectoryControllerCommands.get(robotSide));
@@ -77,6 +81,8 @@ public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBo
    {
       clear();
 
+      executionDelayTime = message.executionDelayTime;
+      
       for (RobotSide robotside : RobotSide.values)
       {
          HandTrajectoryMessage handTrajectoryMessage = message.getHandTrajectoryMessage(robotside);
@@ -119,5 +125,25 @@ public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBo
    public boolean isCommandValid()
    {
       return true;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 }

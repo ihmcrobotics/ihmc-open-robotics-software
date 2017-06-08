@@ -9,6 +9,9 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
 {
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
    private double weight;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public OneDoFJointTrajectoryCommand()
    {
@@ -62,6 +65,26 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    public void setWeight(double weight)
    {
       this.weight = weight;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

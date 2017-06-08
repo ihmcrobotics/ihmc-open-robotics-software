@@ -8,6 +8,9 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
       implements Command<T, M>
 {
    private final TDoubleArrayList desiredJointAccelerations = new TDoubleArrayList(10);
+   
+   /** the time to delay this command on the controller side before being executed **/
+   private double executionDelayTime;
 
    public DesiredAccelerationCommand()
    {
@@ -27,6 +30,7 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
       {
          desiredJointAccelerations.add(message.getDesiredJointAcceleration(i));
       }
+      executionDelayTime = message.getExecutionDelayTime();
    }
 
    @Override
@@ -35,6 +39,7 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
       desiredJointAccelerations.reset();
       for (int i = 0; i < other.getNumberOfJoints(); i++)
          desiredJointAccelerations.add(other.getDesiredJointAcceleration(i));
+      executionDelayTime = other.getExecutionDelayTime();
    }
 
    public int getNumberOfJoints()
@@ -56,5 +61,25 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
    public boolean isCommandValid()
    {
       return !desiredJointAccelerations.isEmpty();
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 }
