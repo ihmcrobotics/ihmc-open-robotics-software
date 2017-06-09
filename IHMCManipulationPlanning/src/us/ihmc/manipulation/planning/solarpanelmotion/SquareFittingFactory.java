@@ -36,6 +36,11 @@ public class SquareFittingFactory
    private LineEquation lineOneAxisY = new LineEquation();
    private LineEquation lineTwoAxisY = new LineEquation();
    
+   Point3D squarePoint1 = new Point3D();
+   Point3D squarePoint2 = new Point3D();
+   Point3D squarePoint3 = new Point3D();
+   Point3D squarePoint4 = new Point3D();
+   
    class LineEquation
    {
       public Point3D point;
@@ -170,6 +175,11 @@ public class SquareFittingFactory
          
    private void fittingSquare()
    {
+      for(int i=0;i<vertices.size();i++)
+      {
+         PrintTools.info(" "+i+" "+vertices.get(i).getX()+" "+vertices.get(i).getY()+" "+vertices.get(i).getZ());
+      }
+      
       double appendingPitchDirection = Math.acos(normalVector.getZ());
       if(normalVector.getX() < 0)
          appendingPitchDirection = -appendingPitchDirection;
@@ -180,7 +190,7 @@ public class SquareFittingFactory
       if(DEBUG)
          PrintTools.info("Currently appendingPitchDirection " + appendingPitchDirection);
            
-      int numberOfSampling = 20;
+      int numberOfSampling = 30;
       double minRangeOfSampling = Math.PI * (-44.0/180.0);
       double maxRangeOfSampling = Math.PI * (44.0/180.0);
       double minArea = Double.MAX_VALUE;
@@ -254,7 +264,7 @@ public class SquareFittingFactory
          if(distance > getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY))
          {
             distance = getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY);
-            lineTwoAxisY = new LineEquation(vertices.get(i), principalAxisY);
+            lineTwoAxisY = new LineEquation(vertices.get(i), principalAxisY);            
          }
       }
    }
@@ -269,6 +279,19 @@ public class SquareFittingFactory
       
       Point3D centerOne = new Point3D((pointOne.getX()+pointTwo.getX())/2, (pointOne.getY()+pointTwo.getY())/2, (pointOne.getZ()+pointTwo.getZ())/2);
       Point3D centerTwo = new Point3D((pointThree.getX()+pointFour.getX())/2, (pointThree.getY()+pointFour.getY())/2, (pointThree.getZ()+pointFour.getZ())/2);
+      
+//      System.out.println(squarePoint1);
+//      System.out.println(squarePoint2);
+//      System.out.println(squarePoint3);
+//      System.out.println(squarePoint4);
+            
+      System.out.println(pointOne);
+      System.out.println(pointTwo);
+      System.out.println(pointThree);
+      System.out.println(pointFour);
+      
+      System.out.println(centerOne);
+      System.out.println(centerTwo);
       
       squarePosition = centerOne;
       

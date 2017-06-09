@@ -269,7 +269,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 100;
             return b;
          }
       };
@@ -279,8 +279,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
-            //boolean b = getSolarPanelAction.isDone();
+            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
@@ -316,20 +316,20 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
-      PrintTools.info("getNumberOfConvexPolygons "+planarRegion.getNumberOfConvexPolygons());
+//      PrintTools.info("getNumberOfConvexPolygons "+planarRegion.getNumberOfConvexPolygons());
       
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
          MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
          
-         PrintTools.info("polygonIndex "+polygonIndex);
+//         PrintTools.info("polygonIndex "+polygonIndex);
          if(polygon != null)
          {
-            PrintTools.info("Vectices "+polygon.getVertices().length);
+//            PrintTools.info("Vectices "+polygon.getVertices().length);
             for(int i=0;i<polygon.getVertices().length;i++)
             {
-               PrintTools.info("raw data "+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
+//               PrintTools.info("raw data "+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
                
                Point3D pointOfVertex = new Point3D(polygon.getVertices()[i].getX(), polygon.getVertices()[i].getY(), polygon.getVertices()[i].getZ());
                
@@ -363,7 +363,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    {
       if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
       {
-         PrintTools.info("@@ This polygon is on outside of the volume ");
+//         PrintTools.info("@@ This polygon is on outside of the volume ");
          return false;
       } 
       
@@ -372,15 +372,15 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private void sortOutSolarPanel(PlanarRegionsList planarRegionsList)
    {
-      PrintTools.info("getNumberOfPlanarRegions");
-      PrintTools.info(""+planarRegionsList.getNumberOfPlanarRegions());
+//      PrintTools.info("getNumberOfPlanarRegions");
+//      PrintTools.info(""+planarRegionsList.getNumberOfPlanarRegions());
       
       ArrayList<PlanarRegion> planarRegionsWithinVolume = new ArrayList<PlanarRegion>();
       
       for(int i=0;i<planarRegionsList.getNumberOfPlanarRegions();i++)
       {
-         PrintTools.info("");
-         PrintTools.info("Planar Region "+i);         
+//         PrintTools.info("");
+//         PrintTools.info("Planar Region "+i);         
          
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
          if(isPlanarRegionWithinVolume(planarRegion))
@@ -393,7 +393,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       for(int i=0;i<numberOfPlanar;i++)
       {
-         PrintTools.info("put factory "+i);
+//         PrintTools.info("put factory "+i);
          SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegionsWithinVolume.get(i));
       }
       
