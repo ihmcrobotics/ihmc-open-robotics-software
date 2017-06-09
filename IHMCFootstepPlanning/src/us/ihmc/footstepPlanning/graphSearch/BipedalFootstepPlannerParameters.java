@@ -33,6 +33,11 @@ public class BipedalFootstepPlannerParameters
    private final DoubleYoVariable cliffHeightToShiftAwayFrom = new DoubleYoVariable("cliffHeightToShiftAwayFrom", registry);
    private final DoubleYoVariable minimumDistanceFromCliffBottoms = new DoubleYoVariable("minimumDistanceFromCliffBottoms", registry);
 
+   private final BooleanYoVariable performYawExploration = new BooleanYoVariable("performYawExploration", registry);
+
+   private final DoubleYoVariable randomizeXYMagnitude = new DoubleYoVariable("randomizeXYMagnitude", registry);
+   private final DoubleYoVariable randomizeYawMagnitude = new DoubleYoVariable("randomizeYawMagnitude", registry);
+
    private double minimumSurfaceNormalZ = 0.7;
    private double maximumZPenetrationOnVRegions = 0.008;
 
@@ -120,6 +125,17 @@ public class BipedalFootstepPlannerParameters
    public void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
    {
       this.wiggleIntoConvexHullOfPlanarRegions.set(wiggleIntoConvexHullOfPlanarRegions);      
+   }
+
+   public void setPerformYawExploration(boolean enable)
+   {
+      performYawExploration.set(enable);
+   }
+
+   public void setRandomizeMagnitudes(double xyMagnitude, double yawMagnitude)
+   {
+      randomizeXYMagnitude.set(xyMagnitude);
+      randomizeYawMagnitude.set(yawMagnitude);
    }
 
    public double getIdealFootstepWidth()
@@ -232,5 +248,18 @@ public class BipedalFootstepPlannerParameters
       this.minimumDistanceFromCliffBottoms.set(minimumDistanceFromCliffBottoms);
    }
 
+   public boolean performYawExploration()
+   {
+      return performYawExploration.getBooleanValue();
+   }
 
+   public double getRandomizeXYMagnitude()
+   {
+      return randomizeXYMagnitude.getDoubleValue();
+   }
+
+   public double getRandomizeYawMagnitude()
+   {
+      return randomizeYawMagnitude.getDoubleValue();
+   }
 }
