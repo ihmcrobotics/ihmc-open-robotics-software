@@ -48,8 +48,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 {   
    private int numberOfPlanar = 0;
    private PlanarRegion planarRegion;
-   //private GetSolarPanelBehavior getSolarPanelBehavior;
-   private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   private GetSolarPanelBehavior getSolarPanelBehavior;
+   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
@@ -81,8 +81,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
-      //getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
-      getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
@@ -266,7 +266,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 100;
             return b;
          }
       };
@@ -276,7 +276,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
