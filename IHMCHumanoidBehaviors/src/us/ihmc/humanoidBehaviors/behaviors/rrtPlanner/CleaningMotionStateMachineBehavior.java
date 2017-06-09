@@ -390,20 +390,33 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       }
       
       numberOfPlanar = planarRegionsWithinVolume.size();
-      
-      for(int i=0;i<numberOfPlanar;i++)
-      {
-//         PrintTools.info("put factory "+i);
-         SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegionsWithinVolume.get(i));
-      }
-      
+            
       PrintTools.info("");
       PrintTools.info("The number Of planar regions with in volume is " + numberOfPlanar);
       
-      if(numberOfPlanar == 1)
+      if(numberOfPlanar > 0)
       {
-         planarRegion = planarRegionsWithinVolume.get(0);                  
+         double score = Double.MAX_VALUE;
+         for(int i=0;i<numberOfPlanar;i++)
+         {
+            SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegionsWithinVolume.get(i));
+            SolarPanel candidatePanel = squareFittingFactory.getSolarPanel();
+            double scoreCandidate = Math.abs(0.6-candidatePanel.getSizeU()) + Math.abs(0.6-candidatePanel.getSizeV());
+            if(score > scoreCandidate)
+            {
+               score = scoreCandidate;
+               planarRegion = planarRegionsWithinVolume.get(i);
+            }
+         }
+   
       }
+            
+
+      
+//      if(numberOfPlanar == 1)
+//      {
+//         planarRegion = planarRegionsWithinVolume.get(0);                  
+//      }
    }
    
    private SquareFittingFactory putPlanarRegionOnFactory(PlanarRegion planarRegion)
