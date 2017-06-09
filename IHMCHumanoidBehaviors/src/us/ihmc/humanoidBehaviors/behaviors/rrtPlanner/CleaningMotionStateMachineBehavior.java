@@ -427,7 +427,18 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          {
             for(int i=0;i<polygon.getVertices().length;i++)
             {
-               vertices.add(polygon.getVertices()[i]);
+               Point3D pointOfVertex = new Point3D(polygon.getVertices()[i].getX(), polygon.getVertices()[i].getY(), polygon.getVertices()[i].getZ());
+               
+               HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+               referenceFrames.updateFrames();
+               ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+               
+               FramePoint framePointOfVertex = new FramePoint(ReferenceFrame.getWorldFrame(), pointOfVertex);
+               
+               framePointOfVertex.changeFrame(midFeetFrame);
+               
+               Point3D32 convertedVertex = new Point3D32(framePointOfVertex.getPoint());
+               vertices.add(convertedVertex);
             }
          }         
       }
@@ -516,7 +527,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          if(planarRegion != null)
          {
-            SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
+            SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegion);
+            //SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
             solarPanel = squareFittingFactory.getSolarPanel();            
          }
 
