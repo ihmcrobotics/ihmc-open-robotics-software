@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -268,7 +269,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 100;
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
             return b;
          }
       };
@@ -278,8 +279,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
-            boolean b = getSolarPanelAction.isDone();
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            //boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
@@ -339,9 +340,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
                FramePoint framePointOfVertex = new FramePoint(ReferenceFrame.getWorldFrame(), pointOfVertex);
                
                framePointOfVertex.changeFrame(midFeetFrame);
-               //System.out.println(framePointOfVertex);
                
-               //if(!isOutsideOftheVolume(polygon.getVertices()[i]))
                if(!isOutsideOftheVolume(framePointOfVertex.getPoint()))
                {
                   return false;
@@ -362,8 +361,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private boolean isOutsideOftheVolume(Point3D pointOfVertex)
    {
-      if(pointOfVertex.getX() > 12.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 11.0 || pointOfVertex.getY() < -11.0 || pointOfVertex.getZ() > 12.0 || pointOfVertex.getZ() < -0.4)
-      //if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
+      if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
       {
          PrintTools.info("@@ This polygon is on outside of the volume ");
          return false;
@@ -386,10 +384,18 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
          if(isPlanarRegionWithinVolume(planarRegion))
-            planarRegionsWithinVolume.add(planarRegion);
+         {
+            planarRegionsWithinVolume.add(planarRegion);            
+         }  
       }
       
       numberOfPlanar = planarRegionsWithinVolume.size();
+      
+      for(int i=0;i<numberOfPlanar;i++)
+      {
+         PrintTools.info("put factory "+i);
+         SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegionsWithinVolume.get(i));
+      }
       
       PrintTools.info("");
       PrintTools.info("The number Of planar regions with in volume is " + numberOfPlanar);
@@ -398,7 +404,35 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       {
          planarRegion = planarRegionsWithinVolume.get(0);                  
       }
-
+   }
+   
+   private SquareFittingFactory putPlanarRegionOnFactory(PlanarRegion planarRegion)
+   {
+      Vector3D normalToPack = new Vector3D();
+      ArrayList<Point3D32> vertices = new ArrayList<Point3D32>();
+      
+      planarRegion.getNormal(normalToPack);
+      
+      vertices.clear();
+      
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+      
+      for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
+      {
+         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
+         MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
+         
+         if(polygon != null)
+         {
+            for(int i=0;i<polygon.getVertices().length;i++)
+            {
+               vertices.add(polygon.getVertices()[i]);
+            }
+         }         
+      }
+      
+      return new SquareFittingFactory(normalToPack, vertices);
    }
    
    private void requestPlanarRegions()
@@ -478,7 +512,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
          
-         //System.out.println(solarPanel.getCenterPose());
+         System.out.println(solarPanel.getCenterPose());
          
          if(planarRegion != null)
          {
@@ -486,7 +520,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             solarPanel = squareFittingFactory.getSolarPanel();            
          }
 
-         //System.out.println(solarPanel.getCenterPose());
+         System.out.println(solarPanel.getCenterPose());
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
