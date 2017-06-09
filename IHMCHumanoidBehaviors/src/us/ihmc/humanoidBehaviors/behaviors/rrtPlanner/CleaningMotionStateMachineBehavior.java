@@ -37,9 +37,11 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SquareFittingFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -326,7 +328,21 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("Vectices "+polygon.getVertices().length);
             for(int i=0;i<polygon.getVertices().length;i++)
             {
-               PrintTools.info(""+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
+               PrintTools.info("raw data "+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
+               
+               HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+               referenceFrames.updateFrames();
+               ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+               
+               Point3D pointOfVertex = new Point3D(polygon.getVertices()[i].getX(), polygon.getVertices()[i].getY(), polygon.getVertices()[i].getZ());
+               FramePoint framePointOfVertex = new FramePoint();
+               framePointOfVertex.setPoint(pointOfVertex);
+               framePointOfVertex.changeFrame(midFeetFrame);
+               
+               Point3D transformedPoint = framePointOfVertex.getPoint();
+               PrintTools.info("transformedPoint "+i+" "+transformedPoint.getX()+" "+transformedPoint.getY()+" "+transformedPoint.getZ());
+               
+               
                if(!isOutsideOftheVolume(polygon.getVertices()[i]))
                {
                   return false;
@@ -462,12 +478,12 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
          
-         System.out.println(solarPanel.getCenterPose());
+         //System.out.println(solarPanel.getCenterPose());
          
          
          SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
          solarPanel = squareFittingFactory.getSolarPanel();
-         System.out.println(solarPanel.getCenterPose());
+         //System.out.println(solarPanel.getCenterPose());
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
