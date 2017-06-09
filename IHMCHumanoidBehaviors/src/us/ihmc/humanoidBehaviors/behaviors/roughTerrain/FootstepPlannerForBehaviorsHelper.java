@@ -67,8 +67,48 @@ public class FootstepPlannerForBehaviorsHelper
       footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
       footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.24);
       
+      footstepPlanningParameters.setPerformYawExploration(false);
+      footstepPlanningParameters.setRandomizeMagnitudes(0.0, 0.0);
+      
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.22;
       footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+   }
+
+   public static void setPlannerParametersForValkyrieSteppingStones(BipedalFootstepPlannerParameters footstepPlanningParameters)
+   {
+      footstepPlanningParameters.setMaximumStepReach(0.70);
+      footstepPlanningParameters.setMaximumStepZ(0.08);
+
+      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.35); //32);
+      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
+
+      footstepPlanningParameters.setMaximumStepYaw(0.4);
+      footstepPlanningParameters.setMinimumStepWidth(0.16);
+      footstepPlanningParameters.setMaximumStepWidth(0.6);
+      footstepPlanningParameters.setMinimumStepLength(-0.01);
+
+      footstepPlanningParameters.setMinimumFootholdPercent(0.95);
+
+      footstepPlanningParameters.setWiggleInsideDelta(0.02);
+      footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
+      footstepPlanningParameters.setMaximumYawWiggle(0.4);
+      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(true);
+      footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
+
+      footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
+      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.24);
+      
+      footstepPlanningParameters.setPerformYawExploration(true);
+      footstepPlanningParameters.setRandomizeMagnitudes(0.25, 0.25);
+      
+      double idealFootstepLength = 0.5;
+      double idealFootstepWidth = 0.3;
+      footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+   }
+
+   public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygonsForValkyrieSteppingStones(RobotContactPointParameters contactPointParameters)
+   {
+      return createDefaultFootPolygons(contactPointParameters, 0.8, 0.8);
    }
 }
