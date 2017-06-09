@@ -23,13 +23,13 @@ public class SolarPanelEnvironment implements CommonAvatarEnvironmentInterface
    
    private final float PITCH = -0.3800f;
    //private final float PITCH = -0.571575946f;
-   private final float YAW = 0.00f;
+   private final float YAW = 0.5500f;
 
-//   private final float FORWARD_OFFSET_X = 1.75f;
-//   private final float FORWARD_OFFSET_Y = 2.15f;
+   private final float FORWARD_OFFSET_X = 1.75f;
+   private final float FORWARD_OFFSET_Y = 2.15f;
    
-   private final float FORWARD_OFFSET_X = 0.75f;
-   private final float FORWARD_OFFSET_Y = -0.15f;
+//   private final float FORWARD_OFFSET_X = 0.75f;
+//   private final float FORWARD_OFFSET_Y = -0.15f;
    
 
 

@@ -226,6 +226,10 @@ public class SquareFittingFactory
       Vector3D principalAxisX = getPrincipalAxisX(squareRotationMatrix);
       Vector3D principalAxisY = getPrincipalAxisY(squareRotationMatrix);
       
+      
+      System.out.println(" principalAxisX "+principalAxisX);
+      System.out.println(" principalAxisY "+principalAxisY);
+      
       double distance;
       
       distance = -Double.MAX_VALUE;      
@@ -235,6 +239,7 @@ public class SquareFittingFactory
          {
             distance = getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisX);
             lineOneAxisX = new LineEquation(vertices.get(i), principalAxisX);
+            squarePoint1 = new Point3D(vertices.get(i));
          }
       }
       
@@ -245,6 +250,7 @@ public class SquareFittingFactory
          {
             distance = getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY);
             lineOneAxisY = new LineEquation(vertices.get(i), principalAxisY);
+            squarePoint2 = new Point3D(vertices.get(i));
          }
       }
       
@@ -255,6 +261,7 @@ public class SquareFittingFactory
          {
             distance = getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisX);
             lineTwoAxisX = new LineEquation(vertices.get(i), principalAxisX);
+            squarePoint3 = new Point3D(vertices.get(i));
          }
       }
       
@@ -264,7 +271,8 @@ public class SquareFittingFactory
          if(distance > getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY))
          {
             distance = getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY);
-            lineTwoAxisY = new LineEquation(vertices.get(i), principalAxisY);            
+            lineTwoAxisY = new LineEquation(vertices.get(i), principalAxisY);  
+            squarePoint4 = new Point3D(vertices.get(i));
          }
       }
    }
@@ -280,11 +288,11 @@ public class SquareFittingFactory
       Point3D centerOne = new Point3D((pointOne.getX()+pointTwo.getX())/2, (pointOne.getY()+pointTwo.getY())/2, (pointOne.getZ()+pointTwo.getZ())/2);
       Point3D centerTwo = new Point3D((pointThree.getX()+pointFour.getX())/2, (pointThree.getY()+pointFour.getY())/2, (pointThree.getZ()+pointFour.getZ())/2);
       
-//      System.out.println(squarePoint1);
-//      System.out.println(squarePoint2);
-//      System.out.println(squarePoint3);
-//      System.out.println(squarePoint4);
-            
+      System.out.println(squarePoint1);
+      System.out.println(squarePoint2);
+      System.out.println(squarePoint3);
+      System.out.println(squarePoint4);
+      
       System.out.println(pointOne);
       System.out.println(pointTwo);
       System.out.println(pointThree);
@@ -293,7 +301,7 @@ public class SquareFittingFactory
       System.out.println(centerOne);
       System.out.println(centerTwo);
       
-      squarePosition = centerOne;
+      squarePosition = new Point3D((centerOne.getX()+centerTwo.getX())/2, (centerOne.getY()+centerTwo.getY())/2, (centerOne.getZ()+centerTwo.getZ())/2);
       
       if(DEBUG)
          PrintTools.info("squarePosition "+ squarePosition.getX() +" "+ squarePosition.getY() +" "+squarePosition.getZ());
