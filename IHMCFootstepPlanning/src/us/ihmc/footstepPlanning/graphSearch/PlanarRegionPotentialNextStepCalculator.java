@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -243,6 +245,7 @@ public class PlanarRegionPotentialNextStepCalculator
          double goalSoleYaw = goalYaws.get(nextSide);
 
          double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(goalSoleYaw, currentSoleYaw);
+         stepYaw = MathTools.clamp(stepYaw, parameters.getMaximumStepYaw());
 
          if (Math.abs(stepYaw) < parameters.getMaximumStepYaw())
          {
@@ -288,6 +291,8 @@ public class PlanarRegionPotentialNextStepCalculator
 
       double distance = currentToGoalVector.length();
       Vector3D idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector);
+      ThreadLocalRandom random = ThreadLocalRandom.current();
+      idealStepVector.add(EuclidCoreRandomTools.generateRandomPoint3D(random, parameters.getRandomizeXYMagnitude()));
 
       Point3D idealStepLocationInWorld = new Point3D(idealStepVector);
       soleZUpTransform.transform(idealStepLocationInWorld);
@@ -311,6 +316,7 @@ public class PlanarRegionPotentialNextStepCalculator
       }
 
       double idealStepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(idealYawInWorld, currentYaw);
+      idealStepYaw += EuclidCoreRandomTools.generateRandomDouble(random, parameters.getRandomizeYawMagnitude());
       idealStepYaw = MathTools.clamp(idealStepYaw, parameters.getMaximumStepYaw());
 
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
@@ -318,11 +324,25 @@ public class PlanarRegionPotentialNextStepCalculator
 
       checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw, smallestCostToGoal);
 
-      for (double xStep = idealStepVector.getX() / 2.0; xStep < 1.6 * idealStepVector.getX(); xStep = xStep + idealStepVector.getX() / 4.0)
+      for (double xStep = parameters.getMinimumStepLength(); xStep < parameters.getMaximumStepReach(); xStep += (parameters.getMaximumStepReach() - parameters.getMinimumStepLength()) / 4.0)
       {
-         for (double yStep = parameters.getMinimumStepWidth(); yStep < parameters.getMaximumStepWidth(); yStep = yStep + parameters.getMaximumStepWidth() / 4.0)
+         for (double yStep = parameters.getMinimumStepWidth(); yStep < parameters.getMaximumStepWidth(); yStep += (parameters.getMaximumStepWidth() - parameters.getMinimumStepWidth()) / 4.0)
          {
-            //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
+            if (parameters.performYawExploration())
+            {
+               for (double thetaStep = -parameters.getMaximumStepYaw(); thetaStep < parameters.getMaximumStepYaw(); thetaStep += 2.0
+                     * parameters.getMaximumStepYaw() / 4.0)
+               {
+                  double nextStepYaw = idealStepYaw + thetaStep;
+                  Vector3D nextStepVector = new Vector3D(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
+                  childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
+
+                  seeIfNodeIsAtGoal(childNode);
+
+                  checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw, smallestCostToGoal);
+               }
+            }
+            else
             {
                double nextStepYaw = idealStepYaw;
                Vector3D nextStepVector = new Vector3D(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
