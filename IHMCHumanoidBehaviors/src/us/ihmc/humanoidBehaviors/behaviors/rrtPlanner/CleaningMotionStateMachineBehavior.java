@@ -269,7 +269,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 100;
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar == 1;
             return b;
          }
       };
@@ -279,8 +279,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          @Override
          public boolean checkCondition()
          {            
-            //boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
-            boolean b = getSolarPanelAction.isDone();
+            boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
+            //boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
@@ -408,6 +408,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
                planarRegion = planarRegionsWithinVolume.get(i);
             }
          }
+         numberOfPlanar = 1;
    
       }
             
