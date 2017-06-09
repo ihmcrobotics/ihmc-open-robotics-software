@@ -330,20 +330,19 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             {
                PrintTools.info("raw data "+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
                
+               Point3D pointOfVertex = new Point3D(polygon.getVertices()[i].getX(), polygon.getVertices()[i].getY(), polygon.getVertices()[i].getZ());
+               
                HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
                referenceFrames.updateFrames();
                ReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
                
-               Point3D pointOfVertex = new Point3D(polygon.getVertices()[i].getX(), polygon.getVertices()[i].getY(), polygon.getVertices()[i].getZ());
-               FramePoint framePointOfVertex = new FramePoint();
-               framePointOfVertex.setPoint(pointOfVertex);
+               FramePoint framePointOfVertex = new FramePoint(ReferenceFrame.getWorldFrame(), pointOfVertex);
+               
                framePointOfVertex.changeFrame(midFeetFrame);
+               //System.out.println(framePointOfVertex);
                
-               Point3D transformedPoint = framePointOfVertex.getPoint();
-               PrintTools.info("transformedPoint "+i+" "+transformedPoint.getX()+" "+transformedPoint.getY()+" "+transformedPoint.getZ());
-               
-               
-               if(!isOutsideOftheVolume(polygon.getVertices()[i]))
+               //if(!isOutsideOftheVolume(polygon.getVertices()[i]))
+               if(!isOutsideOftheVolume(framePointOfVertex.getPoint()))
                {
                   return false;
                }                  
@@ -361,9 +360,10 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       return true;
    }
    
-   private boolean isOutsideOftheVolume(Point3D32 pointOfVertex)
+   private boolean isOutsideOftheVolume(Point3D pointOfVertex)
    {
-      if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
+      if(pointOfVertex.getX() > 12.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 11.0 || pointOfVertex.getY() < -11.0 || pointOfVertex.getZ() > 12.0 || pointOfVertex.getZ() < -0.4)
+      //if(pointOfVertex.getX() > 2.0 || pointOfVertex.getX() < 0.3 || pointOfVertex.getY() > 1.0 || pointOfVertex.getY() < -1.0 || pointOfVertex.getZ() > 2.0 || pointOfVertex.getZ() < 0.4)
       {
          PrintTools.info("@@ This polygon is on outside of the volume ");
          return false;
@@ -480,9 +480,12 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          
          //System.out.println(solarPanel.getCenterPose());
          
-         
-         SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
-         solarPanel = squareFittingFactory.getSolarPanel();
+         if(planarRegion != null)
+         {
+            SquareFittingFactory squareFittingFactory = new SquareFittingFactory(planarRegion);
+            solarPanel = squareFittingFactory.getSolarPanel();            
+         }
+
          //System.out.println(solarPanel.getCenterPose());
          
          // ********************************** get SolarPanel Info ********************************** //
