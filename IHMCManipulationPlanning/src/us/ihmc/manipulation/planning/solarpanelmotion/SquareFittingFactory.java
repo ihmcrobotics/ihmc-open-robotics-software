@@ -85,9 +85,7 @@ public class SquareFittingFactory
          double c2 = otherLine.vector.getZ();
          
          double tOfOtherLine = (a1*y2-a1*y1-b1*x2+b1*x1)/(a2*b1 - a1*b2);
-         
-         System.out.println("tOfOtherLine "+tOfOtherLine);
-         
+                  
          return otherLine.getPointOnLine(tOfOtherLine);
       }
    }   
@@ -262,12 +260,7 @@ public class SquareFittingFactory
    }
    
    private void updateCenterPosition()
-   {
-      System.out.println("lineOneAxisX "+lineOneAxisX.point + " "+lineOneAxisX.vector);
-      System.out.println("lineTwoAxisX "+lineTwoAxisX.point + " "+lineTwoAxisX.vector);
-      System.out.println("lineOneAxisY "+lineOneAxisY.point + " "+lineOneAxisY.vector);
-      System.out.println("lineTwoAxisY "+lineTwoAxisY.point + " "+lineTwoAxisY.vector);
-      
+   {      
       Point3D pointOne = lineOneAxisX.getIntersectedPoint(lineOneAxisY);
       Point3D pointTwo = lineTwoAxisX.getIntersectedPoint(lineTwoAxisY);
       
@@ -279,12 +272,6 @@ public class SquareFittingFactory
       
       squarePosition = centerOne;
       
-      System.out.println(pointOne);
-      System.out.println(pointTwo);
-      System.out.println(pointThree);
-      System.out.println(pointFour);
-      
-      System.out.println(centerOne);
       if(DEBUG)
          PrintTools.info("squarePosition "+ squarePosition.getX() +" "+ squarePosition.getY() +" "+squarePosition.getZ());
    }
