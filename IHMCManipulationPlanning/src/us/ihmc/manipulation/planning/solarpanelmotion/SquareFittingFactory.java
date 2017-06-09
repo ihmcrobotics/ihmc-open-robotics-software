@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SquareFittingFactory
 {
+   private boolean DEBUG = false;
    private PlanarRegion planarRegion;
    private ArrayList<Point3D32> vertices = new ArrayList<Point3D32>();
    private SolarPanel solarPanel;
@@ -37,8 +38,8 @@ public class SquareFittingFactory
    
    class LineEquation
    {
-      Point3D point;
-      Vector3D vector;
+      public Point3D point;
+      public Vector3D vector;
       
       LineEquation()
       {
@@ -68,7 +69,7 @@ public class SquareFittingFactory
       }
       
       Point3D getIntersectedPoint(LineEquation otherLine)
-      {
+      {         
          double x1 = this.point.getX();
          double y1 = this.point.getY();
          double z1 = this.point.getZ();
@@ -85,6 +86,8 @@ public class SquareFittingFactory
          
          double tOfOtherLine = (a1*y2-a1*y1-b1*x2+b1*x1)/(a2*b1 - a1*b2);
          
+         System.out.println("tOfOtherLine "+tOfOtherLine);
+         
          return otherLine.getPointOnLine(tOfOtherLine);
       }
    }   
@@ -96,22 +99,26 @@ public class SquareFittingFactory
    
    public SquareFittingFactory(PlanarRegion planarRegion)
    {
-      this.planarRegion = planarRegion;      
+      setPlanarRegion(planarRegion);
+   }
+   
+   public SquareFittingFactory(Vector3D normalToPack, ArrayList<Point3D32> vertices)
+   {
+      this.vertices = vertices; 
+      this.normalVector = normalToPack;
       updateSquare();
    }
    
    public void setPlanarRegion(PlanarRegion planarRegion)
    {
       this.planarRegion = planarRegion;
+      updateVertices();      
+      updateNormalVector();
       updateSquare();
    }
    
    private void updateSquare()
    {
-      updateVertices();
-            
-      updateNormalVector();
-      
       fittingSquare();
       
       updateLineEquationsOfSquare();
@@ -136,19 +143,24 @@ public class SquareFittingFactory
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
          MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
          
-         PrintTools.info("polygonIndex "+polygonIndex);
+         if(DEBUG)
+            PrintTools.info("polygonIndex "+polygonIndex);
          if(polygon != null)
          {
-            PrintTools.info("Vectices "+polygon.getVertices().length);
+            if(DEBUG)
+               PrintTools.info("Vectices "+polygon.getVertices().length);
+            
             for(int i=0;i<polygon.getVertices().length;i++)
             {
-               PrintTools.info(""+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
+               if(DEBUG)
+                  PrintTools.info(""+i+" "+polygon.getVertices()[i].getX()+" "+polygon.getVertices()[i].getY()+" "+polygon.getVertices()[i].getZ());
                vertices.add(polygon.getVertices()[i]);
             }
          }         
       }
       
-      PrintTools.info("Number Of points are "+ vertices.size());
+      if(DEBUG)
+         PrintTools.info("Number Of points are "+ vertices.size());
    }
    
 
@@ -165,8 +177,10 @@ public class SquareFittingFactory
          appendingPitchDirection = -appendingPitchDirection;
       double appendingYawDirection = Math.asin(normalVector.getY()/Math.sin(appendingPitchDirection));
       
-      PrintTools.info("Currently appendingYawDirection  " + appendingYawDirection);
-      PrintTools.info("Currently appendingPitchDirection " + appendingPitchDirection);
+      if(DEBUG)
+         PrintTools.info("Currently appendingYawDirection  " + appendingYawDirection);
+      if(DEBUG)
+         PrintTools.info("Currently appendingPitchDirection " + appendingPitchDirection);
            
       int numberOfSampling = 20;
       double minRangeOfSampling = Math.PI * (-44.0/180.0);
@@ -175,7 +189,8 @@ public class SquareFittingFactory
       for(int i=0;i<numberOfSampling;i++)
       {
          double appendingYawAngle = (maxRangeOfSampling - minRangeOfSampling) * i/(numberOfSampling-1) + minRangeOfSampling;
-         PrintTools.info(""+i+" "+ appendingYawAngle);
+         if(DEBUG)
+            PrintTools.info(""+i+" "+ appendingYawAngle);
          
          RotationMatrix perturbedRotationMatrix = new RotationMatrix();
          perturbedRotationMatrix.appendYawRotation(appendingYawDirection);
@@ -186,7 +201,8 @@ public class SquareFittingFactory
          {
             minArea = getAreaUnderRotationMatrix(perturbedRotationMatrix);
             squareRotationMatrix = perturbedRotationMatrix;
-            PrintTools.info("appendingYawAngle "+appendingYawAngle);
+            if(DEBUG)
+               PrintTools.info("appendingYawAngle "+appendingYawAngle);
          }
       }      
       
@@ -204,7 +220,7 @@ public class SquareFittingFactory
       
       double distance;
       
-      distance = 0.0;      
+      distance = -Double.MAX_VALUE;      
       for(int i=0;i<vertices.size();i++)
       {
          if(distance < getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisX))
@@ -214,7 +230,7 @@ public class SquareFittingFactory
          }
       }
       
-      distance = 0.0;      
+      distance = -Double.MAX_VALUE;      
       for(int i=0;i<vertices.size();i++)
       {
          if(distance < getSingedDistancePointAndPlane(vertices.get(i), new Point3D(), principalAxisY))
@@ -247,6 +263,11 @@ public class SquareFittingFactory
    
    private void updateCenterPosition()
    {
+      System.out.println("lineOneAxisX "+lineOneAxisX.point + " "+lineOneAxisX.vector);
+      System.out.println("lineTwoAxisX "+lineTwoAxisX.point + " "+lineTwoAxisX.vector);
+      System.out.println("lineOneAxisY "+lineOneAxisY.point + " "+lineOneAxisY.vector);
+      System.out.println("lineTwoAxisY "+lineTwoAxisY.point + " "+lineTwoAxisY.vector);
+      
       Point3D pointOne = lineOneAxisX.getIntersectedPoint(lineOneAxisY);
       Point3D pointTwo = lineTwoAxisX.getIntersectedPoint(lineTwoAxisY);
       
@@ -257,12 +278,25 @@ public class SquareFittingFactory
       Point3D centerTwo = new Point3D((pointThree.getX()+pointFour.getX())/2, (pointThree.getY()+pointFour.getY())/2, (pointThree.getZ()+pointFour.getZ())/2);
       
       squarePosition = centerOne;
+      
+      System.out.println(pointOne);
+      System.out.println(pointTwo);
+      System.out.println(pointThree);
+      System.out.println(pointFour);
+      
+      System.out.println(centerOne);
+      if(DEBUG)
+         PrintTools.info("squarePosition "+ squarePosition.getX() +" "+ squarePosition.getY() +" "+squarePosition.getZ());
    }
    
    private void updateSolarPanel()
    {
       Quaternion solarPanelOrientation = new Quaternion(squareRotationMatrix);
       Pose solarPanelPose = new Pose(squarePosition, solarPanelOrientation);
+      PrintTools.info("Fitted panel info ");
+      System.out.println(solarPanelPose);
+      System.out.println(squareSizeX);
+      System.out.println(squareSizeY);
       solarPanel = new SolarPanel(solarPanelPose, squareSizeX, squareSizeY);
    }
    
