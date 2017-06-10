@@ -425,16 +425,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          {
             numberOfPlanar = 1;   
          }
-         
-   
-      }
             
-
-      
-//      if(numberOfPlanar == 1)
-//      {
-//         planarRegion = planarRegionsWithinVolume.get(0);                  
-//      }
+      }
    }
    
    private SquareFittingFactory putPlanarRegionOnFactory(PlanarRegion planarRegion)
@@ -638,7 +630,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          quaternionSolarPanel.appendPitchRotation(-0.380);
          poseSolarPanel.setOrientation(quaternionSolarPanel);
          
-         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.64, 0.64);
+         SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.57, 0.57);
          
          // ********************************** get SolarPanel Info ********************************** //
          // *********************************** get Cleaning Path *********************************** //
