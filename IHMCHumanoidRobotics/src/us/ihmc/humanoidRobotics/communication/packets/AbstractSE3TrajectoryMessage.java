@@ -77,7 +77,11 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       setUniqueId(se3TrajectoryMessage.getUniqueId());
       setDestination(se3TrajectoryMessage.getDestination());
       setExecutionDelayTime(se3TrajectoryMessage.getExecutionDelayTime());
+      
       frameInformation.set(se3TrajectoryMessage);
+      
+      angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
+      linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
 
    }
 
