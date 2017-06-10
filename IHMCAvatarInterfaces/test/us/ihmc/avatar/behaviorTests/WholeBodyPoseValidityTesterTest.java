@@ -466,7 +466,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       if(isKinematicsToolboxVisualizerEnabled)
          ThreadTools.sleep(13000);
       
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
       
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -636,13 +636,13 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.75, -0.15, 1.03);
+      poseSolarPanel.setPosition(0.71, -0.2, 1.03);
       quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-0.380);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
       
-      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);      
+      solarPanel = new SolarPanel(poseSolarPanel, 0.7, 0.7);      
    }
    
    

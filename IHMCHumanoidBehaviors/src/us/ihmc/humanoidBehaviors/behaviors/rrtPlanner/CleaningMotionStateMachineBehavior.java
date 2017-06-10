@@ -166,7 +166,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             PrintTools.info("gotoReadyPoseAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
             
-            double motionTime = 5.0;
+            double motionTime = 8.0;
             
             SolarPanelCleaningPose pose = SolarPanelCleaningInfo.getReadyPose();
             motionFactory.setMessage(pose, Math.PI*0.0, 0.0, motionTime);
@@ -280,7 +280,6 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          public boolean checkCondition()
          {            
             boolean b = getSolarPanelAction.isDone() && numberOfPlanar != 1;
-            //boolean b = getSolarPanelAction.isDone();
             return b;
          }
       };
@@ -615,7 +614,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          // ********************************** get SolarPanel Info ********************************** //  
          Pose poseSolarPanel = new Pose();
          Quaternion quaternionSolarPanel = new Quaternion();
-         poseSolarPanel.setPosition(0.72, -0.15, 1.03);
+         poseSolarPanel.setPosition(0.71, -0.2, 1.03);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
          quaternionSolarPanel.appendRollRotation(0.0);
          quaternionSolarPanel.appendPitchRotation(-0.380);
