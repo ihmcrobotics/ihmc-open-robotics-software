@@ -15,7 +15,7 @@ public class SolarPanelCleaningInfo
    private static CleaningPathType cleaningType;      
    
    private static double widthOfBezel = 0.03;
-   private static double offsetAlongToZdirection = -0.02;
+   private static double offsetAlongToZdirection = -0.055;
    private static double offsetReadyPose = -0.15;
    
    public enum CleaningPathType
@@ -161,7 +161,7 @@ public class SolarPanelCleaningInfo
          case HORIZONAL_FIXED:
          {
             PrintTools.info("HORIZONAL_FIXED");
-            double nomalizedTimeRatio = 20.0;
+            double nomalizedTimeRatio = 15.0;
             double radiusOfTowel = 0.09;
             
             double totalBezel = radiusOfTowel + widthOfBezel;
