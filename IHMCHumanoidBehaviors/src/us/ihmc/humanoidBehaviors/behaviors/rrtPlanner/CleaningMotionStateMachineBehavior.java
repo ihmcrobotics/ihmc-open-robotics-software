@@ -51,8 +51,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 {   
    private int numberOfPlanar = 0;
    private PlanarRegion planarRegion;
-   private GetSolarPanelBehavior getSolarPanelBehavior;
-   //private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
+   //private GetSolarPanelBehavior getSolarPanelBehavior;
+   private ManuallyPutSolarPanelBehavior getSolarPanelBehavior;
    
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
    
@@ -84,8 +84,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
-      getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
-      //getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
+      //getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
+      getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
@@ -407,7 +407,25 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
                planarRegion = planarRegionsWithinVolume.get(i);
             }
          }
-         numberOfPlanar = 1;
+         
+         SquareFittingFactory squareFittingFactory = putPlanarRegionOnFactory(planarRegion);
+         SolarPanel finalPanel = squareFittingFactory.getSolarPanel();
+         
+         Quaternion guessSolarPanel = new Quaternion();
+         guessSolarPanel.appendYawRotation(Math.PI*0.05);
+         guessSolarPanel.appendRollRotation(0.0);
+         guessSolarPanel.appendPitchRotation(-Math.PI*0.25);
+         
+         PrintTools.info(" dot "+finalPanel.getCenterPose().getOrientation().dot(guessSolarPanel));
+         if(finalPanel.getCenterPose().getOrientation().dot(guessSolarPanel) < 0.9)
+         {  
+            numberOfPlanar = 100;
+         }
+         else
+         {
+            numberOfPlanar = 1;   
+         }
+         
    
       }
             

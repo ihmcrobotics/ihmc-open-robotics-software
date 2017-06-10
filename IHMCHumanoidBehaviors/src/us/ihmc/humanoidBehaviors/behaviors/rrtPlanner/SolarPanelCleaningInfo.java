@@ -161,7 +161,7 @@ public class SolarPanelCleaningInfo
          case HORIZONAL_FIXED:
          {
             PrintTools.info("HORIZONAL_FIXED");
-            double nomalizedTimeRatio = 15.0;
+            double nomalizedTimeRatio = 20.0;
             double radiusOfTowel = 0.09;
             
             double totalBezel = radiusOfTowel + widthOfBezel;
