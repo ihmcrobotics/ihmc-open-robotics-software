@@ -1,4 +1,4 @@
-package us.ihmc.atlas.rrtWalkingpathtest;
+package us.ihmc.atlas.rrtPlannerTest;
 
 import static org.junit.Assert.assertTrue;
 
