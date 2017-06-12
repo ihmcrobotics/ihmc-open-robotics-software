@@ -19,7 +19,7 @@ import us.ihmc.robotics.lists.Settable;
  * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(Command)}.
  * @param <M> Type of the corresponding {@link Packet} that this Command can copy.
  */
-public interface Command<C extends Command<C, M>, M extends Packet<M>> extends Settable<C>
+public interface Command<C extends Command<C, M>, M extends Packet<M>> extends Settable<C>, Comparable<Command<C, M>>
 {
    /**
     * Clear all the data held in this Command.
@@ -63,5 +63,47 @@ public interface Command<C extends Command<C, M>, M extends Packet<M>> extends S
    public default void setExecutionDelayTime(double delayTime)
    {
       throw new NotImplementedException(getClass().getSimpleName() + " does not implement setExecutionDelayTime");
+   }
+   
+   /**
+    * returns the expected execution time of this command. The execution time will be computed when the controller 
+    * receives the command using the controllers time plus the execution delay time.
+    * This is used when {@code getExecutionDelayTime} is non-zero
+    */
+   public default double getExecutionTime()
+   {
+      return 0.0;
+   }
+
+   /**
+    * sets the execution time for this command. This is called by the controller when the command is received.
+    */
+   public default void setExecutionTime(double adjustedExecutionTime)
+   {
+      throw new NotImplementedException(getClass().getSimpleName() + " does not implement setExecutionTime");
+   }
+   
+   /**
+    * compares the execution time of this command with another command. 
+    * @return If this commands execution time is less than the other command it returns -1
+    * If this commands execution time is greater than the other command it returns 1
+    * If they are equal it returns 0
+    * 
+    */
+   public default int compareTo(Command<C,M> command)
+   {
+      double diff = this.getExecutionTime() - command.getExecutionTime();
+      
+      if(diff < 0)
+      {
+         return -1;
+      }
+      
+      if(diff > 0)
+      {
+         return 1;
+      }
+      
+      return 0;
    }
 }
