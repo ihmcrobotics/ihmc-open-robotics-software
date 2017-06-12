@@ -7,7 +7,7 @@ import us.ihmc.commons.PrintTools;
 /**
  * Should be Garbage free
  */
-public class CommandPriorityQueue<T extends Comparable<T>>
+public class GarbageFreePriorityQueue<T extends Comparable<T>>
 {
    private final int size;
    private int count;
@@ -25,7 +25,7 @@ public class CommandPriorityQueue<T extends Comparable<T>>
     * @param size the max size of the priority queue
     */
    @SuppressWarnings("unchecked")
-   public CommandPriorityQueue(int size, Class<?> clazz)
+   public GarbageFreePriorityQueue(int size, Class<?> clazz)
    {
       this.size = size;
       activeQueue  = (T[]) Array.newInstance(clazz, size);
