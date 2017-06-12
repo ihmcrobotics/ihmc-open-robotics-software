@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
 import java.lang.reflect.Array;
+import java.util.Comparator;
 
 import us.ihmc.commons.PrintTools;
 
 /**
  * Should be Garbage free
  */
-public class GarbageFreePriorityQueue<T extends Comparable<T>>
+public class GarbageFreePriorityQueue<T>
 {
    private final int size;
    private int count;
@@ -19,6 +20,7 @@ public class GarbageFreePriorityQueue<T extends Comparable<T>>
    private T[] activeQueue;
    private T[] inactiveQueue;
    private T[] swapQueue;
+   private final Comparator<T> comparator;
    
    /**
     * 
@@ -28,6 +30,20 @@ public class GarbageFreePriorityQueue<T extends Comparable<T>>
    public GarbageFreePriorityQueue(int size, Class<?> clazz)
    {
       this.size = size;
+      this.comparator = null;
+      activeQueue  = (T[]) Array.newInstance(clazz, size);
+      inactiveQueue  = (T[]) Array.newInstance(clazz, size);
+   }
+
+   /**
+    * 
+    * @param size the max size of the priority queue
+    */
+   @SuppressWarnings("unchecked")
+   public GarbageFreePriorityQueue(int size, Class<?> clazz, Comparator<T> comparator)
+   {
+      this.size = size;
+      this.comparator = comparator;
       activeQueue  = (T[]) Array.newInstance(clazz, size);
       inactiveQueue  = (T[]) Array.newInstance(clazz, size);
    }
@@ -66,14 +82,14 @@ public class GarbageFreePriorityQueue<T extends Comparable<T>>
    /**
     * Tries to add an element to the queue. 
     * takes O(n)
-    * @param comparable the object to add to the queue
+    * @param newElement the object to add to the queue
     * @return whether or not the add was successful
     */
-   public boolean add(T comparable)
+   public boolean add(T newElement)
    {
       if(count == size)
       {
-         PrintTools.error("Try to add " + comparable.getClass() + " to the priority queue but the queue was full. Try increasing the queue size");
+         PrintTools.error("Try to add " + newElement.getClass() + " to the priority queue but the queue was full. Try increasing the queue size");
          return false;
       }
       
@@ -82,14 +98,25 @@ public class GarbageFreePriorityQueue<T extends Comparable<T>>
       
       for(int i = 0; i < count; i++)
       {
-         if(activeQueue[i].compareTo(comparable) < 0 || isInserted)
+         boolean isCurrentElementLessThanNewElement = false;
+         if(comparator != null)
+         {
+            isCurrentElementLessThanNewElement = comparator.compare(activeQueue[i], newElement) < 0;
+         }
+         else
+         {
+            Comparable<T> comparable = (Comparable<T>) activeQueue[i];
+            isCurrentElementLessThanNewElement = comparable.compareTo(newElement) < 0;
+         }
+         
+         if(isCurrentElementLessThanNewElement  || isInserted)
          {
             inactiveQueue[newIndex] = activeQueue[i];
             newIndex++;
          }
          else
          {
-            inactiveQueue[newIndex] = comparable;
+            inactiveQueue[newIndex] = newElement;
             newIndex++;
             inactiveQueue[newIndex] = activeQueue[i];
             newIndex++;
@@ -99,7 +126,7 @@ public class GarbageFreePriorityQueue<T extends Comparable<T>>
       
       if(!isInserted)
       {
-         inactiveQueue[newIndex] = comparable;
+         inactiveQueue[newIndex] = newElement;
       }
       
       swapQueue = activeQueue;
