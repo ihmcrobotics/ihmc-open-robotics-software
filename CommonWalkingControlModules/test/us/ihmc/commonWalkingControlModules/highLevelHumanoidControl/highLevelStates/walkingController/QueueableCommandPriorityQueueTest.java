@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 
 public class QueueableCommandPriorityQueueTest
@@ -22,11 +21,11 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testQueueableCommandPriorityQueue()
    {
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(i);
+         chestTrajectoryCommand.setExecutionTime(i);
          assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       }
 
@@ -40,11 +39,11 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testSameDelay()
    {
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(5.0);
+         chestTrajectoryCommand.setExecutionTime(5.0);
          assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       }
       
@@ -53,7 +52,7 @@ public class QueueableCommandPriorityQueueTest
       {
          Command<?, ?> command = commandPriorityQueue.pop();
          assertEquals(9 - index, commandPriorityQueue.getSize());
-         assertEquals(5.0, command.getExecutionDelayTime(), 1e-10);
+         assertEquals(5.0, command.getExecutionTime(), 1e-10);
          index++;
       }
       assertEquals(10, index);
@@ -62,11 +61,11 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testAddingInOrder()
    {
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(i);
+         chestTrajectoryCommand.setExecutionTime(i);
          assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       }
       
@@ -74,7 +73,7 @@ public class QueueableCommandPriorityQueueTest
       while(commandPriorityQueue.peek() != null)
       {
          Command<?, ?> command = commandPriorityQueue.pop();
-         assertEquals(index, command.getExecutionDelayTime(), 1e-10);
+         assertEquals(index, command.getExecutionTime(), 1e-10);
          index++;
       }
       assertEquals(10, index);
@@ -83,12 +82,12 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testPop()
    {
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       ChestTrajectoryCommand[] commands = new ChestTrajectoryCommand[10];
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(10 - i);
+         chestTrajectoryCommand.setExecutionTime(10 - i);
          commands[9 - i] = chestTrajectoryCommand;
          assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       }
@@ -107,7 +106,7 @@ public class QueueableCommandPriorityQueueTest
       int numberOfCommands = 100;
       ArrayList<ChestTrajectoryCommand> commandsInRandomOrder = new ArrayList<>();
       Random random = new Random(100);
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(numberOfCommands);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(numberOfCommands, Command.class);
       ChestTrajectoryCommand[] commands = new ChestTrajectoryCommand[numberOfCommands];
       
       //get a hundred random numbers
@@ -125,7 +124,7 @@ public class QueueableCommandPriorityQueueTest
       for(int i = 0; i < delays.length; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(delays[i]);
+         chestTrajectoryCommand.setExecutionTime(delays[i]);
          commands[i] = chestTrajectoryCommand;
          commandsInRandomOrder.add(random.nextInt(commandsInRandomOrder.size() + 1), chestTrajectoryCommand);
       }
@@ -149,9 +148,9 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testPeek()
    { 
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-      chestTrajectoryCommand.setExecutionDelayTime(5.0);
+      chestTrajectoryCommand.setExecutionTime(5.0);
       assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       assertEquals(chestTrajectoryCommand, commandPriorityQueue.peek());
       assertEquals(1, commandPriorityQueue.getSize());
@@ -160,7 +159,7 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testPopWhenEmpty()
    { 
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       assertNull(commandPriorityQueue.pop());
       assertEquals(0, commandPriorityQueue.getSize());
    }
@@ -168,11 +167,11 @@ public class QueueableCommandPriorityQueueTest
    @Test
    public void testClear()
    { 
-      CommandPriorityQueue commandPriorityQueue = new CommandPriorityQueue(10);
+      CommandPriorityQueue<Command<?,?>> commandPriorityQueue = new CommandPriorityQueue<Command<?,?>>(10, Command.class);
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-         chestTrajectoryCommand.setExecutionDelayTime(i);
+         chestTrajectoryCommand.setExecutionTime(i);
          assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
       }
       
