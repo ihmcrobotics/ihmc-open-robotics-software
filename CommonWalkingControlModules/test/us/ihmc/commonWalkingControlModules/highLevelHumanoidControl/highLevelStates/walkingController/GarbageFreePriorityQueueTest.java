@@ -14,6 +14,7 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.robotics.lists.GarbageFreePriorityQueue;
 
 public class GarbageFreePriorityQueueTest
 {
