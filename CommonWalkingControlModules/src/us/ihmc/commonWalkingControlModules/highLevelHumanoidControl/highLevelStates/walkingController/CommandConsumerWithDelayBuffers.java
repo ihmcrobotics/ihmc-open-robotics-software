@@ -46,7 +46,8 @@ public class CommandConsumerWithDelayBuffers
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
    {
       commandsMap.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
-      priorityQueues.put(commandClass, new GarbageFreePriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class));
+      CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
+      priorityQueues.put(commandClass, new GarbageFreePriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class, commandComparator));
    }
    
    /**
