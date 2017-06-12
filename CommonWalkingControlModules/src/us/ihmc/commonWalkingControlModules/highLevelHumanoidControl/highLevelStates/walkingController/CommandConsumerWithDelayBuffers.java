@@ -24,7 +24,7 @@ public class CommandConsumerWithDelayBuffers
    
    /** Controller's copy of the new commands to be processed. */
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
-   private final Map<Class<?>, CommandPriorityQueue> priorityQueues = new HashMap<>();
+   private final Map<Class<?>, CommandPriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
    
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
@@ -46,7 +46,7 @@ public class CommandConsumerWithDelayBuffers
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
    {
       commandsMap.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
-      priorityQueues.put(commandClass, new CommandPriorityQueue(NUMBER_OF_COMMANDS_TO_QUEUE));
+      priorityQueues.put(commandClass, new CommandPriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class));
    }
    
    /**
@@ -59,7 +59,7 @@ public class CommandConsumerWithDelayBuffers
       Command<?, ?> command = priorityQueues.get(commandClassToCheck).peek();
       if(command != null)
       {
-         double startTime = command.getExecutionDelayTime();
+         double startTime = command.getExecutionTime();
          if(yoTime.getDoubleValue() >= startTime)
          {
             return true;
@@ -88,7 +88,7 @@ public class CommandConsumerWithDelayBuffers
    public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToPoll)
    {
       RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands(commandClassToPoll);
-      CommandPriorityQueue commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
+      CommandPriorityQueue<Command<?, ?>> commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
       
       if(newCommands.size() > 0)
       {
@@ -113,7 +113,7 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = commandsMap.get(command.getClass());
       Command commandCopy = recyclingArrayList.add();
       commandCopy.set(command);
-      commandCopy.setExecutionDelayTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
+      commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
       priorityQueues.get(command.getClass()).add(commandCopy);
    }
    
@@ -127,7 +127,7 @@ public class CommandConsumerWithDelayBuffers
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
    {
       RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands(commandClassToPoll);
-      CommandPriorityQueue commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
+      CommandPriorityQueue<Command<?, ?>> commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
       
       while(isDelayedCommandAvailable(commandClassToPoll))
       {
@@ -145,11 +145,11 @@ public class CommandConsumerWithDelayBuffers
     * @param newCommands the commands received from the {@code CommandInputManager}
     * @return priority queue with new delayed commands added
     */
-   private <C extends Command<C, ?>> CommandPriorityQueue processCommands(Class<C> commandClassToPoll, RecyclingArrayList<C> newCommands)
+   private <C extends Command<C, ?>> CommandPriorityQueue<Command<?, ?>> processCommands(Class<C> commandClassToPoll, RecyclingArrayList<C> newCommands)
    {
       int size = newCommands.size();
       int index = 0;
-      CommandPriorityQueue commandPriorityQueue = priorityQueues.get(commandClassToPoll);
+      CommandPriorityQueue<Command<?, ?>> commandPriorityQueue = priorityQueues.get(commandClassToPoll);
       while(index < size)
       {
          C command = newCommands.get(index);
@@ -176,7 +176,7 @@ public class CommandConsumerWithDelayBuffers
     */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
-      CommandPriorityQueue queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
+      CommandPriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
       if(queueableCommandPriorityQueue != null)
       {
          queueableCommandPriorityQueue.clear();

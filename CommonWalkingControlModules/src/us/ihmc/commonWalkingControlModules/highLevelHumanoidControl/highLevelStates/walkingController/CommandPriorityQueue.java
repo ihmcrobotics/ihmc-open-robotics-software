@@ -1,30 +1,45 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
+import java.lang.reflect.Array;
+
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.controllerAPI.command.Command;
 
 /**
- * Used as a priority Queue to maintain a queue of commands that have execution delays
  * Should be Garbage free
  */
-public class CommandPriorityQueue
+public class CommandPriorityQueue<T extends Comparable<T>>
 {
    private final int size;
    private int count;
-   private Command<?,?>[] activeQueue;
-   private Command<?,?>[] inactiveQueue;
-   private Command<?,?>[] swapQueue;
    
-   public CommandPriorityQueue(int size)
+   // Not the most efficient method but it is garbage free
+   // elements are stored smallest to biggest in the array
+   // pop takes O(n) and add is O(n)
+   // feel free to optimize
+   private T[] activeQueue;
+   private T[] inactiveQueue;
+   private T[] swapQueue;
+   
+   /**
+    * 
+    * @param size the max size of the priority queue
+    */
+   @SuppressWarnings("unchecked")
+   public CommandPriorityQueue(int size, Class<?> clazz)
    {
       this.size = size;
-      activeQueue  = new Command<?,?>[size];
-      inactiveQueue  = new Command<?,?>[size];
+      activeQueue  = (T[]) Array.newInstance(clazz, size);
+      inactiveQueue  = (T[]) Array.newInstance(clazz, size);
    }
   
-   public Command<?,?> pop()
+   /**
+    * removes and returns the smallest comparable in the queue
+    * takes O(n)
+    * @return the smallest comparable in the queue
+    */
+   public T pop()
    {
-      Command<?, ?> command = activeQueue[0];
+      T comparable = activeQueue[0];
       activeQueue[0] = null;
       for(int i = 1; i < count; i++)
       {
@@ -36,37 +51,45 @@ public class CommandPriorityQueue
       {
          count = 0;
       }
-      return command;
+      return comparable;
    }
 
-   public Command<?,?> peek()
+   /**
+    * @return the smallest comparable in the queue
+    */
+   public T peek()
    {
-      Command<?, ?> command = activeQueue[0];
-      return command;
+      T comparable = activeQueue[0];
+      return comparable;
    }
    
-   public boolean add(Command<?, ?> command)
+   /**
+    * Tries to add an element to the queue. 
+    * takes O(n)
+    * @param comparable the object to add to the queue
+    * @return whether or not the add was successful
+    */
+   public boolean add(T comparable)
    {
       if(count == size)
       {
-         PrintTools.error("Try to add " + command.getClass() + " to the priority queue but the queue was full. Try increasing the queue size");
+         PrintTools.error("Try to add " + comparable.getClass() + " to the priority queue but the queue was full. Try increasing the queue size");
          return false;
       }
       
-      double delay = command.getExecutionDelayTime();
       int newIndex = 0;
       boolean isInserted = false;
       
       for(int i = 0; i < count; i++)
       {
-         if(activeQueue[i].getExecutionDelayTime() < delay || isInserted)
+         if(activeQueue[i].compareTo(comparable) < 0 || isInserted)
          {
             inactiveQueue[newIndex] = activeQueue[i];
             newIndex++;
          }
          else
          {
-            inactiveQueue[newIndex] = command;
+            inactiveQueue[newIndex] = comparable;
             newIndex++;
             inactiveQueue[newIndex] = activeQueue[i];
             newIndex++;
@@ -76,7 +99,7 @@ public class CommandPriorityQueue
       
       if(!isInserted)
       {
-         inactiveQueue[newIndex] = command;
+         inactiveQueue[newIndex] = comparable;
       }
       
       swapQueue = activeQueue;
@@ -86,6 +109,9 @@ public class CommandPriorityQueue
       return true;
    }
    
+   /**
+    * removes all the objects from the queue
+    */
    public void clear()
    {
       for(int i = 0; i < activeQueue.length; i++)
@@ -96,6 +122,9 @@ public class CommandPriorityQueue
       count = 0;
    }
    
+   /**
+    * @return the number of elements in the queue
+    */
    public int getSize()
    {
       return count;
