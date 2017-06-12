@@ -12,7 +12,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final PoseTrajectoryGenerator trajectory;
+   private final PositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
@@ -42,7 +42,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    private final FrameVector tempVelocity = new FrameVector();
    private final FrameVector tempAcceleration = new FrameVector();
 
-   public BlendedPositionTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
+   public BlendedPositionTrajectoryGenerator(String prefix, PositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
          YoVariableRegistry parentRegistry)
    {
       this.trajectory = trajectory;
