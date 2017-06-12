@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
+package us.ihmc.robotics.lists;
 
 import java.lang.reflect.Array;
 import java.util.Comparator;
