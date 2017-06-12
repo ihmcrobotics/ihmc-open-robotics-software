@@ -182,6 +182,10 @@ public class SolarPanelCleaningInfo
             cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
             
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, totalBezel , totalBezel + oneStepV * 4.4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio+5.0);
+            cleaningPath.addCleaningPoseWithNomalizedTime(new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - totalBezel , totalBezel + oneStepV * 4.4, offsetAlongToZdirection, -Math.PI*0.2), nomalizedTimeRatio);
+            
+            
             
             
             break;

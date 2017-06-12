@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior.CleaningMotionState;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.SolarPanelCleaningInfo.CleaningPathType;
@@ -66,6 +67,8 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    private FullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
    
+   private final ResetRobotBehavior resetRobotBehavior;
+   
    private boolean manuallyPutControlPoint = true;
       
    
@@ -74,7 +77,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    public enum CleaningMotionState
    {
-      GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, DONE
+      GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, BACK_MOTION, BACKHOME_MOTION, DONE
    }
    
    public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
@@ -88,6 +91,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       getSolarPanelBehavior = new ManuallyPutSolarPanelBehavior(communicationBridge);
       
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       doneBehavior = new TestDoneBehavior(communicationBridge);      
       
       motionFactory = new SolarPanelWholeBodyTrajectoryMessageFactory(fullRobotModel);
@@ -212,6 +216,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
                manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(7), 0.8420, 0.3054, 0.003));
                manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(8), 0.8630, 0.3032, 0.002));
                manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(9), 0.9101, 0.3811, 0.013));
+               
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(10), 0.9205, 0.4311, 0.015));
+               manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(11), 0.9301, 0.2011, -0.15));
             }
             
             else if(SolarPanelCleaningInfo.getCleaningType() == CleaningPathType.DIAGONAL)
@@ -239,8 +246,6 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
                manuallyPutPath.add(new TimeDomain3DNode(cleaningPath.getArrivalTime().get(15), 0.90, 0.38, 0.01));
             }
             // DIAGONAL
-
-            
             // ************************* Manually put
             if(manuallyPutControlPoint)
                motionFactory.setMessage(manuallyPutPath);
@@ -250,6 +255,45 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
             
             
+         }
+      };
+      
+      BehaviorAction<CleaningMotionState> gotoBackMotion = new BehaviorAction<CleaningMotionState>(CleaningMotionState.BACK_MOTION, wholebodyTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("gotoBackMotion");
+            sendPacket(p1);
+            
+            PrintTools.info("gotoBackMotion");
+            WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
+            
+            double motionTime = 8.0;
+            
+            SolarPanel solarPanel = SolarPanelCleaningInfo.getSolarPanel();
+            SolarPanelCleaningPose pose = new SolarPanelCleaningPose(solarPanel, solarPanel.getSizeU() - 0.2, solarPanel.getSizeV() - 0.2, -0.2, -Math.PI*0.3);
+            motionFactory.setMessage(pose, Math.PI*0.0, 0.0, motionTime);
+            wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
+            PelvisTrajectoryMessage pelvisReadyMessage = new PelvisTrajectoryMessage(motionTime, new Point3D(0.0, 0.0, 0.91), new Quaternion());
+            SelectionMatrix6D selectionMatrixPelvis =  new SelectionMatrix6D();
+            selectionMatrixPelvis.clearSelection();
+            selectionMatrixPelvis.selectLinearZ(true);
+            pelvisReadyMessage.setSelectionMatrix(selectionMatrixPelvis);
+            wholebodyMessage.setPelvisTrajectoryMessage(pelvisReadyMessage);
+            wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
+         }
+      };
+      
+      BehaviorAction<CleaningMotionState> gotoHomeMotion = new BehaviorAction<CleaningMotionState>(CleaningMotionState.BACKHOME_MOTION, resetRobotBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("gotoHomeMotion");
+            sendPacket(p1);
+            
+            PrintTools.info("gotoHomeMotion");
          }
       };
             
@@ -294,7 +338,11 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.DONE, noSolutionCondition);
       
       statemachine.addStateWithDoneTransition(gotoReadyPoseAction, CleaningMotionState.CLEANING_MOTION);
-      statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.DONE);
+      //statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.DONE);
+      statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.BACK_MOTION);
+      
+      statemachine.addStateWithDoneTransition(gotoBackMotion, CleaningMotionState.BACKHOME_MOTION);
+      statemachine.addStateWithDoneTransition(gotoHomeMotion, CleaningMotionState.DONE);
       
       statemachine.addState(doneAction);
       
