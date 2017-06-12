@@ -1,4 +1,4 @@
-package us.ihmc.atlas.rrtWalkingpathtest;
+package us.ihmc.atlas.rrtPlannerTest;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;

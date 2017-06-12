@@ -1,4 +1,4 @@
-package us.ihmc.avatar.behaviorTests;
+package us.ihmc.avatar.behaviorTests.SolarPanel;
 
 import static org.junit.Assert.assertTrue;
 
@@ -80,7 +80,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestInterface
+public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private boolean isKinematicsToolboxVisualizerEnabled = false;
