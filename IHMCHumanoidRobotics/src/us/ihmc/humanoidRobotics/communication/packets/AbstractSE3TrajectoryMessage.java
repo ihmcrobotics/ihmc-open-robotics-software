@@ -83,6 +83,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
       linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
 
+      useCustomControlFrame = se3TrajectoryMessage.useCustomControlFrame;
+      controlFramePose = new QuaternionBasedTransform(se3TrajectoryMessage.controlFramePose);
    }
 
    public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
