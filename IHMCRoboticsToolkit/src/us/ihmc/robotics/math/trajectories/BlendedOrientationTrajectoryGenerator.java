@@ -14,7 +14,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final PoseTrajectoryGenerator trajectory;
+   private final OrientationTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
@@ -46,7 +46,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private final FrameVector tempAngularAcceleration = new FrameVector();
    private final Quaternion tempQuaternion = new Quaternion();
 
-   public BlendedOrientationTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
+   public BlendedOrientationTrajectoryGenerator(String prefix, OrientationTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
          YoVariableRegistry parentRegistry)
    {
       this.trajectory = trajectory;
