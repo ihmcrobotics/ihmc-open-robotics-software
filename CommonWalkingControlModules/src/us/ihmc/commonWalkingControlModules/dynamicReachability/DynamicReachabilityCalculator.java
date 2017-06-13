@@ -42,7 +42,8 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
 
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE_REACHABILITY = false;
    private static final double epsilon = 0.005;
 
    private final double transferTwiddleSizeDuration;
@@ -108,6 +109,9 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
    private final SideDependentList<FramePoint> adjustedAnkleLocations = new SideDependentList<>();
    private final SideDependentList<FrameVector> hipOffsets = new SideDependentList<>();
+
+   private final SideDependentList<YoFramePoint> yoAnkleLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint> yoHipLocations = new SideDependentList<>();
 
    private Footstep nextFootstep;
    private boolean isInTransfer;
@@ -179,8 +183,15 @@ public class DynamicReachabilityCalculator
          adjustedAnkleLocations.put(robotSide, new FramePoint());
          hipOffsets.put(robotSide, new FrameVector());
 
-         YoFramePoint hipMaximumLocation = new YoFramePoint(robotSide.getShortLowerCaseName() + "PredictedHipMaximumPoint", worldFrame, registry);
-         YoFramePoint hipMinimumLocation = new YoFramePoint(robotSide.getShortLowerCaseName() + "PredictedHipMinimumPoint", worldFrame, registry);
+         String prefix = robotSide.getShortLowerCaseName();
+         if (VISUALIZE_REACHABILITY)
+         {
+            yoAnkleLocations.put(robotSide, new YoFramePoint(prefix + "AnkleLocation", worldFrame, registry));
+            yoHipLocations.put(robotSide, new YoFramePoint(prefix + "HipLocation", worldFrame, registry));
+         }
+
+         YoFramePoint hipMaximumLocation = new YoFramePoint(prefix + "PredictedHipMaximumPoint", worldFrame, registry);
+         YoFramePoint hipMinimumLocation = new YoFramePoint(prefix + "PredictedHipMinimumPoint", worldFrame, registry);
          hipMaximumLocations.put(robotSide, hipMaximumLocation);
          hipMinimumLocations.put(robotSide, hipMinimumLocation);
          
@@ -295,6 +306,34 @@ public class DynamicReachabilityCalculator
 
       yoGraphicsList.setVisible(VISUALIZE);
 
+      if (VISUALIZE_REACHABILITY)
+      {
+         YoGraphicsList reachabilityGraphicsList = new YoGraphicsList(getClass().getSimpleName() + "Reachability");
+
+         double minLength = minimumLegLength.getDoubleValue();
+         double maxLength = maximumLegLength.getDoubleValue();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            YoGraphicPosition ballInside = new YoGraphicPosition(robotSide.getShortLowerCaseName() + "BallInside", yoAnkleLocations.get(robotSide), minLength, YoAppearance.Green());
+            YoGraphicPosition ballOutside = new YoGraphicPosition(robotSide.getShortLowerCaseName() + "BallOutside", yoAnkleLocations.get(robotSide), maxLength, YoAppearance.LightGreen());
+
+            YoGraphicPosition footViz = new YoGraphicPosition("foot", yoAnkleLocations.get(robotSide), 0.075, YoAppearance.Blue());
+            YoGraphicPosition hipViz = new YoGraphicPosition("hip", yoHipLocations.get(robotSide), 0.075, YoAppearance.Red());
+
+            ballInside.getAppearance().setTransparency(0.8);
+            ballOutside.getAppearance().setTransparency(0.95);
+
+            reachabilityGraphicsList.add(ballInside);
+            reachabilityGraphicsList.add(ballOutside);
+            reachabilityGraphicsList.add(footViz);
+            reachabilityGraphicsList.add(hipViz);
+         }
+
+         yoGraphicsListRegistry.registerYoGraphicsList(reachabilityGraphicsList);
+      }
+
+
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
@@ -325,12 +364,21 @@ public class DynamicReachabilityCalculator
       nextFootstep.getAnklePosition(upcomingStepLocation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
       upcomingStepLocation.changeFrame(worldFrame);
       stanceAnkleLocation.changeFrame(worldFrame);
+      if (VISUALIZE_REACHABILITY) yoAnkleLocations.get(swingSide).set(upcomingStepLocation);
+      if (VISUALIZE_REACHABILITY) yoAnkleLocations.get(stanceSide).set(stanceAnkleLocation);
 
       predictedCoMFrame.update();
       predictedPelvisFrame.update();
       for (RobotSide robotSide : RobotSide.values)
       {
          predictedHipFrames.get(robotSide).update();
+         if (VISUALIZE_REACHABILITY)
+         {
+            tempPoint.setToZero(predictedHipFrames.get(robotSide));
+            tempPoint.changeFrame(worldFrame);
+            yoHipLocations.get(robotSide).set(tempPoint);
+            yoHipLocations.get(robotSide).setZ(0.8);
+         }
       }
    }
 
@@ -637,6 +685,11 @@ public class DynamicReachabilityCalculator
       reachabilityTimer.stopMeasurement();
    }
 
+   public boolean wasTimingAdjusted()
+   {
+      return numberOfAdjustments.getIntegerValue() > 0;
+   }
+
    private boolean checkReachabilityInternal()
    {
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
@@ -648,12 +701,12 @@ public class DynamicReachabilityCalculator
 
       double minimumStanceLegLength, minimumStepLegLength;
       if (heightChange > dynamicReachabilityParameters.getThresholdForStepUp())
-      {
+      { // stepping up, so we should allow the upcoming stance leg length to bend as much as we want
          minimumStepLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStanceLegLength = minimumLegLength.getDoubleValue();
       }
       else if (heightChange < dynamicReachabilityParameters.getThresholdForStepDown())
-      {
+      { // stepping down, so we should allow the upcoming swing leg to bend as much as we want
          minimumStanceLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
@@ -770,7 +823,7 @@ public class DynamicReachabilityCalculator
       widthOfReachableRegion.sub(minimumStanceHipPosition);
 
       double requiredAdjustment;
-      double safetyMultiplier = requiredAdjustmentSafetyFactor.getDoubleValue() - 1.0;
+      double safetyMultiplier = requiredAdjustmentSafetyFactor.getDoubleValue();
 
       if (tempPoint.getX() > maximumStepHipPosition)
       {
@@ -972,7 +1025,7 @@ public class DynamicReachabilityCalculator
       double currentEndTransferDuration = (1.0 - currentTransferDurationAlpha) * currentTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSizeDuration * currentInitialTransferDuration;
+      double variation = -transferTwiddleSizeDuration * currentInitialTransferDuration;
       double modifiedTransferDurationAlpha = (currentInitialTransferDuration + variation) / (currentTransferDuration + variation);
 
       submitTransferTiming(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -982,7 +1035,7 @@ public class DynamicReachabilityCalculator
       currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSizeDuration * currentEndTransferDuration;
+      variation = -transferTwiddleSizeDuration * currentEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (currentEndTransferDuration + variation) / (currentTransferDuration + variation);
 
       submitTransferTiming(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1006,7 +1059,7 @@ public class DynamicReachabilityCalculator
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSizeDuration * nextInitialTransferDuration;
+      double variation = -transferTwiddleSizeDuration * nextInitialTransferDuration;
       double modifiedTransferDurationAlpha = (nextInitialTransferDuration + variation) / (nextTransferDuration + variation);
 
       submitTransferTiming(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1016,7 +1069,7 @@ public class DynamicReachabilityCalculator
       nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSizeDuration * nextEndTransferDuration;
+      variation = -transferTwiddleSizeDuration * nextEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (nextEndTransferDuration + variation) / (nextTransferDuration + variation);
 
       submitTransferTiming(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1035,7 +1088,7 @@ public class DynamicReachabilityCalculator
    private void computeHigherTransferGradient(int stepIndex)
    {
       double originalDuration = originalTransferDurations.get(stepIndex);
-      double variation = transferTwiddleSizeDuration * originalDuration;
+      double variation = -transferTwiddleSizeDuration * originalDuration;
 
       submitTransferTiming(stepIndex, originalDuration + variation, -1.0);
       applyVariation(adjustedCoMPosition);
@@ -1058,7 +1111,7 @@ public class DynamicReachabilityCalculator
       double currentEndSwingDuration = (1.0 - currentSwingDurationAlpha) * currentSwingDuration;
 
       // compute initial swing duration gradient
-      double variation = swingTwiddleSizeDuration * currentInitialSwingDuration;
+      double variation = -swingTwiddleSizeDuration * currentInitialSwingDuration;
       double modifiedSwingDurationAlpha = (currentInitialSwingDuration + variation) / (currentSwingDuration + variation);
 
       submitSwingTiming(stepNumber, currentSwingDuration + variation, modifiedSwingDurationAlpha);
@@ -1068,7 +1121,7 @@ public class DynamicReachabilityCalculator
       currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end swing duration gradient
-      variation = swingTwiddleSizeDuration * currentEndSwingDuration;
+      variation = -swingTwiddleSizeDuration * currentEndSwingDuration;
       modifiedSwingDurationAlpha = 1.0 - (currentEndSwingDuration + variation) / (currentSwingDuration + variation);
 
       submitSwingTiming(stepNumber, currentSwingDuration + variation, modifiedSwingDurationAlpha);
@@ -1084,7 +1137,7 @@ public class DynamicReachabilityCalculator
    private void computeHigherSwingGradient(int stepIndex)
    {
       double duration = originalSwingDurations.get(stepIndex);
-      double variation = swingTwiddleSizeDuration * duration;
+      double variation = -swingTwiddleSizeDuration * duration;
 
       submitSwingTiming(stepIndex, duration + variation, -1.0);
       applyVariation(adjustedCoMPosition);
