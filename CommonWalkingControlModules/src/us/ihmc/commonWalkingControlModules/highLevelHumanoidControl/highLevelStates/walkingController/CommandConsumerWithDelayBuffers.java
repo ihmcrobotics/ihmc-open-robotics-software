@@ -104,7 +104,7 @@ public class CommandConsumerWithDelayBuffers
     * @param clazz class of the command to check availability.
     * @return true if at least one new command is available.
     */
-   public <C extends Command<C, ?>> boolean isNewCommandAvailable(Class<? extends Command<C,?>> clazz)
+   public <C extends Command<C, ?>> boolean isNewCommandAvailable(Class<? extends Command<?,?>> clazz)
    {
       return isDelayedCommandAvailable(clazz);
    }
