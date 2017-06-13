@@ -406,7 +406,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
       
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0 + trajectoryTime);
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
