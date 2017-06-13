@@ -9,7 +9,6 @@ import java.util.Map;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
@@ -299,23 +298,6 @@ public class CommandInputManager
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       commandClassToBufferMap.get(commandClassToFlush).flush();
-   }
-
-   /**
-    * Poll all new available commands and combine them into one command.
-    * After calling this method, no new command will be available.
-    * @param commandClassToPoll Used to know what type of command is to be polled.
-    * @return the new command to be processed, returns null if there is no new available command.
-    */
-   public <C extends CompilableCommand<C, ?>> C pollAndCompileCommands(Class<C> commandClassToPoll)
-   {
-      List<C> commands = pollNewCommands(commandClassToPoll);
-      if (commands.isEmpty())
-         return null;
-
-      for (int i = 1; i < commands.size(); i++)
-         commands.get(0).compile(commands.get(i));
-      return commands.get(0);
    }
 
    /**
