@@ -64,4 +64,22 @@ public interface Command<C extends Command<C, M>, M extends Packet<M>> extends S
    {
       throw new NotImplementedException(getClass().getSimpleName() + " does not implement setExecutionDelayTime");
    }
+   
+   /**
+    * returns the expected execution time of this command. The execution time will be computed when the controller 
+    * receives the command using the controllers time plus the execution delay time.
+    * This is used when {@code getExecutionDelayTime} is non-zero
+    */
+   public default double getExecutionTime()
+   {
+      return 0.0;
+   }
+
+   /**
+    * sets the execution time for this command. This is called by the controller when the command is received.
+    */
+   public default void setExecutionTime(double adjustedExecutionTime)
+   {
+      throw new NotImplementedException(getClass().getSimpleName() + " does not implement setExecutionTime");
+   }
 }

@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import us.ihmc.communication.controllerAPI.command.CompilableCommand;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * @author Sylvain
  *
  */
-public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMessage>
+public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
 {
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
@@ -27,6 +27,8 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
+   /** the execution time. This number is set if the execution delay is non zero**/
+   public double adjustedExecutionTime;
 
    /**
     *
@@ -94,13 +96,6 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    public void set(GoHomeCommand other)
    {
       clear();
-      compile(other);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void compile(GoHomeCommand other)
-   {
       trajectoryTime = other.trajectoryTime;
       executionDelayTime = other.getExecutionDelayTime();
 
@@ -120,6 +115,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
          }
       }
    }
+
 
    /**
     * @return the duration for going back to the home configuration.
@@ -192,5 +188,25 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    public void setExecutionDelayTime(double delayTime)
    {
       this.executionDelayTime = delayTime;
+   }
+   
+   /**
+    * returns the expected execution time of this command. The execution time will be computed when the controller 
+    * receives the command using the controllers time plus the execution delay time.
+    * This is used when {@code getExecutionDelayTime} is non-zero
+    */
+   @Override
+   public double getExecutionTime()
+   {
+      return adjustedExecutionTime;
+   }
+
+   /**
+    * sets the execution time for this command. This is called by the controller when the command is received.
+    */
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      this.adjustedExecutionTime = adjustedExecutionTime;
    }
 }
