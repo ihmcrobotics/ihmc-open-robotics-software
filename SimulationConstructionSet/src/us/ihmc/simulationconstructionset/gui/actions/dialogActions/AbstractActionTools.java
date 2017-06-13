@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -42,8 +42,14 @@ public class AbstractActionTools
 
       try
       {
-         Image image = ImageIO.read(iconInputStream);
-         return new ImageIcon(image);
+         BufferedImage bimage = ImageIO.read(iconInputStream);
+         if (bimage.getWidth() == bimage.getHeight()) {
+            Image image = bimage.getScaledInstance(32, 32, Image.SCALE_DEFAULT);
+            return new ImageIcon(image);
+         } else {
+            System.err.println("It's quite convenient when icons have the same width as height... please resize '"+iconFilename+"'");
+            return null;
+         }
       }
       catch (IOException e)
       {

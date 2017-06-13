@@ -72,7 +72,7 @@ public class LidarScanLogWriter
       else
       {
          packetCommunicator.closeConnection();
-         packetCommunicator.close();
+         packetCommunicator.disconnect();
          packetCommunicator = null;
       }
 

@@ -9,9 +9,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
@@ -28,7 +28,6 @@ import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -281,12 +280,12 @@ public class QuadrupedControllerInputProviderTest
       }
 
       @Override
-      public void close()
+      public void disconnect()
       {
       }
 
       @Override
-      public void attachStateListener(NetStateListener stateListener)
+      public void attachStateListener(ConnectionStateListener stateListener)
       {
       }
 

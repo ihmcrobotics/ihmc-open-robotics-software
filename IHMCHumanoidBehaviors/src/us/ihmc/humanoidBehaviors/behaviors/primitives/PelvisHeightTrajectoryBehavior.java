@@ -31,7 +31,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
       this.outgoingPelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessage;
-         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getLastTrajectoryPoint().getPosition() );
+         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getLastTrajectoryPoint().getZ());
       hasInputBeenSet.set(true);
    }
 

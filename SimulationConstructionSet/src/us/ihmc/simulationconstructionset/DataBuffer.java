@@ -1,11 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
-import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -17,6 +13,9 @@ import us.ihmc.simulationconstructionset.gui.KeyPoints;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class DataBuffer extends YoVariableHolderImplementation
         implements java.io.Serializable, DataBufferCommandsExecutor, ToggleKeyPointModeCommandExecutor, TimeDataHolder, DataEntryHolder
@@ -980,11 +979,6 @@ public class DataBuffer extends YoVariableHolderImplementation
    public void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener commandListener)
    {
       toggleKeyPointModeCommandListeners.add(commandListener);
-   }
-
-   public void toggleCameraKeyPoint(TrackingDollyCameraController camera)
-   {
-      camera.setUseCameraKeyPoints(!camera.useKeyCameraPoints());
    }
 
    public int getNextTime()
