@@ -277,6 +277,30 @@ public class BalanceManager
          dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
 
+   public boolean wasTimingAdjustedForReachability()
+   {
+      if (ENABLE_DYN_REACHABILITY)
+         return dynamicReachabilityCalculator.wasTimingAdjusted();
+      else
+         return false;
+   }
+
+   public double getCurrentTransferDurationAdjustedForReachability()
+   {
+      return icpPlanner.getTransferDuration(0);
+   }
+
+   public double getCurrentSwingDurationAdjustedForReachability()
+   {
+      return icpPlanner.getSwingDuration(0);
+   }
+
+   public double getNextTransferDurationAdjustedForReachability()
+   {
+      return icpPlanner.getTransferDuration(1);
+   }
+
+
    public boolean checkAndUpdateFootstep(Footstep footstep)
    {
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
