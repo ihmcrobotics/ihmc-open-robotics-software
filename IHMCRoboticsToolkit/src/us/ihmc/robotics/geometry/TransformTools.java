@@ -9,7 +9,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
 
 public class TransformTools
@@ -26,14 +28,14 @@ public class TransformTools
       return ret;
    }
 
-   public static Quaternion getTransformedQuat(Quaternion quaternion, Transform transform)
+   public static Quaternion getTransformedQuat(QuaternionReadOnly quaternion, Transform transform)
    {
       Quaternion transformed = new Quaternion();
       transform.transform(quaternion, transformed);
       return transformed;
    }
 
-   public static Point3D getTransformedPoint(Point3D point3d, Transform transform)
+   public static Point3D getTransformedPoint(Point3DReadOnly point3d, Transform transform)
    {
       Point3D transformed = new Point3D();
       transform.transform(point3d, transformed);

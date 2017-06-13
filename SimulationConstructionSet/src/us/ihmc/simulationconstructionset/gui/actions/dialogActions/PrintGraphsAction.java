@@ -1,28 +1,24 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
-
-public class PrintGraphsAction extends AbstractAction
+@SuppressWarnings("serial")
+public class PrintGraphsAction extends SCSAction
 {
-   private static final long serialVersionUID = -4403022630360741566L;
    private PrintGraphsDialogConstructor constructor;
 
    public PrintGraphsAction(PrintGraphsDialogConstructor constructor)
    {
-      super("Print Graphs");
-      this.constructor = constructor;
+      super("Print Graphs",
+              "icons/PrintGraphs.png",
+              KeyEvent.VK_P,
+              "Print Graphs",
+              "Print Graphs"
+      );
 
-      String iconFilename = "icons/Print24.gif";
-      int shortKey = KeyEvent.VK_P;
-      String longDescription = "Print Graphs";
-      String shortDescription = "Print Graphs";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void closeAndDispose()
@@ -32,9 +28,8 @@ public class PrintGraphsAction extends AbstractAction
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }
-   
 }

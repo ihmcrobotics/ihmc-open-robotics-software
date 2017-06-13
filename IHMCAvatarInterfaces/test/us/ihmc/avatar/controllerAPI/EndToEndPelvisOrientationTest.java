@@ -71,7 +71,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
       SO3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints[0];
       drcSimulationTestHelper.send(message);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       String postFix = "Orientation";

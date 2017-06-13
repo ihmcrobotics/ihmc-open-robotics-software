@@ -17,6 +17,9 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    /** The jointspace arm trajectory message that will be used for the hybrid control if {@link #useJointspaceCommand} is true. */
    public ArmTrajectoryMessage armTrajectoryMessage;
 
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
+
    public HandLoadBearingMessage()
    {
       super();
@@ -53,6 +56,24 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    public boolean isUseJointspaceCommand()
    {
       return useJointspaceCommand;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override
