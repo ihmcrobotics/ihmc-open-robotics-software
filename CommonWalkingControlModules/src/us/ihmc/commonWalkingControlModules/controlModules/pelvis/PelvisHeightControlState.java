@@ -8,13 +8,13 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -116,6 +116,16 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       taskspaceControlState.doAction();
    }
    
+   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose initialPose)
+   {
+      if (command.useCustomControlFrame())
+      {
+         PrintTools.warn("Can not use custom control frame with pelvis height.");
+         return false;
+      }
+      return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
+   }
+   
    /**
     * check that the command is valid and queue the trajectory
     * @param command
@@ -126,7 +136,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       if (command.useCustomControlFrame())
       {
-         PrintTools.warn("Can not use custom control frame with pelvis orientation.");
+         PrintTools.warn("Can not use custom control frame with pelvis height.");
          return false;
       }
       

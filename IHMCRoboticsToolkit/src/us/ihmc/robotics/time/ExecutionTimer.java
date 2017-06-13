@@ -1,5 +1,6 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -27,7 +28,7 @@ public class ExecutionTimer
    
    public ExecutionTimer(String name, double measurementDelayInSeconds, YoVariableRegistry registry)
    {
-      this.measurementDelay = (long) (measurementDelayInSeconds * 1e9);
+      this.measurementDelay = Conversions.secondsToNanoseconds(measurementDelayInSeconds);
 
       current = new DoubleYoVariable(name + "Current", registry);
       average = new DoubleYoVariable(name + "Average", registry);
@@ -52,7 +53,7 @@ public class ExecutionTimer
       final long currentNanoTime = System.nanoTime();
       if ((currentNanoTime - timeOfFirstMeasurement) > measurementDelay)
       {
-         final double timeTaken = ((double) (currentNanoTime - startTime)) / 1e9;
+         final double timeTaken = Conversions.nanosecondsToSeconds(currentNanoTime - startTime);
          final double previousAverage = average.getDoubleValue();
          double previousSumOfSquares = MathTools.square(standardDeviation.getDoubleValue()) * ((double) count.getLongValue());
 

@@ -41,6 +41,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -48,6 +49,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHeadTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -61,6 +63,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+      setQueueqableCommandVariables(other);
    }
 
    @Override

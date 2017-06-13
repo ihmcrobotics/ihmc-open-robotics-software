@@ -79,7 +79,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
+         toolboxCommunicator.disconnect();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }

@@ -41,6 +41,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -48,6 +49,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
+      setQueueqableCommandVariables(message);
    }
 
    @Override
@@ -61,6 +63,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+      setQueueqableCommandVariables(other);
    }
 
    @Override
