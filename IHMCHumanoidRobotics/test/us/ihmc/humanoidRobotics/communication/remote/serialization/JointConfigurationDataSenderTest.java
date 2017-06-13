@@ -88,8 +88,8 @@ public class JointConfigurationDataSenderTest
          // assert joint data the same
          assertAllConfigurationsTheSame(testMechanismSendSide, testMechanismReceiveSide, 1e-16);
       }
-      client.close();
-      server.close();
+      client.disconnect();
+      server.disconnect();
    }
 
    private void assertAllConfigurationsDifferent(RandomFloatingChain testMechanismSendSide, RandomFloatingChain testMechanismReceiveSide, double epsilon)

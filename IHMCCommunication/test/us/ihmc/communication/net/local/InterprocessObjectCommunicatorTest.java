@@ -36,7 +36,7 @@ public class InterprocessObjectCommunicatorTest
       assertEquals("Open ports does not equal number of communicators", communicators.size(), IntraprocessCommunicationNetwork.getOpenPorts());
       for (int i = 0; i < communicators.size(); i++)
       {
-         communicators.get(i).close();
+         communicators.get(i).disconnect();
       }
 
       assertEquals("Open ports does not equal zero", 0, IntraprocessCommunicationNetwork.getOpenPorts());
@@ -85,9 +85,9 @@ public class InterprocessObjectCommunicatorTest
          port128ClientA.consumeObject(object);
       }
 
-      port128ClientA.close();
-      port128ClientB.close();
-      port256Client.close();
+      port128ClientA.disconnect();
+      port128ClientB.disconnect();
+      port256Client.disconnect();
 
       assertEquals("Open ports does not equal zero", 0, IntraprocessCommunicationNetwork.getOpenPorts());
       assertFalse("Hashmap is not cleaned up", IntraprocessCommunicationNetwork.hasMap());

@@ -74,8 +74,8 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    
    public void close()
    {
-      uiPacketServer.close();
-      uiModuleCommunicator.close();
+      uiPacketServer.disconnect();
+      uiModuleCommunicator.disconnect();
    }
 
    @Override

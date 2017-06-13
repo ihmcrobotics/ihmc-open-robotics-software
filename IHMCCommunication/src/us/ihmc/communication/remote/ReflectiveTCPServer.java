@@ -174,6 +174,7 @@ public class ReflectiveTCPServer
    // ------------- Server Thread - Listens for new connections and add them to the list of connections to handle
    public class ServerThread implements Runnable
    {
+      @Override
       public void run()
       {
          while ((serverSocket != null) &&!serverSocket.isClosed())
@@ -264,6 +265,7 @@ public class ReflectiveTCPServer
       /**
        * run - while connected, continues to read the object input stream and adds all objects to the newObjects vector
        */
+      @Override
       public void run()
       {
          try
