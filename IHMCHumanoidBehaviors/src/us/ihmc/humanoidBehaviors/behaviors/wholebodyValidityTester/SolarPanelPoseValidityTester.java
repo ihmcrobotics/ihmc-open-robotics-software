@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -64,6 +63,14 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
             
       Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisYaw);
+   }
+   
+   public void setWholeBodyPose(SolarPanelPath cleaningPath, double time, double pelvisHeight, double chestYaw, double chestPitch)
+   {
+      SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
+            
+      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      setWholeBodyPose(aPose, pelvisHeight, chestYaw, chestPitch);
    }
    
    public void setWholeBodyPose(Pose desiredHandPose, double chestYaw)
