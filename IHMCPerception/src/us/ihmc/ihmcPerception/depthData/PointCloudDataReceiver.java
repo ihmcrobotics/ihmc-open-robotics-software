@@ -6,7 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,7 +31,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class PointCloudDataReceiver extends Thread implements NetStateListener, PointCloudDataReceiverInterface
+public class PointCloudDataReceiver extends Thread implements ConnectionStateListener, PointCloudDataReceiverInterface
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;

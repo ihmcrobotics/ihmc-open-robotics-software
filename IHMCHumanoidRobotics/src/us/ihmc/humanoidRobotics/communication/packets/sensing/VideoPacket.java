@@ -9,7 +9,9 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -21,8 +23,8 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    public VideoSource videoSource;
    public long timeStamp;
    public byte[] data;
-   public Point3D position;
-   public Quaternion orientation;
+   public Point3DReadOnly position;
+   public QuaternionReadOnly orientation;
    public IntrinsicParameters intrinsicParameters;
    
    public VideoPacket()
@@ -30,12 +32,12 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       this(videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters,
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters,
          PacketDestination packetDestination)
    {
       if(packetDestination != null)
@@ -68,12 +70,12 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       return intrinsicParameters;
    }
 
-   public Point3D getPosition()
+   public Point3DReadOnly getPosition()
    {
       return position;
    }
 
-   public Quaternion getOrientation()
+   public QuaternionReadOnly getOrientation()
    {
       return orientation;
    }

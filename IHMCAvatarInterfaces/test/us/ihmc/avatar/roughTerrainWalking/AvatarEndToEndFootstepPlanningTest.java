@@ -151,8 +151,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          ThreadTools.sleepForever();
       }
 
-      behaviorCommunicatorClient.close();
-      behaviorCommunicatorServer.close();
+      behaviorCommunicatorClient.disconnect();
+      behaviorCommunicatorServer.disconnect();
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)

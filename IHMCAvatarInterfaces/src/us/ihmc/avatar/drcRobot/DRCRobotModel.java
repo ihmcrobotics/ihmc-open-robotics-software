@@ -52,8 +52,6 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 
    public abstract DRCRobotJointMap getJointMap();
 
-   public abstract DRCRobotSensorInformation getSensorInformation();
-
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
    public abstract void setEnableJointDamping(boolean enableJointDamping);
