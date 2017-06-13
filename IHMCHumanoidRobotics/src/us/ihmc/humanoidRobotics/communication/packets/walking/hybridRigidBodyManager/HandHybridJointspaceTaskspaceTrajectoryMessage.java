@@ -46,6 +46,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHandTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getArmTrajectoryMessage());
+      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
    }
 
    /**

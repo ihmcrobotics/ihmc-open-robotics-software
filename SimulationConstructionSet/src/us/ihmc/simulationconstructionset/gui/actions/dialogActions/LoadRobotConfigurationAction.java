@@ -1,26 +1,31 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadRobotConfigurationDialogConstructor;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadRobotConfigurationDialogConstructor;
-
-public class LoadRobotConfigurationAction extends AbstractAction
+@SuppressWarnings("serial")
+public class LoadRobotConfigurationAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
-
    private LoadRobotConfigurationDialogConstructor constructor;
 
    public LoadRobotConfigurationAction(LoadRobotConfigurationDialogConstructor constructor)
    {
-      super("Load Robot Configuration...");
-      this.constructor = constructor;
+      super("Load Robot Configuration...",
+              "",
+              KeyEvent.VK_UNDEFINED,
+              "Load Robot Config",
+              "Load Robot Configuration"
+      );
 
-      this.putValue(Action.LONG_DESCRIPTION, "Load Robot Configuration");
-      this.putValue(Action.SHORT_DESCRIPTION, "load robot config");
+      this.constructor = constructor;
+   }
+
+   @Override
+   public void doAction()
+   {
+      constructor.constructDialog();
    }
 
    public void setCurrentDirectory(File directory)
@@ -32,11 +37,4 @@ public class LoadRobotConfigurationAction extends AbstractAction
    {
       constructor.setCurrentDirectory(directory);
    }
-
-   @Override
-   public void actionPerformed(ActionEvent e)
-   {
-      constructor.constructDialog();
-   }
-
 }

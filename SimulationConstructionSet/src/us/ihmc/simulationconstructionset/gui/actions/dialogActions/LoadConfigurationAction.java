@@ -1,25 +1,25 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadConfigurationDialogConstructor;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadConfigurationDialogConstructor;
-
-public class LoadConfigurationAction extends AbstractAction
+@SuppressWarnings("serial")
+public class LoadConfigurationAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
    private LoadConfigurationDialogConstructor constructor;
    
    public LoadConfigurationAction(LoadConfigurationDialogConstructor constructor)
    {
-      super("Load Configuration...");
+      super("Load Configuration...",
+              "",
+              KeyEvent.VK_UNDEFINED,
+              "Load Config",
+              "Load Configuration"
+      );
+
       this.constructor = constructor;
-      
-      this.putValue(Action.LONG_DESCRIPTION, "Load Configuration");
-      this.putValue(Action.SHORT_DESCRIPTION, "load config");
    }
 
    public void setCurrentDirectory(File directory)
@@ -33,7 +33,7 @@ public class LoadConfigurationAction extends AbstractAction
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }
@@ -41,6 +41,5 @@ public class LoadConfigurationAction extends AbstractAction
    public void loadGUIConfigurationFile(File file)
    {
       constructor.loadGUIConfigurationFile(file);
-      
    }
 }

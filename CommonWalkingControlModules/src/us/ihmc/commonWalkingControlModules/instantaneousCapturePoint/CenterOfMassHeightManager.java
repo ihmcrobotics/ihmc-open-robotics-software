@@ -184,6 +184,23 @@ public class CenterOfMassHeightManager
     */
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
+      if(command.isEnableUserPelvisControl())
+      {
+         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+         stateMachine.getCurrentState().getCurrentDesiredHeight(tempPosition);
+         
+         tempPose.setToZero(tempPosition.getReferenceFrame());
+         tempPose.setPosition(tempPosition);
+         
+         if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
+         {
+            requestState(pelvisHeightControlState.getStateEnum());
+            return;
+         }
+         PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
+         return;
+      }
+      
       centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
       requestState(centerOfMassHeightControlState.getStateEnum());
    }

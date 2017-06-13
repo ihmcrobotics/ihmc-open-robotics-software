@@ -233,8 +233,14 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    public void compute(double time)
    {
       currentTrajectoryTime.set(time);
-
       boolean changedSubTrajectory = false;
+
+      if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
+      {
+         currentWaypointIndex.set(0);
+         changedSubTrajectory = true;
+      }
+
       while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {

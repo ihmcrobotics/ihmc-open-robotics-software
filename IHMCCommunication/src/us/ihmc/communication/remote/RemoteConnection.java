@@ -11,7 +11,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class RemoteConnection
+import us.ihmc.communication.interfaces.Connectable;
+
+public class RemoteConnection implements Connectable
 {
    private static final int PORT = 7733;
    
@@ -24,6 +26,7 @@ public class RemoteConnection
    private String myIP;
    private boolean DEBUG = false;
 
+   @Override
    public boolean isConnected()
    {
       return isConnected;
@@ -221,6 +224,7 @@ public class RemoteConnection
          this.port = port;
       }
 
+      @Override
       public void run()
       {
          try

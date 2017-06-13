@@ -316,7 +316,7 @@ public abstract class ToolboxModule
       }
       executorService.shutdownNow();
       packetCommunicator.closeConnection();
-      packetCommunicator.close();
+      packetCommunicator.disconnect();
 
       if (yoVariableServer != null)
       {

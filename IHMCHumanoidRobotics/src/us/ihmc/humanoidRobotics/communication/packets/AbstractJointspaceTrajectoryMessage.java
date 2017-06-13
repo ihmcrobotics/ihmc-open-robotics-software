@@ -40,6 +40,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       }
 
       setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
+      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
    }
 
    /**

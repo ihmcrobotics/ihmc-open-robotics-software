@@ -1,30 +1,25 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSnapshotDialogConstructor;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSnapshotDialogConstructor;
-
-public class ExportSnapshotAction extends AbstractAction
+@SuppressWarnings("serial")
+public class ExportSnapshotAction extends SCSAction
 {
-   private static final long serialVersionUID = 958525206323850018L;
-
    private final ExportSnapshotDialogConstructor constructor;
    
    public ExportSnapshotAction(ExportSnapshotDialogConstructor constructor)
    {
-      super("Export Snapshot...");
-      this.constructor = constructor;
+      super("Export Snapshot...",
+              "icons/Screenshot.png",
+              KeyEvent.VK_S,
+              "Export Snapshot",
+              "Export snapshot to a file."
+      );
 
-      String iconFilename = "icons/YoExportSnapshot.gif";
-      int shortKey = KeyEvent.VK_S;
-      String longDescription = "Export snapshot to a file.";
-      String shortDescription = "Export Snapshot";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void setCurrentDirectory(File directory)
@@ -38,7 +33,7 @@ public class ExportSnapshotAction extends AbstractAction
    }
 
    @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
      constructor.constructDialog();
    }

@@ -111,7 +111,7 @@ public class CameraDataReceiver extends Thread
                   stereoListeners.get(i).newImageAvailable(data, cameraFrame.getTransformToWorldFrame());
                }
 
-               compressedVideoDataServer.updateImage(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
+               compressedVideoDataServer.onFrame(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
          }

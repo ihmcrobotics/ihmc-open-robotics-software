@@ -207,10 +207,10 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          iteration++;
       }
 
-      controllerCommunicatorClient.close();
-      controllerCommunicatorServer.close();
-      rosAPI_communicator_client.close();
-      rosAPI_communicator_server.close();
+      controllerCommunicatorClient.disconnect();
+      controllerCommunicatorServer.disconnect();
+      rosAPI_communicator_client.disconnect();
+      rosAPI_communicator_server.disconnect();
    }
 
    private AvatarSimulation avatarSimulation;
@@ -279,8 +279,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          }
       }
 
-      packetCommunicatorClient.close();
-      packetCommunicatorServer.close();
+      packetCommunicatorClient.disconnect();
+      packetCommunicatorServer.disconnect();
    }
 
    private Packet createRandomPacket(Class<? extends Packet> clazz, Random random)
