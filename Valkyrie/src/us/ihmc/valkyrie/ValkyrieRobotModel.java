@@ -60,6 +60,7 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameterization;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -414,7 +415,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
+      return new ValkyrieSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
    }
 
    @Override
@@ -494,7 +495,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
-      return null;
+      return new ValkyrieCollisionBoxProvider(createFullRobotModel());
    }
 
    @Override

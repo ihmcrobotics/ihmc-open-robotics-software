@@ -169,7 +169,6 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
-      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
@@ -203,13 +202,6 @@ public class BalanceManager
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
-      controlHeightWithMomentum.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override public void variableChanged(YoVariable<?> v)
-         {
-            linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(controlHeightWithMomentum.getBooleanValue());
-         }
-      });
 
       String graphicListName = getClass().getSimpleName();
 
@@ -321,7 +313,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
 
@@ -371,6 +363,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
+      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       linearMomentumRateOfChangeControlModule.setOmega0(omega0);

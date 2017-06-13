@@ -121,4 +121,11 @@ public class RRT2DNodeWalkingPath extends RRTNode
          sizeZ = size[2];
       }
    }
+
+   @Override
+   public void setRandomNodeData()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

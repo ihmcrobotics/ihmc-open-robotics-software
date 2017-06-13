@@ -1,26 +1,40 @@
 package us.ihmc.ihmcPerception.vision.shapes;
 
-import boofcv.gui.image.ImagePanel;
-import org.opencv.core.*;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import boofcv.gui.image.ImagePanel;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.color.ColorConversions;
 import us.ihmc.graphicsDescription.color.HSVValue;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -29,7 +43,14 @@ public class OpenCVColoredCircularBlobDetector
 {
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error(OpenCVColoredCircularBlobDetector.class, "Failed to load the OpenCV library.");
+      }
    }
 
    private final String videoFileName;

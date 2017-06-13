@@ -10,10 +10,6 @@ import java.util.ArrayList;
 
 import us.ihmc.communication.streamingData.StreamingDataConsumer;
 
-/**
- * User: GrayThomas
- * Date: 12/10/12
- */
 public class DataObjectTransponder implements StreamingDataConsumer
 {
    protected static boolean DEBUG = false;
@@ -26,17 +22,18 @@ public class DataObjectTransponder implements StreamingDataConsumer
    private boolean connected = false;
    private boolean isSilent = false;
 
-
    void createNewDataReadingDaemon()
    {
       Thread clientThread = new Thread(new DataReadingThread());
       clientThread.setDaemon(true);
       clientThread.start();
    }
+
    int getNumberOfConsumers()
    {
       return streamingDataConsumers.size();
    }
+
    public void addStreamingDataConsumer(StreamingDataConsumer streamingDataConsumer)
    {
       streamingDataConsumers.add(streamingDataConsumer);
@@ -47,11 +44,9 @@ public class DataObjectTransponder implements StreamingDataConsumer
       printIfDebug(getName() + "'s hasClientHandler is " + hasClientHandler + ".");
       printIfDebug(getName() + "'s objectOutputStream is " + objectOutputStream + ".");
 
-
       if (hasClientHandler)
       {
          printIfDebug(getName() + " is sending data on port: " + port);
-
 
          synchronized (this)
          {
@@ -72,7 +67,6 @@ public class DataObjectTransponder implements StreamingDataConsumer
          {
             printIfDebug(getName() + "'s client on port " + port + " is dead");
 
-
             hasClientHandler = false;
          }
       }
@@ -90,17 +84,17 @@ public class DataObjectTransponder implements StreamingDataConsumer
       port = socket.getPort();
       hasClientHandler = true;
       connected = true;
-      printIfDebug(getName()+" is opening output object stream");
+      printIfDebug(getName() + " is opening output object stream");
       objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-      printIfDebug(getName()+" has opened two streams: output "+ objectOutputStream.toString());
-      printIfDebug(getName()+" is opening input object stream");
+      printIfDebug(getName() + " has opened two streams: output " + objectOutputStream.toString());
+      printIfDebug(getName() + " is opening input object stream");
       objectInputStream = new ObjectInputStream(socket.getInputStream());
-      printIfDebug(getName()+" has opened two streams: input "+ objectInputStream.toString());
+      printIfDebug(getName() + " has opened two streams: input " + objectInputStream.toString());
       createNewDataReadingDaemon();
 
       synchronized (this)
       {
-         notifyAll();         
+         notifyAll();
       }
    }
 
@@ -126,6 +120,7 @@ public class DataObjectTransponder implements StreamingDataConsumer
 
    private class DataReadingThread implements Runnable
    {
+      @Override
       public void run()
       {
          while (connected)
@@ -141,15 +136,16 @@ public class DataObjectTransponder implements StreamingDataConsumer
                {
                   if (dataIdentifier != streamingDataConsumer.getDataIdentifier() && streamingDataConsumer.canHandle(obj))
                   {
-                     System.err.println("Can handle yet dataIdentifier != streamingDataConsumer.getDataIdentifier(). object = " + obj + " dataIdentifier = " + dataIdentifier);
+                     System.err.println("Can handle yet dataIdentifier != streamingDataConsumer.getDataIdentifier(). object = " + obj + " dataIdentifier = "
+                           + dataIdentifier);
                      System.err.println("streamingDataConsumer = " + streamingDataConsumer);
                      System.err.println("streamingDataConsumer.getDataIdentifier() = " + streamingDataConsumer.getDataIdentifier());
                      throw new RuntimeException();
                   }
-                  
+
                   if ((dataIdentifier == streamingDataConsumer.getDataIdentifier()) && (streamingDataConsumer.canHandle(obj)))
                   {
-                     consumersResponding ++;
+                     consumersResponding++;
                      streamingDataConsumer.consume(dataIdentifier, obj);
                   }
                }
@@ -157,7 +153,7 @@ public class DataObjectTransponder implements StreamingDataConsumer
                printIfDebug(getName() + "'s DataReadingThread: " + consumersResponding + " consumer(s) Responding");
                if (consumersResponding == 0 && !isSilent)
                {
-                  System.out.println(getName()+" Number of Consumers: "+streamingDataConsumers.size());
+                  System.out.println(getName() + " Number of Consumers: " + streamingDataConsumers.size());
                   throw new RuntimeException(getName() + ", DataObjectTransponder: DataReadingThread: unhandled packet");
                }
             }
@@ -200,7 +196,6 @@ public class DataObjectTransponder implements StreamingDataConsumer
          socket = null;
          objectInputStream = null;
       }
-
    }
 
    public void setIsSilent(boolean isSilent)
@@ -208,17 +203,19 @@ public class DataObjectTransponder implements StreamingDataConsumer
       this.isSilent = isSilent;
    }
 
+   @Override
    public boolean canHandle(Object object)
    {
       return true;
    }
 
+   @Override
    public void consume(long dataObjectIdentifier, Object dataObject)
    {
       try
       {
          sendData(dataObjectIdentifier, dataObject);
-      } 
+      }
       catch (IOException e)
       {
          // TODO Auto-generated catch block
@@ -226,6 +223,7 @@ public class DataObjectTransponder implements StreamingDataConsumer
       }
    }
 
+   @Override
    public long getDataIdentifier()
    {
       return 0;

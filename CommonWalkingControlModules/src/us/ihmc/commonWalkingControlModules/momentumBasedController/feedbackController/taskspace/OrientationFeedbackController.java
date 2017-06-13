@@ -84,6 +84,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private RigidBody base;
    private ReferenceFrame controlBaseFrame;
+   private ReferenceFrame angularGainsFrame;
 
    private final RigidBody endEffector;
    private final MovingReferenceFrame endEffectorFrame;
@@ -178,6 +179,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      angularGainsFrame = command.getAngularGainsFrame();
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
@@ -313,8 +315,14 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorRotationVector);
 
-      feedbackTermToPack.changeFrame(endEffectorFrame);
+      if (angularGainsFrame != null)
+         feedbackTermToPack.changeFrame(angularGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(endEffectorFrame);
+
       kp.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(endEffectorFrame);
    }
 
    /**
@@ -345,8 +353,14 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorAngularVelocity.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(endEffectorFrame);
+      if (angularGainsFrame != null)
+         feedbackTermToPack.changeFrame(angularGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(endEffectorFrame);
+
       kd.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(endEffectorFrame);
    }
 
    /**
@@ -385,8 +399,14 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorRotationVectorIntegrated.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(endEffectorFrame);
+      if (angularGainsFrame != null)
+         feedbackTermToPack.changeFrame(angularGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(endEffectorFrame);
+
       ki.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(endEffectorFrame);
    }
 
    @Override

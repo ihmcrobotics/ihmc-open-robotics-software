@@ -1,30 +1,28 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
-
-public class CreateNewViewportWindowAction extends AbstractAction
+@SuppressWarnings("serial")
+public class CreateNewViewportWindowAction extends SCSAction
 {
-   private static final long serialVersionUID = 1890952078365483337L;
    private CreateNewViewportWindowCommandExecutor executor;
 
    public CreateNewViewportWindowAction(CreateNewViewportWindowCommandExecutor executor)
    {
-      super("New Viewport Window");
-      this.executor = executor;
+      super("New Viewport Window",
+              "",
+              KeyEvent.VK_V,
+              "Creates a new Viewport Window.",
+              "Creates a new Viewport Window for showing 3D Graphics in SCS."
+      );
 
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_V));
-      this.putValue(Action.LONG_DESCRIPTION, "Creates a new Viewport Window for showing 3D Graphics in SCS.");
-      this.putValue(Action.SHORT_DESCRIPTION, "Creates a new Viewport Window.");
+      this.executor = executor;
    }
 
    @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.createNewViewportWindow();
    }

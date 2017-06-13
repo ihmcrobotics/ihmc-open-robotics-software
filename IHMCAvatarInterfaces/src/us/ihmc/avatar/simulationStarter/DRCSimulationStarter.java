@@ -16,7 +16,6 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -36,6 +35,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -48,11 +48,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.SCSPlaybackListener;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -493,7 +493,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
             cameraConfiguration.setCameraMount(cameraName);
 
             int framesPerSecond = 25;
-            DRCRenderedSceneVideoHandler drcRenderedSceneVideoHandler = new DRCRenderedSceneVideoHandler(scsSensorOutputPacketCommunicator);
+            RawVideoDataServer drcRenderedSceneVideoHandler = new RawVideoDataServer(scsSensorOutputPacketCommunicator);
             simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider,
                                                               framesPerSecond);
          }
@@ -564,7 +564,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       if (controllerPacketCommunicator != null)
       {
-         controllerPacketCommunicator.close();
+         controllerPacketCommunicator.disconnect();
       }
    }
 

@@ -1,211 +1,120 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+public class GraphPropertiesPanel extends GridPane implements EventHandler<javafx.event.ActionEvent> {
+    private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
 
+    private final TextField minTextField, maxTextField, baseLineTextField;
+    private final RadioButton individualButton, autoButton, manualButton;
 
-@SuppressWarnings("serial")
-public class GraphPropertiesPanel extends JPanel implements ActionListener
-{
-   private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
+    private final RadioButton timePlotButton, phasePlotButton, baseLineButton;
+    private final Button createFFTPlotButton;
+    private final Button createBodePlotButton;
 
-   private final JTextField minTextField, maxTextField, baseLineTextField;
-   private final JRadioButton individualButton, autoButton, manualButton;
+    private final YoGraph graph;
+    private double newMinVal, newMaxVal;
+    private double[] newBaseVal;
 
-   private final JRadioButton timePlotButton, phasePlotButton, baseLineButton;
-   private final JButton createFFTPlotButton;
-   private final JButton createBodePlotButton;
+    public GraphPropertiesPanel(YoGraph graph) {
+        super();
 
-   private final YoGraph graph;
-   private double newMinVal, newMaxVal;
-   private double[] newBaseVal;
+        this.graph = graph;
 
-   public GraphPropertiesPanel(YoGraph graph)
-   {
-      super();
+        // this.selectedVariable = variable;
+        // selectedVariable.reCalcMinMax();
+        newMinVal = graph.getManualMinScaling();
+        newMaxVal = graph.getManualMaxScaling();
 
-      this.graph = graph;
+        double[] baseLines = graph.getBaseLines();
+        if ((baseLines != null) && (baseLines.length > 0)) {
+            newBaseVal = baseLines;
+        } else {
+            newBaseVal = new double[]{0.0};
+        }
 
-      // this.selectedVariable = variable;
-      // selectedVariable.reCalcMinMax();
-      newMinVal = graph.getManualMinScaling();
-      newMaxVal = graph.getManualMaxScaling();
+        ToggleGroup scaleControlGroup = new ToggleGroup();
+        ToggleGroup plotTypeGroup = new ToggleGroup();
 
-      double[] baseLines = graph.getBaseLines();
-      if ((baseLines != null) && (baseLines.length > 0))
-         newBaseVal = baseLines;
-      else
-         newBaseVal = new double[] {0.0};
+        // Row 0:
 
-      GridBagLayout gridbag = new GridBagLayout();
+        Label scalingLabel = new Label("Scaling:");
+        GridPane.setConstraints(scalingLabel, 0, 0);
 
-      this.setLayout(gridbag);
+        individualButton = new RadioButton("Individual");
+        individualButton.setSelected((graph.getScalingMethod() == YoGraph.INDIVIDUAL_SCALING));
+        individualButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        individualButton.setToggleGroup(scaleControlGroup);
+        GridPane.setConstraints(individualButton, 1, 0);
 
-      Border blackLine = BorderFactory.createLineBorder(Color.black);
-      TitledBorder title = BorderFactory.createTitledBorder(blackLine, "Master Setting");
-      this.setBorder(title);
+        autoButton = new RadioButton("Auto");
+        autoButton.setSelected((graph.getScalingMethod() == YoGraph.AUTO_SCALING));
+        autoButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        autoButton.setToggleGroup(scaleControlGroup);
+        GridPane.setConstraints(autoButton, 3, 0);
 
-      GridBagConstraints constraints = new GridBagConstraints();
+        manualButton = new RadioButton("Manual");
+        manualButton.setSelected((graph.getScalingMethod() == YoGraph.MANUAL_SCALING));
+        manualButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        manualButton.setToggleGroup(scaleControlGroup);
+        GridPane.setConstraints(manualButton, 5, 0);
 
-      // Row 0:
+        // Row 1:
 
-      JLabel scalingLabel = new JLabel("Scaling:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 0;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(scalingLabel, constraints);
-      this.add(scalingLabel);
+        Label settingsLabel = new Label("Manual Settings:");
+        GridPane.setConstraints(settingsLabel, 0, 1);
 
-      individualButton = new JRadioButton("Individual", (graph.getScalingMethod() == YoGraph.INDIVIDUAL_SCALING));
-      individualButton.addActionListener(this);
-      constraints.gridx = 1;
-      constraints.gridy = 0;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(individualButton, constraints);
-      this.add(individualButton);
+        Label minSettingsLabel = new Label("Min:");
+        GridPane.setConstraints(minSettingsLabel, 1, 1);
 
-      autoButton = new JRadioButton("Auto", (graph.getScalingMethod() == YoGraph.AUTO_SCALING));
-      autoButton.addActionListener(this);
-      constraints.gridx = 3;
-      constraints.gridy = 0;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(autoButton, constraints);
-      this.add(autoButton);
+        String minValString = numFormat.format(newMinVal);
+        minTextField = new TextField(minValString);
+        minTextField.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        minTextField.setDisable(graph.getScalingMethod() != YoGraph.MANUAL_SCALING);
+        GridPane.setConstraints(minTextField, 2, 1);
 
-      manualButton = new JRadioButton("Manual", (graph.getScalingMethod() == YoGraph.MANUAL_SCALING));
-      manualButton.addActionListener(this);
-      constraints.gridx = 5;
-      constraints.gridy = 0;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(manualButton, constraints);
-      this.add(manualButton);
+        Label maxSettingsLabel = new Label("Max:");
+        GridPane.setConstraints(maxSettingsLabel, 4, 1);
 
-      ButtonGroup group = new ButtonGroup();
-      group.add(individualButton);
-      group.add(autoButton);
-      group.add(manualButton);
+        String maxValString = numFormat.format(newMaxVal);
+        maxTextField = new TextField(maxValString);
+        maxTextField.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        maxTextField.setDisable(graph.getScalingMethod() != YoGraph.MANUAL_SCALING);
+        GridPane.setConstraints(maxTextField, 5, 1);
 
-      // Row 1:
+        // Row 2:
 
-      JLabel settingsLabel = new JLabel("Manual Settings:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(settingsLabel, constraints);
-      this.add(settingsLabel);
+        Label rangeLabel = new Label("Data Range:");
+        GridPane.setConstraints(rangeLabel, 0, 2);
 
-      JLabel minSettingsLabel = new JLabel("  Min:  ");
-      constraints.gridx = 1;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(minSettingsLabel, constraints);
-      this.add(minSettingsLabel);
+        Label minRangeLabel = new Label("Min:");
+        GridPane.setConstraints(minRangeLabel, 1, 2);
 
-      String minValString = numFormat.format(newMinVal);
-      minTextField = new JTextField(minValString);
-      minTextField.addActionListener(this);
-      minTextField.setEnabled(graph.getScalingMethod() == YoGraph.MANUAL_SCALING);
-      constraints.gridx = 2;
-      constraints.gridy = 1;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(minTextField, constraints);
-      this.add(minTextField);
+        minValString = numFormat.format(graph.getMin());
+        Label minTextLabel = new Label(minValString);
+        GridPane.setConstraints(minTextLabel, 2, 2);
 
-      JLabel maxSettingsLabel = new JLabel("  Max:  ");
-      constraints.gridx = 4;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(maxSettingsLabel, constraints);
-      this.add(maxSettingsLabel);
+        Label maxRangeLabel = new Label("Max:");
+        GridPane.setConstraints(maxRangeLabel, 4, 2);
 
+        maxValString = numFormat.format(graph.getMax());
+        Label maxTextLabel = new Label(maxValString);
+        GridPane.setConstraints(maxTextLabel, 5, 2);
 
-      String maxValString = numFormat.format(newMaxVal);
-      maxTextField = new JTextField(maxValString);
-      maxTextField.addActionListener(this);
-      maxTextField.setEnabled(graph.getScalingMethod() == YoGraph.MANUAL_SCALING);
-      constraints.gridx = 5;
-      constraints.gridy = 1;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(maxTextField, constraints);
-      this.add(maxTextField);
+        // Row 3
 
+        Label typeLabel = new Label("Plot Type:");
+        GridPane.setConstraints(typeLabel, 0, 3);
 
-      // Row 2:
+        timePlotButton = new RadioButton("Time");
+        timePlotButton.setSelected(graph.getPlotType() == YoGraph.TIME_PLOT);
+        timePlotButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        timePlotButton.setToggleGroup(plotTypeGroup);
+        GridPane.setConstraints(timePlotButton, 1, 3);
 
-      JLabel rangeLabel = new JLabel("Data Range:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(rangeLabel, constraints);
-      this.add(rangeLabel);
-
-      JLabel minRangeLabel = new JLabel("  Min:  ");
-      constraints.gridx = 1;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(minRangeLabel, constraints);
-      this.add(minRangeLabel);
-
-      minValString = numFormat.format(graph.getMin());
-      JLabel minTextLabel = new JLabel(minValString);
-      constraints.gridx = 2;
-      constraints.gridy = 2;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(minTextLabel, constraints);
-      this.add(minTextLabel);
-
-      JLabel maxRangeLabel = new JLabel("  Max:  ");
-      constraints.gridx = 4;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(maxRangeLabel, constraints);
-      this.add(maxRangeLabel);
-
-      maxValString = numFormat.format(graph.getMax());
-      JLabel maxTextLabel = new JLabel(maxValString);
-
-      // jTextField.addActionListener(this);
-      constraints.gridx = 5;
-      constraints.gridy = 2;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(maxTextLabel, constraints);
-      this.add(maxTextLabel);
-
-      // Row 3
-      JLabel typeLabel = new JLabel("Plot Type:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 3;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(typeLabel, constraints);
-      this.add(typeLabel);
-
-      timePlotButton = new JRadioButton("Time", (graph.getPlotType() == YoGraph.TIME_PLOT));
-      timePlotButton.addActionListener(this);
-      constraints.gridx = 1;
-      constraints.gridy = 3;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(timePlotButton, constraints);
-      this.add(timePlotButton);
-
+        // TODO: can this be removed?
       /*
        * scatterPlotButton = new JRadioButton("Scatter",(graph.getPlotType()==graph.SCATTER_PLOT));
        * scatterPlotButton.addActionListener(this);
@@ -215,221 +124,179 @@ public class GraphPropertiesPanel extends JPanel implements ActionListener
        * this.add(scatterPlotButton);
        */
 
-      phasePlotButton = new JRadioButton("Phase", (graph.getPlotType() == YoGraph.PHASE_PLOT));
-      phasePlotButton.addActionListener(this);
-      constraints.gridx = 3;
-      constraints.gridy = 3;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(phasePlotButton, constraints);
-      this.add(phasePlotButton);
+        phasePlotButton = new RadioButton("Phase");
+        phasePlotButton.setSelected(graph.getPlotType() == YoGraph.PHASE_PLOT);
+        phasePlotButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        phasePlotButton.setToggleGroup(plotTypeGroup);
+        GridPane.setConstraints(phasePlotButton, 3, 3);
 
-      createFFTPlotButton = new JButton("FFT");
-      createFFTPlotButton.addActionListener(this);
-      constraints.gridx = 4;
-      constraints.gridy = 3;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(createFFTPlotButton, constraints);
-      this.add(createFFTPlotButton);
+        createFFTPlotButton = new Button("FFT");
+        createFFTPlotButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        GridPane.setConstraints(createFFTPlotButton, 4, 3);
 
-      createBodePlotButton = new JButton("Bode");
-      createBodePlotButton.addActionListener(this);
-      constraints.gridx = 5;
-      constraints.gridy = 3;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(createBodePlotButton, constraints);
-      this.add(createBodePlotButton);
+        createBodePlotButton = new Button("Bode");
+        createBodePlotButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        GridPane.setConstraints(createBodePlotButton, 5, 3);
 
-      JLabel baseLineLabel = new JLabel("Base Line:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 4;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(baseLineLabel, constraints);
-      this.add(baseLineLabel);
+        Label baseLineLabel = new Label("Base Line:");
+        GridPane.setConstraints(baseLineLabel, 0, 4);
+
+        StringBuilder baseLineValString = new StringBuilder();
+
+        for (double current : newBaseVal) {
+            baseLineValString.append(numFormat.format(current)).append(",");
+        }
+
+        baseLineTextField = new TextField(baseLineValString.toString());
+        baseLineTextField.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        baseLineTextField.setDisable(false);
+        GridPane.setConstraints(baseLineTextField, 1, 4);
 
 
-      String baseLineValString = "";
+        baseLineButton = new RadioButton("Show Base Line");
+        // TODO: this line was replaced in original code with setSelected(true) - is this line needed?
+        //baseLineButton.setSelected(graph.getShowBaseLines());
+        baseLineButton.setSelected(true);
+        baseLineButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        GridPane.setConstraints(baseLineButton, 3, 4);
 
-      for (double current : newBaseVal)
-      {
-         baseLineValString += numFormat.format(current) + ",";
-      }
+        this.getChildren().addAll(
+                scalingLabel,
+                individualButton,
+                autoButton,
+                manualButton,
+                settingsLabel,
+                minSettingsLabel,
+                minTextField,
+                maxSettingsLabel,
+                maxTextField,
+                rangeLabel,
+                minRangeLabel,
+                minTextLabel,
+                maxRangeLabel,
+                maxTextLabel,
+                typeLabel,
+                timePlotButton,
+                phasePlotButton,
+                createFFTPlotButton,
+                createBodePlotButton,
+                baseLineLabel,
+                baseLineTextField,
+                baseLineButton
+        );
+    }
 
-      baseLineTextField = new JTextField(baseLineValString);
-      baseLineTextField.addActionListener(this);
-      baseLineTextField.setEnabled(true);
-      constraints.gridx = 1;
-      constraints.gridy = 4;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(baseLineTextField, constraints);
-      this.add(baseLineTextField);
+    public void commitChanges() {
+        updateMinTextField();
+        updateMaxTextField();
+        updateBaseLineTextField();
 
+        graph.setManualScaling(newMinVal, newMaxVal);
 
-      baseLineButton = new JRadioButton("Show Base Line", graph.getShowBaseLines());
-      baseLineButton.setSelected(true);
-      baseLineButton.addActionListener(this);
-      constraints.gridx = 3;
-      constraints.gridy = 4;
-      constraints.gridwidth = 1;
+        if (this.individualButton.isSelected()) {
+            graph.setScalingMethod(YoGraph.INDIVIDUAL_SCALING);
+        } else if (this.autoButton.isSelected()) {
+            graph.setScalingMethod(YoGraph.AUTO_SCALING);
+        } else {
+            graph.setScalingMethod(YoGraph.MANUAL_SCALING);
+        }
 
-      // constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(baseLineButton, constraints);
-      this.add(baseLineButton);
+        if (this.timePlotButton.isSelected()) {
+            graph.setPlotType(YoGraph.TIME_PLOT);
+        } else if (this.phasePlotButton.isSelected()) {
+            graph.setPlotType(YoGraph.PHASE_PLOT);
+        }
 
-      ButtonGroup plotGroup = new ButtonGroup();
-      plotGroup.add(timePlotButton);
-
-      // plotGroup.add(scatterPlotButton);
-      plotGroup.add(phasePlotButton);
-
-   }
-
-   public void commitChanges()
-   {
-      updateMinTextField();
-      updateMaxTextField();
-      updateBaseLineTextField();
-
-      graph.setManualScaling(newMinVal, newMaxVal);
-
-      if (this.individualButton.isSelected())
-         graph.setScalingMethod(YoGraph.INDIVIDUAL_SCALING);
-      else if (this.autoButton.isSelected())
-         graph.setScalingMethod(YoGraph.AUTO_SCALING);
-      else
-         graph.setScalingMethod(YoGraph.MANUAL_SCALING);
-
-      if (this.timePlotButton.isSelected())
-         graph.setPlotType(YoGraph.TIME_PLOT);
-
-      // if (this.scatterPlotButton.isSelected()) graph.setPlotType(graph.SCATTER_PLOT);
-      if (this.phasePlotButton.isSelected())
-         graph.setPlotType(YoGraph.PHASE_PLOT);
-
-      graph.setShowBaseLines(baseLineButton.isSelected());
-      graph.setBaseLines(newBaseVal);
+        /* TODO: can this scatterplot catch be removed too?
+        else if (this.scatterPlotButton.isSelected()) {
+            graph.setPlotType(graph.SCATTER_PLOT);
+        }*/
 
 
-   }
+        graph.setShowBaseLines(baseLineButton.isSelected());
+        graph.setBaseLines(newBaseVal);
 
-   @Override
-   public void actionPerformed(ActionEvent event)
-   {
-      if (event.getSource() == maxTextField)
-         updateMaxTextField();
-      if (event.getSource() == minTextField)
-         updateMinTextField();
 
-      if (event.getSource() == autoButton)
-      {
-         maxTextField.setEnabled(false);
-         minTextField.setEnabled(false);
-      }
+    }
 
-      if (event.getSource() == manualButton)
-      {
-         maxTextField.setEnabled(true);
-         minTextField.setEnabled(true);
-      }
+    public void updateMaxTextField() {
+        String text = maxTextField.getText();
 
-      if (event.getSource() == this.individualButton)
-      {
-         maxTextField.setEnabled(false);
-         minTextField.setEnabled(false);
-      }
+        try {
+            newMaxVal = Double.valueOf(text);
+        } catch (NumberFormatException e) {
+            maxTextField.setText(numFormat.format(newMaxVal));
+        }
 
-      if (event.getSource() == this.baseLineButton)
-      {
-         baseLineTextField.setEnabled(baseLineButton.isSelected());
-      }
+    }
 
-      if (event.getSource() == this.createFFTPlotButton)
-      {
-         graph.createFFTPlotsFromEntriesBetweenInOutPoints();
-      }
+    public void updateMinTextField() {
+        String text = minTextField.getText();
 
-      if (event.getSource() == this.createBodePlotButton)
-      {
-         graph.createBodePlotFromEntriesBetweenInOutPoints();
-      }
-   }
+        try {
+            newMinVal = Double.valueOf(text);
+        } catch (NumberFormatException e) {
+            minTextField.setText(numFormat.format(newMinVal));
+        }
+    }
 
-   public void updateMaxTextField()
-   {
-      String text = maxTextField.getText();
+    public void updateBaseLineTextField() {
+        String text = baseLineTextField.getText();
 
-      try
-      {
-         double val = Double.valueOf(text).doubleValue();
-         newMaxVal = val;
-      }
-      catch (NumberFormatException e)
-      {
-         maxTextField.setText(numFormat.format(newMaxVal));
-      }
+        try {
+            newBaseVal = setBaseLines(text);
 
-   }
+        } catch (NumberFormatException e) {
+            StringBuilder baseLineValString = new StringBuilder();
 
-   public void updateMinTextField()
-   {
-      String text = minTextField.getText();
+            for (double current : newBaseVal) {
+                baseLineValString.append(numFormat.format(current)).append(",");
+            }
 
-      try
-      {
-         double val = Double.valueOf(text).doubleValue();
-         newMinVal = val;
-      }
-      catch (NumberFormatException e)
-      {
-         minTextField.setText(numFormat.format(newMinVal));
-      }
-   }
+            baseLineTextField.setText(baseLineValString.toString());
+        }
+    }
 
-   public void updateBaseLineTextField()
-   {
-      String text = baseLineTextField.getText();
-
-      try
-      {
-         newBaseVal = setBaseLines(text);
-
-      }
-      catch (NumberFormatException e)
-      {
-         String baseLineValString = "";
-
-         for (double current : newBaseVal)
-         {
-            baseLineValString += numFormat.format(current) + ",";
-         }
-
-         baseLineTextField.setText(baseLineValString);
-      }
-   }
-
-   public double[] setBaseLines(String baseLinesCommaSeperated)
-   {
-      String[] lines = baseLinesCommaSeperated.split(",");
-      double[] values = new double[lines.length];
-      for (int i = 0; i < lines.length; i++)
-      {
+    public double[] setBaseLines(String baseLinesCommaSeperated) {
+        String[] lines = baseLinesCommaSeperated.split(",");
+        double[] values = new double[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            // TODO: can the try block be removed?
 //       try
 //       {
-         values[i] = Double.valueOf(lines[i]).doubleValue();
+            values[i] = Double.valueOf(lines[i]);
 
 //       }
 //       catch (NumberFormatException e)
 //       {
 //          values[i] = 0;
 //       }
-      }
+        }
 
-      return values;
-   }
+        return values;
+    }
 
-
+    @Override
+    public void handle(javafx.event.ActionEvent event) {
+        if (event.getSource() == maxTextField) {
+            updateMaxTextField();
+        } else if (event.getSource() == minTextField) {
+            updateMinTextField();
+        } else if (event.getSource() == autoButton) {
+            maxTextField.setDisable(true);
+            minTextField.setDisable(true);
+        } else if (event.getSource() == manualButton) {
+            maxTextField.setDisable(false);
+            minTextField.setDisable(false);
+        } else if (event.getSource() == this.individualButton) {
+            maxTextField.setDisable(true);
+            minTextField.setDisable(true);
+        } else if (event.getSource() == this.baseLineButton) {
+            baseLineTextField.setDisable(!baseLineButton.isSelected());
+        } else if (event.getSource() == this.createFFTPlotButton) {
+            graph.createFFTPlotsFromEntriesBetweenInOutPoints();
+        } else if (event.getSource() == this.createBodePlotButton) {
+            graph.createBodePlotFromEntriesBetweenInOutPoints();
+        }
+    }
 }
