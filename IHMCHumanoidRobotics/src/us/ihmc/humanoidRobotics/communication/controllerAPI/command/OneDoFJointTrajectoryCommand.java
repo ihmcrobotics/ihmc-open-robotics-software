@@ -12,6 +12,8 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
+   /** the execution time. This number is set if the execution delay is non zero**/
+   public double adjustedExecutionTime;
 
    public OneDoFJointTrajectoryCommand()
    {
@@ -97,5 +99,25 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
          weightIsValid &= weight >= 0;
       }
       return numberOfTrajectoryPointsIsPositive && weightIsValid;
+   }
+   
+   /**
+    * returns the expected execution time of this command. The execution time will be computed when the controller 
+    * receives the command using the controllers time plus the execution delay time.
+    * This is used when {@code getExecutionDelayTime} is non-zero
+    */
+   @Override
+   public double getExecutionTime()
+   {
+      return adjustedExecutionTime;
+   }
+
+   /**
+    * sets the execution time for this command. This is called by the controller when the command is received.
+    */
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      this.adjustedExecutionTime = adjustedExecutionTime;
    }
 }
