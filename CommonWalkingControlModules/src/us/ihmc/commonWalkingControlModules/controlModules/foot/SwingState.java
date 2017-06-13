@@ -17,15 +17,12 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -52,7 +49,9 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
+   private final BlendedPoseTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
+   private double swingTrajectoryBlendDuration = 0.0;
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
 
@@ -62,10 +61,14 @@ public class SwingState extends AbstractUnconstrainedState
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
 
+   private final FramePose initialPose = new FramePose();
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialLinearVelocity = new FrameVector();
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameVector initialAngularVelocity = new FrameVector();
+   private final FramePose expectedInitialPose = new FramePose();
+   private final FramePoint expectedInitialPosition = new FramePoint();
+   private final FrameOrientation expectedInitialOrientation = new FrameOrientation();
    private final FramePoint finalPosition = new FramePoint();
    private final FrameVector finalLinearVelocity = new FrameVector();
    private final FrameOrientation finalOrientation = new FrameOrientation();
@@ -201,6 +204,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
+      blendedSwingTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
@@ -254,6 +258,10 @@ public class SwingState extends AbstractUnconstrainedState
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
+      initialPose.changeFrame(initialPosition.getReferenceFrame());
+      initialPose.setPosition(initialPosition);
+      initialPose.changeFrame(initialOrientation.getReferenceFrame());
+      initialPose.setOrientation(initialOrientation);
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
       fillAndInitializeTrajectories(true);
@@ -267,8 +275,17 @@ public class SwingState extends AbstractUnconstrainedState
 
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
-      swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
-      swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+
+      if (swingTrajectoryBlendDuration > 0.0)
+      {
+         swingTrajectory.appendPositionWaypoint(0.0, expectedInitialPosition, initialLinearVelocity);
+         swingTrajectory.appendOrientationWaypoint(0.0, expectedInitialOrientation, initialAngularVelocity);
+      }
+      else
+      {
+         swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+         swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+      }
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
@@ -308,6 +325,13 @@ public class SwingState extends AbstractUnconstrainedState
 
       swingTrajectory.initialize();
       touchdownTrajectory.initialize();
+      blendedSwingTrajectory.clear();
+      if (swingTrajectoryBlendDuration > 0.0)
+      {
+         initialPose.changeFrame(worldFrame);
+         blendedSwingTrajectory.blendInitialConstraint(initialPose, 0.0, swingTrajectoryBlendDuration);
+      }
+      blendedSwingTrajectory.initialize();
    }
 
    private void modifyFinalOrientationForTouchdown(FrameOrientation finalOrientationToPack)
@@ -394,6 +418,10 @@ public class SwingState extends AbstractUnconstrainedState
       if (time > swingDuration.getDoubleValue())
       {
          activeTrajectory = touchdownTrajectory;
+      }
+      else if (swingTrajectoryBlendDuration > 0.0)
+      {
+         activeTrajectory = blendedSwingTrajectory;
       }
       else
       {
@@ -548,6 +576,14 @@ public class SwingState extends AbstractUnconstrainedState
             activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
          }
       }
+
+      footstep.getExpectedInitialPose(expectedInitialPose);
+      expectedInitialPose.getPositionIncludingFrame(expectedInitialPosition);
+      expectedInitialPose.getOrientationIncludingFrame(expectedInitialOrientation);
+      if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
+         swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
+      else
+         swingTrajectoryBlendDuration = 0.0;
    }
 
    public void replanTrajectory(Footstep newFootstep, double swingTime, boolean continuousReplan)

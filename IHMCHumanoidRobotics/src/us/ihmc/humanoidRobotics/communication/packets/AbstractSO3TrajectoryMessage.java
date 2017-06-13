@@ -72,6 +72,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
       setUniqueId(so3TrajectoryMessage.getUniqueId());
       setDestination(so3TrajectoryMessage.getDestination());
+      setExecutionDelayTime(so3TrajectoryMessage.getExecutionDelayTime());
       frameInformation.set(so3TrajectoryMessage);
    }
 
@@ -116,6 +117,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
+      setExecutionDelayTime(other.getExecutionDelayTime());
       frameInformation.set(other);
    }
 
