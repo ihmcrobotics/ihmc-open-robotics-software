@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingExitCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferExitCMPMatrix;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -29,6 +31,8 @@ public class ExitCMPCurrentMultiplier
 
    /** List of transfer split fractions that repartition the transfer phase around the corner point. */
    private final List<DoubleYoVariable> transferSplitFractions;
+   /** List of swing split fractions that repartition the swing phase around the corner point. */
+   private final List<DoubleYoVariable> swingSplitFractions;
 
    /** time in swing state for the start of using the spline */
    public final DoubleYoVariable startOfSplineTime;
@@ -49,26 +53,37 @@ public class ExitCMPCurrentMultiplier
    private final boolean givenCubicDerivativeMatrix;
    /** whether or not to clip the time remaining to always be position */
    private final boolean clipTime;
+   private final boolean blendFromInitial;
+
+   private final double blendingFraction;
+   private final double minimumBlendingTime;
 
    public ExitCMPCurrentMultiplier( List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, boolean clipTime, boolean blendFromInitial,
+         double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
-      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, blendFromInitial,
+            blendingFraction, minimumBlendingTime, registry);
    }
 
    public ExitCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, EfficientCubicMatrix cubicMatrix,
-         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
+         EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime, boolean blendFromInitial, double blendingFraction,
+         double minimumBlendingTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentVelocityMultiplier", registry);
 
+      this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
 
       this.clipTime = clipTime;
+      this.blendFromInitial = blendFromInitial;
+      this.blendingFraction = blendingFraction;
+      this.minimumBlendingTime = minimumBlendingTime;
 
       if (cubicMatrix == null)
       {
@@ -93,7 +108,8 @@ public class ExitCMPCurrentMultiplier
       }
 
       transferExitCMPMatrix = new TransferExitCMPMatrix(swingSplitFractions, transferSplitFractions);
-      swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, endOfSplineTime);
+      swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial,
+            minimumBlendingTime);
    }
 
    /**
@@ -252,7 +268,7 @@ public class ExitCMPCurrentMultiplier
          double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         computeSwingFirstSegment();
+         computeSwingFirstSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          computeSwingThirdSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       else
@@ -263,9 +279,31 @@ public class ExitCMPCurrentMultiplier
     * Computes the position multiplier when in the third segment in the swing phase. During this
     * segment, the ICP plan is on the entry CMP, so this value is 0.0.
     */
-   public void computeSwingFirstSegment()
+   public void computeSwingFirstSegment(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
    {
-      positionMultiplier.set(0.0);
+      if (blendFromInitial)
+      {
+         double projectionMultiplier = 0.0;
+
+         double nextTransferOnExitCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double swingTimeOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+         double swingTimeOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+
+         double timeOnExitCMP = nextTransferOnExitCMP + swingTimeOnExitCMP;
+
+         double recursionMultiplier = Math.exp(omega0 * (timeInState - swingTimeOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+
+         double blendingTime = blendingFraction * startOfSplineTime.getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
+         double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
+
+         double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
+         positionMultiplier.set(multiplier);
+      }
+      else
+      {
+         positionMultiplier.set(0.0);
+      }
    }
 
    /**
@@ -344,7 +382,7 @@ public class ExitCMPCurrentMultiplier
    public void computeSegmentedSwingVelocity(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         computeSwingFirstSegmentVelocity();
+         computeSwingFirstSegmentVelocity(omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          computeSwingThirdSegmentVelocity(omega0);
       else
@@ -355,9 +393,9 @@ public class ExitCMPCurrentMultiplier
     * Computes the velocity multiplier when in the third segment in the swing phase. During this
     * segment, the ICP plan is on the entry CMP, so this value is 0.0.
     */
-   public void computeSwingFirstSegmentVelocity()
+   public void computeSwingFirstSegmentVelocity(double omega0)
    {
-      velocityMultiplier.set(0.0);
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 
    /**

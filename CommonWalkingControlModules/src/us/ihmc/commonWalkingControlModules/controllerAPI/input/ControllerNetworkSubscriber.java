@@ -17,6 +17,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -45,6 +46,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
+
+   /** All the possible messages that can be sent to the communicator. */
+   private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
+   
    /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
    private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
@@ -56,6 +61,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.scheduler = scheduler;
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
+      listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
 
       if (packetCommunicator == null)
       {
@@ -64,6 +70,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       }
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
+      listOfSupportedControlMessages.add(MessageOfMessages.class);
 
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
@@ -98,11 +105,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private <T extends Packet<T>> void createAllSubscribersForSupportedMessages()
    {
 
-      List<Class<? extends Packet<?>>> listOfSupportedMessages = controllerCommandInputManager.getListOfSupportedMessages();
-      for (int i = 0; i < listOfSupportedMessages.size(); i++)
+      for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       {
          @SuppressWarnings("unchecked")
-         Class<T> messageClass = (Class<T>) listOfSupportedMessages.get(i);
+         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          createSubscriber(messageClass);
       }
    }
