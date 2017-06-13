@@ -127,6 +127,11 @@ public class WalkingCommandConsumer
    {
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
+   
+   public void update()
+   {
+      commandConsumerWithDelayBuffers.update();
+   }
 
    public void consumeHeadCommands()
    {
