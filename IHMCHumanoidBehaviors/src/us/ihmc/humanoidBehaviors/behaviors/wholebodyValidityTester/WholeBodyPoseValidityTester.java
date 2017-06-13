@@ -404,6 +404,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             isJointLimit = isJointLimit();
             
             outputConverter.updateFullRobotModel(newestSolution);
+            FullHumanoidRobotModel fullRobotModel2 = outputConverter.getFullRobotModel();
+            System.out.println(fullRobotModel2.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23());
             
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
@@ -505,7 +507,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
       
       int rightArmStart = 12;
-      int rightArmEnd = 18;
+      int rightArmEnd = 17;
             
       for(int i=0;i<numberOfJoints;i++)   
       {              
