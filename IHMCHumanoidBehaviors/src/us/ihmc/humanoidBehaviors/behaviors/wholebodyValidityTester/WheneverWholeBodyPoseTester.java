@@ -14,7 +14,12 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.robotcollisionmodel.CollisionModelBox;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
+import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -22,6 +27,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,14 +39,14 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
+public class WheneverWholeBodyPoseTester extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    protected final HumanoidReferenceFrames referenceFrames;
    protected ReferenceFrame midFeetFrame;
    
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
    
    private final DoubleYoVariable solutionQualityThreshold;
    private final DoubleYoVariable solutionStableThreshold;
@@ -79,6 +85,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private boolean isJointLimit = false;
    private boolean isTimeExpired = false;
    
+   private boolean isSleeping = false;
+   
    private KinematicsToolboxOutputStatus newestSolution;   
    
    protected FullHumanoidRobotModel ikFullRobotModel;
@@ -88,7 +96,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    private KinematicsToolboxConfigurationMessage privilegedMessage;
    
-   public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+   private SolarPanel solarPanel;   
+   
+   public WheneverWholeBodyPoseTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(null, outgoingCommunicationBridge);
       
@@ -197,6 +207,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public void holdCurrentChestOrientation()
    {
       FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      //FrameOrientation currentChestOrientation = new FrameOrientation(referenceFrames.getChestFrame());
       yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
       chestSelectionMatrix.setToAngularSelectionOnly();      
    }
@@ -235,7 +246,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public void holdCurrentPelvisHeight()
    {      
       yoDesiredPelvisPosition.setFromReferenceFrame(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
-      System.out.println(yoDesiredPelvisPosition);
       //yoDesiredPelvisPosition.setFromReferenceFrame(referenceFrames.getPelvisFrame());
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
@@ -271,6 +281,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       isSolved = false;
       isJointLimit = false;
       isSendingPacket = true;
+      
+      isSleeping = false;
+      isDone.set(false);
    }
    
    private void putHandMessage()
@@ -296,6 +309,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                                                                                                   desiredHandOrientation);            
             handMessage.setWeight(5.0);
             handMessages.put(robotSide, handMessage);
+            System.out.println(desiredHandPosition);
          }
       }
    }
@@ -313,6 +327,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          RigidBody chest = fullRobotModel.getChest();
          chestMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
          chestMessage.setWeight(10.00);
+         System.out.println(desiredChestOrientation);
       }
    }
    
@@ -339,7 +354,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          yoDesiredPelvisPosition.get(desiredPelvisPosition);
          pelvisMessage.setDesiredPosition(desiredPelvisPosition);
          pelvisMessage.setWeight(10.0);
+         System.out.println(desiredPelvisPosition);
       }
+      
       Point3D desiredPelvisPosition = new Point3D();
       yoDesiredPelvisPosition.get(desiredPelvisPosition);
    }
@@ -352,7 +369,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable())
       {
          if(isSendingPacket == true)
-         {               
+         {            
             for (RobotSide robotSide : RobotSide.values)
             {
                if (handMessages.get(robotSide) != null)
@@ -404,11 +421,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             isJointLimit = isJointLimit();
             
             outputConverter.updateFullRobotModel(newestSolution);
+            FullHumanoidRobotModel fullRobotModel2 = outputConverter.getFullRobotModel();
+            System.out.println(fullRobotModel2.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
-            if(false)
+            if(true)
                PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality
                                +" isReceived "+isReceived +" isGoodSolutionCur "+isGoodSolutionCur +" isSolved "+isSolved);
             
@@ -444,8 +463,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                
                isReceived = false;               
                isSendingPacket = false;
-                               
+                  
                setIsDone(true);
+//               cnt = 0;
+//               isSleeping = true;
             }
          }
       }
@@ -454,6 +475,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      PrintTools.info("whenever tester entered ");
       numberOfTest++;
       
       isPaused.set(false);
@@ -577,25 +599,11 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       }
 
       deactivateKinematicsToolboxModule();
-      
    }
 
    @Override
    public boolean isDone()
    {
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
-      if(isDone.getBooleanValue())
-      {
-         if(true)
-         {
-            if(isCollisionFree == false)
-               PrintTools.warn("col ");
-            if(isGoodIKSolution == false)
-               PrintTools.warn("ik "+oneDoFJoints[indexOfLimit].getName());   
-            if(isTimeExpired == true)
-               PrintTools.warn("isTimeExpired ");
-         }
-      }
       return isDone.getBooleanValue();
    }
    
@@ -604,7 +612,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       cnt = 0;
       isDone.set(value);
    }
-   
+      
    
    
 
@@ -621,50 +629,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       isCollisionFree = robotCollisionModel.getCollisionResult();
    }
    
-   public double getScroe()
-   {
-      double score = 0;
-      double limitScore = 0;
-      double displacementScore = 0;
-      
-      int numberOfJoints = getFullHumanoidRobotModel().getOneDoFJoints().length;
-      
-      int rightArmStart = 12;
-      int rightArmEnd = 17;
-            
-      for(int i=0;i<numberOfJoints;i++)   
-      {              
-         if(i<3 || (i>=rightArmStart && i<=rightArmEnd))
-         {
-            OneDoFJoint aJoint = getFullHumanoidRobotModel().getOneDoFJoints()[i];
-            double aJointValue = newestSolution.getJointAngles()[i];
-            double upperValue = aJoint.getJointLimitUpper();
-            double lowerValue = aJoint.getJointLimitLower();               
-            
-            double diffUpper = Math.abs((upperValue - aJointValue)*(upperValue - aJointValue));
-            double diffLower = Math.abs((aJointValue - lowerValue)*(aJointValue - lowerValue));
-            
-            if(diffUpper > diffLower)
-               limitScore = diffLower;
-            else
-               limitScore = diffUpper;
-            
-            if(DEBUG)
-               PrintTools.info(""+limitScore +" "+ aJointValue+" "+ upperValue +" "+ lowerValue);
-            
-            double aJointValueOfPrivileged = privilegedMessage.getPrivilegedJointAngles()[i];
-            displacementScore = displacementScore + Math.abs((aJointValueOfPrivileged - aJointValue)*(aJointValueOfPrivileged - aJointValue));
-            if(DEBUG)
-               PrintTools.info(""+limitScore+" "+displacementScore);
-            score = limitScore + displacementScore;
-         }
-      } 
-      if(DEBUG)
-         PrintTools.info("");      
-      
-      return score;
-   }
-
    public boolean isValid()
    {
       getCollisionResult();
@@ -689,12 +653,116 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       return isValid;
    }
 
-   public RobotCollisionModel getRobotCollisionModel()
+   private RobotCollisionModel getRobotCollisionModel()
    {
       return robotCollisionModel;
    }
    
-   
-   public abstract void addEnvironmentCollisionModel();
+   public void setSolarPanel(SolarPanel solarPanel)
+   {
+      this.solarPanel = solarPanel;
+      // addEnvironmentCollisionModel();  
+   }   
 
+   public void setWholeBodyPose(SolarPanelPath cleaningPath, RRTNode node)
+   {
+      referenceFrames.updateFrames();
+      midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(node.getNodeData(0));
+      
+      Pose desiredHandPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      
+      if(node.getDimensionOfNodeData() == 2)
+      {
+         double chestYaw = node.getNodeData(1);
+         setWholeBodyPose(desiredHandPose, chestYaw);
+      }
+      else if(node.getDimensionOfNodeData() == 4)
+      {
+         double pelvisHeight = node.getNodeData(1);
+         double chestYaw = node.getNodeData(2);
+         double chestPitch = node.getNodeData(3);
+         
+         setWholeBodyPose(desiredHandPose, pelvisHeight, chestYaw, chestPitch);
+      }      
+   }
+   
+   public void setWholeBodyPose(SolarPanelPath cleaningPath, double time, double pelvisYaw)
+   {
+      SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
+            
+      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      setWholeBodyPose(aPose, pelvisYaw);
+   }
+   
+   public void setWholeBodyPose(SolarPanelPath cleaningPath, double time, double pelvisHeight, double chestYaw, double chestPitch)
+   {
+      SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
+            
+      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      setWholeBodyPose(aPose, pelvisHeight, chestYaw, chestPitch);
+   }
+   
+   public void setWholeBodyPose(Pose desiredHandPose, double chestYaw)
+   {
+      referenceFrames.updateFrames();
+      midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      // Hand
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
+      
+      FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
+      
+      this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
+      
+      // Chest Orientation
+      Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendYawRotation(chestYaw);
+      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
+      this.setDesiredChestOrientation(desiredChestFrameOrientation);
+      
+      // Pelvis Orientation
+      this.holdCurrentPelvisOrientation();
+      
+      // Pelvis Height
+      this.holdCurrentPelvisHeight();
+   }
+
+   public void setWholeBodyPose(Pose desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
+   {
+      referenceFrames.updateFrames();
+      midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      // Hand
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
+            
+      FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
+      
+      this.setDesiredHandPose(RobotSide.RIGHT, desiredHandFramePose);
+      
+      // Chest Orientation
+      Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendYawRotation(chestYaw);
+      desiredChestOrientation.appendPitchRotation(chestPitch);
+      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
+      this.setDesiredChestOrientation(desiredChestFrameOrientation);
+      
+      // Pelvis Orientation
+      this.holdCurrentPelvisOrientation();
+      
+      // Pelvis Height
+      this.setDesiredPelvisHeight(pelvisHeight);
+   }
+   
+   public void addEnvironmentCollisionModel()
+   {  
+      CollisionModelBox solarPanelCollisionModel;
+      solarPanelCollisionModel = new CollisionModelBox(getRobotCollisionModel().getCollisionShapeFactory(), solarPanel.getRigidBodyTransform(),
+                                                       solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeZ());
+      solarPanelCollisionModel.getCollisionShape().setCollisionGroup(0b11111111101111);
+      solarPanelCollisionModel.getCollisionShape().setCollisionMask(0b11111111111111);    
+   }
 }
