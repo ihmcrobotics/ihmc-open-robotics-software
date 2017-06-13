@@ -78,32 +78,32 @@ public class SolarPanelMotionPlanner
          PrintTools.info("motionTime :: "+this.motionTime);
          
          // *** RRT *** //         
-         RRTNode3DTimeDomain.cleaningPath = cleaningPath;
-         RRTNode3DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
+         RRTNode1DTimeDomain.cleaningPath = cleaningPath;
+         RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
          
          
-         RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
-         node0.isValidNode();
-         
-
-         RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
-         RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
-         RRTNode3DTimeDomain node3 = new RRTNode3DTimeDomain(1.0, 0.7, -15/180*Math.PI, 10/180*Math.PI);
-         
-         PrintTools.info(""+node1.isValidNode());
-         ThreadTools.sleep(1000);
-         PrintTools.info(""+node2.isValidNode());
-         ThreadTools.sleep(1000);
-         PrintTools.info(""+node3.isValidNode());
-         ThreadTools.sleep(1000);
-         
-         
-         
-//         RRTNode1DTimeDomain nodeRoot = new RRTNode1DTimeDomain(0.0, 0.0);
+//         RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
+//         node0.isValidNode();
 //         
-//         rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
+//
+//         RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
+//         RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
+//         RRTNode3DTimeDomain node3 = new RRTNode3DTimeDomain(1.0, 0.7, -15/180*Math.PI, 10/180*Math.PI);
+//         
+//         PrintTools.info(""+node1.isValidNode());
+//         ThreadTools.sleep(1000);
+//         PrintTools.info(""+node2.isValidNode());
+//         ThreadTools.sleep(1000);
+//         PrintTools.info(""+node3.isValidNode());
+//         ThreadTools.sleep(1000);
          
-//         rrtPlanner.expandingTreesAndShortCut(200);
+         
+         
+         RRTNode1DTimeDomain nodeRoot = new RRTNode1DTimeDomain(0.0, 0.0);
+         
+         rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
+         
+         rrtPlanner.expandingTreesAndShortCut(200);
          
         
          PrintTools.info("END shortcutting "+RRTNode3DTimeDomain.nodeValidityTester.numberOfTest);

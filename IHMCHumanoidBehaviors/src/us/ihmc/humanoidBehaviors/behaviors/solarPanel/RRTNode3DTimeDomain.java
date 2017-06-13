@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WheneverWholeBodyPoseTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
@@ -29,10 +28,10 @@ public class RRTNode3DTimeDomain extends RRTNode
    @Override
    public boolean isValidNode()
    {
-      nodeValidityTester.onBehaviorEntered();
-      nodeValidityTester.setWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1), getNodeData(2), getNodeData(3));
-      
+      nodeValidityTester.setWholeBodyPose(cleaningPath, this);      
       nodeValidityTester.setUpHasBeenDone();
+      
+      
       
       while(true)
       {         
@@ -43,8 +42,9 @@ public class RRTNode3DTimeDomain extends RRTNode
          }  
          else
          {
-            ThreadTools.sleep(50);
-            PrintTools.info("not yet");
+            ThreadTools.sleep(10);
+            nodeValidityTester.doControl();
+//            PrintTools.info("not yet");
          }
             
       }

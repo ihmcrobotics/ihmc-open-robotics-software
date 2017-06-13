@@ -126,11 +126,11 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       setupKinematicsToolboxModule();
    }
-    
+   
    @Test
-   public void plannerTest() throws SimulationExceededMaximumTimeException, IOException
+   public void isValidTest() throws SimulationExceededMaximumTimeException, IOException
    {
-      if(isKinematicsToolboxVisualizerEnabled)
+      if(false)
          ThreadTools.sleep(13000);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -139,9 +139,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
+            
       drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
@@ -154,7 +152,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
                                                                                 sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
             
       drcBehaviorTestHelper.dispatchBehavior(RRTNode3DTimeDomain.nodeValidityTester);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       // ********** Planning *** //      
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
@@ -164,8 +162,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       RRTNode3DTimeDomain.cleaningPath = cleaningPath;
       RRTNode3DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
       
-      RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
-      node0.isValidNode();
+//      RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
+//      node0.isValidNode();
       
       RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
       RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
@@ -178,9 +176,63 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info(""+node3.isValidNode());
       ThreadTools.sleep(1000);
       
-      
-      scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode3DTimeDomain.cleaningPath));
-
+      PrintTools.info("END");     
+   } 
+    
+   //@Test
+   public void plannerTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+//      if(isKinematicsToolboxVisualizerEnabled)
+//         ThreadTools.sleep(13000);
+//      
+//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      assertTrue(success);
+//
+//      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+//
+//      drcBehaviorTestHelper.updateRobotModel();
+//      
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      
+//      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+//      
+//      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+//      sdfFullRobotModel.updateFrames();
+//            
+//      setUpSolarPanel();
+//            
+//      RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyPoseTester(getRobotModel(), 
+//                                                                                drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+//                                                                                sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+//            
+//      drcBehaviorTestHelper.dispatchBehavior(RRTNode3DTimeDomain.nodeValidityTester);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      
+//      // ********** Planning *** //      
+//      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
+//      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
+//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.05, -Math.PI*0.3), 4.0);  
+//            
+//      RRTNode3DTimeDomain.cleaningPath = cleaningPath;
+//      RRTNode3DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
+//      
+//      RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
+//      node0.isValidNode();
+//      
+//      RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
+//      RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
+//      RRTNode3DTimeDomain node3 = new RRTNode3DTimeDomain(1.0, 0.7, -15/180*Math.PI, 10/180*Math.PI);
+//      
+//      PrintTools.info(""+node1.isValidNode());
+//      ThreadTools.sleep(1000);
+//      PrintTools.info(""+node2.isValidNode());
+//      ThreadTools.sleep(1000);
+//      PrintTools.info(""+node3.isValidNode());
+//      ThreadTools.sleep(1000);
+//      
+//      
+//      scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode3DTimeDomain.cleaningPath));
+//
 //      if (visualize)
 //      {
 //         // ************************************* //
