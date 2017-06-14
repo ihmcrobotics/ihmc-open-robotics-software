@@ -6,7 +6,6 @@ import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.gui.KeyPoints;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
