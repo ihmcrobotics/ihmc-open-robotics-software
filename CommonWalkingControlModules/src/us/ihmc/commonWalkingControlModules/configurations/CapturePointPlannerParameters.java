@@ -291,4 +291,24 @@ public abstract class CapturePointPlannerParameters
    {
       return modelScale * 0.15;
    }
+
+   public boolean getModifyICPPlanByAngularMomentumRate()
+   {
+      return false;
+   }
+
+   public double getCMPOffsetAlphaFilter()
+   {
+      return 0.98;
+   }
+
+   public double getAngularMomentumRateForwardGain()
+   {
+      return 1.3;
+   }
+
+   public double getAngularMomentumRateLateralGain()
+   {
+      return 0.3;
+   }
 }

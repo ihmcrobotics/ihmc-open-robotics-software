@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -22,6 +23,8 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String namePrefix = "icpPlanner";
+
+   private final BooleanYoVariable modifyICPPlanByAngularMomentum;
 
    private final YoFrameVector modifiedICPVelocity;
    private final YoFrameVector modifiedICPAcceleration;
@@ -45,6 +48,9 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
+      modifyICPPlanByAngularMomentum = new BooleanYoVariable(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
+      modifyICPPlanByAngularMomentum.set(capturePointPlannerParameters.getModifyICPPlanByAngularMomentumRate());
+
       modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
       modifiedICPAcceleration = new YoFrameVector(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
 
@@ -52,6 +58,8 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
       modifiedCMPVelocity = new YoFrameVector(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
 
       DoubleYoVariable cmpOffsetAlphaFilter = new DoubleYoVariable(namePrefix + "CMPOffsetAlphaFilter", registry);
+      cmpOffsetAlphaFilter.set(capturePointPlannerParameters.getCMPOffsetAlphaFilter());
+
       cmpOffset = new YoFrameVector(namePrefix + "CMPOffset", worldFrame, registry);
       filteredCMPOffset = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredCMPOffset", "", registry,
                                                                                       cmpOffsetAlphaFilter, cmpOffset);
@@ -61,16 +69,13 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
       angularMomentumRateForwardGain = new DoubleYoVariable(namePrefix + "AngularMomentumRateForwardGain", registry);
       angularMomentumRateLateralGain = new DoubleYoVariable(namePrefix + "AngularMomentumRateLateralGain", registry);
-
-      cmpOffsetAlphaFilter.set(0.98);
-
-      angularMomentumRateForwardGain.set(1.3);
-      angularMomentumRateLateralGain.set(0.3);
+      angularMomentumRateForwardGain.set(capturePointPlannerParameters.getAngularMomentumRateForwardGain());
+      angularMomentumRateLateralGain.set(capturePointPlannerParameters.getAngularMomentumRateLateralGain());
    }
 
    public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)
    {
-      if (copEstimate.containsNaN())
+      if (!modifyICPPlanByAngularMomentum.getBooleanValue() || copEstimate.containsNaN())
       {
          modifiedCMPPosition.set(desiredCMPPosition);
          modifiedCMPVelocity.set(desiredCMPVelocity);
