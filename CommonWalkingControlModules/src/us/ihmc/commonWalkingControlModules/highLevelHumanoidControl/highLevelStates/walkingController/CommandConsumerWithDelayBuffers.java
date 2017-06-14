@@ -8,6 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.GarbageFreePriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -63,17 +64,56 @@ public class CommandConsumerWithDelayBuffers
    {
       for(int i = 0; i < listOfSupportedCommands.size(); i++)
       {
-         RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands((Class<C>) listOfSupportedCommands.get(i));
+         Class<? extends Command<?, ?>> commandClass = listOfSupportedCommands.get(i);
+         RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands((Class<C>) commandClass);
+         
          for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
          {
             C command = newCommands.get(commandIndex);
-            if(command.getExecutionDelayTime() < Double.MIN_VALUE)
+            
+            if(commandClass == ClearDelayQueueCommand.class)
             {
-               GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
+               ClearDelayQueueCommand clearDelayQueueCommand = (ClearDelayQueueCommand) command;
+               handleClearQueueCommand(clearDelayQueueCommand);
+               continue;
             }
             queueCommand(command);
          }  
       }
+   }
+
+   /**
+    * Clears either all of the delay queues or a single delay queue depending on the 
+    * ClearDelayQueueCommand
+    * @param clearDelayQueueCommand a command that dictates which queues to clear
+    */
+   private void handleClearQueueCommand(ClearDelayQueueCommand clearDelayQueueCommand)
+   {
+      if(clearDelayQueueCommand.getClearAllDelayBuffers())
+      {
+         for(int commandIndex = 0; commandIndex < listOfSupportedCommands.size(); commandIndex++)
+         {
+            Class<? extends Command<?, ?>> commandClassToFlush = listOfSupportedCommands.get(commandIndex);
+            clearDelayQueue(commandClassToFlush);
+         }
+      }
+      Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getClazz();
+      if(classToClear != null)
+      {
+         clearDelayQueue(classToClear);
+      }
+   }
+
+   /**
+    * clears a single queue and it's associated RecyclingArrayList
+    * @param commandClassToFlush the class to clear from the queues
+    */
+   private void clearDelayQueue(Class<? extends Command<?, ?>> commandClassToFlush)
+   {
+      GarbageFreePriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
+      queueableCommandPriorityQueue.clear();
+      RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToFlush);
+      recyclingArrayList.clear();
    }
    
    /**
@@ -168,8 +208,7 @@ public class CommandConsumerWithDelayBuffers
     */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
-      GarbageFreePriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
-      queueableCommandPriorityQueue.clear();
+      clearDelayQueue(commandClassToFlush);
       commandInputManager.flushCommands(commandClassToFlush);
    }
 }
