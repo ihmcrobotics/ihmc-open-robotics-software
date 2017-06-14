@@ -553,7 +553,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
       WalkingState currentState = stateMachine.getCurrentState();
-
+      commandConsumer.update();
       commandConsumer.consumeHeadCommands();
       commandConsumer.consumeChestCommands();
       commandConsumer.consumePelvisHeightCommands();
