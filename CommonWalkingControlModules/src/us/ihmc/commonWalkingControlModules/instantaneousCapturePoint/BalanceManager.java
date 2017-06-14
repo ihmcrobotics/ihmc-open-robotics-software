@@ -337,16 +337,13 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   private final FrameVector angularMomentum = new FrameVector();
    private final FramePoint copEstimate = new FramePoint();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCoP(copEstimate);
 
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
-
-      controllerToolbox.getAngularMomentum(angularMomentum);
-      controllerToolbox.getCoP(copEstimate);
       icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
 
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
