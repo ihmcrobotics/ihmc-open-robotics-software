@@ -10,7 +10,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.lists.GarbageFreePriorityQueue;
+import us.ihmc.robotics.lists.PriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
@@ -28,7 +28,7 @@ public class CommandConsumerWithDelayBuffers
    /** Controller's copy of the new commands to be processed. */
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
-   private final Map<Class<?>, GarbageFreePriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
+   private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
@@ -53,7 +53,7 @@ public class CommandConsumerWithDelayBuffers
       queuedCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       outgoingCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
-      priorityQueues.put(commandClass, new GarbageFreePriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class, commandComparator));
+      priorityQueues.put(commandClass, new PriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class, commandComparator));
    }
    
    /**
@@ -110,7 +110,7 @@ public class CommandConsumerWithDelayBuffers
     */
    private void clearDelayQueue(Class<? extends Command<?, ?>> commandClassToFlush)
    {
-      GarbageFreePriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
+      PriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
       queueableCommandPriorityQueue.clear();
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToFlush);
       recyclingArrayList.clear();
@@ -123,7 +123,7 @@ public class CommandConsumerWithDelayBuffers
     */
    public <C extends Command<C, ?>> boolean isNewCommandAvailable(Class<? extends Command<?,?>> clazz)
    {
-      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(clazz);
+      PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(clazz);
       Command<?, ?> command = priorityQueue.peek();
       if(command != null)
       {
@@ -143,7 +143,7 @@ public class CommandConsumerWithDelayBuffers
    @SuppressWarnings("unchecked")
    private void queueCommand(Command<?,?> command)
    {
-      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
+      PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.getSize() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
          PrintTools.error("Tried to add " + command.getClass() + " to the delay queue, but the queue was full. Try increasing the queue size");
@@ -168,7 +168,7 @@ public class CommandConsumerWithDelayBuffers
       if(isNewCommandAvailable(commandClassToPoll))
       {
          RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToPoll);
-         GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
+         PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
          Command<?, ?> command = priorityQueue.pop();
          recyclingArrayList.remove(command);
          return (C) command;
@@ -187,7 +187,7 @@ public class CommandConsumerWithDelayBuffers
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
    {
       RecyclingArrayList<C> commands = (RecyclingArrayList<C>) outgoingCommands.get(commandClassToPoll);
-      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
+      PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToPoll);
       
       commands.clear();
