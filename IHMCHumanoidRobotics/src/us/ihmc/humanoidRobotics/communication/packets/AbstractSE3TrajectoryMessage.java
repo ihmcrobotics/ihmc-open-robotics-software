@@ -80,8 +80,15 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       
       frameInformation.set(se3TrajectoryMessage);
       
-      angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
-      linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
+      if(se3TrajectoryMessage.angularWeightMatrix != null)
+      {
+         angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
+      }
+      
+      if(se3TrajectoryMessage.linearWeightMatrix != null)
+      {
+         linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
+      }
 
       useCustomControlFrame = se3TrajectoryMessage.useCustomControlFrame;
       if (se3TrajectoryMessage.controlFramePose != null)
