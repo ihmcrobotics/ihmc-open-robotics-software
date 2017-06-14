@@ -70,9 +70,9 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    }
 
    //todo make a gain that we skew this with
-   public void modifyDesiredICPForAngularMomentum(FrameVector angularMomentumRate)
+   public void modifyDesiredICPForAngularMomentum(FrameVector angularMomentumRate, double desiredCoMHeightAcceleration)
    {
-      CapturePointTools.computeCentroidalMomentumPivot(mass, gravityZ, angularMomentumRate, desiredCMPPosition, modifiedCMPPosition); //todo incorporate vertical acceleration
+      CapturePointTools.computeCentroidalMomentumPivot(mass, gravityZ, desiredCoMHeightAcceleration, angularMomentumRate, desiredCMPPosition, modifiedCMPPosition); //todo incorporate vertical acceleration
 
       estimateCurrentTimeWithModifiedCMP(modifiedCMPPosition.getFrameTuple());
 
