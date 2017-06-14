@@ -3,7 +3,7 @@ package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class StateTransition<E extends Enum<E>>
 {

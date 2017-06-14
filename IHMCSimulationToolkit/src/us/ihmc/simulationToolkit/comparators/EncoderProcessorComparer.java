@@ -3,9 +3,9 @@ package us.ihmc.simulationToolkit.comparators;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.comparison.BangBangEncoderProcessorEvaluationTrajectory;
 import us.ihmc.sensorProcessing.encoder.comparison.ChirpEncoderProcessorEvaluationTrajectory;

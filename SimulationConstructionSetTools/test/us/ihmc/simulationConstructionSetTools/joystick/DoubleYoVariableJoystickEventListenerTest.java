@@ -1,7 +1,5 @@
 package us.ihmc.simulationConstructionSetTools.joystick;
 
-import static org.junit.Assert.*;
-
 import java.util.Random;
 
 import org.junit.Test;
@@ -9,9 +7,10 @@ import org.junit.Test;
 import net.java.games.input.Component;
 import net.java.games.input.Event;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
+import static org.junit.Assert.assertEquals;
 
 public class DoubleYoVariableJoystickEventListenerTest
 {

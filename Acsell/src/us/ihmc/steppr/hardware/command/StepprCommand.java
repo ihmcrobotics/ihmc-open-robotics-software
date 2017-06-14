@@ -9,7 +9,7 @@ import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.AcsellKneeActuatorCommand;
 import us.ihmc.acsell.hardware.command.AcsellLinearTransmissionActuatorCommand;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.kinematics.fourbar.FourbarProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.steppr.hardware.StepprActuator;

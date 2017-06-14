@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * <p>Description: An implementation of a YoVariableHolder. </p>

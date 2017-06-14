@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.gui;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 
 
 public class YoVariableTogglerOutlet

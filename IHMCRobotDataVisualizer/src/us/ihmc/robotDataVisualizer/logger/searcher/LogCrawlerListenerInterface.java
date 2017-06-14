@@ -1,7 +1,7 @@
 package us.ihmc.robotDataVisualizer.logger.searcher;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public interface LogCrawlerListenerInterface
 {

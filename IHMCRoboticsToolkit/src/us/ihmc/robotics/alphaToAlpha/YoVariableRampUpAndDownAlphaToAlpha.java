@@ -1,6 +1,6 @@
 package us.ihmc.robotics.alphaToAlpha;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
  * Created by Peter on 9/9/2016.

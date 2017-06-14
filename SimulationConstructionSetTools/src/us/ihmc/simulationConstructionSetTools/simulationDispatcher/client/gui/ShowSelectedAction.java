@@ -8,7 +8,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.DispatchHost;
 import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationToDispatch;

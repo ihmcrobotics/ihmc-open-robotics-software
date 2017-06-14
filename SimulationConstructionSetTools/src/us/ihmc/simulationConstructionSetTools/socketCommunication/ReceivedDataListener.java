@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public interface ReceivedDataListener

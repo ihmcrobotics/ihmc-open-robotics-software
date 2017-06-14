@@ -2,8 +2,8 @@ package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 

@@ -3,11 +3,10 @@ package us.ihmc.exampleSimulations.simpleArm;
 
 import java.util.Random;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 /**

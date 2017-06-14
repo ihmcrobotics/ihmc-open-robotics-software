@@ -1,6 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 {

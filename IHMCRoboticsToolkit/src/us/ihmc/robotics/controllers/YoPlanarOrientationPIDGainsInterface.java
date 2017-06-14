@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public interface YoPlanarOrientationPIDGainsInterface extends OrientationPIDGainsInterface
 {

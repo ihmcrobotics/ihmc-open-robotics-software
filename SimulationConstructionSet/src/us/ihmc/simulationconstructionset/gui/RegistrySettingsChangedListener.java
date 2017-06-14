@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.gui;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface RegistrySettingsChangedListener
 {

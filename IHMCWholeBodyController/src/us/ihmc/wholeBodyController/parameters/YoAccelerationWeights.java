@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoAccelerationWeights
 {

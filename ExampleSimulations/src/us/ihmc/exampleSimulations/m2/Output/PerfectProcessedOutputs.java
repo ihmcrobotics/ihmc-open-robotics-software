@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.m2.Output;
 
 
 import us.ihmc.exampleSimulations.m2.JointName;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 

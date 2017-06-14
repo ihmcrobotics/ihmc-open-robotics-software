@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class YoPoint3D implements Point3DBasics

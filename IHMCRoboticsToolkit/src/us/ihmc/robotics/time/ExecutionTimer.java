@@ -2,9 +2,9 @@ package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class ExecutionTimer

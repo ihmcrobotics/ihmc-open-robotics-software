@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class YoJointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
 {

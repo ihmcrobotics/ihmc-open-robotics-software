@@ -11,8 +11,8 @@ import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener

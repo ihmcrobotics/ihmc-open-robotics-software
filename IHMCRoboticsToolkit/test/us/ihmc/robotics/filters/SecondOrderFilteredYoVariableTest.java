@@ -2,7 +2,7 @@ package us.ihmc.robotics.filters;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.filters.SecondOrderFilterType;
 import us.ihmc.robotics.math.filters.SecondOrderFilteredYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;

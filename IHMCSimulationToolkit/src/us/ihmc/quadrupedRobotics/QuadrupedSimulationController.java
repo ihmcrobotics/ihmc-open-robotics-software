@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;

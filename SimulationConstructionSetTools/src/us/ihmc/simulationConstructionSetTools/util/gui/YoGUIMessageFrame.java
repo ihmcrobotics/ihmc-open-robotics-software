@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.BooleanGlobalParameter;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.DoubleGlobalParameter;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.EnumGlobalParameter;

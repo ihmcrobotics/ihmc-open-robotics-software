@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.inputdevices;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 

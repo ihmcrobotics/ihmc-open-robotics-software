@@ -1,6 +1,6 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Describes the job of a {@link YoGraphic}. When the user creates one, the {@link YoGraphic} is assumed 

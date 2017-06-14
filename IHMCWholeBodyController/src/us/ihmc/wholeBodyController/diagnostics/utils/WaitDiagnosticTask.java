@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WaitDiagnosticTask extends DiagnosticTask
 {

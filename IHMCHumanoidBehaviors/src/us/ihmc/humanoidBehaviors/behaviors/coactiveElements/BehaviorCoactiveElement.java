@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BehaviorCoactiveElement implements CoactiveElement
 {
