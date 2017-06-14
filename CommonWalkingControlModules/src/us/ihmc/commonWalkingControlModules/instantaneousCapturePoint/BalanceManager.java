@@ -170,7 +170,7 @@ public class BalanceManager
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
-      icpPlanner = new ICPPlannerWithAngularMomentumOffset(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, totalMass, gravityZ, registry,
+      icpPlanner = new ICPPlannerWithAngularMomentumOffset(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry,
                                                            yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
@@ -338,6 +338,7 @@ public class BalanceManager
    }
 
    private final FrameVector angularMomentum = new FrameVector();
+   private final FramePoint copEstimate = new FramePoint();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
@@ -345,7 +346,8 @@ public class BalanceManager
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
 
       controllerToolbox.getAngularMomentum(angularMomentum);
-      icpPlanner.modifyDesiredICPForAngularMomentum(angularMomentum, desiredCoMHeightAcceleration);
+      controllerToolbox.getCoP(copEstimate);
+      icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate);
 
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
@@ -365,13 +367,11 @@ public class BalanceManager
 
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
-      /*
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
-      */
 
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);

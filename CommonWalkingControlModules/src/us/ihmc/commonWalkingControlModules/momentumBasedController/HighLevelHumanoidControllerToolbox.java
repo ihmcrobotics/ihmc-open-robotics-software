@@ -969,7 +969,12 @@ public class HighLevelHumanoidControllerToolbox
       return omega0.getDoubleValue();
    }
 
-   public void getCop(FramePoint2d copToPack)
+   public void getCoP(FramePoint copToPack)
+   {
+      yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
+   }
+
+   public void getCoP(FramePoint2d copToPack)
    {
       yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
