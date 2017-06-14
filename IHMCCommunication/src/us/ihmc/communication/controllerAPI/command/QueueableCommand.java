@@ -46,6 +46,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       commandId = other.getCommandId();
       executionMode = other.getExecutionMode();
       previousCommandId = other.getPreviousCommandId();
+      this.adjustedExecutionTime = other.getExecutionTime();
    }
 
    /**
