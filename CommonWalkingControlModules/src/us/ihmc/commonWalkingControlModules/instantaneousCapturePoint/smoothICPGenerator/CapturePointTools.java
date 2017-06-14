@@ -1056,9 +1056,15 @@ public class CapturePointTools
          desiredCapturePointToPack.set(initialCapturePoint);
    }
 
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, double verticalCoMHeightAcceleration, FrameVector angularMomentumRate,
+                                                     YoFramePoint zmp, YoFramePoint eCMPToPack)
+   {
+      computeCentroidalMomentumPivot(mass, gravity, verticalCoMHeightAcceleration, angularMomentumRate, zmp.getFrameTuple(), eCMPToPack);
+   }
+
    public static void computeCentroidalMomentumPivot(double mass, double gravity, FrameVector angularMomentumRate, YoFramePoint zmp, YoFramePoint eCMPToPack)
    {
-      computeCentroidalMomentumPivot(mass, gravity, 0.0, angularMomentumRate, zmp.getFrameTuple(), eCMPToPack.getFrameTuple());
+      computeCentroidalMomentumPivot(mass, gravity, 0.0, angularMomentumRate, zmp.getFrameTuple(), eCMPToPack);
    }
 
    public static void computeCentroidalMomentumPivot(double mass, double gravity, FrameVector angularMomentumRate, FramePoint zmp, FramePoint eCMPToPack)
@@ -1066,8 +1072,8 @@ public class CapturePointTools
       computeCentroidalMomentumPivot(mass, gravity, 0.0, angularMomentumRate, zmp, eCMPToPack);
    }
 
-   public static void computeCentroidalMomentumPivot(double mass, double gravity, double verticalAcceleration, FrameVector angularMomentumRate, FramePoint zmp,
-                                                     FramePoint eCMPToPack)
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, double verticalCoMHeightAcceleration, FrameVector angularMomentumRate,
+                                                     FramePoint zmp, FramePoint eCMPToPack)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -1076,7 +1082,23 @@ public class CapturePointTools
 
       eCMPToPack.setX(angularMomentumRate.getY());
       eCMPToPack.setY(-angularMomentumRate.getX());
-      eCMPToPack.scale(1.0 / (mass * (gravity + verticalAcceleration)));
+      eCMPToPack.scale(1.0 / (mass * (gravity + verticalCoMHeightAcceleration)));
+
+      zmp.changeFrame(worldFrame);
+      eCMPToPack.add(zmp);
+   }
+
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, double verticalCoMHeightAcceleration, FrameVector angularMomentumRate,
+                                                     FramePoint zmp, YoFramePoint eCMPToPack)
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      eCMPToPack.setToZero();
+      angularMomentumRate.changeFrame(worldFrame);
+
+      eCMPToPack.setX(angularMomentumRate.getY());
+      eCMPToPack.setY(-angularMomentumRate.getX());
+      eCMPToPack.scale(1.0 / (mass * (gravity + verticalCoMHeightAcceleration)));
 
       zmp.changeFrame(worldFrame);
       eCMPToPack.add(zmp);

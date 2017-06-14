@@ -974,7 +974,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
 
-   public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
+   public void getAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
    }
