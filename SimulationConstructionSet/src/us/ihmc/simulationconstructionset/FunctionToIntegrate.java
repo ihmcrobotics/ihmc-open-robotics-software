@@ -1,7 +1,7 @@
 
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 
 public interface FunctionToIntegrate

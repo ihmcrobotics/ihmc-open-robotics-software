@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.acsell.CostOfTransportCalculator;
 import us.ihmc.acsell.hardware.sensorReader.AcsellSensorReader;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 
 public class LatencyVectorCorruptor implements SignalCorruptor<Tuple3DBasics>

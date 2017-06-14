@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.robotics.time.ExecutionTimer;

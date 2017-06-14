@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class YoPlanarWalkerTimedStep extends PlanarWalkerTimedStep

@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.plotting.PlotterColors;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterLegendPanel;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class SimulationOverheadPlotter implements PlaybackListener

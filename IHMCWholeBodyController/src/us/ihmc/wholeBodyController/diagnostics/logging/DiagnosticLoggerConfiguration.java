@@ -22,7 +22,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class DiagnosticLoggerConfiguration
 {

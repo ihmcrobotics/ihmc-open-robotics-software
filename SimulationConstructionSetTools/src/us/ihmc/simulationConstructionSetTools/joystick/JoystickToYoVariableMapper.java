@@ -5,10 +5,10 @@ import java.util.HashMap;
 
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class JoystickToYoVariableMapper

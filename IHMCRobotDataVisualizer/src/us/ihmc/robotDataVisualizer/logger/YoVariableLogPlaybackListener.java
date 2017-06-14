@@ -1,6 +1,6 @@
 package us.ihmc.robotDataVisualizer.logger;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public interface YoVariableLogPlaybackListener

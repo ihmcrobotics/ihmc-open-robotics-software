@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.gui.camera;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 
 public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDollyPositionHolder

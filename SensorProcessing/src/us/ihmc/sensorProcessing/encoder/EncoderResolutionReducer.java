@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.encoder;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotController.SensorProcessor;
 
 public class EncoderResolutionReducer implements SensorProcessor

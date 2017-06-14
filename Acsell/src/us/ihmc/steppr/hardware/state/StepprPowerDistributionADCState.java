@@ -3,9 +3,9 @@ package us.ihmc.steppr.hardware.state;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 
 public class StepprPowerDistributionADCState implements AcsellPowerDistributionADCState

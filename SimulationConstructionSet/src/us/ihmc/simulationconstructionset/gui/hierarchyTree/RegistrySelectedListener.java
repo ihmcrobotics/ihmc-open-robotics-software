@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.hierarchyTree;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface RegistrySelectedListener
 {

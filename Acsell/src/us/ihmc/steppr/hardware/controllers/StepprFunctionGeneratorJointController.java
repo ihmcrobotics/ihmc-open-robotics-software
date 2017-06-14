@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

@@ -9,7 +9,7 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 
 public class UC33Receiver implements Receiver
 {
