@@ -70,7 +70,6 @@ public class CommandConsumerWithDelayBuffers
             if(command.getExecutionDelayTime() < Double.MIN_VALUE)
             {
                GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
-               priorityQueue.clear();
             }
             queueCommand(command);
          }  
