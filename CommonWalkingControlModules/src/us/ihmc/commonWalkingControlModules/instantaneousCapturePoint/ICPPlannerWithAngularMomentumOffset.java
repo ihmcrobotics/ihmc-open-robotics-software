@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,6 +12,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,20 +29,19 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    private final YoFramePoint modifiedCMPPosition;
    private final YoFrameVector modifiedCMPVelocity;
 
+   private final YoFrameVector cmpOffset;
+   private final AlphaFilteredYoFrameVector filteredCMPOffset;
+   private final DoubleYoVariable cmpOffsetAlphaFilter;
+
    private final DoubleYoVariable modifiedTimeInCurrentState;
    private final DoubleYoVariable modifiedTimeInCurrentStateRemaining;
-
-   private final double mass;
-   private final double gravityZ;
+   private final DoubleYoVariable angularMomentumRateGain;
 
    public ICPPlannerWithAngularMomentumOffset(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                              CapturePointPlannerParameters capturePointPlannerParameters, double mass, double gravityZ,
-                                              YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                              CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
-
-      this.mass = mass;
-      this.gravityZ = gravityZ;
 
       modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
       modifiedICPAcceleration = new YoFrameVector(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
@@ -48,41 +49,58 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
       modifiedCMPPosition = new YoFramePoint(namePrefix + "ModifiedCMPPosition", worldFrame, registry);
       modifiedCMPVelocity = new YoFrameVector(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
 
+      cmpOffsetAlphaFilter = new DoubleYoVariable(namePrefix + "CMPOffsetAlphaFilter", registry);
+      cmpOffset = new YoFrameVector(namePrefix + "CMPOffset", worldFrame, registry);
+      filteredCMPOffset = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredCMPOffset", "", registry,
+                                                                                      cmpOffsetAlphaFilter, cmpOffset);
+
+
       modifiedTimeInCurrentState = new DoubleYoVariable(namePrefix + "ModifiedTimeInCurrentState", registry);
       modifiedTimeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "ModifiedRemainingTime", registry);
+
+      angularMomentumRateGain = new DoubleYoVariable(namePrefix + "AngularMomentumRateGain", registry);
+
+      cmpOffsetAlphaFilter.set(0.97);
+      angularMomentumRateGain.set(1.0);
    }
 
-   //todo make a gain that we skew this with
-   public void modifyDesiredICPForCMPOffset(FramePoint desiredCoP)
+   private final FrameVector cmpOffsetFromCoP = new FrameVector();
+   public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate)
    {
-      desiredCoP.changeFrame(worldFrame);
-      modifiedCMPPosition.set(desiredCoP);
+      if (copEstimate.containsNaN())
+      {
+         modifiedCMPPosition.set(desiredCMPPosition);
+         modifiedCMPVelocity.set(desiredCMPVelocity);
 
-      estimateCurrentTimeWithModifiedCMP(desiredCoP);
+         modifiedICPVelocity.set(desiredICPVelocity);
+         modifiedICPAcceleration.set(desiredICPAcceleration);
 
-      double omega0 = this.omega0.getDoubleValue();
-      modifiedICPVelocity.set(desiredICPPosition);
-      modifiedICPVelocity.sub(modifiedCMPPosition);
-      modifiedICPVelocity.scale(omega0);
+         modifiedTimeInCurrentState.set(timeInCurrentState.getDoubleValue());
+         modifiedTimeInCurrentStateRemaining.set(timeInCurrentStateRemaining.getDoubleValue());
 
-      CapturePointTools.computeDesiredCapturePointAcceleration(omega0, modifiedICPVelocity, modifiedICPAcceleration);
-      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(modifiedICPVelocity, modifiedICPAcceleration, omega0, modifiedCMPVelocity);
-   }
+         PrintTools.warn("CoP Estimate contains NaN.");
+      }
+      else
+      {
+         desiredCMPPosition.getFrameTuple(cmpOffsetFromCoP);
+         cmpOffsetFromCoP.sub(copEstimate);
+         cmpOffsetFromCoP.scale(angularMomentumRateGain.getDoubleValue());
+         cmpOffset.set(cmpOffsetFromCoP);
+         filteredCMPOffset.update();
 
-   //todo make a gain that we skew this with
-   public void modifyDesiredICPForAngularMomentum(FrameVector angularMomentumRate, double desiredCoMHeightAcceleration)
-   {
-      CapturePointTools.computeCentroidalMomentumPivot(mass, gravityZ, desiredCoMHeightAcceleration, angularMomentumRate, desiredCMPPosition, modifiedCMPPosition); //todo incorporate vertical acceleration
+         modifiedCMPPosition.set(desiredCMPPosition);
+         modifiedCMPPosition.add(filteredCMPOffset);
 
-      estimateCurrentTimeWithModifiedCMP(modifiedCMPPosition.getFrameTuple());
+         estimateCurrentTimeWithModifiedCMP(modifiedCMPPosition.getFrameTuple());
 
-      double omega0 = this.omega0.getDoubleValue();
-      modifiedICPVelocity.set(desiredICPPosition);
-      modifiedICPVelocity.sub(modifiedCMPPosition);
-      modifiedICPVelocity.scale(omega0);
+         double omega0 = this.omega0.getDoubleValue();
+         modifiedICPVelocity.set(desiredICPPosition);
+         modifiedICPVelocity.sub(modifiedCMPPosition);
+         modifiedICPVelocity.scale(omega0);
 
-      CapturePointTools.computeDesiredCapturePointAcceleration(omega0, modifiedICPVelocity, modifiedICPAcceleration);
-      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(modifiedICPVelocity, modifiedICPAcceleration, omega0, modifiedCMPVelocity);
+         CapturePointTools.computeDesiredCapturePointAcceleration(omega0, modifiedICPVelocity, modifiedICPAcceleration);
+         CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(modifiedICPVelocity, modifiedICPAcceleration, omega0, modifiedCMPVelocity);
+      }
    }
 
    private void estimateCurrentTimeWithModifiedCMP(FramePoint desiredCoPFromAngularMomentum)
