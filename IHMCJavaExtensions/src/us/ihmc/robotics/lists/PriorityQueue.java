@@ -8,7 +8,7 @@ import us.ihmc.commons.PrintTools;
 /**
  * Should be Garbage free
  */
-public class GarbageFreePriorityQueue<T>
+public class PriorityQueue<T>
 {
    private final int size;
    private int count;
@@ -27,7 +27,7 @@ public class GarbageFreePriorityQueue<T>
     * @param size the max size of the priority queue
     */
    @SuppressWarnings("unchecked")
-   public GarbageFreePriorityQueue(int size, Class<?> clazz)
+   public PriorityQueue(int size, Class<?> clazz)
    {
       this.size = size;
       this.comparator = null;
@@ -40,7 +40,7 @@ public class GarbageFreePriorityQueue<T>
     * @param size the max size of the priority queue
     */
    @SuppressWarnings("unchecked")
-   public GarbageFreePriorityQueue(int size, Class<?> clazz, Comparator<T> comparator)
+   public PriorityQueue(int size, Class<?> clazz, Comparator<T> comparator)
    {
       this.size = size;
       this.comparator = comparator;
