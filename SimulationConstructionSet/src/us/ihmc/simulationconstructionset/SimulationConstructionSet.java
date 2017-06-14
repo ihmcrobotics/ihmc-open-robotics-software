@@ -51,6 +51,8 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;
@@ -3455,7 +3457,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
       // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
 
       // dataWriter.writeSpreadsheetFormattedData(myDataBuffer, (mySimulation.getDT() * mySimulation.getRecordFreq()), vars);
       dataWriter.writeSpreadsheetFormattedData(myDataBuffer, vars);
@@ -3476,7 +3478,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public void writeData(String varGroupName, boolean binary, boolean compress, File chosenFile)
    {
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
       writeData(vars, binary, compress, chosenFile);
    }
 
@@ -3507,7 +3509,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroup, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroup, varGroupList);
       dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);
    }
 
@@ -3619,7 +3621,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       System.out.println("Writing State File " + chosenFile.getName()); // filename);
 
       // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
       dataWriter.writeState(robots[0].getName(), (mySimulation.getDT() * mySimulation.getRecordFreq()), vars, binary, compress);
    }
 
@@ -3636,7 +3638,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
 
       dataWriter.writeSpreadsheetFormattedState(myDataBuffer, vars);
    }
@@ -4505,5 +4507,4 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
    }
-
 }

@@ -6,8 +6,6 @@ import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.gui.config.VarGroup;
-import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -254,20 +252,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       }
 
       return tempList.getMatchingVariables(varNames, regularExpressions);
-   }
-
-   public ArrayList<YoVariable<?>> getVarsFromGroup(String varGroupName, VarGroupList varGroupList)
-   {
-      if (varGroupName.equals("all"))
-      {
-         return getVariables();
-      }
-
-      VarGroup varGroup = varGroupList.getVarGroup(varGroupName);
-      String[] varNames = varGroup.getVars();
-      String[] regularExpressions = varGroup.getRegularExpressions();
-
-      return getVars(varNames, regularExpressions);
    }
 
    /**

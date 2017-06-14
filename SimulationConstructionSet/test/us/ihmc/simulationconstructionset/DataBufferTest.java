@@ -594,57 +594,6 @@ public class DataBufferTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
-   public void testGetVarsFromGroup()
-   {
-      dataBuffer.addEntry(aBuffer);
-      dataBuffer.addEntry(bBuffer);
-      dataBuffer.addEntry(cBuffer);
-
-      VarGroup varGroupOne = new VarGroup("varGroupOne");
-      VarGroup varGroupTwo = new VarGroup("varGroupTwo");
-      VarGroup varGroupThree = new VarGroup("varGroupThree");
-
-      varGroupOne.addVar("a_arm");
-      varGroupOne.addVar("c_arm");
-
-      String[] allRegularExpressions = { ".*" };
-      String[] cRegularExpressions = { "c.*" };
-
-      varGroupTwo.addRegularExpressions(allRegularExpressions);
-      varGroupThree.addRegularExpressions(cRegularExpressions);
-
-      VarGroupList varGroupList = new VarGroupList();
-      varGroupList.addVarGroup(varGroupOne);
-      varGroupList.addVarGroup(varGroupTwo);
-      varGroupList.addVarGroup(varGroupThree);
-
-      ArrayList<YoVariable<?>> allVarsFromGroup = dataBuffer.getVarsFromGroup("all", varGroupList);
-
-      assertTrue(allVarsFromGroup.contains(a));
-      assertTrue(allVarsFromGroup.contains(b));
-      assertTrue(allVarsFromGroup.contains(c));
-
-      ArrayList<YoVariable<?>> aVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupOne", varGroupList);
-
-      assertTrue(aVarsFromGroup.contains(a));
-      assertFalse(aVarsFromGroup.contains(b));
-      assertTrue(aVarsFromGroup.contains(c));
-
-      ArrayList<YoVariable<?>> regExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupTwo", varGroupList);
-
-      assertTrue(regExpVarsFromGroup.contains(a));
-      assertTrue(regExpVarsFromGroup.contains(b));
-      assertTrue(regExpVarsFromGroup.contains(c));
-
-      ArrayList<YoVariable<?>> cRegExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupThree", varGroupList);
-
-      assertFalse(cRegExpVarsFromGroup.contains(a));
-      assertFalse(cRegExpVarsFromGroup.contains(b));
-      assertTrue(cRegExpVarsFromGroup.contains(c));
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
    public void testSetMaxBufferSize()
 
    {
