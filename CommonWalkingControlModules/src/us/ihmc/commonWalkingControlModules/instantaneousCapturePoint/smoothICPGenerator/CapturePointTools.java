@@ -1056,6 +1056,32 @@ public class CapturePointTools
          desiredCapturePointToPack.set(initialCapturePoint);
    }
 
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, FrameVector angularMomentumRate, YoFramePoint zmp, YoFramePoint eCMPToPack)
+   {
+      computeCentroidalMomentumPivot(mass, gravity, 0.0, angularMomentumRate, zmp.getFrameTuple(), eCMPToPack.getFrameTuple());
+   }
+
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, FrameVector angularMomentumRate, FramePoint zmp, FramePoint eCMPToPack)
+   {
+      computeCentroidalMomentumPivot(mass, gravity, 0.0, angularMomentumRate, zmp, eCMPToPack);
+   }
+
+   public static void computeCentroidalMomentumPivot(double mass, double gravity, double verticalAcceleration, FrameVector angularMomentumRate, FramePoint zmp,
+                                                     FramePoint eCMPToPack)
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      eCMPToPack.setToZero(worldFrame);
+      angularMomentumRate.changeFrame(worldFrame);
+
+      eCMPToPack.setX(angularMomentumRate.getY());
+      eCMPToPack.setY(-angularMomentumRate.getX());
+      eCMPToPack.scale(1.0 / (mass * (gravity + verticalAcceleration)));
+
+      zmp.changeFrame(worldFrame);
+      eCMPToPack.add(zmp);
+   }
+
    /**
     * Compute the angular momentum about the center of mass in the world frame.
     * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>,

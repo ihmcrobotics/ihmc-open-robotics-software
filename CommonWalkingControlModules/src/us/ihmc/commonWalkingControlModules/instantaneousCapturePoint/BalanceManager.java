@@ -169,7 +169,9 @@ public class BalanceManager
       }
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
-      icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      icpPlanner = new ICPPlannerWithAngularMomentumOffset(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, totalMass, gravityZ, registry,
+                                                           yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
