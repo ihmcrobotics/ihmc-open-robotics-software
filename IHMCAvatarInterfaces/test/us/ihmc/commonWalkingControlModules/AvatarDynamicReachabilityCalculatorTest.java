@@ -32,9 +32,9 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
-   private static String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
-   private static String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
+   private static String shortScript = "scripts/ExerciseAndJUnitScripts/dynamicReachabilityForwardShort.xml";
+   private static String mediumScript = "scripts/ExerciseAndJUnitScripts/dynamicReachabilityForwardMedium.xml";
+   private static String longScript = "scripts/ExerciseAndJUnitScripts/dynamicReachabilityForwardLong.xml";
 
    private static double simulationTime = 10.0;
 
@@ -73,9 +73,27 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 100000000)
    */
-   public void testForwardWalking() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkingShort() throws SimulationExceededMaximumTimeException
    {
-      setupTest(slowStepScript);
+      setupTest(shortScript);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      assertTrue(success);
+   }
+
+   public void testForwardWalkingMedium() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(mediumScript);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      assertTrue(success);
+   }
+
+   public void testForwardWalkingLong() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(longScript);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 

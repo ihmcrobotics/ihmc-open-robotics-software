@@ -60,6 +60,7 @@ public class CommandConsumerWithDelayBuffersTest
             try
             {
                commandInputManager.submitCommand((C) command);
+               commandConsumer.update();
                assertTrue(commandConsumer.isNewCommandAvailable(clazz));
             }
             catch (NotImplementedException e) 
@@ -102,6 +103,7 @@ public class CommandConsumerWithDelayBuffersTest
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
+         yoTime.set(0.0);
          Command<?,M> command = getCommand(random, clazz);
          
          if(command.isCommandValid())
@@ -110,13 +112,16 @@ public class CommandConsumerWithDelayBuffersTest
             {
                command.setExecutionDelayTime(random.nextDouble() + 0.1);
                commandInputManager.submitCommand((C) command);
-               assertTrue(commandConsumer.isNewCommandAvailable(clazz));
+               assertFalse(commandConsumer.isNewCommandAvailable(clazz));
             }
             catch (NotImplementedException e) 
             {
             }
          }
       }
+      
+      commandConsumer.update();
+      
       
       //check no commands are available, (they should all be queued)
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
@@ -160,7 +165,7 @@ public class CommandConsumerWithDelayBuffersTest
    @Test
    public <C extends Command<C, ?>, M extends Packet<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      Random random = new Random(100);
+      Random random = new Random(10);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
       DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
@@ -170,14 +175,15 @@ public class CommandConsumerWithDelayBuffersTest
          for (int i = 0; i < CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE; i++)
          {
             Command<?, M> command = getCommand(random, clazz);
-
+            
             if (command.isCommandValid())
             {
                try
                {
                   command.setExecutionDelayTime(random.nextDouble() + 0.1);
                   commandInputManager.submitCommand((C) command);
-                  assertTrue(commandConsumer.isNewCommandAvailable(clazz));
+                  commandConsumer.update();
+                  assertFalse(commandConsumer.isNewCommandAvailable(clazz));
                }
                catch (NotImplementedException e)
                {
@@ -206,10 +212,12 @@ public class CommandConsumerWithDelayBuffersTest
       //yoTime is now larger than the delay so all commands should be available
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
+//      Class clazz = FootstepDataListCommand.class;
+//      Class clazz = FootstepDataListCommand.class;
          if(commandConsumer.isNewCommandAvailable(clazz))
          {
+            System.out.println(clazz);
             assertEquals(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE, commandConsumer.pollNewCommands((Class<C>) clazz).size());
-            
             //we added several commands and then popped them so now they should all be empty
             assertNull(commandConsumer.pollNewestCommand((Class<C>) clazz));
             assertFalse(commandConsumer.isNewCommandAvailable(clazz));
@@ -250,8 +258,9 @@ public class CommandConsumerWithDelayBuffersTest
       {
          commandInputManager.submitCommand(randomOrderedCommands.get(i));
       }
-      
-      assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
+      assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
+      commandConsumer.update();
+      assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
       
       
@@ -288,7 +297,7 @@ public class CommandConsumerWithDelayBuffersTest
       DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
-      TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE];
+      TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE - 1];
       ArrayList<TestCommand> randomOrderedCommands = new ArrayList<TestCommand>();
       for(int i = 0; i < commands.length; i++)
       {
@@ -304,64 +313,25 @@ public class CommandConsumerWithDelayBuffersTest
          commandInputManager.submitCommand(randomOrderedCommands.get(i));
       }
       
-      assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
+      commandConsumer.update();
+      assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
       
       TestCommand notDelayedCommand = new TestCommand();
       notDelayedCommand.setData(random.nextLong());
       commandInputManager.submitCommand(notDelayedCommand);
       
+      commandConsumer.update();
       assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
       List<TestCommand> polledCommands = commandConsumer.pollNewCommands(TestCommand.class);
       assertEquals(1,polledCommands.size());
       assertTrue(notDelayedCommand.equals(polledCommands.get(0)));
       
-      yoTime.set(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1);
+      yoTime.set(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE);
       assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
   
-   @Test
-   public <C extends Command<C, ?>, M extends Packet<M>> void testSendingNonDelayedCommandWhenCommandsAreDelayedClearsAllDelayedCommandsADifferentWay()
-   {
-      Random random = new Random(100);
-      List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
-      controllerSupportedCommands.add(TestCommand.class);
-      CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
-      CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
-      
-      TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE];
-      ArrayList<TestCommand> randomOrderedCommands = new ArrayList<TestCommand>();
-      for(int i = 0; i < commands.length; i++)
-      {
-         TestCommand command = new TestCommand();
-         command.setExecutionDelayTime(i + 0.5);
-         command.setData(random.nextLong());
-         commands[i] = command;
-         randomOrderedCommands.add(random.nextInt(randomOrderedCommands.size() + 1), command);
-      }
-      
-      for(int i = 0; i < randomOrderedCommands.size(); i++)
-      {
-         commandInputManager.submitCommand(randomOrderedCommands.get(i));
-      }
-      
-      assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
-      assertNull(commandConsumer.pollNewestCommand(TestCommand.class));
-      
-      TestCommand notDelayedCommand = new TestCommand();
-      notDelayedCommand.setData(random.nextLong());
-      commandInputManager.submitCommand(notDelayedCommand);
-      
-      assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
-      assertTrue(notDelayedCommand.equals(commandConsumer.pollNewestCommand(TestCommand.class)));
-      
-      yoTime.set(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1);
-      assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
-      assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
-   }
-
    @Test
    public <C extends Command<C, ?>, M extends Packet<M>> void testFlushCommands()
    {
@@ -388,8 +358,8 @@ public class CommandConsumerWithDelayBuffersTest
          commandInputManager.submitCommand(randomOrderedCommands.get(i));
       }
       
-      
-      assertTrue(commandConsumer.isNewCommandAvailable(TestCommand.class));
+      commandConsumer.update();
+      assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
 
       commandConsumer.flushCommands(TestCommand.class);
@@ -400,6 +370,39 @@ public class CommandConsumerWithDelayBuffersTest
       yoTime.set(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1);
       assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
+   }
+   
+   @Test
+   public <C extends Command<C, ?>, M extends Packet<M>> void testAddingTooManyCommands()
+   {
+      Random random = new Random(100);
+      List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
+      controllerSupportedCommands.add(TestCommand.class);
+      CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
+      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
+      
+      TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1];
+      ArrayList<TestCommand> randomOrderedCommands = new ArrayList<TestCommand>();
+      for(int i = 0; i < commands.length; i++)
+      {
+         TestCommand command = new TestCommand();
+         command.setExecutionDelayTime(i + 0.5);
+         command.setData(random.nextLong());
+         commands[i] = command;
+         randomOrderedCommands.add(random.nextInt(randomOrderedCommands.size() + 1), command);
+      }
+      
+      for(int i = 0; i < randomOrderedCommands.size(); i++)
+      {
+         commandInputManager.submitCommand(randomOrderedCommands.get(i));
+         commandConsumer.update();
+      }
+      
+      yoTime.set(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 2);
+      assertEquals(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE,commandConsumer.pollNewCommands(TestCommand.class).size());
+      
+      
    }
    
    private <M extends Packet<M>> Command<?, M> getCommand(Random random, Class clazz)

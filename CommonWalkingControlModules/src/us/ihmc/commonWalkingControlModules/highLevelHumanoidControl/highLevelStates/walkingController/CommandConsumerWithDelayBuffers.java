@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
@@ -14,25 +15,27 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 /**
  * Pulls commands from the CommandInputManager and checks the delay time, If there is no delay or the delay is negative, it is available to be consumed
  * If the command has an execution delay it is put in a priority queue and held until the delay time has elapsed.
- *
+ * You must call update each tick to be able to consume commands
  */
 public class CommandConsumerWithDelayBuffers
 {
-   public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 5;
+   public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 10;
 
    private final DoubleYoVariable yoTime;
    private final CommandInputManager commandInputManager;
    
    /** Controller's copy of the new commands to be processed. */
-   private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
+   private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
+   private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, GarbageFreePriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
-   
+   private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
    {
       this.yoTime = yoTime;
       this.commandInputManager = commandInputManager;
-      registerNewCommands(commandInputManager.getListOfSupportedCommands());
+      listOfSupportedCommands = commandInputManager.getListOfSupportedCommands();
+      registerNewCommands(listOfSupportedCommands);
    }
    
    @SuppressWarnings("unchecked")
@@ -46,19 +49,43 @@ public class CommandConsumerWithDelayBuffers
 
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
    {
-      commandsMap.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
+      queuedCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
+      outgoingCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
       priorityQueues.put(commandClass, new GarbageFreePriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class, commandComparator));
    }
    
    /**
-    * Returns true if a delayed command is ready to be executed
-    * @param commandClassToCheck class to check
-    * @return true if a command is ready to be executed, false otherwise. More than one command may be available if true
+    * You MUST call this method each tick or you wont get any commands!
+    * Polls commands from the commandInputManager and puts them in the delay queue. 
     */
-   private boolean isDelayedCommandAvailable(Class<? extends Command<?, ?>> commandClassToCheck)
+   public <C extends Command<C, ?>> void update()
    {
-      Command<?, ?> command = priorityQueues.get(commandClassToCheck).peek();
+      for(int i = 0; i < listOfSupportedCommands.size(); i++)
+      {
+         RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands((Class<C>) listOfSupportedCommands.get(i));
+         for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
+         {
+            C command = newCommands.get(commandIndex);
+            if(command.getExecutionDelayTime() < Double.MIN_VALUE)
+            {
+               GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
+               priorityQueue.clear();
+            }
+            queueCommand(command);
+         }  
+      }
+   }
+   
+   /**
+    * Check if a new command is available.
+    * @param clazz class of the command to check availability.
+    * @return true if at least one new command is available.
+    */
+   public <C extends Command<C, ?>> boolean isNewCommandAvailable(Class<? extends Command<?,?>> clazz)
+   {
+      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(clazz);
+      Command<?, ?> command = priorityQueue.peek();
       if(command != null)
       {
          double startTime = command.getExecutionTime();
@@ -71,15 +98,25 @@ public class CommandConsumerWithDelayBuffers
    }
    
    /**
-    * Check if a new command to be processed is available.
-    * @param commandClassToCheck class of the command to check availability.
-    * @return true if at least one new command is available.
+    * Updates the execution delay and puts the command in a priority queue
+    * @param command
     */
-   public boolean isNewCommandAvailable(Class<? extends Command<?, ?>> commandClassToCheck)
+   @SuppressWarnings("unchecked")
+   private void queueCommand(Command<?,?> command)
    {
-      return isDelayedCommandAvailable(commandClassToCheck) || commandInputManager.isNewCommandAvailable(commandClassToCheck);
+      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
+      if(priorityQueue.getSize() >= NUMBER_OF_COMMANDS_TO_QUEUE)
+      {
+         PrintTools.error("Tried to add " + command.getClass() + " to the delay queue, but the queue was full. Try increasing the queue size");
+         return;
+      }
+      RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
+      Command commandCopy = recyclingArrayList.add();
+      commandCopy.set(command);
+      commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
+      priorityQueue.add(commandCopy);
    }
-
+   
    /**
     * Poll the most recent available command.
     * After calling this method, no new command will be available excluding delayed commands
@@ -89,34 +126,16 @@ public class CommandConsumerWithDelayBuffers
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToPoll)
    {
-      RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands(commandClassToPoll);
-      GarbageFreePriorityQueue<Command<?, ?>> commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
-      
-      if(newCommands.size() > 0)
+      if(isNewCommandAvailable(commandClassToPoll))
       {
-         return newCommands.get(0);
-      }
-      
-      if(isDelayedCommandAvailable(commandClassToPoll))
-      {
-         return (C) commandPriorityQueue.pop();
+         RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToPoll);
+         GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
+         Command<?, ?> command = priorityQueue.pop();
+         recyclingArrayList.remove(command);
+         return (C) command;
       }
       
       return null;
-   }
-
-   /**
-    * Updates the execution delay and puts the command in a priority queue
-    * @param command
-    */
-   @SuppressWarnings("unchecked")
-   private <C extends Command<C, ?>> void queueCommand(Command<?,?> command)
-   {
-      RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = commandsMap.get(command.getClass());
-      Command commandCopy = recyclingArrayList.add();
-      commandCopy.set(command);
-      commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
-      priorityQueues.get(command.getClass()).add(commandCopy);
    }
    
    /**
@@ -128,48 +147,20 @@ public class CommandConsumerWithDelayBuffers
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
    {
-      RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands(commandClassToPoll);
-      GarbageFreePriorityQueue<Command<?, ?>> commandPriorityQueue = processCommands(commandClassToPoll, newCommands);
+      RecyclingArrayList<C> commands = (RecyclingArrayList<C>) outgoingCommands.get(commandClassToPoll);
+      GarbageFreePriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
+      RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToPoll);
       
-      while(isDelayedCommandAvailable(commandClassToPoll))
+      commands.clear();
+      
+      while(isNewCommandAvailable(commandClassToPoll))
       {
-         Command<?, ?> queuedCommand = commandPriorityQueue.pop();
-         newCommands.add().set((C) queuedCommand);
+         Command<?, ?> queuedCommand =  priorityQueue.pop();
+         recyclingArrayList.remove(queuedCommand);
+         commands.add().set((C) queuedCommand);
       }
       
-      return newCommands;
-   }
-
-   /**
-    * pulls delayed commands out of {@code newCommands} and queues them
-    * If a non delayed command is found the queue is cleared. 
-    * @param commandClassToPoll the command class
-    * @param newCommands the commands received from the {@code CommandInputManager}
-    * @return priority queue with new delayed commands added
-    */
-   private <C extends Command<C, ?>> GarbageFreePriorityQueue<Command<?, ?>> processCommands(Class<C> commandClassToPoll, RecyclingArrayList<C> newCommands)
-   {
-      int size = newCommands.size();
-      int index = 0;
-      GarbageFreePriorityQueue<Command<?, ?>> commandPriorityQueue = priorityQueues.get(commandClassToPoll);
-      while(index < size)
-      {
-         C command = newCommands.get(index);
-         
-         if(command.getExecutionDelayTime() > Double.MIN_VALUE)
-         {
-            queueCommand(command);
-            newCommands.remove(index);
-            index--;
-            size--;
-         }
-         else
-         {
-            commandPriorityQueue.clear();
-         }
-         index++;
-      }
-      return commandPriorityQueue;
+      return commands;
    }
 
    /**
@@ -179,10 +170,7 @@ public class CommandConsumerWithDelayBuffers
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       GarbageFreePriorityQueue<Command<?, ?>> queueableCommandPriorityQueue = priorityQueues.get(commandClassToFlush);
-      if(queueableCommandPriorityQueue != null)
-      {
-         queueableCommandPriorityQueue.clear();
-      }
+      queueableCommandPriorityQueue.clear();
       commandInputManager.flushCommands(commandClassToFlush);
    }
 }

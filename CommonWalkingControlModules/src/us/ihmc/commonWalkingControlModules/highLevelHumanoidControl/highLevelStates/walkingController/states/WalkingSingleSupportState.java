@@ -210,6 +210,18 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
 
+      if (balanceManager.wasTimingAdjustedForReachability())
+      {
+         double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
+         double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
+         double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
+         double nextSwingDuration = nextFootstepTiming.getSwingTime();
+
+         swingTime = currentSwingDuration;
+         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
+         nextFootstepTiming.setTimings(nextSwingDuration, nextTransferDuration);
+      }
+
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          balanceManager.updateCurrentICPPlan();
