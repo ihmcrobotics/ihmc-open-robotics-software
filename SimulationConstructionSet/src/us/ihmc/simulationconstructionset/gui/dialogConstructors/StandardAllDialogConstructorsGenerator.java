@@ -8,7 +8,6 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.TimeHolder;
-import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.StopCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
@@ -19,6 +18,7 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.videos.ExportVideo;
+import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
