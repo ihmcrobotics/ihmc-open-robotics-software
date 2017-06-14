@@ -27,8 +27,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 
 public class DrillDetectionUI

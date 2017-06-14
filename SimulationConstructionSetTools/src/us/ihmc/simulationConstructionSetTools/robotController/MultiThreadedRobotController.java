@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
+import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.simulationconstructionset.PlayCycleListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

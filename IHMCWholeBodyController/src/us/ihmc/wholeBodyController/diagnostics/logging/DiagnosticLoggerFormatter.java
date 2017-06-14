@@ -6,7 +6,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class DiagnosticLoggerFormatter extends Formatter
 {

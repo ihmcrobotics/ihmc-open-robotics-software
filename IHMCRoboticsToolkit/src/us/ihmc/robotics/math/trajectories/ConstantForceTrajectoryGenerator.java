@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 
 public class ConstantForceTrajectoryGenerator implements DoubleTrajectoryGenerator

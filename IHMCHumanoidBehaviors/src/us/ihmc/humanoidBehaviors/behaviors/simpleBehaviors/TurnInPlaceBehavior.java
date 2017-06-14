@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

@@ -6,9 +6,9 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 @SuppressWarnings("serial")

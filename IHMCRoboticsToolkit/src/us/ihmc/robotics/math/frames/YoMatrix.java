@@ -2,9 +2,9 @@ package us.ihmc.robotics.math.frames;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 /**
  * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound.

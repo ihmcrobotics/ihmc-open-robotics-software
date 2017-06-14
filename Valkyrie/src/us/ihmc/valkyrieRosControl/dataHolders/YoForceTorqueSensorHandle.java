@@ -2,8 +2,8 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 

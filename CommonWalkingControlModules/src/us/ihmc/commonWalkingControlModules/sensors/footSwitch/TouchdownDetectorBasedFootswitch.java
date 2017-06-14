@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInterface

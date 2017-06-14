@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.simulationTesting;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;

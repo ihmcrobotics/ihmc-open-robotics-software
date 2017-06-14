@@ -8,10 +8,10 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.PriorityQueue;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
@@ -46,11 +46,11 @@ public class CommandConsumerWithDelayBuffers
    {
       for (int i = 0; i < commandClasses.size(); i++)
       {
-         Class<? extends Command<?, ?>> commandClass = commandClasses.get(i);
+         Class commandClass = commandClasses.get(i);
          registerNewCommand((Class<C>) commandClass);
-         
-         Builder<? extends Command<?, ?>> commandConstructor = CommandInputManager.createBuilderWithEmptyConstructor(commandClass);
-         Command<?, ?> command = commandConstructor.newInstance();
+
+         GenericTypeBuilder commandConstructor = GenericTypeBuilder.createBuilderWithEmptyConstructor(commandClass);
+         Command<?, ?> command = (Command<?, ?>) commandConstructor.newInstance();
          messageToCommandMap.put(command.getMessageClass(), commandClass);
       }
    }

@@ -9,8 +9,8 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationToolkit.visualizers.FullRobotModelVisualizer;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class BehaviorService
 {

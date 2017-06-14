@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor

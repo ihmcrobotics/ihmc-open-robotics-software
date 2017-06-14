@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 
 public class EnumGlobalParameter extends GlobalParameter
 {

@@ -3,9 +3,9 @@ package us.ihmc.valkyrie.encoder.comparison;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessorNoYoVariablesWrapper;

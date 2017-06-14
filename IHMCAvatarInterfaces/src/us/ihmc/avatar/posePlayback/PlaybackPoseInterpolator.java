@@ -1,9 +1,9 @@
 package us.ihmc.avatar.posePlayback;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 

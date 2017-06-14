@@ -3,9 +3,9 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.convexOptimization.QpOASESCWrapper;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class OASESConstrainedQPSolver extends ConstrainedQPSolver

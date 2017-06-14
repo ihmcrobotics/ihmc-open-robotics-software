@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MasterVariableChangedListener implements VariableChangedListener
 {

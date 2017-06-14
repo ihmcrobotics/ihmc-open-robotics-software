@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 

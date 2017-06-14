@@ -2,8 +2,8 @@ package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class YoAngularAccelerationWeights
 {

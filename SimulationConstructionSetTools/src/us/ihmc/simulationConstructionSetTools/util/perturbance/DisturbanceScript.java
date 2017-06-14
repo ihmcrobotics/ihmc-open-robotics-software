@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.util.perturbance;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.simulationconstructionset.scripts.DisturbanceScriptEntry;
 import us.ihmc.simulationconstructionset.scripts.Script;
 

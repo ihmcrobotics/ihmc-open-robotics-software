@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;

@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * creates a pin joint with a pd controller built in.

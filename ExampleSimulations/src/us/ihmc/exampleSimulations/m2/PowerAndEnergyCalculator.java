@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.m2;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

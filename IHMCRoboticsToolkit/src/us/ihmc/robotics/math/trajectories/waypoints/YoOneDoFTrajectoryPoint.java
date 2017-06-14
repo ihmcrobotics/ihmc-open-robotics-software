@@ -7,8 +7,8 @@ import java.text.NumberFormat;
 
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<YoOneDoFTrajectoryPoint>

@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.scripts;
 
-import static org.junit.Assert.*;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.Random;
@@ -11,12 +9,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
+import static org.junit.Assert.assertEquals;
 
 public class TimeScriptTest
 {

@@ -22,10 +22,10 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;

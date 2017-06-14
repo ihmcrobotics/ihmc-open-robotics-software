@@ -2,7 +2,7 @@ package us.ihmc.robotDataLogger.handshake;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SummaryProvider
 {

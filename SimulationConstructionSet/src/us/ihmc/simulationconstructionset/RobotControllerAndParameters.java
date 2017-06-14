@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class RobotControllerAndParameters

@@ -4,9 +4,9 @@ import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

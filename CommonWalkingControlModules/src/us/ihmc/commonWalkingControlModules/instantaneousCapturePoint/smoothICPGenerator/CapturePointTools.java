@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.List;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;

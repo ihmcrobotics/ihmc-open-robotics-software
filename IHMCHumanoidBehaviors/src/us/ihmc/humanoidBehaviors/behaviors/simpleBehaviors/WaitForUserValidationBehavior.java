@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 
 public class WaitForUserValidationBehavior extends AbstractBehavior
 {

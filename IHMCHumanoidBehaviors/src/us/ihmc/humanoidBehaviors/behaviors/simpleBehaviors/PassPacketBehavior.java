@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 
 public class PassPacketBehavior extends AbstractBehavior
 {

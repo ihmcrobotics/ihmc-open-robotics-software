@@ -6,7 +6,7 @@ import java.awt.Color;
 
 import javax.swing.JLabel;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 @SuppressWarnings("serial")

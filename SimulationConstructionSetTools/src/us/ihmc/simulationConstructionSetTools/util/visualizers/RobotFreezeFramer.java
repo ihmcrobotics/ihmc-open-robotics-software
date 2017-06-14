@@ -2,9 +2,9 @@ package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;

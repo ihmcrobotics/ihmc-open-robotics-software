@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 
 class FloatingJointRobotSensor implements SensorInterface

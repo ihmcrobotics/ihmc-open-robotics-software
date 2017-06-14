@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
 

@@ -7,7 +7,7 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;

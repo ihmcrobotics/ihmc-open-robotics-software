@@ -2,8 +2,8 @@ package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
