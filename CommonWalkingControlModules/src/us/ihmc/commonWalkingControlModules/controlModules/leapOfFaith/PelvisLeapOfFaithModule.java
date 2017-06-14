@@ -28,7 +28,7 @@ public class PelvisLeapOfFaithModule
 
    private double swingDuration;
 
-   private final BooleanYoVariable usePelvisRelaxation = new BooleanYoVariable("leapOfFaithUsePelvisRelaxation", registry);
+   private final BooleanYoVariable usePelvisRotation = new BooleanYoVariable("leapOfFaithUsePelvisRotation", registry);
    private final DoubleYoVariable yawGain = new DoubleYoVariable("leapOfFaithPelvisYawGain", registry);
    private final DoubleYoVariable rollGain = new DoubleYoVariable("leapOfFaithPelvisRollGain", registry);
 
@@ -37,7 +37,7 @@ public class PelvisLeapOfFaithModule
    {
       this.soleZUpFrames = soleZUpFrames;
 
-      usePelvisRelaxation.set(parameters.usePelvisRelaxation());
+      usePelvisRotation.set(parameters.usePelvisRotation());
       yawGain.set(parameters.getPelvisYawGain());
       rollGain.set(parameters.getPelvisRollGain());
 
@@ -72,7 +72,7 @@ public class PelvisLeapOfFaithModule
    {
       orientationOffset.setToZero();
 
-      if (isInSwing && usePelvisRelaxation.getBooleanValue())
+      if (isInSwing && usePelvisRotation.getBooleanValue())
       {
          double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
 
