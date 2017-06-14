@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.yoVariables.IndexChangedListener;
 import us.ihmc.yoVariables.YoVariableHolderImplementation;
 import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;
