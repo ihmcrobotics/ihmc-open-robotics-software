@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.yoVariables.YoVariableHolderImplementation;
 import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
 import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.yoVariables.listener.RewoundListener;
@@ -14,11 +15,12 @@ import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class DataBuffer extends YoVariableHolderImplementation
-        implements java.io.Serializable, DataBufferCommandsExecutor, ToggleKeyPointModeCommandExecutor, TimeDataHolder, DataEntryHolder
+        implements Serializable, DataBufferCommandsExecutor, ToggleKeyPointModeCommandExecutor, TimeDataHolder, DataEntryHolder
 {
    private String timeVariableName = "t";
 
