@@ -4,7 +4,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
 
 public class VarPropertiesPanel extends GridPane implements EventHandler<javafx.event.ActionEvent> {
 
