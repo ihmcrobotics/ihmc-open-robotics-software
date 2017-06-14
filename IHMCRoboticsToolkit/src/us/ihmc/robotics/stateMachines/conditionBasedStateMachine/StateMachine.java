@@ -1,7 +1,7 @@
 package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class StateMachine<E extends Enum<E>> extends GenericStateMachine<E, State<E>>

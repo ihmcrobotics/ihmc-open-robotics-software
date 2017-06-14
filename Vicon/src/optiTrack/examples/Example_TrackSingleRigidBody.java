@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 
 public class Example_TrackSingleRigidBody implements MocapRigidbodiesListener

@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 
 public interface CreatedNewVariablesListener

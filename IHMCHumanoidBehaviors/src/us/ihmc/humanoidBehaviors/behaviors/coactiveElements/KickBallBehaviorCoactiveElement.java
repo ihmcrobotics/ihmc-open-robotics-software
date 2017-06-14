@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePointArray;
 
 public abstract class KickBallBehaviorCoactiveElement extends BehaviorCoactiveElement

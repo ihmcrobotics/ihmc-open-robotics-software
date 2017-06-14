@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.tools.io.DatagramInputStream;
 import us.ihmc.tools.io.DatagramOutputStream;
 import us.ihmc.tools.thread.ThreadTools;

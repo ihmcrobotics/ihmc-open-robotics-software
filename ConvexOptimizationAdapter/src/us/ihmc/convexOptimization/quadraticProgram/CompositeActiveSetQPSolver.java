@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class CompositeActiveSetQPSolver extends ConstrainedQPSolver

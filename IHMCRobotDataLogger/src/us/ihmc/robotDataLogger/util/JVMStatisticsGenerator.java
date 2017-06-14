@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class JVMStatisticsGenerator

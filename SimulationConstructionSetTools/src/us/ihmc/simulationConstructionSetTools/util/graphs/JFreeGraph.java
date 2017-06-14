@@ -47,8 +47,8 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 
 public class JFreeGraph extends JPanel

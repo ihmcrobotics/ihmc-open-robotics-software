@@ -1,7 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * This interface is applied to YoGraphics and Artifacts which support

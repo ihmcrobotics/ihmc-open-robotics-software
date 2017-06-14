@@ -3,7 +3,7 @@ package us.ihmc.robotDataLogger;
 import java.nio.LongBuffer;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistryBuffer
 {

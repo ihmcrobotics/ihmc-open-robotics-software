@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;

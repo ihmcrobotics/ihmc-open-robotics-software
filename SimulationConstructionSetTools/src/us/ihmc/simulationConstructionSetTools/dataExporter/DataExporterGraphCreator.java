@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.Color;
 import java.io.File;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;

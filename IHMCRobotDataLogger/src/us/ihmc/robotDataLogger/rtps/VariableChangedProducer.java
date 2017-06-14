@@ -5,8 +5,8 @@ import java.util.List;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.robotDataLogger.Announcement;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VariableChangedProducer
 {

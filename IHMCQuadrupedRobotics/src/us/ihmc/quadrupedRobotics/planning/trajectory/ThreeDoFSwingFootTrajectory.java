@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;

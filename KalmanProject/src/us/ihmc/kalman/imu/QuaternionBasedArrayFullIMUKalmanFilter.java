@@ -3,8 +3,8 @@ package us.ihmc.kalman.imu;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedFullIMUKalmanFilter
 {

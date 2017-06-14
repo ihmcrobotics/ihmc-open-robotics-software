@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /* ** leg_kinematics.c                                   * * */
 /* ** Kinematics for one Bug Leg                         * **/

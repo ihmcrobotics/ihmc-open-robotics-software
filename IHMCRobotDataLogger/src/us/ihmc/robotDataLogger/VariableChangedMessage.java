@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VariableChangedMessage
 {

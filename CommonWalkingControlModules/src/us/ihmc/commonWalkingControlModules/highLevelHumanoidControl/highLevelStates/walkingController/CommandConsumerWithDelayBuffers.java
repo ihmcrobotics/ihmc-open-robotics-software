@@ -7,7 +7,7 @@ import java.util.Map;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.GarbageFreePriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 

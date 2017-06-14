@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface HeadOrientationControllerParameters
 {

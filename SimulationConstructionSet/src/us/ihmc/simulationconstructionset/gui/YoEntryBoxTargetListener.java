@@ -8,7 +8,7 @@ import java.awt.dnd.DropTargetListener;
 
 import javax.swing.TransferHandler;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoEntryBoxTargetListener implements DropTargetListener
 {

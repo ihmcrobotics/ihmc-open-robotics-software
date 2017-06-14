@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface CoactiveElement
 {

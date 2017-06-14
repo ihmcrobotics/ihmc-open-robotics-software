@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;

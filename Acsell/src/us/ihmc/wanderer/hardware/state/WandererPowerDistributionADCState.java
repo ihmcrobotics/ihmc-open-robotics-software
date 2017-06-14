@@ -3,9 +3,9 @@ package us.ihmc.wanderer.hardware.state;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
 

@@ -6,8 +6,8 @@ import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getAngu
 import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadialVelocity;
 import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadius;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

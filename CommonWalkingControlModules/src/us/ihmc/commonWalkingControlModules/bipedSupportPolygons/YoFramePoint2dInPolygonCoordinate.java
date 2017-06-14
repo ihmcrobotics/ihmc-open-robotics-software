@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;

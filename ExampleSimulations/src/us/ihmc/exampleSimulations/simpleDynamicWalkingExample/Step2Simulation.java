@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

@@ -3,7 +3,7 @@ package us.ihmc.kalman.comparisons;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class ConstantAccelerationKalmanSetup implements RobotController

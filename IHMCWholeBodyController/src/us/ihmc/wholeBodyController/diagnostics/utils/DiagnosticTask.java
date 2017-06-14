@@ -2,8 +2,8 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 
 import java.util.ArrayDeque;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
