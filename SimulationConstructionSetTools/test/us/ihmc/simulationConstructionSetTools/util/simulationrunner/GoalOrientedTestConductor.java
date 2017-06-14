@@ -193,8 +193,6 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       {
          PrintTools.error(this, assertionFailedMessage);
          
-         concludeTesting();
-         
          throw new AssertionFailedError(assertionFailedMessage);
       }
    }

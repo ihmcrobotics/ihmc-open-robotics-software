@@ -340,7 +340,7 @@ public abstract class ICPOptimizationController
     */
    public void setSwingSplitFraction(int stepNumber, double splitFraction)
    {
-      transferSplitFractions.get(stepNumber).set(splitFraction);
+      swingSplitFractions.get(stepNumber).set(splitFraction);
    }
 
    /**

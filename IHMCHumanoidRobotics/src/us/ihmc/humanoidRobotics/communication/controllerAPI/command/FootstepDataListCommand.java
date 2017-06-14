@@ -68,7 +68,8 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       finalTransferDuration = other.finalTransferDuration;
       executionMode = other.executionMode;
       executionTiming = other.executionTiming;
-      executionDelayTime = other.getExecutionDelayTime();
+      executionDelayTime = other.executionDelayTime;
+      adjustedExecutionTime = other.adjustedExecutionTime;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
