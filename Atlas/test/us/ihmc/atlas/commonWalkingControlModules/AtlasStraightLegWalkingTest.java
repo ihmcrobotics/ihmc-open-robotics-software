@@ -47,6 +47,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                   return gains;
                }
+
                @Override
                public boolean doHeelTouchdownIfPossible()
                {

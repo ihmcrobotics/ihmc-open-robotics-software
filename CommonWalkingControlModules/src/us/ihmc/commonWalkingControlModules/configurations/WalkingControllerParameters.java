@@ -39,6 +39,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private DynamicReachabilityParameters dynamicReachabilityParameters;
    private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
+   private LeapOfFaithParameters leapOfFaithParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -791,5 +792,13 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
          pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
 
       return pelvisOffsetWhileWalkingParameters;
+   }
+
+   public LeapOfFaithParameters getLeapOfFaithParameters()
+   {
+      if (leapOfFaithParameters == null)
+         leapOfFaithParameters = new LeapOfFaithParameters();
+
+      return leapOfFaithParameters;
    }
 }

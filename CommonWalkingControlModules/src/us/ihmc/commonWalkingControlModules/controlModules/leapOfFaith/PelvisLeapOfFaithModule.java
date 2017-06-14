@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -26,15 +28,18 @@ public class PelvisLeapOfFaithModule
 
    private double swingDuration;
 
+   private final BooleanYoVariable usePelvisRelaxation = new BooleanYoVariable("leapOfFaithUsePelvisRelaxation", registry);
    private final DoubleYoVariable yawGain = new DoubleYoVariable("leapOfFaithPelvisYawGain", registry);
    private final DoubleYoVariable rollGain = new DoubleYoVariable("leapOfFaithPelvisRollGain", registry);
 
-   public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
+   public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
+                                  YoVariableRegistry parentRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
 
-      yawGain.set(1.0);
-      rollGain.set(10.0);
+      usePelvisRelaxation.set(parameters.usePelvisRelaxation());
+      yawGain.set(parameters.getPelvisYawGain());
+      rollGain.set(parameters.getPelvisRollGain());
 
       parentRegistry.addChild(registry);
    }
@@ -67,7 +72,7 @@ public class PelvisLeapOfFaithModule
    {
       orientationOffset.setToZero();
 
-      if (isInSwing)
+      if (isInSwing && usePelvisRelaxation.getBooleanValue())
       {
          double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
 
