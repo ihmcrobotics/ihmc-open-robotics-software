@@ -41,6 +41,18 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private LeapOfFaithParameters leapOfFaithParameters;
 
+   private final double massScale;
+
+   public WalkingControllerParameters()
+   {
+      this(1.0);
+   }
+
+   public WalkingControllerParameters(double massScale)
+   {
+      this.massScale = massScale;
+   }
+
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
     * position and desired velocity from the desired acceleration.
@@ -797,7 +809,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public LeapOfFaithParameters getLeapOfFaithParameters()
    {
       if (leapOfFaithParameters == null)
-         leapOfFaithParameters = new LeapOfFaithParameters();
+         leapOfFaithParameters = new LeapOfFaithParameters(massScale);
 
       return leapOfFaithParameters;
    }
