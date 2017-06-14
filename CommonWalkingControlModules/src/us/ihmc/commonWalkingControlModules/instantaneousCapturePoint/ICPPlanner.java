@@ -116,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.008;
 
@@ -132,13 +132,13 @@ public class ICPPlanner
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
    /** Desired position for the Instantaneous Capture Point (ICP) */
-   private final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
+   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    /** Desired velocity for the Instantaneous Capture Point (ICP) */
    private final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
    /** Desired acceleration for the Instantaneous Capture Point (ICP) */
    private final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
-   private final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
+   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
    private final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
@@ -146,7 +146,7 @@ public class ICPPlanner
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
-   private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
+   protected final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
 
    /** Time at which the current state was initialized. */
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "CurrentStateInitialTime", registry);
@@ -203,7 +203,7 @@ public class ICPPlanner
     * <p>
     * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
     * when the robot is getting stuck at the end of transfer.
-    * </p>
+    true* </p>
     */
    private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
 
