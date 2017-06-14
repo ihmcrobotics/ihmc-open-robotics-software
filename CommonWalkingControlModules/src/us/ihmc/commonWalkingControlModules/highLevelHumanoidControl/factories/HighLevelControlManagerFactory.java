@@ -7,6 +7,7 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -223,9 +224,10 @@ public class HighLevelControlManagerFactory
 
       YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
+      LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }

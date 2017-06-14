@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -38,7 +39,8 @@ public class PelvisOrientationManager
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
    public PelvisOrientationManager(YoOrientationPIDGainsInterface gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+                                   LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                   YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
@@ -46,7 +48,7 @@ public class PelvisOrientationManager
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisOrientationControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
-      walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
+      walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
       setupStateMachine();
 

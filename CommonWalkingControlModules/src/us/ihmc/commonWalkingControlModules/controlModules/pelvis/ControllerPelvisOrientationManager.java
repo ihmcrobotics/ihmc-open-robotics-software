@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.PelvisLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -73,7 +74,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
 
    public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+                                             LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             YoVariableRegistry parentRegistry)
    {
       super(PelvisOrientationControlMode.WALKING_CONTROLLER);
 
@@ -129,7 +131,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
-      leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, registry);
+      leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, leapOfFaithParameters, registry);
 
       parentRegistry.addChild(registry);
    }

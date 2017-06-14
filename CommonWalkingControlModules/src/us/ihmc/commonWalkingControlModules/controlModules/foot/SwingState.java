@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
@@ -227,7 +228,8 @@ public class SwingState extends AbstractUnconstrainedState
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
-      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody(), registry);
+      LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
+      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody(), leapOfFaithParameters, registry);
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
