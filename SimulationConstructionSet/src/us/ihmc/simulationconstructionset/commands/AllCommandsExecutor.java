@@ -1,6 +1,8 @@
 package us.ihmc.simulationconstructionset.commands;
 
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
+import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
 
 public interface AllCommandsExecutor
         extends DataBufferCommandsExecutor, RunCommandsExecutor, AddCameraKeyCommandExecutor, AddKeyPointCommandExecutor, CreateNewGraphWindowCommandExecutor,

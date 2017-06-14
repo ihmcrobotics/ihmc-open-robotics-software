@@ -1,17 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.yoVariables.YoVariableHolderImplementation;
-import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
-import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.gui.KeyPoints;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
@@ -1034,27 +1029,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       {
          super(message);
       }
-   }
-
-
-   public ArrayList<YoVariable<?>> search(String searchText)
-   {
-      ArrayList<YoVariable<?>> allVariables = getAllVariables();
-      ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();
-
-      for (int i = 0; i < allVariables.size(); i++)
-      {
-         DataBufferEntry entry = entries.get(i);
-
-         boolean match = RegularExpression.check(entry.getVariable().getName(), searchText);
-
-         if (match)
-         {
-            ret.add(entry.getVariable());
-         }
-      }
-
-      return ret;
    }
 
    public boolean checkIfDataIsEqual(DataBuffer dataBuffer, double epsilon)
