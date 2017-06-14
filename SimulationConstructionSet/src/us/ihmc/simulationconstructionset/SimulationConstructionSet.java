@@ -52,7 +52,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
-import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;

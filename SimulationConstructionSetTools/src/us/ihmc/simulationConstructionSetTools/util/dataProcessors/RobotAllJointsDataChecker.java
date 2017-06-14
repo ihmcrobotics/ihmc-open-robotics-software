@@ -3,10 +3,10 @@ package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 
 public class RobotAllJointsDataChecker implements DataProcessingFunction
 {
