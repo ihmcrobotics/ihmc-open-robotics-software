@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;

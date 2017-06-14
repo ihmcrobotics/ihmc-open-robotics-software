@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui;
 
 import javax.swing.JFrame;
 
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
