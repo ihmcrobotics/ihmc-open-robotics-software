@@ -18,7 +18,7 @@ import com.jmatio.types.MLDouble;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

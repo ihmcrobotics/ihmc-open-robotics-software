@@ -9,7 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.VarPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
