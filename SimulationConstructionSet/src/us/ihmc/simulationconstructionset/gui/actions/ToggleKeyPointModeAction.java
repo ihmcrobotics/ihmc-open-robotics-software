@@ -1,8 +1,9 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
+
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.net.URL;

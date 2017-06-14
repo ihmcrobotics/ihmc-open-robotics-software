@@ -1,7 +1,8 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.GotoInPointCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
+
 import java.awt.event.KeyEvent;
 
 @SuppressWarnings("serial")
