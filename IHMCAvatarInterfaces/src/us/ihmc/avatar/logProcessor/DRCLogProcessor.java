@@ -10,9 +10,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataVisualizer.logger.LogVisualizer;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 
 public abstract class DRCLogProcessor
 {

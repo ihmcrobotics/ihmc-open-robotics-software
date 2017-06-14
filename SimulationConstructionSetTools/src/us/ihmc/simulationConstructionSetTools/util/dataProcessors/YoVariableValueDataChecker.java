@@ -1,9 +1,9 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableValueDataChecker implements DataProcessingFunction
