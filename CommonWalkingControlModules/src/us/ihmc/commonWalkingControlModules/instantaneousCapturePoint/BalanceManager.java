@@ -347,7 +347,7 @@ public class BalanceManager
 
       controllerToolbox.getAngularMomentum(angularMomentum);
       controllerToolbox.getCoP(copEstimate);
-      icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate);
+      icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
 
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
