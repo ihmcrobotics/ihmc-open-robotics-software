@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 
@@ -21,6 +20,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     */
    public ClearDelayQueueMessage()
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
 
    /**
@@ -30,6 +30,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
    public ClearDelayQueueMessage(Class<Packet<?>> clazz)
    {
       this.clazz = clazz;
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
    
    /**
