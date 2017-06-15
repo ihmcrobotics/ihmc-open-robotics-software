@@ -49,7 +49,7 @@ import org.w3c.dom.Document;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class JFreeGraph extends JPanel
 {

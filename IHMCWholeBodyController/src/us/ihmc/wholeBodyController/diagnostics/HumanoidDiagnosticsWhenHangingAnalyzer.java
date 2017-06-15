@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class HumanoidDiagnosticsWhenHangingAnalyzer

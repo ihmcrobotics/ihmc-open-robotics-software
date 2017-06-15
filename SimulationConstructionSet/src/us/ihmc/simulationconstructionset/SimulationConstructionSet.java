@@ -63,7 +63,7 @@ import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
