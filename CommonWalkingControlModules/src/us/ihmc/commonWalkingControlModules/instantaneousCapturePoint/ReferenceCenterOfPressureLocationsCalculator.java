@@ -1,24 +1,26 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +30,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
 {
    // Some general hygiene declarations   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double CoP_Point_Size = 0.005;
+   private static final double CoPPointSize = 0.005;
 
    // Some Yo declarations
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -42,16 +44,16 @@ public class ReferenceCenterOfPressureLocationsCalculator
    // State variables 
    private BooleanYoVariable isDoneWalking;
    private IntegerYoVariable numberOfUpcomingFootsteps;
+   private IntegerYoVariable numberOfPointsPerFoot;
    private IntegerYoVariable numberOfFootstepstoConsider;
    
    private List<FootstepPoints> footCoPLocation = new ArrayList<>();
-   private List<YoFramePoint2d> coPLocations  = new ArrayList<>(); 
+   private List<FramePoint2d> coPLocations  = new ArrayList<>(); 
    private List<FrameVector2d> coPOffsets = new ArrayList<>();
+   private SideDependentList<FrameConvexPolygon2d> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
+   private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    
-   //TODO add visualization for CoP trajectories
-   private List<FootstepPoints> coPLocationsReadOnly = new ArrayList<>();
-   
-   private List<Footstep> upcomingFootsteps = new ArrayList<>();
+   private List<Footstep> upcomingFootsteps = new ArrayList<>();  
    
    // TODO User customizable input declarations
    private final SideDependentList<YoFrameVector2d> CoPUserOffsets = new SideDependentList<>();
@@ -61,9 +63,18 @@ public class ReferenceCenterOfPressureLocationsCalculator
                                                        YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
-      this.parentRegistry = parentRegistry;      
+      this.parentRegistry = parentRegistry;
       isDoneWalking = new BooleanYoVariable(namePrefix + "IsDoneWalking", registry);
-      numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
+      
+      for(RobotSide side : RobotSide.values)
+      {
+         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFeet.get(side).getContactPoints2d());
+         defaultFootPolygons.put(side, defaultFootPolygon);
+         supportFootPolygonsInSoleZUpFrames.put(side, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(side));         
+      }
+      
+      this.numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
+      this.numberOfPointsPerFoot = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfFootstepstoConsider = new IntegerYoVariable(namePrefix + "NumberOfFootstepsToConsider", registry);
       this.numberOfFootstepstoConsider.set(numberFootstepsToConsider);      
       this.parentRegistry.addChild(registry);      
@@ -71,8 +82,10 @@ public class ReferenceCenterOfPressureLocationsCalculator
    
    public void initializeParameters(ExtendedCapturePointPlannerParameters icpPlannerParameters)
    {
-      numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());      
-      coPOffsets = icpPlannerParameters.getCoPOffsets();
+      this.numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());      
+      this.numberOfPointsPerFoot.set(icpPlannerParameters.getNumberOfPointsPerFoot());
+      this.coPOffsets = icpPlannerParameters.getCoPOffsets();
+      
       if(coPOffsets.size() != icpPlannerParameters.getNumberOfPointsPerFoot())
       {
          PrintTools.warn(this, "Mismatch in CoP Offsets size (" + coPOffsets.size() + " and number of CoP trajectory way points (" + icpPlannerParameters.getNumberOfPointsPerFoot() + ")");
@@ -89,6 +102,19 @@ public class ReferenceCenterOfPressureLocationsCalculator
       }
    }
 
+   public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
+   {
+      for (int i = 0; i < coPLocations.size(); i++)
+      {
+         YoFramePoint graphicFramePoint = new YoFramePoint(namePrefix +"CoPWayPoint" + i, worldFrame, parentRegistry);
+         graphicFramePoint.set(coPLocations.get(i).getX(), coPLocations.get(i).getY(), 0.0);
+         YoGraphicPosition entryCMPViz = new YoGraphicPosition(namePrefix + "GraphicCoPWaypoint" + i, graphicFramePoint, CoPPointSize, YoAppearance.Green(),
+               GraphicType.SOLID_BALL);
+         yoGraphicsList.add(entryCMPViz);
+         artifactList.add(entryCMPViz.createArtifact());
+      }      
+   }
+   
    public void addUpcomingFootstep(Footstep footstep)
    {
       if(footstep != null)
@@ -99,7 +125,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
             PrintTools.warn(this, "Received bad footstep: " + footstep);
       }
    }
-      
+   
    public void clear()
    {
       upcomingFootsteps.clear();
@@ -112,7 +138,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
    
    public void update()
    {
-      // TODO Auto-generated method stub      
+      // TODO Auto-generated method stub
    }
 
    public void setSafeDistanceFromSupportEdges(double distance)
@@ -127,11 +153,6 @@ public class ReferenceCenterOfPressureLocationsCalculator
       return;
    }
 
-   public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
-   {
-      // TODO 
-   }
-
    public int getNumberOfFootstepRegistered()
    {
       return numberOfUpcomingFootsteps.getIntegerValue();
@@ -144,21 +165,53 @@ public class ReferenceCenterOfPressureLocationsCalculator
    
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
-      // TODO Auto-generated method stub      
-   }
-   
-   public void computeReferenceCoPForFootstep()
-   {
+      // TODO 
+      footCoPLocation.clear();
+      coPLocations.clear();
       
    }
    
-   public List<YoFramePoint2d> getCoPs()
+   public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide side, boolean atAStop)
+   {
+      // TODO 
+      footCoPLocation.clear();
+      coPLocations.clear();      
+   }
+   
+   private void computeReferenceCoPsForUpcomingFootSteps(RobotSide side, int numberOfUpcomingFootSteps, int copIndex)   
+   {
+      // TODO 
+      
+   }
+   
+   private void computeReferenceCoPsForFootstep(ArrayList<FramePoint> coPPointsToPack, RobotSide side, ReferenceFrame soleFrame, FrameConvexPolygon2d defaultFootPolygon, boolean isLastUpcomingStep)
+   {
+      FootstepPoints newFootstepCoPs = new FootstepPoints(side, soleFrame);
+      if(!isLastUpcomingStep)
+      {
+         for(int i=0; i<numberOfPointsPerFoot.getIntegerValue();i++)
+         {  
+            FramePoint2d coPPoint = new FramePoint2d(soleFrame);
+            coPPoint.add(coPOffsets.get(i));
+            newFootstepCoPs.addFootstepPoint(coPPoint);
+            coPLocations.add(coPPoint.changeFrameAndProjectToXYPlaneCopy(worldFrame));
+         }         
+      }
+      else
+      {
+         // TODO 
+         
+      }
+      footCoPLocation.add(newFootstepCoPs);         
+   }
+   
+   public List<FramePoint2d> getCoPs()
    {      
       return coPLocations;
    }
 
    
-   public YoFramePoint2d getNextCoP()
+   public FramePoint2d getNextCoP()
    {
       return coPLocations.get(0);
    }
@@ -166,6 +219,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
    
    public void getNextCoP(FramePoint entryCMPToPack)
    {
-      // TODO Auto-generated method stub      
+      FramePoint2d nextCoP = coPLocations.get(0);
+      entryCMPToPack.setIncludingFrame(nextCoP.getReferenceFrame(), nextCoP.getX(), nextCoP.getY(), 0.0);
    }
 }
