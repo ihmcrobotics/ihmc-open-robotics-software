@@ -195,6 +195,13 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       transform.transform(position);
       transform.transform(orientation);
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      transform.inverseTransform(position);
+      transform.inverseTransform(orientation);
+   }
    
    public void applyTransformToPositionOnly(Transform transform)
    {

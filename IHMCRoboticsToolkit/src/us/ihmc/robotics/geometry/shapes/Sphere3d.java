@@ -156,4 +156,10 @@ public class Sphere3d extends Shape3d<Sphere3d>
    {
       applyTransformToPose(transform);
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      applyInverseTransformToPose(transform);
+   }
 }

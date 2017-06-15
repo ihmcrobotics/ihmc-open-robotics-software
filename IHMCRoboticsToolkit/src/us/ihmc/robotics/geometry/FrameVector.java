@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -266,12 +265,6 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       {
          return false;
       }
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      tuple.applyTransform(transform);
    }
 
    @Override

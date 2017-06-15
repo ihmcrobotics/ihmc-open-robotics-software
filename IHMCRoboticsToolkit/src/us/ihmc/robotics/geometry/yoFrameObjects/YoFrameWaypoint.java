@@ -115,6 +115,14 @@ public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F exte
    }
 
    @Override
+   public final void applyInverseTransform(Transform transform)
+   {
+      putYoValuesIntoFrameWaypoint();
+      frameWaypoint.applyInverseTransform(transform);
+      getYoValuesFromFrameWaypoint();
+   }
+
+   @Override
    public void setToZero()
    {
       frameWaypoint.setToZero(getReferenceFrame());

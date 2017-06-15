@@ -136,11 +136,18 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       return angleOfRampIncline;
    }
-   
+
    @Override
    public void applyTransform(Transform transform)
    {
       applyTransformToPose(transform);
+      updateRamp();
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      applyInverseTransformToPose(transform);
       updateRamp();
    }
 

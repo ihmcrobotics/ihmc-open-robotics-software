@@ -144,6 +144,12 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      applyInverseTransformToPose(transform);
+   }
+
+   @Override
    public String toString()
    {
       return "radius = " + radius + ", thickness = " + tubeRadius + ", pose = " + getPoseString() + "\n";

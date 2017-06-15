@@ -229,6 +229,13 @@ public class Box3d extends Shape3d<Box3d>
       facesAreOutOfDate = true;
    }
 
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      applyInverseTransformToPose(transform);
+      facesAreOutOfDate = true;
+   }
+
    public void scale(double scale)
    {
       for (Direction direction : Direction.values())

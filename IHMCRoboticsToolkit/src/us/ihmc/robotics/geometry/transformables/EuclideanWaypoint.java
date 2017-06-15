@@ -132,6 +132,13 @@ public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, Euc
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      transform.inverseTransform(position);
+      transform.inverseTransform(linearVelocity);
+   }
+
+   @Override
    public boolean epsilonEquals(EuclideanWaypoint other, double epsilon)
    {
       if (!position.epsilonEquals(other.position, epsilon))
