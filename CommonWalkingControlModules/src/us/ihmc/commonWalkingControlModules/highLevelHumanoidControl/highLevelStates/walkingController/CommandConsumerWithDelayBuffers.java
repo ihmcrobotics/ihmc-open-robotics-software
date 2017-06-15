@@ -152,7 +152,12 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
       Command commandCopy = recyclingArrayList.add();
       commandCopy.set(command);
-      commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
+      
+      //not all commands implement setExecution time, if they don't the execution time will be 0 and should move to the front of the queue
+      if(commandCopy.isDelayedExecutionSupported())
+      {
+         commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
+      }
       priorityQueue.add(commandCopy);
    }
    
