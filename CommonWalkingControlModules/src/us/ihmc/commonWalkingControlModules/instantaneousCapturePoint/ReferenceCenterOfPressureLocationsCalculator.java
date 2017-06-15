@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.qpOASES.returnValue;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -46,6 +47,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
    private IntegerYoVariable numberOfUpcomingFootsteps;
    private IntegerYoVariable numberOfPointsPerFoot;
    private IntegerYoVariable numberOfFootstepstoConsider;
+   private IntegerYoVariable plannedCoPIndex;
    
    private List<FootstepPoints> footCoPLocation = new ArrayList<>();
    private List<FramePoint2d> coPLocations  = new ArrayList<>(); 
@@ -58,6 +60,15 @@ public class ReferenceCenterOfPressureLocationsCalculator
    // TODO User customizable input declarations
    private final SideDependentList<YoFrameVector2d> CoPUserOffsets = new SideDependentList<>();
    
+   
+   /**
+    * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
+    * @param namePrefix
+    * @param bipedSupportPolygons
+    * @param contactableFeet
+    * @param numberFootstepsToConsider
+    * @param parentRegistry
+    */
    public ReferenceCenterOfPressureLocationsCalculator(String namePrefix, BipedSupportPolygons bipedSupportPolygons,
                                                        SideDependentList<? extends ContactablePlaneBody> contactableFeet, int numberFootstepsToConsider,
                                                        YoVariableRegistry parentRegistry)
@@ -77,9 +88,15 @@ public class ReferenceCenterOfPressureLocationsCalculator
       this.numberOfPointsPerFoot = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfFootstepstoConsider = new IntegerYoVariable(namePrefix + "NumberOfFootstepsToConsider", registry);
       this.numberOfFootstepstoConsider.set(numberFootstepsToConsider);      
+      this.plannedCoPIndex = new IntegerYoVariable(namePrefix + "PlannedCoPIndex", registry);      
       this.parentRegistry.addChild(registry);      
    }
    
+   /**
+    * Initializes the desired ICP Planning parameters for the planning. 
+    * Should be called immediately after creating object
+    * @param icpPlannerParameters
+    */
    public void initializeParameters(ExtendedCapturePointPlannerParameters icpPlannerParameters)
    {
       this.numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());      
@@ -102,6 +119,11 @@ public class ReferenceCenterOfPressureLocationsCalculator
       }
    }
 
+   /**
+    * Creates a visualizer for the planned CoP trajectory
+    * @param yoGraphicsList 
+    * @param artifactList
+    */
    public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
       for (int i = 0; i < coPLocations.size(); i++)
@@ -112,9 +134,13 @@ public class ReferenceCenterOfPressureLocationsCalculator
                GraphicType.SOLID_BALL);
          yoGraphicsList.add(entryCMPViz);
          artifactList.add(entryCMPViz.createArtifact());
-      }      
+      }
    }
    
+   /**
+    * Add footstep location to planned
+    * @param footstep
+    */
    public void addUpcomingFootstep(Footstep footstep)
    {
       if(footstep != null)
@@ -126,9 +152,42 @@ public class ReferenceCenterOfPressureLocationsCalculator
       }
    }
    
+   /**
+    * Remove first footstep in the upcoming footstep queue from planner
+    */
+   public void removeFootStepQueueFront()
+   {
+      removeFootstep(0);
+   }
+   
+   /**
+    * Removes specified footstep from upcoming footstep queue
+    * @param index
+    */
+   public void removeFootstep(int index)
+   {
+      upcomingFootsteps.remove(index);
+   }
+   
+   /**
+    * Clears the CoP plan and footsteps used to generate current plan
+    */
    public void clear()
    {
       upcomingFootsteps.clear();
+      footCoPLocation.clear();
+      coPLocations.clear();
+      plannedCoPIndex.set(0);
+   }
+   
+   /**
+    * Clears the CoP plan. Footsteps used to generate the plan are retained
+    */
+   public void clearPlan()
+   {
+      footCoPLocation.clear();
+      coPLocations.clear();
+      plannedCoPIndex.set(0);
    }
    
    public boolean isDoneWalking()
@@ -155,27 +214,51 @@ public class ReferenceCenterOfPressureLocationsCalculator
 
    public int getNumberOfFootstepRegistered()
    {
-      return numberOfUpcomingFootsteps.getIntegerValue();
+      return numberOfUpcomingFootsteps.getIntegerValue();      
+   }
+   
+   public int getNumberOfCoPPlannedFootSteps()
+   {
+      return plannedCoPIndex.getIntegerValue();
    }
 
    public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
    {
-      // TODO Auto-generated method stub      
+      // TODO Auto-generated method stub
    }
    
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
-      // TODO 
-      footCoPLocation.clear();
-      coPLocations.clear();
+      int plannedCoPIndex = this.plannedCoPIndex.getIntegerValue();
+      if(plannedCoPIndex+1 < footCoPLocation.size())
+      {
+         clearPlannedCoPs(plannedCoPIndex+1, footCoPLocation.size());
+         PrintTools.warn(this.getClass(), "Replanning footsteps due to index-data mismatch");         
+      }
+      else if(plannedCoPIndex+1 > footCoPLocation.size())
+      {         
+         plannedCoPIndex = footCoPLocation.size()-1;
+         PrintTools.warn(this.getClass(), "Resetting CoP plan index due to index-data mismatch");
+      }
       
+      
+      
+   }
+   
+   private void clearPlannedCoPs(int plannedCoPCountFromIndex, int plannedCoPsStored)
+   {
+      if(plannedCoPCountFromIndex < plannedCoPsStored)
+      {
+         for(int i=plannedCoPsStored; i>plannedCoPCountFromIndex; i--)
+         {
+            footCoPLocation.remove(i-1);
+         }
+      }
    }
    
    public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide side, boolean atAStop)
    {
       // TODO 
-      footCoPLocation.clear();
-      coPLocations.clear();      
    }
    
    private void computeReferenceCoPsForUpcomingFootSteps(RobotSide side, int numberOfUpcomingFootSteps, int copIndex)   
