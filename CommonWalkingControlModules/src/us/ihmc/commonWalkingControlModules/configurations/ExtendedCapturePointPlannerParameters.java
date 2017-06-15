@@ -12,4 +12,10 @@ public abstract class ExtendedCapturePointPlannerParameters extends CapturePoint
    {
       return 2;
    }
+   
+   public int getOrderOfCoPInterpolation()
+   {
+      return 3;
+   }
+   
 }
