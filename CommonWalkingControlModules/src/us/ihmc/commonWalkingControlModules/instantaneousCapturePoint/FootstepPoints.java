@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,7 +19,9 @@ public class FootstepPoints
    private ReferenceFrame footFrame;
    private List<FramePoint2d> footstepPoints;
    private RobotSide side;
-   
+   private Footstep footstep;
+   private FootstepTiming footstepTiming;
+      
    /**
     * Initialize the foot point storage object
     * @param side Specify foot side
@@ -26,7 +30,7 @@ public class FootstepPoints
    
    public FootstepPoints(RobotSide side, ReferenceFrame refFrame)
    {
-      this(side, refFrame, 0);
+      this(side, refFrame, 0);      
    }
    
    /**

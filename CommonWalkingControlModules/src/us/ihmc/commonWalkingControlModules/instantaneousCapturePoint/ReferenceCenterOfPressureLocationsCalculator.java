@@ -3,13 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.fraction.FractionConversionException;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.convexOptimization.qpOASES.returnValue;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -27,7 +24,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -54,12 +51,14 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    private IntegerYoVariable numberOfPointsPerFoot;
    private IntegerYoVariable numberOfFootstepstoConsider;
    private IntegerYoVariable plannedCoPIndex;
+   private IntegerYoVariable orderOfSplineInterpolation;
 
    private List<FootstepPoints> footCoPLocation = new ArrayList<>();
    private List<FramePoint2d> coPLocations = new ArrayList<>();
    private List<FrameVector2d> coPOffsets = new ArrayList<>();
    private SideDependentList<FrameConvexPolygon2d> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
    private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
+   private ArrayList<YoPolynomial3D> coPTrajectoryPolynomials = new ArrayList<>();
 
    private List<Footstep> upcomingFootsteps = new ArrayList<>();
 
@@ -76,7 +75,6 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    }
 
    /**
-    * 
     * @param icpPlannerParameters
     * @param bipedSupportPolygons
     * @param contactableFeet
@@ -86,6 +84,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
                                     SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
       this.parentRegistry = parentRegistry;
+      this.parentRegistry.addChild(registry);
       isDoneWalking = new BooleanYoVariable(namePrefix + "IsDoneWalking", registry);
 
       for (RobotSide side : RobotSide.values)
@@ -96,13 +95,14 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
       }
 
       this.numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
-      this.numberOfPointsPerFoot = new IntegerYoVariable(namePrefix + "NumberOfPointsPerFootstep", registry);
-      this.numberOfFootstepstoConsider = new IntegerYoVariable(namePrefix + "NumberOfFootstepsToConsider", registry);
-      this.plannedCoPIndex = new IntegerYoVariable(namePrefix + "PlannedCoPIndex", registry);
-      this.parentRegistry.addChild(registry);
-      this.numberOfFootstepstoConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       this.numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+      this.numberOfPointsPerFoot = new IntegerYoVariable(namePrefix + "NumberOfPointsPerFootstep", registry);
       this.numberOfPointsPerFoot.set(icpPlannerParameters.getNumberOfPointsPerFoot());
+      this.numberOfFootstepstoConsider = new IntegerYoVariable(namePrefix + "NumberOfFootstepsToConsider", registry);
+      this.numberOfFootstepstoConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+      this.orderOfSplineInterpolation = new IntegerYoVariable(namePrefix + "OrderOfCoPInterpolation", registry);
+      this.orderOfSplineInterpolation.set(icpPlannerParameters.getOrderOfCoPInterpolation());
+      this.plannedCoPIndex = new IntegerYoVariable(namePrefix + "PlannedCoPIndex", registry);
       this.coPOffsets = icpPlannerParameters.getCoPOffsets();
 
       if (coPOffsets.size() != icpPlannerParameters.getNumberOfPointsPerFoot())
@@ -315,9 +315,14 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    }
 
    @Override
-   public List<YoPolynomial> getPolynomialTrajectory()
+   public List<YoPolynomial3D> getPolynomialTrajectory()
    {
-      // TODO Auto-generated method stub
-      return null;
+      generatePolynomialCoefficients();
+      return coPTrajectoryPolynomials;
+   }
+
+   private void generatePolynomialCoefficients()
+   {
+      coPTrajectoryPolynomials.clear();      
    }
 }
