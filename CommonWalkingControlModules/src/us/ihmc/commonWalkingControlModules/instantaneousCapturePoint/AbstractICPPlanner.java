@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-public class AbstractICPPlanner
+public abstract class AbstractICPPlanner
 {
 
 }
