@@ -20,13 +20,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.BooleanYoVariable;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 
 public class DataFileWriterTest
 {

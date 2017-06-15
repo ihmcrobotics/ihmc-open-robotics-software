@@ -22,8 +22,8 @@ import us.ihmc.graphicsDescription.graphInterfaces.SimpleGraphIndicesHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class JavaFXHeatmapVisualizer

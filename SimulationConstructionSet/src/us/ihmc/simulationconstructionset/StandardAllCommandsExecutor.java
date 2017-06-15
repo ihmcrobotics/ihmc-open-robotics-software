@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
 
 public class StandardAllCommandsExecutor implements AllCommandsExecutor
