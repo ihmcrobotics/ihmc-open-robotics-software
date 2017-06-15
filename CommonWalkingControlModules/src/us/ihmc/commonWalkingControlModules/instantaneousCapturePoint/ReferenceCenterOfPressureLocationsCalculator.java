@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.fraction.FractionConversionException;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
 import us.ihmc.commons.PrintTools;
@@ -161,6 +163,17 @@ public class ReferenceCenterOfPressureLocationsCalculator
    }
    
    /**
+    * Removes the specified number of footsteps from the queue front
+    * @param numberOfFootstepsToRemove number of steps to remove
+    */
+   
+   public void removeFootStepQueueFront(int numberOfFootstepsToRemove)
+   {
+      for(int i=0; i<numberOfFootstepsToRemove; i++)
+         removeFootstep(0);
+   }
+   
+   /**
     * Removes specified footstep from upcoming footstep queue
     * @param index
     */
@@ -222,10 +235,17 @@ public class ReferenceCenterOfPressureLocationsCalculator
       return plannedCoPIndex.getIntegerValue();
    }
 
-   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
+
+   public void computeReferenceCoPsForUpcomingSteps(RobotSide side, int numberOfUpcomingFootSteps, int copIndex)   
    {
-      // TODO Auto-generated method stub
-   }
+      // TODO
+   }      
+
+   private void computeReferenceCoPsForLastStep(ArrayList<FramePoint> coPPointsToPack, RobotSide supportSide, ReferenceFrame supportSoleFrame, 
+                                                FrameConvexPolygon2d defaultFootPolygon)
+   {
+      
+   }      
    
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
@@ -239,10 +259,25 @@ public class ReferenceCenterOfPressureLocationsCalculator
       {         
          plannedCoPIndex = footCoPLocation.size()-1;
          PrintTools.warn(this.getClass(), "Resetting CoP plan index due to index-data mismatch");
-      }
+      }      
+   }
+
+   public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide side, boolean atAStop)
+   {
+      // TODO       
+   }
       
-      
-      
+   private void computeReferenceCoPsForFootstep(ArrayList<FramePoint> coPPointsToPack, RobotSide side, ReferenceFrame soleFrame, FrameConvexPolygon2d defaultFootPolygon)
+   {
+      FootstepPoints newFootstepCoPs = new FootstepPoints(side, soleFrame);
+      for(int i=0; i<numberOfPointsPerFoot.getIntegerValue();i++)
+      {  
+         FramePoint2d coPPoint = new FramePoint2d(soleFrame);
+         coPPoint.add(coPOffsets.get(i));
+         newFootstepCoPs.addFootstepPoint(coPPoint);
+         coPLocations.add(coPPoint.changeFrameAndProjectToXYPlaneCopy(worldFrame));
+      }         
+      footCoPLocation.add(newFootstepCoPs);         
    }
    
    private void clearPlannedCoPs(int plannedCoPCountFromIndex, int plannedCoPsStored)
@@ -254,39 +289,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
             footCoPLocation.remove(i-1);
          }
       }
-   }
-   
-   public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide side, boolean atAStop)
-   {
-      // TODO 
-   }
-   
-   private void computeReferenceCoPsForUpcomingFootSteps(RobotSide side, int numberOfUpcomingFootSteps, int copIndex)   
-   {
-      // TODO 
-      
-   }
-   
-   private void computeReferenceCoPsForFootstep(ArrayList<FramePoint> coPPointsToPack, RobotSide side, ReferenceFrame soleFrame, FrameConvexPolygon2d defaultFootPolygon, boolean isLastUpcomingStep)
-   {
-      FootstepPoints newFootstepCoPs = new FootstepPoints(side, soleFrame);
-      if(!isLastUpcomingStep)
-      {
-         for(int i=0; i<numberOfPointsPerFoot.getIntegerValue();i++)
-         {  
-            FramePoint2d coPPoint = new FramePoint2d(soleFrame);
-            coPPoint.add(coPOffsets.get(i));
-            newFootstepCoPs.addFootstepPoint(coPPoint);
-            coPLocations.add(coPPoint.changeFrameAndProjectToXYPlaneCopy(worldFrame));
-         }         
-      }
-      else
-      {
-         // TODO 
-         
-      }
-      footCoPLocation.add(newFootstepCoPs);         
-   }
+   }      
    
    public List<FramePoint2d> getCoPs()
    {      
