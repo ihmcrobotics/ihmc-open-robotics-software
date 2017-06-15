@@ -337,7 +337,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)
    {
-      framePose2dToPack.setPoseIncludingFrame(referenceFrame, getX(), getY(), getYaw());
+      framePose2dToPack.setIncludingFrame(referenceFrame, getX(), getY(), getYaw());
    }
 
    public void getPosition2dIncludingFrame(FramePoint2d framePoint2dToPack)
