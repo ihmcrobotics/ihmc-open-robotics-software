@@ -515,7 +515,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Defines the duration spent ramping up the allowable normal toe contact force if {@link #rampUpAllowableToeLoadAfterContact()} is true.:w
+    * Defines the duration spent ramping up the allowable normal toe contact force if {@link #rampUpAllowableToeLoadAfterContact()} is true.
     *
     * @return duration (s)
     */
