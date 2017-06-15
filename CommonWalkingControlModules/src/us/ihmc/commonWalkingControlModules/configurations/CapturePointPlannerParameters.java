@@ -299,7 +299,7 @@ public abstract class CapturePointPlannerParameters
 
    public double getCMPOffsetAlphaFilter()
    {
-      return 0.99;
+         return 0.75;
    }
 
    public double getAngularMomentumRateForwardGain()
@@ -309,6 +309,6 @@ public abstract class CapturePointPlannerParameters
 
    public double getAngularMomentumRateLateralGain()
    {
-      return 0.7;
+      return 0.6;
    }
 }
