@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.math3.fraction.FractionConversionException;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.qpOASES.returnValue;
@@ -16,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -25,13 +27,15 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ReferenceCenterOfPressureLocationsCalculator
+public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponentPolynomialTrajectoryPlannerInterface
 {
-   // Some general hygiene declarations   
+   // Some general hygiene declarations  
+   private static final CMPComponentType cmpComponentType = CMPComponentType.CoP;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double CoPPointSize = 0.005;
 
@@ -143,7 +147,7 @@ public class ReferenceCenterOfPressureLocationsCalculator
     * Add footstep location to planned
     * @param footstep
     */
-   public void addUpcomingFootstep(Footstep footstep)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if(footstep != null)
       {
@@ -302,10 +306,22 @@ public class ReferenceCenterOfPressureLocationsCalculator
       return coPLocations.get(0);
    }
 
-   
    public void getNextCoP(FramePoint entryCMPToPack)
    {
       FramePoint2d nextCoP = coPLocations.get(0);
       entryCMPToPack.setIncludingFrame(nextCoP.getReferenceFrame(), nextCoP.getX(), nextCoP.getY(), 0.0);
+   }
+
+   @Override
+   public CMPComponentType getComponentType()
+   {
+      return cmpComponentType;
+   }
+
+   @Override
+   public List<YoPolynomial> getPolynomialTrajectory()
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }
