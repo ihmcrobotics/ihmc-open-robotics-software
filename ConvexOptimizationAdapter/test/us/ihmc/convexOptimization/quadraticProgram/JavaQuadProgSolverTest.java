@@ -457,7 +457,7 @@ public class JavaQuadProgSolverTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000000)
    public void testSimpleCasesWithBoundsConstraints() throws NoConvergenceException
    {
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
@@ -524,8 +524,8 @@ public class JavaQuadProgSolverTest
       quadraticCostScalar = 0.0;
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-      variableLowerBounds = new double[] { 1.0 + 1e-12};
-      variableUpperBounds = new double[] { 1.0 - 1e-12};
+      variableLowerBounds = new double[] { 1.0 - 1e-12};
+      variableUpperBounds = new double[] { 1.0 + 1e-12};
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
@@ -542,8 +542,8 @@ public class JavaQuadProgSolverTest
       quadraticCostScalar = 0.0;
       solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-      variableLowerBounds = new double[] { -1.0 + 1e-12};
-      variableUpperBounds = new double[] { -1.0 - 1e-12};
+      variableLowerBounds = new double[] { -1.0 - 1e-12};
+      variableUpperBounds = new double[] { -1.0 + 1e-12};
       solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
       solution = new double[1];
