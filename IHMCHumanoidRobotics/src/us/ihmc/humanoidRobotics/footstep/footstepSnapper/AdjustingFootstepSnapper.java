@@ -200,7 +200,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
                continue;
             }
 
-            newDesiredSolePosition.setPoseIncludingFrame(desiredSolePosition.getReferenceFrame(), point2d.getX(), point2d.getY(), originalYaw + angleOffsets[i]);
+            newDesiredSolePosition.setIncludingFrame(desiredSolePosition.getReferenceFrame(), point2d.getX(), point2d.getY(), originalYaw + angleOffsets[i]);
             footstepFound = convexHullFootstepSnapper.snapFootstep(footstep, heightMap);
 
             if (footstepFound!= Footstep.FootstepType.BAD_FOOTSTEP)
