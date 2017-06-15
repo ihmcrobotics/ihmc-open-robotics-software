@@ -496,6 +496,21 @@ public class Pose2D implements GeometryObject<Pose2D>
    }
 
    /**
+    * Transforms the position and orientation parts of this pose 2D by the inverse of the given
+    * {@code transform}.
+    *
+    * @param transform the geometric transform to apply on this pose 2D. Not modified.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY plane.
+    */
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      position.applyInverseTransform(transform);
+      orientation.applyInverseTransform(transform);
+   }
+
+   /**
     * Tests on a per component basis, if this pose 2D is exactly equal to {@code other}.
     *
     * @param other the other pose 2D to compare against this. Not modified.

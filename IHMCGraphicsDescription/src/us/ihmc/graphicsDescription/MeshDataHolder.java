@@ -111,6 +111,16 @@ public class MeshDataHolder implements Transformable
          vertexNormals[i].applyTransform(transform);
    }
 
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      for (int i = 0; i < vertices.length; i++)
+         vertices[i].applyInverseTransform(transform);
+
+      for (int i = 0; i < vertexNormals.length; i++)
+         vertexNormals[i].applyInverseTransform(transform);
+   }
+
    /**
     * Utility method to rotate a given mesh using a given rotation matrix.
     * @param input the mesh to rotate. Not modified.

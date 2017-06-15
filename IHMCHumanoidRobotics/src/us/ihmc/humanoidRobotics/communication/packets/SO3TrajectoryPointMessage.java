@@ -154,6 +154,13 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      transform.inverseTransform(orientation);
+      transform.inverseTransform(angularVelocity);
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");

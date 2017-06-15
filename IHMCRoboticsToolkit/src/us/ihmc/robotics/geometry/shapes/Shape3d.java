@@ -135,6 +135,11 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       pose.applyTransform(transform);
    }
 
+   public void applyInverseTransformToPose(Transform transform)
+   {
+      pose.applyInverseTransform(transform);
+   }
+
    public boolean epsilonEqualsPose(Shape3d<S> other, double epsilon)
    {
       return pose.epsilonEquals(other.pose, epsilon);

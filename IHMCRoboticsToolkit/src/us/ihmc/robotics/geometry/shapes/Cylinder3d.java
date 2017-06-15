@@ -134,6 +134,12 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      applyInverseTransformToPose(transform);
+   }
+
+   @Override
    protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
       boolean insideOrOnSurfaceLocal = true;

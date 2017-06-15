@@ -282,12 +282,19 @@ public class Plane3d implements GeometryObject<Plane3d>
 
       return returnPlane;
    }
-   
+
    @Override
    public void applyTransform(Transform transform)
    {
       point.applyTransform(transform);
       normal.applyTransform(transform);
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      point.applyInverseTransform(transform);
+      normal.applyInverseTransform(transform);
    }
 
    public void getIntersectionWithLine(Point3DBasics intersectionToPack, Point3DReadOnly lineStart, Vector3DReadOnly lineVector)

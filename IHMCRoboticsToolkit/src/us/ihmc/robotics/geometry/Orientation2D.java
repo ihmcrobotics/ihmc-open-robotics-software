@@ -444,6 +444,30 @@ public class Orientation2D implements GeometryObject<Orientation2D>
    }
 
    /**
+    * Transforms this orientation 2D by the inverse of the given {@code transform}.
+    * <p>
+    * This is equivalent to extracting the yaw rotation part from the given transform and subtracting it
+    * to this.
+    * </p>
+    *
+    * @param transform the geometric transform to apply on this orientation 2D. Not modified.
+    * @throws NotAMatrix2DException if the rotation part of {@code transform} is not a
+    *            transformation in the XY plane.
+    */
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      xVector.set(1.0, 0.0);
+      transform.inverseTransform(xVector);
+      double deltaYaw = Math.atan2(xVector.getY(), xVector.getX());
+
+      if (Double.isNaN(deltaYaw) || Double.isInfinite(deltaYaw))
+         deltaYaw = 0.0;
+
+      add(deltaYaw);
+   }
+
+   /**
     * Tests if the yaw angle of this orientation is equal to an {@code epsilon} to the yaw of
     * {@code other}.
     * <p>

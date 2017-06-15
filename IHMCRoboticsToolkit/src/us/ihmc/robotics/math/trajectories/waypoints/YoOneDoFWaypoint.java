@@ -131,4 +131,10 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
    {
       // Do nothing since simple numbers here.
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      // Do nothing since simple numbers here.
+   }
 }
