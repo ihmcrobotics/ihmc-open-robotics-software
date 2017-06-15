@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.VisualizablePacket;
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> implements VisualizablePacket
 {   
    /** the class you want to clear **/
-   public Class<Command<?,?>> clazz;
+   public Class<? extends Packet<?>> clazz;
    
    /** clear all the delay buffers **/
    public boolean clearAllDelayBuffers;
@@ -27,7 +27,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public ClearDelayQueueMessage(Class<Command<?,?>> clazz)
+   public ClearDelayQueueMessage(Class<Packet<?>> clazz)
    {
       this.clazz = clazz;
    }
@@ -36,7 +36,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public void setClazz(Class<Command<?, ?>> clazz)
+   public void setClazz(Class<? extends Packet<?>> clazz)
    {
       this.clazz = clazz;
    }
@@ -45,7 +45,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * get the class to clear
     * @param clazz the class to clear
     */
-   public Class<Command<?, ?>> getClazz()
+   public Class<? extends Packet<?>> getClazz()
    {
       return clazz;
    }
