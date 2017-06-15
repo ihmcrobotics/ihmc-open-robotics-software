@@ -88,12 +88,15 @@ public class Orientation2D implements GeometryObject<Orientation2D>
 
    /**
     * Sets the yaw angle of this orientation 2D.
+    * <p>
+    * Note that the argument is trimmed to be contained in [-<i>pi</i>, <i>pi</pi>].
+    * </p>
     * 
     * @param yaw the new yaw angle value in radians.
     */
    public void setYaw(double yaw)
    {
-      this.yaw = yaw;
+      this.yaw = AngleTools.trimAngleMinusPiToPi(yaw);
    }
 
    /**
@@ -392,15 +395,28 @@ public class Orientation2D implements GeometryObject<Orientation2D>
    }
 
    /**
-    * Computes the distance between {@code this} and {@code other} as the absolute difference in angle:<br>
+    * Computes the distance between {@code this} and {@code other} as the absolute difference in
+    * angle:<br>
     * {@code distance = Math.abs(this.yaw - other.yaw)}
     * 
     * @param other the other orientation 2D. Not modified.
-    * @return the distance between {@code this} and {@code other}.
+    * @return the distance between {@code this} and {@code other} contained in [0, <i>pi</pi>].
     */
    public double distance(Orientation2D other)
    {
-      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(yaw, other.yaw));
+      return Math.abs(difference(other));
+   }
+
+   /**
+    * Computes and returns the difference between {@code this} and {@code other}:<br>
+    * {@code distance = this.yaw - other.yaw}
+    * 
+    * @param other the other orientation 2D. Not modified.
+    * @return the difference between {@code this} and {@code other} contained in [-<i>pi</i>, <i>pi</pi>].
+    */
+   public double difference(Orientation2D other)
+   {
+      return AngleTools.computeAngleDifferenceMinusPiToPi(yaw, other.yaw);
    }
 
    /**

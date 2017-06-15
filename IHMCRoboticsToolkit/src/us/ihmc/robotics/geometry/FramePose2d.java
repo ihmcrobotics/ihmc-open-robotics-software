@@ -60,8 +60,8 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
 
    public void getPose(RigidBodyTransform transformToPack)
    {
-      orientation.getTransform3D(transformToPack);
-      transformToPack.setTranslation(new Vector3D(position.getX(), position.getY(), 0.0));
+      transformToPack.setRotationYaw(orientation.getYaw());
+      transformToPack.setTranslation(position.getX(), position.getY(), 0.0);
    }
 
    public void set(FramePose2d pose)
