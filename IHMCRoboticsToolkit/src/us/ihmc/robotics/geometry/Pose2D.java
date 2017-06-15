@@ -49,6 +49,17 @@ public class Pose2D implements GeometryObject<Pose2D>
       set(other);
    }
 
+   /**
+    * Creates a new pose 2D and initializes it with the given parameters.
+    * 
+    * @param position tuple used to initialize the position part of this pose. Not modified.
+    * @param orientation used to initialize the orientation part of this pose. Not modified.
+    */
+   public Pose2D(Tuple2DReadOnly position, Orientation2D orientation)
+   {
+      set(position, orientation);
+   }
+
    /** {@inheritDoc} */
    @Override
    public boolean containsNaN()
