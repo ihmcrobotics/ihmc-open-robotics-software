@@ -124,4 +124,15 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
    }
+   
+   /**
+    * tells the controller if this command supports delayed execution
+    * (Spoiler alert: It does)
+    * @return
+    */
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
 }
