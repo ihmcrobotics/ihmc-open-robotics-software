@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.dataBuffer;
 
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.yoVariables.variable.YoVariable;

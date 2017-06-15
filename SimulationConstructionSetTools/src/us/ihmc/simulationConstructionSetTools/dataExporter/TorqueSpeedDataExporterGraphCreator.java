@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
