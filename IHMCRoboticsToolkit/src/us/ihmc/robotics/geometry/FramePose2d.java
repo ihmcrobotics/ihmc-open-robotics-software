@@ -56,11 +56,16 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
       checkReferenceFrameMatch(position);
       pose.setPosition(position.getGeometryObject());
    }
-
+   
    public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform rigidBodyTransform)
    {
+      setIncludingFrame(referenceFrame, rigidBodyTransform, true);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform rigidBodyTransform, boolean checkIsTransform2D)
+   {
       setToZero(referenceFrame);
-      pose.set(rigidBodyTransform);
+      pose.set(rigidBodyTransform, checkIsTransform2D);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double yaw)

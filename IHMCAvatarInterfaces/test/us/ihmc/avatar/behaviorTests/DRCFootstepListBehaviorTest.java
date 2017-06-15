@@ -404,7 +404,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
       FramePose2d ret = new FramePose2d();
-      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), ankleTransformToWorld);
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), ankleTransformToWorld, false);
 
       return ret;
    }

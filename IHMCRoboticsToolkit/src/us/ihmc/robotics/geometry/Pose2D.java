@@ -205,7 +205,22 @@ public class Pose2D implements GeometryObject<Pose2D>
     */
    public void set(RigidBodyTransform rigidBodyTransform)
    {
-      rigidBodyTransform.checkIfRotation2D();
+      set(rigidBodyTransform, true);
+   }
+
+   /**
+    * Sets this pose 2D to match the given rigid-body transform.
+    * 
+    * @param rigidBodyTransform the transform use to set this pose 2D. Not modified.
+    * @param checkIsTransform2D indicates whether or not the method should check that the rotation
+    *           part of the given transform represents a 2D rotation in the XY-plane.
+    * @throws NotAMatrix2DException if {@code checkIsTransform2D} is {@code true} and if the
+    *            rotation part of the transform does not represent a 2D transformation.
+    */
+   public void set(RigidBodyTransform rigidBodyTransform, boolean checkIsTransform2D)
+   {
+      if (checkIsTransform2D)
+         rigidBodyTransform.checkIfRotation2D();
 
       setPosition(rigidBodyTransform.getTranslationX(), rigidBodyTransform.getTranslationY());
       setOrientation(rigidBodyTransform.getRotationMatrix().getYaw());
