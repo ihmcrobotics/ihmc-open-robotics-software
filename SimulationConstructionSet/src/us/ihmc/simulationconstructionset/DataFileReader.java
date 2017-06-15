@@ -12,12 +12,14 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileReader

@@ -5,8 +5,8 @@ import java.io.File;
 
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
 
 public class DataExporterGraphCreator

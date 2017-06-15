@@ -7,8 +7,8 @@ import javax.swing.JFrame;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 
 public class GraphTester
 {
