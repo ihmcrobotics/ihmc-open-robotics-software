@@ -8,6 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.PriorityQueue;
@@ -29,6 +30,7 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
@@ -44,7 +46,12 @@ public class CommandConsumerWithDelayBuffers
    {
       for (int i = 0; i < commandClasses.size(); i++)
       {
-         registerNewCommand((Class<C>) commandClasses.get(i));
+         Class<? extends Command<?, ?>> commandClass = commandClasses.get(i);
+         registerNewCommand((Class<C>) commandClass);
+         
+         Builder<? extends Command<?, ?>> commandConstructor = CommandInputManager.createBuilderWithEmptyConstructor(commandClass);
+         Command<?, ?> command = commandConstructor.newInstance();
+         messageToCommandMap.put(command.getMessageClass(), commandClass);
       }
    }
 
@@ -97,7 +104,14 @@ public class CommandConsumerWithDelayBuffers
             clearDelayQueue(commandClassToFlush);
          }
       }
-      Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getClazz();
+      Class<? extends Packet<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
+      if(messageClassToClear != null)
+      {
+         Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);
+         clearDelayQueueCommand.setCommandClassToClear(commandClassToClear);
+      }
+      
+      Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getCommandClassToClear();
       if(classToClear != null)
       {
          clearDelayQueue(classToClear);
