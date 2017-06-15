@@ -378,7 +378,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(StopAllTrajectoryCommand.class).size());
       
       ClearDelayQueueCommand clearQueueCommand = new ClearDelayQueueCommand();
-      clearQueueCommand.setClazz(TestCommand.class);
+      clearQueueCommand.setCommandClassToClear(TestCommand.class);
       commandInputManager.submitCommand(clearQueueCommand);
       
       commandConsumer.update();
