@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -17,6 +18,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -48,6 +50,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    private IntegerYoVariable numberOfFootstepstoConsider;
    private IntegerYoVariable plannedCoPIndex;
    private IntegerYoVariable orderOfSplineInterpolation;
+   private DoubleYoVariable defaultFinalTransferDuration;
 
    // Plan variables
    private List<FootstepPoints> footstepLocation = new ArrayList<>();
@@ -78,7 +81,8 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
     * @param parentRegistry
     */
    public void initializeParameters(ExtendedCapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
+                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry, 
+                                    double defaultFinalTransferDuration)
    {
       this.parentRegistry = parentRegistry;
       this.parentRegistry.addChild(registry);
@@ -109,6 +113,8 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
       currentSoleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
       this.bipedSupportPolygons = bipedSupportPolygons;
 
+      this.defaultFinalTransferDuration = new DoubleYoVariable(namePrefix + "FinalTransferDuration", registry);
+      this.defaultFinalTransferDuration.set(defaultFinalTransferDuration);
       this.numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       this.numberOfPointsPerFoot = new IntegerYoVariable(namePrefix + "NumberOfPointsPerFootstep", registry);
