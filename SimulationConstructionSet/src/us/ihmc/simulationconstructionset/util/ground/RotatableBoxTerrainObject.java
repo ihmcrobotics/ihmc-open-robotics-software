@@ -64,7 +64,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    {
       RigidBodyTransform transformCenterConventionToBottomConvention = box.getTransformCopy();
 
-      transformCenterConventionToBottomConvention = TransformTools.transformLocalZ(transformCenterConventionToBottomConvention, -box.getDimension(Direction.Z) / 2.0);
+      transformCenterConventionToBottomConvention.appendTranslation(0.0, 0.0, -box.getDimension(Direction.Z) / 2.0);
       linkGraphics = new Graphics3DObject();
       linkGraphics.transform(transformCenterConventionToBottomConvention);
 

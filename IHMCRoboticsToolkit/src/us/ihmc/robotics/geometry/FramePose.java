@@ -376,7 +376,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       changeFrame(rotationAxisFrame);
 
       RigidBodyTransform axisRotationTransform = new RigidBodyTransform();
-      TransformTools.rotate(axisRotationTransform, angle, rotationAxis);
+      TransformTools.appendRotation(axisRotationTransform, angle, rotationAxis);
 
       if (!lockPosition)
       {

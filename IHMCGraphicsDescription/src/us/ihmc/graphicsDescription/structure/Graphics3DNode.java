@@ -105,7 +105,7 @@ public class Graphics3DNode
 
    public void rotate(double angle, Axis axis)
    {
-      TransformTools.rotate(transform, angle, axis);
+      TransformTools.appendRotation(transform, angle, axis);
    }
 
    public Vector3D getTranslation()

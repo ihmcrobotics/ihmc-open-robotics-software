@@ -80,7 +80,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    private RigidBodyTransform transformToBottomOfCylinder()
    {
-      return TransformTools.transformLocalZ(location, -height / 2.0);
+      RigidBodyTransform ret = new RigidBodyTransform(location);
+      ret.appendTranslation(0.0, 0.0, - height / 2.0);
+      return ret;
    }
 
    @Override
