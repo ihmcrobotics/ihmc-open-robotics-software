@@ -2,23 +2,23 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class SwingExitCMPMatrix extends DenseMatrix64F
 {
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   private final DoubleYoVariable endOfSplineTime;
-   private final DoubleYoVariable startOfSplineTime;
+   private final YoDouble endOfSplineTime;
+   private final YoDouble startOfSplineTime;
 
    private final boolean blendFromInitial;
    private final double minimumBlendingTime;
 
-   public SwingExitCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
+   public SwingExitCMPMatrix(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
+         YoDouble startOfSplineTime, YoDouble endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
@@ -36,7 +36,7 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+   public void compute(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          double omega0)
    {
       // recurse backward from upcoming corner point to current corner point, then project forward to end of spline

@@ -12,7 +12,7 @@ import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,7 +33,7 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
 
    protected final EnumMap<ACTUATOR, AcsellActuatorState> actuatorStates;
    private final AcsellPowerDistributionADCState powerDistributionState;
-   private final DoubleYoVariable totalMotorPower;
+   private final YoDouble totalMotorPower;
    protected final AcsellXSensState xsens;
 
    protected final EnumMap<JOINT, AcsellJointState> jointStates;
@@ -52,7 +52,7 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
          this.powerDistributionState = new WandererPowerDistributionADCState("powerDistribution", registry);
       else
          this.powerDistributionState = new StepprPowerDistributionADCState("powerDistribution", registry);
-      totalMotorPower = new DoubleYoVariable("totalMotorPower", registry);
+      totalMotorPower = new YoDouble("totalMotorPower", registry);
       xsens = new AcsellXSensState("xsens", robot, registry);
       
       actuatorStates = createActuators();

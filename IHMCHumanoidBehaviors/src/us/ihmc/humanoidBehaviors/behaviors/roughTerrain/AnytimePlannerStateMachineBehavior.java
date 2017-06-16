@@ -46,7 +46,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -71,7 +71,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       FIDUCIAL, VALVE, HARD_CODED;
    }
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
 
@@ -81,9 +81,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private final YoBoolean reachedGoal = new YoBoolean(prefix + "ReachedGoal", registry);
    private final YoBoolean clearedLidar = new YoBoolean(prefix + "ClearedLidar", registry);
-   private final DoubleYoVariable reachedGoalThreshold = new DoubleYoVariable(prefix + "ReachedGoalThreshold", registry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
+   private final YoDouble reachedGoalThreshold = new YoDouble(prefix + "ReachedGoalThreshold", registry);
+   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
    private final YoBoolean receivedFootstepCompletedPacket = new YoBoolean(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final YoBoolean havePlanarRegionsBeenSet = new YoBoolean(prefix + "HavePlanarRegionsBeenSet", registry);
@@ -116,7 +116,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       LOCATE_GOAL, REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, SQUARE_UP, REACHED_GOAL
    }
 
-   public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
+   public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, HumanoidReferenceFrames referenceFrames,
                                              LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                              WholeBodyControllerParameters wholeBodyControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
                                              GoalDetectorBehaviorService goalDetectorBehaviorService, boolean createYoVariableServerForPlannerVisualizer)
@@ -331,7 +331,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       private final YoBoolean receivedPlanarRegionsList = new YoBoolean(prefix + "ReceivedPlanarRegionsList", registry);
       private final YoStopwatch requestNewPlanarRegionsTimer = new YoStopwatch(yoTime);
-      private final DoubleYoVariable planarRegionsResponseTimeout = new DoubleYoVariable(prefix + "PlanarRegionsResponseTimeout", registry);
+      private final YoDouble planarRegionsResponseTimeout = new YoDouble(prefix + "PlanarRegionsResponseTimeout", registry);
       private PlanarRegionsList planarRegionsList;
 
       public RequestAndWaitForPlanarRegionsListBehavior(CommunicationBridgeInterface communicationBridge)
@@ -397,7 +397,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       private final double sleepTime;
 
-      public ResettingSleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
+      public ResettingSleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, double sleepTime)
       {
          super(outgoingCommunicationBridge, yoTime, sleepTime);
          this.sleepTime = sleepTime;

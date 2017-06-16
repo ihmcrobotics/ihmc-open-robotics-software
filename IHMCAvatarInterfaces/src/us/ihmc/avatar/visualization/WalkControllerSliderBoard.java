@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -174,11 +174,11 @@ public class WalkControllerSliderBoard
    {
 
       //Make sure the joints you want to control are not being controlled by any other control module.
-      final DoubleYoVariable alpha = new DoubleYoVariable("HeadSliderControlAlpha", registry);
+      final YoDouble alpha = new YoDouble("HeadSliderControlAlpha", registry);
       alpha.set(0.6);
-      final DoubleYoVariable headYawPercentage = new DoubleYoVariable("SliderHeadYawPercentage", registry);
-      final DoubleYoVariable lowerHeadPitchPercentage = new DoubleYoVariable("SliderLowerHeadPitchPercentage", registry);
-      final DoubleYoVariable upperHeadPitchPercentage = new DoubleYoVariable("SliderUpperHeadPitchPercentage", registry);
+      final YoDouble headYawPercentage = new YoDouble("SliderHeadYawPercentage", registry);
+      final YoDouble lowerHeadPitchPercentage = new YoDouble("SliderLowerHeadPitchPercentage", registry);
+      final YoDouble upperHeadPitchPercentage = new YoDouble("SliderUpperHeadPitchPercentage", registry);
       final AlphaFilteredYoVariable alphaFilteredHeadYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredHeadYawPercentage",registry,alpha,headYawPercentage);
       final AlphaFilteredYoVariable alphaFilteredUpperHeadPitchPercentage = new AlphaFilteredYoVariable("AlphaFilteredUpperHeadPitchPercentage",registry,alpha,upperHeadPitchPercentage);
       final AlphaFilteredYoVariable alphaFilteredLowerHeadPitchYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredLowerHeadPitchPercentage",registry,alpha,lowerHeadPitchPercentage);
@@ -234,7 +234,7 @@ public class WalkControllerSliderBoard
                NeckJointName headYaw = NeckJointName.DISTAL_NECK_YAW;
                double neckYawJointRange = sliderBoardControlledNeckJointsWithLimits.get(headYaw).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft();
-               DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(headYaw) + "_unconstrained"
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(headYaw) + "_unconstrained"
                      + CommonNames.q_d);
                desiredAngle.set(alphaFilteredHeadYawPercentage.getDoubleValue() * neckYawJointRange + sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft());
             }
@@ -252,7 +252,7 @@ public class WalkControllerSliderBoard
                NeckJointName upperHeadPitch = NeckJointName.DISTAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft();
-               DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch)
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch)
                      + "_unconstrained" + CommonNames.q_d);
                desiredAngle.set(alphaFilteredUpperHeadPitchPercentage.getDoubleValue() * jointRange + sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft());
             }
@@ -270,7 +270,7 @@ public class WalkControllerSliderBoard
                NeckJointName lowerHeadPitch = NeckJointName.PROXIMAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft();
-               DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(lowerHeadPitch)
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(lowerHeadPitch)
                      + "_unconstrained" + CommonNames.q_d);
                desiredAngle.set(alphaFilteredLowerHeadPitchYawPercentage.getDoubleValue() * jointRange + sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft());
             }

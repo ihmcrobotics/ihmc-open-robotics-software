@@ -41,7 +41,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -63,9 +63,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
    private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable yoTimeRobot;
-   private final DoubleYoVariable yoTimeBehaviorDispatcher;
-   private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
+   private final YoDouble yoTimeRobot;
+   private final YoDouble yoTimeBehaviorDispatcher;
+   private final YoDouble yoTimeLastFullRobotModelUpdate;
 
    private final DRCRobotModel drcRobotModel;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -116,11 +116,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, networkModuleParameters, automaticallySimulate);
 
       yoTimeRobot = getRobot().getYoTime();
-      yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
+      yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);
 
       this.drcRobotModel = robotModel;
       this.fullRobotModel = robotModel.createFullRobotModel();
-      yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
+      yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
       
       this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
@@ -192,7 +192,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return robotDataReceiver;
    }
 
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return yoTimeRobot;
    }

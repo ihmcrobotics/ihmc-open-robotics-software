@@ -6,7 +6,7 @@ import java.util.List;
 import junit.framework.AssertionFailedError;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -38,7 +38,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
       
-      DoubleYoVariable yoTime = (DoubleYoVariable) scs.getVariable("t");
+      YoDouble yoTime = (YoDouble) scs.getVariable("t");
       yoTime.addVariableChangedListener(this);
       scs.startOnAThread();
       scs.addSimulateDoneListener(this);
@@ -218,12 +218,12 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       concludeTesting(2);
    }
    
-   public void addTimeLimit(DoubleYoVariable timeYoVariable, double timeLimit)
+   public void addTimeLimit(YoDouble timeYoVariable, double timeLimit)
    {
       sustainGoals.add(YoVariableTestGoal.doubleLessThan(timeYoVariable, timeYoVariable.getDoubleValue() + timeLimit));
    }
    
-   public void addDurationGoal(DoubleYoVariable timeYoVariable, double durationFromNow)
+   public void addDurationGoal(YoDouble timeYoVariable, double durationFromNow)
    {
       terminalGoals.add(YoVariableTestGoal.timeInFuture(timeYoVariable, durationFromNow));
    }

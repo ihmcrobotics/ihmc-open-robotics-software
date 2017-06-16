@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
@@ -74,7 +74,7 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
 
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
-   private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
+   private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
 
    private final YoBoolean doPartialFootholdDetection;
 
@@ -93,8 +93,8 @@ public class PartialFootholdControlModule
    /**
     * Variables for checking the area of the unsafe part of the foothold.
     */
-   private final DoubleYoVariable unsafeArea;
-   private final DoubleYoVariable minAreaToConsider;
+   private final YoDouble unsafeArea;
+   private final YoDouble minAreaToConsider;
    private final YoBoolean unsafeAreaAboveThreshold;
 
    private final YoBoolean expectingLineContact;
@@ -179,7 +179,7 @@ public class PartialFootholdControlModule
 
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
 
-      unsafeArea = new DoubleYoVariable(namePrefix + "UnsafeArea", registry);
+      unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 

@@ -44,7 +44,7 @@ import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -148,7 +148,7 @@ public class KinematicsToolboxController extends ToolboxController
     * This is the current estimate of the solution quality that is calculated based on the tracking
     * error for the end-effectors (center of mass included) being actively controlled.
     */
-   private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
+   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    /**
     * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to
@@ -186,20 +186,20 @@ public class KinematicsToolboxController extends ToolboxController
     * current privileged configuration can be changed at any time by sending a
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final DoubleYoVariable privilegedWeight = new DoubleYoVariable("privilegedWeight", registry);
+   private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
     * compute for each joint a privileged velocity based on the difference between the privileged
     * angle and the current angle. These privileged joint velocities are then used to complete the
     * optimization problem in such way that they don't interfere with the user commands.
     */
-   private final DoubleYoVariable privilegedConfigurationGain = new DoubleYoVariable("privilegedConfigurationGain", registry);
+   private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
    /**
     * Cap used to limit the magnitude of the privileged joint velocities computed in the controller
     * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution
     * converges quicker.
     */
-   private final DoubleYoVariable privilegedMaxVelocity = new DoubleYoVariable("privilegedMaxVelocity", registry);
+   private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out
     * if the current privileged configuration used in the controller core is to be updated or not.
@@ -211,12 +211,12 @@ public class KinematicsToolboxController extends ToolboxController
     * Default weight used when holding the support foot/feet in place. It is rather high such that
     * they do not deviate much from their initial poses.
     */
-   private final DoubleYoVariable footWeight = new DoubleYoVariable("footWeight", registry);
+   private final YoDouble footWeight = new YoDouble("footWeight", registry);
    /**
     * Default weight used when holding the center of mass in place. It is rather high such that it
     * does not deviate much from its initial position.
     */
-   private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
+   private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
 
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user
@@ -236,7 +236,7 @@ public class KinematicsToolboxController extends ToolboxController
     * joint such that a factor of 0.05 for the hip yaw will effectively reduce the allowed range of
     * motion by 2.5% on the upper and lower end of the joint.
     */
-   private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
+   private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
 
    /**
     * This is the list of all the rigid-bodies that can ever be controlled and it is initialized in
@@ -399,9 +399,9 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void populateJointLimitReductionFactors()
    {
-      DoubleYoVariable hipReductionFactor = new DoubleYoVariable("hipLimitReductionFactor", registry);
-      DoubleYoVariable kneeReductionFactor = new DoubleYoVariable("kneeLimitReductionFactor", registry);
-      DoubleYoVariable ankleReductionFactor = new DoubleYoVariable("ankleLimitReductionFactor", registry);
+      YoDouble hipReductionFactor = new YoDouble("hipLimitReductionFactor", registry);
+      YoDouble kneeReductionFactor = new YoDouble("kneeLimitReductionFactor", registry);
+      YoDouble ankleReductionFactor = new YoDouble("ankleLimitReductionFactor", registry);
       hipReductionFactor.set(0.05);
 
       legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);

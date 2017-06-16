@@ -16,7 +16,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -125,8 +125,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
-      DoubleYoVariable maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
-      DoubleYoVariable maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
+      YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
+      YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
       kpLinear = positionGains.createProportionalGainMatrix();
       kdLinear = positionGains.createDerivativeGainMatrix();

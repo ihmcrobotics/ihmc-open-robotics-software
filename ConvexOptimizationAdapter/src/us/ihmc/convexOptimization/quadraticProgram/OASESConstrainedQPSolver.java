@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.convexOptimization.QpOASESCWrapper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -26,8 +26,8 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver
     * @return returnCode from C-API
     */
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   DoubleYoVariable maxCPUTime = new DoubleYoVariable("maxCPUTime", registry);
-   DoubleYoVariable currentCPUTime = new DoubleYoVariable("currentCPUTime", registry);
+   YoDouble maxCPUTime = new YoDouble("maxCPUTime", registry);
+   YoDouble currentCPUTime = new YoDouble("currentCPUTime", registry);
    IntegerYoVariable maxWorkingSetChange = new IntegerYoVariable("maxWorkingSetchange", registry);
    IntegerYoVariable currentWorkingSetChange = new IntegerYoVariable("currentWorkingSetchange", registry);
 

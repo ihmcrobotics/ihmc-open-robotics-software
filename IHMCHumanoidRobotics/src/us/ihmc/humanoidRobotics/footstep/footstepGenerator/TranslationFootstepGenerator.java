@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -21,11 +21,11 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    // private static final boolean DEBUG = false;
    private FramePoint2d endPoint;
    private StraightLineOverheadPath footstepPath;
-   protected final DoubleYoVariable forwardWalkingStepLength = new DoubleYoVariable("translationalForwardWalkingStepLength", registry);
-   protected final DoubleYoVariable backwardWalkingStepLength = new DoubleYoVariable("translationalBackwardStepLength", registry);
-   protected final DoubleYoVariable sidewardWalkingStepLength = new DoubleYoVariable("translationalSidewardStepLength", registry);
-   protected final DoubleYoVariable nominalWalkingStepWidth = new DoubleYoVariable("translationalForwardWalkingStepWidth", registry);
-   protected final DoubleYoVariable minimumWalkingStepWidth = new DoubleYoVariable("translationalMinimumStepWidth", registry);
+   protected final YoDouble forwardWalkingStepLength = new YoDouble("translationalForwardWalkingStepLength", registry);
+   protected final YoDouble backwardWalkingStepLength = new YoDouble("translationalBackwardStepLength", registry);
+   protected final YoDouble sidewardWalkingStepLength = new YoDouble("translationalSidewardStepLength", registry);
+   protected final YoDouble nominalWalkingStepWidth = new YoDouble("translationalForwardWalkingStepWidth", registry);
+   protected final YoDouble minimumWalkingStepWidth = new YoDouble("translationalMinimumStepWidth", registry);
    private boolean isRightwardPath;
    private boolean isForwardPath;
 

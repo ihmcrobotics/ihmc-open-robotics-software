@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -72,7 +72,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final YoBoolean hasConverged;
    private final IntegerYoVariable segments;
    private final IntegerYoVariable activeSegment;
-   private final ArrayList<DoubleYoVariable> waypointTimes = new ArrayList<>();
+   private final ArrayList<YoDouble> waypointTimes = new ArrayList<>();
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -80,8 +80,8 @@ public class PositionOptimizedTrajectoryGenerator
 
    private final YoGraphicPolynomial3D trajectoryViz;
 
-   private final DoubleYoVariable maxSpeed;
-   private final DoubleYoVariable maxSpeedTime;
+   private final YoDouble maxSpeed;
+   private final YoDouble maxSpeedTime;
    private final FrameVector tempVelocity = new FrameVector();
 
    public PositionOptimizedTrajectoryGenerator()
@@ -177,8 +177,8 @@ public class PositionOptimizedTrajectoryGenerator
       else
          trajectoryViz = null;
 
-      maxSpeed = new DoubleYoVariable("MaxVelocity", registry);
-      maxSpeedTime = new DoubleYoVariable("MaxVelocityTime", registry);
+      maxSpeed = new YoDouble("MaxVelocity", registry);
+      maxSpeedTime = new YoDouble("MaxVelocityTime", registry);
    }
 
    private void extendBySegment(YoVariableRegistry registry)
@@ -186,7 +186,7 @@ public class PositionOptimizedTrajectoryGenerator
       int size = waypointTimes.size() + 1;
       for (Direction axis : Direction.values)
          trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
-      waypointTimes.add(new DoubleYoVariable(namePrefix + "WaypointTime" + size, registry));
+      waypointTimes.add(new YoDouble(namePrefix + "WaypointTime" + size, registry));
       waypointPositions.add();
    }
 

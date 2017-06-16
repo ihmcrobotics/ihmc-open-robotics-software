@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -58,7 +58,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
    private final FramePoint cop = new FramePoint();
-   private final DoubleYoVariable copAlpha;
+   private final YoDouble copAlpha;
    private final AlphaFilteredYoFramePoint copFiltered;
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
 
@@ -66,8 +66,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final YoFramePoint yoPlanePoint;
    private final YoFrameVector yoPlaneNormal;
 
-   private final DoubleYoVariable angleFootGround;
-   private final DoubleYoVariable angleTreshold;
+   private final YoDouble angleFootGround;
+   private final YoDouble angleTreshold;
    private final YoBoolean footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix,
@@ -82,7 +82,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
 
-      angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
+      angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
       angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
       footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
 

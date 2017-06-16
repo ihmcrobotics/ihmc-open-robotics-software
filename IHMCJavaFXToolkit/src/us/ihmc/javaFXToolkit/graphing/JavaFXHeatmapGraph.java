@@ -32,7 +32,7 @@ import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.tools.color.Gradient;
 
 public class JavaFXHeatmapGraph
@@ -47,8 +47,8 @@ public class JavaFXHeatmapGraph
    
    private TObjectIntHashMap<Point2D> heatmap;
 
-   private DoubleYoVariable x;
-   private DoubleYoVariable y;
+   private YoDouble x;
+   private YoDouble y;
    private GraphicsContext graphicsContext;
    private Scene scene;
 
@@ -248,12 +248,12 @@ public class JavaFXHeatmapGraph
       graphicsContext.fillRect(upperLeftX, upperLeftY, width, height);
    }
 
-   public void setXVariable(DoubleYoVariable x)
+   public void setXVariable(YoDouble x)
    {
       this.x = x;
    }
 
-   public void setYVariable(DoubleYoVariable y)
+   public void setYVariable(YoDouble y)
    {
       this.y = y;
    }

@@ -15,7 +15,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -33,10 +33,10 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable leaveTime;
-   private final DoubleYoVariable approachTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble leaveTime;
+   private final YoDouble approachTime;
    private final YoPolynomial xyPolynomial, zPolynomial;
 
    private final YoFramePointInMultipleFrames initialPosition;
@@ -48,8 +48,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final YoFrameVectorInMultipleFrames currentVelocity;
    private final YoFrameVectorInMultipleFrames currentAcceleration;
 
-   private final DoubleYoVariable leaveDistance;
-   private final DoubleYoVariable approachDistance;
+   private final YoDouble leaveDistance;
+   private final YoDouble approachDistance;
 
    /** The current trajectory frame chosen by the user. */
    private ReferenceFrame currentTrajectoryFrame;
@@ -94,10 +94,10 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      leaveTime = new DoubleYoVariable(namePrefix + "LeaveTime", registry);
-      approachTime = new DoubleYoVariable(namePrefix + "ApproachTime", registry);
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      leaveTime = new YoDouble(namePrefix + "LeaveTime", registry);
+      approachTime = new YoDouble(namePrefix + "ApproachTime", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
       xyPolynomial = new YoPolynomial(namePrefix + "PositionPolynomial", 6, registry);
       zPolynomial = new YoPolynomial(namePrefix + "VelocityPolynomial", 8, registry);
 
@@ -121,8 +121,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame, distortedPlane);
       currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame, distortedPlane);
 
-      leaveDistance = new DoubleYoVariable(namePrefix + "LeaveDistance", registry);
-      approachDistance = new DoubleYoVariable(namePrefix + "ApproachDistance", registry);
+      leaveDistance = new YoDouble(namePrefix + "LeaveDistance", registry);
+      approachDistance = new YoDouble(namePrefix + "ApproachDistance", registry);
 
       registerMultipleFramesHolders(initialPosition, finalPosition, currentPosition, currentVelocity, currentAcceleration);
 
@@ -231,7 +231,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.leaveTime.set(leaveTime);
    }
 
-   protected DoubleYoVariable getYoLeaveTime()
+   protected YoDouble getYoLeaveTime()
    {
       return leaveTime;
    }

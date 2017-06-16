@@ -11,7 +11,7 @@ import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineS
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -23,7 +23,7 @@ public class QuadrupedFootStateMachine
 
    // control variables
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable timestamp;
+   private final YoDouble timestamp;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
    private final FrameVector soleForceCommand;
@@ -46,7 +46,7 @@ public class QuadrupedFootStateMachine
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedFootStateMachine(QuadrupedFootStateMachineParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
-         DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
+         YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();

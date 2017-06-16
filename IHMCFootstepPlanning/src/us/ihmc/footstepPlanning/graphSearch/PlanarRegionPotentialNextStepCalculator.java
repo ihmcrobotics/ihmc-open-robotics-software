@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -37,9 +37,9 @@ public class PlanarRegionPotentialNextStepCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable footArea = new DoubleYoVariable("footArea", registry);
-   private final DoubleYoVariable totalArea = new DoubleYoVariable("totalArea", registry);
-   private final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
+   private final YoDouble footArea = new YoDouble("footArea", registry);
+   private final YoDouble totalArea = new YoDouble("totalArea", registry);
+   private final YoDouble stepReach = new YoDouble("stepReach", registry);
    
    private final YoBoolean enableStepAdjustmentCosts;
 

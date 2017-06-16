@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -155,7 +155,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate,
+   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate,
                                                                         YoBoolean enabled)
    {
       Pair<RateLimitedYoFrameVector, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = centerOfMassRateLimitedDataVectors.get(space);
@@ -355,7 +355,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate,
+   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, YoDouble maximumRate,
                                                             YoBoolean enabled)
    {
       EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
@@ -445,8 +445,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
-                                                            DoubleYoVariable maximumAngularRate, YoBoolean enabled)
+   public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
+                                                            YoDouble maximumAngularRate, YoBoolean enabled)
    {
       return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate, enabled),
                                             getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate, enabled));
@@ -467,8 +467,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
-                                                                DoubleYoVariable maximumAngularRate, YoBoolean enabled)
+   public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
+                                                                YoDouble maximumAngularRate, YoBoolean enabled)
    {
       return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate, enabled),
                                             getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate, enabled));

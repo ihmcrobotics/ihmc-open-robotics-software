@@ -27,7 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -73,8 +73,8 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
    private final DRCKinematicsBasedStateEstimator stateEstimator;
    private final LogDataProcessorHelper logDataProcessorHelper;
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> estimatedJointPositionMap = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> estimatedJointVelocityMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> estimatedJointPositionMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> estimatedJointVelocityMap = new LinkedHashMap<>();
 
    private final YoFramePoint estimatedRootJointPosition = new YoFramePoint("log_estimatedRootJoint", worldFrame, registry);
    private final YoFrameQuaternion estimatedRootJointQuaternion = new YoFrameQuaternion("log_estimatedRootJoint", worldFrame, registry);
@@ -107,7 +107,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          @Override
          public void configureSensorProcessing(SensorProcessing sensorProcessing)
          {
-            DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
+            YoDouble maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
             double defaultJointStiffness = Double.POSITIVE_INFINITY;
             Map<String, Double> jointSpecificStiffness = new HashMap<>();
 
@@ -123,11 +123,11 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             jointSpecificStiffness.put(StepprJoint.LEFT_KNEE_Y.getSdfName(), 6000.0);
             jointSpecificStiffness.put(StepprJoint.RIGHT_KNEE_Y.getSdfName(), 6000.0);
 
-            Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("_log_stiffness", defaultJointStiffness, jointSpecificStiffness);
-            DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("log_jointVelocityAlphaFilter", 16.0);
+            Map<OneDoFJoint, YoDouble> jointPositionStiffness = sensorProcessing.createStiffness("_log_stiffness", defaultJointStiffness, jointSpecificStiffness);
+            YoDouble jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("log_jointVelocityAlphaFilter", 16.0);
 
-            DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("log_angularVelocityAlphaFilter", 16.0);
-            DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("log_linearAccelerationAlphaFilter", 67.0);
+            YoDouble angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("log_angularVelocityAlphaFilter", 16.0);
+            YoDouble linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("log_linearAccelerationAlphaFilter", 67.0);
 
             sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maxDeflection, false);
 
@@ -161,10 +161,10 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
 
       for (OneDoFJoint joint : stateEstimatorSensorDefinitions.getJointSensorDefinitions())
       {
-         DoubleYoVariable estimatedJointPosition = new DoubleYoVariable("log_q_" + joint.getName(), registry);
+         YoDouble estimatedJointPosition = new YoDouble("log_q_" + joint.getName(), registry);
          estimatedJointPositionMap.put(joint, estimatedJointPosition);
 
-         DoubleYoVariable estimatedJointVelocity = new DoubleYoVariable("log_qd_" + joint.getName(), registry);
+         YoDouble estimatedJointVelocity = new YoDouble("log_qd_" + joint.getName(), registry);
          estimatedJointVelocityMap.put(joint, estimatedJointVelocity);
       }
 
@@ -238,7 +238,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          YoVariableHolder yoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
          final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
          final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
-         final DoubleYoVariable footLoadPercentage = (DoubleYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
+         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
          {

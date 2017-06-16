@@ -193,7 +193,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof DoubleYoVariable)
+      else if (variable instanceof YoDouble)
       {
          return new DataHolder<Double>(offset, new MLDouble(name, dims))
          {

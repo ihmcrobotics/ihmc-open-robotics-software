@@ -14,7 +14,7 @@ import java.util.Collections;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -227,7 +227,7 @@ public class TimeScript implements Script
          case DOUBLE:
          {  
             double value = Double.parseDouble(t_part);
-            ret.addVarValue((DoubleYoVariable) variable, value);
+            ret.addVarValue((YoDouble) variable, value);
             break;
          }
          case BOOLEAN:

@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,8 +46,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private YoBoolean doFootExplorationInTransferToStanding;
-   private DoubleYoVariable percentageChickenSupport;
-   private DoubleYoVariable timeBeforeExploring;
+   private YoDouble percentageChickenSupport;
+   private YoDouble timeBeforeExploring;
    private SideDependentList<YoBoolean> autoCropToLineAfterExploration = new SideDependentList<>();
    private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>(); // old hold position
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>(); // old hold position
@@ -254,10 +254,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       // increase ankle damping to match the real robot better
-      DoubleYoVariable damping_l_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
-      DoubleYoVariable damping_l_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
-      DoubleYoVariable damping_r_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
-      DoubleYoVariable damping_r_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
+      YoDouble damping_l_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
+      YoDouble damping_l_aky = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
+      YoDouble damping_r_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
+      YoDouble damping_r_aky = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
       damping_l_akx.set(1.0);
       damping_l_aky.set(1.0);
       damping_r_akx.set(1.0);
@@ -265,8 +265,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
       // get a bunch of relevant variables
       doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
-      percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
-      timeBeforeExploring = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
+      percentageChickenSupport = (YoDouble) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
+      timeBeforeExploring = (YoDouble) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
       for (RobotSide robotSide : RobotSide.values)
       {
          String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();

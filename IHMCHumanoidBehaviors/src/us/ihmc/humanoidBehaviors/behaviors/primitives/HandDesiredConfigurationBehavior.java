@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandDesiredConfigurationBehavior extends AbstractBehavior
@@ -16,14 +16,14 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final YoBoolean hasInputBeenSet;
    private final YoBoolean hasPacketBeenSet;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime; // hardcoded, to be determined
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime; // hardcoded, to be determined
    private final YoBoolean trajectoryTimeElapsed;
 
    private final boolean DEBUG = false;
 
-   public HandDesiredConfigurationBehavior(String name, CommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
+   public HandDesiredConfigurationBehavior(String name, CommunicationBridgeInterface outgoingCommunicationBridgeInterface, YoDouble yoTime)
    {
       super(name,outgoingCommunicationBridgeInterface);
       this.yoTime = yoTime;
@@ -31,9 +31,9 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       hasInputBeenSet = new YoBoolean(getName() + "hasInputBeenSet", registry);
       hasPacketBeenSet = new YoBoolean(getName() + "hasPacketBeenSet", registry);
 
-      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(getName() + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
 
       trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);

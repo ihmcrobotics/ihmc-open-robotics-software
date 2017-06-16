@@ -17,7 +17,7 @@ import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -50,7 +50,7 @@ public class SupportState extends AbstractFootControlState
 
    private final YoBoolean footBarelyLoaded;
    private final YoBoolean copOnEdge;
-   private final DoubleYoVariable footLoadThreshold;
+   private final YoDouble footLoadThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FootSwitchInterface footSwitch;
@@ -90,16 +90,16 @@ public class SupportState extends AbstractFootControlState
    private final ExplorationHelper explorationHelper;
    private final PartialFootholdControlModule partialFootholdControlModule;
    private final YoBoolean requestFootholdExploration;
-   private final DoubleYoVariable recoverTime;
-   private final DoubleYoVariable timeBeforeExploring;
+   private final YoDouble recoverTime;
+   private final YoDouble timeBeforeExploring;
 
    // For straight legs with privileged configuration
    private final RigidBody pelvis;
 
    // Toe contact point loading time
    private final boolean rampUpAllowableToeLoadAfterContact;
-   private final DoubleYoVariable toeLoadingDuration;
-   private final DoubleYoVariable fullyLoadedMagnitude;
+   private final YoDouble toeLoadingDuration;
+   private final YoDouble fullyLoadedMagnitude;
 
    private final FramePoint tempPoint = new FramePoint();
 
@@ -116,13 +116,13 @@ public class SupportState extends AbstractFootControlState
 
       footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
       copOnEdge = new YoBoolean(prefix + "CopOnEdge", registry);
-      footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
+      footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       rampUpAllowableToeLoadAfterContact = walkingControllerParameters.rampUpAllowableToeLoadAfterContact();
-      toeLoadingDuration = new DoubleYoVariable(prefix + "ToeContactPointLoadingTime", registry);
-      fullyLoadedMagnitude = new DoubleYoVariable(prefix + "FullyLoadedMagnitude", registry);
+      toeLoadingDuration = new YoDouble(prefix + "ToeContactPointLoadingTime", registry);
+      fullyLoadedMagnitude = new YoDouble(prefix + "FullyLoadedMagnitude", registry);
       toeLoadingDuration.set(walkingControllerParameters.getToeLoadingDuration());
       fullyLoadedMagnitude.set(walkingControllerParameters.getFullyLoadedToeForce());
 
@@ -159,8 +159,8 @@ public class SupportState extends AbstractFootControlState
       }
       else
       {
-         recoverTime = new DoubleYoVariable(prefix + "RecoverTime", registry);
-         timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
+         recoverTime = new YoDouble(prefix + "RecoverTime", registry);
+         timeBeforeExploring = new YoDouble(prefix + "TimeBeforeExploring", registry);
       }
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();

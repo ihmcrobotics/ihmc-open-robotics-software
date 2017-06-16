@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -58,7 +58,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final long estimatorDTInNS;
    private final long estimatorTicksPerControlTick;
 
-   private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
+   private final YoDouble controllerTime = new YoDouble("controllerTime", registry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
@@ -208,7 +208,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
-         MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
+         MomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
          ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,

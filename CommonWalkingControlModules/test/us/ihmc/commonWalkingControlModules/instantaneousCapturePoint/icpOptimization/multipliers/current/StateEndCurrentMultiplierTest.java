@@ -12,7 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,31 +29,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -117,31 +117,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPTransferWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -205,30 +205,30 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationOneCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
       }
@@ -288,30 +288,30 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationOneCMPTransferWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
       }
@@ -371,31 +371,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPFirstSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -450,31 +450,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPFirstSegmentWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -543,31 +543,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPSecondSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -640,31 +640,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPSecondSegmentWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -737,31 +737,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPThirdSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -821,31 +821,31 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationTwoCMPThirdSegmentWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
-         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
+         YoDouble swingSplitRatio = new YoDouble("swingSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          swingSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
@@ -905,30 +905,30 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationOneCMPSwing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
       }
@@ -984,30 +984,30 @@ public class StateEndCurrentMultiplierTest
    public void testCalculationOneCMPSwingWithBlending()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         YoDouble transferSplitRatio = new YoDouble("transferSplitRatio" + i, registry);
          transferSplitRatio.setToNaN();
          transferSplitFractions.add(transferSplitRatio);
       }

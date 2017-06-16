@@ -1,14 +1,13 @@
 package us.ihmc.sensorProcessing.encoder;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
-
 
 public class SimulatedEncoder
 {
    private final double encoderTicksPerUnitOfPosition;
-   private DoubleYoVariable positionFromEncoder;
+   private YoDouble positionFromEncoder;
    private IntegerYoVariable encoderTicks;
 
    public SimulatedEncoder(double encoderTicksPerUnitOfPosition, String name, YoVariableRegistry parentRegistry)
@@ -18,7 +17,7 @@ public class SimulatedEncoder
 
       YoVariableRegistry registry = new YoVariableRegistry("simulatedEncoder_" + name);
 
-      positionFromEncoder = new DoubleYoVariable("positionFromEncoder_" + name, registry);
+      positionFromEncoder = new YoDouble("positionFromEncoder_" + name, registry);
       encoderTicks = new IntegerYoVariable("encoderTicks_" + name, registry);
 
       this.encoderTicksPerUnitOfPosition = encoderTicksPerUnitOfPosition;

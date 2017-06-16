@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.gui.Debug;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -26,7 +26,7 @@ public class DebugSCSVarListException
       {
          YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
          
-         DoubleYoVariable foo = new DoubleYoVariable("foo_" + count, "", registry);
+         YoDouble foo = new YoDouble("foo_" + count, "", registry);
 
          YoVariableList varList = new YoVariableList("foo_" + count);
          varList.addVariable(foo);

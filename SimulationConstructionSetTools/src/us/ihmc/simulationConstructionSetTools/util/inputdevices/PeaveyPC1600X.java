@@ -13,7 +13,7 @@ import javax.sound.midi.Transmitter;
 
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 
@@ -215,12 +215,12 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
    }
 
-   public void setChannel(int channel, DoubleYoVariable var, double min, double max)
+   public void setChannel(int channel, YoDouble var, double min, double max)
    {
       setChannel(channel, var, min, max, 1.0);
    }
 
-   public void setChannel(int channel, DoubleYoVariable var, double min, double max, double exponent)
+   public void setChannel(int channel, YoDouble var, double min, double max, double exponent)
    {
       if ((channel < 1) || (channel > 16))
       {

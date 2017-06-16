@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,7 +35,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable toeOffContactInterpolation;
+   private final YoDouble toeOffContactInterpolation;
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
 
@@ -52,7 +52,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
       }
 
-      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
+      toeOffContactInterpolation = new YoDouble(namePrefix + "ToeOffContactInterpolation", registry);
       toeOffContactInterpolation.set(walkingControllerParameters.getToeOffContactInterpolation());
 
       hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);

@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -37,12 +37,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class HermiteCurveBasedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable trajectoryTimeScale;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble trajectoryTimeScale;
    private final IntegerYoVariable piInteger;
 
-   private final DoubleYoVariable[] cumulativeBeziers;
+   private final YoDouble[] cumulativeBeziers;
 
    private final YoFrameQuaternion[] controlQuaternions;
    private final YoFrameVector[] controlAngularVelocities;
@@ -76,19 +76,19 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       super(allowMultipleFrames, referenceFrame);
 
       registry = new YoVariableRegistry(name);
-      trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", registry);
-      trajectoryTimeScale = new DoubleYoVariable(name + "TrajectoryTimeScale", registry);
+      trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
+      trajectoryTimeScale = new YoDouble(name + "TrajectoryTimeScale", registry);
       piInteger = new IntegerYoVariable(name + "PiInteger", registry);
-      currentTime = new DoubleYoVariable(name + "Time", registry);
+      currentTime = new YoDouble(name + "Time", registry);
       trajectoryFrame = referenceFrame;
 
-      cumulativeBeziers = new DoubleYoVariable[4];
+      cumulativeBeziers = new YoDouble[4];
       controlQuaternions = new YoFrameQuaternion[4];
       controlAngularVelocities = new YoFrameVector[4];
 
       for (int i = 1; i <= 3; i++)
       {
-         cumulativeBeziers[i] = new DoubleYoVariable(name + "CumulativeBezier" + i, registry);
+         cumulativeBeziers[i] = new YoDouble(name + "CumulativeBezier" + i, registry);
       }
 
       String initialOrientationName = "InitialOrientation";

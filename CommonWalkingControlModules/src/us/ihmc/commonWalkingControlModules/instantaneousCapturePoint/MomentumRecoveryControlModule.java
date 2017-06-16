@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -48,12 +48,12 @@ public class MomentumRecoveryControlModule
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable distanceToExtendUpcomingFoothold = new DoubleYoVariable("DistanceToExtendUpcomingFoothold", registry);
-   private final DoubleYoVariable distanceToShrinkSafeAreaSS = new DoubleYoVariable("DistanceToShrinkSafeAreaSS", registry);
-   private final DoubleYoVariable distanceToShrinkSafeAreaIfRecoveringSS = new DoubleYoVariable("DistanceToShrinkSafeAreaIfRecoveringSS", registry);
-   private final DoubleYoVariable distanceToShrinkSafeAreaDS = new DoubleYoVariable("DistanceToShrinkSafeAreaDS", registry);
-   private final DoubleYoVariable distanceToShrinkSafeAreaIfRecoveringDS = new DoubleYoVariable("DistanceToShrinkSafeAreaIfRecoveringDS", registry);
-   private final DoubleYoVariable maxIcpError = new DoubleYoVariable("maxIcpError", registry);
+   private final YoDouble distanceToExtendUpcomingFoothold = new YoDouble("DistanceToExtendUpcomingFoothold", registry);
+   private final YoDouble distanceToShrinkSafeAreaSS = new YoDouble("DistanceToShrinkSafeAreaSS", registry);
+   private final YoDouble distanceToShrinkSafeAreaIfRecoveringSS = new YoDouble("DistanceToShrinkSafeAreaIfRecoveringSS", registry);
+   private final YoDouble distanceToShrinkSafeAreaDS = new YoDouble("DistanceToShrinkSafeAreaDS", registry);
+   private final YoDouble distanceToShrinkSafeAreaIfRecoveringDS = new YoDouble("DistanceToShrinkSafeAreaIfRecoveringDS", registry);
+   private final YoDouble maxIcpError = new YoDouble("maxIcpError", registry);
 
    private final YoBoolean usingUpperBodyMomentum = new YoBoolean("usingUpperBodyMomentum", registry);
    private final YoBoolean usingHighMomentumWeight = new YoBoolean("usingHighMomentumWeight", registry);
@@ -62,7 +62,7 @@ public class MomentumRecoveryControlModule
    private final YoBoolean allowUpperBodyMomentumInDoubleSupport = new YoBoolean("allowUpperBodyMomentumInDoubleSupport", registry);
    private final YoBoolean allowUsingHighMomentumWeight = new YoBoolean("allowUsingHighMomentumWeight", registry);
 
-   private final DoubleYoVariable maxDistanceCMPSupport = new DoubleYoVariable("maxDistanceCMPSupport", registry);
+   private final YoDouble maxDistanceCMPSupport = new YoDouble("maxDistanceCMPSupport", registry);
 
    private boolean icpErrorUpToDate = false;
    private boolean robotSideUpToDate = false;

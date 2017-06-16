@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePointArray;
 
@@ -22,15 +22,15 @@ public abstract class KickBallBehaviorCoactiveElement extends BehaviorCoactiveEl
    public final YoBoolean foundBall = new YoBoolean("foundBall", machineWritableRegistry);
 
    public final IntegerYoVariable numBlobsDetected = new IntegerYoVariable("numBlobsDetected", machineWritableRegistry);
-   public final DoubleYoVariable blobX = new DoubleYoVariable("blobX", machineWritableRegistry);
-   public final DoubleYoVariable blobY = new DoubleYoVariable("blobY", machineWritableRegistry);
+   public final YoDouble blobX = new YoDouble("blobX", machineWritableRegistry);
+   public final YoDouble blobY = new YoDouble("blobY", machineWritableRegistry);
 
    public final YoFramePointArray ballPositions = new YoFramePointArray(MAX_DETECTED_BALLS, "detectedBall", machineWritableRegistry);
-   public final DoubleYoVariable[] ballRadii = new DoubleYoVariable[MAX_DETECTED_BALLS];
+   public final YoDouble[] ballRadii = new YoDouble[MAX_DETECTED_BALLS];
    {
       for (int index = 0; index < MAX_DETECTED_BALLS; index++)
       {
-         ballRadii[index] = new DoubleYoVariable("ballRadius" + index, machineWritableRegistry);
+         ballRadii[index] = new YoDouble("ballRadius" + index, machineWritableRegistry);
       }
    }
    public final YoBoolean validAcknowledged = new YoBoolean("validAcknowledged", machineWritableRegistry);

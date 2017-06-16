@@ -51,7 +51,7 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,7 +73,7 @@ public class IHMCHumanoidBehaviorManager
          new IHMCCommunicationKryoNetClassList());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+   private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
 
@@ -123,8 +123,8 @@ public class IHMCHumanoidBehaviorManager
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
 
-      //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
-      //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
+      //      YoDouble minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
+      //      YoDouble icpError = capturePointUpdatable.getIcpError();
 
       SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = null;
       if (sensorInfo.getWristForceSensorNames() != null && !sensorInfo.getWristForceSensorNames().containsValue(null))
@@ -177,7 +177,7 @@ public class IHMCHumanoidBehaviorManager
     */
    private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
          LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
-         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
+         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
          CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -287,7 +287,7 @@ public class IHMCHumanoidBehaviorManager
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, CommunicationBridgeInterface outgoingCommunicationBridge,
+         HumanoidReferenceFrames referenceFrames, YoDouble yoTime, CommunicationBridgeInterface outgoingCommunicationBridge,
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {

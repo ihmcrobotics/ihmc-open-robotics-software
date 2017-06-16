@@ -4,7 +4,7 @@ import static us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPosition
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -20,7 +20,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final LeadInOutPositionTrajectoryGenerator positionTrajectoryGenerator;
    private final SimpleOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   private final DoubleYoVariable leaveTime;
+   private final YoDouble leaveTime;
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameOrientation tempOrientation = new FrameOrientation();

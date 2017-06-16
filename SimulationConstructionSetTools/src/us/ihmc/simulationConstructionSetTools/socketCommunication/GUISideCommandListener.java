@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
@@ -176,7 +176,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       NameSpace fullNameSpace = NameSpace.createNameSpaceFromAFullVariableName(fullVariableName);
       YoVariableRegistry registry = rootRegistry.getRegistry(fullNameSpace);
       String shortVariableName = NameSpace.stripOffNameSpaceToGetVariableName(fullVariableName);
-      DoubleYoVariable newVar = new DoubleYoVariable(shortVariableName, "", registry);
+      YoDouble newVar = new YoDouble(shortVariableName, "", registry);
 
       allVariables.addVariable(newVar);
 

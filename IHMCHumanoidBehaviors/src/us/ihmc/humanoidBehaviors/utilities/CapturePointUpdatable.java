@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -40,8 +40,8 @@ public class CapturePointUpdatable implements Updatable
    private final YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
    // Computed Stuff
-   private final DoubleYoVariable icpError = new DoubleYoVariable("icpError", registry);
-   private final DoubleYoVariable minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
+   private final YoDouble icpError = new YoDouble("icpError", registry);
+   private final YoDouble minIcpDistanceToSupportPolygon = new YoDouble("minIcpDistanceToSupportPolygon", registry);
    private final YoBoolean tippingDetected = new YoBoolean("tippingDetected", registry);
    private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
 
@@ -185,12 +185,12 @@ public class CapturePointUpdatable implements Updatable
       return yoDoubleSupport;
    }
 
-   public DoubleYoVariable getMinIcpDistanceToSupportPolygon()
+   public YoDouble getMinIcpDistanceToSupportPolygon()
    {
       return minIcpDistanceToSupportPolygon;
    }
 
-   public DoubleYoVariable getIcpError()
+   public YoDouble getIcpError()
    {
       return icpError;
    }

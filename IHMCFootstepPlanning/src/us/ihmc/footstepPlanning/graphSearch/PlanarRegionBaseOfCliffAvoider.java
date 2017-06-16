@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -23,9 +23,9 @@ public class PlanarRegionBaseOfCliffAvoider
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoFrameVector yoShiftVectorInSoleFrame = new YoFrameVector("shiftVectorInSoleFrame", null, registry);
-   private final DoubleYoVariable maximumCliffXInSoleFrame = new DoubleYoVariable("maximumCliffXInSoleFrame", registry);
-   private final DoubleYoVariable maximumCliffYInSoleFrame = new DoubleYoVariable("maximumCliffYInSoleFrame", registry);
-   private final DoubleYoVariable maximumCliffZInSoleFrame = new DoubleYoVariable("maximumCliffZInSoleFrame", registry);
+   private final YoDouble maximumCliffXInSoleFrame = new YoDouble("maximumCliffXInSoleFrame", registry);
+   private final YoDouble maximumCliffYInSoleFrame = new YoDouble("maximumCliffYInSoleFrame", registry);
+   private final YoDouble maximumCliffZInSoleFrame = new YoDouble("maximumCliffZInSoleFrame", registry);
 
    private final YoGraphicPosition beforeAdjustmentPosition, afterAdjustmentPosition;
 

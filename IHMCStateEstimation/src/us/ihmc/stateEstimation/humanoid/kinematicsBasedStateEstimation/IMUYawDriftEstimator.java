@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -41,26 +41,26 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final IntegerYoVariable numberOfFeetTrusted = new IntegerYoVariable("numberOfFeetTrustedIMUDrift", registry);
 
    private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
-   private final DoubleYoVariable delayBeforeTrustingFoot = new DoubleYoVariable("delayBeforeTrustingFootIMUDrift", registry);
+   private final YoDouble delayBeforeTrustingFoot = new YoDouble("delayBeforeTrustingFootIMUDrift", registry);
 
    private final YoFramePoint referenceAverageFootPosition = new YoFramePoint("referenceAverageFootPositionIMUDrift", worldFrame, registry);
    private final Map<RigidBody, YoFramePoint> referenceFootPositions = new LinkedHashMap<>();
    private final YoFramePoint currentAverageFootPosition = new YoFramePoint("currentAverageFootPositionIMUDrift", worldFrame, registry);
    private final Map<RigidBody, YoFramePoint> currentFootPositions = new LinkedHashMap<>();
 
-   private final DoubleYoVariable footLinearVelocityThreshold = new DoubleYoVariable("footLinearVelocityThreshold", registry);
-   private final Map<RigidBody, DoubleYoVariable> currentFootLinearVelocities = new LinkedHashMap<>();
+   private final YoDouble footLinearVelocityThreshold = new YoDouble("footLinearVelocityThreshold", registry);
+   private final Map<RigidBody, YoDouble> currentFootLinearVelocities = new LinkedHashMap<>();
 
-   private final Map<RigidBody, DoubleYoVariable> estimatedYawDriftPerFoot = new LinkedHashMap<>();
+   private final Map<RigidBody, YoDouble> estimatedYawDriftPerFoot = new LinkedHashMap<>();
 
-   private final DoubleYoVariable estimatedYawDrift = new DoubleYoVariable("estimatedRawYawDrift", registry);
-   private final DoubleYoVariable estimatedYawDriftPrevious = new DoubleYoVariable("estimatedYawDriftPrevious", registry);
-   private final DoubleYoVariable yawDriftAlphaFilter = new DoubleYoVariable("yawDriftAlphaFilter", registry);
-   private final DoubleYoVariable estimatedFilteredYawDrift = new DoubleYoVariable("estimatedFilteredYawDrift", registry);
+   private final YoDouble estimatedYawDrift = new YoDouble("estimatedRawYawDrift", registry);
+   private final YoDouble estimatedYawDriftPrevious = new YoDouble("estimatedYawDriftPrevious", registry);
+   private final YoDouble yawDriftAlphaFilter = new YoDouble("yawDriftAlphaFilter", registry);
+   private final YoDouble estimatedFilteredYawDrift = new YoDouble("estimatedFilteredYawDrift", registry);
 
-   private final DoubleYoVariable previouslyEstimatedYawDrift = new DoubleYoVariable("previouslyEstimatedYawDrift", registry);
-   private final DoubleYoVariable totalEstimatedYawDrift = new DoubleYoVariable("totalEstimatedYawDrift", registry);
-   private final DoubleYoVariable yawDriftRateAlphaFilter = new DoubleYoVariable("yawDriftRateAlphaFilter", registry);
+   private final YoDouble previouslyEstimatedYawDrift = new YoDouble("previouslyEstimatedYawDrift", registry);
+   private final YoDouble totalEstimatedYawDrift = new YoDouble("totalEstimatedYawDrift", registry);
+   private final YoDouble yawDriftRateAlphaFilter = new YoDouble("yawDriftRateAlphaFilter", registry);
    private final AlphaFilteredYoVariable estimatedYawDriftRate = new AlphaFilteredYoVariable("estimatedYawDriftRate", registry, yawDriftRateAlphaFilter);
 
    private final YoBoolean enableCompensation = new YoBoolean("enableIMUDriftYawCompensation", registry);
@@ -119,7 +119,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          RigidBody foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
-         DoubleYoVariable currentFootLinearVelocity = new DoubleYoVariable(footNameCamelCase + "IMUDriftCurrentLinearVelocityMag", registry);
+         YoDouble currentFootLinearVelocity = new YoDouble(footNameCamelCase + "IMUDriftCurrentLinearVelocityMag", registry);
          currentFootLinearVelocities.put(foot, currentFootLinearVelocity);
 
       }
@@ -128,7 +128,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          RigidBody foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
-         DoubleYoVariable estimatedYawDriftFoot = new DoubleYoVariable(footNameCamelCase + "EstimatedYawDrift", registry);
+         YoDouble estimatedYawDriftFoot = new YoDouble(footNameCamelCase + "EstimatedYawDrift", registry);
          estimatedYawDriftPerFoot.put(foot, estimatedYawDriftFoot);
       }
 

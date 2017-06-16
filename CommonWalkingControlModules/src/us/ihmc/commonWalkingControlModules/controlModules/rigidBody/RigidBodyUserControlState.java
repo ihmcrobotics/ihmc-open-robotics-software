@@ -8,7 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyUserControlState extends RigidBodyControlState
@@ -20,13 +20,13 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final OneDoFJoint[] jointsToControl;
    private final int numberOfJoints;
 
-   private final DoubleYoVariable[] userDesiredJointAccelerations;
-   private final DoubleYoVariable[] weights;
+   private final YoDouble[] userDesiredJointAccelerations;
+   private final YoDouble[] weights;
 
    private final YoBoolean abortUserControlMode;
    private final YoBoolean hasWeights;
 
-   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
@@ -36,14 +36,14 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       this.numberOfJoints = jointsToControl.length;
 
       jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
-      userDesiredJointAccelerations = new DoubleYoVariable[jointsToControl.length];
-      weights = new DoubleYoVariable[jointsToControl.length];
+      userDesiredJointAccelerations = new YoDouble[jointsToControl.length];
+      weights = new YoDouble[jointsToControl.length];
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          String jointName = jointsToControl[i].getName();
-         userDesiredJointAccelerations[i] = new DoubleYoVariable(prefix + "_" + jointName + "_qdd_d", registry);
-         weights[i] = new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry);
+         userDesiredJointAccelerations[i] = new YoDouble(prefix + "_" + jointName + "_qdd_d", registry);
+         weights[i] = new YoDouble(prefix + "_" + jointName + "_weight", registry);
          jointspaceAccelerationCommand.addJoint(jointsToControl[i], Double.NaN);
       }
 

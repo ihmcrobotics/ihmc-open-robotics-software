@@ -13,7 +13,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
@@ -55,7 +55,7 @@ public class StateMachineExampleTwoTest
 
       final YoBoolean threeToOneTransitionAction = new YoBoolean("threeToOneTransitionAction", registry);
 
-      DoubleYoVariable timeProvider = new DoubleYoVariable("time", registry);
+      YoDouble timeProvider = new YoDouble("time", registry);
       timeProvider.set(13.3);
 
       StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("complexStateMachine", "switchTime", StateEnum.class, StateEnum.FOUR, timeProvider, registry);

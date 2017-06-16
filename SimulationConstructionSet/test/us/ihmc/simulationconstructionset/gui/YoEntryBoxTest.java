@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
@@ -39,8 +39,8 @@ public class YoEntryBoxTest
       private EnumYoVariable<BadGreekEnum> badGreekVariable;
       private EnumYoVariable<LargeEnum> largeEnumVariable;
       private EnumYoVariable<SmallEnum> smallEnumVariable;
-      private DoubleYoVariable numberVariable;
-      private DoubleYoVariable time;
+      private YoDouble numberVariable;
+      private YoDouble time;
       private final String name = "simpleController";
 
       public SimpleController()
@@ -59,7 +59,7 @@ public class YoEntryBoxTest
                .THE_FOLLOWING_IS_TAKEN_FROM_RAIBERT_1986_ONE_PART_OF_THE_CONTROL_SYSTEM_EXCITED_THE_CYCLIC_MOTION_THAT_UNDERLIES_RUNNING_WHILE_REGULATING_THE_HEIGHT_TO_WHICH_THE_MACHINE_HOPPED);
          smallEnumVariable = new EnumYoVariable<SmallEnum>("smallEnumVariable", registry, SmallEnum.class);
          smallEnumVariable.set(SmallEnum.IF);
-         numberVariable = new DoubleYoVariable("numberVariable", registry);
+         numberVariable = new YoDouble("numberVariable", registry);
          numberVariable.set(42.0);
          time = robot.getYoTime();
       }
@@ -108,7 +108,7 @@ public class YoEntryBoxTest
 
       }
 
-      public DoubleYoVariable getTimeVariable()
+      public YoDouble getTimeVariable()
       {
          return time;
       }
@@ -118,7 +118,7 @@ public class YoEntryBoxTest
          return badGreekVariable;
       }
 
-      public DoubleYoVariable getNumberVariable()
+      public YoDouble getNumberVariable()
       {
          return numberVariable;
       }
@@ -162,8 +162,8 @@ public class YoEntryBoxTest
       ArrayList<YoEntryBox> entryBoxes = scsGUI.getEntryBoxArrayPanel().getEntryBoxesOnThisPanel();
 
       EnumYoVariable<BadGreekEnum> badGreekVariable = controller.getBadGreekVariable();
-      DoubleYoVariable numberVariable = controller.getNumberVariable();
-      DoubleYoVariable timeVariable = controller.getTimeVariable();
+      YoDouble numberVariable = controller.getNumberVariable();
+      YoDouble timeVariable = controller.getTimeVariable();
       badGreekVariable.set(BadGreekEnum.BETA);
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
       assertEquals(timeVariable, entryBoxes.get(0).getVariableInThisBox());

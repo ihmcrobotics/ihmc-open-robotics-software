@@ -26,7 +26,7 @@ import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -69,13 +69,13 @@ public class YoKalmanFilter implements KalmanFilter
    private final LinearSolver<DenseMatrix64F> solver;
 
    // YoVariables
-   private final List<List<DoubleYoVariable>> yoF = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoG = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoH = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoQ = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoR = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoP = new ArrayList<List<DoubleYoVariable>>();
-   private final List<DoubleYoVariable> yoX = new ArrayList<DoubleYoVariable>();
+   private final List<List<YoDouble>> yoF = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoG = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoH = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoQ = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoR = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoP = new ArrayList<List<YoDouble>>();
+   private final List<YoDouble> yoX = new ArrayList<YoDouble>();
 
    private final IntegerYoVariable nStates;
    private final IntegerYoVariable nInputs;

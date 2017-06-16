@@ -3,25 +3,25 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DoublePendulumController");
-   private final DoubleYoVariable q_j1 = new DoubleYoVariable("q_j1", registry);
-   private final DoubleYoVariable qd_j1 = new DoubleYoVariable("qd_j1", registry);
-   private final DoubleYoVariable q_j2 = new DoubleYoVariable("q_j2", registry);
-   private final DoubleYoVariable qd_j2 = new DoubleYoVariable("qd_j2", registry);
+   private final YoDouble q_j1 = new YoDouble("q_j1", registry);
+   private final YoDouble qd_j1 = new YoDouble("qd_j1", registry);
+   private final YoDouble q_j2 = new YoDouble("q_j2", registry);
+   private final YoDouble qd_j2 = new YoDouble("qd_j2", registry);
 
-   private final DoubleYoVariable tau_j1 = new DoubleYoVariable("tau_j1", registry);
-   private final DoubleYoVariable tau_j2 = new DoubleYoVariable("tau_j2", registry);
+   private final YoDouble tau_j1 = new YoDouble("tau_j1", registry);
+   private final YoDouble tau_j2 = new YoDouble("tau_j2", registry);
 
-   private final DoubleYoVariable q_j1_d = new DoubleYoVariable("q_j1_d", registry);
-   private final DoubleYoVariable q_j2_d = new DoubleYoVariable("q_j2_d", registry);
+   private final YoDouble q_j1_d = new YoDouble("q_j1_d", registry);
+   private final YoDouble q_j2_d = new YoDouble("q_j2_d", registry);
 
-   private final DoubleYoVariable kp = new DoubleYoVariable("kp", registry);
-   private final DoubleYoVariable kd = new DoubleYoVariable("kd", registry);
+   private final YoDouble kp = new YoDouble("kp", registry);
+   private final YoDouble kd = new YoDouble("kd", registry);
    
    private final LongYoVariable tick = new LongYoVariable("tick", registry);
 

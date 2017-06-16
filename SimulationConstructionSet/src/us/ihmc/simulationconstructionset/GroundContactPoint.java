@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -16,7 +16,7 @@ public class GroundContactPoint extends ExternalForcePoint
  
    private final YoFramePoint touchdownLocation;
    
-   private final DoubleYoVariable fs;    // Foot Switch TODO: YoBoolean or EnumYoVariable
+   private final YoDouble fs;    // Foot Switch TODO: YoBoolean or EnumYoVariable
    private final YoFrameVector surfaceNormal;
 
    private final YoBoolean slip;    // Whether or not it is slipping.
@@ -43,7 +43,7 @@ public class GroundContactPoint extends ExternalForcePoint
 
       touchdownLocation = new YoFramePoint(name + "_td", "", ReferenceFrame.getWorldFrame(), registry);
 
-      fs = new DoubleYoVariable(name + "_fs", "GroundContactPoint foot switch", registry);
+      fs = new YoDouble(name + "_fs", "GroundContactPoint foot switch", registry);
 
       slip = new YoBoolean(name + "_slip", "GroundContactPoint slipping", registry);
       collisionCount = new IntegerYoVariable(name + "_coll", "GroundContactPoint colliding", registry);
@@ -112,7 +112,7 @@ public class GroundContactPoint extends ExternalForcePoint
       return touchdownLocation;
    }
    
-   public DoubleYoVariable getYoFootSwitch()
+   public YoDouble getYoFootSwitch()
    {
       return fs;
    }

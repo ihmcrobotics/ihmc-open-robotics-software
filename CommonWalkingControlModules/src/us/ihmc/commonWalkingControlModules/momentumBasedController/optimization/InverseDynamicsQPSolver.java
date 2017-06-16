@@ -6,7 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -47,8 +47,8 @@ public class InverseDynamicsQPSolver
    private final IntegerYoVariable numberOfEqualityConstraints = new IntegerYoVariable("numberOfEqualityConstraints", registry);
    private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
-   private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
-   private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
+   private final YoDouble jointAccelerationRegularization = new YoDouble("jointAccelerationRegularization", registry);
+   private final YoDouble jointJerkRegularization = new YoDouble("jointJerkRegularization", registry);
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;

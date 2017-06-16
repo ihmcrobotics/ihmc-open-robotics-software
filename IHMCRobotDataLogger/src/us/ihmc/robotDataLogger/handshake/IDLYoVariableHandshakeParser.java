@@ -135,7 +135,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          switch (type)
          {
          case DoubleYoVariable:
-            DoubleYoVariable doubleVar = new DoubleYoVariable(name, parent);
+            YoDouble doubleVar = new YoDouble(name, parent);
             variableList.add(doubleVar);
             break;
 
