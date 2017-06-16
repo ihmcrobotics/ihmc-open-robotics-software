@@ -149,19 +149,21 @@ public class Box3d extends Shape3d<Box3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       setDimensions(0.0, 0.0, 0.0);
    }
 
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       setDimensions(Double.NaN, Double.NaN, Double.NaN);
    }
 
    @Override
    public boolean containsNaN()
    {
-      return Double.isNaN(getHeight()) || Double.isNaN(getLength()) || Double.isNaN(getWidth());
+      return super.containsNaN() || Double.isNaN(getHeight()) || Double.isNaN(getLength()) || Double.isNaN(getWidth());
    }
 
    @Override

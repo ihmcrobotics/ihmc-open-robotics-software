@@ -104,12 +104,13 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    @Override
    public boolean containsNaN()
    {
-      return Double.isNaN(height) || Double.isNaN(radius);
+      return super.containsNaN() || Double.isNaN(height) || Double.isNaN(radius);
    }
 
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       height = Double.NaN;
       radius = Double.NaN;
    }
@@ -117,6 +118,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       height = 0.0;
       radius = 0.0;
    }

@@ -272,19 +272,21 @@ public class Ramp3d extends Shape3d<Ramp3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       size.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       size.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      return size.containsNaN();
+      return super.containsNaN() || size.containsNaN();
    }
 
    @Override
