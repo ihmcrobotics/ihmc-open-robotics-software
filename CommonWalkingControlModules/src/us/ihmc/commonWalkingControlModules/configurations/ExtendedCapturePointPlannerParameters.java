@@ -8,6 +8,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public abstract class ExtendedCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    public abstract List<FrameVector2d> getCoPOffsets(RobotSide side);
+   public abstract List<FrameVector2d> getFinalTransferCoPOffset();
    
    public int getNumberOfPointsPerFoot()
    {
