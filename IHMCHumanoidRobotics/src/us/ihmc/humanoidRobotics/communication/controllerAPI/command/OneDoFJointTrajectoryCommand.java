@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -19,12 +21,24 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
    }
 
+   public OneDoFJointTrajectoryCommand(Random random)
+   {
+      super(random);
+      commandId = random.nextInt(1000);
+      executionDelayTime = random.nextDouble() * random.nextInt(1000);
+      adjustedExecutionTime = random.nextDouble() * random.nextInt(1000);
+      weight = random.nextDouble() * random.nextInt(1000);
+   }
+
    @Override
    public void clear()
    {
       super.clear();
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       setWeight(Double.NaN);
+      executionDelayTime = 0.0;
+      adjustedExecutionTime = 0.0;
+      
    }
 
    @Override
