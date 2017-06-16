@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 public class QuickHull3DWrapperTest
 {
@@ -209,7 +209,7 @@ public class QuickHull3DWrapperTest
 
       List<Point3D> vertices = new ArrayList<Point3D>();
       ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
-      Pose polygonPose = new Pose(new Point3D(), new Quaternion());
+      Pose3D polygonPose = new Pose3D(new Point3D(), new Quaternion());
       faces.get(0).get2DPolygonAndPose(currentPolygon, polygonPose);
       vertices.addAll(faces.get(0).getPoints());
 

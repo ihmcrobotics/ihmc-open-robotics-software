@@ -18,13 +18,13 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose extends AbstractFrameObject<FramePose, Pose>
+public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
 {
-   private final Pose pose;
+   private final Pose3D pose;
 
    public FramePose()
    {
@@ -33,10 +33,10 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public FramePose(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, new Pose());
+      this(referenceFrame, new Pose3D());
    }
 
-   public FramePose(ReferenceFrame referenceFrame, Pose pose)
+   public FramePose(ReferenceFrame referenceFrame, Pose3D pose)
    {
       super(referenceFrame, pose);
       this.pose = getGeometryObject();
@@ -44,7 +44,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public FramePose(FramePoint position, FrameOrientation orientation)
    {
-      this(position.getReferenceFrame(), new Pose(position.getGeometryObject(), orientation.getGeometryObject()));
+      this(position.getReferenceFrame(), new Pose3D(position.getGeometryObject(), orientation.getGeometryObject()));
 
       if (position.getReferenceFrame() != orientation.getReferenceFrame())
       {
@@ -55,13 +55,13 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public FramePose(ReferenceFrame referenceFrame, Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
-      this(referenceFrame, new Pose());
+      this(referenceFrame, new Pose3D());
       setPose(position, orientation);
    }
 
    public FramePose(FramePose framePose)
    {
-      this(framePose.getReferenceFrame(), new Pose(framePose.getGeometryObject()));
+      this(framePose.getReferenceFrame(), new Pose3D(framePose.getGeometryObject()));
    }
 
    public FramePose(ReferenceFrame referenceFrame, RigidBodyTransform transform)

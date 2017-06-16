@@ -9,7 +9,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 /**
  * @author agrabertilton
@@ -145,7 +145,7 @@ public class HullFace
       }
    }
 
-   public void get2DPolygonAndPose(ConvexPolygon2D polygonToPack, Pose polygonPose)
+   public void get2DPolygonAndPose(ConvexPolygon2D polygonToPack, Pose3D polygonPose)
    {
       if (facePoints.isEmpty())
       {

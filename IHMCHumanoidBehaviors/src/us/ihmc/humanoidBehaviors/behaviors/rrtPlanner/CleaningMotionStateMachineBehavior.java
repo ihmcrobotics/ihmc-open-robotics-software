@@ -20,7 +20,7 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -60,7 +60,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
     
       // ********************************** get SolarPanel Info ********************************** //     
       
-      Pose poseSolarPanel = new Pose();
+      Pose3D poseSolarPanel = new Pose3D();
       Quaternion quaternionSolarPanel = new Quaternion();
       poseSolarPanel.setPosition(0.7, -0.05, 1.0);
       quaternionSolarPanel.appendRollRotation(0.0);

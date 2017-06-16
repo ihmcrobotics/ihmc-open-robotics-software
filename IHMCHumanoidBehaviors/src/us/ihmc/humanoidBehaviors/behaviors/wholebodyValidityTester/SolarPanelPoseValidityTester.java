@@ -14,7 +14,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
@@ -41,7 +41,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(node.getNodeData(0));
       
-      Pose desiredHandPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D desiredHandPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       
       if(node.getDimensionOfNodeData() == 2)
       {
@@ -62,11 +62,11 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    {
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D aPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    
-   public void setWholeBodyPose(Pose desiredHandPose, double chestYaw)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double chestYaw)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -92,7 +92,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       this.holdCurrentPelvisHeight();
    }
 
-   public void setWholeBodyPose(Pose desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();

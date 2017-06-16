@@ -20,27 +20,27 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public class Pose implements GeometryObject<Pose>
+public class Pose3D implements GeometryObject<Pose3D>
 {
    private final Quaternion orientation = new Quaternion();
    private final Point3D position = new Point3D();
 
-   public Pose()
+   public Pose3D()
    {
    }
 
-   public Pose(Pose other)
+   public Pose3D(Pose3D other)
    {
       orientation.set(other.getOrientation());
       position.set(other.getPosition());
    }
 
-   public Pose(RigidBodyTransform transform)
+   public Pose3D(RigidBodyTransform transform)
    {
       transform.get(orientation, position);
    }
 
-   public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
+   public Pose3D(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
       this.position.set(position);
@@ -128,7 +128,7 @@ public class Pose implements GeometryObject<Pose>
    }
 
    @Override
-   public void set(Pose other)
+   public void set(Pose3D other)
    {
       orientation.set(other.getOrientation());
       position.set(other.getPosition());
@@ -186,13 +186,13 @@ public class Pose implements GeometryObject<Pose>
       orientation.normalizeAndLimitToPiMinusPi();
    }
 
-   public void interpolate(Pose other, double alpha)
+   public void interpolate(Pose3D other, double alpha)
    {
       position.interpolate(other.position, alpha);
       orientation.interpolate(other.orientation, alpha);
    }
 
-   public void interpolate(Pose pose1, Pose pose2, double alpha)
+   public void interpolate(Pose3D pose1, Pose3D pose2, double alpha)
    {
       position.interpolate(pose1.position, pose2.position, alpha);
       orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
@@ -325,7 +325,7 @@ public class Pose implements GeometryObject<Pose>
     * @param other the other pose used to measure the distance. Not modified.
     * @return the distance between the position part of the two poses.
     */
-   public double getPositionDistance(Pose other)
+   public double getPositionDistance(Pose3D other)
    {
       return position.distance(other.position);
    }
@@ -349,7 +349,7 @@ public class Pose implements GeometryObject<Pose>
     * @return the absolute angle difference between {@code this.orientation} and
     *         {@code other.orientation}.
     */
-   public double getOrientationDistance(Pose other)
+   public double getOrientationDistance(Pose3D other)
    {
       return orientation.distance(other.orientation);
    }
@@ -466,7 +466,7 @@ public class Pose implements GeometryObject<Pose>
     * @return {@code true} if the two poses are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(Pose other)
+   public boolean equals(Pose3D other)
    {
       if (other == null)
          return false;
@@ -476,7 +476,7 @@ public class Pose implements GeometryObject<Pose>
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(Pose)}, it returns {@code false} otherwise.
+    * returns {@link #equals(Pose3D)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -486,7 +486,7 @@ public class Pose implements GeometryObject<Pose>
    {
       try
       {
-         return equals((Pose) obj);
+         return equals((Pose3D) obj);
       }
       catch (ClassCastException e)
       {
@@ -495,12 +495,12 @@ public class Pose implements GeometryObject<Pose>
    }
 
    @Override
-   public boolean epsilonEquals(Pose other, double epsilon)
+   public boolean epsilonEquals(Pose3D other, double epsilon)
    {
       return epsilonEquals(other, epsilon, epsilon);
    }
 
-   public boolean epsilonEquals(Pose other, double positionEpsilon, double orientationEpsilon)
+   public boolean epsilonEquals(Pose3D other, double positionEpsilon, double orientationEpsilon)
    {
       return position.epsilonEquals(other.position, positionEpsilon) && orientation.epsilonEquals(other.orientation, orientationEpsilon);
    }

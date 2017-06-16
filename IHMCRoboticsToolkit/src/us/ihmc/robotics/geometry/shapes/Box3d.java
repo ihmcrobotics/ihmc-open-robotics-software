@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 /**
  * Box where base frame is in the center.
@@ -69,7 +69,7 @@ public class Box3d extends Shape3d<Box3d>
       commonConstructor(length, width, height);
    }
 
-   public Box3d(Pose pose, double length, double width, double height)
+   public Box3d(Pose3D pose, double length, double width, double height)
    {
       setPose(pose);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
