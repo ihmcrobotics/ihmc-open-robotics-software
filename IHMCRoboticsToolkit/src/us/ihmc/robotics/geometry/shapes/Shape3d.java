@@ -245,7 +245,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 
    public void setPose(Pose pose)
    {
-      pose.getPose(this.shapePose);
+      pose.get(this.shapePose);
    }
 
    public void setPose(RigidBodyTransform transform)

@@ -5,7 +5,6 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -232,17 +231,27 @@ public class Pose implements GeometryObject<Pose>
       RotationMatrixTools.applyYawRotation(yaw, position, position);
       orientation.prependYawRotation(yaw);
    }
-   
+
    public void prependPitchRotation(double pitch)
    {
       RotationMatrixTools.applyPitchRotation(pitch, position, position);
       orientation.prependPitchRotation(pitch);
    }
-   
+
    public void prependRollRotation(double roll)
    {
       RotationMatrixTools.applyRollRotation(roll, position, position);
       orientation.prependRollRotation(roll);
+   }
+
+   public void prependTransform(RigidBodyTransform transform)
+   {
+      applyTransform(transform);
+   }
+
+   public void prependTransform(QuaternionBasedTransform transform)
+   {
+      applyTransform(transform);
    }
 
    public void appendTranslation(double x, double y, double z)
@@ -275,16 +284,28 @@ public class Pose implements GeometryObject<Pose>
    {
       orientation.appendYawRotation(yaw);
    }
-   
+
    public void appendPitchRotation(double pitch)
    {
       orientation.appendPitchRotation(pitch);
    }
-   
+
    public void appendRollRotation(double roll)
    {
       RotationMatrixTools.applyRollRotation(roll, position, position);
       orientation.appendRollRotation(roll);
+   }
+
+   public void appendTransform(RigidBodyTransform transform)
+   {
+      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
+      orientation.multiply(transform.getRotationMatrix());
+   }
+
+   public void appendTransform(QuaternionBasedTransform transform)
+   {
+      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
+      orientation.multiply(transform.getQuaternion());
    }
 
    /**
@@ -310,8 +331,8 @@ public class Pose implements GeometryObject<Pose>
    }
 
    /**
-    * Computes the smallest angle representing the difference between the orientation part of this pose 3D and the
-    * give {@code orientation}.
+    * Computes the smallest angle representing the difference between the orientation part of this
+    * pose 3D and the give {@code orientation}.
     * 
     * @param orientation the orientation used to compute the orientation distance. Not modified.
     * @return the absolute angle difference between {@code this} and {@code orientation}.
@@ -334,12 +355,6 @@ public class Pose implements GeometryObject<Pose>
    }
 
    @Override
-   public boolean epsilonEquals(Pose other, double epsilon)
-   {
-      return orientation.epsilonEquals(other.getOrientation(), epsilon) && position.epsilonEquals(other.getPosition(), epsilon);
-   }
-
-   @Override
    public void applyTransform(Transform transform)
    {
       transform.transform(position);
@@ -351,43 +366,6 @@ public class Pose implements GeometryObject<Pose>
    {
       transform.inverseTransform(position);
       transform.inverseTransform(orientation);
-   }
-
-   public void applyTransformToPositionOnly(Transform transform)
-   {
-      transform.transform(position);
-   }
-
-   public void applyTransformToOrientationOnly(Transform transform)
-   {
-      transform.transform(orientation);
-   }
-
-   public void appendTransform(RigidBodyTransform transform)
-   {
-      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
-      orientation.multiply(transform.getRotationMatrix());
-   }
-
-   public void appendTransform(QuaternionBasedTransform transform)
-   {
-      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
-      orientation.multiply(transform.getQuaternion());
-   }
-
-   public String printOutPosition()
-   {
-      return position.toString();
-   }
-
-   public String printOutOrientation()
-   {
-      return orientation.toString();
-   }
-
-   public void getPose(RigidBodyTransform transformToPack)
-   {
-      transformToPack.set(orientation, position);
    }
 
    public Point3DReadOnly getPosition()
@@ -415,19 +393,24 @@ public class Pose implements GeometryObject<Pose>
       return position.getZ();
    }
 
+   public double getYaw()
+   {
+      return orientation.getYaw();
+   }
+
+   public double getPitch()
+   {
+      return orientation.getPitch();
+   }
+
+   public double getRoll()
+   {
+      return orientation.getRoll();
+   }
+
    public void getPosition(Tuple3DBasics tupleToPack)
    {
       tupleToPack.set(position);
-   }
-
-   public void getRigidBodyTransform(RigidBodyTransform transformToPack)
-   {
-      transformToPack.set(orientation, position);
-   }
-
-   public void getPose(QuaternionBasedTransform transformToPack)
-   {
-      transformToPack.set(orientation, position);
    }
 
    public void getOrientation(RotationMatrix matrixToPack)
@@ -443,6 +426,11 @@ public class Pose implements GeometryObject<Pose>
    public void getOrientation(AxisAngleBasics axisAngleToPack)
    {
       axisAngleToPack.set(orientation);
+   }
+
+   public void getOrientationYawPitchRoll(double[] yawPitchRollToPack)
+   {
+      orientation.getYawPitchRoll(yawPitchRollToPack);
    }
 
    /**
@@ -461,34 +449,81 @@ public class Pose implements GeometryObject<Pose>
       orientation.get(rotationVectorToPack);
    }
 
-   public void getYawPitchRoll(double[] yawPitchRollToPack)
+   public void get(RigidBodyTransform transformToPack)
    {
-      orientation.getYawPitchRoll(yawPitchRollToPack);
+      transformToPack.set(orientation, position);
    }
 
-   public double getYaw()
+   public void get(QuaternionBasedTransform transformToPack)
    {
-      return orientation.getYaw();
+      transformToPack.set(orientation, position);
    }
 
-   public double getPitch()
+   /**
+    * Tests on a per component basis, if this pose 3D is exactly equal to {@code other}.
+    *
+    * @param other the other pose 3D to compare against this. Not modified.
+    * @return {@code true} if the two poses are exactly equal component-wise, {@code false}
+    *         otherwise.
+    */
+   public boolean equals(Pose other)
    {
-      return orientation.getPitch();
+      if (other == null)
+         return false;
+      else
+         return position.equals(other.position) && orientation.equals(other.orientation);
    }
 
-   public double getRoll()
+   /**
+    * Tests if the given {@code object}'s class is the same as this, in which case the method
+    * returns {@link #equals(Pose)}, it returns {@code false} otherwise.
+    *
+    * @param object the object to compare against this. Not modified.
+    * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
+    */
+   @Override
+   public boolean equals(Object obj)
    {
-      return orientation.getRoll();
-   }
-
-   public boolean epsilonEquals(Pose other, double positionErrorMargin, double orientationErrorMargin)
-   {
-      return position.epsilonEquals(other.getPosition(), positionErrorMargin) && orientation.epsilonEquals(other.getOrientation(), orientationErrorMargin);
+      try
+      {
+         return equals((Pose) obj);
+      }
+      catch (ClassCastException e)
+      {
+         return false;
+      }
    }
 
    @Override
+   public boolean epsilonEquals(Pose other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon, epsilon);
+   }
+
+   public boolean epsilonEquals(Pose other, double positionEpsilon, double orientationEpsilon)
+   {
+      return position.epsilonEquals(other.position, positionEpsilon) && orientation.epsilonEquals(other.orientation, orientationEpsilon);
+   }
+
+   public String printOutPosition()
+   {
+      return position.toString();
+   }
+
+   public String printOutOrientation()
+   {
+      return orientation.toString();
+   }
+
+   /**
+    * Provides a {@code String} representation of this pose 3D as follows:<br>
+    * Pose 3D: position = (x, y, z), orientation = (qx, qy, qz, qs)
+    *
+    * @return the {@code String} representing this pose 3D.
+    */
+   @Override
    public String toString()
    {
-      return EuclidCoreIOTools.getTuple3DString(position) + "\n" + EuclidCoreIOTools.getTuple4DString(orientation);
+      return "Pose 3D: position = " + position + ", orientation = " + orientation;
    }
 }
