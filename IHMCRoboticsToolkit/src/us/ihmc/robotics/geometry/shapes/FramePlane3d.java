@@ -269,7 +269,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
 	   Point3D intersectionToPack = new Point3D();
-	   plane3d.getIntersectionWithLine(intersectionToPack, line.getPoint(), line.getNormalizedVector());
+	   plane3d.intersectionWith(intersectionToPack, line.getPoint(), line.getNormalizedVector());
 	   pointToPack.set(intersectionToPack);
    }
 
