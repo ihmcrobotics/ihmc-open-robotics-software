@@ -81,16 +81,16 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       this.height = height;
    }
 
-   public Plane3d getPlane(CylinderFaces face)
+   public Plane3D getPlane(CylinderFaces face)
    {
-      Plane3d plane;
+      Plane3D plane;
       switch (face)
       {
          case TOP :
-            plane = new Plane3d(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
+            plane = new Plane3D(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
             break;
          case BOTTOM :
-            plane = new Plane3d(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
+            plane = new Plane3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
             break;
          default :
             throw(new RuntimeException("Unrecognized cylinder face"));

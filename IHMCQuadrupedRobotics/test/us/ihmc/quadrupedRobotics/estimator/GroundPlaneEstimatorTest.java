@@ -20,7 +20,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -50,7 +50,7 @@ public class GroundPlaneEstimatorTest
    {
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
       List<FramePoint> pointListA = new ArrayList<FramePoint>();
-      Plane3d plane3dA = new Plane3d();
+      Plane3D plane3dA = new Plane3D();
 
       pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0,  1.0,  0.1));
       pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0, -1.0,  0.1));
@@ -62,7 +62,7 @@ public class GroundPlaneEstimatorTest
       Vector3D normalA = plane3dA.getNormalCopy();
       
       List<FramePoint> pointListB = new ArrayList<FramePoint>();
-      Plane3d plane3dB = new Plane3d();
+      Plane3D plane3dB = new Plane3D();
       pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0 + 4.0,  1.0 + 4.0,  0.1));
       pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0 + 4.0, -1.0 + 4.0,  0.1));
       pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(), -1.0 + 4.0,  1.0 + 4.0, -0.1));

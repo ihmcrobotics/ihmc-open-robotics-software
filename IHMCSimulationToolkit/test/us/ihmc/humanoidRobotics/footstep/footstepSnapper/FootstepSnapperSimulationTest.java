@@ -43,7 +43,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -825,7 +825,7 @@ public class FootstepSnapperSimulationTest
 
 //       planePosition.set(planePosition.x, planePosition.y, planePosition.z - 0.01); adversary code, move foot plane down a little
          planePoint.set(planePosition);
-         Plane3d solePlane = new Plane3d(planePosition, planeNormal);
+         Plane3D solePlane = new Plane3D(planePosition, planeNormal);
 
          if (assertPointConditions)
          {
@@ -857,7 +857,7 @@ public class FootstepSnapperSimulationTest
    }
 
 
-   private boolean pointsBelowPlane(List<Point3D> point3ds, Plane3d plane, double tolerance)
+   private boolean pointsBelowPlane(List<Point3D> point3ds, Plane3D plane, double tolerance)
    {
       for (Point3D point3d : point3ds)
       {
@@ -870,7 +870,7 @@ public class FootstepSnapperSimulationTest
       return true;
    }
 
-   private boolean pointBelowPlane(Point3D point, Plane3d plane, double tolerance)
+   private boolean pointBelowPlane(Point3D point, Plane3D plane, double tolerance)
    {
       double distanceAlongNormal = plane.signedDistance(point);
       if (distanceAlongNormal > tolerance)

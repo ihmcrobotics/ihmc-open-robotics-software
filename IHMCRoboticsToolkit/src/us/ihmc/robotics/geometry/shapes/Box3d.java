@@ -23,7 +23,7 @@ public class Box3d extends Shape3d<Box3d>
    public static final int NUM_VERTICES_PER_FACE = 4;
 
    private final EnumMap<Direction, Double> dimensions;
-   private final EnumMap<FaceName, Plane3d> faces;
+   private final EnumMap<FaceName, Plane3D> faces;
    private boolean facesAreOutOfDate;
 
    private final Point3D temporaryPoint;
@@ -37,7 +37,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       setPose(other);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
       temporaryPoint = new Point3D();
 
       commonConstructor(other.getLength(), other.getWidth(), other.getHeight());
@@ -51,7 +51,7 @@ public class Box3d extends Shape3d<Box3d>
    public Box3d(double lengthX, double widthY, double heightZ)
    {
       dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
       temporaryPoint = new Point3D();
 
       commonConstructor(lengthX, widthY, heightZ);
@@ -61,7 +61,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       setPose(transform);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
       temporaryPoint = new Point3D();
 
       commonConstructor(length, width, height);
@@ -71,7 +71,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       setPose(pose);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
       temporaryPoint = new Point3D();
 
       commonConstructor(length, width, height);
@@ -81,7 +81,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       setPose(position, orientation);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
       temporaryPoint = new Point3D();
 
       commonConstructor(length, width, height);
@@ -91,7 +91,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       for (FaceName faceName : FaceName.values())
       {
-         faces.put(faceName, new Plane3d());
+         faces.put(faceName, new Plane3D());
       }
 
       setDimensions(length, width, height);
@@ -138,7 +138,7 @@ public class Box3d extends Shape3d<Box3d>
       return dimensions.get(Direction.Z);
    }
 
-   public void getFace(Direction direction, boolean positive, Plane3d planeToPack)
+   public void getFace(Direction direction, boolean positive, Plane3D planeToPack)
    {
       planeToPack.set(faces.get(FaceName.get(positive, direction)));
       transformToWorld(planeToPack);
@@ -221,7 +221,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       ensureFacesAreUpToDate();
 
-      for (Plane3d face : faces.values())
+      for (Plane3D face : faces.values())
       {
          if (face.isOnOrAbove(point))
          {
@@ -238,7 +238,7 @@ public class Box3d extends Shape3d<Box3d>
       boolean isInsideOrOnSurface = true;
       for (FaceName faceName : FaceName.values)
       {
-         Plane3d face = faces.get(faceName);
+         Plane3D face = faces.get(faceName);
          if (!face.isOnOrBelow(x, y, z, epsilon))
          {
             isInsideOrOnSurface = false;
@@ -259,7 +259,7 @@ public class Box3d extends Shape3d<Box3d>
 
       if (isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0))
       {
-         Plane3d nearestFace = getClosestFace(pointInWorldToCheck);
+         Plane3D nearestFace = getClosestFace(pointInWorldToCheck);
 
          closestPointToPack.set(pointInWorldToCheck);
          nearestFace.orthogonalProjection(closestPointToPack);
@@ -280,7 +280,7 @@ public class Box3d extends Shape3d<Box3d>
          {
             if (closestPointToPack.distance(pointInWorldToCheck) == 0.0)
             {
-               Plane3d nearestFace = getClosestFace(closestPointToPack);
+               Plane3D nearestFace = getClosestFace(closestPointToPack);
                nearestFace.getNormal(normalToPack);
             }
             else
@@ -295,16 +295,16 @@ public class Box3d extends Shape3d<Box3d>
       }
    }
 
-   private Plane3d getClosestFace(Point3DReadOnly point)
+   private Plane3D getClosestFace(Point3DReadOnly point)
    {
       ensureFacesAreUpToDate();
 
       double nearestDistance = Double.POSITIVE_INFINITY;
-      Plane3d nearestFace = null;
+      Plane3D nearestFace = null;
 
       for (FaceName faceName : FaceName.values)
       {
-         Plane3d face = faces.get(faceName);
+         Plane3D face = faces.get(faceName);
          double distance = face.distance(point);
          if (distance < nearestDistance)
          {
@@ -409,7 +409,7 @@ public class Box3d extends Shape3d<Box3d>
       {
          for (FaceName faceName : faces.keySet())
          {
-            Plane3d face = faces.get(faceName);
+            Plane3D face = faces.get(faceName);
             
             double xNormal = faceName.getDirection() == Direction.X ? faceName.sign() * 1.0 : 0.0;
             double yNormal = faceName.getDirection() == Direction.Y ? faceName.sign() * 1.0 : 0.0;
@@ -482,7 +482,7 @@ public class Box3d extends Shape3d<Box3d>
 
       ensureFacesAreUpToDate();
 
-      for (Plane3d face : faces.values())
+      for (Plane3D face : faces.values())
       {
          builder.append(face.toString());
       }
@@ -523,11 +523,11 @@ public class Box3d extends Shape3d<Box3d>
    /**
     * @deprecated Makes garbage. Use getFace(Direction, boolean, Plane3d)
     */
-   public Plane3d getFace(FaceName faceName)
+   public Plane3D getFace(FaceName faceName)
    {
       ensureFacesAreUpToDate();
    
-      Plane3d facePlane = new Plane3d();
+      Plane3D facePlane = new Plane3D();
       facePlane.set(faces.get(faceName));
       transformToWorld(facePlane);
       return facePlane;

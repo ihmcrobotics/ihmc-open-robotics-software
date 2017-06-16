@@ -161,7 +161,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 6);
 
       List<HullFace> faces = quickHull.getFaces();
-      Plane3d facePlane = new Plane3d();
+      Plane3D facePlane = new Plane3D();
       Vector3D planeNormal = new Vector3D();
       for (HullFace face : faces)
       {
