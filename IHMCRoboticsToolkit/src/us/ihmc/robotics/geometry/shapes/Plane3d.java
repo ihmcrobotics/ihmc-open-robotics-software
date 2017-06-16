@@ -64,7 +64,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       return pointToReturn;
    }
    
-   public Point3D getPoint()
+   public Point3DReadOnly getPoint()
    {
       return point;
    }
@@ -110,7 +110,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       return normalToReturn;
    }
    
-   public Vector3D getNormal()
+   public Vector3DReadOnly getNormal()
    {
       return normal;
    }
@@ -126,6 +126,12 @@ public class Plane3d implements GeometryObject<Plane3d>
    {
       this.normal.set(plane3d.normal);
       this.point.set(plane3d.point);
+   }
+
+   public void set(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
+   {
+      point.set(pointOnPlane);
+      normal.set(planeNormal);
    }
 
    public void setNormal(Vector3DReadOnly normal)
