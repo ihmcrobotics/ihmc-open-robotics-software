@@ -32,7 +32,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -57,7 +57,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final YoBoolean requestedPlanarRegion = new YoBoolean(prefix + "RequestedPlanarRegion", registry);
    private final YoDouble shorterGoalLength = new YoDouble(prefix + "ShorterGoalLength", registry);
 
-   private final EnumYoVariable<RobotSide> nextSideToSwing;
+   private final YoEnum<RobotSide> nextSideToSwing;
 
    private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
@@ -88,7 +88,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       footstepPlanner = createFootstepPlanner();
 
-      nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
+      nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
       plannerTimer = new YoStopwatch(yoTime);

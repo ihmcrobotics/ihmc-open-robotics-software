@@ -3,13 +3,13 @@ package us.ihmc.quadrupedRobotics;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final EnumYoVariable<QuadrupedPositionControllerRequestedEvent> userTrigger;
-   private final EnumYoVariable<QuadrupedPositionControllerState> positionControllerState;
+   private final YoEnum<QuadrupedPositionControllerRequestedEvent> userTrigger;
+   private final YoEnum<QuadrupedPositionControllerState> positionControllerState;
    private final YoDouble swingDuration;
    private final YoDouble desiredCoMPositionZ;
 
@@ -18,18 +18,18 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (EnumYoVariable<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("userTrigger");
-      positionControllerState = (EnumYoVariable<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
+      userTrigger = (YoEnum<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("userTrigger");
+      positionControllerState = (YoEnum<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
       swingDuration = (YoDouble) scs.getVariable("swingDuration");
       desiredCoMPositionZ = (YoDouble) scs.getVariable("desiredCoMPositionZ");
    }
 
-   public EnumYoVariable<QuadrupedPositionControllerRequestedEvent> getUserTrigger()
+   public YoEnum<QuadrupedPositionControllerRequestedEvent> getUserTrigger()
    {
       return userTrigger;
    }
 
-   public EnumYoVariable<QuadrupedPositionControllerState> getPositionControllerState()
+   public YoEnum<QuadrupedPositionControllerState> getPositionControllerState()
    {
       return positionControllerState;
    }

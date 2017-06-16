@@ -54,7 +54,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private final YoBoolean expo_isWalking;
    private final YoDouble priorWalkingDuration;
    private final LongYoVariable startingStepCount;
-   //private final EnumYoVariable<WalkingState> walkingState;
+   //private final YoEnum<WalkingState> walkingState;
    private final YoDouble distanceTraveled;
    private final YoDouble startDistance;
    private final YoDouble batteryLevel;
@@ -104,7 +104,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          walking_time = new YoDouble("walkingtime", registry);
          expo_isWalking = new YoBoolean("walk", registry);
          startingStepCount = new LongYoVariable("expoStartingStepCount", registry);
-         //walkingState = new EnumYoVariable<WalkingState>("walkingState", registry, WalkingState.class);
+         //walkingState = new YoEnum<WalkingState>("walkingState", registry, WalkingState.class);
          priorWalkingDuration = new YoDouble("startWalkingTime", registry);
          distanceTraveled = new YoDouble("distanceTraveled", registry);
          startDistance = new YoDouble("startDistance", registry);
@@ -133,7 +133,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          walking_time = new YoDouble("expoWalkingTime", parentRegistry);
          expo_isWalking = (YoBoolean) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
          startingStepCount = new LongYoVariable("expoStartingStepCount", parentRegistry);
-         //walkingState = (EnumYoVariable<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         //walkingState = (YoEnum<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          priorWalkingDuration = new YoDouble("expoStartWalkingTime", parentRegistry);
          distanceTraveled = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");
          startDistance = new YoDouble("expoStartDistance", parentRegistry);
@@ -160,7 +160,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            manageWalkingStateChanged((EnumYoVariable<WalkingState>) v);
+            manageWalkingStateChanged((YoEnum<WalkingState>) v);
          }
       }); */
    }   
@@ -293,7 +293,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          internalPriorWalkingDuration = walking_time.getDoubleValue();      
    }
    
-   private void manageWalkingStateChanged(EnumYoVariable<WalkingStateEnum> walkingState)
+   private void manageWalkingStateChanged(YoEnum<WalkingStateEnum> walkingState)
    {
       switch(walkingState.getEnumValue())
       {

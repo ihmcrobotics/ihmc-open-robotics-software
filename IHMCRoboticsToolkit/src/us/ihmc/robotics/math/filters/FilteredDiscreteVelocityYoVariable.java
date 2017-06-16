@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * @author jrebula
@@ -29,7 +29,7 @@ public class FilteredDiscreteVelocityYoVariable extends YoDouble
    private final YoDouble position;
 
    private final YoDouble lastUpdateTime;
-   private final EnumYoVariable<Direction> lastUpdateDirection;
+   private final YoEnum<Direction> lastUpdateDirection;
    private final YoDouble unfilteredVelocity;
 
    private final YoDouble lastPosition;
@@ -47,7 +47,7 @@ public class FilteredDiscreteVelocityYoVariable extends YoDouble
 
       lastPosition = new YoDouble(name + "_lastPosition", registry);
       lastUpdateTime = new YoDouble(name + "_lastUpdateTime", registry);
-      lastUpdateDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+      lastUpdateDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
       unfilteredVelocity = new YoDouble(name + "_unfilteredVelocity", registry);
 
       reset();
@@ -67,7 +67,7 @@ public class FilteredDiscreteVelocityYoVariable extends YoDouble
 
       lastPosition = new YoDouble(name + "_lastPosition", registry);
       lastUpdateTime = new YoDouble(name + "_lastUpdateTime", registry);
-      lastUpdateDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+      lastUpdateDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
       unfilteredVelocity = new YoDouble(name + "_unfilteredVelocity", registry);
 
       reset();
@@ -85,7 +85,7 @@ public class FilteredDiscreteVelocityYoVariable extends YoDouble
 
       lastPosition = new YoDouble(name + "_lastPosition", registry);
       lastUpdateTime = new YoDouble(name + "_lastUpdateTime", registry);
-      lastUpdateDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+      lastUpdateDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
       unfilteredVelocity = new YoDouble(name + "_unfilteredVelocity", registry);
 
       reset();

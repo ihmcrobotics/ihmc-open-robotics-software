@@ -8,7 +8,7 @@ import net.java.games.input.Event;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -18,7 +18,7 @@ public class HexapodGamePadManager implements JoystickEventListener
 {
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
    
-   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode;
+   private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode;
    private final YoDouble desiredLinearVelocityX;
    private final YoDouble desiredLinearVelocityY;
    private final YoDouble desiredLinearVelocityZ;
@@ -46,7 +46,7 @@ public class HexapodGamePadManager implements JoystickEventListener
      currentOrientationPitch = (YoDouble) registry.getVariable("BODYdesiredOrientationPitch");
      currentOrientationRoll = (YoDouble) registry.getVariable("BODYdesiredOrientationRoll");
      desiredAngularVelocityZ = (YoDouble) registry.getVariable("BODYdesiredAngularVelocityZ");
-     controllerCoreMode = (EnumYoVariable<WholeBodyControllerCoreMode>) registry.getVariable("controllerCoreMode");
+     controllerCoreMode = (YoEnum<WholeBodyControllerCoreMode>) registry.getVariable("controllerCoreMode");
      
      
       

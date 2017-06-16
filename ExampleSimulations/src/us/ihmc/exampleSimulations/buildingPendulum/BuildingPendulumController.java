@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.buildingPendulum;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -14,7 +14,7 @@ public class BuildingPendulumController extends SimpleRobotController
    private final YoBoolean atCenter = new YoBoolean("AtCenter", registry);
 
    private RobotSide activeSide;
-   private final EnumYoVariable<RobotSide> yoActiveSide = new EnumYoVariable<>("ActiveSide", registry, RobotSide.class);
+   private final YoEnum<RobotSide> yoActiveSide = new YoEnum<>("ActiveSide", registry, RobotSide.class);
 
    private double pendulumAngle;
    private double pendulumAngleSwitch;

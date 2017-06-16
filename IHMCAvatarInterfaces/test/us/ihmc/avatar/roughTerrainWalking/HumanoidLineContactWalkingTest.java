@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -74,7 +74,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
    private ContactPointController contactPointController;
-   private SideDependentList<EnumYoVariable<ConstraintType>> footStates = new SideDependentList<>();
+   private SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
 
    private YoBoolean doFootExplorationInTransferToStanding;
    private YoDouble transferTime;
@@ -85,7 +85,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>();
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>();
    private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
-   private SideDependentList<EnumYoVariable<ExplorationMethod>> explorationMethods = new SideDependentList<>();
+   private SideDependentList<YoEnum<ExplorationMethod>> explorationMethods = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
@@ -374,7 +374,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       for (RobotSide robotSide : RobotSide.values)
       {
          String variableName = robotSide.getCamelCaseNameForStartOfExpression() + "FootState";
-         EnumYoVariable<ConstraintType> footState = (EnumYoVariable<ConstraintType>) drcSimulationTestHelper.getYoVariable(variableName);
+         YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) drcSimulationTestHelper.getYoVariable(variableName);
          footStates.put(robotSide, footState);
       }
 
@@ -397,7 +397,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
          YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
-         EnumYoVariable<ExplorationMethod> explorationMethod = (EnumYoVariable<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
+         YoEnum<ExplorationMethod> explorationMethod = (YoEnum<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
          explorationMethods.put(robotSide, explorationMethod);
       }
       allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");

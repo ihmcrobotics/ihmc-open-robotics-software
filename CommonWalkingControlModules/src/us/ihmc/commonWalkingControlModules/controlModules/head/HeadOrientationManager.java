@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -39,7 +39,7 @@ public class HeadOrientationManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final GenericStateMachine<HeadControlMode, HeadControlState> stateMachine;
-   private final EnumYoVariable<HeadControlMode> requestedState = new EnumYoVariable<>("headRequestedControlMode", registry, HeadControlMode.class, true);
+   private final YoEnum<HeadControlMode> requestedState = new YoEnum<>("headRequestedControlMode", registry, HeadControlMode.class, true);
 
    private final TaskspaceHeadControlState taskspaceHeadControlState;
    private final JointspaceHeadControlState jointspaceHeadControlState;

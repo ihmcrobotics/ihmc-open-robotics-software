@@ -39,7 +39,7 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -948,12 +948,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       private final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds;
       private final ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints;
 
-      private final EnumYoVariable<HighLevelState> requestedHighLevelState;
+      private final YoEnum<HighLevelState> requestedHighLevelState;
 
 
       public StandStillDoNothingPelvisPoseHistoryCorrectorController()
       {
-         requestedHighLevelState = (EnumYoVariable<HighLevelState>) simulationConstructionSet.getVariable(
+         requestedHighLevelState = (YoEnum<HighLevelState>) simulationConstructionSet.getVariable(
                HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
          requestedHighLevelState.set(HighLevelState.DO_NOTHING_BEHAVIOR);
 

@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,7 +36,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 public class ComponentBasedFootstepDataMessageGenerator implements Updatable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
+   private final YoEnum<RobotSide> nextSwingLeg = YoEnum.create("nextSwingLeg", RobotSide.class, registry);
    private final YoBoolean walk = new YoBoolean("walk", registry);
    private final YoBoolean walkPrevious = new YoBoolean("walkPrevious", registry);
 

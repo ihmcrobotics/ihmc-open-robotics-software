@@ -17,7 +17,7 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -66,7 +66,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, YoDouble> yoMotorDamping = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
    private final EnumMap<StepprJoint, YoDouble> desiredQddFeedForwardGain = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
    private final EnumMap<StepprJoint, YoDouble> desiredJointQ = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
-   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
+   private final YoEnum<WalkingStateEnum> yoWalkingState = new YoEnum<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
 
    private final YoDouble masterMotorDamping = new YoDouble("masterMotorDamping", registry);
 
@@ -85,7 +85,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       TORQUE_CONTROL, POSITION_CONTROL;
    };
 
-   private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
+   private final EnumMap<StepprJoint, YoEnum<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, YoEnum<JointControlMode>>(
          StepprJoint.class);
 
    private WalkingStateEnum currentWalkingState;
@@ -259,7 +259,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    {
       for (StepprJoint joint : StepprJoint.values)
       {
-         EnumYoVariable<JointControlMode> controlMode = new EnumYoVariable<StepprOutputWriter.JointControlMode>(joint.getSdfName()
+         YoEnum<JointControlMode> controlMode = new YoEnum<JointControlMode>(joint.getSdfName()
                + JointControlMode.class.getSimpleName(), registry, JointControlMode.class, false);
 
          controlMode.set(JointControlMode.TORQUE_CONTROL);
@@ -366,7 +366,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
-      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((YoEnum<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
       //((YoBoolean)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
 

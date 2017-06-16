@@ -12,7 +12,7 @@ import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -26,7 +26,7 @@ public class HexapodHighLevelControlManager
 
    private final ControlledBodiesCommand controlledBodiesCommand = new ControlledBodiesCommand();
    private final ControllerCoreCommand controllerCoreCommandList;
-   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
+   private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode = new YoEnum<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final HexapodBodySpatialManager bodySpatialManager;
    private final HexapodMomentumController hexapodMomentumController;
    private final HexapodStepController stepController;

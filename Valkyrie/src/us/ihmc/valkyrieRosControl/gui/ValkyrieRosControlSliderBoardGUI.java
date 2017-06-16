@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl.gui;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.Robot;
@@ -21,7 +21,7 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
    {
       MidiSliderBoard sliderBoard = new MidiSliderBoard(scs);
 
-      EnumYoVariable<?> selectedJoint = (EnumYoVariable<?>) registry.getVariable("ValkyrieRosControlSliderBoard", "selectedJoint");
+      YoEnum<?> selectedJoint = (YoEnum<?>) registry.getVariable("ValkyrieRosControlSliderBoard", "selectedJoint");
       
       YoVariable<?> q_d = registry.getVariable("ValkyrieRosControlSliderBoard", "qDesiredSelected");
       YoVariable<?> qd_d = registry.getVariable("ValkyrieRosControlSliderBoard", "qdDesiredSelected");

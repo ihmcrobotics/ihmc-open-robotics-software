@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -26,7 +26,7 @@ public class WalkControllerSliderBoard
    
    public WalkControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel)
    {
-      final EnumYoVariable<SliderBoardMode> sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
+      final YoEnum<SliderBoardMode> sliderBoardMode = new YoEnum<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       // TODO: FIXME: This is a super rough, temporary fix for 
@@ -143,7 +143,7 @@ public class WalkControllerSliderBoard
    }
 
    private void setupIndividualHandControl(final SliderBoardConfigurationManager sliderBoardConfigurationManager,
-         final EnumYoVariable<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+         final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
       sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length - 1);
       SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardControlledFingerJointsWithLimits();
@@ -170,7 +170,7 @@ public class WalkControllerSliderBoard
    }
 
    private void setupHeadAndHandSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager,
-         final EnumYoVariable<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+         final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
 
       //Make sure the joints you want to control are not being controlled by any other control module.

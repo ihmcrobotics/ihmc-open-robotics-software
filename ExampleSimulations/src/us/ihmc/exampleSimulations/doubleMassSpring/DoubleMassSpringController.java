@@ -2,14 +2,14 @@ package us.ihmc.exampleSimulations.doubleMassSpring;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class DoubleMassSpringController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final EnumYoVariable<ControlMode> controlMode = new EnumYoVariable<ControlMode>("controlMode", registry, ControlMode.class);
+   private final YoEnum<ControlMode> controlMode = new YoEnum<ControlMode>("controlMode", registry, ControlMode.class);
 
    private final YoDouble kSpring = new YoDouble("kSpring", registry);
    private final YoDouble x1Des = new YoDouble("x1Des", registry);

@@ -5,7 +5,7 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.robotController.RobotController;
@@ -61,7 +61,7 @@ public class PeterPlanarWalkerController implements RobotController
    private YoMinimumJerkTrajectory trajectorySwingHip;
    private YoMinimumJerkTrajectory trajectorySwingKnee;
     
-   private EnumYoVariable<RobotSide> swingLeg = new EnumYoVariable<RobotSide>("swingLeg", registry, RobotSide.class);
+   private YoEnum<RobotSide> swingLeg = new YoEnum<RobotSide>("swingLeg", registry, RobotSide.class);
 
    private StateMachine<ControllerState> stateMachine;
 

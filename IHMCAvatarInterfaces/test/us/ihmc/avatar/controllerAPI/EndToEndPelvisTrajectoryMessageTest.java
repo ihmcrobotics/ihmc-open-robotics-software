@@ -49,7 +49,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -425,7 +425,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private void assertCenterOfMassHeightManagerIsInState(SimulationConstructionSet scs, PelvisHeightControlMode mode)
    {
-      EnumYoVariable<PelvisHeightControlMode> centerOfMassHeightManagerState = (EnumYoVariable<PelvisHeightControlMode> ) scs.getVariable("CenterOfMassHeightManager", "CenterOfMassHeightManagerState");
+      YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.getVariable("CenterOfMassHeightManager", "CenterOfMassHeightManagerState");
       assertEquals(mode, centerOfMassHeightManagerState.getEnumValue());
    }
 
@@ -880,7 +880,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String managerName = PelvisOrientationManager.class.getSimpleName();
-      EnumYoVariable<PelvisOrientationControlMode> orientationControlMode = (EnumYoVariable<PelvisOrientationControlMode>) scs.getVariable(managerName, managerName + "State");
+      YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.getVariable(managerName, managerName + "State");
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 

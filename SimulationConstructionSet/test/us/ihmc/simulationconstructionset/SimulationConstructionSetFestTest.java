@@ -15,7 +15,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.tools.thread.ThreadTools;
@@ -43,7 +43,7 @@ public class SimulationConstructionSetFestTest
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       YoVariableRegistry registryOne = new YoVariableRegistry("RegistryOne");
-      EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", registryOne, Axis.class);
+      YoEnum<Axis> enumForTests = new YoEnum<Axis>("enumForTests", registryOne, Axis.class);
       YoVariableRegistry registryTwo = new YoVariableRegistry("RegistryTwo");
       YoBoolean booleanForTests = new YoBoolean("booleanForTests", registryTwo);
       registryOne.addChild(registryTwo);

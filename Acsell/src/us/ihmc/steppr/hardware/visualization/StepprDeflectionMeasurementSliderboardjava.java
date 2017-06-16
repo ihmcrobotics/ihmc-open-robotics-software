@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -21,7 +21,7 @@ import us.ihmc.steppr.hardware.controllers.StepprStandPrepSetpoints;
 public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer implements IndexChangedListener
 {
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprStandPrepSliderBoard");
-   private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
+   private final YoEnum<StepprStandPrepSetpoints> selectedJointPair = new YoEnum<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
 
    private final YoDouble selectedJoint_tau_d = new YoDouble("selectedJoint_tau_d", sliderBoardRegistry);

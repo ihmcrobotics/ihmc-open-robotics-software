@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -25,7 +25,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
 {
 
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("WandererPDSliderBoard");
-   private final EnumYoVariable<WandererJoint> selectedJoint = new EnumYoVariable<>("selectedJoint", sliderBoardRegistry, WandererJoint.class);
+   private final YoEnum<WandererJoint> selectedJoint = new YoEnum<>("selectedJoint", sliderBoardRegistry, WandererJoint.class);
 
    private final YoBoolean selectedJoint_enabled = new YoBoolean("selectedJoint_enabled", sliderBoardRegistry);
    private final YoDouble selectedJoint_q = new YoDouble("selectedJoint_q", sliderBoardRegistry);

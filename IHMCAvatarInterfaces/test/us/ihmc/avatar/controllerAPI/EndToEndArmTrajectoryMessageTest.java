@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
@@ -731,7 +731,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
    {
       String managerName = bodyName + "Manager";
-      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
    }
 
    public static double[] findControllerDesiredPositions(OneDoFJoint[] armJoints, SimulationConstructionSet scs)

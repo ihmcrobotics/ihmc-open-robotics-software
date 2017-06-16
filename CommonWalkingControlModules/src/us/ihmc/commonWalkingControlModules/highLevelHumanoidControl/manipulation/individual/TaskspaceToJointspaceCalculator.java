@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -77,7 +77,7 @@ public class TaskspaceToJointspaceCalculator
 
    private final YoDouble jointAngleRegularizationWeight;
    private final IntegerYoVariable exponentForPNorm;
-   private final EnumYoVariable<SecondaryObjective> currentSecondaryObjective;
+   private final YoEnum<SecondaryObjective> currentSecondaryObjective;
 
    private final YoDouble maximumJointVelocity;
    private final YoDouble maximumJointAcceleration;
@@ -166,7 +166,7 @@ public class TaskspaceToJointspaceCalculator
       exponentForPNorm = new IntegerYoVariable(namePrefix + "ExponentForPNorm", registry);
       exponentForPNorm.set(6);
 
-      currentSecondaryObjective = new EnumYoVariable<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);
+      currentSecondaryObjective = new YoEnum<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);
       currentSecondaryObjective.set(SecondaryObjective.TOWARD_RESTING_CONFIGURATION);
 
       yoPrivilegedJointPositions = new YoDouble[numberOfDoF];

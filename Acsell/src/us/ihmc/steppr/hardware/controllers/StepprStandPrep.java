@@ -9,7 +9,7 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -40,7 +40,7 @@ public class StepprStandPrep implements StepprController
    private final EnumDoubleMap<StepprJoint> initialPositions = new EnumDoubleMap<>(StepprJoint.class);
 
    private final YoBoolean startStandprep = new YoBoolean("startStandprep", registry);
-   private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
+   private final YoEnum<StandPrepState> standPrepState = new YoEnum<>("standPrepState", registry, StandPrepState.class);
 
    private final YoDouble crouch = new YoDouble("crouch", registry);
 

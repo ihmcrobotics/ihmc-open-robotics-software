@@ -5,7 +5,7 @@ import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class YoQuadrupedTimedStep extends QuadrupedTimedStep
 {
-   private final EnumYoVariable<RobotQuadrant> robotQuadrant;
+   private final YoEnum<RobotQuadrant> robotQuadrant;
    private final YoTimeInterval timeInterval;
    private final YoDouble groundClearance;
    private final YoFramePoint goalPosition;
@@ -21,7 +21,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    public YoQuadrupedTimedStep(String prefix, YoVariableRegistry registry)
    {
       super();
-      this.robotQuadrant = new EnumYoVariable<>(prefix + "RobotQuadrant", registry, RobotQuadrant.class);
+      this.robotQuadrant = new YoEnum<>(prefix + "RobotQuadrant", registry, RobotQuadrant.class);
       this.groundClearance = new YoDouble(prefix + "GroundClearance", registry);
       this.goalPosition = new YoFramePoint(prefix + "GoalPosition", ReferenceFrame.getWorldFrame(), registry);
       this.timeInterval = new YoTimeInterval(prefix + "TimeInterval", registry);

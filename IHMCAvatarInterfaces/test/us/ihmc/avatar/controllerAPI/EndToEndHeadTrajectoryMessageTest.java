@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -153,7 +153,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    {
       String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
       String headControlStateName = "headControlState";
-      return ((EnumYoVariable<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
+      return ((YoEnum<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 
    public static double findControllerSwitchTime(SimulationConstructionSet scs)

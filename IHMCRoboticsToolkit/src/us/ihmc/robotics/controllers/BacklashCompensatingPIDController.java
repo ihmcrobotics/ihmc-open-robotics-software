@@ -4,7 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BacklashCompensatingPIDController extends PIDController
 {
@@ -14,7 +14,7 @@ public class BacklashCompensatingPIDController extends PIDController
    private final YoDouble lowGainReduction, gainReduction;
    private final YoDouble rampUpTime, rampDownTime, holdLowGainsTime;
 
-   private final EnumYoVariable<GainChangerState> gainChangerState;
+   private final YoEnum<GainChangerState> gainChangerState;
    private final YoDouble switchTime;
    private final YoBoolean previousTorqueWasPositive;
    
@@ -29,7 +29,7 @@ public class BacklashCompensatingPIDController extends PIDController
       gainReduction = new YoDouble("gainReduction_" + suffix, registry);
       lowGainReduction = new YoDouble("lowGainReduction_" + suffix, registry);
 
-      gainChangerState = new EnumYoVariable<GainChangerState>("gainChangerState_" + suffix, registry, GainChangerState.class);
+      gainChangerState = new YoEnum<GainChangerState>("gainChangerState_" + suffix, registry, GainChangerState.class);
       
       rampDownTime = new YoDouble("rampDownTime_" + suffix, registry);
       rampUpTime = new YoDouble("rampUpTime_" + suffix, registry);

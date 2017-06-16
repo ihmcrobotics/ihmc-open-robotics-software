@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -36,9 +36,9 @@ public class YoEntryBoxTest
    private class SimpleController implements RobotControllerWithAttachRobot
    {
       private YoVariableRegistry registry;
-      private EnumYoVariable<BadGreekEnum> badGreekVariable;
-      private EnumYoVariable<LargeEnum> largeEnumVariable;
-      private EnumYoVariable<SmallEnum> smallEnumVariable;
+      private YoEnum<BadGreekEnum> badGreekVariable;
+      private YoEnum<LargeEnum> largeEnumVariable;
+      private YoEnum<SmallEnum> smallEnumVariable;
       private YoDouble numberVariable;
       private YoDouble time;
       private final String name = "simpleController";
@@ -51,13 +51,13 @@ public class YoEntryBoxTest
       public void attachRobot(Robot robot)
       {
          registry = new YoVariableRegistry("controllerRegistry");
-         badGreekVariable = new EnumYoVariable<BadGreekEnum>("badGreekVariable", registry, BadGreekEnum.class);
+         badGreekVariable = new YoEnum<BadGreekEnum>("badGreekVariable", registry, BadGreekEnum.class);
          badGreekVariable.set(BadGreekEnum.ALPHA);
-         largeEnumVariable = new EnumYoVariable<LargeEnum>("largeEnumVariable", registry, LargeEnum.class);
+         largeEnumVariable = new YoEnum<LargeEnum>("largeEnumVariable", registry, LargeEnum.class);
          largeEnumVariable
             .set(LargeEnum
                .THE_FOLLOWING_IS_TAKEN_FROM_RAIBERT_1986_ONE_PART_OF_THE_CONTROL_SYSTEM_EXCITED_THE_CYCLIC_MOTION_THAT_UNDERLIES_RUNNING_WHILE_REGULATING_THE_HEIGHT_TO_WHICH_THE_MACHINE_HOPPED);
-         smallEnumVariable = new EnumYoVariable<SmallEnum>("smallEnumVariable", registry, SmallEnum.class);
+         smallEnumVariable = new YoEnum<SmallEnum>("smallEnumVariable", registry, SmallEnum.class);
          smallEnumVariable.set(SmallEnum.IF);
          numberVariable = new YoDouble("numberVariable", registry);
          numberVariable.set(42.0);
@@ -113,7 +113,7 @@ public class YoEntryBoxTest
          return time;
       }
 
-      public EnumYoVariable<BadGreekEnum> getBadGreekVariable()
+      public YoEnum<BadGreekEnum> getBadGreekVariable()
       {
          return badGreekVariable;
       }
@@ -161,7 +161,7 @@ public class YoEntryBoxTest
       scs.setupEntryBox("badGreekVariable");
       ArrayList<YoEntryBox> entryBoxes = scsGUI.getEntryBoxArrayPanel().getEntryBoxesOnThisPanel();
 
-      EnumYoVariable<BadGreekEnum> badGreekVariable = controller.getBadGreekVariable();
+      YoEnum<BadGreekEnum> badGreekVariable = controller.getBadGreekVariable();
       YoDouble numberVariable = controller.getNumberVariable();
       YoDouble timeVariable = controller.getTimeVariable();
       badGreekVariable.set(BadGreekEnum.BETA);

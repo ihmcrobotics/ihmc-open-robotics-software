@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
 
 /**
@@ -31,7 +31,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 	private final YoDouble position;
 
 	private final YoDouble lastPosChangeTimeInterval;
-	private final EnumYoVariable<Direction> lastPosChangeDirection;
+	private final YoEnum<Direction> lastPosChangeDirection;
 	
 	private final TimestampedVelocityYoVariable finiteDifferenceVelocity;
 	private final YoDouble unfilteredVelocity;
@@ -63,7 +63,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
 		
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);
@@ -97,7 +97,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
 
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);
@@ -129,7 +129,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = EnumYoVariable.create(name + "_lastUpdateDirection", Direction.class, registry);
+		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
 
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);

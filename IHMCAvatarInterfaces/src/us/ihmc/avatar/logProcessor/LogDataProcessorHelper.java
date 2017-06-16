@@ -20,7 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -48,7 +48,7 @@ public class LogDataProcessorHelper
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
    private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
-   private final SideDependentList<EnumYoVariable<?>> footStates = new SideDependentList<>();
+   private final SideDependentList<YoEnum<?>> footStates = new SideDependentList<>();
 
    private final double controllerDT;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -106,7 +106,7 @@ public class LogDataProcessorHelper
          String footStateNameSpace = sidePrefix + FootControlModule.class.getSimpleName();
          String footStateName = namePrefix + "State";
          @SuppressWarnings("unchecked")
-         EnumYoVariable<?> footState = (EnumYoVariable<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
+         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
          footStates.put(robotSide, footState);
       }
 

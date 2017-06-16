@@ -8,7 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class JoystickToYoVariableMapper
@@ -64,7 +64,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         EnumYoVariable<T> yoVariable = (EnumYoVariable<T>) yoVariableHolder.getVariable(variableName);
+         YoEnum<T> yoVariable = (YoEnum<T>) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             EnumYoVariableJoystickEventListener<T> joystickEventListener = new EnumYoVariableJoystickEventListener<T>(yoVariable, component, enumToSwitchTo);
