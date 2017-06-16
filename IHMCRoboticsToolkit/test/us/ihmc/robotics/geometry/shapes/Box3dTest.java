@@ -75,7 +75,7 @@ public class Box3dTest
       assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setFromTransform(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      box1.setPose(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -91,7 +91,7 @@ public class Box3dTest
       assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setFromTransform(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      box1.setPose(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -110,7 +110,7 @@ public class Box3dTest
       Box3d box1 = new Box3d(transform, length, width, height);
       Box3d box2 = new Box3d(transform, new double[] {length, width, height});
       Box3d box3 = new Box3d(length, width, height);
-      box3.setFromTransform(transform);
+      box3.setPose(transform);
 
       assertBoxEquals(box1, box2, 0.0);
       assertBoxEquals(box1, box3, 0.0);
@@ -123,7 +123,7 @@ public class Box3dTest
       Random random = new Random(351235L);
       Box3d box = new Box3d();
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      box.setFromTransform(transform);
+      box.setPose(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
       box.getPose(transformBack);
@@ -137,7 +137,7 @@ public class Box3dTest
       RotationMatrix matrixBack = new RotationMatrix();
       Point3D pointBack = new Point3D();
 
-      box.getRotation(matrixBack);
+      box.getOrientation(matrixBack);
       assertTrue(matrix.epsilonEquals(matrixBack, Epsilons.ONE_TRILLIONTH));
       assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
@@ -407,13 +407,13 @@ public class Box3dTest
       double height = random.nextDouble();
 
       Box3d box = new Box3d(length, width, height);
-      box.setTranslation(new Point3D(center));
+      box.setPosition(new Point3D(center));
 
       for (int i = 0; i < nTests; i++)
       {
          RotationMatrix rotation = new RotationMatrix();
          rotation.set(RandomGeometry.nextAxisAngle(random));
-         box.setRotation(rotation);
+         box.setOrientation(rotation);
          assertEquals(length, box.getLength(), Epsilons.ONE_TRILLIONTH);
          assertEquals(width, box.getWidth(), Epsilons.ONE_TRILLIONTH);
          assertEquals(height, box.getHeight(), Epsilons.ONE_TRILLIONTH);
@@ -596,7 +596,7 @@ public class Box3dTest
          box.setYawPitchRoll(yaw, pitch, roll);
          
          RotationMatrix rotation = new RotationMatrix();
-         box.getRotation(rotation);
+         box.getOrientation(rotation);
          
          double epsilon = 1e-14;
          assertEquals(yaw, rotation.getYaw(), epsilon);

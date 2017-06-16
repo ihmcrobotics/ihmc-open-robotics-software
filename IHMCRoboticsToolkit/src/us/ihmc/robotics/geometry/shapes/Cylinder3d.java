@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -127,18 +126,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public boolean epsilonEquals(Cylinder3d other, double epsilon)
    {
       return MathTools.epsilonEquals(height, other.height, epsilon) && MathTools.epsilonEquals(radius, other.radius, epsilon);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      applyTransformToPose(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      applyInverseTransformToPose(transform);
    }
 
    @Override

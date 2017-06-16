@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -137,18 +136,6 @@ public class Torus3d extends Shape3d<Torus3d>
    public boolean containsNaN()
    {
       return super.containsNaN() || Double.isNaN(radius) || Double.isNaN(tubeRadius);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      applyTransformToPose(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      applyInverseTransformToPose(transform);
    }
 
    @Override
