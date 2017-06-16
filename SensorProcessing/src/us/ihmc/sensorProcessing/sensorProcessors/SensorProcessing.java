@@ -16,7 +16,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -208,7 +208,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final List<String> allIMUSensorNames = new ArrayList<>();
    private final List<String> allForceSensorNames = new ArrayList<>();
 
-   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> jointEnabledIndicators = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoBoolean> jointEnabledIndicators = new LinkedHashMap<>();
 
    private final double updateDT;
 
@@ -269,7 +269,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          outputJointTaus.put(oneDoFJoint, rawJointTau);
          processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
-         BooleanYoVariable jointEnabledIndicator = new BooleanYoVariable("joint_enabled_" + jointName, registry);
+         YoBoolean jointEnabledIndicator = new YoBoolean("joint_enabled_" + jointName, registry);
          jointEnabledIndicator.set(true);
          jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
       }

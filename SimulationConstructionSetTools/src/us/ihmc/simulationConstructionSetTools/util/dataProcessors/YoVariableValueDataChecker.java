@@ -2,17 +2,17 @@ package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableValueDataChecker implements DataProcessingFunction
 {
-   private BooleanYoVariable maximumValueExceeded;
-   private BooleanYoVariable minimumValueExceeded;
-   private BooleanYoVariable maximumDerivativeExceeded;
-   private BooleanYoVariable maximumSecondDerivativeExceeded;
-   private BooleanYoVariable derivativeCompError;
+   private YoBoolean maximumValueExceeded;
+   private YoBoolean minimumValueExceeded;
+   private YoBoolean maximumDerivativeExceeded;
+   private YoBoolean maximumSecondDerivativeExceeded;
+   private YoBoolean derivativeCompError;
 
    private DoubleYoVariable maximumValue;
    private DoubleYoVariable minimumValue;
@@ -71,13 +71,13 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
 
       this.actualDerivativeofVariableToCheck = actualDerivativeOfVariableToCheck;
 
-      maximumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxValueExceeded", registry);
-      minimumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MinValueExceeded", registry);
-      maximumDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxDervExceeded", registry);
-      maximumSecondDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxSecDervExceeded", registry);
+      maximumValueExceeded = new YoBoolean(variableToCheck.getName() + "_MaxValueExceeded", registry);
+      minimumValueExceeded = new YoBoolean(variableToCheck.getName() + "_MinValueExceeded", registry);
+      maximumDerivativeExceeded = new YoBoolean(variableToCheck.getName() + "_MaxDervExceeded", registry);
+      maximumSecondDerivativeExceeded = new YoBoolean(variableToCheck.getName() + "_MaxSecDervExceeded", registry);
 
       if (actualDerivativeofVariableToCheck != null)
-         derivativeCompError = new BooleanYoVariable(variableToCheck.getName() + "_DerivativeCompError", registry);
+         derivativeCompError = new YoBoolean(variableToCheck.getName() + "_DerivativeCompError", registry);
 
       calculatedDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcDerv", registry);
       calculatedSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcSecDerv", registry);

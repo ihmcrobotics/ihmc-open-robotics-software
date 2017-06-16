@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -61,7 +61,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    RobotSide side = RobotSide.RIGHT;
 
-   public WalkThroughDoorBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public WalkThroughDoorBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {

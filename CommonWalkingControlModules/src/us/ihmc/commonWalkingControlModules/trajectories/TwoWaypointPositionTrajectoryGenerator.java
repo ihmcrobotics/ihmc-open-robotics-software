@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -39,7 +39,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final int numberOfVisualizationMarkers = 50;
-   private final BooleanYoVariable visualize;
+   private final YoBoolean visualize;
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
@@ -54,7 +54,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
 
-   private final BooleanYoVariable setInitialSwingVelocityToZero;
+   private final YoBoolean setInitialSwingVelocityToZero;
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -99,7 +99,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          yoGraphicsListRegistry = null;
       }
 
-      setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
+      setInitialSwingVelocityToZero = new YoBoolean(namePrefix + "SetInitialSwingVelocityToZero", registry);
       setInitialSwingVelocityToZero.set(false);
 
       if (visualize)
@@ -149,7 +149,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame, 2, registry,
             namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
 
-      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
+      this.visualize = new YoBoolean(namePrefix + "Visualize", registry);
       this.visualize.set(visualize);
       this.maxSwingHeightFromStanceFoot = maxSwingHeightFromStanceFoot;
    }

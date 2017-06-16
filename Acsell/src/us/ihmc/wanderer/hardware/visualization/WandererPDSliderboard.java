@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.IndexChangedListener;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -27,7 +27,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("WandererPDSliderBoard");
    private final EnumYoVariable<WandererJoint> selectedJoint = new EnumYoVariable<>("selectedJoint", sliderBoardRegistry, WandererJoint.class);
 
-   private final BooleanYoVariable selectedJoint_enabled = new BooleanYoVariable("selectedJoint_enabled", sliderBoardRegistry);
+   private final YoBoolean selectedJoint_enabled = new YoBoolean("selectedJoint_enabled", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_q = new DoubleYoVariable("selectedJoint_q", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_qd = new DoubleYoVariable("selectedJoint_qd", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_tau = new DoubleYoVariable("selectedJoint_tau", sliderBoardRegistry);
@@ -102,7 +102,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
 
    private class JointVariables
    {
-      private final BooleanYoVariable enabled;
+      private final YoBoolean enabled;
 
       private final DoubleYoVariable q;
       private final DoubleYoVariable qd;
@@ -122,7 +122,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
       {
          final String prefix = joint.getSdfName();
          final String namespace = "WandererCommand." + prefix;
-         enabled = new BooleanYoVariable(joint.getSdfName() + "_enabled", sliderBoardRegistry);
+         enabled = new YoBoolean(joint.getSdfName() + "_enabled", sliderBoardRegistry);
          enabled.addVariableChangedListener(new VariableChangedListener()
          {
 
@@ -157,7 +157,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
                      break;
                   }
 
-                  BooleanYoVariable actEnabled = (BooleanYoVariable) variableHolder.getVariable(namespace, variable);
+                  YoBoolean actEnabled = (YoBoolean) variableHolder.getVariable(namespace, variable);
                   actEnabled.set(enabled.getBooleanValue());
                }
             }

@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -22,7 +22,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable userDoFootPose = new BooleanYoVariable("userDoFootPose", registry);
+   private final YoBoolean userDoFootPose = new YoBoolean("userDoFootPose", registry);
    private final DoubleYoVariable userDesiredFootPoseTrajectoryTime = new DoubleYoVariable("userDesiredFootPoseTrajectoryTime", registry);
 
    private final EnumYoVariable<RobotSide> userFootPoseSide = new EnumYoVariable<RobotSide>("userFootPoseSide", registry, RobotSide.class);

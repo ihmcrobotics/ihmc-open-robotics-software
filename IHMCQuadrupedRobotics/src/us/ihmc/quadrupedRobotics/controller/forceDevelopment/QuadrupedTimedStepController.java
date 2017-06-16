@@ -16,6 +16,7 @@ import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
@@ -26,7 +27,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -325,14 +325,14 @@ public class QuadrupedTimedStepController
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
       private final FramePoint goalPosition;
-      private final GlitchFilteredBooleanYoVariable touchdownTrigger;
+      private final GlitchFilteredYoBoolean touchdownTrigger;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
          this.goalPosition = new FramePoint();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
-         this.touchdownTrigger = new GlitchFilteredBooleanYoVariable(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
+         this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                touchdownTriggerWindowParameter.get());
       }
 

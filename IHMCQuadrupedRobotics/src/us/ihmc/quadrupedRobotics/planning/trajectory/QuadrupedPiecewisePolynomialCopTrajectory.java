@@ -8,7 +8,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -44,7 +44,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable trajectoryInitialized;
+   private final YoBoolean trajectoryInitialized;
    private final TimeInterval trajectoryTimeInterval;
    private final FramePoint copPositionAtCurrentTime;
    private final YoFramePoint yoCopPositionAtCurrentTime;
@@ -60,7 +60,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    public QuadrupedPiecewisePolynomialCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoVariableRegistry parentRegistry)
    {
       int maximumNumberOfTrajectorySegments = 3 * maximumNumberOfContactPhases;
-      trajectoryInitialized = new BooleanYoVariable("copTrajectoryInitialized", registry);
+      trajectoryInitialized = new YoBoolean("copTrajectoryInitialized", registry);
       trajectoryTimeInterval = new TimeInterval();
       copPositionAtCurrentTime = new FramePoint();
       yoCopPositionAtCurrentTime = new YoFramePoint("copPositionAtCurrentTime", ReferenceFrame.getWorldFrame(), registry);

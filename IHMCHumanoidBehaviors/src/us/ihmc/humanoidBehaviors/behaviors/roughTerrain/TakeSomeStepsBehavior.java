@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -44,7 +44,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final EnumYoVariable<RobotSide> nextSideToSwing;
    private final EnumYoVariable<RobotSide> currentlySwingingFoot;
 
-   private final BooleanYoVariable doneTakingSteps;
+   private final YoBoolean doneTakingSteps;
 
    private final YoFramePose footstepPlannerInitialStepPose;
    private final YoFramePose footstepPlannerGoalPose;
@@ -68,7 +68,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
       nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
-      doneTakingSteps = new BooleanYoVariable(prefix + "DoneTakingSteps", registry);
+      doneTakingSteps = new YoBoolean(prefix + "DoneTakingSteps", registry);
 
       currentlySwingingFoot = new EnumYoVariable<>("currentlySwingingFoot", registry, RobotSide.class, true);
 

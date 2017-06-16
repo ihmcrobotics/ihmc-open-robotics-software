@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -58,7 +58,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(behaviorCommunicationBridge);

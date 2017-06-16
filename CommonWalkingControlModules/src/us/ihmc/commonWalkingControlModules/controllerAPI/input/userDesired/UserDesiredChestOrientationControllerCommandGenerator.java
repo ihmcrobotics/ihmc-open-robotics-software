@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -16,9 +16,9 @@ public class UserDesiredChestOrientationControllerCommandGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable userDesiredChestGoToHomeOrientation = new BooleanYoVariable("userDesiredChestGoToHomeOrientation", registry);
+   private final YoBoolean userDesiredChestGoToHomeOrientation = new YoBoolean("userDesiredChestGoToHomeOrientation", registry);
    private final DoubleYoVariable userDesiredChestTrajectoryTime = new DoubleYoVariable("userDesiredChestTrajectoryTime", registry);
-   private final BooleanYoVariable userDoChestOrientation = new BooleanYoVariable("userDoChestOrientation", registry);
+   private final YoBoolean userDoChestOrientation = new YoBoolean("userDoChestOrientation", registry);
    private final YoFrameOrientation userDesiredChestOrientation;
 
    private final FrameOrientation frameOrientation = new FrameOrientation();

@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
@@ -89,9 +89,9 @@ public class HarmonographRobot extends Robot
 
    
    private final DoubleYoVariable kpArmWeld, kdArmWeld, kpPenOnDesk;
-   private final BooleanYoVariable penIsAboveDesk;
+   private final YoBoolean penIsAboveDesk;
    private final DoubleYoVariable penToDeskDistance;
-   private final BooleanYoVariable clearPoints;
+   private final YoBoolean clearPoints;
 
    private final DoubleYoVariable rotationalKineticEnergy, translationalKineticEnergy, gravitationalPotentialEnergy, totalEnergy;
    
@@ -109,10 +109,10 @@ public class HarmonographRobot extends Robot
       kdArmWeld = new DoubleYoVariable("kdArmWeld", registry);
       kpPenOnDesk = new DoubleYoVariable("kpPenOnDesk", registry);
       
-      penIsAboveDesk = new BooleanYoVariable("penIsAboveDesk", registry);
+      penIsAboveDesk = new YoBoolean("penIsAboveDesk", registry);
       penToDeskDistance = new DoubleYoVariable("penToDeskDistance", registry);
       
-      clearPoints = new BooleanYoVariable("clearPoints", registry);
+      clearPoints = new YoBoolean("clearPoints", registry);
 
       rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
       translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);

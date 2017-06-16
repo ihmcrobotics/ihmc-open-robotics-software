@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -58,7 +58,7 @@ public class KneeControlModule
    private final DoubleYoVariable straighteningSpeed;
    private final DoubleYoVariable collapsingDuration;
 
-   private final BooleanYoVariable activelyControl;
+   private final YoBoolean activelyControl;
 
    private final YoPDGains jointspaceGains;
    private final DoubleYoVariable jointspaceWeight;
@@ -70,7 +70,7 @@ public class KneeControlModule
       String namePrefix = sidePrefix + "Knee";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
 
-      activelyControl = new BooleanYoVariable(namePrefix + "ActivelyControl", registry);
+      activelyControl = new YoBoolean(namePrefix + "ActivelyControl", registry);
       activelyControl.set(false);
 
       jointspaceWeight = new DoubleYoVariable(namePrefix + "JointspaceWeight", registry);

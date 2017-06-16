@@ -6,7 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -26,10 +26,10 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isStanding = new BooleanYoVariable("pelvisIsStanding", registry);
-   private final BooleanYoVariable isInTransfer = new BooleanYoVariable("pelvisInInTransfer", registry);
+   private final YoBoolean isStanding = new YoBoolean("pelvisIsStanding", registry);
+   private final YoBoolean isInTransfer = new YoBoolean("pelvisInInTransfer", registry);
 
-   private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
+   private final YoBoolean addPelvisOffsetsBasedOnStep = new YoBoolean("addPelvisOffsetsBasedOnStep", registry);
 
    private final DoubleYoVariable previousSwingDuration = new DoubleYoVariable("pelvisPreviousSwingDuration", registry);
    private final DoubleYoVariable transferDuration = new DoubleYoVariable("pelvisTransferDuration", registry);

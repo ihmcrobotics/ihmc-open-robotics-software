@@ -25,12 +25,10 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
-
 
 /**
  * Adapted from http://code.google.com/p/efficient-java-matrix-library/wiki/KalmanFilterExamples
@@ -83,7 +81,7 @@ public class YoKalmanFilter implements KalmanFilter
    private final IntegerYoVariable nInputs;
    private final IntegerYoVariable nMeasurements;
 
-   private final BooleanYoVariable updateCovarianceAndGain;
+   private final YoBoolean updateCovarianceAndGain;
 
    private boolean doChecks = false;
 
@@ -105,7 +103,7 @@ public class YoKalmanFilter implements KalmanFilter
       // applications S should not be modified.
 
 
-      updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain",
+      updateCovarianceAndGain = new YoBoolean(name + "UpdateCovarianceAndGain",
               "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
       updateCovarianceAndGain.set(true);
 

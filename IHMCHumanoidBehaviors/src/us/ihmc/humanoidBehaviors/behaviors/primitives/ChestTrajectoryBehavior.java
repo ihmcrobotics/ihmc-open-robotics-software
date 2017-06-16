@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class ChestTrajectoryBehavior extends AbstractBehavior
@@ -16,11 +16,11 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    
    private ChestTrajectoryMessage outgoingChestTrajectoryMessage;
 
-   private final BooleanYoVariable hasPacketBeenSent;
+   private final YoBoolean hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
-   private final BooleanYoVariable trajectoryTimeHasElapsed;
+   private final YoBoolean trajectoryTimeHasElapsed;
 
    public ChestTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -28,12 +28,12 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeHasElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
+      trajectoryTimeHasElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
    }
 
    public void setInput(ChestTrajectoryMessage chestOrientationPacket)

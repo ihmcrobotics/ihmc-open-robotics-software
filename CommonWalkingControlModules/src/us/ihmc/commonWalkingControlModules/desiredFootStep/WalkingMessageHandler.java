@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -51,7 +51,7 @@ public class WalkingMessageHandler
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final List<FootstepTiming> upcomingFootstepTimings = new ArrayList<>();
 
-   private final BooleanYoVariable hasNewFootstepAdjustment = new BooleanYoVariable("hasNewFootstepAdjustement", registry);
+   private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
@@ -64,13 +64,13 @@ public class WalkingMessageHandler
 
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
-   private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
+   private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
    private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
    private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
    private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
    private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
 
-   private final BooleanYoVariable isWalking = new BooleanYoVariable("isWalking", registry);
+   private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")

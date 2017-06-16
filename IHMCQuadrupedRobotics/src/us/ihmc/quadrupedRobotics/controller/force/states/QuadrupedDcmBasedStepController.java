@@ -18,7 +18,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajecto
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -114,9 +114,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
-   private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
-   private final BooleanYoVariable onLiftOffTriggered = new BooleanYoVariable("onLiftOffTriggered", registry);
-   private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
+   private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
+   private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
+   private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream)

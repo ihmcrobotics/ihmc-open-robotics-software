@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -103,7 +103,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setForwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -138,7 +138,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setBackwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -178,7 +178,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       // enable push recovery
       enable.set(true);

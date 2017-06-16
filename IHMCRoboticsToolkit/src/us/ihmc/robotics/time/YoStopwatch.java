@@ -1,7 +1,7 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 
@@ -12,7 +12,7 @@ public class YoStopwatch
    private DoubleYoVariable yoLapStart;
    private LongYoVariable yoLapCount;
    private DoubleYoVariable yoRecordedLapTotal;
-   private BooleanYoVariable yoSuspended;
+   private YoBoolean yoSuspended;
    private DoubleYoVariable yoSuspendStart;
    private DoubleYoVariable yoResumedSuspensionTotal;
 
@@ -30,7 +30,7 @@ public class YoStopwatch
       yoLapStart = new DoubleYoVariable(name + "LapStart", registry);
       yoLapCount = new LongYoVariable(name + "LapCount", registry);
       yoRecordedLapTotal = new DoubleYoVariable(name + "RecordedLapTotal", registry);
-      yoSuspended = new BooleanYoVariable(name + "Suspended", registry);
+      yoSuspended = new YoBoolean(name + "Suspended", registry);
       yoSuspendStart = new DoubleYoVariable(name + "SuspendStart", registry);
       yoResumedSuspensionTotal = new DoubleYoVariable(name + "ResumedSuspensionTotal", registry);
       yoLapStart.setToNaN();

@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -79,10 +79,10 @@ public class TaskspaceHandControlState extends HandControlState
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
-   private final BooleanYoVariable abortTaskspaceControlState;
+   private final YoBoolean abortTaskspaceControlState;
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final YoBoolean isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
@@ -122,11 +122,11 @@ public class TaskspaceHandControlState extends HandControlState
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
-      abortTaskspaceControlState = new BooleanYoVariable(namePrefix + "AbortTaskspaceControlState", registry);
+      abortTaskspaceControlState = new YoBoolean(namePrefix + "AbortTaskspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);

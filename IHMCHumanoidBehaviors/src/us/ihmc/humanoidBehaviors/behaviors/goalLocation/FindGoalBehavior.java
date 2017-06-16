@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -30,7 +30,7 @@ public class FindGoalBehavior extends AbstractBehavior
 
    private final YoStopwatch headTrajectorySentTimer;
 
-   private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundGoal", registry);
+   private final YoBoolean foundFiducial = new YoBoolean(prefix + "FoundGoal", registry);
    private final IntegerYoVariable behaviorEnteredCount = new IntegerYoVariable(prefix + "BehaviorEnteredCount", registry);
    private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
    private final DoubleYoVariable headPitchToCenterFucdicial = new DoubleYoVariable(prefix + "HeadPitchToCenterFucdicial", registry);

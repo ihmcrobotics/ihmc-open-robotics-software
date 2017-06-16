@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -71,32 +71,32 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final EnumYoVariable<SliderSpace> sliderSpace = new EnumYoVariable<SliderSpace>("sliderSpace", "", registry, SliderSpace.class, false);
    private final EnumYoVariable<SliderBodyPart> sliderBodyPart = new EnumYoVariable<SliderBodyPart>("sliderBodyPart", "", registry, SliderBodyPart.class, false);
 
-   private final BooleanYoVariable isCaptureSnapshotRequested = new BooleanYoVariable("isCaptureSnapshotRequested", dontRecordRegistry);
-   private final BooleanYoVariable isSaveSequenceRequested = new BooleanYoVariable("isSaveSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isLoadSequenceRequested = new BooleanYoVariable("isLoadSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isClearSequenceRequested = new BooleanYoVariable("isClearSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isLoadFrameByFrameSequenceRequested = new BooleanYoVariable("isLoadFrameByFrameSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isPlayPoseFromFrameByFrameSequenceRequested = new BooleanYoVariable("isPlayPoseFromFrameByFrameSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isSymmetricModeRequested = new BooleanYoVariable("isSymmetricModeRequested", dontRecordRegistry);
-   private final BooleanYoVariable isResetToBasePoseRequested = new BooleanYoVariable("isResetToBasePoseRequested", dontRecordRegistry);
-   private final BooleanYoVariable isLoadLastSequenceRequested = new BooleanYoVariable("isLoadLastSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isCaptureSnapshotRequested = new YoBoolean("isCaptureSnapshotRequested", dontRecordRegistry);
+   private final YoBoolean isSaveSequenceRequested = new YoBoolean("isSaveSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isLoadSequenceRequested = new YoBoolean("isLoadSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isClearSequenceRequested = new YoBoolean("isClearSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isLoadFrameByFrameSequenceRequested = new YoBoolean("isLoadFrameByFrameSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isPlayPoseFromFrameByFrameSequenceRequested = new YoBoolean("isPlayPoseFromFrameByFrameSequenceRequested", dontRecordRegistry);
+   private final YoBoolean isSymmetricModeRequested = new YoBoolean("isSymmetricModeRequested", dontRecordRegistry);
+   private final YoBoolean isResetToBasePoseRequested = new YoBoolean("isResetToBasePoseRequested", dontRecordRegistry);
+   private final YoBoolean isLoadLastSequenceRequested = new YoBoolean("isLoadLastSequenceRequested", dontRecordRegistry);
 
-   private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", dontRecordRegistry);
-   private final BooleanYoVariable isChestControlRequested = new BooleanYoVariable("isChestControlRequested", dontRecordRegistry);
+   private final YoBoolean isPelvisControlRequested = new YoBoolean("isPelvisControlRequested", dontRecordRegistry);
+   private final YoBoolean isChestControlRequested = new YoBoolean("isChestControlRequested", dontRecordRegistry);
 
-   private final BooleanYoVariable isLeftLegControlRequested = new BooleanYoVariable("isLeftLegControlRequested", dontRecordRegistry);
-   private final BooleanYoVariable isRightLegControlRequested = new BooleanYoVariable("isRightLegControlRequested", dontRecordRegistry);
-   private final BooleanYoVariable isLeftArmControlRequested = new BooleanYoVariable("isLeftArmControlRequested", dontRecordRegistry);
-   private final BooleanYoVariable isRightArmControlRequested = new BooleanYoVariable("isRightArmControlRequested", dontRecordRegistry);
+   private final YoBoolean isLeftLegControlRequested = new YoBoolean("isLeftLegControlRequested", dontRecordRegistry);
+   private final YoBoolean isRightLegControlRequested = new YoBoolean("isRightLegControlRequested", dontRecordRegistry);
+   private final YoBoolean isLeftArmControlRequested = new YoBoolean("isLeftArmControlRequested", dontRecordRegistry);
+   private final YoBoolean isRightArmControlRequested = new YoBoolean("isRightArmControlRequested", dontRecordRegistry);
 
-   private final BooleanYoVariable isSupportBaseControlRequested = new BooleanYoVariable("isSupportBaseControlRequested", dontRecordRegistry);
-   private final BooleanYoVariable isSupportBaseToggleRequested = new BooleanYoVariable("isSupportBaseToggleRequested", dontRecordRegistry);
+   private final YoBoolean isSupportBaseControlRequested = new YoBoolean("isSupportBaseControlRequested", dontRecordRegistry);
+   private final YoBoolean isSupportBaseToggleRequested = new YoBoolean("isSupportBaseToggleRequested", dontRecordRegistry);
 
-   private final BooleanYoVariable isSupportBaseControlTargetRequested = new BooleanYoVariable("isSupportBaseControlTargetRequested", dontRecordRegistry);
-   private final BooleanYoVariable isSupportBaseTargetToggleRequested = new BooleanYoVariable("isSupportBaseTargetToggleRequested", dontRecordRegistry);
+   private final YoBoolean isSupportBaseControlTargetRequested = new YoBoolean("isSupportBaseControlTargetRequested", dontRecordRegistry);
+   private final YoBoolean isSupportBaseTargetToggleRequested = new YoBoolean("isSupportBaseTargetToggleRequested", dontRecordRegistry);
 
-   private final SideDependentList<BooleanYoVariable> isLegControlRequested = new SideDependentList<BooleanYoVariable>(isLeftLegControlRequested, isRightLegControlRequested);
-   private final SideDependentList<BooleanYoVariable> isArmControlRequested = new SideDependentList<BooleanYoVariable>(isLeftArmControlRequested, isRightArmControlRequested);
+   private final SideDependentList<YoBoolean> isLegControlRequested = new SideDependentList<YoBoolean>(isLeftLegControlRequested, isRightLegControlRequested);
+   private final SideDependentList<YoBoolean> isArmControlRequested = new SideDependentList<YoBoolean>(isLeftArmControlRequested, isRightArmControlRequested);
 
    private final SimulationConstructionSet scs;
    private final MidiSliderBoard sliderBoard;
@@ -148,7 +148,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       JOINT, CARTESIAN
    }
    
-   private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
+   private final YoBoolean controlFingers = new YoBoolean("controlFingers", registry);
 
    public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, FloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -694,7 +694,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       public void variableChanged(YoVariable<?> v)
       {
-         if (!(v instanceof BooleanYoVariable))
+         if (!(v instanceof YoBoolean))
             return;
 
          for (RobotSide robotSide : RobotSide.values)

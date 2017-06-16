@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -43,8 +43,8 @@ public class YoFunctionGenerator
    private final DoubleYoVariable timeModeChanged;
    private final DoubleYoVariable timeInCurrentMode;
    private final DoubleYoVariable kRateForExponentialChirp;
-   private final BooleanYoVariable chirpUpAndDown;
-   private final BooleanYoVariable stopAfterResetTime;
+   private final YoBoolean chirpUpAndDown;
+   private final YoBoolean stopAfterResetTime;
 
    private final EnumYoVariable<YoFunctionGeneratorMode> mode;
    private final EnumYoVariable<YoFunctionGeneratorMode> modePrevious;
@@ -114,8 +114,8 @@ public class YoFunctionGenerator
       pauseTime = new DoubleYoVariable(name + "PauseTime", registry);
       resetTime = new DoubleYoVariable(name + "ResetTime", registry);
       chirpRate = new DoubleYoVariable(name + "ChirpRate", registry);
-      chirpUpAndDown = new BooleanYoVariable(name + "ChirpUpAndDown", registry);
-      stopAfterResetTime = new BooleanYoVariable(name + "StopAfterResetTime", registry);
+      chirpUpAndDown = new YoBoolean(name + "ChirpUpAndDown", registry);
+      stopAfterResetTime = new YoBoolean(name + "StopAfterResetTime", registry);
       stopAfterResetTime.set(false);
 
       chirpFrequency = new DoubleYoVariable(name + "ChirpFrequency", registry);

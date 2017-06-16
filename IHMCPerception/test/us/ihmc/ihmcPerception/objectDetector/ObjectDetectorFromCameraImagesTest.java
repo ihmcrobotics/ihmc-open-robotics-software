@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -121,7 +121,7 @@ public class ObjectDetectorFromCameraImagesTest
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
-      BooleanYoVariable objectTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
+      YoBoolean objectTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
 
       DoubleYoVariable objectReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
       DoubleYoVariable objectReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");

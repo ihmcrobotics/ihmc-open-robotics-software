@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -31,7 +31,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final String shortName = "CenterOfMassFBController";
    private final YoVariableRegistry registry = new YoVariableRegistry(shortName);
 
-   private final BooleanYoVariable isEnabled = new BooleanYoVariable("is" + shortName + "Enabled", registry);
+   private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;

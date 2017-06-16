@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -55,7 +55,7 @@ public class CenterOfMassHeightManager
    private final PelvisHeightControlState pelvisHeightControlState;
    
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
-   private final BooleanYoVariable enableUserPelvisControlDuringWalking = new BooleanYoVariable("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
+   private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
    
    private final FramePose tempPose = new FramePose();
    private final FramePoint tempPosition = new FramePoint();

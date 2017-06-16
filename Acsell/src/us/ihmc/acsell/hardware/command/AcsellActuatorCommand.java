@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -14,7 +14,7 @@ import us.ihmc.steppr.hardware.StepprActuator;
 public abstract class AcsellActuatorCommand
 {
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
    private final DoubleYoVariable tauDesired;
    private final DoubleYoVariable tauInertia;
    //private final DoubleYoVariable currentDesired;
@@ -33,7 +33,7 @@ public abstract class AcsellActuatorCommand
       this.currentLimit = actuator.getCurrentLimit();
       this.registry = new YoVariableRegistry(name);
 
-      this.enabled = new BooleanYoVariable(name + "Enabled", registry);
+      this.enabled = new YoBoolean(name + "Enabled", registry);
       this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
       this.tauInertia = new DoubleYoVariable(name + "TauInertia", registry);
       this.qddDesired = new DoubleYoVariable(name + "qdd_d", registry);

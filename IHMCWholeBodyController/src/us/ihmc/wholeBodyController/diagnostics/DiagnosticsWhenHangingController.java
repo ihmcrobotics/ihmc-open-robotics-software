@@ -22,7 +22,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -62,7 +62,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> finalPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory> transitionSplines = new LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory>();
 
-   private final BooleanYoVariable manualMode = new BooleanYoVariable("diagnosticsWhenHangingManualMode", registry);
+   private final YoBoolean manualMode = new YoBoolean("diagnosticsWhenHangingManualMode", registry);
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
@@ -71,9 +71,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private DoubleYoVariable yoTime;
 
-   private final BooleanYoVariable startDiagnostics = new BooleanYoVariable("startDiagnostics", registry);
-   private final BooleanYoVariable pauseDiagnostics = new BooleanYoVariable("pauseDiagnostics", registry);
-   private final BooleanYoVariable finishedDiagnostics = new BooleanYoVariable("finishedDiagnostics", registry);
+   private final YoBoolean startDiagnostics = new YoBoolean("startDiagnostics", registry);
+   private final YoBoolean pauseDiagnostics = new YoBoolean("pauseDiagnostics", registry);
+   private final YoBoolean finishedDiagnostics = new YoBoolean("finishedDiagnostics", registry);
 
    private final DoubleYoVariable splineDuration = new DoubleYoVariable("splineDuration", registry);
 
@@ -83,16 +83,16 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final DoubleYoVariable diagnosticsPDMasterGain = new DoubleYoVariable("diagnosticsPDMasterGain", registry);
    private final DoubleYoVariable maximumTorqueOffset = new DoubleYoVariable("maximumTorqueOffset", registry);
 
-   private final BooleanYoVariable adaptTorqueOffset = new BooleanYoVariable("adaptTorqueOffset", registry);
-   private final BooleanYoVariable printTorqueOffsets = new BooleanYoVariable("printTorqueOffsets", registry);
-   private final BooleanYoVariable transferTorqueOffsets = new BooleanYoVariable("transferTorqueOffsets", registry);
+   private final YoBoolean adaptTorqueOffset = new YoBoolean("adaptTorqueOffset", registry);
+   private final YoBoolean printTorqueOffsets = new YoBoolean("printTorqueOffsets", registry);
+   private final YoBoolean transferTorqueOffsets = new YoBoolean("transferTorqueOffsets", registry);
 
    private StateMachine<DiagnosticsWhenHangingState> stateMachine;
 
    private final boolean useArms;
 
-   private final BooleanYoVariable updateFootForceSensorOffsets = new BooleanYoVariable("updateFootForceSensorOffsets", registry);
-   private final BooleanYoVariable printForceSensorsOffsets = new BooleanYoVariable("printForceSensorsOffsets", registry);
+   private final YoBoolean updateFootForceSensorOffsets = new YoBoolean("updateFootForceSensorOffsets", registry);
+   private final YoBoolean printForceSensorsOffsets = new YoBoolean("printForceSensorsOffsets", registry);
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final SideDependentList<YoFrameVector> footForcesRaw = new SideDependentList<YoFrameVector>();
    private final SideDependentList<YoFrameVector> footTorquesRaw = new SideDependentList<YoFrameVector>();

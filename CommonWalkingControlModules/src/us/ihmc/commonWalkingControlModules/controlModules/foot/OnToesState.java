@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -49,7 +49,7 @@ public class OnToesState extends AbstractFootControlState
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
    private final List<YoContactPoint> contactPointsInContact = new ArrayList<>();
 
-   private final BooleanYoVariable usePointContact;
+   private final YoBoolean usePointContact;
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
@@ -74,7 +74,7 @@ public class OnToesState extends AbstractFootControlState
       contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
       contactableFoot.getToeOffContactLine(toeOffContactLine2d);
 
-      usePointContact = new BooleanYoVariable(namePrefix + "UsePointContact", registry);
+      usePointContact = new YoBoolean(namePrefix + "UsePointContact", registry);
 
       toeOffDesiredPitchAngle = new DoubleYoVariable(namePrefix + "ToeOffDesiredPitchAngle", registry);
       toeOffDesiredPitchVelocity = new DoubleYoVariable(namePrefix + "ToeOffDesiredPitchVelocity", registry);

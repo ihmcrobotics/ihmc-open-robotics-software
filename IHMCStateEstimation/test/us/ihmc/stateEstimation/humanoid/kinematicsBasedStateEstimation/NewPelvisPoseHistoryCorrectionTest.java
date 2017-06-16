@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPac
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -241,7 +241,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    }
 
 
-   private BooleanYoVariable isRotationCorrectionEnabled;
+   private YoBoolean isRotationCorrectionEnabled;
    private DoubleYoVariable maximumErrorTranslation;
    private DoubleYoVariable maximumErrorAngleInDegrees;
 
@@ -249,7 +249,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
-      isRotationCorrectionEnabled = (BooleanYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
+      isRotationCorrectionEnabled = (YoBoolean) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
       isRotationCorrectionEnabled.set(false);
       maximumErrorTranslation = (DoubleYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorTranslation");
       maximumErrorTranslation.set(Double.MAX_VALUE);

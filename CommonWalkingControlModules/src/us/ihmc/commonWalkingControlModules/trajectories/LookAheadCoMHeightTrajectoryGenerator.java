@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -58,9 +58,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
 
-   private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isPelvisOffsetHeightTrajectoryStopped", registry);
+   private final YoBoolean isTrajectoryOffsetStopped = new YoBoolean("isPelvisOffsetHeightTrajectoryStopped", registry);
 
-   private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
+   private final YoBoolean hasBeenInitializedWithNextStep = new YoBoolean("hasBeenInitializedWithNextStep", registry);
 
    private final DoubleYoVariable offsetHeightAboveGround = new DoubleYoVariable("offsetHeightAboveGround", registry);
 
@@ -95,8 +95,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
    private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
 
-   private final BooleanYoVariable correctForCoMHeightDrift = new BooleanYoVariable("correctForCoMHeightDrift", registry);
-   private final BooleanYoVariable initializeToCurrent = new BooleanYoVariable("initializeCoMHeightToCurrent", registry);
+   private final YoBoolean correctForCoMHeightDrift = new YoBoolean("correctForCoMHeightDrift", registry);
+   private final YoBoolean initializeToCurrent = new YoBoolean("initializeCoMHeightToCurrent", registry);
 
    private final BagOfBalls bagOfBalls;
 
@@ -111,7 +111,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final YoBoolean isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class);
 
@@ -159,7 +159,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisHeightTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisHeightTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);

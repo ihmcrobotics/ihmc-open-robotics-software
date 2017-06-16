@@ -3,11 +3,10 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
-
 
 public class YoIMUHandleHolder
 {
@@ -17,7 +16,7 @@ public class YoIMUHandleHolder
    private final DoubleYoVariable xdd, ydd, zdd;
    private final DoubleYoVariable theta_x, theta_y, theta_z;
    private final DoubleYoVariable q_w, q_x, q_y, q_z;
-   private final BooleanYoVariable isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
+   private final YoBoolean isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
 
    public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -40,9 +39,9 @@ public class YoIMUHandleHolder
       q_y = new DoubleYoVariable(name + "_q_y", registry);
       q_z = new DoubleYoVariable(name + "_q_z", registry);
       
-      isLinearAccelerationValid = new BooleanYoVariable(name + "_isLinearAccelerationValid", registry);
-      isAngularRateValid = new BooleanYoVariable(name + "_isAngularRateValid", registry);
-      isOrientationMeasurementValid = new BooleanYoVariable(name + "_isOrientationMeasurementValid", registry);
+      isLinearAccelerationValid = new YoBoolean(name + "_isLinearAccelerationValid", registry);
+      isAngularRateValid = new YoBoolean(name + "_isAngularRateValid", registry);
+      isOrientationMeasurementValid = new YoBoolean(name + "_isOrientationMeasurementValid", registry);
       
       parentRegistry.addChild(registry);
       

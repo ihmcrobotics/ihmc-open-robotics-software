@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorData;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -45,7 +45,7 @@ public class ForceSensorDistalMassCompensator
    private final YoFrameVector yoSensorForceMassCompensated;
    private final YoFrameVector yoSensorTorqueMassCompensated;
    
-   private final BooleanYoVariable addSimulatedSensorNoise;
+   private final YoBoolean addSimulatedSensorNoise;
 
    public ForceSensorDistalMassCompensator(ForceSensorDefinition forceSensorDefinition, double dtForLowpassFilter, YoVariableRegistry registry)
    {
@@ -76,7 +76,7 @@ public class ForceSensorDistalMassCompensator
       yoSensorForceMassCompensated = new YoFrameVector(sensorName + "ForceMassCompensated", world, registry);
       yoSensorTorqueMassCompensated = new YoFrameVector(sensorName + "TorqueMassCompensated", world, registry);
       
-      addSimulatedSensorNoise = new BooleanYoVariable(sensorName + "AddSimulatedNoise", registry);
+      addSimulatedSensorNoise = new YoBoolean(sensorName + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);
    }
 

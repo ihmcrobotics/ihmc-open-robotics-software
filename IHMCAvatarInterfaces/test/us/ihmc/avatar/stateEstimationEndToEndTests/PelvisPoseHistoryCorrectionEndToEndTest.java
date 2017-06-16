@@ -37,7 +37,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
@@ -218,7 +218,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private DoubleYoVariable manualTranslationOffsetX;
    private DoubleYoVariable manualTranslationOffsetY;
-   private BooleanYoVariable manuallyTriggerLocalizationUpdate;
+   private YoBoolean manuallyTriggerLocalizationUpdate;
 
 //   private BlockingSimulationRunner blockingSimulationRunner;
 
@@ -319,7 +319,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
       manualTranslationOffsetX = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_X");
       manualTranslationOffsetY = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_Y");
-      manuallyTriggerLocalizationUpdate = (BooleanYoVariable) registry.getVariable(nameSpace, "manuallyTriggerLocalizationUpdate");
+      manuallyTriggerLocalizationUpdate = (YoBoolean) registry.getVariable(nameSpace, "manuallyTriggerLocalizationUpdate");
 
    }
 
@@ -826,7 +826,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private void activatePelvisPoseHistoryCorrector(YoVariableRegistry registry, boolean activate)
    {
-      BooleanYoVariable useExternalPelvisCorrector = (BooleanYoVariable) registry.getVariable("DRCKinematicsBasedStateEstimator", "useExternalPelvisCorrector");
+      YoBoolean useExternalPelvisCorrector = (YoBoolean) registry.getVariable("DRCKinematicsBasedStateEstimator", "useExternalPelvisCorrector");
       useExternalPelvisCorrector.set(activate);
    }
 
@@ -872,7 +872,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       AvatarSimulation avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
       avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
-      BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
+      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walk");
       walk.set(true);
       return drcFlatGroundWalkingTrack;
    }

@@ -17,7 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -56,7 +56,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
 
    // YoVariables
-   private final BooleanYoVariable yoUseForceFeedbackControl;
+   private final YoBoolean yoUseForceFeedbackControl;
    private final EnumYoVariable<FallBehaviorType> fallBehaviorType = EnumYoVariable.create("fallBehaviorType", FallBehaviorType.class, registry);
    private final YoEuclideanPositionGains yoPositionControllerGains;
 
@@ -95,7 +95,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       fullRobotModel = environment.getFullRobotModel();
 
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
-      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
 
       environment.getParentRegistry().addChild(registry);
    }

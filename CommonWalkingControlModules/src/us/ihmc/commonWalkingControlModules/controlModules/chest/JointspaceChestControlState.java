@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -23,7 +23,7 @@ public class JointspaceChestControlState extends ChestControlState
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
-   private final Map<OneDoFJoint, BooleanYoVariable> jointTrackingPosition = new HashMap<>();
+   private final Map<OneDoFJoint, YoBoolean> jointTrackingPosition = new HashMap<>();
 
    private final DoubleYoVariable weight = new DoubleYoVariable("chestJointspaceWeight", registry);
    private final YoPIDGains gains;
@@ -31,7 +31,7 @@ public class JointspaceChestControlState extends ChestControlState
 
    private final OneDoFJoint[] jointsOriginal;
 
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isSpineTrajectoryStopped", registry);
+   private final YoBoolean isTrajectoryStopped = new YoBoolean("isSpineTrajectoryStopped", registry);
    private final DoubleYoVariable receivedNewCommandTime = new DoubleYoVariable("receivedNewCommandTime", registry);
    private final DoubleYoVariable yoTime;
 
@@ -49,7 +49,7 @@ public class JointspaceChestControlState extends ChestControlState
          String jointName = joint.getName();
          MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(jointName, registry);
          jointTrajectoryGenerators.put(joint, jointTrajectoryGenerator);
-         jointTrackingPosition.put(joint, new BooleanYoVariable(jointName + "TrackingPosition", registry));
+         jointTrackingPosition.put(joint, new YoBoolean(jointName + "TrackingPosition", registry));
 
          feedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
@@ -129,7 +129,7 @@ public class JointspaceChestControlState extends ChestControlState
          OneDoFJoint joint = jointsOriginal[i];
          MultipleWaypointsTrajectoryGenerator jointTajectoryGenerator = jointTrajectoryGenerators.get(joint);
 
-         BooleanYoVariable jointTracking = jointTrackingPosition.get(joint);
+         YoBoolean jointTracking = jointTrackingPosition.get(joint);
          if (!isTrajectoryStopped.getBooleanValue() && jointTracking.getBooleanValue())
          {
             jointTajectoryGenerator.compute(timeInTrajectory);

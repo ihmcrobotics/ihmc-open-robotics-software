@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -25,7 +25,7 @@ public class ScsMocapRigidBody
    private DoubleYoVariable qy;
    private DoubleYoVariable qz;
    private DoubleYoVariable qw;
-   private BooleanYoVariable isTracked;
+   private YoBoolean isTracked;
    
    private DoubleYoVariable xVel;
    private DoubleYoVariable yVel;
@@ -47,7 +47,7 @@ public class ScsMocapRigidBody
       qy = new DoubleYoVariable("qy", registry);
       qz = new DoubleYoVariable("qz", registry);
       qw = new DoubleYoVariable("qw", registry);
-      this.isTracked = new BooleanYoVariable("", registry);
+      this.isTracked = new YoBoolean("", registry);
       
       
       xVel = new DoubleYoVariable("xVel", registry);

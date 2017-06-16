@@ -33,9 +33,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -80,7 +79,7 @@ public class BalanceManager
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
 
-   private final BooleanYoVariable editStepTimingForReachability = new BooleanYoVariable("editStepTimingForReachability", registry);
+   private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
    private final DoubleYoVariable yoTime;
 
@@ -111,8 +110,8 @@ public class BalanceManager
    private final DoubleYoVariable safeDistanceFromSupportEdgesToStopCancelICPPlan = new DoubleYoVariable("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
    private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
-   private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
-   private final BooleanYoVariable controlHeightWithMomentum = new BooleanYoVariable("controlHeightWithMomentum", registry);
+   private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
    private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);

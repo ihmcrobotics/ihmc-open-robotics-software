@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredCo
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -38,7 +38,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final DoubleYoVariable handControllerTime = new DoubleYoVariable("handControllerTime", registry);
    private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
-   private final BooleanYoVariable sendFingerJointGains = new BooleanYoVariable("sendFingerJointGains", registry);
+   private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
 
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kpMap = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kdMap = new LinkedHashMap<>();

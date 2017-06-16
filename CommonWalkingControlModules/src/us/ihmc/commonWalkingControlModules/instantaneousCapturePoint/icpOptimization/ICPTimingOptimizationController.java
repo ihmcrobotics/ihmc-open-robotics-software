@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -30,7 +30,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final DoubleYoVariable timingSolutionUpperBound = new DoubleYoVariable(yoNamePrefix + "TimingSolutionUpperBound", registry);
 
    private final DoubleYoVariable timingDeadline = new DoubleYoVariable(yoNamePrefix + "TimingDeadline", registry);
-   private final BooleanYoVariable finishedOnTime = new BooleanYoVariable(yoNamePrefix + "FinishedOnTime", registry);
+   private final YoBoolean finishedOnTime = new YoBoolean(yoNamePrefix + "FinishedOnTime", registry);
 
    private final double variationSizeToComputeTimingGradient;
    private final int maxNumberOfGradientIterations;

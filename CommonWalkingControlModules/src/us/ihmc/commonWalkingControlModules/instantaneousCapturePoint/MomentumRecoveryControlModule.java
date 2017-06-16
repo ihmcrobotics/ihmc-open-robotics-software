@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -55,12 +55,12 @@ public class MomentumRecoveryControlModule
    private final DoubleYoVariable distanceToShrinkSafeAreaIfRecoveringDS = new DoubleYoVariable("DistanceToShrinkSafeAreaIfRecoveringDS", registry);
    private final DoubleYoVariable maxIcpError = new DoubleYoVariable("maxIcpError", registry);
 
-   private final BooleanYoVariable usingUpperBodyMomentum = new BooleanYoVariable("usingUpperBodyMomentum", registry);
-   private final BooleanYoVariable usingHighMomentumWeight = new BooleanYoVariable("usingHighMomentumWeight", registry);
+   private final YoBoolean usingUpperBodyMomentum = new YoBoolean("usingUpperBodyMomentum", registry);
+   private final YoBoolean usingHighMomentumWeight = new YoBoolean("usingHighMomentumWeight", registry);
 
-   private final BooleanYoVariable allowUpperBodyMomentumInSingleSupport = new BooleanYoVariable("allowUpperBodyMomentumInSingleSupport", registry);
-   private final BooleanYoVariable allowUpperBodyMomentumInDoubleSupport = new BooleanYoVariable("allowUpperBodyMomentumInDoubleSupport", registry);
-   private final BooleanYoVariable allowUsingHighMomentumWeight = new BooleanYoVariable("allowUsingHighMomentumWeight", registry);
+   private final YoBoolean allowUpperBodyMomentumInSingleSupport = new YoBoolean("allowUpperBodyMomentumInSingleSupport", registry);
+   private final YoBoolean allowUpperBodyMomentumInDoubleSupport = new YoBoolean("allowUpperBodyMomentumInDoubleSupport", registry);
+   private final YoBoolean allowUsingHighMomentumWeight = new YoBoolean("allowUsingHighMomentumWeight", registry);
 
    private final DoubleYoVariable maxDistanceCMPSupport = new DoubleYoVariable("maxDistanceCMPSupport", registry);
 

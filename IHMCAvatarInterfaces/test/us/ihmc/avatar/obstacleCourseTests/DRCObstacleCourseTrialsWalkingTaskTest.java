@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -189,7 +189,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
-      BooleanYoVariable doToeTouchdownIfPossible = (BooleanYoVariable) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
+      YoBoolean doToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
       doToeTouchdownIfPossible.set(true);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);

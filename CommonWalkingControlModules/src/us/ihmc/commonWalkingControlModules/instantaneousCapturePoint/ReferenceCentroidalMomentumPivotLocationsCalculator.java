@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
@@ -54,7 +54,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final List<YoFramePointInMultipleFrames> exitCMPs = new ArrayList<>();
    private final List<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<>();
 
-   private final BooleanYoVariable isDoneWalking;
+   private final YoBoolean isDoneWalking;
    private final DoubleYoVariable maxForwardEntryCMPOffset;
    private final DoubleYoVariable minForwardEntryCMPOffset;
    private final DoubleYoVariable maxForwardExitCMPOffset;
@@ -65,7 +65,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final DoubleYoVariable stepLengthToCMPOffsetFactor;
    private final DoubleYoVariable footstepLengthThresholdToPutExitCMPOnToes;
 
-   private final BooleanYoVariable putExitCMPOnToes;
+   private final YoBoolean putExitCMPOnToes;
    private final DoubleYoVariable exitCMPForwardSafetyMarginOnToes;
 
    private final ReferenceFrame midFeetZUpFrame;
@@ -117,7 +117,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       firstEntryCMPForSingleSupport.setToNaN();
 
-      isDoneWalking = new BooleanYoVariable(namePrefix + "IsDoneWalking", registry);
+      isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
       maxForwardEntryCMPOffset = new DoubleYoVariable(namePrefix + "MaxForwardEntryCMPOffset", registry);
       minForwardEntryCMPOffset = new DoubleYoVariable(namePrefix + "MinForwardEntryCMPOffset", registry);
       maxForwardExitCMPOffset = new DoubleYoVariable(namePrefix + "MaxForwardExitCMPOffset", registry);
@@ -132,7 +132,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
-      putExitCMPOnToes = new BooleanYoVariable(namePrefix + "PutExitCMPOnToes", registry);
+      putExitCMPOnToes = new YoBoolean(namePrefix + "PutExitCMPOnToes", registry);
       exitCMPForwardSafetyMarginOnToes = new DoubleYoVariable(namePrefix + "ExitCMPForwardSafetyMarginOnToes", registry);
 
       for (RobotSide robotSide : RobotSide.values)

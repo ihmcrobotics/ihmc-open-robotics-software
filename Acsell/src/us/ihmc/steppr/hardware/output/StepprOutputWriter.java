@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -53,7 +53,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final DoubleYoVariable controlRatio = new DoubleYoVariable("controlRatio", registry);
 
    private boolean outputEnabled;
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableOutput", registry);
 
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
@@ -367,7 +367,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
       //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
-      //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
+      //((YoBoolean)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
 
 

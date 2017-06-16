@@ -10,7 +10,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -379,7 +379,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       
       case BOOLEAN:
       {
-         yoVariable = new BooleanYoVariable(variableName, registry);
+         yoVariable = new YoBoolean(variableName, registry);
          break;
       }
       

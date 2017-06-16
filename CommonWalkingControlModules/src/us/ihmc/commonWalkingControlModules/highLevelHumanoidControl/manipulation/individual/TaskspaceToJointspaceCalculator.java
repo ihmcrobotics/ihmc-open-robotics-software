@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -104,7 +104,7 @@ public class TaskspaceToJointspaceCalculator
    private final AlphaFilteredYoFramePoint yoBaseParentJointFramePositionFiltered;
    private final AlphaFilteredYoFrameQuaternion yoBaseParentJointFrameOrientationFiltered;
 
-   private final BooleanYoVariable enableFeedbackControl;
+   private final YoBoolean enableFeedbackControl;
    private final DoubleYoVariable kpTaskspaceAngularError;
    private final DoubleYoVariable kpTaskspaceLinearError;
 
@@ -223,7 +223,7 @@ public class TaskspaceToJointspaceCalculator
       yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix + "BaseParentJointFrameFiltered", "",
             yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
 
-      enableFeedbackControl = new BooleanYoVariable(namePrefix + "EnableFeedBackControl", registry);
+      enableFeedbackControl = new YoBoolean(namePrefix + "EnableFeedBackControl", registry);
       kpTaskspaceAngularError = new DoubleYoVariable(namePrefix + "KpTaskspaceAngularError", registry);
       kpTaskspaceLinearError = new DoubleYoVariable(namePrefix + "KpTaskspaceLinearError", registry);
 

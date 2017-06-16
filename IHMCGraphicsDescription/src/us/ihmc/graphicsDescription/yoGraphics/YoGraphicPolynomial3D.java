@@ -20,11 +20,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -165,7 +162,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns
     * on this flag to let the WRITER know that it has to synchronize.
     */
-   private final BooleanYoVariable readerExists;
+   private final YoBoolean readerExists;
 
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
@@ -392,7 +389,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       currentGraphicType = new EnumYoVariable<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
       currentColorType = new EnumYoVariable<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
-      readerExists = new BooleanYoVariable(name + "ReaderExists", registry);
+      readerExists = new YoBoolean(name + "ReaderExists", registry);
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];
@@ -491,7 +488,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       currentGraphicType = (EnumYoVariable<?>) yoVariables[index++];
       currentColorType = (EnumYoVariable<?>) yoVariables[index++];
-      readerExists = (BooleanYoVariable) yoVariables[index++];
+      readerExists = (YoBoolean) yoVariables[index++];
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];

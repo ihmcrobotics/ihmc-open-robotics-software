@@ -13,7 +13,7 @@ import java.util.Collections;
 
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -242,7 +242,7 @@ public class TimeScript implements Script
                value = Boolean.parseBoolean(t_part);
             }
             
-            ret.addVarValue((BooleanYoVariable) variable, value);
+            ret.addVarValue((YoBoolean) variable, value);
             break;
          }
          case ENUM:

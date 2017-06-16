@@ -20,12 +20,8 @@ import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.LongYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -210,7 +206,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof BooleanYoVariable)
+      else if (variable instanceof YoBoolean)
       {
          return new DataHolder<Integer>(offset, new MLInt32(name, dims))
          {

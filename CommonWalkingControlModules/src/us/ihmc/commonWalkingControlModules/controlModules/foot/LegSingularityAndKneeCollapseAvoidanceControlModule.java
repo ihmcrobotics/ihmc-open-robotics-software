@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -52,7 +52,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable checkVelocityForSwingSingularityAvoidance;
+   private final YoBoolean checkVelocityForSwingSingularityAvoidance;
 
    private final DoubleYoVariable alphaSwingSingularityAvoidance;
    private final DoubleYoVariable alphaSwingKneeMechanicalLimitAvoidance;
@@ -126,13 +126,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
    private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
 
-   private final BooleanYoVariable isSwingMechanicalLimitAvoidanceUsed;
-   private final BooleanYoVariable isSwingSingularityAvoidanceUsed;
-   private final BooleanYoVariable isSupportSingularityAvoidanceUsed;
-   private final BooleanYoVariable isSupportCollapseAvoidanceUsed;
-   private final BooleanYoVariable isUnreachableFootstepCompensated;
-   private final BooleanYoVariable doSmoothTransitionOutOfCollapseAvoidance;
-   private final BooleanYoVariable doSmoothTransitionOutOfSingularityAvoidance;
+   private final YoBoolean isSwingMechanicalLimitAvoidanceUsed;
+   private final YoBoolean isSwingSingularityAvoidanceUsed;
+   private final YoBoolean isSupportSingularityAvoidanceUsed;
+   private final YoBoolean isSupportCollapseAvoidanceUsed;
+   private final YoBoolean isUnreachableFootstepCompensated;
+   private final YoBoolean doSmoothTransitionOutOfCollapseAvoidance;
+   private final YoBoolean doSmoothTransitionOutOfSingularityAvoidance;
 
    private final DoubleYoVariable correctionAlphaFilter;
    private final AlphaFilteredYoVariable heightCorrectedFilteredForCollapseAvoidance;
@@ -176,7 +176,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       frameBeforeHipPitchJoint = hipPitchJoint.getFrameBeforeJoint();
       endEffectorFrame = contactablePlaneBody.getFrameAfterParentJoint();
 
-      checkVelocityForSwingSingularityAvoidance = new BooleanYoVariable(namePrefix + "CheckVelocityForSwingSingularityAvoidance", registry);
+      checkVelocityForSwingSingularityAvoidance = new YoBoolean(namePrefix + "CheckVelocityForSwingSingularityAvoidance", registry);
 
       alphaSwingSingularityAvoidance = new DoubleYoVariable(namePrefix + "AlphaSwingSingularityAvoidance", registry);
       alphaSwingKneeMechanicalLimitAvoidance = new DoubleYoVariable(namePrefix + "AlphaSwingKneeMechanicalLimitAvoidance", registry);
@@ -259,13 +259,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       correctedDesiredLegLength = new DoubleYoVariable(namePrefix + "CorrectedDesiredLegLength", registry);
       currentLegLength = new DoubleYoVariable(namePrefix + "CurrentLegLength", registry);
 
-      isSwingMechanicalLimitAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingMechanicalLimitAvoidanceUsed", registry);
-      isSwingSingularityAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingSingularityAvoidanceUsed", registry);
-      isSupportSingularityAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSupportSingularityAvoidanceUsed", registry);
-      isSupportCollapseAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSupportCollapseAvoidanceUsed", registry);
-      isUnreachableFootstepCompensated = new BooleanYoVariable(namePrefix + "IsUnreachableFootstepCompensated", registry);
-      doSmoothTransitionOutOfCollapseAvoidance = new BooleanYoVariable(namePrefix + "DoSmoothTransitionCollapseAvoidance", registry);
-      doSmoothTransitionOutOfSingularityAvoidance = new BooleanYoVariable(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
+      isSwingMechanicalLimitAvoidanceUsed = new YoBoolean(namePrefix + "IsSwingMechanicalLimitAvoidanceUsed", registry);
+      isSwingSingularityAvoidanceUsed = new YoBoolean(namePrefix + "IsSwingSingularityAvoidanceUsed", registry);
+      isSupportSingularityAvoidanceUsed = new YoBoolean(namePrefix + "IsSupportSingularityAvoidanceUsed", registry);
+      isSupportCollapseAvoidanceUsed = new YoBoolean(namePrefix + "IsSupportCollapseAvoidanceUsed", registry);
+      isUnreachableFootstepCompensated = new YoBoolean(namePrefix + "IsUnreachableFootstepCompensated", registry);
+      doSmoothTransitionOutOfCollapseAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionCollapseAvoidance", registry);
+      doSmoothTransitionOutOfSingularityAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
 
       final ReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
       virtualLegTangentialFrameHipCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameHipCentered", pelvisFrame)

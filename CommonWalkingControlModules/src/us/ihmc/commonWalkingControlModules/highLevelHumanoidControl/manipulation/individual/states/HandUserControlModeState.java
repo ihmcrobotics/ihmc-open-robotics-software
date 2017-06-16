@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
@@ -20,7 +20,7 @@ public class HandUserControlModeState extends HandControlState
    private final DoubleYoVariable[] userDesiredJointAccelerations;
    private final DoubleYoVariable timeOfLastUserMesage;
    private final DoubleYoVariable timeSinceLastUserMesage;
-   private final BooleanYoVariable abortUserControlMode;
+   private final YoBoolean abortUserControlMode;
    private final DoubleYoVariable yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
@@ -44,7 +44,7 @@ public class HandUserControlModeState extends HandControlState
 
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
-      abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
+      abortUserControlMode = new YoBoolean(namePrefix + "AbortUserControlMode", registry);
       yoTime = controllerToolbox.getYoTime();
    }
 

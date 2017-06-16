@@ -4,7 +4,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -27,7 +27,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
    private final DoubleYoVariable delayedSignal;
    private final DoubleYoVariable estimatedDelay;
 
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
 
    private final DenseMatrix64F referenceSignalBuffer;
    private final DenseMatrix64F delayedSignalBuffer;
@@ -68,7 +68,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       estimatedDelay = new DoubleYoVariable(namePrefix + "_estimatedDelay", registry);
       correlationForDelay = new DoubleYoVariable(namePrefix + "_correlationForDelay", registry);
       maxCorrelation = new DoubleYoVariable(namePrefix + "_maxCorrelation", registry);
-      enabled = new BooleanYoVariable(namePrefix + "_enabled", registry);
+      enabled = new YoBoolean(namePrefix + "_enabled", registry);
 
       maxLeadInTicks = new IntegerYoVariable(namePrefix + "_maxPhaseLeadInTicks", registry);
       maxLeadInTicks.set(DEFAULT_MAX_ABS_LEAD);

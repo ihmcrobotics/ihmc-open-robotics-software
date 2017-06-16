@@ -8,7 +8,7 @@ import java.util.Map;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -40,7 +40,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
    private final IntegerYoVariable numberOfFeetTrusted = new IntegerYoVariable("numberOfFeetTrustedIMUDrift", registry);
 
-   private final Map<RigidBody, GlitchFilteredBooleanYoVariable> areFeetTrusted = new LinkedHashMap<>();
+   private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final DoubleYoVariable delayBeforeTrustingFoot = new DoubleYoVariable("delayBeforeTrustingFootIMUDrift", registry);
 
    private final YoFramePoint referenceAverageFootPosition = new YoFramePoint("referenceAverageFootPositionIMUDrift", worldFrame, registry);
@@ -63,8 +63,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final DoubleYoVariable yawDriftRateAlphaFilter = new DoubleYoVariable("yawDriftRateAlphaFilter", registry);
    private final AlphaFilteredYoVariable estimatedYawDriftRate = new AlphaFilteredYoVariable("estimatedYawDriftRate", registry, yawDriftRateAlphaFilter);
 
-   private final BooleanYoVariable enableCompensation = new BooleanYoVariable("enableIMUDriftYawCompensation", registry);
-   private final BooleanYoVariable integrateDriftRate = new BooleanYoVariable("integrateDriftRate", registry);
+   private final YoBoolean enableCompensation = new YoBoolean("enableIMUDriftYawCompensation", registry);
+   private final YoBoolean integrateDriftRate = new YoBoolean("integrateDriftRate", registry);
 
    private final FramePoint footPosition = new FramePoint();
    private final FramePoint averagePosition = new FramePoint();
@@ -89,7 +89,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          String footNamePascalCase = FormattingTools.underscoredToCamelCase(foot.getName(), true);
 
          int windowSize = (int) (delayBeforeTrustingFoot.getDoubleValue() / estimatorDT);
-         GlitchFilteredBooleanYoVariable isFootTrusted = new GlitchFilteredBooleanYoVariable("is" + footNamePascalCase + "TrustedIMUDrift", registry,
+         GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry,
                windowSize);
          areFeetTrusted.put(foot, isFootTrusted);
 
@@ -205,7 +205,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
-         GlitchFilteredBooleanYoVariable isFootTrusted = areFeetTrusted.get(foot);
+         GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
 
          boolean hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getDoubleValue();

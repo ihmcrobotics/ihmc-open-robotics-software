@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -49,7 +49,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final DoubleYoVariable currentRelativeSteeringAngle;
    private final DoubleYoVariable finalSteeringAngle;
 
-   private final BooleanYoVariable isCurrentAngleBeingAdjusted;
+   private final YoBoolean isCurrentAngleBeingAdjusted;
    private final DoubleYoVariable maximumAngleTrackingErrorTolerated;
    private final DoubleYoVariable currentControlledFrameRelativeAngle;
    private final DoubleYoVariable currentAngleTrackingError;
@@ -105,8 +105,8 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePose tangentialSteeringFramePose = new FramePose();
    private final YoFramePose yoTangentialSteeringFramePose;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
-   private final BooleanYoVariable showViz;
+   /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
+   private final YoBoolean showViz;
 
    public SteeringPoseTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -122,7 +122,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       initialZ = new DoubleYoVariable(namePrefix + "SteeringZPosition", registry);
 
-      isCurrentAngleBeingAdjusted = new BooleanYoVariable(namePrefix + "IsCurrentSteeringAngleBeingAdjusted", registry);
+      isCurrentAngleBeingAdjusted = new YoBoolean(namePrefix + "IsCurrentSteeringAngleBeingAdjusted", registry);
       maximumAngleTrackingErrorTolerated = new DoubleYoVariable(namePrefix + "MaxSteeringAngleTrackingErrorTolerated", registry);
       maximumAngleTrackingErrorTolerated.set(Math.toRadians(30.0));
       currentControlledFrameRelativeAngle = new DoubleYoVariable(namePrefix + "CurrentControlledFrameSteeringAngle", registry);
@@ -218,7 +218,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
-         showViz = new BooleanYoVariable(namePrefix + "ShowSteeringViz", registry);
+         showViz = new YoBoolean(namePrefix + "ShowSteeringViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             public void variableChanged(YoVariable<?> v)

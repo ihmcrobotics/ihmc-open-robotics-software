@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -11,7 +11,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
 {
    private final YoFrameQuaternion unfilteredQuaternion;
    private final DoubleYoVariable alpha;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
    private final Quaternion qMeasured = new Quaternion();
    private final Quaternion qPreviousFiltered = new Quaternion();
    private final Quaternion qNewFiltered = new Quaternion();
@@ -41,7 +41,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       super(namePrefix, nameSuffix, referenceFrame, registry);
       this.unfilteredQuaternion = unfilteredQuaternion;
       this.alpha = alpha;
-      this.hasBeenCalled = new BooleanYoVariable(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
    }
 
    @Override

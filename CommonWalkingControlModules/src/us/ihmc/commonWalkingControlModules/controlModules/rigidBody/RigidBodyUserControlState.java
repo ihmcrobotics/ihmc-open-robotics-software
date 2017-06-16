@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -23,14 +23,14 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final DoubleYoVariable[] userDesiredJointAccelerations;
    private final DoubleYoVariable[] weights;
 
-   private final BooleanYoVariable abortUserControlMode;
-   private final BooleanYoVariable hasWeights;
+   private final YoBoolean abortUserControlMode;
+   private final YoBoolean hasWeights;
 
    public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
-      hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
+      hasWeights = new YoBoolean(prefix + "HasWeights", registry);
 
       this.jointsToControl = jointsToControl;
       this.numberOfJoints = jointsToControl.length;
@@ -47,7 +47,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
          jointspaceAccelerationCommand.addJoint(jointsToControl[i], Double.NaN);
       }
 
-      abortUserControlMode = new BooleanYoVariable(prefix + "Abort", registry);
+      abortUserControlMode = new YoBoolean(prefix + "Abort", registry);
    }
 
    public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)

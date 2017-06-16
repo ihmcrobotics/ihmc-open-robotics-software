@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -70,8 +70,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
    private final YoFramePose distortedPlanePose;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
-   private final BooleanYoVariable showViz;
+   /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
+   private final YoBoolean showViz;
 
    public LeadInOutPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -154,7 +154,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
-         showViz = new BooleanYoVariable(namePrefix + "ShowViz", registry);
+         showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             @Override

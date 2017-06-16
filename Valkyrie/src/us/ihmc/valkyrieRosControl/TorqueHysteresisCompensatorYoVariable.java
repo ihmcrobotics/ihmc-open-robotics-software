@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -27,12 +27,12 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
 
    private final EnumYoVariable<HysteresisState> hysteresisState;
 
-   private final BooleanYoVariable isAccelerationHigh;
-   private final BooleanYoVariable isVelocityLow;
+   private final YoBoolean isAccelerationHigh;
+   private final YoBoolean isVelocityLow;
 
    private final DoubleYoVariable hysteresisSign;
 
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
 
    public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, DoubleYoVariable torqueHysteresisAmplitude,
          DoubleYoVariable jointAccelerationMin, DoubleYoVariable jointVelocityMax, DoubleYoVariable rampTime, DoubleYoVariable yoTime,
@@ -58,12 +58,12 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
       rampStartTime = new DoubleYoVariable(getName() + "RampStartTime", registry);
       hysteresisState = new EnumYoVariable<>(getName() + "State", registry, HysteresisState.class, false);
 
-      isAccelerationHigh = new BooleanYoVariable(getName() + "IsQddHigh", registry);
-      isVelocityLow = new BooleanYoVariable(getName() + "IsQdLow", registry);
+      isAccelerationHigh = new YoBoolean(getName() + "IsQddHigh", registry);
+      isVelocityLow = new YoBoolean(getName() + "IsQdLow", registry);
 
       hysteresisSign = new DoubleYoVariable(getName() + "HysteresisSign", registry);
 
-      enabled = new BooleanYoVariable(getName() + "Enabled", registry);
+      enabled = new YoBoolean(getName() + "Enabled", registry);
    }
 
    public void reset()

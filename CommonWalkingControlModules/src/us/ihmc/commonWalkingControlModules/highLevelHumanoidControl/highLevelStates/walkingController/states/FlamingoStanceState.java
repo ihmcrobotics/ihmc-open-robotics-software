@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBear
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FlamingoStanceState extends SingleSupportState
 {
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final BooleanYoVariable loadFoot;
+   private final YoBoolean loadFoot;
    private final DoubleYoVariable loadFootStartTime;
    private final DoubleYoVariable loadFootDuration;
    private final DoubleYoVariable loadFootTransferDuration;
@@ -52,7 +52,7 @@ public class FlamingoStanceState extends SingleSupportState
       legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
-      loadFoot = new BooleanYoVariable(namePrefix + "LoadFoot", registry);
+      loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);
       loadFootStartTime = new DoubleYoVariable(namePrefix + "LoadFootStartTime", registry);
       loadFootDuration = new DoubleYoVariable(namePrefix + "LoadFootDuration", registry);
       loadFootTransferDuration = new DoubleYoVariable(namePrefix + "LoadFootTransferDuration", registry);

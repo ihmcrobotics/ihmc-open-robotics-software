@@ -48,7 +48,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -949,12 +949,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static boolean findControllerStopBooleanForXY(SimulationConstructionSet scs)
    {
-      return ((BooleanYoVariable) scs.getVariable(PelvisICPBasedTranslationManager.class.getSimpleName(), "isPelvisTranslationalTrajectoryStopped")).getBooleanValue();
+      return ((YoBoolean) scs.getVariable(PelvisICPBasedTranslationManager.class.getSimpleName(), "isPelvisTranslationalTrajectoryStopped")).getBooleanValue();
    }
 
    public static boolean findControllerStopBooleanForHeight(SimulationConstructionSet scs)
    {
-      return ((BooleanYoVariable) scs.getVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(), "isPelvisOffsetHeightTrajectoryStopped")).getBooleanValue();
+      return ((YoBoolean) scs.getVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(), "isPelvisOffsetHeightTrajectoryStopped")).getBooleanValue();
    }
 
    public static int findControllerNumberOfWaypointsForXY(SimulationConstructionSet scs)

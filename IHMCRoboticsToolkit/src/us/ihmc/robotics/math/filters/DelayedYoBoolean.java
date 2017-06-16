@@ -1,24 +1,24 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class DelayedBooleanYoVariable extends BooleanYoVariable
+public class DelayedYoBoolean extends YoBoolean
 {
-   private final BooleanYoVariable variableToDelay;
+   private final YoBoolean variableToDelay;
 
-   private final BooleanYoVariable[] previousYoVariables;
+   private final YoBoolean[] previousYoVariables;
 
-   public DelayedBooleanYoVariable(String name, String description, BooleanYoVariable variableToDelay, int ticksToDelay, YoVariableRegistry registry)
+   public DelayedYoBoolean(String name, String description, YoBoolean variableToDelay, int ticksToDelay, YoVariableRegistry registry)
    {
       super(name, description, registry);
 
       this.variableToDelay = variableToDelay;
-      previousYoVariables = new BooleanYoVariable[ticksToDelay];
+      previousYoVariables = new YoBoolean[ticksToDelay];
 
       for (int i = 0; i < ticksToDelay; i++)
       {
-         previousYoVariables[i] = new BooleanYoVariable(name + "_previous" + i, registry);
+         previousYoVariables[i] = new YoBoolean(name + "_previous" + i, registry);
          previousYoVariables[i].set(variableToDelay.getBooleanValue());
       }
 
@@ -45,7 +45,7 @@ public class DelayedBooleanYoVariable extends BooleanYoVariable
 
    public void reset()
    {
-      for (BooleanYoVariable var : previousYoVariables)
+      for (YoBoolean var : previousYoVariables)
       {
          var.set(variableToDelay.getBooleanValue());
       }

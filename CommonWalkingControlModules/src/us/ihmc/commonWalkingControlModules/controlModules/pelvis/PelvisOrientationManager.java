@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -30,7 +30,7 @@ public class PelvisOrientationManager
 
    private final GenericStateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
    private final EnumYoVariable<PelvisOrientationControlMode> requestedState;
-   private final BooleanYoVariable enableUserPelvisControlDuringWalking = new BooleanYoVariable("EnableUserPelvisControlDuringWalking", registry);
+   private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("EnableUserPelvisControlDuringWalking", registry);
 
    private final ControllerPelvisOrientationManager walkingManager;
    private final UserPelvisOrientationManager userManager;

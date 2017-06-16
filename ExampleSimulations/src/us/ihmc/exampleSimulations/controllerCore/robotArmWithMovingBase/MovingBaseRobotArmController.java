@@ -27,7 +27,7 @@ import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -78,23 +78,23 @@ public class MovingBaseRobotArmController implements RobotController
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
-   private final BooleanYoVariable goToTarget = new BooleanYoVariable("goToTarget", registry);
+   private final YoBoolean goToTarget = new YoBoolean("goToTarget", registry);
    private final DoubleYoVariable trajectoryDuration = new DoubleYoVariable("handTrajectoryDuration", registry);
    private final DoubleYoVariable trajectoryStartTime = new DoubleYoVariable("handTrajectoryStartTime", registry);
 
    private final StraightLinePoseTrajectoryGenerator trajectory;
 
-   private final BooleanYoVariable controlLinearX = new BooleanYoVariable("controlLinearX", registry);
-   private final BooleanYoVariable controlLinearY = new BooleanYoVariable("controlLinearY", registry);
-   private final BooleanYoVariable controlLinearZ = new BooleanYoVariable("controlLinearZ", registry);
-   private final BooleanYoVariable controlAngularX = new BooleanYoVariable("controlAngularX", registry);
-   private final BooleanYoVariable controlAngularY = new BooleanYoVariable("controlAngularY", registry);
-   private final BooleanYoVariable controlAngularZ = new BooleanYoVariable("controlAngularZ", registry);
+   private final YoBoolean controlLinearX = new YoBoolean("controlLinearX", registry);
+   private final YoBoolean controlLinearY = new YoBoolean("controlLinearY", registry);
+   private final YoBoolean controlLinearZ = new YoBoolean("controlLinearZ", registry);
+   private final YoBoolean controlAngularX = new YoBoolean("controlAngularX", registry);
+   private final YoBoolean controlAngularY = new YoBoolean("controlAngularY", registry);
+   private final YoBoolean controlAngularZ = new YoBoolean("controlAngularZ", registry);
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RobotJointLimitWatcher robotJointLimitWatcher;
 
-   private final BooleanYoVariable setRandomConfiguration = new BooleanYoVariable("setRandomConfiguration", registry);
+   private final YoBoolean setRandomConfiguration = new YoBoolean("setRandomConfiguration", registry);
    private final ReferenceFrame baseFrame;
 
    public MovingBaseRobotArmController(MovingBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -354,7 +354,7 @@ public class MovingBaseRobotArmController implements RobotController
       return handTargetOrientation;
    }
 
-   public BooleanYoVariable getGoToTarget()
+   public YoBoolean getGoToTarget()
    {
       return goToTarget;
    }

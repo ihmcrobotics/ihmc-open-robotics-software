@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -23,7 +23,7 @@ public class HeadUserControlModeState extends HeadControlState
 
    private final DoubleYoVariable timeOfLastUserMesage;
    private final DoubleYoVariable timeSinceLastUserMesage;
-   private final BooleanYoVariable abortUserControlMode;
+   private final YoBoolean abortUserControlMode;
    private final DoubleYoVariable yoTime;
 
    public HeadUserControlModeState(OneDoFJoint[] userControlledJoints, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
@@ -43,7 +43,7 @@ public class HeadUserControlModeState extends HeadControlState
 
       timeOfLastUserMesage = new DoubleYoVariable("HeadTimeOfsLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable("HeadTimeSinceLastUserMesage", registry);
-      abortUserControlMode = new BooleanYoVariable("HeadAbortUserControlMode", registry);
+      abortUserControlMode = new YoBoolean("HeadAbortUserControlMode", registry);
 
       parentRegistry.addChild(registry);
    }

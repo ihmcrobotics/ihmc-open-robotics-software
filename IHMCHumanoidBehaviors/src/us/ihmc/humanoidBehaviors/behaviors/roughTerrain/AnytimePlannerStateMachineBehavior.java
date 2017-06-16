@@ -45,7 +45,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -79,14 +79,14 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   private final BooleanYoVariable reachedGoal = new BooleanYoVariable(prefix + "ReachedGoal", registry);
-   private final BooleanYoVariable clearedLidar = new BooleanYoVariable(prefix + "ClearedLidar", registry);
+   private final YoBoolean reachedGoal = new YoBoolean(prefix + "ReachedGoal", registry);
+   private final YoBoolean clearedLidar = new YoBoolean(prefix + "ClearedLidar", registry);
    private final DoubleYoVariable reachedGoalThreshold = new DoubleYoVariable(prefix + "ReachedGoalThreshold", registry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
-   private final BooleanYoVariable receivedFootstepCompletedPacket = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
+   private final YoBoolean receivedFootstepCompletedPacket = new YoBoolean(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
-   private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
+   private final YoBoolean havePlanarRegionsBeenSet = new YoBoolean(prefix + "HavePlanarRegionsBeenSet", registry);
    private FootstepPlan currentPlan;
    private final IntegerYoVariable numberOfFootstepsInCurrentPlan = new IntegerYoVariable(prefix + "NumberOfFootstepsInCurrentPlan", registry);
 
@@ -329,7 +329,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private class RequestAndWaitForPlanarRegionsListBehavior extends AbstractBehavior
    {
-      private final BooleanYoVariable receivedPlanarRegionsList = new BooleanYoVariable(prefix + "ReceivedPlanarRegionsList", registry);
+      private final YoBoolean receivedPlanarRegionsList = new YoBoolean(prefix + "ReceivedPlanarRegionsList", registry);
       private final YoStopwatch requestNewPlanarRegionsTimer = new YoStopwatch(yoTime);
       private final DoubleYoVariable planarRegionsResponseTimeout = new DoubleYoVariable(prefix + "PlanarRegionsResponseTimeout", registry);
       private PlanarRegionsList planarRegionsList;
