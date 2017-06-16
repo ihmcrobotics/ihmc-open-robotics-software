@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -51,16 +50,6 @@ public class Sphere3d extends Shape3d<Sphere3d>
    public void setRadius(double radius)
    {
       this.radius = radius;
-   }
-   
-   public void setCenter(double x, double y, double z)
-   {
-      setPosition(x, y, z);
-   }
-
-   public void getCenter(Point3DBasics centerToPack)
-   {
-      getPosition(centerToPack);
    }
 
    @Override
@@ -151,17 +140,5 @@ public class Sphere3d extends Shape3d<Sphere3d>
    public String toString()
    {
       return "radius = " + radius + "\n";
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      applyTransformToPose(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      applyInverseTransformToPose(transform);
    }
 }

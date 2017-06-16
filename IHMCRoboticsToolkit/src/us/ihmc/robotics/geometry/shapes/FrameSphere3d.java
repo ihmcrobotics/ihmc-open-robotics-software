@@ -34,12 +34,12 @@ public class FrameSphere3d extends FrameShape3d<FrameSphere3d, Sphere3d>
    public void getCenter(FramePoint centerToPack)
    {
       centerToPack.setToZero(getReferenceFrame());
-      sphere.getCenter(centerToPack.getPoint());
+      sphere.getPosition(centerToPack.getPoint());
    }
    
    public void getCenter(Point3DBasics centerToPack)
    {
-      sphere.getCenter(centerToPack);
+      sphere.getPosition(centerToPack);
    }
    
    public double getRadius()

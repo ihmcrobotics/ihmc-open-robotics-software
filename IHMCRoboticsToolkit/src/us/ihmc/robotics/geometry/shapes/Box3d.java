@@ -4,9 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -195,46 +193,6 @@ public class Box3d extends Shape3d<Box3d>
       dimensions.put(Direction.X, lengthX);
       dimensions.put(Direction.Y, widthY);
       dimensions.put(Direction.Z, heightZ);
-      facesAreOutOfDate = true;
-   }
-
-   public void setFromTransform(RigidBodyTransform transform)
-   {
-      setPose(transform);
-      facesAreOutOfDate = true;
-   }
-
-   @Override
-   public void setYawPitchRoll(double yaw, double pitch, double roll)
-   {
-      super.setYawPitchRoll(yaw, pitch, roll);
-      facesAreOutOfDate = true;
-   }
-
-   @Override
-   public void setOrientation(RotationMatrixReadOnly rotation)
-   {
-      super.setOrientation(rotation);
-      facesAreOutOfDate = true;
-   }
-
-   public void setPosition(Point3DReadOnly translation)
-   {
-      super.setPosition(translation);
-      facesAreOutOfDate = true;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      applyTransformToPose(transform);
-      facesAreOutOfDate = true;
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      applyInverseTransformToPose(transform);
       facesAreOutOfDate = true;
    }
 
@@ -548,16 +506,8 @@ public class Box3d extends Shape3d<Box3d>
    public RigidBodyTransform getTransformCopy()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      getRigidBodyTransform(ret);
+      getPose(ret);
       return ret;
-   }
-
-   /**
-    * @deprecated Use getOrientation(Matrix3d) 
-    */
-   public void getRotation(RotationMatrix rotationMatrixToPack)
-   {
-      getOrientation(rotationMatrixToPack);
    }
 
    /**
@@ -566,7 +516,7 @@ public class Box3d extends Shape3d<Box3d>
    public RotationMatrix getRotationCopy()
    {
       RotationMatrix ret = new RotationMatrix();
-      getRotation(ret);
+      getOrientation(ret);
       return ret;
    }
 
@@ -581,23 +531,5 @@ public class Box3d extends Shape3d<Box3d>
       facePlane.set(faces.get(faceName));
       transformToWorld(facePlane);
       return facePlane;
-   }
-
-   /**
-    * @deprecated Use setOrientation(Matrix3d)
-    */
-   public void setRotation(RotationMatrix rotation)
-   {
-      super.setOrientation(rotation);
-      facesAreOutOfDate = true;
-   }
-
-   /**
-    * @deprecated Use setPosition(Point3D)
-    */
-   public void setTranslation(Point3D translation)
-   {
-      setPosition(translation);
-      facesAreOutOfDate = true;
    }
 }

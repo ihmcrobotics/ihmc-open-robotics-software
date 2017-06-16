@@ -119,7 +119,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
    
    public void setTransform(RigidBodyTransform transform3D)
    {
-      box3d.setFromTransform(transform3D);
+      box3d.setPose(transform3D);
    }
 
    @Override

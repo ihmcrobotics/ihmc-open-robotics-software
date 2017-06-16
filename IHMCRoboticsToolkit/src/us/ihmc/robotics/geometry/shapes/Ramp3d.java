@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -135,20 +134,6 @@ public class Ramp3d extends Shape3d<Ramp3d>
    public double getRampIncline()
    {
       return angleOfRampIncline;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      applyTransformToPose(transform);
-      updateRamp();
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      applyInverseTransformToPose(transform);
-      updateRamp();
    }
 
    @Override
