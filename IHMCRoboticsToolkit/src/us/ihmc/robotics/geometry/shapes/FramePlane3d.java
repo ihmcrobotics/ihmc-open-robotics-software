@@ -135,7 +135,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       pointB.get(temporaryPointB);
       pointC.get(temporaryPointC);
       
-      plane3d.setPoints(temporaryPointA, temporaryPointB, temporaryPointC);
+      plane3d.set(temporaryPointA, temporaryPointB, temporaryPointC);
    }
    
    public void changeFrame(ReferenceFrame desiredFrame)
