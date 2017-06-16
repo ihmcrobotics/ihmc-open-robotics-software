@@ -29,20 +29,20 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    /** the selection matrix for each axis **/
    @RosIgnoredField
-   public SelectionMatrix3DMessage linearSelectionMatrix;
+   public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
    /** the weight matrix for each axis **/
    @RosIgnoredField
-   public WeightMatrix3DMessage linearWeightMatrix;
+   public WeightMatrix3DMessage linearWeightMatrix = new WeightMatrix3DMessage();
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public QuaternionBasedTransform controlFramePose;
+   public QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
    public AbstractEuclideanTrajectoryMessage()
    {
@@ -119,7 +119,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
-   /** 
+   /**
     * set this message to the have the same contents of the other message
     * @param other the other message
     */
