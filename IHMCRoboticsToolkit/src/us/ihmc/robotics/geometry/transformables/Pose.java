@@ -3,67 +3,68 @@ package us.ihmc.robotics.geometry.transformables;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.GeometryObject;
-import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.QuaternionTools;
-import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
-import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.robotics.geometry.interfaces.PoseTransform;
 
-public class Pose implements GeometryObject<Pose>, PoseTransform
+public class Pose implements GeometryObject<Pose>
 {
-   private final Quaternion orientation;
-   private final Point3D position;
-   private final TransformToPoseTransformAPIMap transformToPoseTransformAPIMap;
-
-   public Pose(Pose pose)
-   {
-      orientation = new Quaternion(pose.getOrientation());
-      position = new Point3D(pose.getPosition());
-      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
-   }
+   private final Quaternion orientation = new Quaternion();
+   private final Point3D position = new Point3D();
 
    public Pose()
    {
-      orientation = new Quaternion();
-      position = new Point3D();
-      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
+   }
+
+   public Pose(Pose other)
+   {
+      orientation.set(other.getOrientation());
+      position.set(other.getPosition());
    }
 
    public Pose(RigidBodyTransform transform)
    {
-      transform.getRotation(orientation = new Quaternion());
-      transform.getTranslation(position = new Point3D());
-      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
+      transform.get(orientation, position);
    }
 
    public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      this.orientation = new Quaternion(orientation);
-      this.position = new Point3D(position);
-      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
+      this.orientation.set(orientation);
+      this.position.set(position);
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return orientation.containsNaN() || position.containsNaN();
+   }
+
+   @Override
+   public void setToZero()
+   {
+      orientation.setToZero();
+      position.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      orientation.setToNaN();
+      position.setToNaN();
    }
 
    public void setX(double x)
@@ -81,24 +82,79 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       position.setZ(z);
    }
 
-   public double getX()
-   {
-      return position.getX();
-   }
-
-   public double getY()
-   {
-      return position.getY();
-   }
-
-   public double getZ()
-   {
-      return position.getZ();
-   }
-
    public void setPosition(double x, double y, double z)
    {
       position.set(x, y, z);
+   }
+
+   public void setPosition(Tuple3DReadOnly position)
+   {
+      this.position.set(position);
+   }
+
+   public void setPositionXY(Point2DReadOnly point)
+   {
+      position.setX(point.getX());
+      position.setY(point.getY());
+   }
+
+   public void setOrientation(double qx, double qy, double qz, double qs)
+   {
+      orientation.set(qx, qy, qy, qs);
+   }
+
+   public void setOrientation(QuaternionReadOnly quaternion)
+   {
+      orientation.set(quaternion);
+   }
+
+   public void setOrientation(RotationMatrixReadOnly matrix3d)
+   {
+      orientation.set(matrix3d);
+   }
+
+   public void setOrientation(AxisAngleReadOnly axisAngle4d)
+   {
+      orientation.set(axisAngle4d);
+   }
+
+   public void setOrientationYawPitchRoll(double[] yawPitchRoll)
+   {
+      orientation.setYawPitchRoll(yawPitchRoll);
+   }
+
+   public void setOrientationYawPitchRoll(double yaw, double pitch, double roll)
+   {
+      orientation.setYawPitchRoll(yaw, pitch, roll);
+   }
+
+   @Override
+   public void set(Pose other)
+   {
+      orientation.set(other.getOrientation());
+      position.set(other.getPosition());
+   }
+
+   public void set(RigidBodyTransform transform)
+   {
+      transform.get(orientation, position);
+   }
+
+   public void set(QuaternionBasedTransform transform)
+   {
+      transform.get(orientation, position);
+   }
+
+   public void set(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   {
+      this.orientation.set(orientation);
+      this.position.set(position);
+   }
+
+   public void set(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
+   {
+      this.orientation.set(orientation);
+      this.position.set(position);
    }
 
    /**
@@ -131,56 +187,150 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       orientation.normalizeAndLimitToPiMinusPi();
    }
 
-   public void translate(Tuple3DReadOnly translation)
+   public void interpolate(Pose other, double alpha)
    {
-      position.add(translation);
+      position.interpolate(other.position, alpha);
+      orientation.interpolate(other.orientation, alpha);
    }
 
-   public void translate(double x, double y, double z)
+   public void interpolate(Pose pose1, Pose pose2, double alpha)
+   {
+      position.interpolate(pose1.position, pose2.position, alpha);
+      orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
+   }
+
+   public void prependTranslation(double x, double y, double z)
    {
       position.add(x, y, z);
    }
 
-   public void rotate(QuaternionReadOnly rotation)
+   public void prependTranslation(Tuple3DReadOnly translation)
+   {
+      prependTranslation(translation.getX(), translation.getY(), translation.getZ());
+   }
+
+   public void prependRotation(QuaternionReadOnly rotation)
+   {
+      rotation.transform(position);
+      rotation.transform(orientation);
+   }
+
+   public void prependRotation(RotationMatrixReadOnly rotation)
+   {
+      rotation.transform(position);
+      rotation.transform(orientation);
+   }
+
+   public void prependRotation(AxisAngleReadOnly rotation)
+   {
+      rotation.transform(position);
+      rotation.transform(orientation);
+   }
+
+   public void prependYawRotation(double yaw)
+   {
+      RotationMatrixTools.applyYawRotation(yaw, position, position);
+      orientation.prependYawRotation(yaw);
+   }
+   
+   public void prependPitchRotation(double pitch)
+   {
+      RotationMatrixTools.applyPitchRotation(pitch, position, position);
+      orientation.prependPitchRotation(pitch);
+   }
+   
+   public void prependRollRotation(double roll)
+   {
+      RotationMatrixTools.applyRollRotation(roll, position, position);
+      orientation.prependRollRotation(roll);
+   }
+
+   public void appendTranslation(double x, double y, double z)
+   {
+      double thisX = position.getX();
+      double thisY = position.getY();
+      double thisZ = position.getZ();
+
+      position.set(x, y, z);
+      orientation.transform(position);
+      position.add(thisX, thisY, thisZ);
+   }
+
+   public void appendTranslation(Tuple3DReadOnly translation)
+   {
+      appendTranslation(translation.getX(), translation.getY(), translation.getZ());
+   }
+
+   public void appendRotation(QuaternionReadOnly rotation)
    {
       orientation.multiply(rotation);
    }
+
+   public void appendRotation(RotationMatrixReadOnly rotation)
+   {
+      orientation.multiply(rotation);
+   }
+
+   public void appendYawRotation(double yaw)
+   {
+      orientation.appendYawRotation(yaw);
+   }
    
-   public Point3DReadOnly getPoint()
+   public void appendPitchRotation(double pitch)
    {
-      return position;
+      orientation.appendPitchRotation(pitch);
+   }
+   
+   public void appendRollRotation(double roll)
+   {
+      RotationMatrixTools.applyRollRotation(roll, position, position);
+      orientation.appendRollRotation(roll);
    }
 
-   public QuaternionReadOnly getOrientation()
+   /**
+    * Computes the distance between the position of this pose 3D and the given {@code point}.
+    * 
+    * @param point the other point used to measure the distance. Not modified.
+    * @return the distance between this pose and the given {@code point}.
+    */
+   public double getPositionDistance(Point3DReadOnly point)
    {
-      return orientation;
+      return position.distance(point);
    }
 
-   @Override
-   public void set(Pose other)
+   /**
+    * Computes the distances between the position part of the two poses.
+    * 
+    * @param other the other pose used to measure the distance. Not modified.
+    * @return the distance between the position part of the two poses.
+    */
+   public double getPositionDistance(Pose other)
    {
-      orientation.set(other.getOrientation());
-      position.set(other.getPosition());
+      return position.distance(other.position);
    }
 
-   @Override
-   public void setToZero()
+   /**
+    * Computes the smallest angle representing the difference between the orientation part of this pose 3D and the
+    * give {@code orientation}.
+    * 
+    * @param orientation the orientation used to compute the orientation distance. Not modified.
+    * @return the absolute angle difference between {@code this} and {@code orientation}.
+    */
+   public double getOrientationDistance(QuaternionReadOnly orientation)
    {
-      orientation.setToZero();
-      position.setToZero();
+      return this.orientation.distance(orientation);
    }
 
-   @Override
-   public void setToNaN()
+   /**
+    * Computes the absolute angle difference between this pose 2D and {@code other}.
+    * 
+    * @param other the other pose 2D used to compute the orientation distance. Not modified.
+    * @return the absolute angle difference between {@code this.orientation} and
+    *         {@code other.orientation}.
+    */
+   public double getOrientationDistance(Pose other)
    {
-      orientation.setToNaN();
-      position.setToNaN();
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return orientation.containsNaN() || position.containsNaN();
+      return orientation.distance(other.orientation);
    }
 
    @Override
@@ -202,7 +352,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       transform.inverseTransform(position);
       transform.inverseTransform(orientation);
    }
-   
+
    public void applyTransformToPositionOnly(Transform transform)
    {
       transform.transform(position);
@@ -212,7 +362,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    {
       transform.transform(orientation);
    }
-   
+
    public void appendTransform(RigidBodyTransform transform)
    {
       QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
@@ -223,12 +373,6 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    {
       QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
       orientation.multiply(transform.getQuaternion());
-   }
-   
-   public void interpolate(Pose pose1, Pose pose2, double alpha)
-   {
-      orientation.interpolate(pose1.getOrientation(), pose2.getOrientation(), alpha);
-      position.interpolate(pose1.getPosition(), pose2.getPosition(), alpha);
    }
 
    public String printOutPosition()
@@ -241,35 +385,6 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       return orientation.toString();
    }
 
-   public void setPose(RigidBodyTransform transform)
-   {
-      transform.getRotation(orientation);
-      transform.getTranslation(position);
-   }
-
-   public void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
-   {
-      this.orientation.set(orientation);
-      this.position.set(position);
-   }
-
-   public void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
-   {
-      this.orientation.set(orientation);
-      this.position.set(position);
-   }
-
-   public void setPosition(Tuple3DReadOnly position)
-   {
-      this.position.set(position);
-   }
-
-   public void setXY(Point2DReadOnly point)
-   {
-      position.setX(point.getX());
-      position.setY(point.getY());
-   }
-
    public void getPose(RigidBodyTransform transformToPack)
    {
       transformToPack.set(orientation, position);
@@ -278,6 +393,26 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    public Point3DReadOnly getPosition()
    {
       return position;
+   }
+
+   public QuaternionReadOnly getOrientation()
+   {
+      return orientation;
+   }
+
+   public double getX()
+   {
+      return position.getX();
+   }
+
+   public double getY()
+   {
+      return position.getY();
+   }
+
+   public double getZ()
+   {
+      return position.getZ();
    }
 
    public void getPosition(Tuple3DBasics tupleToPack)
@@ -290,24 +425,9 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       transformToPack.set(orientation, position);
    }
 
-   public void setOrientation(double qx, double qy, double qz, double qs)
+   public void getPose(QuaternionBasedTransform transformToPack)
    {
-      orientation.set(qx, qy, qy, qs);
-   }
-
-   public void setOrientation(QuaternionReadOnly quaternion)
-   {
-      orientation.set(quaternion);
-   }
-
-   public void setOrientation(RotationMatrixReadOnly matrix3d)
-   {
-      orientation.set(matrix3d);
-   }
-
-   public void setOrientation(AxisAngleReadOnly axisAngle4d)
-   {
-      orientation.set(axisAngle4d);
+      transformToPack.set(orientation, position);
    }
 
    public void getOrientation(RotationMatrix matrixToPack)
@@ -341,16 +461,6 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       orientation.get(rotationVectorToPack);
    }
 
-   public void setYawPitchRoll(double[] yawPitchRoll)
-   {
-      orientation.setYawPitchRoll(yawPitchRoll);
-   }
-
-   public void setYawPitchRoll(double yaw, double pitch, double roll)
-   {
-      orientation.setYawPitchRoll(yaw, pitch, roll);
-   }
-
    public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
       orientation.getYawPitchRoll(yawPitchRollToPack);
@@ -375,318 +485,10 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    {
       return position.epsilonEquals(other.getPosition(), positionErrorMargin) && orientation.epsilonEquals(other.getOrientation(), orientationErrorMargin);
    }
-   
+
    @Override
    public String toString()
    {
       return EuclidCoreIOTools.getTuple3DString(position) + "\n" + EuclidCoreIOTools.getTuple4DString(orientation);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Transformable transformable)
-   {
-      transformable.applyTransform(transformToPoseTransformAPIMap);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
-   {
-      orientation.transform(pointOriginal, pointTransformed);
-      pointTransformed.add(position);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
-   {
-      orientation.transform(vectorOriginal, vectorTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
-   {
-      orientation.transform(quaternionOriginal, quaternionTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
-   {
-      orientation.transform(vectorOriginal, vectorTransformed);
-      vectorTransformed.addX(vectorTransformed.getS() * position.getX());
-      vectorTransformed.addY(vectorTransformed.getS() * position.getY());
-      vectorTransformed.addZ(vectorTransformed.getS() * position.getZ());
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
-   {
-      orientation.transform(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
-      pointTransformed.add(position.getX(), position.getY());
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
-   {
-      orientation.transform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
-   {
-      orientation.transform(matrixOriginal, matrixTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
-   {
-      orientation.transform(matrixOriginal, matrixTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(RigidBodyTransform original, RigidBodyTransform transformed)
-   {
-      transformed.set(orientation, position);
-      transformed.multiply(original);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToWorld(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
-   {
-      transformed.set(orientation, position);
-      transformed.multiply(original);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Transformable transformable)
-   {
-      transformable.applyTransform(transformToPoseTransformAPIMap);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
-   {
-      pointTransformed.set(pointOriginal);
-      pointTransformed.sub(position);
-      orientation.inverseTransform(pointTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
-   {
-      orientation.inverseTransform(vectorOriginal, vectorTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
-   {
-      orientation.inverseTransform(quaternionOriginal, quaternionTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
-   {
-      vectorTransformed.set(vectorOriginal);
-      vectorTransformed.subX(vectorTransformed.getS() * position.getX());
-      vectorTransformed.subY(vectorTransformed.getS() * position.getY());
-      vectorTransformed.subZ(vectorTransformed.getS() * position.getZ());
-      orientation.inverseTransform(vectorTransformed, vectorTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
-   {
-      pointTransformed.set(pointOriginal);
-      pointTransformed.sub(position.getX(), position.getY());
-      orientation.inverseTransform(pointTransformed, checkIfTransformInXYPlane);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
-   {
-      orientation.inverseTransform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
-   {
-      orientation.inverseTransform(matrixOriginal, matrixTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
-   {
-      orientation.inverseTransform(matrixOriginal, matrixTransformed);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(RigidBodyTransform original, RigidBodyTransform transformed)
-   {
-      transformed.set(orientation, position);
-      transformed.invert();
-      transformed.multiply(original);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void transformToLocal(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
-   {
-      transformed.set(orientation, position);
-      transformed.invert();
-      transformed.multiply(original);
-   }
-   
-   private class TransformToPoseTransformAPIMap implements Transform
-   {
-      @Override
-      public void transform(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
-      {
-         transformToWorld(pointOriginal, pointTransformed);
-      }
-
-      @Override
-      public void transform(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
-      {
-         transformToWorld(vectorOriginal, vectorTransformed);
-      }
-
-      @Override
-      public void transform(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
-      {
-         transformToWorld(quaternionOriginal, quaternionTransformed);
-      }
-
-      @Override
-      public void transform(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
-      {
-         transformToWorld(vectorOriginal, vectorTransformed);
-      }
-
-      @Override
-      public void transform(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
-      {
-         transformToWorld(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
-      }
-
-      @Override
-      public void transform(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
-      {
-         transformToWorld(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
-      }
-
-      @Override
-      public void transform(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
-      {
-         transformToWorld(matrixOriginal, matrixTransformed);
-      }
-
-      @Override
-      public void transform(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
-      {
-         transformToWorld(matrixOriginal, matrixTransformed);
-      }
-
-      @Override
-      public void transform(RigidBodyTransform original, RigidBodyTransform transformed)
-      {
-         transformToWorld(original, transformed);
-      }
-
-      @Override
-      public void transform(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
-      {
-         transformToWorld(original, transformed);
-      }
-
-      @Override
-      public void transform(AffineTransform original, AffineTransform transformed)
-      {
-         throw new RuntimeException("Affine transforms can't be transformed to Pose frame.");
-      }
-
-      @Override
-      public void inverseTransform(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
-      {
-         transformToLocal(pointOriginal, pointTransformed);
-      }
-
-      @Override
-      public void inverseTransform(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
-      {
-         transformToLocal(vectorOriginal, vectorTransformed);
-      }
-
-      @Override
-      public void inverseTransform(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
-      {
-         transformToLocal(quaternionOriginal, quaternionTransformed);
-      }
-
-      @Override
-      public void inverseTransform(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
-      {
-         transformToLocal(vectorOriginal, vectorTransformed);
-      }
-
-      @Override
-      public void inverseTransform(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
-      {
-         transformToLocal(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
-      }
-
-      @Override
-      public void inverseTransform(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
-      {
-         transformToLocal(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
-      }
-
-      @Override
-      public void inverseTransform(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
-      {
-         transformToLocal(matrixOriginal, matrixTransformed);
-      }
-
-      @Override
-      public void inverseTransform(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
-      {
-         transformToLocal(matrixOriginal, matrixTransformed);
-      }
-
-      @Override
-      public void inverseTransform(RigidBodyTransform original, RigidBodyTransform transformed)
-      {
-         transformToLocal(original, transformed);
-      }
-
-      @Override
-      public void inverseTransform(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
-      {
-         transformToLocal(original, transformed);
-      }
-
-      @Override
-      public void inverseTransform(AffineTransform original, AffineTransform transformed)
-      {
-         throw new RuntimeException("Affine transforms can't be transformed to Pose frame.");
-      }
    }
 }

@@ -72,7 +72,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -98,7 +98,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);

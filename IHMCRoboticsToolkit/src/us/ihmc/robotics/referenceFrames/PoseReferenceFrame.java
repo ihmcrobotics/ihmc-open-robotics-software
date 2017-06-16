@@ -134,7 +134,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void translateAndUpdate(double x, double y, double z)
    {
-      originPose.translate(x, y, z);
+      originPose.prependTranslation(x, y, z);
       this.update();
    }
 

@@ -976,7 +976,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose desiredRandomHandPose = new FramePose(fullRobotModel.getHandControlFrame(robotSide));
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          desiredRandomHandPose.changeFrame(worldFrame);
-         desiredRandomHandPose.translate(RandomGeometry.nextVector3D(random, 0.2));
+         desiredRandomHandPose.prependTranslation(RandomGeometry.nextVector3D(random, 0.2));
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();

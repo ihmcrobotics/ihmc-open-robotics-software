@@ -312,7 +312,7 @@ public abstract class DRCPushRecoveryTest
       FramePose footPose = new FramePose(
             drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
-      footPose.translate(0.0, 0.0, 0.2);
+      footPose.prependTranslation(0.0, 0.0, 0.2);
       Point3D desiredFootPosition = new Point3D();
       Quaternion desiredFootOrientation = new Quaternion();
       footPose.getPose(desiredFootPosition, desiredFootOrientation);

@@ -77,8 +77,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
    {
-      return new FramePose(referenceFrame, RandomGeometry.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ),
-                           RandomGeometry.nextQuaternion(random));
+      return new FramePose(referenceFrame, RandomGeometry.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ), RandomGeometry.nextQuaternion(random));
    }
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin,
@@ -126,17 +125,17 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
-      pose.setPose(position, orientation);
+      pose.set(position, orientation);
    }
 
    private void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
    {
-      pose.setPose(position, orientation);
+      pose.set(position, orientation);
    }
 
    public void setPose(RigidBodyTransform transform)
    {
-      pose.setPose(transform);
+      pose.set(transform);
    }
 
    public void setPoseIncludingFrame(FramePose framePose)
@@ -160,7 +159,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
-      pose.setPose(transform);
+      pose.set(transform);
       this.referenceFrame = referenceFrame;
    }
 
@@ -202,12 +201,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
-      pose.setYawPitchRoll(yawPitchRoll);
+      pose.setOrientationYawPitchRoll(yawPitchRoll);
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      pose.setYawPitchRoll(yaw, pitch, roll);
+      pose.setOrientationYawPitchRoll(yaw, pitch, roll);
    }
 
    public void setOrientation(FrameOrientation frameOrientation)
@@ -218,7 +217,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setXYFromPosition2d(FramePoint2d position2d)
    {
-      pose.setXY(position2d.getPoint());
+      pose.setPositionXY(position2d.getPoint());
    }
 
    @Override
@@ -263,7 +262,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getPositionIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
    {
-      frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPoint());
+      frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }
 
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
@@ -342,7 +341,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getPosition2dIncludingFrame(FramePoint2d framePoint2dToPack)
    {
-      framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPoint().getX(), pose.getPoint().getY());
+      framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPosition().getX(), pose.getPosition().getY());
    }
 
    public void getOrientation2dIncludingFrame(FrameOrientation2d frameOrientation2dToPack)
@@ -423,42 +422,79 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.normalizeQuaternionAndLimitToPi();
    }
 
-   public void translate(Tuple3DBasics translation)
+   public void prependTranslation(double x, double y, double z)
    {
-      pose.translate(translation);
+      pose.prependTranslation(x, y, z);
    }
 
-   public void translate(double x, double y, double z)
+   public void prependTranslation(Tuple3DReadOnly translation)
    {
-      pose.translate(x, y, z);
+      pose.prependTranslation(translation);
    }
-   
-   /**
-    * <p>Translate the pose with a translation in local frame.</p>
-    * 
-    * <p>Not thread safe. Will transform transform to world frame and back.</p>
-    * 
-    * @param localTranslation translation in local pose frame
-    */
-   public void translateLocally(Vector3DBasics localTranslation)
+
+   public void prependRotation(QuaternionReadOnly rotation)
    {
-      pose.transformToWorld(localTranslation);
-      pose.translate(localTranslation);
-      pose.transformToLocal(localTranslation);
+      pose.prependRotation(rotation);
    }
-   
-   /**
-    * <p>Rotate the pose with a translation in local frame.</p>
-    * 
-    * <p>Not thread safe. Will transform transform to world frame and back.</p>
-    * 
-    * @param localRotation translation in local pose frame
-    */
-   public void rotateLocally(QuaternionBasics localRotation)
+
+   public void prependRotation(RotationMatrixReadOnly rotation)
    {
-      pose.transformToWorld(localRotation);
-      pose.rotate(localRotation);
-      pose.transformToLocal(localRotation);
+      pose.prependRotation(rotation);
+   }
+
+   public void prependRotation(AxisAngleReadOnly rotation)
+   {
+      pose.prependRotation(rotation);
+   }
+
+   public void prependYawRotation(double yaw)
+   {
+      pose.prependYawRotation(yaw);
+   }
+
+   public void prependPitchRotation(double pitch)
+   {
+      pose.prependPitchRotation(pitch);
+   }
+
+   public void prependRollRotation(double roll)
+   {
+      pose.prependRollRotation(roll);
+   }
+
+   public void appendTranslation(double x, double y, double z)
+   {
+      pose.appendTranslation(x, y, z);
+   }
+
+   public void appendTranslation(Tuple3DReadOnly translation)
+   {
+      pose.appendTranslation(translation);
+   }
+
+   public void appendRotation(QuaternionReadOnly rotation)
+   {
+      pose.appendRotation(rotation);
+   }
+
+   public void appendRotation(RotationMatrixReadOnly rotation)
+   {
+      pose.appendRotation(rotation);
+   }
+
+   public void appendYawRotation(double yaw)
+   {
+      pose.appendYawRotation(yaw);
+   }
+
+   public void appendPitchRotation(double pitch)
+   {
+      pose.appendPitchRotation(pitch);
+   }
+
+   public void appendRollRotation(double roll)
+   {
+      pose.appendRollRotation(roll);
    }
 
    public double getX()
@@ -510,7 +546,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public FramePoint getFramePointCopy()
    {
-      FramePoint ret = new FramePoint(getReferenceFrame(), pose.getPoint());
+      FramePoint ret = new FramePoint(getReferenceFrame(), pose.getPosition());
       return ret;
    }
 
@@ -525,7 +561,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       checkReferenceFrameMatch(otherPose);
 
       FrameVector ret = new FrameVector(referenceFrame);
-      ret.sub(otherPose.pose.getPoint(), pose.getPoint());
+      ret.sub(otherPose.pose.getPosition(), pose.getPosition());
 
       return ret;
    }
@@ -554,7 +590,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    {
       checkReferenceFrameMatch(framePose);
 
-      return pose.getPoint().distance(framePose.pose.getPoint());
+      return pose.getPosition().distance(framePose.pose.getPosition());
    }
 
    public RigidBodyTransform getTransformFromThisToThat(FramePose thatPose)
@@ -595,12 +631,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       else if (rotationAngleEpsilonEqualsPlusOrMinusPi)
       {
          originToPack.setToZero(referenceFrame);
-         originToPack.interpolate(pose.getPoint(), otherPose.pose.getPoint(), 0.5);
+         originToPack.interpolate(pose.getPosition(), otherPose.pose.getPosition(), 0.5);
       }
       else
       {
-         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
-                                                       originToPack.getPoint());
+         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPosition(), otherPose.pose.getPosition(), rotationAxis.getVector(), rotationAngle,
+                                                              originToPack.getPoint());
       }
    }
 
@@ -645,7 +681,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    @Override
    public String toString()
    {
-      return "Position: " + pose.getPoint().toString() + "\n" + pose.getOrientation().toString() + "  -- " + referenceFrame.getName();
+      return "Position: " + pose.getPosition().toString() + "\n" + pose.getOrientation().toString() + "  -- " + referenceFrame.getName();
    }
 
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)

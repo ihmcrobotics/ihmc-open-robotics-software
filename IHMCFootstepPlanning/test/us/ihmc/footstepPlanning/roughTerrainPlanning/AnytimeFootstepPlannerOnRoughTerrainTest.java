@@ -57,7 +57,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       for(RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 
@@ -103,7 +103,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       for(RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 
