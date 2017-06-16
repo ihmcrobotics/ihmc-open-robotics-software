@@ -15,11 +15,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.Conversions;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.LongYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class WandererExpoFrame extends JFrame implements PlaybackListener
@@ -54,7 +51,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private final DoubleYoVariable total_time;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable walking_time;
-   private final BooleanYoVariable expo_isWalking;
+   private final YoBoolean expo_isWalking;
    private final DoubleYoVariable priorWalkingDuration;
    private final LongYoVariable startingStepCount;
    //private final EnumYoVariable<WalkingState> walkingState;
@@ -105,7 +102,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          total_time = new DoubleYoVariable("time", registry);
          startTime = new DoubleYoVariable("startTime", registry);
          walking_time = new DoubleYoVariable("walkingtime", registry);
-         expo_isWalking = new BooleanYoVariable("walk", registry);
+         expo_isWalking = new YoBoolean("walk", registry);
          startingStepCount = new LongYoVariable("expoStartingStepCount", registry);
          //walkingState = new EnumYoVariable<WalkingState>("walkingState", registry, WalkingState.class);
          priorWalkingDuration = new DoubleYoVariable("startWalkingTime", registry);
@@ -134,7 +131,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          total_time = new DoubleYoVariable("expoTime", parentRegistry);
          startTime = new DoubleYoVariable("expoStartTime", parentRegistry);
          walking_time = new DoubleYoVariable("expoWalkingTime", parentRegistry);
-         expo_isWalking = (BooleanYoVariable) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
+         expo_isWalking = (YoBoolean) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
          startingStepCount = new LongYoVariable("expoStartingStepCount", parentRegistry);
          //walkingState = (EnumYoVariable<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          priorWalkingDuration = new DoubleYoVariable("expoStartWalkingTime", parentRegistry);

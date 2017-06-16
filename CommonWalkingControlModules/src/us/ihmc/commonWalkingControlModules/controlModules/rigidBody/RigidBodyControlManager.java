@@ -27,7 +27,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -63,10 +63,10 @@ public class RigidBodyControlManager
 
    private final OneDoFJoint[] jointsToControl;
 
-   private final BooleanYoVariable allJointsEnabled;
+   private final YoBoolean allJointsEnabled;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final BooleanYoVariable stateSwitched;
+   private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          Pose homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
@@ -79,7 +79,7 @@ public class RigidBodyControlManager
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
-      stateSwitched = new BooleanYoVariable(namePrefix + "StateSwitched", registry);
+      stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
       defaultControlMode = new EnumYoVariable<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
       defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
@@ -107,7 +107,7 @@ public class RigidBodyControlManager
       else
          this.homePose = null;
 
-      allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
+      allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
 
       setupStateMachine();

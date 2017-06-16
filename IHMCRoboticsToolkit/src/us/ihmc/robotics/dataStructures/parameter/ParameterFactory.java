@@ -2,7 +2,7 @@ package us.ihmc.robotics.dataStructures.parameter;
 
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -73,14 +73,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoBoolean variable = new YoBoolean("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((BooleanYoVariable) v).getBooleanValue());
+               parameter.set(((YoBoolean) v).getBooleanValue());
             }
          });
 

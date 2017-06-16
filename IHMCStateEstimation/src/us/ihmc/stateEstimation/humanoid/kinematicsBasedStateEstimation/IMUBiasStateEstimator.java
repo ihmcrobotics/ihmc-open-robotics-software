@@ -13,7 +13,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
@@ -45,14 +45,14 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
    private final List<DoubleYoVariable> linearAccelerationMagnitudes = new ArrayList<>();
 
-   private final BooleanYoVariable enableIMUBiasCompensation = new BooleanYoVariable("enableIMUBiasCompensation", registry);
+   private final YoBoolean enableIMUBiasCompensation = new YoBoolean("enableIMUBiasCompensation", registry);
    private final DoubleYoVariable imuBiasEstimationThreshold = new DoubleYoVariable("imuBiasEstimationThreshold", registry);
    private final DoubleYoVariable biasAlphaFilter = new DoubleYoVariable("imuBiasAlphaFilter", registry);
 
    private final List<DoubleYoVariable> feetToIMUAngularVelocityMagnitudes = new ArrayList<>();
    private final List<DoubleYoVariable> feetToIMULinearVelocityMagnitudes = new ArrayList<>();
-   private final List<BooleanYoVariable> isBiasEstimated = new ArrayList<>();
-   private final List<BooleanYoVariable> isIMUOrientationBiasEstimated = new ArrayList<>();
+   private final List<YoBoolean> isBiasEstimated = new ArrayList<>();
+   private final List<YoBoolean> isIMUOrientationBiasEstimated = new ArrayList<>();
 
    private final List<? extends IMUSensorReadOnly> imuProcessedOutputs;
    private final Map<IMUSensorReadOnly, Integer> imuToIndexMap = new HashMap<>();
@@ -112,8 +112,8 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          feetToIMUAngularVelocityMagnitudes.add(new DoubleYoVariable("feetTo" + sensorName + "AngularVelocityMagnitude", registry));
          feetToIMULinearVelocityMagnitudes.add(new DoubleYoVariable("feetTo" + sensorName + "LinearVelocityMagnitude", registry));
-         isBiasEstimated.add(new BooleanYoVariable("is" + sensorName + "BiasEstimated", registry));
-         isIMUOrientationBiasEstimated.add(new BooleanYoVariable("is" + sensorName + "OrientationBiasEstimated", registry));
+         isBiasEstimated.add(new YoBoolean("is" + sensorName + "BiasEstimated", registry));
+         isIMUOrientationBiasEstimated.add(new YoBoolean("is" + sensorName + "OrientationBiasEstimated", registry));
 
          angularVelocityBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
          linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));

@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollision
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -44,9 +44,9 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
    private final IntegerYoVariable yoCollisionSeverityLevelOneToThree;
-   private final BooleanYoVariable yoForceLimitExceeded;
-   private final BooleanYoVariable yoStiffnessLimitExceeded;
-   private final BooleanYoVariable yoImpactDetected;
+   private final YoBoolean yoForceLimitExceeded;
+   private final YoBoolean yoStiffnessLimitExceeded;
+   private final YoBoolean yoImpactDetected;
    private final DoubleYoVariable yoImpactTime;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
@@ -100,9 +100,9 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoImpactForceThreshold_N = new DoubleYoVariable(forceSensorName + "ImpactForceThreshold_N", registry);
 
       yoCollisionSeverityLevelOneToThree = new IntegerYoVariable(forceSensorName + "CollisionSeverity", "", registry, 1, 3);
-      yoForceLimitExceeded = new BooleanYoVariable(forceSensorName + "forceLimitExceeded", registry);
-      yoStiffnessLimitExceeded = new BooleanYoVariable(forceSensorName + "stiffnessLimitExceeded", registry);
-      yoImpactDetected = new BooleanYoVariable(forceSensorName + "ImpactDetected", registry);
+      yoForceLimitExceeded = new YoBoolean(forceSensorName + "forceLimitExceeded", registry);
+      yoStiffnessLimitExceeded = new YoBoolean(forceSensorName + "stiffnessLimitExceeded", registry);
+      yoImpactDetected = new YoBoolean(forceSensorName + "ImpactDetected", registry);
       yoImpactDetected.set(false);
 
       yoImpactTime = new DoubleYoVariable(forceSensorName + "ImpactTime", registry);

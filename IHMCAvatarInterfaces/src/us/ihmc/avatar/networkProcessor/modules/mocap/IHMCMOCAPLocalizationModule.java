@@ -28,7 +28,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -98,9 +98,9 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
    private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
 
-   private final BooleanYoVariable requestReInitialization = new BooleanYoVariable("requestReInitialization", registry);
-   private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
-   private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
+   private final YoBoolean requestReInitialization = new YoBoolean("requestReInitialization", registry);
+   private final YoBoolean requestFootsteps = new YoBoolean("requestFootsteps", registry);
+   private final YoBoolean walkingAround = new YoBoolean("walkingAround", registry);
       
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel, MocapPlanarRegionsListManager planarRegionsListManager)
    {

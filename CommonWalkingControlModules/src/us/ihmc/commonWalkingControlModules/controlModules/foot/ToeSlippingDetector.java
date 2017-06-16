@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -31,7 +31,7 @@ public class ToeSlippingDetector
    private final DoubleYoVariable velocityThreshold;
    private final DoubleYoVariable slippageDistanceThreshold;
 
-   private final BooleanYoVariable isToeSlipping;
+   private final YoBoolean isToeSlipping;
 
    private final double dt;
    private final RigidBody foot;
@@ -57,7 +57,7 @@ public class ToeSlippingDetector
       velocityThreshold = new DoubleYoVariable(namePrefix + "VelocityThreshold", registry);
       slippageDistanceThreshold = new DoubleYoVariable(namePrefix + "SlippageDistanceThreshold", registry);
 
-      isToeSlipping = new BooleanYoVariable(namePrefix + "IsToeSlipping", registry);
+      isToeSlipping = new YoBoolean(namePrefix + "IsToeSlipping", registry);
 
       parentRegistry.addChild(registry);
    }

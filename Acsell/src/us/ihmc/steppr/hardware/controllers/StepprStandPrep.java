@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -39,12 +39,12 @@ public class StepprStandPrep implements StepprController
 
    private final EnumDoubleMap<StepprJoint> initialPositions = new EnumDoubleMap<>(StepprJoint.class);
 
-   private final BooleanYoVariable startStandprep = new BooleanYoVariable("startStandprep", registry);
+   private final YoBoolean startStandprep = new YoBoolean("startStandprep", registry);
    private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
 
    private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableStandPrepOutput", registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)

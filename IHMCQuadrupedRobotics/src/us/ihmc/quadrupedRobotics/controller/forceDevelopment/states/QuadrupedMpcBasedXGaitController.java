@@ -31,7 +31,7 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -117,7 +117,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
-   private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
+   private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider,

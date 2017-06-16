@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.planarWalker;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -45,8 +45,8 @@ public class PeterPlanarWalkerController implements RobotController
    private DoubleYoVariable stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
 
    private DoubleYoVariable swingTimeForThisStep = new DoubleYoVariable("swingTimeForThisStep", registry);
-   private BooleanYoVariable initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
-   private BooleanYoVariable initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
+   private YoBoolean initalizedKneeExtension = new YoBoolean("initalizedKneeExtension", registry);
+   private YoBoolean initalizedKneeDoubleExtension = new YoBoolean("initalizedKneeDoubleExtension", registry);
 
    private DoubleYoVariable kneeMoveStartTime = new DoubleYoVariable("kneeMoveStartTime", registry);
    private DoubleYoVariable startingHipAngle = new DoubleYoVariable("startingHipAngle", registry);

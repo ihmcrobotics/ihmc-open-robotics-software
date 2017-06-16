@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -17,7 +17,7 @@ public class QuinticSplineInterpolator
    private final int numberOfSplines;
 
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable initialized;
+   private final YoBoolean initialized;
 
    // Matrices used internally to calculate constants
    private DenseMatrix64F h;
@@ -55,7 +55,7 @@ public class QuinticSplineInterpolator
       this.numberOfSplines = numberOfSplines;
 
       registry = new YoVariableRegistry(name);
-      initialized = new BooleanYoVariable("initialized", registry);
+      initialized = new YoBoolean("initialized", registry);
       initialized.set(false);
 
       h = new DenseMatrix64F(pointsToInterpolate - 1, 1);
@@ -332,7 +332,7 @@ public class QuinticSplineInterpolator
       private final DoubleYoVariable[] e;
       private final DoubleYoVariable[] f;
 
-      private final BooleanYoVariable coefficientsSet;
+      private final YoBoolean coefficientsSet;
 
       public QuinticSpline(String name, int pointsToInterpolate, YoVariableRegistry parentRegistry)
       {
@@ -346,7 +346,7 @@ public class QuinticSplineInterpolator
          e = new DoubleYoVariable[segments];
          f = new DoubleYoVariable[segments];
 
-         coefficientsSet = new BooleanYoVariable("initialized", registry);
+         coefficientsSet = new YoBoolean("initialized", registry);
          coefficientsSet.set(false);
 
          for (int i = 0; i < segments; i++)

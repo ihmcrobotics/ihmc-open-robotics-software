@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -38,8 +38,8 @@ import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private final BooleanYoVariable replanTrajectory;
-   private final BooleanYoVariable doContinuousReplanning;
+   private final YoBoolean replanTrajectory;
+   private final YoBoolean doContinuousReplanning;
 
    private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
@@ -84,16 +84,16 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleYoVariable swingTimeSpeedUpFactor;
    private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
    private final DoubleYoVariable minSwingTimeForDisturbanceRecovery;
-   private final BooleanYoVariable isSwingSpeedUpEnabled;
+   private final YoBoolean isSwingSpeedUpEnabled;
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
 
-   private final BooleanYoVariable doHeelTouchdownIfPossible;
+   private final YoBoolean doHeelTouchdownIfPossible;
    private final DoubleYoVariable heelTouchdownAngle;
    private final DoubleYoVariable maximumHeightForHeelTouchdown;
    private final DoubleYoVariable heelTouchdownLengthRatio;
 
-   private final BooleanYoVariable doToeTouchdownIfPossible;
+   private final YoBoolean doToeTouchdownIfPossible;
    private final DoubleYoVariable toeTouchdownAngle;
    private final DoubleYoVariable stepDownHeightForToeTouchdown;
    private final DoubleYoVariable toeTouchdownDepthRatio;
@@ -150,7 +150,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       finalSwingHeightOffset = new DoubleYoVariable(namePrefix + "SwingFinalHeightOffset", registry);
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
-      replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
+      replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
 
       minHeightDifferenceForObstacleClearance = new DoubleYoVariable(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
       minHeightDifferenceForObstacleClearance.set(walkingControllerParameters.getMinHeightDifferenceForStepUpOrDown());
@@ -159,7 +159,7 @@ public class SwingState extends AbstractUnconstrainedState
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
 
-      doHeelTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoHeelTouchdownIfPossible", registry);
+      doHeelTouchdownIfPossible = new YoBoolean(namePrefix + "DoHeelTouchdownIfPossible", registry);
       heelTouchdownAngle = new DoubleYoVariable(namePrefix + "HeelTouchdownAngle", registry);
       maximumHeightForHeelTouchdown = new DoubleYoVariable(namePrefix + "MaximumHeightForHeelTouchdown", registry);
       heelTouchdownLengthRatio = new DoubleYoVariable(namePrefix + "HeelTouchdownLengthRatio", registry);
@@ -168,7 +168,7 @@ public class SwingState extends AbstractUnconstrainedState
       maximumHeightForHeelTouchdown.set(walkingControllerParameters.getMaximumHeightForHeelTouchdown());
       heelTouchdownLengthRatio.set(walkingControllerParameters.getHeelTouchdownLengthRatio());
 
-      doToeTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoToeTouchdownIfPossible", registry);
+      doToeTouchdownIfPossible = new YoBoolean(namePrefix + "DoToeTouchdownIfPossible", registry);
       toeTouchdownAngle = new DoubleYoVariable(namePrefix + "ToeTouchdownAngle", registry);
       stepDownHeightForToeTouchdown = new DoubleYoVariable(namePrefix + "StepDownHeightForToeTouchdown", registry);
       toeTouchdownDepthRatio = new DoubleYoVariable(namePrefix + "ToeTouchdownDepthRatio", registry);
@@ -178,7 +178,7 @@ public class SwingState extends AbstractUnconstrainedState
       toeTouchdownDepthRatio.set(walkingControllerParameters.getToeTouchdownDepthRatio());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
-      doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
+      doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
 
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
@@ -218,7 +218,7 @@ public class SwingState extends AbstractUnconstrainedState
       maxSwingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
       currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
       currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
-      isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
+      isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());

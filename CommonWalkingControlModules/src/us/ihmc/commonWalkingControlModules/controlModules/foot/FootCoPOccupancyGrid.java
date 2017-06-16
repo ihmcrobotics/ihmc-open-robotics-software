@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -42,7 +42,7 @@ public class FootCoPOccupancyGrid
 
    private final IntegerYoVariable currentXIndex;
    private final IntegerYoVariable currentYIndex;
-   private final BooleanYoVariable areCurrentCoPIndicesValid;
+   private final YoBoolean areCurrentCoPIndicesValid;
 
    private final YoFramePoint[][] cellViz;
 
@@ -60,7 +60,7 @@ public class FootCoPOccupancyGrid
    private final DenseMatrix64F occupancyGrid = new DenseMatrix64F(1, 1);
 
    private final DoubleYoVariable decayRate;
-   private final BooleanYoVariable resetGridToEmpty;
+   private final YoBoolean resetGridToEmpty;
 
    public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
          int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
@@ -100,12 +100,12 @@ public class FootCoPOccupancyGrid
          decayRate.set(defaultDecayRate);
       }
 
-      resetGridToEmpty = new BooleanYoVariable(namePrefix + name + "Reset", registry);
+      resetGridToEmpty = new YoBoolean(namePrefix + name + "Reset", registry);
       resetGridToEmpty.set(false);
 
       currentXIndex = new IntegerYoVariable(namePrefix + "CurrentXIndex", registry);
       currentYIndex = new IntegerYoVariable(namePrefix + "CurrentYIndex", registry);
-      areCurrentCoPIndicesValid = new BooleanYoVariable(namePrefix + "IsCurrentCoPIndicesValid", registry);
+      areCurrentCoPIndicesValid = new YoBoolean(namePrefix + "IsCurrentCoPIndicesValid", registry);
 
       cellSize = new YoFrameVector2d(namePrefix + "CellSize", soleFrame, registry);
       cellArea = new DoubleYoVariable(namePrefix + "CellArea", registry);

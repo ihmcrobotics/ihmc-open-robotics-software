@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -57,8 +57,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    
    private final SideDependentList<YoGraphicPolygon> footstepStartsViz, footstepGoalsViz, footstepsUnderConsiderationViz, acceptedFootstepsViz, rejectedFootstepsViz;
 
-   private final BooleanYoVariable leftNodeIsAtGoal, rightNodeIsAtGoal;
-   private final SideDependentList<BooleanYoVariable> nodeIsAtGoal;
+   private final YoBoolean leftNodeIsAtGoal, rightNodeIsAtGoal;
+   private final SideDependentList<YoBoolean> nodeIsAtGoal;
 
    private final EnumYoVariable<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
 
@@ -130,8 +130,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       acceptedFootstepsViz = new SideDependentList<>(leftAcceptedFootstepViz, rightAcceptedFootstepViz);
       rejectedFootstepsViz = new SideDependentList<>(leftRejectedFootstepViz, rightRejectedFootstepViz);
 
-      leftNodeIsAtGoal = new BooleanYoVariable("leftNodeIsAtGoal", registry);
-      rightNodeIsAtGoal = new BooleanYoVariable("rightNodeIsAtGoal", registry);
+      leftNodeIsAtGoal = new YoBoolean("leftNodeIsAtGoal", registry);
+      rightNodeIsAtGoal = new YoBoolean("rightNodeIsAtGoal", registry);
       nodeIsAtGoal = new SideDependentList<>(leftNodeIsAtGoal, rightNodeIsAtGoal);
 
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepStartViz);

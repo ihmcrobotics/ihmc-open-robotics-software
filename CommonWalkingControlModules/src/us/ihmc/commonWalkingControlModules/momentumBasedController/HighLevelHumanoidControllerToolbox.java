@@ -29,7 +29,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -530,8 +530,8 @@ public class HighLevelHumanoidControllerToolbox
    private final Wrench footWrench = new Wrench();
    private final FrameVector footForceVector = new FrameVector();
 
-   private final BooleanYoVariable enableHighCoPDampingForShakies = new BooleanYoVariable("enableHighCoPDampingForShakies", registry);
-   private final BooleanYoVariable isCoPTrackingBad = new BooleanYoVariable("isCoPTrackingBad", registry);
+   private final YoBoolean enableHighCoPDampingForShakies = new YoBoolean("enableHighCoPDampingForShakies", registry);
+   private final YoBoolean isCoPTrackingBad = new YoBoolean("isCoPTrackingBad", registry);
    private final DoubleYoVariable highCoPDampingErrorTrigger = new DoubleYoVariable("highCoPDampingErrorTrigger", registry);
    private final DoubleYoVariable highCoPDampingStartTime = new DoubleYoVariable("highCoPDampingStartTime", registry);
    private final DoubleYoVariable highCoPDampingDuration = new DoubleYoVariable("highCoPDampingDuration", registry);

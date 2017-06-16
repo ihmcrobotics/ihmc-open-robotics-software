@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -30,7 +30,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final OrientationProvider initialOrientationProvider;
    private final OrientationProvider finalOrientationProvider;
 
-   private final BooleanYoVariable continuouslyUpdateFinalOrientation;
+   private final YoBoolean continuouslyUpdateFinalOrientation;
    
    private final FrameOrientation tempInitialOrientation;
    private final FrameOrientation tempFinalOrientation;
@@ -48,7 +48,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       
       this.initialOrientation = new YoFrameQuaternion(namePrefix + "InitialOrientation", referenceFrame, registry);
       this.finalOrientation = new YoFrameQuaternion(namePrefix + "FinalOrientation", referenceFrame, registry);
-      this.continuouslyUpdateFinalOrientation = new BooleanYoVariable(namePrefix + "ContinuouslyUpdate", registry);
+      this.continuouslyUpdateFinalOrientation = new YoBoolean(namePrefix + "ContinuouslyUpdate", registry);
       
       this.desiredOrientation = new YoFrameQuaternion(namePrefix + "desiredOrientation", referenceFrame, registry);
       this.desiredAngularVelocity = new YoFrameVector(namePrefix + "desiredAngularVelocity", referenceFrame, registry);

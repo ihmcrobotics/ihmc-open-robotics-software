@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -81,24 +81,24 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
    private final DoubleYoVariable yoStableLoRAngularVelocityThreshold;
-   private final BooleanYoVariable yoIsLoRStable;
+   private final YoBoolean yoIsLoRStable;
 
    /** Threshold on the transversal velocity of the CoR w.r.t. the LoR to determine whether or not the CoR is stable. */
    private final DoubleYoVariable yoStableCoRLinearVelocityThreshold;
-   private final BooleanYoVariable yoIsCoRStable;
+   private final YoBoolean yoIsCoRStable;
 
    /** Threshold on the foot angular velocity around the line of rotation. */
    private final DoubleYoVariable yoAngularVelocityAroundLoRThreshold;
-   private final BooleanYoVariable yoIsAngularVelocityAroundLoRPastThreshold;
+   private final YoBoolean yoIsAngularVelocityAroundLoRPastThreshold;
 
    /** Threshold on the foot drop around the line of rotation. */
    private final DoubleYoVariable yoFootDropThreshold;
-   private final BooleanYoVariable yoIsFootDropPastThreshold;
+   private final YoBoolean yoIsFootDropPastThreshold;
 
    /** Main output of this class that informs on wether or not the foot is rotating. */
-   private final BooleanYoVariable yoIsFootRotating;
+   private final YoBoolean yoIsFootRotating;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final YoBoolean hasBeenInitialized;
 
    private final FrameVector angularVelocity = new FrameVector();
    private final FrameVector2d angularVelocity2d = new FrameVector2d();
@@ -172,20 +172,20 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoFootDropOrLift = new DoubleYoVariable(namePrefix + "FootDropOrLift", generalDescription, registry);
 
       yoStableLoRAngularVelocityThreshold = explorationParameters.getStableLoRAngularVelocityThreshold();
-      yoIsLoRStable = new BooleanYoVariable(namePrefix + "IsLoRStable", generalDescription, registry);
+      yoIsLoRStable = new YoBoolean(namePrefix + "IsLoRStable", generalDescription, registry);
 
       yoStableCoRLinearVelocityThreshold = explorationParameters.getStableCoRLinearVelocityThreshold();
-      yoIsCoRStable = new BooleanYoVariable(namePrefix + "IsCoRStable", generalDescription, registry);
+      yoIsCoRStable = new YoBoolean(namePrefix + "IsCoRStable", generalDescription, registry);
 
       yoAngularVelocityAroundLoRThreshold = explorationParameters.getAngularVelocityAroundLoRThreshold();
-      yoIsAngularVelocityAroundLoRPastThreshold = new BooleanYoVariable(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
+      yoIsAngularVelocityAroundLoRPastThreshold = new YoBoolean(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
 
       yoFootDropThreshold = explorationParameters.getFootDropThreshold();
-      yoIsFootDropPastThreshold = new BooleanYoVariable(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
+      yoIsFootDropPastThreshold = new YoBoolean(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
 
-      yoIsFootRotating = new BooleanYoVariable(namePrefix + "RotatingVelocity", generalDescription, registry);
+      yoIsFootRotating = new YoBoolean(namePrefix + "RotatingVelocity", generalDescription, registry);
 
-      hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
+      hasBeenInitialized = new YoBoolean(namePrefix + "HasBeenInitialized", registry);
 
       angularVelocity2d.setToZero(soleFrame);
       lineOfRotationInSoleFrame.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0, 0.0);

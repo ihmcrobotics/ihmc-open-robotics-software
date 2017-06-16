@@ -1,7 +1,7 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 
 public class ControlMode implements AcsellSlowSensor
@@ -17,13 +17,13 @@ public class ControlMode implements AcsellSlowSensor
    }
    
    private final EnumYoVariable<ControlModeEnum> controlMode;
-   private final BooleanYoVariable thermalShutdown;
+   private final YoBoolean thermalShutdown;
    
    
    public ControlMode(String name, YoVariableRegistry registry)
    {
       controlMode = new EnumYoVariable<>(name + "ControlMode", registry, ControlModeEnum.class, true);
-      thermalShutdown = new BooleanYoVariable(name + "ThermalShutdown", registry);
+      thermalShutdown = new YoBoolean(name + "ThermalShutdown", registry);
    }
 
    @Override

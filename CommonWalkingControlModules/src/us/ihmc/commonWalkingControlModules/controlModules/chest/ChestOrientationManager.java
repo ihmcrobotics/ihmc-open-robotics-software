@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -36,7 +36,7 @@ public class ChestOrientationManager
    private final GenericStateMachine<ChestControlMode, ChestControlState> stateMachine;
    private final EnumYoVariable<ChestControlMode> requestedState = new EnumYoVariable<>("chestRequestedControlMode", registry, ChestControlMode.class, true);
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable(getClass().getSimpleName() + "Initialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean(getClass().getSimpleName() + "Initialized", registry);
 
    private final TaskspaceChestControlState taskspaceChestControlState;
    private final JointspaceChestControlState jointspaceChestControlState;

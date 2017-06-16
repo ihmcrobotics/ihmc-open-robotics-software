@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -25,8 +25,8 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final DoubleYoVariable sleepTime = new DoubleYoVariable("BehaviorSleepTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable("BehaviorTransferTime", registry);
    private final DoubleYoVariable stepLength = new DoubleYoVariable("BehaviorStepLength", registry);
-   private final BooleanYoVariable stepInPlace = new BooleanYoVariable("StepInPlace", registry);
-   private final BooleanYoVariable abortBehavior = new BooleanYoVariable("AbortBehavior", registry);
+   private final YoBoolean stepInPlace = new YoBoolean("StepInPlace", registry);
+   private final YoBoolean abortBehavior = new YoBoolean("AbortBehavior", registry);
 
    private final YoStopwatch timer;
 

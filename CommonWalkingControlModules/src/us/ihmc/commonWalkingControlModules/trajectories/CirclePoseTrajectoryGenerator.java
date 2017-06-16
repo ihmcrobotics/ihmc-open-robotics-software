@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -54,7 +54,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final DoubleYoVariable initialAngle;
    private final DoubleYoVariable currentRelativeAngle;
 
-   private final BooleanYoVariable isCurrentAngleBeingAdjusted;
+   private final YoBoolean isCurrentAngleBeingAdjusted;
    private final DoubleYoVariable maximumAngleTrackingErrorTolerated;
    private final DoubleYoVariable currentControlledFrameRelativeAngle;
    private final DoubleYoVariable currentAngleTrackingError;
@@ -112,8 +112,8 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePose tangentialCircleFramePose = new FramePose();
    private final YoFramePose yoTangentialCircleFramePose;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
-   private final BooleanYoVariable showViz;
+   /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
+   private final YoBoolean showViz;
 
    public CirclePoseTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, DoubleProvider trajectoryTimeProvider,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -135,7 +135,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       initialAngle = new DoubleYoVariable(namePrefix + "InitialAngle", registry);
       finalAngle = new DoubleYoVariable(namePrefix + "FinalAngle", registry);
 
-      isCurrentAngleBeingAdjusted = new BooleanYoVariable(namePrefix + "IsCurrentAngleBeingAdjusted", registry);
+      isCurrentAngleBeingAdjusted = new YoBoolean(namePrefix + "IsCurrentAngleBeingAdjusted", registry);
       maximumAngleTrackingErrorTolerated = new DoubleYoVariable(namePrefix + "MaxAngleTrackingErrorTolerated", registry);
       maximumAngleTrackingErrorTolerated.set(Math.toRadians(30.0));
       currentControlledFrameRelativeAngle = new DoubleYoVariable(namePrefix + "CurrentControlledFrameAngle", registry);
@@ -210,7 +210,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
-         showViz = new BooleanYoVariable(namePrefix + "ShowViz", registry);
+         showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             public void variableChanged(YoVariable<?> v)

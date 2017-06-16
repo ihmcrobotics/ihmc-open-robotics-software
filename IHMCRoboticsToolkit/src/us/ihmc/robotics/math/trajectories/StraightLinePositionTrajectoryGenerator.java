@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -33,7 +33,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    private final FramePoint tempInitialPosition;
    private final FramePoint tempFinalPosition;
 
-   private final BooleanYoVariable continuouslyUpdateFinalPosition;
+   private final YoBoolean continuouslyUpdateFinalPosition;
    private final DoubleProvider trajectoryTimeProvider;
 
    public StraightLinePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
@@ -52,7 +52,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       this.parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
       this.initialPosition = new YoFramePoint(namePrefix + "InitialPos", referenceFrame, registry);
       this.finalPosition = new YoFramePoint(namePrefix + "FinalPos", referenceFrame, registry);
-      this.continuouslyUpdateFinalPosition = new BooleanYoVariable(namePrefix + "ContinuouslyUpdate", registry);
+      this.continuouslyUpdateFinalPosition = new YoBoolean(namePrefix + "ContinuouslyUpdate", registry);
 
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;

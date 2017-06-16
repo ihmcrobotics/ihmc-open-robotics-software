@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -19,7 +19,7 @@ public class StepprDeflectionMeasurement implements StepprController
    private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> desiredForces = new EnumMap<>(StepprStandPrepSetpoints.class);
    private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> dampingValues = new EnumMap<>(StepprStandPrepSetpoints.class);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableForceOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableForceOutput", registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)

@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointT
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
@@ -38,10 +38,10 @@ public class JointSpaceHandControlState extends HandControlState
    private final YoPIDGains gains;
    private final DoubleYoVariable weight;
 
-   private final BooleanYoVariable abortJointspaceControlState;
+   private final YoBoolean abortJointspaceControlState;
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final YoBoolean isReadyToHandleQueuedCommands;
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfQueuedCommands = new HashMap<>();
    private final Map<OneDoFJoint, RecyclingArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
 
@@ -79,8 +79,8 @@ public class JointSpaceHandControlState extends HandControlState
          commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class));
       }
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
-      abortJointspaceControlState = new BooleanYoVariable(namePrefix + "AbortJointspaceControlState", registry);
+      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      abortJointspaceControlState = new YoBoolean(namePrefix + "AbortJointspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 

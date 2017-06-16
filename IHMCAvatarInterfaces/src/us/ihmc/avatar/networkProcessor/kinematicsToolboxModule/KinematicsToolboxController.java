@@ -43,7 +43,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -151,10 +151,10 @@ public class KinematicsToolboxController extends ToolboxController
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
 
    /**
-    * Updated during the initialization phase, this set of two {@link BooleanYoVariable}s is used to
+    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to
     * know which foot is currently used for support in the walking controller.
     */
-   private final SideDependentList<BooleanYoVariable> isFootInSupport = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>();
    /**
     * Updated during the initialization phase, this is where the poses of the feet are stored so
     * they can be held in place during the optimization process such that the solution will be
@@ -173,13 +173,13 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code true} by default but can be disabled using the message
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final BooleanYoVariable holdSupportFootPose = new BooleanYoVariable("holdSupportFootPose", registry);
+   private final YoBoolean holdSupportFootPose = new YoBoolean("holdSupportFootPose", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run.
     * It is {@code true} by default but can be disabled using the message
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final BooleanYoVariable holdCenterOfMassXYPosition = new BooleanYoVariable("holdCenterOfMassXYPosition", registry);
+   private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
 
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
@@ -321,7 +321,7 @@ public class KinematicsToolboxController extends ToolboxController
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new BooleanYoVariable("is" + side + "FootInSupport", registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
       }
 

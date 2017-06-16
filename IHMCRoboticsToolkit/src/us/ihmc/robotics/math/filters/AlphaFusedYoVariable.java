@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
@@ -36,12 +36,12 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
    private final DoubleYoVariable fastSignal;
    private final DoubleYoVariable steadyStateOffset;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -57,7 +57,7 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
    public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha, DoubleYoVariable slowSignal, DoubleYoVariable fastSignal)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -74,7 +74,7 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
          DoubleYoVariable fastSignal)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = 0.0;
       this.alphaVariable = alphaVariable;

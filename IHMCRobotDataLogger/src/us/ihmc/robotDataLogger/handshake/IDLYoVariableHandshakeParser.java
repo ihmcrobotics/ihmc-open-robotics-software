@@ -29,12 +29,8 @@ import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.LongYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * Class to decode variable data from handshakes
@@ -149,7 +145,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             break;
 
          case BooleanYoVariable:
-            BooleanYoVariable boolVar = new BooleanYoVariable(name, parent);
+            YoBoolean boolVar = new YoBoolean(name, parent);
             variableList.add(boolVar);
             break;
 

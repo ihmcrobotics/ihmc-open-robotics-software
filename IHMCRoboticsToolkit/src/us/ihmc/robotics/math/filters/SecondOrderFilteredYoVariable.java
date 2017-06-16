@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
@@ -37,7 +37,7 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
 {
    private final double dt;
    private final SecondOrderFilteredYoVariableParameters parameters;
-   protected final BooleanYoVariable hasBeenCalled;
+   protected final YoBoolean hasBeenCalled;
    private final DoubleYoVariable inputVariable;
    private final DoubleYoVariable[] input;
    private final DoubleYoVariable[] output;
@@ -67,7 +67,7 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
       super(name, registry);
       this.dt = dt;
       this.parameters = parameters;
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
       this.inputVariable = inputVariable;
       this.input = new DoubleYoVariable[3];
       this.output = new DoubleYoVariable[3];

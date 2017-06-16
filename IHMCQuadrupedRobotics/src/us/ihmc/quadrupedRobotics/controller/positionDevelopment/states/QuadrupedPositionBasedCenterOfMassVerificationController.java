@@ -23,7 +23,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -498,7 +498,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       private final HashMap<TrotPair, CenterOfMassIncrementVariableHolder> incrementHolders = new HashMap<>();
       private final double totalMass;
       private final double bodyMass;
-      private final BooleanYoVariable shiftCoMOverCenterOfFeet = new BooleanYoVariable("shiftCoMOverCenterOfFeet", registry);
+      private final YoBoolean shiftCoMOverCenterOfFeet = new YoBoolean("shiftCoMOverCenterOfFeet", registry);
 
       public MoveCenterOfMassAround()
       {

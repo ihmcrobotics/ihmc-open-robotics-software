@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -27,8 +27,8 @@ public class UserDesiredHandPoseControllerCommandGenerator
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable userDoHandPose = new BooleanYoVariable("userDoHandPose", registry);
-   private final BooleanYoVariable userDesiredSetHandPoseToActual = new BooleanYoVariable("userDesiredSetHandPoseToActual", registry);
+   private final YoBoolean userDoHandPose = new YoBoolean("userDoHandPose", registry);
+   private final YoBoolean userDesiredSetHandPoseToActual = new YoBoolean("userDesiredSetHandPoseToActual", registry);
 
    private final DoubleYoVariable userDesiredHandPoseTrajectoryTime = new DoubleYoVariable("userDesiredHandPoseTrajectoryTime", registry);
 

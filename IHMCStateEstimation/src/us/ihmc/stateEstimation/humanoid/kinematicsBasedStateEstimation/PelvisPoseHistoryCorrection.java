@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBu
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -97,7 +97,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final DoubleYoVariable interpolationTranslationAlphaFilterAlphaValue;
    private final DoubleYoVariable interpolationRotationAlphaFilterAlphaValue;
 
-   private final BooleanYoVariable manuallyTriggerLocalizationUpdate;
+   private final YoBoolean manuallyTriggerLocalizationUpdate;
    private final DoubleYoVariable manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
    private final DoubleYoVariable manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
 
@@ -212,7 +212,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
       //      distanceError = new DoubleYoVariable("distanceError", registry);
 
-      manuallyTriggerLocalizationUpdate = new BooleanYoVariable("manuallyTriggerLocalizationUpdate", registry);
+      manuallyTriggerLocalizationUpdate = new YoBoolean("manuallyTriggerLocalizationUpdate", registry);
 
       manualTranslationOffsetX = new DoubleYoVariable("manualTranslationOffset_X", registry);
       manualTranslationOffsetY = new DoubleYoVariable("manualTranslationOffset_Y", registry);

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule.RotationCalculatorType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -29,7 +29,7 @@ public class ExplorationParameters
    private static final double defaultCopGridDecayAlpha = 1.0;
 
    /** Parameters for the partial foothold control module */
-   private final BooleanYoVariable useCopOccupancyGrid;
+   private final YoBoolean useCopOccupancyGrid;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
    private final IntegerYoVariable shrinkMaxLimit;
@@ -90,7 +90,7 @@ public class ExplorationParameters
       copGridDecayAlpha.set(defaultCopGridDecayAlpha);
 
       namePrefix = "ExplorationFoothold_";
-      useCopOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCopOccupancyGrid", registry);
+      useCopOccupancyGrid = new YoBoolean(namePrefix + "UseCopOccupancyGrid", registry);
       useCopOccupancyGrid.set(defaultUseCopOccupancyGrid);
       thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
       thresholdForCoPRegionOccupancy.set(defaultThresholdForCoPRegionOccupancy);
@@ -154,7 +154,7 @@ public class ExplorationParameters
       return copGridDecayAlpha;
    }
 
-   public BooleanYoVariable getUseCopOccupancyGrid()
+   public YoBoolean getUseCopOccupancyGrid()
    {
       return useCopOccupancyGrid;
    }

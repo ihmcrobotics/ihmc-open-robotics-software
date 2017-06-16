@@ -23,7 +23,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
@@ -35,7 +35,7 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 public class SphereDetectionBehavior extends AbstractBehavior
 {
 
-   private BooleanYoVariable ballFound = new BooleanYoVariable("ballFound", registry);
+   private YoBoolean ballFound = new YoBoolean("ballFound", registry);
    private DoubleYoVariable ballRadius = new DoubleYoVariable("ballRadius", registry);
    private DoubleYoVariable ballX = new DoubleYoVariable("ballX", registry);
    private DoubleYoVariable ballY = new DoubleYoVariable("ballY", registry);

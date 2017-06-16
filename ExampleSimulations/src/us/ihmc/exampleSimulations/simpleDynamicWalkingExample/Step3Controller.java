@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +33,7 @@ public class Step3Controller implements RobotController
    private DoubleYoVariable controlHipTau;
    private DoubleYoVariable controlKneeForce;
 
-   private BooleanYoVariable onTheFloor;
+   private YoBoolean onTheFloor;
    private DoubleYoVariable gcHeightRight;
 
    private double ffComponent = -38.0 * 9.81;
@@ -75,7 +75,7 @@ public class Step3Controller implements RobotController
       desiredKneeZ.set(0.2);
       controlKneeForce = new DoubleYoVariable("controlKneeForce", controllerRegistry);
 
-      onTheFloor = new BooleanYoVariable("onTheFloor", controllerRegistry);
+      onTheFloor = new YoBoolean("onTheFloor", controllerRegistry);
       onTheFloor.set(true);
 
       gcHeightRight = new DoubleYoVariable("gcHeightRight", controllerRegistry);

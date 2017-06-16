@@ -6,7 +6,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -1313,15 +1313,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class ReadyToStartWalkingCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBack;
+      private final YoBoolean enoughTimePassed, supportLegIsBack;
 
       public ReadyToStartWalkingCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_RTS_" + supportSide, "Check if enough time passed to start walking",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_RTS_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         supportLegIsBack = new BooleanYoVariable("supportLegIsBack_RTS_" + supportSide, "Check if the support leg for this transition is the reward leg",
+         supportLegIsBack = new YoBoolean("supportLegIsBack_RTS_" + supportSide, "Check if the support leg for this transition is the reward leg",
                                            registry);
       }
 
@@ -1348,18 +1348,18 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SupportToToeOffCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBackAndUnloaded, otherSideInSupport;
+      private final YoBoolean enoughTimePassed, supportLegIsBackAndUnloaded, otherSideInSupport;
 
       public SupportToToeOffCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_STTO_" + supportSide, "Check if enough time passed to start walking",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_STTO_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         otherSideInSupport = new BooleanYoVariable("otherSideInSupport_TOTS_" + supportSide, "Check if other side is in support before going to toe off",
+         otherSideInSupport = new YoBoolean("otherSideInSupport_TOTS_" + supportSide, "Check if other side is in support before going to toe off",
                  registry);
 
-         supportLegIsBackAndUnloaded = new BooleanYoVariable("supportLegIsBackAndUnloaded_STTO_" + supportSide,
+         supportLegIsBackAndUnloaded = new YoBoolean("supportLegIsBackAndUnloaded_STTO_" + supportSide,
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
@@ -1394,15 +1394,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class ToeOffToSwingCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBackAndUnloaded;
+      private final YoBoolean enoughTimePassed, supportLegIsBackAndUnloaded;
 
       public ToeOffToSwingCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_TOTS_" + supportSide, "Check if enough time passed to start walking", 
+         enoughTimePassed = new YoBoolean("enoughTimePassed_TOTS_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         supportLegIsBackAndUnloaded = new BooleanYoVariable("supportLegIsBackAndUnloaded_TOTS_" + supportSide,
+         supportLegIsBackAndUnloaded = new YoBoolean("supportLegIsBackAndUnloaded_TOTS_" + supportSide,
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
@@ -1446,15 +1446,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SwingToSupportCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, swingFootHitGround;
+      private final YoBoolean enoughTimePassed, swingFootHitGround;
 
       public SwingToSupportCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_STS_" + supportSide, "Check if enough time passed to ensure swing is done",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_STS_" + supportSide, "Check if enough time passed to ensure swing is done",
                                             registry);
-         swingFootHitGround = new BooleanYoVariable("swingFootHitGround_STS_" + supportSide, "Check if the swing foot hit the ground", 
+         swingFootHitGround = new YoBoolean("swingFootHitGround_STS_" + supportSide, "Check if the swing foot hit the ground",
                  registry);
       }
 

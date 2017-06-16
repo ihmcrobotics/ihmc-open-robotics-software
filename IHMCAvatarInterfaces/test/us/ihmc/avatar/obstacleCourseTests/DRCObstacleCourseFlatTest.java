@@ -292,7 +292,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -393,7 +393,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -504,7 +504,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();

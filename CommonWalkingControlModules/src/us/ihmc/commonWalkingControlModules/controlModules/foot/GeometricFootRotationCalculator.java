@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -68,7 +68,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
    private final DoubleYoVariable angleFootGround;
    private final DoubleYoVariable angleTreshold;
-   private final BooleanYoVariable footRotating;
+   private final YoBoolean footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix,
          ContactablePlaneBody contactableFoot,
@@ -84,7 +84,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
       angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
       angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
-      footRotating = new BooleanYoVariable(namePrefix + "RotatingGeometry", registry);
+      footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
 
       copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
       copFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered",

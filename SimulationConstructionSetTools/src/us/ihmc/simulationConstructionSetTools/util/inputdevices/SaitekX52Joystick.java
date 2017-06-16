@@ -7,7 +7,7 @@ import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationConstructionSetTools.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
@@ -90,7 +90,7 @@ public class SaitekX52Joystick
    
    public void mapBooleanVariableToComponent(YoVariableHolder holder, SaitekX52Mapping mapping, String variableName, boolean toggle, boolean invert)
    {
-      BooleanYoVariable yoVariable = (BooleanYoVariable) holder.getVariable(variableName);
+      YoBoolean yoVariable = (YoBoolean) holder.getVariable(variableName);
       if (yoVariable != null)
       {
          mapBooleanVariableToComponent(mapping, yoVariable, toggle, invert);
@@ -101,7 +101,7 @@ public class SaitekX52Joystick
       }
    }
 
-   public void mapBooleanVariableToComponent(SaitekX52Mapping mapping, BooleanYoVariable yoVariable, boolean toggle, boolean invert)
+   public void mapBooleanVariableToComponent(SaitekX52Mapping mapping, YoBoolean yoVariable, boolean toggle, boolean invert)
    {
       Component component = joystick.findComponent(mapping.getIdentifier());
       BooleanYoVariableJoystickEventListener booleanYoVariableJoystickEventListener = new BooleanYoVariableJoystickEventListener(yoVariable, component, toggle, invert);

@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -31,7 +31,7 @@ public class KickBehavior extends AbstractBehavior
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DoubleYoVariable yoTime;
    private final ReferenceFrame midZupFrame;
-   private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
+   private YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final FootTrajectoryBehavior footTrajectoryBehavior;
 
    private FramePoint2d objectToKickPose;
@@ -42,7 +42,7 @@ public class KickBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);

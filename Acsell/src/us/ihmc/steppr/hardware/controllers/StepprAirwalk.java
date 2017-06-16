@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -35,10 +35,10 @@ public class StepprAirwalk implements StepprController
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredOffsets = new EnumMap<>(StepprJoint.class);
    private final EnumDoubleMap<StepprJoint> initialPositions = new EnumDoubleMap<>(StepprJoint.class);
 
-   private final BooleanYoVariable startAirwalk = new BooleanYoVariable("startAirwalk", registry);
+   private final YoBoolean startAirwalk = new YoBoolean("startAirwalk", registry);
    private final EnumYoVariable<AirwalkState> airwalkState = new EnumYoVariable<>("airwalkState", registry, AirwalkState.class);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableOutput", registry);
 
    private final DoubleYoVariable hipAmplitude = new DoubleYoVariable("hipAmplitude", registry);
    private final DoubleYoVariable hipFrequency = new DoubleYoVariable("hipFrequency", registry);

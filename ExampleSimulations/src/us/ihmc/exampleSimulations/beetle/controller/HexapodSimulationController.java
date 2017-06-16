@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -49,7 +49,7 @@ public class HexapodSimulationController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final BooleanYoVariable useInverseDynamics = new BooleanYoVariable("useInverseDynamics", registry);
+   private final YoBoolean useInverseDynamics = new YoBoolean("useInverseDynamics", registry);
 
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;

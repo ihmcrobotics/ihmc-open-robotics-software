@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -14,7 +14,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    private final DoubleYoVariable desiredVelocity;
    private final DoubleYoVariable desiredAcceleration;
    private final DoubleYoVariable desiredCurrent;
-   private final BooleanYoVariable resetIntegrators;
+   private final YoBoolean resetIntegrators;
 
    public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -26,7 +26,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredVelocity = new DoubleYoVariable(namePrefix + "DesiredVelocity" + suffixString, registry);
       desiredAcceleration = new DoubleYoVariable(namePrefix + "DesiredAcceleration" + suffixString, registry);
       desiredCurrent = new DoubleYoVariable(namePrefix + "DesiredCurrent" + suffixString, registry);
-      resetIntegrators = new BooleanYoVariable(namePrefix + "ResetIntegrators" + suffixString, registry);
+      resetIntegrators = new YoBoolean(namePrefix + "ResetIntegrators" + suffixString, registry);
 
       clear();
    }

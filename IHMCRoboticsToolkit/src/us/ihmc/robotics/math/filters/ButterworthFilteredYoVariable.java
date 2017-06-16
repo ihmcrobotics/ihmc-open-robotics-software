@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
@@ -34,14 +34,14 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
    private final DoubleYoVariable position;
    private final DoubleYoVariable previousInput;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    private final ButterworthFilterType butterworthFilterType;
 
    public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -58,7 +58,7 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -74,7 +74,7 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
    public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alpha = 0.0;
       this.alphaVariable = alphaVariable;
@@ -91,7 +91,7 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alpha = 0.0;
       this.alphaVariable = alphaVariable;

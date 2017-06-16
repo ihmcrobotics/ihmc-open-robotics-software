@@ -14,7 +14,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.robotController.RobotController;
@@ -48,13 +48,13 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
    private DiagnosticDataReporter diagnosticDataReporterRunning = null;
 
-   private final BooleanYoVariable doIdleControl = new BooleanYoVariable("doIdleControl", registry);
+   private final YoBoolean doIdleControl = new YoBoolean("doIdleControl", registry);
    private final DoubleYoVariable qdMaxIdle = new DoubleYoVariable("qdMaxIdle", registry);
    private final DoubleYoVariable qddMaxIdle = new DoubleYoVariable("qddMaxIdle", registry);
    private final DoubleYoVariable tauMaxIdle = new DoubleYoVariable("tauMaxIdle", registry);
 
-   private final BooleanYoVariable isDiagnosticComplete = new BooleanYoVariable("isDiagnosticComplete", registry);
-   private final BooleanYoVariable robotIsAlive = new BooleanYoVariable("robotIsAlive", registry);
+   private final YoBoolean isDiagnosticComplete = new YoBoolean("isDiagnosticComplete", registry);
+   private final YoBoolean robotIsAlive = new YoBoolean("robotIsAlive", registry);
    private final DoubleYoVariable startTime = new DoubleYoVariable("diagnosticControllerStartTime", registry);
 
    private final double controlDT;

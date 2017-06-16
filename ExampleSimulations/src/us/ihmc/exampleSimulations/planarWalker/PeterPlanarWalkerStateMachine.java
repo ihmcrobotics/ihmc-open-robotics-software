@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.planarWalker;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
@@ -42,8 +42,8 @@ public class PeterPlanarWalkerStateMachine
    private DoubleYoVariable lastStepHipAngle;
    private DoubleYoVariable stepToStepHipAngleDelta;
 
-   private BooleanYoVariable initalizedKneeExtension;
-   private BooleanYoVariable initalizedKneeDoubleExtension;
+   private YoBoolean initalizedKneeExtension;
+   private YoBoolean initalizedKneeDoubleExtension;
 
    private DoubleYoVariable kneeMoveStartTime;
    private DoubleYoVariable startingHipAngle;
@@ -81,8 +81,8 @@ public class PeterPlanarWalkerStateMachine
       this.lastStepHipAngle = new DoubleYoVariable("lastStepHipAngle", registry);
       this.stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
 
-      this.initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
-      this.initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
+      this.initalizedKneeExtension = new YoBoolean("initalizedKneeExtension", registry);
+      this.initalizedKneeDoubleExtension = new YoBoolean("initalizedKneeDoubleExtension", registry);
 
       this.kneeMoveStartTime = new DoubleYoVariable("kneeMoveStartTime", registry);
       this.startingHipAngle = new DoubleYoVariable("startingHipAngle", registry);

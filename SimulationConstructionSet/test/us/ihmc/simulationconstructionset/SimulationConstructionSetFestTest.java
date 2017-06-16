@@ -13,7 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
@@ -45,7 +45,7 @@ public class SimulationConstructionSetFestTest
       YoVariableRegistry registryOne = new YoVariableRegistry("RegistryOne");
       EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", registryOne, Axis.class);
       YoVariableRegistry registryTwo = new YoVariableRegistry("RegistryTwo");
-      BooleanYoVariable booleanForTests = new BooleanYoVariable("booleanForTests", registryTwo);
+      YoBoolean booleanForTests = new YoBoolean("booleanForTests", registryTwo);
       registryOne.addChild(registryTwo);
       scs.addYoVariableRegistry(registryOne);
 

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
@@ -49,7 +49,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends DoubleYoVariable
 	private final DoubleYoVariable velocityIfEncoderTicksNowConstantAccel;
 
 
-	private final BooleanYoVariable useDecay;
+	private final YoBoolean useDecay;
 
 	public FilteredDiscreteVelocityYoVariable2(String name, String description, double alpha, DoubleYoVariable time, YoVariableRegistry registry)
 	{
@@ -78,7 +78,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends DoubleYoVariable
 		velocityIfEncoderTicksNow = new DoubleYoVariable(name + "_velocityIfEncoderTicksNow", registry);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		useDecay = new BooleanYoVariable(name + "_useDecay", registry);
+		useDecay = new YoBoolean(name + "_useDecay", registry);
 		
 		reset();
 	}
@@ -112,7 +112,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends DoubleYoVariable
 		velocityIfEncoderTicksNow = new DoubleYoVariable(name + "_velocityIfEncoderTicksNow", registry);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 
-		useDecay = new BooleanYoVariable(name + "_useDecay", registry);
+		useDecay = new YoBoolean(name + "_useDecay", registry);
 		
 		reset();
 	}
@@ -144,7 +144,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends DoubleYoVariable
 		velocityIfEncoderTicksNow = new DoubleYoVariable(name + "_velocityIfEncoderTicksNow", registry);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 
-		useDecay = new BooleanYoVariable(name + "_useDecay", registry);
+		useDecay = new YoBoolean(name + "_useDecay", registry);
 		
 		reset();
 	}

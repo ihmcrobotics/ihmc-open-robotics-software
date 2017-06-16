@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.IndexChangedListener;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -82,7 +82,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
 
       
       final YoVariable<?> motorPowerStateRequest = registry.getVariable("WandererSetup", "motorPowerStateRequest");
-      BooleanYoVariable requestPowerOff = new BooleanYoVariable("requestPowerOff", registry);
+      YoBoolean requestPowerOff = new YoBoolean("requestPowerOff", registry);
       requestPowerOff.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -218,7 +218,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
       
-      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
+      YoBoolean walk = (YoBoolean) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addJoystickEventListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
       
       if (treadmillManager!=null)

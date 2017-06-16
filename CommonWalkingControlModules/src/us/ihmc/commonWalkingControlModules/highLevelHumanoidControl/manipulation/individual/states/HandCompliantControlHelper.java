@@ -6,7 +6,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -24,8 +24,8 @@ public class HandCompliantControlHelper
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable[] doCompliantControlLinear;
-   private final BooleanYoVariable[] doCompliantControlAngular;
+   private final YoBoolean[] doCompliantControlLinear;
+   private final YoBoolean[] doCompliantControlAngular;
    private final DoubleYoVariable forceDeadzoneSize;
    private final DoubleYoVariable torqueDeadzoneSize;
    private final DeadzoneYoFrameVector deadzoneMeasuredForce;
@@ -95,15 +95,15 @@ public class HandCompliantControlHelper
       desiredForce = new YoFrameVector(namePrefix + "DesiredForce", null, registry);
       desiredTorque = new YoFrameVector(namePrefix + "DesiredTorque", null, registry);
 
-      doCompliantControlLinear = new BooleanYoVariable[3];
-      doCompliantControlLinear[0] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearX", registry);
-      doCompliantControlLinear[1] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearY", registry);
-      doCompliantControlLinear[2] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearZ", registry);
+      doCompliantControlLinear = new YoBoolean[3];
+      doCompliantControlLinear[0] = new YoBoolean(namePrefix + "DoCompliantControlLinearX", registry);
+      doCompliantControlLinear[1] = new YoBoolean(namePrefix + "DoCompliantControlLinearY", registry);
+      doCompliantControlLinear[2] = new YoBoolean(namePrefix + "DoCompliantControlLinearZ", registry);
 
-      doCompliantControlAngular = new BooleanYoVariable[3];
-      doCompliantControlAngular[0] = new BooleanYoVariable(namePrefix + "DoCompliantControlAngularX", registry);
-      doCompliantControlAngular[1] = new BooleanYoVariable(namePrefix + "DoCompliantControlAngularY", registry);
-      doCompliantControlAngular[2] = new BooleanYoVariable(namePrefix + "DoCompliantControlAngularZ", registry);
+      doCompliantControlAngular = new YoBoolean[3];
+      doCompliantControlAngular[0] = new YoBoolean(namePrefix + "DoCompliantControlAngularX", registry);
+      doCompliantControlAngular[1] = new YoBoolean(namePrefix + "DoCompliantControlAngularY", registry);
+      doCompliantControlAngular[2] = new YoBoolean(namePrefix + "DoCompliantControlAngularZ", registry);
 
       for (int i = 0; i < 3; i++)
       {

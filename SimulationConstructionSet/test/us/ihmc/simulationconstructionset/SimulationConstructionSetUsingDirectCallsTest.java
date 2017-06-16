@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
@@ -169,17 +169,17 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DNodeType graphics3DNodeType;
    private ExternalForcePoint simpleExternalForcePoint;
    private YoGraphic yoGraphic;
-   private BooleanYoVariable exitActionListenerHasBeenNotified;
-   private BooleanYoVariable simulationRewoundListenerHasBeenNotified;
-   private BooleanYoVariable simulationDoneListenerHasBeenNotified;
-   private BooleanYoVariable setSimulationDoneCriterion;
+   private YoBoolean exitActionListenerHasBeenNotified;
+   private YoBoolean simulationRewoundListenerHasBeenNotified;
+   private YoBoolean simulationDoneListenerHasBeenNotified;
+   private YoBoolean setSimulationDoneCriterion;
    private ExtraPanelConfiguration extraPanelConfiguration;
    private CameraConfiguration cameraConfiguration;
    private ViewportConfiguration viewportConfiguration;
    private GraphConfiguration[] graphConfigurations;
    private DoubleYoVariable realTimeRateInSCS;
-   private BooleanYoVariable processDataHasBeenCalled;
-   private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled;
+   private YoBoolean processDataHasBeenCalled;
+   private YoBoolean toggleKeyPointModeCommandListenerHasBeenCalled;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicMenuManager yoGraphicMenuManager;
    private ScsPhysics simpleScsPhysics;
@@ -202,10 +202,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       graphics3DNodeType = Graphics3DNodeType.GROUND;
       simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
       yoGraphic = new YoGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
-      exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
-      simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
-      simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
-      setSimulationDoneCriterion = new BooleanYoVariable("setSimulationDoneCriterion", dummyRegistry);
+      exitActionListenerHasBeenNotified = new YoBoolean("exitActionListenerHasBeenNotified", dummyRegistry);
+      simulationRewoundListenerHasBeenNotified = new YoBoolean("simulationRewoundListenerHasBeenNotified", dummyRegistry);
+      simulationDoneListenerHasBeenNotified = new YoBoolean("simulationDoneListenerHasBeenNotified", dummyRegistry);
+      setSimulationDoneCriterion = new YoBoolean("setSimulationDoneCriterion", dummyRegistry);
       extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
       cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
       viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
@@ -213,8 +213,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       graphConfigurations = createGraphConfigurations(graphConfigurationNames);
       realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
-      processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
-      toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
+      processDataHasBeenCalled = new YoBoolean("processDataHasBeenCalled", dummyRegistry);
+      toggleKeyPointModeCommandListenerHasBeenCalled = new YoBoolean("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
       yoGraphicsListRegistry = createYoGraphicsListRegistryWithObject();
       yoGraphicMenuManager = new YoGraphicMenuManager();
 

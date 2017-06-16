@@ -6,7 +6,7 @@ import Jama.Matrix;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
@@ -26,7 +26,7 @@ public class CoMHeightTimeDerivativesSmoother
 
    private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
    private final DoubleYoVariable inputComHeight = new DoubleYoVariable("inputComHeight", registry);
    private final DoubleYoVariable inputComHeightVelocity = new DoubleYoVariable("inputComHeightVelocity", registry);
