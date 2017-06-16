@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -25,7 +25,7 @@ public class NoisifierAndDelayer implements RobotController, ExampleFunctionCont
    private final double xDoubleDotStandardDeviation;
    
    private double lastMeasurement;
-   private final IntegerYoVariable ticksPerMeasurement;
+   private final YoInteger ticksPerMeasurement;
    private int tickFromLastMeasurement;
 
    private boolean isPositionMeasurementUpdated = false;
@@ -35,7 +35,7 @@ public class NoisifierAndDelayer implements RobotController, ExampleFunctionCont
       name = getClass().getSimpleName();
       this.function = function;
       
-      ticksPerMeasurement = new IntegerYoVariable("ticksPerMeasurement", registry);
+      ticksPerMeasurement = new YoInteger("ticksPerMeasurement", registry);
       ticksPerMeasurement.set(7);
       tickFromLastMeasurement = 0;
 

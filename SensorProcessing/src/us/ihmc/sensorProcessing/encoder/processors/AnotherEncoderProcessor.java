@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * <p>Title: </p>
@@ -23,7 +23,7 @@ public class AnotherEncoderProcessor extends AbstractEncoderProcessor
    private int previousPosition;
    private boolean previousTickUp;
 
-   public AnotherEncoderProcessor(String name, IntegerYoVariable rawPosition, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public AnotherEncoderProcessor(String name, YoInteger rawPosition, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
    }

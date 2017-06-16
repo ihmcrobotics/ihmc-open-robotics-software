@@ -16,7 +16,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.ThreadTools;
@@ -37,13 +37,13 @@ public class JVMStatisticsGenerator
    private final LongYoVariable totalGCInvocations = new LongYoVariable("totalGCInvocations", registry);
    private final LongYoVariable totalGCTotalCollectionTimeMs = new LongYoVariable("gcTotalCollectionTimeMs", registry);
 
-   private final IntegerYoVariable loadedClassCount = new IntegerYoVariable("loadedClassCount", registry);
+   private final YoInteger loadedClassCount = new YoInteger("loadedClassCount", registry);
    private final LongYoVariable totalLoadedClassCount = new LongYoVariable("totalLoadedClassCount", registry);
    private final LongYoVariable unloadedClassCount = new LongYoVariable("unloadedClassCount", registry);
 
    private final LongYoVariable totalCompilationTime = new LongYoVariable("totalCompilationTimeMs", registry);
 
-   private final IntegerYoVariable availableProcessors = new IntegerYoVariable("availableProcessors", registry);
+   private final YoInteger availableProcessors = new YoInteger("availableProcessors", registry);
    private final YoDouble systemLoadAverage = new YoDouble("systemLoadAverage", registry);
 
    private final ArrayList<GCBeanHolder> gcBeanHolders = new ArrayList<>();

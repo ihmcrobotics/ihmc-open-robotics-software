@@ -27,7 +27,7 @@ import org.ejml.ops.MatrixFeatures;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -77,9 +77,9 @@ public class YoKalmanFilter implements KalmanFilter
    private final List<List<YoDouble>> yoP = new ArrayList<List<YoDouble>>();
    private final List<YoDouble> yoX = new ArrayList<YoDouble>();
 
-   private final IntegerYoVariable nStates;
-   private final IntegerYoVariable nInputs;
-   private final IntegerYoVariable nMeasurements;
+   private final YoInteger nStates;
+   private final YoInteger nInputs;
+   private final YoInteger nMeasurements;
 
    private final YoBoolean updateCovarianceAndGain;
 
@@ -88,9 +88,9 @@ public class YoKalmanFilter implements KalmanFilter
    public YoKalmanFilter(String name, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
-      nStates = new IntegerYoVariable("nStates", registry);
-      nInputs = new IntegerYoVariable("nInputs", registry);
-      nMeasurements = new IntegerYoVariable("nMeasurements", registry);
+      nStates = new YoInteger("nStates", registry);
+      nInputs = new YoInteger("nInputs", registry);
+      nMeasurements = new YoInteger("nMeasurements", registry);
 
 
       // covariance matrices are symmetric positive semi-definite

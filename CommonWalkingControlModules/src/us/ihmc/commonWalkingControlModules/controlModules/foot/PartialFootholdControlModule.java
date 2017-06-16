@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -68,12 +68,12 @@ public class PartialFootholdControlModule
    private final FrameConvexPolygon2d fullSupportAfterShrinking = new FrameConvexPolygon2d();
    private final YoFrameConvexPolygon2d yoFullSupportAfterShrinking;
 
-   private final IntegerYoVariable shrinkMaxLimit;
-   private final IntegerYoVariable shrinkCounter;
+   private final YoInteger shrinkMaxLimit;
+   private final YoInteger shrinkCounter;
 
-   private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
+   private final YoInteger numberOfCellsOccupiedOnSideOfLine;
 
-   private final IntegerYoVariable thresholdForCoPRegionOccupancy;
+   private final YoInteger thresholdForCoPRegionOccupancy;
    private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
 
    private final YoBoolean doPartialFootholdDetection;
@@ -128,9 +128,9 @@ public class PartialFootholdControlModule
       yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
       yoFullSupportAfterShrinking = new YoFrameConvexPolygon2d(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);
 
-      shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
+      shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
 
-      numberOfCellsOccupiedOnSideOfLine = new IntegerYoVariable(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
+      numberOfCellsOccupiedOnSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
       {

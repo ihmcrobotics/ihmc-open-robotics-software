@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  *  Filter the given yoVariable using a moving average filter.
@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.IntegerYoVariable;
  */
 public class SimpleMovingAverageFilteredYoVariable extends YoDouble
 {
-   private final IntegerYoVariable windowSize;
+   private final YoInteger windowSize;
    private final YoDouble yoVariableToFilter;
 
    private final DenseMatrix64F previousUpdateValues = new DenseMatrix64F(0, 0);
@@ -34,7 +34,7 @@ public class SimpleMovingAverageFilteredYoVariable extends YoDouble
       super(name, registry);
 
       this.yoVariableToFilter = yoVariableToFilter;
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", registry);
+      this.windowSize = new YoInteger(name + "WindowSize", registry);
       this.windowSize.set(windowSize);
 
       previousUpdateValues.reshape(windowSize, 1);

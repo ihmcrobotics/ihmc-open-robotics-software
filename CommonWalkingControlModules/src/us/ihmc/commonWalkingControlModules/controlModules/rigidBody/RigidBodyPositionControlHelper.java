@@ -10,12 +10,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyPositionControlHelper
 {
-   private final IntegerYoVariable numberOfPositionControlledJoints;
+   private final YoInteger numberOfPositionControlledJoints;
 
    private final YoDouble[] accelerationIntegrationAlphaPosition;
    private final YoDouble[] accelerationIntegrationAlphaVelocity;
@@ -38,7 +38,7 @@ public class RigidBodyPositionControlHelper
             positionControlledJoints.add(joint);
       }
 
-      numberOfPositionControlledJoints = new IntegerYoVariable(namePrefix + "NumberOfPositionControlledJoints", registry);
+      numberOfPositionControlledJoints = new YoInteger(namePrefix + "NumberOfPositionControlledJoints", registry);
       numberOfPositionControlledJoints.set(positionControlledJoints.size());
 
       accelerationIntegrationAlphaPosition = new YoDouble[numberOfPositionControlledJoints.getIntegerValue()];

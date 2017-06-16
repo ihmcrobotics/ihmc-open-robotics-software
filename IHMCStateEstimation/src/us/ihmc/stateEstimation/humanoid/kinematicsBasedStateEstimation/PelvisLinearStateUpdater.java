@@ -81,7 +81,7 @@ public class PelvisLinearStateUpdater
    private final YoDouble alphaIMUAgainstKinematicsForPosition = new YoDouble("alphaIMUAgainstKinematicsForPosition", registry);
 
    private final YoBoolean useGroundReactionForcesToComputeCenterOfMassVelocity = new YoBoolean("useGRFToComputeCoMVelocity", registry);
-   private final IntegerYoVariable numberOfEndEffectorsTrusted = new IntegerYoVariable("numberOfEndEffectorsTrusted", registry);
+   private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
 
    private final Map<RigidBody, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, YoDouble>();
    private final YoDouble forceZInPercentThresholdToFilterFoot = new YoDouble("forceZInPercentThresholdToFilterFootUserParameter", registry);

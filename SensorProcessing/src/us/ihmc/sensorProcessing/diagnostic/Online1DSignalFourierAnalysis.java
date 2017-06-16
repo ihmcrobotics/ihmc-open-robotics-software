@@ -6,16 +6,16 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredIntegerYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 
 public class Online1DSignalFourierAnalysis
 {
    private final YoVariableRegistry registry;
 
-   private final GlitchFilteredIntegerYoVariable principalOscillationIndex;
-   private final GlitchFilteredIntegerYoVariable secondaryOscillationIndex;
+   private final GlitchFilteredYoInteger principalOscillationIndex;
+   private final GlitchFilteredYoInteger secondaryOscillationIndex;
 
    private final YoDouble principalFrequency;
    private final YoDouble secondaryFrequency;
@@ -23,7 +23,7 @@ public class Online1DSignalFourierAnalysis
    private final YoDouble principalMagnitude;
    private final YoDouble secondaryMagnitude;
 
-   private final IntegerYoVariable minFrequencyIndex;
+   private final YoInteger minFrequencyIndex;
    private final YoDouble minimumMagnitude;
 
    private final YoBoolean enabled;
@@ -55,8 +55,8 @@ public class Online1DSignalFourierAnalysis
       enabled = new YoBoolean(registry.getName() + "_enabled", registry);
 
       int windowSize = 10;
-      principalOscillationIndex = new GlitchFilteredIntegerYoVariable(namePrefix + "PrincipalOscillationIndex", windowSize, registry);
-      secondaryOscillationIndex = new GlitchFilteredIntegerYoVariable(namePrefix + "SecondaryOscillationIndex", windowSize, registry);
+      principalOscillationIndex = new GlitchFilteredYoInteger(namePrefix + "PrincipalOscillationIndex", windowSize, registry);
+      secondaryOscillationIndex = new GlitchFilteredYoInteger(namePrefix + "SecondaryOscillationIndex", windowSize, registry);
 
       principalFrequency = new YoDouble(namePrefix + "PrincipalFrequency", registry);
       secondaryFrequency = new YoDouble(namePrefix + "SecondaryFrequency", registry);
@@ -64,7 +64,7 @@ public class Online1DSignalFourierAnalysis
       principalMagnitude = new YoDouble(namePrefix + "PrincipalMagnitude", registry);
       secondaryMagnitude = new YoDouble(namePrefix + "SecondaryMagnitude", registry);
 
-      minFrequencyIndex = new IntegerYoVariable(namePrefix + "MinFrequencyIndex", registry);
+      minFrequencyIndex = new YoInteger(namePrefix + "MinFrequencyIndex", registry);
       minFrequencyIndex.set(2);
       minimumMagnitude = new YoDouble(namePrefix + "MinimumMagnitude", registry);
 

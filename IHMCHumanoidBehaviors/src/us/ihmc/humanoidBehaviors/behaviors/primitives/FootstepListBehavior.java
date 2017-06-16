@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +33,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
-   private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
+   private final YoInteger numberOfFootsteps = new YoInteger("numberOfFootsteps" + behaviorName, registry);
    private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
    private final YoBoolean isStopped = new YoBoolean("isStopped", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);

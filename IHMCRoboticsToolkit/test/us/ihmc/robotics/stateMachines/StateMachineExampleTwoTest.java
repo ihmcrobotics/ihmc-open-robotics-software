@@ -14,7 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
@@ -29,10 +29,10 @@ public class StateMachineExampleTwoTest
    public void testComplexStateMachineExample()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      final IntegerYoVariable ticksInStateOne = new IntegerYoVariable("ticksInStateOne", registry);
-      final IntegerYoVariable ticksInStateTwo = new IntegerYoVariable("ticksInStateTwo", registry);
-      final IntegerYoVariable ticksInStateThree = new IntegerYoVariable("ticksInStateThree", registry);
-      final IntegerYoVariable ticksInStateFour = new IntegerYoVariable("ticksInStateFour", registry);
+      final YoInteger ticksInStateOne = new YoInteger("ticksInStateOne", registry);
+      final YoInteger ticksInStateTwo = new YoInteger("ticksInStateTwo", registry);
+      final YoInteger ticksInStateThree = new YoInteger("ticksInStateThree", registry);
+      final YoInteger ticksInStateFour = new YoInteger("ticksInStateFour", registry);
 
       final YoBoolean inStateOne = new YoBoolean("inStateOne", registry);
       final YoBoolean inStateTwo = new YoBoolean("inStateTwo", registry);
@@ -311,9 +311,9 @@ public class StateMachineExampleTwoTest
    private class ExampleState extends State<StateEnum>
    {
       private final YoBoolean inState, didTransitionIntoState, didTransitionOutOfState;
-      private final IntegerYoVariable ticksInState;
+      private final YoInteger ticksInState;
 
-      public ExampleState(StateEnum stateEnum, YoBoolean inState, YoBoolean didTransitionIntoState, YoBoolean didTransitionOutOfState, IntegerYoVariable ticksInState)
+      public ExampleState(StateEnum stateEnum, YoBoolean inState, YoBoolean didTransitionIntoState, YoBoolean didTransitionOutOfState, YoInteger ticksInState)
       {
          super(stateEnum);
 

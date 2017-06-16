@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -76,9 +76,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final YoBoolean hasPositionGains;
    private final YoBoolean hasLinearWeight;
 
-   private final IntegerYoVariable numberOfPointsInQueue;
-   private final IntegerYoVariable numberOfPointsInGenerator;
-   private final IntegerYoVariable numberOfPoints;
+   private final YoInteger numberOfPointsInQueue;
+   private final YoInteger numberOfPointsInGenerator;
+   private final YoInteger numberOfPoints;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
@@ -129,9 +129,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trackingOrientation = new YoBoolean(prefix + "TrackingOrientation", registry);
       trackingPosition = new YoBoolean(prefix + "TrackingPosition", registry);
 
-      numberOfPointsInQueue = new IntegerYoVariable(prefix + "NumberOfPointsInQueue", registry);
-      numberOfPointsInGenerator = new IntegerYoVariable(prefix + "NumberOfPointsInGenerator", registry);
-      numberOfPoints = new IntegerYoVariable(prefix + "NumberOfPoints", registry);
+      numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
+      numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
+      numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
 
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);

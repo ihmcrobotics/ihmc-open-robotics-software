@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.pushRecovery;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -16,7 +16,7 @@ public class PushRobotTestConductor
    private final YoFrameVector pushDirection;
    private final YoFrameVector pushForce;
    private final YoDouble pushTimeSwitch;
-   private final IntegerYoVariable pushNumber;
+   private final YoInteger pushNumber;
    private final YoDouble pushDelay;
    private final YoDouble yoTime;
    
@@ -27,7 +27,7 @@ public class PushRobotTestConductor
       pushDuration = (YoDouble) scs.getVariable(jointName + "_pushDuration");
       pushMagnitude = (YoDouble) scs.getVariable(jointName + "_pushMagnitude");
       pushTimeSwitch = (YoDouble) scs.getVariable(jointName + "_pushTimeSwitch");
-      pushNumber = (IntegerYoVariable) scs.getVariable(jointName + "_pushNumber");
+      pushNumber = (YoInteger) scs.getVariable(jointName + "_pushNumber");
       pushDelay = (YoDouble) scs.getVariable(jointName + "_pushDelay");
       yoTime = (YoDouble) scs.getVariable("t");
       

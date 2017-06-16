@@ -50,7 +50,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -963,7 +963,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String positionTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
 
-      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
    }
 
@@ -973,7 +973,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 //      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
 //      String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
       String bodyName = rigidBody.getName();
-      IntegerYoVariable pelvisHeightTaskspaceNumberOfPoints = (IntegerYoVariable) scs.getVariable(bodyName + "HeightTaskspaceControlModule", bodyName + "HeightTaskspaceNumberOfPoints");
+      YoInteger pelvisHeightTaskspaceNumberOfPoints = (YoInteger) scs.getVariable(bodyName + "HeightTaskspaceControlModule", bodyName + "HeightTaskspaceNumberOfPoints");
       int numberOfWaypoints = pelvisHeightTaskspaceNumberOfPoints.getIntegerValue();
       return numberOfWaypoints;
    }
@@ -984,7 +984,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String pelvisPrefix = bodyName + "Height";
       String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
-      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable(offsetHeightTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.getVariable(offsetHeightTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
    }
 

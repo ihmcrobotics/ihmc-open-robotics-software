@@ -6,15 +6,15 @@ import java.util.logging.Logger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DiagnosticTaskExecutor
 {
    private Logger logger;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final IntegerYoVariable currentTaskIndex;
-   private final IntegerYoVariable numberOfTasksRemaining;
+   private final YoInteger currentTaskIndex;
+   private final YoInteger numberOfTasksRemaining;
    private final YoBoolean isDone;
    private final YoBoolean hasAborted;
    private final YoDouble timeInCurrentTask;
@@ -28,8 +28,8 @@ public class DiagnosticTaskExecutor
    {
       parentRegistry.addChild(registry);
 
-      currentTaskIndex = new IntegerYoVariable(namePrefix + "CurrentTaskIndex", registry);
-      numberOfTasksRemaining = new IntegerYoVariable(namePrefix + "TasksRemaining", registry);
+      currentTaskIndex = new YoInteger(namePrefix + "CurrentTaskIndex", registry);
+      numberOfTasksRemaining = new YoInteger(namePrefix + "TasksRemaining", registry);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
       hasAborted = new YoBoolean(namePrefix + "HasAborted", registry);
       timeInCurrentTask = new YoDouble(namePrefix + "TimeInCurrentTask", registry);

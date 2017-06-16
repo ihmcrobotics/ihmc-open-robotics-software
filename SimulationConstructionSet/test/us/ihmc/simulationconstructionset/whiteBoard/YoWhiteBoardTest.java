@@ -411,7 +411,7 @@ public class YoWhiteBoardTest
 
             case INTEGER :
             {
-               variablesToCopyTo.add(new IntegerYoVariable(name, registry));
+               variablesToCopyTo.add(new YoInteger(name, registry));
 
                break;
             }
@@ -483,7 +483,7 @@ public class YoWhiteBoardTest
 
             case 1 :
             {
-               variables.add(new IntegerYoVariable(name, registry));
+               variables.add(new YoInteger(name, registry));
 
                break;
             }
