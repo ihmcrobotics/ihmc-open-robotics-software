@@ -188,7 +188,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       midGroundPoint.scale(0.5);
 
-      waypointAdjustmentPlane.setPoints(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
+      waypointAdjustmentPlane.set(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
       rigidBodyTransform.setRotation(axisAngle);
