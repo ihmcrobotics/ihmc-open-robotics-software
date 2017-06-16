@@ -1074,7 +1074,7 @@ public final class YoProtoHandshakeProto {
          */
         IntegerYoVariable(2, 3),
         /**
-         * <code>LongYoVariable = 4;</code>
+         * <code>YoLong = 4;</code>
          */
         LongYoVariable(3, 4),
         /**
@@ -1096,7 +1096,7 @@ public final class YoProtoHandshakeProto {
          */
         public static final int IntegerYoVariable_VALUE = 3;
         /**
-         * <code>LongYoVariable = 4;</code>
+         * <code>YoLong = 4;</code>
          */
         public static final int LongYoVariable_VALUE = 4;
         /**

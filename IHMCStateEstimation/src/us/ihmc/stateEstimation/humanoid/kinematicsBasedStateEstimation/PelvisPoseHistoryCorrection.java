@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
@@ -74,7 +74,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final Vector3D distanceToTravelVector = new Vector3D();
    private final AxisAngle angleToTravelAxis4d = new AxisAngle();
 
-   private final LongYoVariable seNonProcessedPelvisTimeStamp;
+   private final YoLong seNonProcessedPelvisTimeStamp;
 
    private final AlphaFilteredYoVariable interpolationTranslationAlphaFilter;
    private final AlphaFilteredYoVariable interpolationRotationAlphaFilter;
@@ -193,7 +193,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
       confidenceFactor = new YoDouble("PelvisErrorCorrectionConfidenceFactor", registry);
 
-      seNonProcessedPelvisTimeStamp = new LongYoVariable("seNonProcessedPelvis_timestamp", registry);
+      seNonProcessedPelvisTimeStamp = new YoLong("seNonProcessedPelvis_timestamp", registry);
 
       translationClippedAlphaValue = new YoDouble("translationClippedAlphaValue", registry);
       rotationClippedAlphaValue = new YoDouble("rotationClippedAlphaValue", registry);

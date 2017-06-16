@@ -4,7 +4,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class ExecutionTimer
@@ -17,7 +17,7 @@ public class ExecutionTimer
    private final YoDouble standardDeviation;
    private final YoDouble maximum;
    private final SimpleMovingAverageFilteredYoVariable movingAverage;
-   private final LongYoVariable count;
+   private final YoLong count;
 
    private long startTime;
 
@@ -35,7 +35,7 @@ public class ExecutionTimer
       movingAverage = new SimpleMovingAverageFilteredYoVariable(name + "MovingAverage", 100, current, registry);
       standardDeviation = new YoDouble(name + "StandardDeviation", registry);
       maximum = new YoDouble(name + "Maximum", registry);
-      count = new LongYoVariable(name + "Count", registry);
+      count = new YoLong(name + "Count", registry);
    }
 
    public void startMeasurement()

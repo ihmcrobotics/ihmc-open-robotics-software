@@ -12,12 +12,12 @@ import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 import us.ihmc.yoVariables.listener.RewoundListener;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {
-   private final LongYoVariable timestamp;
+   private final YoLong timestamp;
 
    
    private final ArrayList<String> videos = new ArrayList<>();
@@ -28,7 +28,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 
    private VideoDataPlayer activePlayer = null;
 
-   public MultiVideoDataPlayer(File dataDirectory, LogProperties logProperties, LongYoVariable timestamp)
+   public MultiVideoDataPlayer(File dataDirectory, LogProperties logProperties, YoLong timestamp)
    {
       this.timestamp = timestamp;
 

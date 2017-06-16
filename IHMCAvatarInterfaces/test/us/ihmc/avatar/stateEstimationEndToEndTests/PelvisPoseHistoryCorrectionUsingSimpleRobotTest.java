@@ -24,7 +24,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -62,7 +62,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private YoDouble interpolationRotationAlphaFilterBreakFrequency;
    private YoDouble interpolationRotationAlphaFilterAlphaValue;
    private YoDouble interpolationRotationAlphaFilter;
-   private LongYoVariable seNonProcessedPelvisTimeStamp;
+   private YoLong seNonProcessedPelvisTimeStamp;
    private YoDouble maxTranslationVelocityClip;
    private YoDouble maxRotationVelocityClip;
    private YoDouble translationClippedAlphaValue;
@@ -177,7 +177,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       interpolationRotationAlphaFilterAlphaValue = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterAlphaValue");
       interpolationRotationAlphaFilterBreakFrequency = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterBreakFrequency");
       confidenceFactor = (YoDouble) registry.getVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
-      seNonProcessedPelvisTimeStamp = (LongYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
+      seNonProcessedPelvisTimeStamp = (YoLong) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
       maxTranslationVelocityClip = (YoDouble) registry.getVariable(nameSpace, "maxTranslationVelocityClip");
       maxRotationVelocityClip = (YoDouble) registry.getVariable(nameSpace, "maxRotationVelocityClip");
       translationClippedAlphaValue = (YoDouble) registry.getVariable(nameSpace, "translationClippedAlphaValue");

@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -55,7 +55,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoPlaneContactState yoPlaneContactState;
 
-   private final LongYoVariable lastCommandId;
+   private final YoLong lastCommandId;
    private final YoBoolean hasReset;
    private final YoBoolean resetRequested;
 
@@ -118,7 +118,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReset = new YoBoolean(namePrefix + "HasReset", registry);
       resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {

@@ -27,7 +27,7 @@ import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.wanderer.hardware.WandererActuator;
 
 public class AcsellActuatorState
@@ -39,8 +39,8 @@ public class AcsellActuatorState
    private final double motorKt;
    private final int SensedCurrentToTorqueDirection;
 
-   private final LongYoVariable microControllerTime;
-   private final LongYoVariable actualActuatorDT;
+   private final YoLong microControllerTime;
+   private final YoLong actualActuatorDT;
 
    private final YoDouble inphaseCompositeStatorCurrent;
    private final YoDouble quadratureCompositeStatorCurrent;
@@ -55,11 +55,11 @@ public class AcsellActuatorState
 
    private final YoDouble motorPower;
 
-   private final LongYoVariable lastReceivedControlID;
+   private final YoLong lastReceivedControlID;
 
    private final int[] slowSensorSlotIDs = new int[7];
 
-   private final LongYoVariable checksumFailures;
+   private final YoLong checksumFailures;
 
    private final YoDouble motorAngleOffset;
 
@@ -67,8 +67,8 @@ public class AcsellActuatorState
    private final int PRESSURE_SENSOR_BASE_11 = 11;
    
    private long lastMicroControllerTime;
-   private final LongYoVariable consecutivePacketDropCount;
-   private final LongYoVariable totalPacketDropCount;
+   private final YoLong consecutivePacketDropCount;
+   private final YoLong totalPacketDropCount;
    private final AcsellSlowSensorConstants slowSensorConstants;
    
    private final double motorEncoderScale;
@@ -85,8 +85,8 @@ public class AcsellActuatorState
       this.motorKt = actuator.getKt();
       this.slowSensorConstants = slowSensorConstants;
       this.SensedCurrentToTorqueDirection = actuator.getSensedCurrentToTorqueDirection();
-      this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
-      this.actualActuatorDT = new LongYoVariable(name + "ActualDT", registry);
+      this.microControllerTime = new YoLong(name + "MicroControllerTime", registry);
+      this.actualActuatorDT = new YoLong(name + "ActualDT", registry);
 
       this.inphaseCompositeStatorCurrent = new YoDouble(name + "InphaseCompositeStatorCurrent", registry);
       this.quadratureCompositeStatorCurrent = new YoDouble(name + "QuadratureCompositeStatorCurrent", registry);
@@ -105,14 +105,14 @@ public class AcsellActuatorState
 
       this.motorPower = new YoDouble(name + "MotorPower", registry);
 
-      this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
+      this.lastReceivedControlID = new YoLong(name + "LastReceivedControlID", registry);
 
       this.motorAngleOffset = new YoDouble(name + "MotorAngleOffset", registry);
       
-      this.consecutivePacketDropCount = new LongYoVariable(name + "ConsecutivePacketDropCount", registry);
-      this.totalPacketDropCount = new LongYoVariable(name + "TotalPacketDropCount", registry);
+      this.consecutivePacketDropCount = new YoLong(name + "ConsecutivePacketDropCount", registry);
+      this.totalPacketDropCount = new YoLong(name + "TotalPacketDropCount", registry);
 
-      this.checksumFailures = new LongYoVariable("checksumFailures", registry);
+      this.checksumFailures = new YoLong("checksumFailures", registry);
 
       createSlowSensors(name);
 

@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -80,10 +80,10 @@ public class TaskspaceHandControlState extends HandControlState
    private final Vector3D linearWeight = new Vector3D();
 
    private final YoBoolean abortTaskspaceControlState;
-   private final LongYoVariable lastCommandId;
+   private final YoLong lastCommandId;
 
    private final YoBoolean isReadyToHandleQueuedCommands;
-   private final LongYoVariable numberOfQueuedCommands;
+   private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
    public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoSE3PIDGainsInterface gains,
@@ -123,11 +123,11 @@ public class TaskspaceHandControlState extends HandControlState
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
       abortTaskspaceControlState = new YoBoolean(namePrefix + "AbortTaskspaceControlState", registry);
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
-      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
+      numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
    }
