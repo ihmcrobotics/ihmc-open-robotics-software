@@ -9,11 +9,12 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
@@ -241,7 +242,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getPose(RigidBodyTransform transformToPack)
    {
-      pose.getPose(transformToPack);
+      pose.get(transformToPack);
    }
 
    public void getPoseIncludingFrame(FramePoint framePointToPack, FrameOrientation orientationToPack)
@@ -267,7 +268,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
-      pose.getRigidBodyTransform(transformToPack);
+      pose.get(transformToPack);
    }
 
    public QuaternionReadOnly getOrientation()
@@ -287,7 +288,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void getOrientation(double[] yawPitchRoll)
    {
-      pose.getYawPitchRoll(yawPitchRoll);
+      pose.getOrientationYawPitchRoll(yawPitchRoll);
    }
 
    public void getOrientation(AxisAngleBasics axisAngleToPack)
@@ -375,19 +376,22 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
       changeFrame(rotationAxisFrame);
 
-      RigidBodyTransform axisRotationTransform = new RigidBodyTransform();
-      TransformTools.appendRotation(axisRotationTransform, angle, rotationAxis);
+      AxisAngle axisAngle = new AxisAngle(0.0, 0.0, 0.0, angle);
+      axisAngle.setElement(rotationAxis.ordinal(), 1.0);
 
       if (!lockPosition)
       {
-         Vector3D tempVector = new Vector3D();
-         getPosition(tempVector);
-         axisRotationTransform.transform(tempVector);
-         this.setPosition(tempVector);
+         Point3D newPosition = new Point3D(pose.getPosition());
+         axisAngle.transform(newPosition);
+         setPosition(newPosition);
       }
 
       if (!lockOrientation)
-         pose.applyTransformToOrientationOnly(axisRotationTransform);
+      {
+         Quaternion newOrientation = new Quaternion(pose.getOrientation());
+         axisAngle.transform(newOrientation);
+         setOrientation(newOrientation);
+      }
 
       changeFrame(initialFrame);
    }
