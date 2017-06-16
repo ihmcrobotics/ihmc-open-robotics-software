@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.RecursionMultipliers;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -29,7 +29,7 @@ public class StateMultiplierCalculator
    private final YoDouble timeSpentOnFinalCMP;
    private final YoDouble startOfSplineTime;
    private final YoDouble endOfSplineTime;
-   private final IntegerYoVariable currentSwingSegment;
+   private final YoInteger currentSwingSegment;
 
    private final RecursionMultipliers recursionMultipliers;
 
@@ -72,7 +72,7 @@ public class StateMultiplierCalculator
       timeSpentOnFinalCMP = new YoDouble(yoNamePrefix + "TimeSpentOnFinalCMP", registry);
       startOfSplineTime = new YoDouble(yoNamePrefix + "StartOfSplineTime", registry);
       endOfSplineTime = new YoDouble(yoNamePrefix + "EndOfSplineTime", registry);
-      currentSwingSegment = new IntegerYoVariable(yoNamePrefix + "CurrentSegment", registry);
+      currentSwingSegment = new YoInteger(yoNamePrefix + "CurrentSegment", registry);
 
 
       cubicMatrix = new EfficientCubicMatrix();

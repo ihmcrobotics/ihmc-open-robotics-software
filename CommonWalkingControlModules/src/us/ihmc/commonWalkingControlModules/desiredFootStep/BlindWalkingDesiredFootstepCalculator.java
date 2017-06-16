@@ -10,7 +10,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -44,7 +44,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    private final YoDouble maxStepWidth = new YoDouble("maxStepWidth", registry);
 
    private final YoDouble stepPitch = new YoDouble("stepPitch", registry);
-   private final IntegerYoVariable numberBlindStepsInPlace = new IntegerYoVariable("numberBlindStepsInPlace", registry);
+   private final YoInteger numberBlindStepsInPlace = new YoInteger("numberBlindStepsInPlace", registry);
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ZUpFrame> soleZUpFrames = new SideDependentList<>();

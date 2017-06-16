@@ -3,14 +3,14 @@ package us.ihmc.sensorProcessing.encoder.processors;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {
    protected final YoVariableRegistry registry;
-   protected final IntegerYoVariable rawTicks;
+   protected final YoInteger rawTicks;
    protected final YoDouble time;
 
    protected final YoDouble processedTicks;
@@ -21,7 +21,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
 
    private final String name;
    
-   public AbstractEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public AbstractEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       this.name = name;
       

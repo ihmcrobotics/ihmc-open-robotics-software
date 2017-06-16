@@ -4,7 +4,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
@@ -19,8 +19,8 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
    private final YoEnum<EncoderState> state;
 
-   private final IntegerYoVariable previousRawTicks, previousRawTicksTwoBack;
-   private final IntegerYoVariable previousProcessedTicks, previousProcessedTicksTwoBack;
+   private final YoInteger previousRawTicks, previousRawTicksTwoBack;
+   private final YoInteger previousProcessedTicks, previousProcessedTicksTwoBack;
    private final YoDouble previousTime, previousTimeTwoBack;
 
    private final double dt;
@@ -29,12 +29,12 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
    private final YoDouble minPriorRate, maxPriorRate, averagePriorRate;
    private int updateCount=0;
    private final int slowUpdateFactor;
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, double dt,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt,YoVariableRegistry registry)
    {
       this( name,  rawTicks,  time,  distancePerTick,  dt, 1, registry);
    }
 
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
@@ -50,12 +50,12 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
       this.maxPossibleRate = new YoDouble(name + "maxPossibleRate", registry);
       this.averagePriorRate = new YoDouble(name + "averagePriorRate", registry);
 
-      this.previousRawTicksTwoBack = new IntegerYoVariable(name + "prevRawPos2", registry);
-      this.previousRawTicks = new IntegerYoVariable(name + "prevRawPos", registry);
+      this.previousRawTicksTwoBack = new YoInteger(name + "prevRawPos2", registry);
+      this.previousRawTicks = new YoInteger(name + "prevRawPos", registry);
       this.previousTime = new YoDouble(name + "prevTime", registry);
 
-      this.previousProcessedTicks = new IntegerYoVariable(name + "prevPos", registry);
-      this.previousProcessedTicksTwoBack = new IntegerYoVariable(name + "prevPos2", registry);
+      this.previousProcessedTicks = new YoInteger(name + "prevPos", registry);
+      this.previousProcessedTicksTwoBack = new YoInteger(name + "prevPos2", registry);
       this.previousTimeTwoBack = new YoDouble(name + "prevTime2", registry);
    }
 

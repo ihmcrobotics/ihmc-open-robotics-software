@@ -15,7 +15,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
@@ -106,7 +106,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
    private class SimpleCoactiveElement implements CoactiveElement
    {
       private final YoVariableRegistry userInterfaceWritableRegistry = new YoVariableRegistry("userInterfaceWritable");
-      private final IntegerYoVariable uiTickCount = new IntegerYoVariable("uiTickCount", userInterfaceWritableRegistry);
+      private final YoInteger uiTickCount = new YoInteger("uiTickCount", userInterfaceWritableRegistry);
       private final YoBoolean buttonWasClicked = new YoBoolean("buttonWasClicked", userInterfaceWritableRegistry);
       private final YoDouble variableForUserInterfaceToWrite = new YoDouble("variableForUserInterfaceToWrite", userInterfaceWritableRegistry);
 

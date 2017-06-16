@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.comparison.BangBangEncoderProcessorEvaluationTrajectory;
 import us.ihmc.sensorProcessing.encoder.comparison.ChirpEncoderProcessorEvaluationTrajectory;
@@ -36,7 +36,7 @@ public class EncoderProcessorComparer
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
-   private final IntegerYoVariable rawTicks;
+   private final YoInteger rawTicks;
    private final YoDouble rawPosition;
    private final YoDouble time;
    private final YoDouble actualPosition;
@@ -54,7 +54,7 @@ public class EncoderProcessorComparer
    {
       Robot nullRobot = new Robot("nullRobot");
       registry = nullRobot.getRobotsYoVariableRegistry();
-      rawTicks = new IntegerYoVariable("rawTicks", registry);
+      rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
       time = nullRobot.getYoTime();
       actualPosition = new YoDouble("actualPosition", registry);

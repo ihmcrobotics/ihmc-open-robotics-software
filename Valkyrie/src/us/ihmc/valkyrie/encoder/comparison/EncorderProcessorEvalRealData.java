@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessorNoYoVariablesWrapper;
@@ -26,7 +26,7 @@ public class EncorderProcessorEvalRealData
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
-   private final IntegerYoVariable rawTicks, heartBeat;
+   private final YoInteger rawTicks, heartBeat;
    private final YoDouble rawPosition;
    private final YoDouble time;
    private final YoDouble turboJerryRate,fdRate;
@@ -40,9 +40,9 @@ public class EncorderProcessorEvalRealData
    {
       Robot nullRobot = new Robot("nullRobot");
       registry = nullRobot.getRobotsYoVariableRegistry();
-      rawTicks = new IntegerYoVariable("rawTicks", registry);
+      rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
-      heartBeat = new IntegerYoVariable("turboHeartBeat", registry);
+      heartBeat = new YoInteger("turboHeartBeat", registry);
       
       turboJerryRate = new YoDouble("turboJerryProcRate", registry);
       fdRate = new YoDouble("fdRate", registry);

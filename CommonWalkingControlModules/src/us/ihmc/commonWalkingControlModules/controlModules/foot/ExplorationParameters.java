@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This class provides parameters for foothold exploration that are common for both feet. In this
@@ -30,9 +30,9 @@ public class ExplorationParameters
 
    /** Parameters for the partial foothold control module */
    private final YoBoolean useCopOccupancyGrid;
-   private final IntegerYoVariable thresholdForCoPRegionOccupancy;
+   private final YoInteger thresholdForCoPRegionOccupancy;
    private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
-   private final IntegerYoVariable shrinkMaxLimit;
+   private final YoInteger shrinkMaxLimit;
    private final YoEnum<RotationCalculatorType> rotationCalculatorType;
    private final YoDouble minAreaToConsider;
    private static final boolean defaultUseCopOccupancyGrid = true;
@@ -92,11 +92,11 @@ public class ExplorationParameters
       namePrefix = "ExplorationFoothold_";
       useCopOccupancyGrid = new YoBoolean(namePrefix + "UseCopOccupancyGrid", registry);
       useCopOccupancyGrid.set(defaultUseCopOccupancyGrid);
-      thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
+      thresholdForCoPRegionOccupancy = new YoInteger(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
       thresholdForCoPRegionOccupancy.set(defaultThresholdForCoPRegionOccupancy);
       distanceFromLineOfRotationToComputeCoPOccupancy = new YoDouble(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry);
       distanceFromLineOfRotationToComputeCoPOccupancy.set(defaultDistanceFromLineOfRotationToComputeCoPOccupancy);
-      shrinkMaxLimit = new IntegerYoVariable(namePrefix + "ShrinkMaxLimit", registry);
+      shrinkMaxLimit = new YoInteger(namePrefix + "ShrinkMaxLimit", registry);
       shrinkMaxLimit.set(defaultShrinkMaxLimit);
       rotationCalculatorType = new YoEnum<>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
       rotationCalculatorType.set(defaultRotationCalculatorType);
@@ -159,7 +159,7 @@ public class ExplorationParameters
       return useCopOccupancyGrid;
    }
 
-   public IntegerYoVariable getThresholdForCoPRegionOccupancy()
+   public YoInteger getThresholdForCoPRegionOccupancy()
    {
       return thresholdForCoPRegionOccupancy;
    }
@@ -169,7 +169,7 @@ public class ExplorationParameters
       return distanceFromLineOfRotationToComputeCoPOccupancy;
    }
 
-   public IntegerYoVariable getShrinkMaxLimit()
+   public YoInteger getShrinkMaxLimit()
    {
       return shrinkMaxLimit;
    }

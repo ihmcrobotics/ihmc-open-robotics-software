@@ -13,22 +13,18 @@ import java.util.Collections;
 
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
-
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class TimeScript implements Script
 {
    // Rep invariant: timeScriptEntryList must be always sorted!
    private ArrayList<TimeScriptEntry> sortedTimeScriptEntryList = new ArrayList<TimeScriptEntry>();
-   private final IntegerYoVariable nextTimeScriptIndex;
+   private final YoInteger nextTimeScriptIndex;
 
    public TimeScript(YoVariableRegistry registry)
    {
-      nextTimeScriptIndex = new IntegerYoVariable("nextTimeScriptIndex", registry);
+      nextTimeScriptIndex = new YoInteger("nextTimeScriptIndex", registry);
       nextTimeScriptIndex.set(0);
    }
 
@@ -257,7 +253,7 @@ public class TimeScript implements Script
          case INTEGER:
          {
             int value = Integer.parseInt(t_part);
-            ret.addVarValue((IntegerYoVariable) variable, value);
+            ret.addVarValue((YoInteger) variable, value);
             break;
          }
          default:

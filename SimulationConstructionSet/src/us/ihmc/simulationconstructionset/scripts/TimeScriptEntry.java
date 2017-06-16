@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class TimeScriptEntry implements Comparable<Object>
 {
@@ -36,7 +36,7 @@ public class TimeScriptEntry implements Comparable<Object>
       varValuePairs.add(variableValuePair);
    }
    
-   public void addVarValue(IntegerYoVariable variable, int value)
+   public void addVarValue(YoInteger variable, int value)
    {
       if (variable == null)
          return;
@@ -136,10 +136,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class IntegerVariableValuePair implements VariableValuePair
    {
-      protected IntegerYoVariable variable;
+      protected YoInteger variable;
       protected int value;
 
-      public IntegerVariableValuePair(IntegerYoVariable variable, int value)
+      public IntegerVariableValuePair(YoInteger variable, int value)
       {
          this.variable = variable;
          this.value = value;

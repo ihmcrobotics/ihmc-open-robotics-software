@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * <p>Title: </p>
@@ -24,7 +24,7 @@ public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
    private final YoDouble previousPositionTwoBack, previousTimeTwoBack;
 
 
-   public StateMachineTwoEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineTwoEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 

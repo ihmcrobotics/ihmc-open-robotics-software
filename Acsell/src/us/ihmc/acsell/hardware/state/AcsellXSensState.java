@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class AcsellXSensState
 {
@@ -18,7 +18,7 @@ public class AcsellXSensState
    
    private final YoDouble qs, qx, qy, qz;
    
-   private final IntegerYoVariable sample;
+   private final YoInteger sample;
    
    private final Quaternion Qsi = new Quaternion();
    private final Quaternion Qip = new Quaternion();
@@ -47,7 +47,7 @@ public class AcsellXSensState
       this.qy = new YoDouble("qy", registry);
       this.qz = new YoDouble("qz", registry);
       
-      this.sample = new IntegerYoVariable("sample", registry);
+      this.sample = new YoInteger("sample", registry);
       
       parentRegistry.addChild(registry);
    }

@@ -3,7 +3,7 @@ package us.ihmc.avatar.posePlayback;
 import us.ihmc.commons.Conversions;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class PlaybackPoseInterpolator
@@ -14,7 +14,7 @@ public class PlaybackPoseInterpolator
    private final YoDouble poseMorphPercentage = new YoDouble("poseMorphPercentage", registry);
    private final YoDouble poseMorphDuration = new YoDouble("poseMorphDuration", registry);
    private final YoDouble timeDelayAfterPose = new YoDouble("timeDelayAfterPose", registry);
-   private final IntegerYoVariable poseSequenceIndex = new IntegerYoVariable("poseSequenceIndex", registry);
+   private final YoInteger poseSequenceIndex = new YoInteger("poseSequenceIndex", registry);
    
    private boolean lastPoseIncrementedSequence = false;
 //   private final double defaultPoseMorphDuration = 1.0;

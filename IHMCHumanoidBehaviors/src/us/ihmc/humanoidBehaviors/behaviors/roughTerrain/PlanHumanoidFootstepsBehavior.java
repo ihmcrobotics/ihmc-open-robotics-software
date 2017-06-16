@@ -33,7 +33,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -52,7 +52,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
-   private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
+   private final YoInteger planarRegionsListCount = new YoInteger(prefix + "PlanarRegionsListCount", registry);
    private final YoBoolean foundPlan = new YoBoolean(prefix + "FoundPlan", registry);
    private final YoBoolean requestedPlanarRegion = new YoBoolean(prefix + "RequestedPlanarRegion", registry);
    private final YoDouble shorterGoalLength = new YoDouble(prefix + "ShorterGoalLength", registry);

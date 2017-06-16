@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -46,7 +46,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final YoFramePoint2d yoStartOfSplineCoM;
    private final YoFramePoint2d yoEndOfSplineCoM;
 
-   private final IntegerYoVariable currentSegment;
+   private final YoInteger currentSegment;
 
    private ReferenceFrame trajectoryFrame;
    private ReferenceFrame initialFrame;
@@ -119,7 +119,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       startOfSplineTime = new YoDouble(namePrefix + "StartOfSplineTime", registry);
       endOfSplineTime = new YoDouble(namePrefix + "EndOfSplineTime", registry);
 
-      currentSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
+      currentSegment = new YoInteger(namePrefix + "CurrentSegment", registry);
 
       spline = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, trajectoryFrame, registry);
 

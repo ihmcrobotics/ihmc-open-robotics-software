@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -873,7 +873,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
       String numberOfWaypointsVarName = footPrefix + "NumberOfWaypoints";
       String orientationTrajectoryName = footPrefix + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-      return ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static int findNumberOfWaypointsForPosition(RobotSide robotSide, SimulationConstructionSet scs)
@@ -882,7 +882,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
       String numberOfWaypointsVarName = footPrefix + "NumberOfWaypoints";
       String positionTrajectoryName = footPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
-      return ((IntegerYoVariable) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static SimpleSE3TrajectoryPoint findTrajectoryPoint(RobotSide robotSide, int trajectoryPointIndex, SimulationConstructionSet scs)

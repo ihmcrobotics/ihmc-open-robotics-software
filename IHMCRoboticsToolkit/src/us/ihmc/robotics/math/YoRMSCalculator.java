@@ -4,17 +4,17 @@ import static us.ihmc.robotics.MathTools.square;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoRMSCalculator
 {
    private final YoDouble rms;
-   private final IntegerYoVariable nUpdates;
+   private final YoInteger nUpdates;
 
    public YoRMSCalculator(String prefix, YoVariableRegistry registry)
    {
       rms = new YoDouble(prefix + "Rms", registry);
-      nUpdates = new IntegerYoVariable(prefix + "RmsNUpdates", registry);
+      nUpdates = new YoInteger(prefix + "RmsNUpdates", registry);
    }
 
    public void update(double input)

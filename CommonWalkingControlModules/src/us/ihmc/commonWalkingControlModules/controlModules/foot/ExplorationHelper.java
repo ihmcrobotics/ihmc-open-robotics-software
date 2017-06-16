@@ -13,7 +13,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -43,7 +43,7 @@ public class ExplorationHelper
    private double lastShrunkTime = 0.0;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private final FramePoint2d currentCorner = new FramePoint2d();
-   private final IntegerYoVariable yoCurrentCorner;
+   private final YoInteger yoCurrentCorner;
 
    private final FramePoint2d desiredCopInWorld = new FramePoint2d();
    private final YoFramePoint2d yoDesiredCop;
@@ -53,7 +53,7 @@ public class ExplorationHelper
       footholdExplorationActive = new YoBoolean(prefix + "FootholdExplorationActive", registry);
       timeExploring = new YoDouble(prefix + "TimeExploring", registry);
       startTime = new YoDouble(prefix + "StartTime", registry);
-      yoCurrentCorner = new IntegerYoVariable(prefix + "CurrentCornerExplored", registry);
+      yoCurrentCorner = new YoInteger(prefix + "CurrentCornerExplored", registry);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
       explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);

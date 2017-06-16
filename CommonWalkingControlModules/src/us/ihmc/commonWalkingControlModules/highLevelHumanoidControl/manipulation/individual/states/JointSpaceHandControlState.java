@@ -19,7 +19,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -42,7 +42,7 @@ public class JointSpaceHandControlState extends HandControlState
    private final LongYoVariable lastCommandId;
 
    private final YoBoolean isReadyToHandleQueuedCommands;
-   private final Map<OneDoFJoint, IntegerYoVariable> numberOfQueuedCommands = new HashMap<>();
+   private final Map<OneDoFJoint, YoInteger> numberOfQueuedCommands = new HashMap<>();
    private final Map<OneDoFJoint, RecyclingArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
 
    public JointSpaceHandControlState(String namePrefix, Map<OneDoFJoint, Double> homeConfiguration, OneDoFJoint[] controlledJoints, YoPIDGains gains,
@@ -75,7 +75,7 @@ public class JointSpaceHandControlState extends HandControlState
          MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(joint.getName(), registry);
          jointTrajectoryGenerators.put(joint, multiWaypointTrajectoryGenerator);
 
-         numberOfQueuedCommands.put(joint, new IntegerYoVariable(joint.getName() + "NumberOfQueuedCommands", registry));
+         numberOfQueuedCommands.put(joint, new YoInteger(joint.getName() + "NumberOfQueuedCommands", registry));
          commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class));
       }
 

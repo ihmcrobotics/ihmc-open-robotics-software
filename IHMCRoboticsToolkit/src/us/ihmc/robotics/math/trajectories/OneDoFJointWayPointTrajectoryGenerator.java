@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
@@ -22,8 +22,8 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
    private final YoDouble currentTime;
    private final OneDoFJoint joint;
    private final YoDouble currentTimeOffset;
-   private final IntegerYoVariable currentPolynomialIndex;
-   private final IntegerYoVariable currentNumberOfWaypoints;
+   private final YoInteger currentPolynomialIndex;
+   private final YoInteger currentNumberOfWaypoints;
 
    public OneDoFJointWayPointTrajectoryGenerator(String namePrefix, OneDoFJoint joint, DoubleProvider trajectoryTimeProvider, int maxNumberOfWayPoints,
          YoVariableRegistry parentRegistry)
@@ -41,8 +41,8 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
       finalizeMotionPolynomial = new YoPolynomial(namePrefix + "FinalizeMotionPolynomial", 4, registry);
 
       currentTimeOffset = new YoDouble(namePrefix + "CurrentTimeOffset", registry);
-      currentNumberOfWaypoints = new IntegerYoVariable(namePrefix + "CurrentNumberOfWayPoints", registry);
-      currentPolynomialIndex = new IntegerYoVariable(namePrefix + "CurrentPolynomialIndex", registry);
+      currentNumberOfWaypoints = new YoInteger(namePrefix + "CurrentNumberOfWayPoints", registry);
+      currentPolynomialIndex = new YoInteger(namePrefix + "CurrentPolynomialIndex", registry);
       connectingPolynomials = new ArrayList<>(maxNumberOfWayPoints - 2);
       for (int i = 0; i < maxNumberOfWayPoints - 2; i++)
       {

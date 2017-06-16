@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -38,7 +38,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Map<RigidBody, ReferenceFrame> footSoleFrames = new LinkedHashMap<>();
 
-   private final IntegerYoVariable numberOfFeetTrusted = new IntegerYoVariable("numberOfFeetTrustedIMUDrift", registry);
+   private final YoInteger numberOfFeetTrusted = new YoInteger("numberOfFeetTrustedIMUDrift", registry);
 
    private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final YoDouble delayBeforeTrustingFoot = new YoDouble("delayBeforeTrustingFootIMUDrift", registry);

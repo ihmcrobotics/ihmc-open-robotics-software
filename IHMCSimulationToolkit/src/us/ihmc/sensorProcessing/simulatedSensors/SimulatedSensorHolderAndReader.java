@@ -10,7 +10,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 public class SimulatedSensorHolderAndReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
-   protected final IntegerYoVariable step = new IntegerYoVariable("step", registry);
+   protected final YoInteger step = new YoInteger("step", registry);
 
    protected final YoDouble yoTime;
 

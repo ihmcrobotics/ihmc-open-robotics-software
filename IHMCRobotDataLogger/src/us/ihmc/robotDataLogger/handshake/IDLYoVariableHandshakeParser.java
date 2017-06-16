@@ -140,7 +140,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             break;
 
          case IntegerYoVariable:
-            IntegerYoVariable intVar = new IntegerYoVariable(name, parent);
+            YoInteger intVar = new YoInteger(name, parent);
             variableList.add(intVar);
             break;
 
