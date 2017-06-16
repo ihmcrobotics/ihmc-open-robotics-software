@@ -77,7 +77,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    {
       if (pelvisZUpFrame != null)
       {
-         pelvisOrientation2d.set(pelvisZUpFrame);
+         pelvisOrientation2d.setToZero(pelvisZUpFrame);
          pelvisOrientation2d.changeFrame(worldFrame);
          desiredHeadingControlModule.resetHeadingAngle(pelvisOrientation2d.getYaw());
       }

@@ -46,6 +46,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       commandId = other.getCommandId();
       executionMode = other.getExecutionMode();
       previousCommandId = other.getPreviousCommandId();
+      this.adjustedExecutionTime = other.getExecutionTime();
    }
 
    /**
@@ -158,5 +159,16 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    public void setExecutionTime(double adjustedExecutionTime)
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
+   }
+   
+   /**
+    * tells the controller if this command supports delayed execution
+    * (Spoiler alert: It does)
+    * @return
+    */
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
    }
 }

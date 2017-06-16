@@ -1654,7 +1654,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw, double angleRelativeToPath, double percentOfMaxFootstepLength)
    {
       FramePose2d targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
+      targetPoseInWorld.setIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
 
       WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath,

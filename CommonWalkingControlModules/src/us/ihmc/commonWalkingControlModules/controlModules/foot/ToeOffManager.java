@@ -30,7 +30,7 @@ public class ToeOffManager
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
+   private static final boolean DO_TOE_OFF_FOR_SIDE_STEPS = false;
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
    private static final double forwardSteppingThreshold = -0.05;
@@ -60,10 +60,12 @@ public class ToeOffManager
    private final DoubleYoVariable icpProximityForDSToeOff = new DoubleYoVariable("icpProximityForDSToeOff", registry);
    private final DoubleYoVariable icpProximityForSSToeOff = new DoubleYoVariable("icpProximityForSSToeOff", registry);
    private final DoubleYoVariable ecmpProximityForToeOff = new DoubleYoVariable("ecmpProximityForToeOff", registry);
+   private final DoubleYoVariable copProximityForToeOff = new DoubleYoVariable("copProximityForToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
    private final BooleanYoVariable isDesiredECMPOKForToeOff = new BooleanYoVariable("isDesiredECMPOKForToeOff", registry);
+   private final BooleanYoVariable isDesiredCoPOKForToeOff = new BooleanYoVariable("isDesiredCoPOKForToeOff", registry);
    private final BooleanYoVariable needToSwitchToToeOffForAnkleLimit = new BooleanYoVariable("needToSwitchToToeOffForAnkleLimit", registry);
    private final BooleanYoVariable isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
 
@@ -73,6 +75,8 @@ public class ToeOffManager
          registry, isCurrentICPOKForToeOff, smallGlitchWindowSize);
    private final GlitchFilteredBooleanYoVariable isDesiredECMPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredECMPOKForToeOffFilt",
          registry, isDesiredECMPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredBooleanYoVariable isDesiredCoPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredCoPOKForToeOffFilt",
+         registry, isDesiredCoPOKForToeOff, smallGlitchWindowSize);
 
    private final GlitchFilteredBooleanYoVariable isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt",
          registry, isRearAnklePitchHittingLimit, largeGlitchWindowSize);
@@ -126,6 +130,7 @@ public class ToeOffManager
       this.icpPercentOfStanceForSSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForSSToeOff());
 
       this.ecmpProximityForToeOff.set(walkingControllerParameters.getECMPProximityForToeOff());
+      this.copProximityForToeOff.set(walkingControllerParameters.getCoPProximityForToeOff());
 
       this.toeOffCalculator = toeOffCalculator;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -176,6 +181,9 @@ public class ToeOffManager
       isDesiredECMPOKForToeOff.set(false);
       isDesiredECMPOKForToeOffFilt.set(false);
 
+      isDesiredCoPOKForToeOff.set(false);
+      isDesiredCoPOKForToeOffFilt.set(false);
+
       isRearAnklePitchHittingLimit.set(false);
       isRearAnklePitchHittingLimitFilt.set(false);
 
@@ -224,7 +232,7 @@ public class ToeOffManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusSingleSupport(FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusSingleSupport(FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
       {
@@ -239,6 +247,9 @@ public class ToeOffManager
 
          isDesiredECMPOKForToeOff.set(false);
          isDesiredECMPOKForToeOffFilt.set(false);
+
+         isDesiredCoPOKForToeOff.set(false);
+         isDesiredCoPOKForToeOffFilt.set(false);
 
          computeToePointContact.set(false);
          computeToeLineContact.set(false);
@@ -267,6 +278,7 @@ public class ToeOffManager
       double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), leadingFootSupportPolygon, soleFrame, percentProximity);
       icpProximityForSSToeOff.set(requiredProximity);
 
+      checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
 
       if (!toeContact.evaluateToeOffConditions(trailingLeg))
@@ -299,7 +311,8 @@ public class ToeOffManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP,
+         FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       nextFootstep = null;
       if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
@@ -315,6 +328,9 @@ public class ToeOffManager
 
          isDesiredECMPOKForToeOff.set(false);
          isDesiredECMPOKForToeOffFilt.set(false);
+
+         isDesiredCoPOKForToeOff.set(false);
+         isDesiredCoPOKForToeOffFilt.set(false);
 
          needToSwitchToToeOffForAnkleLimit.set(false);
          computeToePointContact.set(false);
@@ -344,6 +360,7 @@ public class ToeOffManager
       double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), leadingFootSupportPolygon, soleFrame, percentProximity);
       icpProximityForDSToeOff.set(requiredProximity);
 
+      checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
 
       if (!toeContact.evaluateToeOffConditions(trailingLeg))
@@ -405,6 +422,21 @@ public class ToeOffManager
       {
          isDesiredECMPOKForToeOff.set(true);
          isDesiredECMPOKForToeOffFilt.set(true);
+      }
+   }
+
+   private void checkCoPLocation(FramePoint2d desiredCoP)
+   {
+      if (walkingControllerParameters.checkCoPLocationToTriggerToeOff())
+      {
+         desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
+         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.distance(desiredCoP) <= copProximityForToeOff.getDoubleValue());
+         isDesiredCoPOKForToeOffFilt.update();
+      }
+      else
+      {
+         isDesiredCoPOKForToeOff.set(true);
+         isDesiredCoPOKForToeOffFilt.set(true);
       }
    }
 
@@ -507,7 +539,7 @@ public class ToeOffManager
       }
 
       boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
-      if (isSideStepping && !DO_TOEOFF_FOR_SIDE_STEPS)
+      if (isSideStepping && !DO_TOE_OFF_FOR_SIDE_STEPS)
          return false;
 
       boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getDoubleValue();
@@ -691,7 +723,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue() || !isDesiredCoPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
             computeToeLineContact.set(true);
@@ -757,7 +789,7 @@ public class ToeOffManager
             return false;
          }
 
-         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue() && !isDesiredCoPOKForToeOffFilt.getBooleanValue())
          {
             doPointToeOff.set(false);
             computeToePointContact.set(true);

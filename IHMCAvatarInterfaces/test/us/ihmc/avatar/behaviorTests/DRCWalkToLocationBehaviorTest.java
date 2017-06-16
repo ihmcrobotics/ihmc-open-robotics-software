@@ -487,7 +487,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       walkDirection.normalize();
       double xDesired = desiredMidFeetPose.getX() + walkDistance * walkDirection.getX();
       double yDesired = desiredMidFeetPose.getY() + walkDistance * walkDirection.getY();
-      desiredMidFeetPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), xDesired, yDesired, desiredYawAngle);
+      desiredMidFeetPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), xDesired, yDesired, desiredYawAngle);
 
       return desiredMidFeetPose;
    }
@@ -528,7 +528,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       midFeetPose.setToZero(midFeetFrame);
       midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
       FramePose2d ret = new FramePose2d();
-      ret.setPoseIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
+      ret.setIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }

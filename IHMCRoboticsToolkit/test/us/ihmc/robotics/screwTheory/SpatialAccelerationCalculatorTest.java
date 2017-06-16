@@ -463,7 +463,7 @@ public class SpatialAccelerationCalculatorTest
 
                expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
                EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex, expectedLinearAcceleration.getVector(),
-                                                       actualLinearAcceleration.getVector(), 5.0e-5);
+                                                       actualLinearAcceleration.getVector(), 7.0e-5);
             }
          }
       }
