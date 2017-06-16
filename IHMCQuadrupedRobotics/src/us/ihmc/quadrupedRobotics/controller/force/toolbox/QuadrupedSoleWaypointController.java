@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +14,7 @@ public class QuadrupedSoleWaypointController
 {
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable robotTime;
+   private final YoDouble robotTime;
 
    // SoleWaypoint variables
    QuadrantDependentList<MultipleWaypointsPositionTrajectoryGenerator> quadrupedWaypointsPositionTrajectoryGenerator;
@@ -29,7 +29,7 @@ public class QuadrupedSoleWaypointController
    private double taskStartTime;
 
    public QuadrupedSoleWaypointController(ReferenceFrame bodyFrame, QuadrantDependentList<QuadrupedSolePositionController> solePositionController,
-         DoubleYoVariable robotTimeStamp, YoVariableRegistry parentRegistry)
+         YoDouble robotTimeStamp, YoVariableRegistry parentRegistry)
    {
       this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
       this.bodyFrame = bodyFrame;

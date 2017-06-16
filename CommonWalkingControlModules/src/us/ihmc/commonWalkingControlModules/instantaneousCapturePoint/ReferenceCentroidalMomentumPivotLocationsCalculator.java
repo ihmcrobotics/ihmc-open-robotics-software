@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -55,18 +55,18 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final List<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<>();
 
    private final YoBoolean isDoneWalking;
-   private final DoubleYoVariable maxForwardEntryCMPOffset;
-   private final DoubleYoVariable minForwardEntryCMPOffset;
-   private final DoubleYoVariable maxForwardExitCMPOffset;
-   private final DoubleYoVariable minForwardExitCMPOffset;
-   private final DoubleYoVariable footstepHeightThresholdToPutExitCMPOnToesSteppingDown;
-   private final DoubleYoVariable footstepLengthThresholdToPutExitCMPOnToesSteppingDown;
+   private final YoDouble maxForwardEntryCMPOffset;
+   private final YoDouble minForwardEntryCMPOffset;
+   private final YoDouble maxForwardExitCMPOffset;
+   private final YoDouble minForwardExitCMPOffset;
+   private final YoDouble footstepHeightThresholdToPutExitCMPOnToesSteppingDown;
+   private final YoDouble footstepLengthThresholdToPutExitCMPOnToesSteppingDown;
 
-   private final DoubleYoVariable stepLengthToCMPOffsetFactor;
-   private final DoubleYoVariable footstepLengthThresholdToPutExitCMPOnToes;
+   private final YoDouble stepLengthToCMPOffsetFactor;
+   private final YoDouble footstepLengthThresholdToPutExitCMPOnToes;
 
    private final YoBoolean putExitCMPOnToes;
-   private final DoubleYoVariable exitCMPForwardSafetyMarginOnToes;
+   private final YoDouble exitCMPForwardSafetyMarginOnToes;
 
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
@@ -94,8 +94,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final FrameConvexPolygon2d tempSupportPolygonForShrinking = new FrameConvexPolygon2d();
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
 
-   private final DoubleYoVariable safeDistanceFromCMPToSupportEdges;
-   private final DoubleYoVariable safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
+   private final YoDouble safeDistanceFromCMPToSupportEdges;
+   private final YoDouble safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
 
    private final FramePoint2d centroidOfUpcomingFootstep = new FramePoint2d();
    private final FramePoint2d centroidOfCurrentFootstep = new FramePoint2d();
@@ -110,7 +110,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
     * By default the CMPs for the last step are centered between the foot support polygon centroids. This parameter (default 0.5)
     * specifies where on the line connecting the centroids the CMPs are placed.
     */
-   private final DoubleYoVariable percentageChickenSupport;
+   private final YoDouble percentageChickenSupport;
 
    public ReferenceCentroidalMomentumPivotLocationsCalculator(String namePrefix, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int numberFootstepsToConsider, YoVariableRegistry parentRegistry)
@@ -118,22 +118,22 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       firstEntryCMPForSingleSupport.setToNaN();
 
       isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
-      maxForwardEntryCMPOffset = new DoubleYoVariable(namePrefix + "MaxForwardEntryCMPOffset", registry);
-      minForwardEntryCMPOffset = new DoubleYoVariable(namePrefix + "MinForwardEntryCMPOffset", registry);
-      maxForwardExitCMPOffset = new DoubleYoVariable(namePrefix + "MaxForwardExitCMPOffset", registry);
-      minForwardExitCMPOffset = new DoubleYoVariable(namePrefix + "MinForwardExitCMPOffset", registry);
-      safeDistanceFromCMPToSupportEdges = new DoubleYoVariable(namePrefix + "SafeDistanceFromCMPToSupportEdges", registry);
-      footstepHeightThresholdToPutExitCMPOnToesSteppingDown = new DoubleYoVariable(namePrefix + "FootstepHeightThresholdToPutExitCMPOnToesSteppingDown", registry);
-      footstepLengthThresholdToPutExitCMPOnToesSteppingDown = new DoubleYoVariable(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToesSteppingDown", registry);
-      safeDistanceFromCMPToSupportEdgesWhenSteppingDown = new DoubleYoVariable(namePrefix + "SafeDistanceFromCMPToSupportEdgesWhenSteppingDown", registry);
+      maxForwardEntryCMPOffset = new YoDouble(namePrefix + "MaxForwardEntryCMPOffset", registry);
+      minForwardEntryCMPOffset = new YoDouble(namePrefix + "MinForwardEntryCMPOffset", registry);
+      maxForwardExitCMPOffset = new YoDouble(namePrefix + "MaxForwardExitCMPOffset", registry);
+      minForwardExitCMPOffset = new YoDouble(namePrefix + "MinForwardExitCMPOffset", registry);
+      safeDistanceFromCMPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCMPToSupportEdges", registry);
+      footstepHeightThresholdToPutExitCMPOnToesSteppingDown = new YoDouble(namePrefix + "FootstepHeightThresholdToPutExitCMPOnToesSteppingDown", registry);
+      footstepLengthThresholdToPutExitCMPOnToesSteppingDown = new YoDouble(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToesSteppingDown", registry);
+      safeDistanceFromCMPToSupportEdgesWhenSteppingDown = new YoDouble(namePrefix + "SafeDistanceFromCMPToSupportEdgesWhenSteppingDown", registry);
 
-      stepLengthToCMPOffsetFactor = new DoubleYoVariable(namePrefix + "StepLengthToCMPOffsetFactor", registry);
-      footstepLengthThresholdToPutExitCMPOnToes = new DoubleYoVariable(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToes", registry);
+      stepLengthToCMPOffsetFactor = new YoDouble(namePrefix + "StepLengthToCMPOffsetFactor", registry);
+      footstepLengthThresholdToPutExitCMPOnToes = new YoDouble(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToes", registry);
 
       numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
       putExitCMPOnToes = new YoBoolean(namePrefix + "PutExitCMPOnToes", registry);
-      exitCMPForwardSafetyMarginOnToes = new DoubleYoVariable(namePrefix + "ExitCMPForwardSafetyMarginOnToes", registry);
+      exitCMPForwardSafetyMarginOnToes = new YoDouble(namePrefix + "ExitCMPForwardSafetyMarginOnToes", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -166,7 +166,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          exitCMPsInWorldFrameReadOnly.add(exitConstantCMP.buildUpdatedYoFramePointForVisualizationOnly());
       }
 
-      percentageChickenSupport = new DoubleYoVariable("PercentageChickenSupport", registry);
+      percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
       percentageChickenSupport.set(0.5);
 
       parentRegistry.addChild(registry);

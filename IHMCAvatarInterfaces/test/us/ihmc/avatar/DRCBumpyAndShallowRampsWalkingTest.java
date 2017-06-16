@@ -24,7 +24,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -121,14 +121,14 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       YoBoolean walk = (YoBoolean) scs.getVariable("walk");
-      DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
-      DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
-      DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
+      YoDouble q_x = (YoDouble) scs.getVariable("q_x");
+      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityX");
+      YoDouble desiredHeading = (YoDouble) scs.getVariable("desiredHeading");
 
-//    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-//      DoubleYoVariable leftFootHeight = (DoubleYoVariable) scs.getVariable("p_leftFootPositionZ");
-//      DoubleYoVariable rightFootHeight = (DoubleYoVariable) scs.getVariable("p_rightFootPositionZ");
+//    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
+      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+//      YoDouble leftFootHeight = (YoDouble) scs.getVariable("p_leftFootPositionZ");
+//      YoDouble rightFootHeight = (YoDouble) scs.getVariable("p_rightFootPositionZ");
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
@@ -195,12 +195,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       YoBoolean walk = (YoBoolean) scs.getVariable("walk");
-      DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
-      DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
-      DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
+      YoDouble q_x = (YoDouble) scs.getVariable("q_x");
+      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityX");
+      YoDouble desiredHeading = (YoDouble) scs.getVariable("desiredHeading");
 
-//    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
+//    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
+      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
@@ -317,9 +317,9 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       YoBoolean walk = (YoBoolean) scs.getVariable("walk");
-      DoubleYoVariable stepLength = (DoubleYoVariable) scs.getVariable("maxStepLength");
-      DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) scs.getVariable("offsetHeightAboveGround");
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
+      YoDouble stepLength = (YoDouble) scs.getVariable("maxStepLength");
+      YoDouble offsetHeightAboveGround = (YoDouble) scs.getVariable("offsetHeightAboveGround");
+      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
       stepLength.set(0.4);
       offsetHeightAboveGround.set(-0.1);
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);

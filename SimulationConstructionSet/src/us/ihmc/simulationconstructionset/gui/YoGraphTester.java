@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
@@ -48,7 +48,7 @@ public class YoGraphTester
 
       int nPoints = 200;
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoVariable = new DoubleYoVariable("variableOne", registry);
+      YoDouble yoVariable = new YoDouble("variableOne", registry);
       
       DataBufferEntry dataEntry = new DataBufferEntry(yoVariable, nPoints);
       

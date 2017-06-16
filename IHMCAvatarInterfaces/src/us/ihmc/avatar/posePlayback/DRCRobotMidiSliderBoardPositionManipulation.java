@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -101,21 +101,21 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final SimulationConstructionSet scs;
    private final MidiSliderBoard sliderBoard;
 
-   private final DoubleYoVariable q_yaw = new DoubleYoVariable("q_yaw", registry);
-   private final DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
-   private final DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
+   private final YoDouble q_yaw = new YoDouble("q_yaw", registry);
+   private final YoDouble q_pitch = new YoDouble("q_pitch", registry);
+   private final YoDouble q_roll = new YoDouble("q_roll", registry);
 
-   private final DoubleYoVariable q_left = new DoubleYoVariable("q_left", registry);
-   private final DoubleYoVariable q_right = new DoubleYoVariable("q_right", registry);
-   private final SideDependentList<DoubleYoVariable> q_hands = new SideDependentList<DoubleYoVariable>(q_left, q_right);
+   private final YoDouble q_left = new YoDouble("q_left", registry);
+   private final YoDouble q_right = new YoDouble("q_right", registry);
+   private final SideDependentList<YoDouble> q_hands = new SideDependentList<YoDouble>(q_left, q_right);
    private final SideDependentList<String> handSideString = new SideDependentList<String>("q_left_f", "q_right_f");
 
    private boolean symmetricMode = false;
    private RobotSide symmetricControlSide;
-   private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz, q_x, q_y, q_z;
+   private final YoDouble q_qs, q_qx, q_qy, q_qz, q_x, q_y, q_z;
    private Quaternion qprev;
 
-   //   private final DoubleYoVariable BaseControlPoint = new DoubleYoVariable("BaseControlPoint", registry);
+   //   private final YoDouble BaseControlPoint = new YoDouble("BaseControlPoint", registry);
    private final YoFramePoint[] baseControlPoints = new YoFramePoint[4];
    private final ArrayList<YoGraphic> baseControlPointsList = new ArrayList<YoGraphic>();
    private final ArrayList<YoGraphic> baseControlLinesList = new ArrayList<YoGraphic>();
@@ -486,9 +486,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                for (int j = 0; j <= 2; j++)
                {
                   @SuppressWarnings("deprecation")
-                  DoubleYoVariable thisVariable = (DoubleYoVariable) scs.getVariable(thisSidePrefix + f + "_j" + j);
+                  YoDouble thisVariable = (YoDouble) scs.getVariable(thisSidePrefix + f + "_j" + j);
                   @SuppressWarnings("deprecation")
-                  DoubleYoVariable oppositeSideVariable = (DoubleYoVariable) scs.getVariable(oppositeSidePrefix + f + "_j" + j);
+                  YoDouble oppositeSideVariable = (YoDouble) scs.getVariable(oppositeSidePrefix + f + "_j" + j);
                   SymmetricModeListener symmetricModeListener = new SymmetricModeListener(oppositeSideVariable, robotSide, 1.0);
                   thisVariable.addVariableChangedListener(symmetricModeListener);
                }
@@ -926,11 +926,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private class SymmetricModeListener implements VariableChangedListener
    {
-      private final DoubleYoVariable variableToSet;
+      private final YoDouble variableToSet;
       private final RobotSide robotSide;
       private final double respectiveSign;
 
-      public SymmetricModeListener(DoubleYoVariable variableToSet, RobotSide robotSide, double sign)
+      public SymmetricModeListener(YoDouble variableToSet, RobotSide robotSide, double sign)
       {
          this.variableToSet = variableToSet;
          this.robotSide = robotSide;
@@ -941,7 +941,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          if (symmetricMode && (robotSide == symmetricControlSide))
          {
-            variableToSet.set(respectiveSign * ((DoubleYoVariable) yoVariable).getDoubleValue());
+            variableToSet.set(respectiveSign * ((YoDouble) yoVariable).getDoubleValue());
          }
       }
    }
@@ -950,7 +950,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       public void variableChanged(YoVariable<?> v)
       {
-         if (!(v instanceof DoubleYoVariable))
+         if (!(v instanceof YoDouble))
             return;
 
          if (v.equals(q_yaw) || v.equals(q_pitch) || v.equals(q_roll))
@@ -978,7 +978,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          {
             for (int j = 1; j <= 2; j++)
             {
-               ((DoubleYoVariable) scs.getVariable(handSideString.get(robotSide) + f + "_j" + j)).set(q_val);
+               ((YoDouble) scs.getVariable(handSideString.get(robotSide) + f + "_j" + j)).set(q_val);
             }
          }
       }

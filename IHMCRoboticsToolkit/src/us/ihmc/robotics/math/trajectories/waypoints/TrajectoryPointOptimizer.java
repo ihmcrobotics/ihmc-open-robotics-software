@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.time.ExecutionTimer;
 
@@ -86,7 +86,7 @@ public class TrajectoryPointOptimizer
 
    private final DenseMatrix64F timeGradient = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
-   private final DoubleYoVariable timeGain;
+   private final YoDouble timeGain;
 
    private final ExecutionTimer computeTimer;
    private final ExecutionTimer timeUpdateTimer;
@@ -125,7 +125,7 @@ public class TrajectoryPointOptimizer
       this.iteration = new IntegerYoVariable(namePrefix + "Iteration", registry);
       this.computeTimer = new ExecutionTimer(namePrefix + "ComputeTimer", 0.0, registry);
       this.timeUpdateTimer = new ExecutionTimer(namePrefix + "TimeUpdateTimer", 0.0, registry);
-      this.timeGain = new DoubleYoVariable(namePrefix + "TimeGain", registry);
+      this.timeGain = new YoDouble(namePrefix + "TimeGain", registry);
 
       dimensions = Math.max(dimensions, 0);
       this.dimensions.set(dimensions);

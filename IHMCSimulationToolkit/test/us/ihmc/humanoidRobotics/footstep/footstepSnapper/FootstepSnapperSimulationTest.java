@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -609,10 +609,10 @@ public class FootstepSnapperSimulationTest
       private final boolean visualize;
 
       private final YoVariableRegistry registry = new YoVariableRegistry("HeightMapBestFitPlaneCalculatorTest");
-      private final DoubleYoVariable soleX = new DoubleYoVariable("soleX", registry);
-      private final DoubleYoVariable soleY = new DoubleYoVariable("soleY", registry);
-      private final DoubleYoVariable soleZ = new DoubleYoVariable("soleZ", registry);
-      private final DoubleYoVariable soleYaw = new DoubleYoVariable("soleYaw", registry);
+      private final YoDouble soleX = new YoDouble("soleX", registry);
+      private final YoDouble soleY = new YoDouble("soleY", registry);
+      private final YoDouble soleZ = new YoDouble("soleZ", registry);
+      private final YoDouble soleYaw = new YoDouble("soleYaw", registry);
       private final YoFramePose planePose = new YoFramePose("planePose", "", worldFrame, registry);
       private final YoFramePoint queryPoint = new YoFramePoint("query", "", worldFrame, registry);
       private final YoFramePoint planePoint = new YoFramePoint("planePoint", "", worldFrame, registry);

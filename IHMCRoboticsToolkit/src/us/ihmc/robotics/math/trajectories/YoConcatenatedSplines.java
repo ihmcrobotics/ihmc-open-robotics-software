@@ -7,14 +7,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 
 public class YoConcatenatedSplines
 {
@@ -23,8 +22,8 @@ public class YoConcatenatedSplines
    private final YoVariableRegistry registry;
    
    private final List<YoSpline3D> splines;
-   private final List<ImmutablePair<DoubleYoVariable, DoubleYoVariable>> rangeList;
-   private final DoubleYoVariable arcLength;
+   private final List<ImmutablePair<YoDouble, YoDouble>> rangeList;
+   private final YoDouble arcLength;
    
    private final YoFramePoint position;
    private final YoFrameVector velocity;
@@ -42,20 +41,20 @@ public class YoConcatenatedSplines
       this.referenceFrame = referenceFrame;
 
       this.splines = new ArrayList<YoSpline3D>();
-      rangeList = new ArrayList<ImmutablePair<DoubleYoVariable, DoubleYoVariable>>();
+      rangeList = new ArrayList<ImmutablePair<YoDouble, YoDouble>>();
 
       for (int i = 0; i < numberOfCoefficientsPerPolynomial.length; i++)
       {
          splines.add(new YoSpline3D(numberOfCoefficientsPerPolynomial[i], arcLengthCalculatorDivisionsPerPolynomial, referenceFrame, registry,
                                     namePrefix + "Spline" + i));
-         rangeList.add(new ImmutablePair<DoubleYoVariable, DoubleYoVariable>(new DoubleYoVariable(namePrefix + "Range" + i + "First", registry),
-                                new DoubleYoVariable(namePrefix + "Range" + i + "Second", registry)));
+         rangeList.add(new ImmutablePair<YoDouble, YoDouble>(new YoDouble(namePrefix + "Range" + i + "First", registry),
+                                new YoDouble(namePrefix + "Range" + i + "Second", registry)));
       }
 
       position = new YoFramePoint(namePrefix + "Position", referenceFrame, registry);
       velocity = new YoFrameVector(namePrefix + "Velocity", referenceFrame, registry);
       acceleration = new YoFrameVector(namePrefix + "Acceleration", referenceFrame, registry);
-      arcLength = new DoubleYoVariable(namePrefix + "ArcLength", registry);
+      arcLength = new YoDouble(namePrefix + "ArcLength", registry);
       
       currentSplineIndex = new IntegerYoVariable(namePrefix + "CurrentSplineIndex", registry);
    }

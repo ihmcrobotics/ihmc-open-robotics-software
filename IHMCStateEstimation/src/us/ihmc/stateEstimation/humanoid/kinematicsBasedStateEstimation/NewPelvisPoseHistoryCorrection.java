@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -56,14 +56,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private boolean sendCorrectionUpdate = false;
    
    //Deadzone translation variables
-   private final DoubleYoVariable xDeadzoneSize;
-   private final DoubleYoVariable yDeadzoneSize;
-   private final DoubleYoVariable zDeadzoneSize;
-   private final DoubleYoVariable yawDeadzoneSize;
+   private final YoDouble xDeadzoneSize;
+   private final YoDouble yDeadzoneSize;
+   private final YoDouble zDeadzoneSize;
+   private final YoDouble yawDeadzoneSize;
 
-   private final DoubleYoVariable alphaFilterBreakFrequency;
+   private final YoDouble alphaFilterBreakFrequency;
    
-   private final DoubleYoVariable confidenceFactor;
+   private final YoDouble confidenceFactor;
    
    private final RigidBodyTransform stateEstimatorPelvisTransformInWorld = new RigidBodyTransform();
    private final RigidBodyTransform localizationTransformInWorld = new RigidBodyTransform();
@@ -73,13 +73,13 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final RigidBodyTransform errorBetweenCorrectedAndLocalizationTransform = new RigidBodyTransform();
    private final Vector3D totalErrorTranslation = new Vector3D(); 
    private final Quaternion totalErrorRotation = new Quaternion(); 
-   private final DoubleYoVariable totalErrorTranslation_X;
-   private final DoubleYoVariable totalErrorTranslation_Y;
-   private final DoubleYoVariable totalErrorTranslation_Z;
+   private final YoDouble totalErrorTranslation_X;
+   private final YoDouble totalErrorTranslation_Y;
+   private final YoDouble totalErrorTranslation_Z;
    private final double[] totalErrorYawPitchRoll = new double[3];
-   private final DoubleYoVariable totalErrorRotation_Yaw;
-   private final DoubleYoVariable totalErrorRotation_Pitch;
-   private final DoubleYoVariable totalErrorRotation_Roll;
+   private final YoDouble totalErrorRotation_Yaw;
+   private final YoDouble totalErrorRotation_Pitch;
+   private final YoDouble totalErrorRotation_Roll;
    
    private final IntegerYoVariable pelvisBufferSize;
    
@@ -130,13 +130,13 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
       
-      xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
+      xDeadzoneSize = new YoDouble("xDeadzoneSize", registry);
       xDeadzoneSize.set(X_DEADZONE_SIZE);
-      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);
+      yDeadzoneSize = new YoDouble("yDeadzoneSize", registry);
       yDeadzoneSize.set(Y_DEADZONE_SIZE);
-      zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
+      zDeadzoneSize = new YoDouble("zDeadzoneSize", registry);
       zDeadzoneSize.set(Z_DEADZONE_SIZE);
-      yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
+      yawDeadzoneSize = new YoDouble("yawDeadzoneSize", registry);
       yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
       
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
@@ -145,10 +145,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.pelvisBufferSize = new IntegerYoVariable("pelvisBufferSize", registry);
       this.pelvisBufferSize.set(pelvisBufferSize);
       
-      alphaFilterBreakFrequency = new DoubleYoVariable("alphaFilterBreakFrequency", registry);
+      alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
       alphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
       
-      confidenceFactor = new DoubleYoVariable("PelvisErrorCorrectionConfidenceFactor", registry);
+      confidenceFactor = new YoDouble("PelvisErrorCorrectionConfidenceFactor", registry);
       
       offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
@@ -160,12 +160,12 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       yoCorrectedPelvisPoseInWorldFrame = new YoFramePose("correctedPelvisPoseInWorldFrame", worldFrame, registry);
       yoIterativeClosestPointPoseInWorldFrame = new YoFramePose("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
       
-      totalErrorTranslation_X = new DoubleYoVariable("totalErrorTranslation_X", registry);
-      totalErrorTranslation_Y = new DoubleYoVariable("totalErrorTranslation_Y", registry);
-      totalErrorTranslation_Z = new DoubleYoVariable("totalErrorTranslation_Z", registry);
-      totalErrorRotation_Yaw = new DoubleYoVariable("totalErrorRotation_Yaw", registry);
-      totalErrorRotation_Pitch = new DoubleYoVariable("totalErrorRotation_Pitch", registry);
-      totalErrorRotation_Roll = new DoubleYoVariable("totalErrorRotation_Roll", registry);
+      totalErrorTranslation_X = new YoDouble("totalErrorTranslation_X", registry);
+      totalErrorTranslation_Y = new YoDouble("totalErrorTranslation_Y", registry);
+      totalErrorTranslation_Z = new YoDouble("totalErrorTranslation_Z", registry);
+      totalErrorRotation_Yaw = new YoDouble("totalErrorRotation_Yaw", registry);
+      totalErrorRotation_Pitch = new YoDouble("totalErrorRotation_Pitch", registry);
+      totalErrorRotation_Roll = new YoDouble("totalErrorRotation_Roll", registry);
       
       hasOneIcpPacketEverBeenReceived = new YoBoolean("hasOneIcpPacketEverBeenReceived", registry);
       hasOneIcpPacketEverBeenReceived.set(false);

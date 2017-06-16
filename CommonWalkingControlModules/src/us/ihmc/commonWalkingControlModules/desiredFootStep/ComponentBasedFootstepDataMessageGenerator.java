@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,8 +40,8 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
    private final YoBoolean walk = new YoBoolean("walk", registry);
    private final YoBoolean walkPrevious = new YoBoolean("walkPrevious", registry);
 
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("footstepGeneratorSwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable("footstepGeneratorTransferTime", registry);
+   private final YoDouble swingTime = new YoDouble("footstepGeneratorSwingTime", registry);
+   private final YoDouble transferTime = new YoDouble("footstepGeneratorTransferTime", registry);
 
    private final ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator;
    private final CommandInputManager commandInputManager;

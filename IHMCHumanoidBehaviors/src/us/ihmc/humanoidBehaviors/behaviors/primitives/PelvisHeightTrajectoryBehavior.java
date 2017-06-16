@@ -5,7 +5,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
 {
@@ -14,16 +14,16 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    private final YoBoolean trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
    private PelvisHeightTrajectoryMessage outgoingPelvisHeightTrajectoryMessage;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime;
 
-   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
-      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(getName() + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
    }

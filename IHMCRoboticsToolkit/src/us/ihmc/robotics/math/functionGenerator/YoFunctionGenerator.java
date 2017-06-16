@@ -5,7 +5,7 @@ import java.util.Random;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.YoSignalDerivative;
@@ -36,13 +36,13 @@ public class YoFunctionGenerator
 
    private final Random random = new Random(1776L);
 
-   private final DoubleYoVariable value, offset, amplitude, frequency, phase, resetTime, pauseTime, chirpRate, chirpFrequency, chirpFrequencyMax;
-   private final DoubleYoVariable valueDot;
+   private final YoDouble value, offset, amplitude, frequency, phase, resetTime, pauseTime, chirpRate, chirpFrequency, chirpFrequencyMax;
+   private final YoDouble valueDot;
    private final FilteredVelocityYoVariable valueDotFromFilter;
 
-   private final DoubleYoVariable timeModeChanged;
-   private final DoubleYoVariable timeInCurrentMode;
-   private final DoubleYoVariable kRateForExponentialChirp;
+   private final YoDouble timeModeChanged;
+   private final YoDouble timeInCurrentMode;
+   private final YoDouble kRateForExponentialChirp;
    private final YoBoolean chirpUpAndDown;
    private final YoBoolean stopAfterResetTime;
 
@@ -51,7 +51,7 @@ public class YoFunctionGenerator
    private final YoVariable[] createdVariables;
    private final YoSignalDerivative signalDerivative;
 
-   private final DoubleYoVariable time;
+   private final YoDouble time;
    private double sweepFrequencyLowHz = 0.001;
    private double previousResetTime, previousChirpFrequency;
    private boolean previousChirpUpAndDown;
@@ -60,8 +60,8 @@ public class YoFunctionGenerator
 
    private boolean modeChanged;
    private final AlphaFilteredYoVariable offsetFiltered, amplitudeFiltered;
-   private final DoubleYoVariable frequencyFiltered, phaseFiltered;
-   private final DoubleYoVariable alphaFilter;
+   private final YoDouble frequencyFiltered, phaseFiltered;
+   private final YoDouble alphaFilter;
 
    public YoFunctionGenerator(String name, YoVariableRegistry registry)
    {
@@ -73,12 +73,12 @@ public class YoFunctionGenerator
       this(name, null, registry);
    }
 
-   public YoFunctionGenerator(String name, DoubleYoVariable time, YoVariableRegistry parentRegistry)
+   public YoFunctionGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry)
    {
       this(name, time, parentRegistry, false, -1.0);
    }
 
-   public YoFunctionGenerator(String name, DoubleYoVariable time, YoVariableRegistry parentRegistry, boolean smoothParameters, double dT)
+   public YoFunctionGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry, boolean smoothParameters, double dT)
    {
       this.smoothParameters = smoothParameters;
 
@@ -86,20 +86,20 @@ public class YoFunctionGenerator
 
       this.time = time;
 
-      value = new DoubleYoVariable(name + "Value", registry);
+      value = new YoDouble(name + "Value", registry);
 
-      valueDot = new DoubleYoVariable(name + "ValueDot", registry);
+      valueDot = new YoDouble(name + "ValueDot", registry);
       if (dT != -1.0)
          valueDotFromFilter = new FilteredVelocityYoVariable(name + "ValueDotFromFilter", "", 0.0, value, dT, registry);
       else
          valueDotFromFilter = null;
 
-      offset = new DoubleYoVariable(name + "Offset", registry);
-      amplitude = new DoubleYoVariable(name + "Amp", registry);
-      frequency = new DoubleYoVariable(name + "Freq", registry);
-      phase = new DoubleYoVariable(name + "Phase", registry);
+      offset = new YoDouble(name + "Offset", registry);
+      amplitude = new YoDouble(name + "Amp", registry);
+      frequency = new YoDouble(name + "Freq", registry);
+      phase = new YoDouble(name + "Phase", registry);
 
-      alphaFilter = new DoubleYoVariable("alphaFilter", registry);
+      alphaFilter = new YoDouble("alphaFilter", registry);
       if (!smoothParameters)
          alphaFilter.set(0.0);
       else
@@ -108,22 +108,22 @@ public class YoFunctionGenerator
       offsetFiltered = new AlphaFilteredYoVariable("offsetFiltered", registry, alphaFilter, offset);
       amplitudeFiltered = new AlphaFilteredYoVariable("amplitudeFiltered", registry, alphaFilter, amplitude);
 
-      frequencyFiltered = new DoubleYoVariable("frequencyFiltered", registry);
-      phaseFiltered = new DoubleYoVariable("phaseFiltered", registry);
+      frequencyFiltered = new YoDouble("frequencyFiltered", registry);
+      phaseFiltered = new YoDouble("phaseFiltered", registry);
 
-      pauseTime = new DoubleYoVariable(name + "PauseTime", registry);
-      resetTime = new DoubleYoVariable(name + "ResetTime", registry);
-      chirpRate = new DoubleYoVariable(name + "ChirpRate", registry);
+      pauseTime = new YoDouble(name + "PauseTime", registry);
+      resetTime = new YoDouble(name + "ResetTime", registry);
+      chirpRate = new YoDouble(name + "ChirpRate", registry);
       chirpUpAndDown = new YoBoolean(name + "ChirpUpAndDown", registry);
       stopAfterResetTime = new YoBoolean(name + "StopAfterResetTime", registry);
       stopAfterResetTime.set(false);
 
-      chirpFrequency = new DoubleYoVariable(name + "ChirpFrequency", registry);
-      chirpFrequencyMax = new DoubleYoVariable(name + "ChirpFrequencyMax", registry);
+      chirpFrequency = new YoDouble(name + "ChirpFrequency", registry);
+      chirpFrequencyMax = new YoDouble(name + "ChirpFrequencyMax", registry);
 
-      timeModeChanged = new DoubleYoVariable(name + "TimeModeChanged", registry);
-      timeInCurrentMode = new DoubleYoVariable(name + "TimeInCurrentMode", registry);
-      kRateForExponentialChirp = new DoubleYoVariable(name + "KRateForExponentialChirp", registry);
+      timeModeChanged = new YoDouble(name + "TimeModeChanged", registry);
+      timeInCurrentMode = new YoDouble(name + "TimeInCurrentMode", registry);
+      kRateForExponentialChirp = new YoDouble(name + "KRateForExponentialChirp", registry);
 
       mode = EnumYoVariable.create(name + "Mode", YoFunctionGeneratorMode.class, registry);
       modePrevious = EnumYoVariable.create(name + "ModePrevious", YoFunctionGeneratorMode.class, registry);

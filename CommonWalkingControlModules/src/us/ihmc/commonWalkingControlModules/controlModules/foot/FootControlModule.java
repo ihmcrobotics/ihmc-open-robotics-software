@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -71,7 +71,7 @@ public class FootControlModule
    private final SupportState supportStateNew;
 
    private final FootSwitchInterface footSwitch;
-   private final DoubleYoVariable footLoadThresholdToHoldPosition;
+   private final YoDouble footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
    private final ToeOffCalculator toeOffCalculator;
@@ -99,7 +99,7 @@ public class FootControlModule
       this.robotSide = robotSide;
 
       footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
-      footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
+      footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
       holdPositionIfCopOnEdge = new YoBoolean(namePrefix + "HoldPositionIfCopOnEdge", registry);
@@ -110,7 +110,7 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
-      DoubleYoVariable time = controllerToolbox.getYoTime();
+      YoDouble time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);

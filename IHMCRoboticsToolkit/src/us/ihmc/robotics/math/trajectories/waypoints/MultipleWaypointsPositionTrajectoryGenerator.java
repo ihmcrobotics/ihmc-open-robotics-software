@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -26,7 +26,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTrajectoryTime;
+   private final YoDouble currentTrajectoryTime;
 
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
@@ -66,7 +66,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
-      currentTrajectoryTime = new DoubleYoVariable(namePrefix + "CurrentTrajectoryTime", registry);
+      currentTrajectoryTime = new YoDouble(namePrefix + "CurrentTrajectoryTime", registry);
       currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
 
       subTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "SubTrajectory", allowMultipleFrames, referenceFrame, registry);

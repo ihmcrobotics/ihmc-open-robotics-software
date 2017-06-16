@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -31,8 +31,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    private final List<OneDoFJoint> legOneDoFJoints;
    
    private final YoBoolean isInContact;
-   private final DoubleYoVariable zForceThreshold;
-   private final DoubleYoVariable measuredZForce;
+   private final YoDouble zForceThreshold;
+   private final YoDouble measuredZForce;
    private final FrameVector footForce = new FrameVector();
    
    public ForceBasedTouchDownDetection(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame, YoVariableRegistry parentRegistry)
@@ -41,8 +41,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       registry = new YoVariableRegistry(prefix);
       
       isInContact = new YoBoolean(prefix + "isInContact", registry);
-      zForceThreshold = new DoubleYoVariable(prefix + "zForceThreshold", registry);
-      measuredZForce = new DoubleYoVariable(prefix + "measuredZForce", registry);
+      zForceThreshold = new YoDouble(prefix + "zForceThreshold", registry);
+      measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
       
       zForceThreshold.set(80.0);
       

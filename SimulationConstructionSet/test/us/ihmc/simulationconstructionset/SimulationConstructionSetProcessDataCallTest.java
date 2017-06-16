@@ -7,7 +7,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimulationConstructionSetProcessDataCallTest
 {   
@@ -25,7 +25,7 @@ public class SimulationConstructionSetProcessDataCallTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
       registry = new YoVariableRegistry("testRegustry");
-      DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
+      YoDouble dataSet = new YoDouble("dataSet", registry);
       scs.addYoVariableRegistry(registry);
       
       int startValue = 5;
@@ -48,7 +48,7 @@ public class SimulationConstructionSetProcessDataCallTest
       scs.applyDataProcessingFunction(counterProcessingFunction);
       
       //Exact data from Data Processing Class
-      DoubleYoVariable counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
+      YoDouble counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
 
       if (DEBUG)
       {
@@ -83,7 +83,7 @@ public class SimulationConstructionSetProcessDataCallTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
       registry = new YoVariableRegistry("testRegustry");
-      DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
+      YoDouble dataSet = new YoDouble("dataSet", registry);
       scs.addYoVariableRegistry(registry);
       
       int startValue = 5;
@@ -106,7 +106,7 @@ public class SimulationConstructionSetProcessDataCallTest
       scs.applyDataProcessingFunctionBackward(counterProcessingFunction);
       
       //Exact data from Data Processing Class
-      DoubleYoVariable counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
+      YoDouble counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
 
       if (DEBUG)
       {
@@ -142,7 +142,7 @@ public class SimulationConstructionSetProcessDataCallTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       registry = new YoVariableRegistry("testRegustry");
-      DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
+      YoDouble dataSet = new YoDouble("dataSet", registry);
       scs.addYoVariableRegistry(registry);
       
       int startValue = 5;
@@ -165,7 +165,7 @@ public class SimulationConstructionSetProcessDataCallTest
       scs.applyDataProcessingFunction(copierProcessingFunction);
 
       //Exact data from Data Processing Class
-      DoubleYoVariable copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
+      YoDouble copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
 
       if (DEBUG)
       {
@@ -200,7 +200,7 @@ public class SimulationConstructionSetProcessDataCallTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       registry = new YoVariableRegistry("testRegustry");
-      DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
+      YoDouble dataSet = new YoDouble("dataSet", registry);
       scs.addYoVariableRegistry(registry);
       
       int startValue = 5;
@@ -223,7 +223,7 @@ public class SimulationConstructionSetProcessDataCallTest
       scs.applyDataProcessingFunctionBackward(copierProcessingFunction);
       
       //Exact data from Data Processing Class
-      DoubleYoVariable copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
+      YoDouble copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
       
       if (DEBUG)
       {
@@ -251,13 +251,13 @@ public class SimulationConstructionSetProcessDataCallTest
    
    public static class CopierProcessingFunction implements DataProcessingFunction
    {
-      private final DoubleYoVariable copyVariable;
-      private final DoubleYoVariable testVariable;
+      private final YoDouble copyVariable;
+      private final YoDouble testVariable;
       
-      public CopierProcessingFunction(DoubleYoVariable inputData, YoVariableRegistry registry)
+      public CopierProcessingFunction(YoDouble inputData, YoVariableRegistry registry)
       {
          testVariable = inputData;
-         copyVariable = new DoubleYoVariable("copyVariable", registry);
+         copyVariable = new YoDouble("copyVariable", registry);
       }
       
       @Override
@@ -269,7 +269,7 @@ public class SimulationConstructionSetProcessDataCallTest
          copyVariable.set(holderDouble);
       }
       
-      public DoubleYoVariable getCopyVariable()
+      public YoDouble getCopyVariable()
       {
          return copyVariable;
       }
@@ -284,12 +284,12 @@ public class SimulationConstructionSetProcessDataCallTest
    
    public static class CounterProcessingFunction implements DataProcessingFunction
    {
-      private final DoubleYoVariable countVariable;
+      private final YoDouble countVariable;
       private int count = 0;
       
       public CounterProcessingFunction(YoVariableRegistry registry)
       {
-         countVariable = new DoubleYoVariable("countVariable", registry);
+         countVariable = new YoDouble("countVariable", registry);
       }
       
       @Override
@@ -299,7 +299,7 @@ public class SimulationConstructionSetProcessDataCallTest
          count++;
       }
       
-      public DoubleYoVariable getCountVariable()
+      public YoDouble getCountVariable()
       {
          return countVariable;
       }

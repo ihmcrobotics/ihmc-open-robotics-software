@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.frames;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 /**
@@ -21,7 +21,7 @@ public class YoMatrix
    private final int maxNumberOfRows, maxNumberOfColumns;
 
    private final IntegerYoVariable numberOfRows, numberOfColumns;
-   private final DoubleYoVariable[][] variables;
+   private final YoDouble[][] variables;
 
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoVariableRegistry registry)
    {
@@ -34,13 +34,13 @@ public class YoMatrix
       this.numberOfRows.set(maxNumberOfRows);
       this.numberOfColumns.set(maxNumberOfColumns);
 
-      variables = new DoubleYoVariable[maxNumberOfRows][maxNumberOfColumns];
+      variables = new YoDouble[maxNumberOfRows][maxNumberOfColumns];
 
       for (int row = 0; row < maxNumberOfRows; row++)
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            variables[row][column] = new DoubleYoVariable(name + "_" + row + "_" + column, registry);
+            variables[row][column] = new YoDouble(name + "_" + row + "_" + column, registry);
          }
       }
    }

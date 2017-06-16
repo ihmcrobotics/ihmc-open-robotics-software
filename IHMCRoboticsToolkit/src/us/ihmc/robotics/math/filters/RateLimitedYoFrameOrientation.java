@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -11,7 +11,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateLimitedYoFrameOrientation extends YoFrameOrientation
 {
-   private final DoubleYoVariable maxRateVariable;
+   private final YoDouble maxRateVariable;
 
    private final YoFrameOrientation rawOrientation;
    private final YoBoolean limited;
@@ -20,13 +20,13 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
 
    private final FrameVector differenceVector = new FrameVector();
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    YoFrameOrientation rawOrientation)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawOrientation, rawOrientation.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
@@ -44,7 +44,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
       setMaxRate(maxRate);
    }
 
-   private RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   private RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                     YoFrameOrientation rawOrientation, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
@@ -55,7 +55,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
       if (maxRate != null)
          this.maxRateVariable = maxRate;
       else
-         this.maxRateVariable = new DoubleYoVariable(namePrefix + "MaxRate" + nameSuffix, registry);
+         this.maxRateVariable = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
 
       this.rawOrientation = rawOrientation;
 

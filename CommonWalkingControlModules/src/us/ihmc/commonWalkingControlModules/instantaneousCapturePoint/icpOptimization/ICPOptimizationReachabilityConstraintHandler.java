@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -20,8 +20,8 @@ public class ICPOptimizationReachabilityConstraintHandler
    public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
          String yoNamePrefix, YoVariableRegistry registry)
    {
-      DoubleYoVariable forwardLimit = new DoubleYoVariable(yoNamePrefix + "ForwardReachabilityLimit", registry);
-      DoubleYoVariable backwardLimit = new DoubleYoVariable(yoNamePrefix + "BackwardReachabilityLimit", registry);
+      YoDouble forwardLimit = new YoDouble(yoNamePrefix + "ForwardReachabilityLimit", registry);
+      YoDouble backwardLimit = new YoDouble(yoNamePrefix + "BackwardReachabilityLimit", registry);
       forwardLimit.set(icpOptimizationParameters.getForwardReachabilityLimit());
       backwardLimit.set(icpOptimizationParameters.getBackwardReachabilityLimit());
 
@@ -29,8 +29,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       {
          ReferenceFrame soleFrame = bipedSupportPolygons.getSoleZUpFrames().get(robotSide);
 
-         DoubleYoVariable innerLimit = new DoubleYoVariable(yoNamePrefix + robotSide.getSideNameFirstLetter() + "LateralReachabilityInnerLimit", registry);
-         DoubleYoVariable outerLimit = new DoubleYoVariable(yoNamePrefix + robotSide.getSideNameFirstLetter() + "LateralReachabilityOuterLimit", registry);
+         YoDouble innerLimit = new YoDouble(yoNamePrefix + robotSide.getSideNameFirstLetter() + "LateralReachabilityInnerLimit", registry);
+         YoDouble outerLimit = new YoDouble(yoNamePrefix + robotSide.getSideNameFirstLetter() + "LateralReachabilityOuterLimit", registry);
          innerLimit.set(robotSide.negateIfLeftSide(icpOptimizationParameters.getLateralReachabilityInnerLimit()));
          outerLimit.set(robotSide.negateIfLeftSide(icpOptimizationParameters.getLateralReachabilityOuterLimit()));
 

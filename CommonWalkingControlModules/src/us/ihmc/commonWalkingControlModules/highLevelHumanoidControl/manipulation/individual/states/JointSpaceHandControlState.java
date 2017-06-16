@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -36,7 +36,7 @@ public class JointSpaceHandControlState extends HandControlState
 
    private final YoVariableRegistry registry;
    private final YoPIDGains gains;
-   private final DoubleYoVariable weight;
+   private final YoDouble weight;
 
    private final YoBoolean abortJointspaceControlState;
    private final LongYoVariable lastCommandId;
@@ -57,7 +57,7 @@ public class JointSpaceHandControlState extends HandControlState
 
       this.controlledJoints = controlledJoints;
 
-      weight = new DoubleYoVariable(namePrefix + "JointspaceWeight", registry);
+      weight = new YoDouble(namePrefix + "JointspaceWeight", registry);
       weight.set(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
 
       jointspaceFeedbackControlCommand.setGains(gains);

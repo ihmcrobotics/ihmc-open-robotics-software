@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -15,12 +15,12 @@ import us.ihmc.robotics.trajectories.providers.PositionProvider;
 public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    protected final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
    private final YoFramePoint currentPosition;
    private final YoFrameVector currentVelocity;
    private final YoFrameVector currentAcceleration;
 
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
    private final YoFramePoint initialPosition;
    private final YoFramePoint finalPosition;
@@ -40,9 +40,9 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
          PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
-      this.currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
+      this.currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
       this.currentPosition = new YoFramePoint(namePrefix + "CurrentPosition", referenceFrame, registry);
       this.currentVelocity = new YoFrameVector(namePrefix + "CurrentVelocity", referenceFrame, registry);
       this.currentAcceleration = new YoFrameVector(namePrefix + "CurrentAcceleration", referenceFrame, registry);

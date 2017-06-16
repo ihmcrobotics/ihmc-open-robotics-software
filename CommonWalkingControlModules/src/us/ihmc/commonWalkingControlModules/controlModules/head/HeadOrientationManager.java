@@ -22,7 +22,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -45,7 +45,7 @@ public class HeadOrientationManager
    private final JointspaceHeadControlState jointspaceHeadControlState;
    private final HeadUserControlModeState headUserControlModeState;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final YoBoolean hasBeenInitialized = new YoBoolean("hasHeadOrientationManagerBeenInitialized", registry);
 

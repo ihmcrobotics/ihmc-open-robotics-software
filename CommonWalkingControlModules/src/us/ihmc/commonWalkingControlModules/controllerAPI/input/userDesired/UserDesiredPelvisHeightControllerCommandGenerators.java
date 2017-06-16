@@ -6,7 +6,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -18,14 +18,14 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
    private final YoBoolean userDoPelvisHeight = new YoBoolean("userDesiredPelvisHeightExecute", registry);
    private final YoBoolean userDesiredSetPelvisHeightToActual = new YoBoolean("userDesiredPelvisSetHeightToActual", registry);
 
-   private final DoubleYoVariable userDesiredPelvisHeightTrajectoryTime = new DoubleYoVariable("userDesiredPelvisHeightTrajectoryTime", registry);
+   private final YoDouble userDesiredPelvisHeightTrajectoryTime = new YoDouble("userDesiredPelvisHeightTrajectoryTime", registry);
 
-   private final DoubleYoVariable userDesiredPelvisHeight;
+   private final YoDouble userDesiredPelvisHeight;
 
    public UserDesiredPelvisHeightControllerCommandGenerators(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel,
          double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      userDesiredPelvisHeight = new DoubleYoVariable("userDesiredPelvisHeight", registry);
+      userDesiredPelvisHeight = new YoDouble("userDesiredPelvisHeight", registry);
 
 
       userDesiredSetPelvisHeightToActual.addVariableChangedListener(new VariableChangedListener()

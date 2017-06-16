@@ -1,20 +1,20 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class RawPhaseCurrentADTicks implements AcsellSlowSensor
 {
    private final IntegerYoVariable rawPhaseCurrentADTicks;
-   private final DoubleYoVariable phaseCurrent;
+   private final YoDouble phaseCurrent;
    private final double conversionFactor;
 
    public RawPhaseCurrentADTicks(String name, String phase, double conversionFactor, YoVariableRegistry registry)
    {
       this.conversionFactor = conversionFactor;
       rawPhaseCurrentADTicks = new IntegerYoVariable(name + "RawPhase" + phase + "CurrentADTicks", registry);
-      phaseCurrent = new DoubleYoVariable(name + "Phase" + phase + "Current", registry);
+      phaseCurrent = new YoDouble(name + "Phase" + phase + "Current", registry);
    }
 
    @Override

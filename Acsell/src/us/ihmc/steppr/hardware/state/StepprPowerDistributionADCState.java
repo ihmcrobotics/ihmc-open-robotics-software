@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 
@@ -13,12 +13,12 @@ public class StepprPowerDistributionADCState implements AcsellPowerDistributionA
    private final YoVariableRegistry registry;
    private final IntegerYoVariable ADC[] = new IntegerYoVariable[8];
 
-   private final DoubleYoVariable robotPower;
-   private final DoubleYoVariable robotWork;
-   private final DoubleYoVariable busVoltage;
-   private final DoubleYoVariable leftLimbCurrent;
-   private final DoubleYoVariable rightLimbCurrent;
-   private final DoubleYoVariable torsoLimbCurrent;
+   private final YoDouble robotPower;
+   private final YoDouble robotWork;
+   private final YoDouble busVoltage;
+   private final YoDouble leftLimbCurrent;
+   private final YoDouble rightLimbCurrent;
+   private final YoDouble torsoLimbCurrent;
    private final double dt;
 
    public StepprPowerDistributionADCState(String name, YoVariableRegistry parentRegistry)
@@ -29,12 +29,12 @@ public class StepprPowerDistributionADCState implements AcsellPowerDistributionA
          ADC[i] = new IntegerYoVariable("rawADC" + i, registry);
       }
 
-      robotPower = new DoubleYoVariable("robotPower", registry);
-      robotWork = new DoubleYoVariable("robotWork", registry);
-      busVoltage = new DoubleYoVariable("busVoltage", registry);
-      leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
-      rightLimbCurrent = new DoubleYoVariable("rightLimbCurrent", registry);
-      torsoLimbCurrent = new DoubleYoVariable("torsoLimbCurrent", registry);
+      robotPower = new YoDouble("robotPower", registry);
+      robotWork = new YoDouble("robotWork", registry);
+      busVoltage = new YoDouble("busVoltage", registry);
+      leftLimbCurrent = new YoDouble("leftLimbCurrent", registry);
+      rightLimbCurrent = new YoDouble("rightLimbCurrent", registry);
+      torsoLimbCurrent = new YoDouble("torsoLimbCurrent", registry);
       dt = (new BonoRobotModel(true, false)).getEstimatorDT();
       parentRegistry.addChild(registry);
    }
@@ -56,7 +56,7 @@ public class StepprPowerDistributionADCState implements AcsellPowerDistributionA
    }
 
    @Override
-   public DoubleYoVariable getTotalWorkVariable()
+   public YoDouble getTotalWorkVariable()
    {
       return robotWork;
    }

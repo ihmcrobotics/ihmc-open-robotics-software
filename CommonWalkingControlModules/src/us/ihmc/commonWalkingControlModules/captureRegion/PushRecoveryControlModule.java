@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -40,10 +40,10 @@ public class PushRecoveryControlModule
    private final YoBoolean recoveringFromDoubleSupportFall;
    private final YoBoolean footstepWasProjectedInCaptureRegion;
 
-   private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
+   private final SideDependentList<YoDouble> distanceICPToFeet = new SideDependentList<>();
    private final YoBoolean isICPOutside;
    private final YoBoolean isICPErrorTooLarge;
-   private final DoubleYoVariable icpErrorThreshold;
+   private final YoDouble icpErrorThreshold;
    private final EnumYoVariable<RobotSide> closestFootToICP;
    private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
 
@@ -90,7 +90,7 @@ public class PushRecoveryControlModule
 
       isICPOutside = new YoBoolean("isICPOutside", registry);
       isICPErrorTooLarge = new YoBoolean("isICPErrorTooLarge", registry);
-      icpErrorThreshold = new DoubleYoVariable("icpErrorThreshold", registry);
+      icpErrorThreshold = new YoDouble("icpErrorThreshold", registry);
       icpErrorThreshold.set(0.05);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
@@ -102,7 +102,7 @@ public class PushRecoveryControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         DoubleYoVariable distanceICPToFoot = new DoubleYoVariable("DistanceICPTo" + side + "Foot", registry);
+         YoDouble distanceICPToFoot = new YoDouble("DistanceICPTo" + side + "Foot", registry);
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
 

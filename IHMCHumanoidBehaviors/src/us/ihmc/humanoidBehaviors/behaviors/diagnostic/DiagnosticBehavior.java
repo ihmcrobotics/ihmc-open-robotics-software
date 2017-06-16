@@ -107,8 +107,8 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoBoolean hasControllerWakenUp;
    private final YoBoolean automaticDiagnosticRoutineRequested;
    private final YoBoolean automaticDiagnosticRoutineHasStarted;
-   private final DoubleYoVariable timeWhenControllerWokeUp;
-   private final DoubleYoVariable timeToWaitBeforeEnable;
+   private final YoDouble timeWhenControllerWokeUp;
+   private final YoDouble timeToWaitBeforeEnable;
    private final YoBoolean enableHandOrientation;
 
    private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
@@ -127,22 +127,22 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final SleepBehavior sleepBehavior;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
-   private final DoubleYoVariable sleepTimeBetweenPoses;
+   private final YoDouble yoTime;
+   private final YoDouble trajectoryTime, flyingTrajectoryTime;
+   private final YoDouble sleepTimeBetweenPoses;
    private final YoBoolean doPelvisAndChestYaw;
    private final IntegerYoVariable numberOfCyclesToRun;
-   private final DoubleYoVariable minCoMHeightOffset, maxCoMHeightOffset;
+   private final YoDouble minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
    private final FullHumanoidRobotModel fullRobotModel;
 
    //Icp Offset generator variables
    private final YoBoolean isIcpOffsetSenderEnabled;
-   private final DoubleYoVariable minMaxIcpAngularOffset;
-   private final DoubleYoVariable minMaxIcpTranslationOffset;
-   private final DoubleYoVariable previousIcpPacketSentTime;
+   private final YoDouble minMaxIcpAngularOffset;
+   private final YoDouble minMaxIcpTranslationOffset;
+   private final YoDouble previousIcpPacketSentTime;
    private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
-   private final DoubleYoVariable icpTimeDelay;
+   private final YoDouble icpTimeDelay;
 
    private final YoFrameConvexPolygon2d yoSupportPolygon;
 
@@ -217,14 +217,14 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final double minMaxRoll = Math.toRadians(15.0);
    private final double minMaxYaw = Math.toRadians(30.0);
 
-   private final DoubleYoVariable footstepLength;
-   private final DoubleYoVariable swingTime;
-   private final DoubleYoVariable transferTime;
+   private final YoDouble footstepLength;
+   private final YoDouble swingTime;
+   private final YoDouble transferTime;
 
-   private final DoubleYoVariable maxFootPoseHeight;
-   private final DoubleYoVariable maxFootPoseDisplacement;
+   private final YoDouble maxFootPoseHeight;
+   private final YoDouble maxFootPoseDisplacement;
 
-   private final DoubleYoVariable angleToTurnInDegrees;
+   private final YoDouble angleToTurnInDegrees;
 
    private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
@@ -236,11 +236,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final SideDependentList<RigidBodyTransform> armZeroJointAngleConfigurationOffsets = new SideDependentList<>();
 
-   private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
-   private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
+   private final YoDouble pelvisOrientationScaleFactor = new YoDouble("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
+   private final YoDouble bootyShakeTime = new YoDouble("diagnosticBehaviorButtyShakeTime", registry);
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
+         YoDouble yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -254,8 +254,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       hasControllerWakenUp = new YoBoolean("diagnostBehaviorHasControllerWakenUp", registry);
       automaticDiagnosticRoutineRequested = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
       automaticDiagnosticRoutineHasStarted = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
-      timeWhenControllerWokeUp = new DoubleYoVariable("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
-      timeToWaitBeforeEnable = new DoubleYoVariable("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
+      timeWhenControllerWokeUp = new YoDouble("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
+      timeToWaitBeforeEnable = new YoDouble("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
       enableHandOrientation = new YoBoolean("diagnosticEnableHandOrientation", registry);
 
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
@@ -277,43 +277,43 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          }
       });
-      minMaxIcpAngularOffset = new DoubleYoVariable(getName() + "MinMaxIcpAngularOffset", registry);
+      minMaxIcpAngularOffset = new YoDouble(getName() + "MinMaxIcpAngularOffset", registry);
       minMaxIcpAngularOffset.set(0.0);
-      minMaxIcpTranslationOffset = new DoubleYoVariable(getName() + "MinMaxIcpTranslationOffset", registry);
+      minMaxIcpTranslationOffset = new YoDouble(getName() + "MinMaxIcpTranslationOffset", registry);
       minMaxIcpTranslationOffset.set(0.06);
-      previousIcpPacketSentTime = new DoubleYoVariable("DiagnosticBehaviorPreviousIcpPacketSentTime", registry);
+      previousIcpPacketSentTime = new YoDouble("DiagnosticBehaviorPreviousIcpPacketSentTime", registry);
       stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(10000);
-      icpTimeDelay = new DoubleYoVariable(getName() + "IcpTimeDelay", registry);
+      icpTimeDelay = new YoDouble(getName() + "IcpTimeDelay", registry);
       icpTimeDelay.set(0.99);
       ///////////////////
 
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
-      flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      flyingTrajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
 
-      swingTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "SwingTime", registry);
+      swingTime = new YoDouble(behaviorNameFirstLowerCase + "SwingTime", registry);
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());
-      transferTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TransferTime", registry);
+      transferTime = new YoDouble(behaviorNameFirstLowerCase + "TransferTime", registry);
       transferTime.set(walkingControllerParameters.getDefaultTransferTime());
 
-      maxFootPoseHeight = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxFootPoseHeight", registry);
+      maxFootPoseHeight = new YoDouble(behaviorNameFirstLowerCase + "MaxFootPoseHeight", registry);
       maxFootPoseHeight.set(0.1);
-      maxFootPoseDisplacement = new DoubleYoVariable(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
+      maxFootPoseDisplacement = new YoDouble(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
       maxFootPoseDisplacement.set(0.2);
-      angleToTurnInDegrees = new DoubleYoVariable(behaviorNameFirstLowerCase + "AngleToTurnInDegrees", registry);
+      angleToTurnInDegrees = new YoDouble(behaviorNameFirstLowerCase + "AngleToTurnInDegrees", registry);
       angleToTurnInDegrees.set(0.0);
 
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
-      sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
+      sleepTimeBetweenPoses = new YoDouble(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
       sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 0.5);
 
-      minCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
+      minCoMHeightOffset = new YoDouble(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
       minCoMHeightOffset.set(-0.15);
-      maxCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
+      maxCoMHeightOffset = new YoDouble(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
       maxCoMHeightOffset.set(0.05);
 
-      footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
+      footstepLength = new YoDouble(behaviorNameFirstLowerCase + "FootstepLength", registry);
       footstepLength.set(0.3);
 
       bootyShakeTime.set(1.0);

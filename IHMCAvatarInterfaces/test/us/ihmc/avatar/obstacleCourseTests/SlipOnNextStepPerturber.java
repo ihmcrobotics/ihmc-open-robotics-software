@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -25,7 +25,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
 
    private final EnumYoVariable<SlipState> slipState;
    private final YoBoolean slipNextStep;
-   private final DoubleYoVariable slipAfterTimeDelta, touchdownTimeForSlip;
+   private final YoDouble slipAfterTimeDelta, touchdownTimeForSlip;
    private final YoFrameVector amountToSlipNextStep;
    private final YoFrameOrientation rotationToSlipNextStep;
 
@@ -35,8 +35,8 @@ public class SlipOnNextStepPerturber extends ModularRobotController
 
       String sideString = robotSide.getCamelCaseNameForStartOfExpression();
       this.robot = robot;
-      this.touchdownTimeForSlip = new DoubleYoVariable(sideString + "TouchdownTimeForSlip", registry);
-      this.slipAfterTimeDelta = new DoubleYoVariable(sideString + "SlipAfterTimeDelta", registry);
+      this.touchdownTimeForSlip = new YoDouble(sideString + "TouchdownTimeForSlip", registry);
+      this.slipAfterTimeDelta = new YoDouble(sideString + "SlipAfterTimeDelta", registry);
       this.slipNextStep = new YoBoolean(sideString + "SlipNextStep", registry);
 
       amountToSlipNextStep = new YoFrameVector(sideString + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);

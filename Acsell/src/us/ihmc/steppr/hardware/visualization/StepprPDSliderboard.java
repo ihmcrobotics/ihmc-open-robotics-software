@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -28,17 +28,17 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    private final EnumYoVariable<StepprJoint> selectedJoint = new EnumYoVariable<>("selectedJoint", sliderBoardRegistry, StepprJoint.class);
 
    private final YoBoolean selectedJoint_enabled = new YoBoolean("selectedJoint_enabled", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_q = new DoubleYoVariable("selectedJoint_q", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_qd = new DoubleYoVariable("selectedJoint_qd", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_tau = new DoubleYoVariable("selectedJoint_tau", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_tau_d = new DoubleYoVariable("selectedJoint_tau_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_q = new YoDouble("selectedJoint_q", sliderBoardRegistry);
+   private final YoDouble selectedJoint_qd = new YoDouble("selectedJoint_qd", sliderBoardRegistry);
+   private final YoDouble selectedJoint_tau = new YoDouble("selectedJoint_tau", sliderBoardRegistry);
+   private final YoDouble selectedJoint_tau_d = new YoDouble("selectedJoint_tau_d", sliderBoardRegistry);
 
-   private final DoubleYoVariable selectedJoint_q_d = new DoubleYoVariable("selectedJoint_q_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_qd_d = new DoubleYoVariable("selectedJoint_qd_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kp = new DoubleYoVariable("selectedJoint_kp", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_tauFF = new DoubleYoVariable("selectedJoint_tauFF", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
+   private final YoDouble selectedJoint_q_d = new YoDouble("selectedJoint_q_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_qd_d = new YoDouble("selectedJoint_qd_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kp = new YoDouble("selectedJoint_kp", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kd = new YoDouble("selectedJoint_kd", sliderBoardRegistry);
+   private final YoDouble selectedJoint_tauFF = new YoDouble("selectedJoint_tauFF", sliderBoardRegistry);
+   private final YoDouble selectedJoint_damping = new YoDouble("selectedJoint_damping", sliderBoardRegistry);
 
    private volatile boolean started = false;
 
@@ -104,19 +104,19 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    {
       private final YoBoolean enabled;
 
-      private final DoubleYoVariable q;
-      private final DoubleYoVariable qd;
-      private final DoubleYoVariable tau;
-      private final DoubleYoVariable tau_d;
+      private final YoDouble q;
+      private final YoDouble qd;
+      private final YoDouble tau;
+      private final YoDouble tau_d;
 
-      private final DoubleYoVariable q_d;
-      private final DoubleYoVariable qd_d;
+      private final YoDouble q_d;
+      private final YoDouble qd_d;
 
-      private final DoubleYoVariable kp;
-      private final DoubleYoVariable kd;
+      private final YoDouble kp;
+      private final YoDouble kd;
 
-      private final DoubleYoVariable tauFF;
-      private final DoubleYoVariable damping;
+      private final YoDouble tauFF;
+      private final YoDouble damping;
 
       public JointVariables(final StepprJoint joint, final YoVariableHolder variableHolder)
       {
@@ -200,18 +200,18 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
             qdStateVariable = prefix + "_qd";
             tauStateVariable = prefix + "_tauPredictedCurrent";
          }
-         q = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qStateVariable);
-         qd = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qdStateVariable);
-         tau = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, tauStateVariable);
+         q = (YoDouble) variableHolder.getVariable(stateNameSpace, qStateVariable);
+         qd = (YoDouble) variableHolder.getVariable(stateNameSpace, qdStateVariable);
+         tau = (YoDouble) variableHolder.getVariable(stateNameSpace, tauStateVariable);
 
-         q_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_q_d");
-         qd_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_qd_d");
-         tauFF = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_tau_ff");
-         damping = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_damping");
-         kp = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kp_" + prefix);
-         kd = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kd_" + prefix);
+         q_d = (YoDouble) variableHolder.getVariable("StepprPDJointController", prefix + "_q_d");
+         qd_d = (YoDouble) variableHolder.getVariable("StepprPDJointController", prefix + "_qd_d");
+         tauFF = (YoDouble) variableHolder.getVariable("StepprPDJointController", prefix + "_tau_ff");
+         damping = (YoDouble) variableHolder.getVariable("StepprPDJointController", prefix + "_damping");
+         kp = (YoDouble) variableHolder.getVariable("StepprPDJointController", "kp_" + prefix);
+         kd = (YoDouble) variableHolder.getVariable("StepprPDJointController", "kd_" + prefix);
 
-         tau_d = (DoubleYoVariable) variableHolder.getVariable(namespace, prefix + "TauDesired");
+         tau_d = (YoDouble) variableHolder.getVariable(namespace, prefix + "TauDesired");
 
       }
 

@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSenso
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -48,7 +48,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
    private final YoBoolean calibrateWristForceSensors;
-   private final SideDependentList<DoubleYoVariable> wristSubtreeMass;
+   private final SideDependentList<YoDouble> wristSubtreeMass;
    private final SideDependentList<YoFrameVector> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector> wristTorquesSubtreeWeightCancelled;
 
@@ -182,7 +182,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);
             wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
-            DoubleYoVariable handMass = new DoubleYoVariable(namePrefix + "SubtreeMass", registry);
+            YoDouble handMass = new YoDouble(namePrefix + "SubtreeMass", registry);
             wristSubtreeMass.put(robotSide, handMass);
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }

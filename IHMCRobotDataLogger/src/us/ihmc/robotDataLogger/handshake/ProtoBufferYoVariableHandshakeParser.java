@@ -31,7 +31,7 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
@@ -134,7 +134,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
          switch (type)
          {
             case DoubleYoVariable:
-               DoubleYoVariable doubleVar = new DoubleYoVariable(name, parent);
+               YoDouble doubleVar = new YoDouble(name, parent);
                variableList.add(doubleVar);
                break;
 

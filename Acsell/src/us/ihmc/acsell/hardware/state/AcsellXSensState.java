@@ -6,17 +6,17 @@ import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class AcsellXSensState
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable accelX, accelY, accelZ;
-   private final DoubleYoVariable gyroX, gyroY, gyroZ;
-   private final DoubleYoVariable magX, magY, magZ;
+   private final YoDouble accelX, accelY, accelZ;
+   private final YoDouble gyroX, gyroY, gyroZ;
+   private final YoDouble magX, magY, magZ;
    
-   private final DoubleYoVariable qs, qx, qy, qz;
+   private final YoDouble qs, qx, qy, qz;
    
    private final IntegerYoVariable sample;
    
@@ -30,22 +30,22 @@ public class AcsellXSensState
    {
       this.registry = new YoVariableRegistry(name);
       this.robot = robot;
-      this.accelX = new DoubleYoVariable("accelX", registry);
-      this.accelY = new DoubleYoVariable("accelY", registry);
-      this.accelZ = new DoubleYoVariable("accelZ", registry);
+      this.accelX = new YoDouble("accelX", registry);
+      this.accelY = new YoDouble("accelY", registry);
+      this.accelZ = new YoDouble("accelZ", registry);
 
-      this.gyroX = new DoubleYoVariable("gyroX", registry);
-      this.gyroY = new DoubleYoVariable("gyroY", registry);
-      this.gyroZ = new DoubleYoVariable("gyroZ", registry);
+      this.gyroX = new YoDouble("gyroX", registry);
+      this.gyroY = new YoDouble("gyroY", registry);
+      this.gyroZ = new YoDouble("gyroZ", registry);
 
-      this.magX = new DoubleYoVariable("magX", registry);
-      this.magY = new DoubleYoVariable("magY", registry);
-      this.magZ = new DoubleYoVariable("magZ", registry);
+      this.magX = new YoDouble("magX", registry);
+      this.magY = new YoDouble("magY", registry);
+      this.magZ = new YoDouble("magZ", registry);
 
-      this.qs = new DoubleYoVariable("qs", registry);
-      this.qx = new DoubleYoVariable("qx", registry);
-      this.qy = new DoubleYoVariable("qy", registry);
-      this.qz = new DoubleYoVariable("qz", registry);
+      this.qs = new YoDouble("qs", registry);
+      this.qx = new YoDouble("qx", registry);
+      this.qy = new YoDouble("qy", registry);
+      this.qz = new YoDouble("qz", registry);
       
       this.sample = new IntegerYoVariable("sample", registry);
       

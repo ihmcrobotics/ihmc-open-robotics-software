@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -20,8 +20,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {
    private final YoVariableRegistry registry;
    private final YoBoolean hitGround, fixedOnGround;
-   private final DoubleYoVariable switchZThreshold;
-   private final DoubleYoVariable soleZ, ankleZ;
+   private final YoDouble switchZThreshold;
+   private final YoDouble soleZ, ankleZ;
    private final double totalRobotWeight;
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
@@ -37,9 +37,9 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
-      soleZ = new DoubleYoVariable(footName + "soleZ", registry);
-      ankleZ = new DoubleYoVariable(footName + "ankleZ", registry);
-      this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
+      soleZ = new YoDouble(footName + "soleZ", registry);
+      ankleZ = new YoDouble(footName + "ankleZ", registry);
+      this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
 
       yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
@@ -69,9 +69,9 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
-      soleZ = new DoubleYoVariable(footName + "soleZ", registry);
-      ankleZ = new DoubleYoVariable(footName + "ankleZ", registry);
-      this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
+      soleZ = new YoDouble(footName + "soleZ", registry);
+      ankleZ = new YoDouble(footName + "ankleZ", registry);
+      this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
 
       yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);

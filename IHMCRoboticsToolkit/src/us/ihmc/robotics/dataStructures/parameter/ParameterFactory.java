@@ -3,7 +3,7 @@ package us.ihmc.robotics.dataStructures.parameter;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -104,14 +104,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoDouble variable = new YoDouble("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((DoubleYoVariable) v).getDoubleValue());
+               parameter.set(((YoDouble) v).getDoubleValue());
             }
          });
 
@@ -138,14 +138,14 @@ public class ParameterFactory
          {
             final int count = i;
 
-            final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final YoDouble variable = new YoDouble("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
-                  parameter.set(count, ((DoubleYoVariable) v).getDoubleValue());
+                  parameter.set(count, ((YoDouble) v).getDoubleValue());
                }
             });
 

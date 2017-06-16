@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.stateEstimator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -21,7 +21,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody contactablePlaneBody;
    private final ReferenceFrame measurementFrame;
 
-   private final DoubleYoVariable forceThreshold;
+   private final YoDouble forceThreshold;
 
    private final FrameVector measuredForce = new FrameVector();
    private final FrameVector measuredForceWorld = new FrameVector();
@@ -36,7 +36,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
       this.contactablePlaneBody = contactablePlaneBody;
       this.totalRobotWeight = totalRobotWeight;
       measurementFrame = contactablePlaneBody.getSoleFrame();
-      forceThreshold = new DoubleYoVariable(contactablePlaneBody.getName() + "ForceThreshold", registry);
+      forceThreshold = new YoDouble(contactablePlaneBody.getName() + "ForceThreshold", registry);
       forceThreshold.set(0.04 * totalRobotWeight);
       
       yoMeasuredForceWorld = new YoFrameVector(contactablePlaneBody.getName() + "MeasuredForceWorld", worldFrame, registry);

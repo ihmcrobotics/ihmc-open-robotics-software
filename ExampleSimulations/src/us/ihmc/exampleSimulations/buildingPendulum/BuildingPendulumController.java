@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
@@ -21,7 +21,7 @@ public class BuildingPendulumController extends SimpleRobotController
    private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
 
 
-   private final DoubleYoVariable mySliderBoardTest = new DoubleYoVariable(variableName, registry);
+   private final YoDouble mySliderBoardTest = new YoDouble(variableName, registry);
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
    {

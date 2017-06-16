@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -150,7 +150,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
-         private final DoubleYoVariable q_y = (DoubleYoVariable) scs.getVariable("q_y");
+         private final YoDouble q_y = (YoDouble) scs.getVariable("q_y");
 
          @Override
          public void initializeProcessing()

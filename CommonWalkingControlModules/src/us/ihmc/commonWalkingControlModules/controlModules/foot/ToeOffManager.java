@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -54,13 +54,13 @@ public class ToeOffManager
    private final YoBoolean updateLineContactDuringToeOff = new YoBoolean("updateLineContactDuringToeOff", registry);
    private final YoBoolean updatePointContactDuringToeOff = new YoBoolean("updatePointContactDuringToeOff", registry);
 
-   private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
-   private final DoubleYoVariable icpPercentOfStanceForDSToeOff = new DoubleYoVariable("icpPercentOfStanceForDSToeOff", registry);
-   private final DoubleYoVariable icpPercentOfStanceForSSToeOff = new DoubleYoVariable("icpPercentOfStanceForSSToeOff", registry);
-   private final DoubleYoVariable icpProximityForDSToeOff = new DoubleYoVariable("icpProximityForDSToeOff", registry);
-   private final DoubleYoVariable icpProximityForSSToeOff = new DoubleYoVariable("icpProximityForSSToeOff", registry);
-   private final DoubleYoVariable ecmpProximityForToeOff = new DoubleYoVariable("ecmpProximityForToeOff", registry);
-   private final DoubleYoVariable copProximityForToeOff = new DoubleYoVariable("copProximityForToeOff", registry);
+   private final YoDouble ankleLowerLimitToTriggerToeOff = new YoDouble("ankleLowerLimitToTriggerToeOff", registry);
+   private final YoDouble icpPercentOfStanceForDSToeOff = new YoDouble("icpPercentOfStanceForDSToeOff", registry);
+   private final YoDouble icpPercentOfStanceForSSToeOff = new YoDouble("icpPercentOfStanceForSSToeOff", registry);
+   private final YoDouble icpProximityForDSToeOff = new YoDouble("icpProximityForDSToeOff", registry);
+   private final YoDouble icpProximityForSSToeOff = new YoDouble("icpProximityForSSToeOff", registry);
+   private final YoDouble ecmpProximityForToeOff = new YoDouble("ecmpProximityForToeOff", registry);
+   private final YoDouble copProximityForToeOff = new YoDouble("copProximityForToeOff", registry);
 
    private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
@@ -81,9 +81,9 @@ public class ToeOffManager
    private final GlitchFilteredYoBoolean isRearAnklePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearAnklePitchHittingLimitFilt",
          registry, isRearAnklePitchHittingLimit, largeGlitchWindowSize);
 
-   private final DoubleYoVariable minStepLengthForToeOff = new DoubleYoVariable("minStepLengthForToeOff", registry);
-   private final DoubleYoVariable minStepHeightForToeOff = new DoubleYoVariable("minStepHeightForToeOff", registry);
-   private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
+   private final YoDouble minStepLengthForToeOff = new YoDouble("minStepLengthForToeOff", registry);
+   private final YoDouble minStepHeightForToeOff = new YoDouble("minStepHeightForToeOff", registry);
+   private final YoDouble extraCoMMaxHeightWithToes = new YoDouble("extraCoMMaxHeightWithToes", registry);
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint> contactStatePoints = new ArrayList<>();

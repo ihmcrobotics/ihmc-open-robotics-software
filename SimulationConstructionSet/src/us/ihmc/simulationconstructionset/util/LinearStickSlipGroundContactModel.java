@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
@@ -23,15 +23,15 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
    private static final double DEFAULT_ALPHA_SLIP = 0.7;
    private static final double DEFAULT_ALPHA_STICK = 0.7;
 
-   private final DoubleYoVariable groundKxy = new DoubleYoVariable("groundKxy", "LinearStickSlipGroundContactModel x and y spring constant", registry);
-   private final DoubleYoVariable groundBxy = new DoubleYoVariable("groundBxy", "LinearStickSlipGroundContactModel x and y damping constant", registry);
-   private final DoubleYoVariable groundKz = new DoubleYoVariable("groundKz", "LinearStickSlipGroundContactModel z spring constant", registry);
-   private final DoubleYoVariable groundBz = new DoubleYoVariable("groundBz", "LinearStickSlipGroundContactModel z damping constant", registry);
-   private final DoubleYoVariable groundStiffeningLength = new DoubleYoVariable("groundStiffeningLength",
+   private final YoDouble groundKxy = new YoDouble("groundKxy", "LinearStickSlipGroundContactModel x and y spring constant", registry);
+   private final YoDouble groundBxy = new YoDouble("groundBxy", "LinearStickSlipGroundContactModel x and y damping constant", registry);
+   private final YoDouble groundKz = new YoDouble("groundKz", "LinearStickSlipGroundContactModel z spring constant", registry);
+   private final YoDouble groundBz = new YoDouble("groundBz", "LinearStickSlipGroundContactModel z damping constant", registry);
+   private final YoDouble groundStiffeningLength = new YoDouble("groundStiffeningLength",
                                                               "LinearStickSlipGroundContactModel z spring nominal stiffening length", registry);
-   private final DoubleYoVariable groundAlphaSlip = new DoubleYoVariable("groundAlphaSlip", "LinearStickSlipGroundContactModel slip coefficient of friction",
+   private final YoDouble groundAlphaSlip = new YoDouble("groundAlphaSlip", "LinearStickSlipGroundContactModel slip coefficient of friction",
                                                        registry);
-   private final DoubleYoVariable groundAlphaStick = new DoubleYoVariable("groundAlphaStick",
+   private final YoDouble groundAlphaStick = new YoDouble("groundAlphaStick",
                                                         "LinearStickSlipGroundContactModel stick coefficient of friction", registry);
 
    private final YoBoolean groundEnableSlip = new YoBoolean("groundEnableSlip", "LinearStickSlipGroundContactModel. If true can slip",

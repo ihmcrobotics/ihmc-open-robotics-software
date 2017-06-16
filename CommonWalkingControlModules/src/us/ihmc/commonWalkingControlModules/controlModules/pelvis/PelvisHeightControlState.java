@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -50,7 +50,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    
    private final ReferenceFrame baseFrame;
-   private final DoubleYoVariable defaultHeightAboveAnkleForHome;
+   private final YoDouble defaultHeightAboveAnkleForHome;
    private final FramePose tempPose = new FramePose();
    
    public PelvisHeightControlState(YoPositionPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -64,7 +64,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       RigidBody elevator = fullRobotModel.getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       baseFrame = referenceFrames.getMidFootZUpGroundFrame();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       
 
@@ -73,7 +73,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
       double soleToAnkleZHeight = computeSoleToAnkleMeanZHeight(controllerToolbox, fullRobotModel);
-      defaultHeightAboveAnkleForHome = new DoubleYoVariable(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
+      defaultHeightAboveAnkleForHome = new YoDouble(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
       defaultHeightAboveAnkleForHome.set(walkingControllerParameters.nominalHeightAboveAnkle() + soleToAnkleZHeight);
       
       parentRegistry.addChild(registry);

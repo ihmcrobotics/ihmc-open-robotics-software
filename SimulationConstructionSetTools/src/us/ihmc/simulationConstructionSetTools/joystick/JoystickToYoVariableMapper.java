@@ -7,7 +7,7 @@ import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
@@ -27,7 +27,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         DoubleYoVariable yoVariable = (DoubleYoVariable) yoVariableHolder.getVariable(variableName);
+         YoDouble yoVariable = (YoDouble) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             DoubleYoVariableJoystickEventListener joystickEventListener = new DoubleYoVariableJoystickEventListener(yoVariable, component, minValue, maxValue, deadZone, invert);

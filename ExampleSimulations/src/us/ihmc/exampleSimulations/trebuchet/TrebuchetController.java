@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.trebuchet;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,9 +19,9 @@ public class TrebuchetController implements RobotController
    private final YoFrameVector poleToBallPosition = new YoFrameVector("poleToBallPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector poleToBallVelocity = new YoFrameVector("poleToBallVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable poleTipToBallCenterDistance = new DoubleYoVariable("poleTipToBallCenterDistance", registry);
-   private final DoubleYoVariable poleTipToBallCenterVelocity = new DoubleYoVariable("poleTipToBallCenterVelocity", registry);
-   private final DoubleYoVariable ropeForce = new DoubleYoVariable("ropeForce", registry);
+   private final YoDouble poleTipToBallCenterDistance = new YoDouble("poleTipToBallCenterDistance", registry);
+   private final YoDouble poleTipToBallCenterVelocity = new YoDouble("poleTipToBallCenterVelocity", registry);
+   private final YoDouble ropeForce = new YoDouble("ropeForce", registry);
 
    private final TrebuchetRobot trebuchetRobot;
    private final ExternalForcePoint ballCenterExternalForcePoint, poleTipExternalForcePoint;

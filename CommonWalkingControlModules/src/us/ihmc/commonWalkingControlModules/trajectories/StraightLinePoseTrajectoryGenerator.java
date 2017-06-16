@@ -13,7 +13,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -57,8 +57,8 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    // Not sure if that's actually necessary, the cubic one maybe enough.
    private final YoPolynomial quinticParameterPolynomial;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameOrientation tempOrientation = new FrameOrientation();
@@ -119,8 +119,8 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
       quinticParameterPolynomial = new YoPolynomial(namePrefix + "QuinticParameterPolynomial", 6, registry);
 
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
       multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
       registerMultipleFramesHolders(initialPosition, finalPosition, currentPosition, currentVelocity, currentAcceleration);

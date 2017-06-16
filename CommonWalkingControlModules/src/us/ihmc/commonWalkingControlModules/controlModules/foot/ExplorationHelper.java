@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -30,12 +30,12 @@ public class ExplorationHelper
    private final ReferenceFrame soleFrame;
 
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
-   private final DoubleYoVariable copCommandWeight;
+   private final YoDouble copCommandWeight;
    private final Vector2D commandWeight = new Vector2D();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable timeExploring;
+   private final YoDouble startTime;
+   private final YoDouble timeExploring;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private int currentCornerIdx = 0;
@@ -51,8 +51,8 @@ public class ExplorationHelper
    public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoVariableRegistry registry)
    {
       footholdExplorationActive = new YoBoolean(prefix + "FootholdExplorationActive", registry);
-      timeExploring = new DoubleYoVariable(prefix + "TimeExploring", registry);
-      startTime = new DoubleYoVariable(prefix + "StartTime", registry);
+      timeExploring = new YoDouble(prefix + "TimeExploring", registry);
+      startTime = new YoDouble(prefix + "StartTime", registry);
       yoCurrentCorner = new IntegerYoVariable(prefix + "CurrentCornerExplored", registry);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());

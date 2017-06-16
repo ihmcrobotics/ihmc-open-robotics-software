@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
@@ -468,7 +468,7 @@ public class OneStepCaptureRegionCalculatorTest
       YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
       yoGraphicsListRegistry.registerArtifact("Capture", captureRegionArtifact);
       final EnumYoVariable<RobotSide> yoSupportSide = new EnumYoVariable<>("supportSide", registry, RobotSide.class);
-      final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
+      final YoDouble swingTimeRemaining = new YoDouble("swingTimeRemaining", registry);
       final YoFramePoint2d yoICP = new YoFramePoint2d("ICP", worldFrame, registry);
       yoGraphicsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
       final double omega0 = 3.4;

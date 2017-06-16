@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -72,10 +72,10 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       YoVariableRegistry registry = new YoVariableRegistry("SwingHeightTestController");
       Random random = new Random();
       FullHumanoidRobotModel estimatorModel;
-      DoubleYoVariable maxFootHeight = new DoubleYoVariable("maxFootHeight", registry);
-      DoubleYoVariable leftFootHeight = new DoubleYoVariable("leftFootHeight", registry);
-      DoubleYoVariable rightFootHeight = new DoubleYoVariable("rightFootHeight", registry);
-      DoubleYoVariable randomNum = new DoubleYoVariable("randomNumberInTestController", registry);
+      YoDouble maxFootHeight = new YoDouble("maxFootHeight", registry);
+      YoDouble leftFootHeight = new YoDouble("leftFootHeight", registry);
+      YoDouble rightFootHeight = new YoDouble("rightFootHeight", registry);
+      YoDouble randomNum = new YoDouble("randomNumberInTestController", registry);
       FramePoint leftFootOrigin;
       FramePoint rightFootOrigin;
 

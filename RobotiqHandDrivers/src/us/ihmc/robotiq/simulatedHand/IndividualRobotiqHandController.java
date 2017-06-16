@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -55,12 +55,12 @@ public class IndividualRobotiqHandController implements RobotController
    private final List<OneDegreeOfFreedomJoint> allFingerJoints = new ArrayList<>();
 
    private final YoPolynomial yoPolynomial;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
    private final YoBoolean hasTrajectoryTimeChanged, isStopped;
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> initialDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> finalDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
    
    private final EnumYoVariable<RobotiqGraspMode> graspMode;
    private final EnumYoVariable<RobotiqGraspMode> desiredGraspMode;
@@ -69,7 +69,7 @@ public class IndividualRobotiqHandController implements RobotController
    
    private StateMachine<GraspState> stateMachine;
 
-   public IndividualRobotiqHandController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, FloatingRootJointRobot simulatedRobot,
+   public IndividualRobotiqHandController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FloatingRootJointRobot simulatedRobot,
          YoVariableRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -83,13 +83,13 @@ public class IndividualRobotiqHandController implements RobotController
          String jointName = jointEnum.getJointName(robotSide);
          OneDegreeOfFreedomJoint fingerJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
 
-         DoubleYoVariable initialDesiredAngle = new DoubleYoVariable("q_d_initial_" + jointName, registry);
+         YoDouble initialDesiredAngle = new YoDouble("q_d_initial_" + jointName, registry);
          initialDesiredAngles.put(fingerJoint, initialDesiredAngle);
 
-         DoubleYoVariable finalDesiredAngle = new DoubleYoVariable("q_d_final_" + jointName, registry);
+         YoDouble finalDesiredAngle = new YoDouble("q_d_final_" + jointName, registry);
          finalDesiredAngles.put(fingerJoint, finalDesiredAngle);
 
-         DoubleYoVariable desiredAngle = new DoubleYoVariable("q_d_" + jointName, registry);
+         YoDouble desiredAngle = new YoDouble("q_d_" + jointName, registry);
          desiredAngles.put(fingerJoint, desiredAngle);
 
          allFingerJoints.add(fingerJoint);
@@ -116,9 +116,9 @@ public class IndividualRobotiqHandController implements RobotController
          }
       }
 
-      startTrajectoryTime = new DoubleYoVariable(sidePrefix + "StartTrajectoryTime", registry);
-      currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
-      endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
+      startTrajectoryTime = new YoDouble(sidePrefix + "StartTrajectoryTime", registry);
+      currentTrajectoryTime = new YoDouble(sidePrefix + "CurrentTrajectoryTime", registry);
+      endTrajectoryTime = new YoDouble(sidePrefix + "EndTrajectoryTime", registry);
       this.trajectoryTime = trajectoryTime;
       hasTrajectoryTimeChanged = new YoBoolean(sidePrefix + "HasTrajectoryTimeChanged", registry);
       isStopped = new YoBoolean(sidePrefix + "IsStopped", registry);

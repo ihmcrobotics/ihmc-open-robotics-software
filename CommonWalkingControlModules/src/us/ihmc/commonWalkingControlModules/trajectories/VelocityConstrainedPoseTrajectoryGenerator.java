@@ -18,7 +18,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -92,8 +92,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private ReferenceFrame finalFrame;
    private final YoFrameOrientation interpolationFrameForViz;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
 
    // For Visualization
    private final boolean visualize;
@@ -169,8 +169,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       copyOfInitialAngularVelocity = new FrameVector(trajectoryFrame);
       copyOfFinalAngularVelocity = new FrameVector(trajectoryFrame);
 
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
       xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 6, registry);
       yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 6, registry);

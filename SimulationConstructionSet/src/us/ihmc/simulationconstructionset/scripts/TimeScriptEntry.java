@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.scripts;
 import java.util.ArrayList;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
@@ -20,7 +20,7 @@ public class TimeScriptEntry implements Comparable<Object>
       timeScriptCommands = new ArrayList<TimeScriptCommand>();
    }
 
-   public void addVarValue(DoubleYoVariable variable, double value)
+   public void addVarValue(YoDouble variable, double value)
    {
       if (variable == null)
          return;
@@ -100,10 +100,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class DoubleVariableValuePair implements VariableValuePair
    {
-      protected DoubleYoVariable variable;
+      protected YoDouble variable;
       protected double value;
 
-      public DoubleVariableValuePair(DoubleYoVariable variable, double value)
+      public DoubleVariableValuePair(YoDouble variable, double value)
       {
          this.variable = variable;
          this.value = value;

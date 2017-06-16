@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -16,8 +16,8 @@ import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 public class OrientationInterpolationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameQuaternion finalOrientation;
@@ -42,8 +42,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
                                                       YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      this.currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      this.currentTime = new YoDouble(namePrefix + "Time", registry);
       this.parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
       
       this.initialOrientation = new YoFrameQuaternion(namePrefix + "InitialOrientation", referenceFrame, registry);

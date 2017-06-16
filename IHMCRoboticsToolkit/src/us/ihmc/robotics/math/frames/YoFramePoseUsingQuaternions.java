@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -273,37 +273,37 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       getOrientation().get(quaternionToPack);
    }
 
-   public DoubleYoVariable getYoX()
+   public YoDouble getYoX()
    {
       return getPosition().getYoX();
    }
 
-   public DoubleYoVariable getYoY()
+   public YoDouble getYoY()
    {
       return getPosition().getYoY();
    }
 
-   public DoubleYoVariable getYoZ()
+   public YoDouble getYoZ()
    {
       return getPosition().getYoZ();
    }
 
-   public DoubleYoVariable getYoQs()
+   public YoDouble getYoQs()
    {
       return getOrientation().getYoQs();
    }
 
-   public DoubleYoVariable getYoQx()
+   public YoDouble getYoQx()
    {
       return getOrientation().getYoQx();
    }
 
-   public DoubleYoVariable getYoQy()
+   public YoDouble getYoQy()
    {
       return getOrientation().getYoQy();
    }
 
-   public DoubleYoVariable getYoQz()
+   public YoDouble getYoQz()
    {
       return getOrientation().getYoQz();
    }

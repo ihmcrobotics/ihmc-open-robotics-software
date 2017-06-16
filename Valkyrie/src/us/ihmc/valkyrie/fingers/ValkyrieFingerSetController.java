@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -39,22 +39,22 @@ public class ValkyrieFingerSetController implements RobotController
    private final RobotSide robotSide;
 
    private final YoPolynomial yoPolynomial;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
    private final YoBoolean hasTrajectoryTimeChanged, isStopped;
 
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> initialDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> finalDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
 
-   private final EnumMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
+   private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
 
    private final EnumYoVariable<HandConfiguration> handConfiguration;
    private final EnumYoVariable<HandConfiguration> handDesiredConfiguration;
    private StateMachine<GraspState> stateMachine;
 
-   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, FullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
+   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       this.controllerRegistry = controllerRegistry;
@@ -66,9 +66,9 @@ public class ValkyrieFingerSetController implements RobotController
 
       mapJointsAndVariables(fullRobotModel);
 
-      startTrajectoryTime = new DoubleYoVariable(sidePrefix + "StartTrajectoryTime", registry);
-      currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
-      endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
+      startTrajectoryTime = new YoDouble(sidePrefix + "StartTrajectoryTime", registry);
+      currentTrajectoryTime = new YoDouble(sidePrefix + "CurrentTrajectoryTime", registry);
+      endTrajectoryTime = new YoDouble(sidePrefix + "EndTrajectoryTime", registry);
       this.trajectoryTime = trajectoryTime;
       hasTrajectoryTimeChanged = new YoBoolean(sidePrefix + "HasTrajectoryTimeChanged", registry);
       isStopped = new YoBoolean(sidePrefix + "IsStopped", registry);
@@ -98,13 +98,13 @@ public class ValkyrieFingerSetController implements RobotController
       for (ValkyrieRealRobotFingerJoint jointEnum : ValkyrieRealRobotFingerJoint.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         DoubleYoVariable initialDesiredAngle = new DoubleYoVariable("q_d_initial_" + sidePrefix + jointEnum, registry);
+         YoDouble initialDesiredAngle = new YoDouble("q_d_initial_" + sidePrefix + jointEnum, registry);
          initialDesiredAngles.put(jointEnum, initialDesiredAngle);
 
-         DoubleYoVariable finalDesiredAngle = new DoubleYoVariable("q_d_final_" + sidePrefix + jointEnum, registry);
+         YoDouble finalDesiredAngle = new YoDouble("q_d_final_" + sidePrefix + jointEnum, registry);
          finalDesiredAngles.put(jointEnum, finalDesiredAngle);
 
-         DoubleYoVariable desiredAngle = new DoubleYoVariable("q_d_" + sidePrefix + jointEnum, registry);
+         YoDouble desiredAngle = new YoDouble("q_d_" + sidePrefix + jointEnum, registry);
          desiredAngles.put(jointEnum, desiredAngle);
       }
 

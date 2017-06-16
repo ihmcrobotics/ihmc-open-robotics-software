@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
@@ -22,7 +22,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTrajectoryTime;
+   private final YoDouble currentTrajectoryTime;
 
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
@@ -54,7 +54,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       numberOfWaypoints = new IntegerYoVariable(namePrefix + "NumberOfWaypoints", registry);
       numberOfWaypoints.set(0);
 
-      currentTrajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
+      currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
 
       subTrajectory = new QuinticPolynomialTrajectoryGenerator(namePrefix + "SubTrajectory", initialPositionProvider, initialVelocityProvider,

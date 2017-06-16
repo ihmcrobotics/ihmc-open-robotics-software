@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -17,7 +17,7 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
 
    private final IntegerYoVariable positionTrajectoryGeneratorIndex;
    private final ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators;
-   private final DoubleYoVariable timeIntoStep;
+   private final YoDouble timeIntoStep;
 
    public WrapperForMultiplePositionTrajectoryGenerators(ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators, String namePrefix,
          YoVariableRegistry parentRegistry)
@@ -27,7 +27,7 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
 
       this.positionTrajectoryGenerators = positionTrajectoryGenerators;
       positionTrajectoryGeneratorIndex = new IntegerYoVariable(namePrefix + "PositionTrajectoryGeneratorIndex", registry);
-      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
       this.replanPositionTrajectory = new YoBoolean(namePrefix + "ReplanPositionTrajectory", registry);
       this.replanPositionTrajectory.set(false);
