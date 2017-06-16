@@ -16,11 +16,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPoints
 {
-   private ReferenceFrame footFrame;
    private List<FramePoint2d> footstepPoints;
-   private RobotSide side;
    private Footstep footstep;
-   private FootstepTiming footstepTiming;
+   private FootstepTiming timing;
+   private ReferenceFrame footFrame;
       
    /**
     * Initialize the foot point storage object
@@ -28,9 +27,9 @@ public class FootstepPoints
     * @param refFrame Provide corresponding foot reference frame. This will be stored and accessed to get updated values
     */
    
-   public FootstepPoints(RobotSide side, ReferenceFrame refFrame)
+   public FootstepPoints(Footstep footstep, FootstepTiming timing)
    {
-      this(side, refFrame, 0);      
+      this(footstep, timing, 0);     
    }
    
    /**
@@ -40,11 +39,12 @@ public class FootstepPoints
     * @param estimatedSize Initial estimate of the number of points to be stored
     */
    
-   public FootstepPoints(RobotSide side, ReferenceFrame refFrame, int estimatedSize)
+   public FootstepPoints(Footstep footstep, FootstepTiming timing, int estimatedSize)
    {
-      this.side = side;
-      this.footFrame = refFrame;
       this.footstepPoints = new ArrayList<>(estimatedSize);
+      this.footstep = footstep;
+      this.timing = timing;      
+      this.footFrame = footstep.getSoleReferenceFrame();
    }
    
    public void addFootstepPoint(FramePoint2d newPoint)
@@ -85,5 +85,5 @@ public class FootstepPoints
    public FramePoint2d getFootStepPointInFeetFrame(int index)
    {
       return footstepPoints.get(index);
-   }   
+   }
 }
