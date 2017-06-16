@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -1316,14 +1316,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    public static int findControllerNumberOfWaypoints(SimulationConstructionSet scs, RigidBody chest)
    {
       String chestPrefix = chest.getName();
-      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable(chestPrefix + "TaskspaceControlModule", chestPrefix + "TaskspaceNumberOfPoints")).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.getVariable(chestPrefix + "TaskspaceControlModule", chestPrefix + "TaskspaceNumberOfPoints")).getIntegerValue();
       return numberOfWaypoints;
    }
 
    public static int findControllerNumberOfWaypointsInGenerator(SimulationConstructionSet scs, RigidBody chest)
    {
       String chestPrefix = chest.getName();
-      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable(chestPrefix + "TaskspaceControlModule", chestPrefix + "TaskspaceNumberOfPointsInGenerator")).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.getVariable(chestPrefix + "TaskspaceControlModule", chestPrefix + "TaskspaceNumberOfPointsInGenerator")).getIntegerValue();
       return numberOfWaypoints;
    }
 

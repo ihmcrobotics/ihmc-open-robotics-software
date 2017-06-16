@@ -5,14 +5,14 @@ import java.nio.ByteBuffer;
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
 
 public class WandererPowerDistributionADCState implements AcsellPowerDistributionADCState
 {
    private final YoVariableRegistry registry;
-   private final IntegerYoVariable ADC[] = new IntegerYoVariable[8];
+   private final YoInteger ADC[] = new YoInteger[8];
 
    private final YoDouble robotPower;
    private final YoDouble robotWork;
@@ -32,7 +32,7 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
       this.registry = new YoVariableRegistry(name);
       for (int i = 0; i < ADC.length; i++)
       {
-         ADC[i] = new IntegerYoVariable("rawADC" + i, registry);
+         ADC[i] = new YoInteger("rawADC" + i, registry);
       }
 
       robotPower = new YoDouble("robotPower", registry);

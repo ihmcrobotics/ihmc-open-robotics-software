@@ -370,7 +370,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       
       case INTEGER:
       {
-         yoVariable = new IntegerYoVariable(variableName, registry);
+         yoVariable = new YoInteger(variableName, registry);
          break;
       }
       
@@ -383,7 +383,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       default: 
       {
          // Treat EnumYoVariables as IntegerYoVariables if you are creating them here. Otherwise need to know the class itself...
-         yoVariable = new IntegerYoVariable(variableName, registry);
+         yoVariable = new YoInteger(variableName, registry);
       }
       }
 

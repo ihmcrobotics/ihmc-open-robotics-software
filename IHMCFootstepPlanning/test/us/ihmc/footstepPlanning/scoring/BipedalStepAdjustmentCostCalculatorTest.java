@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -44,7 +44,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private YoDouble colorIndexYoVariable;
    private YoDouble stanceFootPitch;
    private YoDouble yoTime;
-   private IntegerYoVariable candidateIndex;
+   private YoInteger candidateIndex;
 
    private double incrementX = 0.1;
    private double incrementY = 0.05;
@@ -135,7 +135,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       YoDouble yYoVariable = new YoDouble("y", registry);
       colorIndexYoVariable = new YoDouble("colorIndex", registry);
       stanceFootPitch = new YoDouble("stanceFootPitch", registry);
-      candidateIndex = new IntegerYoVariable("candidateIndex", registry);
+      candidateIndex = new YoInteger("candidateIndex", registry);
 
       BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(registry, yoGraphicsListRegistry);
 

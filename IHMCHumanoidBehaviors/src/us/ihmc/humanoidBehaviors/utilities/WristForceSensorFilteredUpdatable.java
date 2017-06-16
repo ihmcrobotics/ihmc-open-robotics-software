@@ -11,7 +11,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
@@ -43,7 +43,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
    private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
-   private final IntegerYoVariable yoCollisionSeverityLevelOneToThree;
+   private final YoInteger yoCollisionSeverityLevelOneToThree;
    private final YoBoolean yoForceLimitExceeded;
    private final YoBoolean yoStiffnessLimitExceeded;
    private final YoBoolean yoImpactDetected;
@@ -99,7 +99,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoImpactStiffnessThreshold_NperM = new YoDouble(forceSensorName + "ImpactStiffnessThreshold_NperM", registry);
       yoImpactForceThreshold_N = new YoDouble(forceSensorName + "ImpactForceThreshold_N", registry);
 
-      yoCollisionSeverityLevelOneToThree = new IntegerYoVariable(forceSensorName + "CollisionSeverity", "", registry, 1, 3);
+      yoCollisionSeverityLevelOneToThree = new YoInteger(forceSensorName + "CollisionSeverity", "", registry, 1, 3);
       yoForceLimitExceeded = new YoBoolean(forceSensorName + "forceLimitExceeded", registry);
       yoStiffnessLimitExceeded = new YoBoolean(forceSensorName + "stiffnessLimitExceeded", registry);
       yoImpactDetected = new YoBoolean(forceSensorName + "ImpactDetected", registry);

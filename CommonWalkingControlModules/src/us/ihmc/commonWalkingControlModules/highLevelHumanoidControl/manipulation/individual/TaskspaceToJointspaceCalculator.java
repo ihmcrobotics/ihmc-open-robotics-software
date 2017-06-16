@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -76,7 +76,7 @@ public class TaskspaceToJointspaceCalculator
    private final int maxNumberOfConstraints = SpatialMotionVector.SIZE;
 
    private final YoDouble jointAngleRegularizationWeight;
-   private final IntegerYoVariable exponentForPNorm;
+   private final YoInteger exponentForPNorm;
    private final YoEnum<SecondaryObjective> currentSecondaryObjective;
 
    private final YoDouble maximumJointVelocity;
@@ -163,7 +163,7 @@ public class TaskspaceToJointspaceCalculator
 
       jointAngleRegularizationWeight = new YoDouble(namePrefix + "JointAngleRegularizationWeight", registry);
 
-      exponentForPNorm = new IntegerYoVariable(namePrefix + "ExponentForPNorm", registry);
+      exponentForPNorm = new YoInteger(namePrefix + "ExponentForPNorm", registry);
       exponentForPNorm.set(6);
 
       currentSecondaryObjective = new YoEnum<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);

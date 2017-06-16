@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 {
@@ -23,13 +23,13 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
    private final YoBoolean hasBeenCalled;
 
    private final YoBoolean isVariableDead;
-   private final IntegerYoVariable hasBeenDeadForNTicks;
+   private final YoInteger hasBeenDeadForNTicks;
 
    private final YoBoolean isVariableNaN;
-   private final IntegerYoVariable hasBeenNaNForNTicks;
+   private final YoInteger hasBeenNaNForNTicks;
 
    private final YoBoolean isVariableInfinite;
-   private final IntegerYoVariable hasBeenInfiniteForNTicks;
+   private final YoInteger hasBeenInfiniteForNTicks;
 
    private final YoBoolean enabled;
 
@@ -58,15 +58,15 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 
       isVariableDead = new YoBoolean(inputName + "IsDead", registry);
       isVariableDead.set(false);
-      hasBeenDeadForNTicks = new IntegerYoVariable(inputName + "HasBeenDeadForNTicks", registry);
+      hasBeenDeadForNTicks = new YoInteger(inputName + "HasBeenDeadForNTicks", registry);
 
       isVariableNaN = new YoBoolean(inputName + "IsNaN", registry);
       isVariableNaN.set(false);
-      hasBeenNaNForNTicks = new IntegerYoVariable(inputName + "HasBeenNaNForNTicks", registry);
+      hasBeenNaNForNTicks = new YoInteger(inputName + "HasBeenNaNForNTicks", registry);
 
       isVariableInfinite = new YoBoolean(inputName + "IsInfinite", registry);
       isVariableInfinite.set(false);
-      hasBeenInfiniteForNTicks = new IntegerYoVariable(inputName + "HasBeenInfiniteForNTicks", registry);
+      hasBeenInfiniteForNTicks = new YoInteger(inputName + "HasBeenInfiniteForNTicks", registry);
 
       enabled = new YoBoolean(registry.getName() + "Enabled", registry);
 

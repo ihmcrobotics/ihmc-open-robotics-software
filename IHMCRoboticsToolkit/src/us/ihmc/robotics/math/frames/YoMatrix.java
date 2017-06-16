@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound.
@@ -20,7 +20,7 @@ public class YoMatrix
 {
    private final int maxNumberOfRows, maxNumberOfColumns;
 
-   private final IntegerYoVariable numberOfRows, numberOfColumns;
+   private final YoInteger numberOfRows, numberOfColumns;
    private final YoDouble[][] variables;
 
    public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoVariableRegistry registry)
@@ -28,8 +28,8 @@ public class YoMatrix
       this.maxNumberOfRows = maxNumberOfRows;
       this.maxNumberOfColumns = maxNumberOfColumns;
 
-      this.numberOfRows = new IntegerYoVariable(name + "NumRows", registry);
-      this.numberOfColumns = new IntegerYoVariable(name + "NumCols", registry);
+      this.numberOfRows = new YoInteger(name + "NumRows", registry);
+      this.numberOfColumns = new YoInteger(name + "NumCols", registry);
 
       this.numberOfRows.set(maxNumberOfRows);
       this.numberOfColumns.set(maxNumberOfColumns);

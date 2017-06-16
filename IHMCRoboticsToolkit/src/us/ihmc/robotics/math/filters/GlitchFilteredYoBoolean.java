@@ -2,19 +2,19 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GlitchFilteredYoBoolean extends YoBoolean
 {
    private YoBoolean variableToFilter;
-   private final IntegerYoVariable windowSize;
-   protected final IntegerYoVariable counter;
+   private final YoInteger windowSize;
+   protected final YoInteger counter;
 
    public GlitchFilteredYoBoolean(String name, int windowSize)
    {
       super(name, "GlitchFilteredYoBoolean", null);
-      counter = new IntegerYoVariable(name + "Count", getYoVariableRegistry());
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", getYoVariableRegistry());
+      counter = new YoInteger(name + "Count", getYoVariableRegistry());
+      this.windowSize = new YoInteger(name + "WindowSize", getYoVariableRegistry());
 
       initialize(null, windowSize);
    }
@@ -22,8 +22,8 @@ public class GlitchFilteredYoBoolean extends YoBoolean
    public GlitchFilteredYoBoolean(String name, YoVariableRegistry registry, int windowSize)
    {
       super(name, registry);
-      counter = new IntegerYoVariable(name + "Count", registry);
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", registry);
+      counter = new YoInteger(name + "Count", registry);
+      this.windowSize = new YoInteger(name + "WindowSize", registry);
 
       initialize(null, windowSize);
    }
@@ -31,8 +31,8 @@ public class GlitchFilteredYoBoolean extends YoBoolean
    public GlitchFilteredYoBoolean(String name, YoBoolean yoVariableToFilter, int windowSize)
    {
       super(name, "GlitchFilteredYoBoolean", null);
-      counter = new IntegerYoVariable(name + "Count", getYoVariableRegistry());
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", getYoVariableRegistry());
+      counter = new YoInteger(name + "Count", getYoVariableRegistry());
+      this.windowSize = new YoInteger(name + "WindowSize", getYoVariableRegistry());
 
       initialize(yoVariableToFilter, windowSize);
    }
@@ -45,8 +45,8 @@ public class GlitchFilteredYoBoolean extends YoBoolean
    public GlitchFilteredYoBoolean(String name, String description, YoVariableRegistry registry, YoBoolean yoVariableToFilter, int windowSize)
    {
       super(name, description, registry);
-      counter = new IntegerYoVariable(name + "Count", description, registry);
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", description, registry);
+      counter = new YoInteger(name + "Count", description, registry);
+      this.windowSize = new YoInteger(name + "WindowSize", description, registry);
 
       initialize(yoVariableToFilter, windowSize);
    }

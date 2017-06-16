@@ -18,7 +18,7 @@ import us.ihmc.robotDataVisualizer.visualizer.JointUpdater;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -48,7 +48,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    private final ByteBuffer logLine;
    private final LongBuffer logLongArray;
 
-   private final IntegerYoVariable currentRecordTick;
+   private final YoInteger currentRecordTick;
 
    private final int numberOfEntries;
    private final long initialTimestamp;
@@ -106,7 +106,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       logLine = ByteBuffer.allocate(bufferSize);
       logLongArray = logLine.asLongBuffer();
 
-      currentRecordTick = new IntegerYoVariable("currentRecordTick", getRobotsYoVariableRegistry());
+      currentRecordTick = new YoInteger("currentRecordTick", getRobotsYoVariableRegistry());
 
       try
       {

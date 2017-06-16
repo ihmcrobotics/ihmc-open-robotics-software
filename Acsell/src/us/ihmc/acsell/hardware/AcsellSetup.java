@@ -20,7 +20,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class AcsellSetup extends RealtimeThread
@@ -39,8 +39,8 @@ public class AcsellSetup extends RealtimeThread
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprSetup");
 
-   private final IntegerYoVariable logicPowerStateRequest = new IntegerYoVariable("logicPowerStateRequest", registry);
-   private final IntegerYoVariable motorPowerStateRequest = new IntegerYoVariable("motorPowerStateRequest", registry);
+   private final YoInteger logicPowerStateRequest = new YoInteger("logicPowerStateRequest", registry);
+   private final YoInteger motorPowerStateRequest = new YoInteger("motorPowerStateRequest", registry);
 
    private long logicSwitchTime = -1;
    private long motorSwitchTime = -1;

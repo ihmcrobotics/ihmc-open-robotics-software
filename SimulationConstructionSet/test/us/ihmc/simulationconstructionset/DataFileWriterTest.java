@@ -56,7 +56,7 @@ public class DataFileWriterTest
       YoDouble variableFour = new YoDouble("variableFour", registryOne);
       YoDouble variableFive = new YoDouble("variableFive", registryTwo);
       YoBoolean variableSix = new YoBoolean("variableSix", rootRegistry);
-      IntegerYoVariable variableSeven = new IntegerYoVariable("variableSeven", registryThree);
+      YoInteger variableSeven = new YoInteger("variableSeven", registryThree);
 
       dataBuffer.addVariable(variableOne);
       dataBuffer.addVariable(variableTwo);

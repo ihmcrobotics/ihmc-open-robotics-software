@@ -30,7 +30,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -339,8 +339,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       
    private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
    {
-      private final IntegerYoVariable footstepsCompleted = new IntegerYoVariable("footstepsCompleted", registry);
-      private final IntegerYoVariable numberOfFootstepsToTake = new IntegerYoVariable("numberOfFootstepsToTake", registry);
+      private final YoInteger footstepsCompleted = new YoInteger("footstepsCompleted", registry);
+      private final YoInteger numberOfFootstepsToTake = new YoInteger("numberOfFootstepsToTake", registry);
       
       @Override
       public void receivedPacket(FootstepStatus packet)

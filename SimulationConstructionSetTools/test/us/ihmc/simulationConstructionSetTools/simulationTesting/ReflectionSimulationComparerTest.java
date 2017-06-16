@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -164,7 +164,7 @@ public class ReflectionSimulationComparerTest
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("RewindableObject");
       
-      private final IntegerYoVariable counter = new IntegerYoVariable("counter", registry);
+      private final YoInteger counter = new YoInteger("counter", registry);
       private int counter2;
      
       private final boolean isRewindable;

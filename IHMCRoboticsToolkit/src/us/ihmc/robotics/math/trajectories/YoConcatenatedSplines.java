@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -30,7 +30,7 @@ public class YoConcatenatedSplines
    private final YoFrameVector acceleration;
    private final ReferenceFrame referenceFrame;
    
-   private final IntegerYoVariable currentSplineIndex;
+   private final YoInteger currentSplineIndex;
 
    public YoConcatenatedSplines(int[] numberOfCoefficientsPerPolynomial, ReferenceFrame referenceFrame, int arcLengthCalculatorDivisionsPerPolynomial,
                                 YoVariableRegistry parentRegistry, String namePrefix)
@@ -56,7 +56,7 @@ public class YoConcatenatedSplines
       acceleration = new YoFrameVector(namePrefix + "Acceleration", referenceFrame, registry);
       arcLength = new YoDouble(namePrefix + "ArcLength", registry);
       
-      currentSplineIndex = new IntegerYoVariable(namePrefix + "CurrentSplineIndex", registry);
+      currentSplineIndex = new YoInteger(namePrefix + "CurrentSplineIndex", registry);
    }
 
    public void setQuadraticQuinticQuadratic(double[] times, FramePoint[] positions, FrameVector initialVelocity, FrameVector finalVelocity)

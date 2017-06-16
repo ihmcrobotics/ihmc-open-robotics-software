@@ -131,7 +131,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime, flyingTrajectoryTime;
    private final YoDouble sleepTimeBetweenPoses;
    private final YoBoolean doPelvisAndChestYaw;
-   private final IntegerYoVariable numberOfCyclesToRun;
+   private final YoInteger numberOfCyclesToRun;
    private final YoDouble minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -382,7 +382,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       activeSideForHandControl = new YoEnum<>("activeSideForHandControl", registry, RobotSide.class, true);
       activeSideForHandControl.set(RobotSide.LEFT);
 
-      numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);
+      numberOfCyclesToRun = new YoInteger("numberOfDiagnosticCyclesToRun", registry);
       numberOfCyclesToRun.set(1);
 
       doPelvisAndChestYaw = new YoBoolean("diagnosticDoPelvisAndChestYaw", registry);

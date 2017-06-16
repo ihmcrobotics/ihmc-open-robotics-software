@@ -31,7 +31,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final String namePrefix = "userDesiredStep";
-   private final IntegerYoVariable stepsToTake = new IntegerYoVariable(namePrefix + "sToTake", registry);
+   private final YoInteger stepsToTake = new YoInteger(namePrefix + "sToTake", registry);
    private final YoEnum<RobotSide> firstStepSide = new YoEnum<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
    private final YoDouble minimumWidth = new YoDouble(namePrefix + "MinWidth", registry);
 

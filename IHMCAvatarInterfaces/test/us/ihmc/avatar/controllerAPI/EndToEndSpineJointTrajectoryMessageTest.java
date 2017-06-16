@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -334,7 +334,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPoints", bodyName + RigidBodyJointControlHelper.shortName);
+      YoInteger numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPoints", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
@@ -343,7 +343,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInGenerator", bodyName + RigidBodyJointControlHelper.shortName);
+      YoInteger numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInGenerator", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
@@ -352,7 +352,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
       String jointName = joint.getName();
-      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInQueue", bodyName + RigidBodyJointControlHelper.shortName);
+      YoInteger numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInQueue", bodyName + RigidBodyJointControlHelper.shortName);
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
@@ -496,9 +496,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getYoVariable(scs, name, namespace, YoBoolean.class);
    }
 
-   private static IntegerYoVariable getIntegerYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoInteger getIntegerYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, IntegerYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoInteger.class);
    }
 
    private static YoDouble getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)

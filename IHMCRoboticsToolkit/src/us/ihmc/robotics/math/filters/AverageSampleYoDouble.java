@@ -2,11 +2,11 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class AverageSampleYoDouble extends YoDouble
 {
-   private final IntegerYoVariable dataLength;
+   private final YoInteger dataLength;
    private final YoDouble dataSource;
    private final YoDouble dataCumulated;
 
@@ -20,7 +20,7 @@ public class AverageSampleYoDouble extends YoDouble
       super(name, registry);
 
       this.dataSource = dataSource;
-      dataLength = new IntegerYoVariable(name + "DataLength", registry);
+      dataLength = new YoInteger(name + "DataLength", registry);
       dataCumulated = new YoDouble(name + "DataCumulated", registry);
    }
 

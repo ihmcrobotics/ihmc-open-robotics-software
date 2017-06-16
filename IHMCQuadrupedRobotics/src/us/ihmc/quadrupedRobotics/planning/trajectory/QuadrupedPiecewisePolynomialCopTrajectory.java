@@ -10,7 +10,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -51,8 +51,8 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    private final QuadrantDependentList<FramePoint> solePositionAtCurrentTime;
    private final QuadrantDependentList<ContactState> contactStateAtCurrentTime;
    private final QuadrantDependentList<MutableDouble> contactPressureAtCurrentTime;
-   private final EndDependentList<IntegerYoVariable> numberOfContactPhasesPerEnd;
-   private final EndDependentList<IntegerYoVariable> numberOfPressurePolynomialsPerEnd;
+   private final EndDependentList<YoInteger> numberOfContactPhasesPerEnd;
+   private final EndDependentList<YoInteger> numberOfPressurePolynomialsPerEnd;
    private final EndDependentList<ArrayList<QuadrupedTimedContactPhase>> contactPhasesPerEnd;
    private final EndDependentList<ArrayList<YoTimedPolynomial>> pressurePolynomialsPerEnd;
    private final YoDouble copShiftDuration;
@@ -81,8 +81,8 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       {
          String robotEndPrefix = robotEnd.getCamelCaseNameForStartOfExpression();
          String robotEndModifier = robotEnd.getCamelCaseNameForMiddleOfExpression();
-         numberOfContactPhasesPerEnd.set(robotEnd, new IntegerYoVariable("numberOf" + robotEndModifier + "ContactPhases", registry));
-         numberOfPressurePolynomialsPerEnd.set(robotEnd, new IntegerYoVariable("numberOf" + robotEndModifier + "PressurePolynomials", registry));
+         numberOfContactPhasesPerEnd.set(robotEnd, new YoInteger("numberOf" + robotEndModifier + "ContactPhases", registry));
+         numberOfPressurePolynomialsPerEnd.set(robotEnd, new YoInteger("numberOf" + robotEndModifier + "PressurePolynomials", registry));
          contactPhasesPerEnd.set(robotEnd, new ArrayList<QuadrupedTimedContactPhase>(maximumNumberOfContactPhases));
          pressurePolynomialsPerEnd.set(robotEnd, new ArrayList<YoTimedPolynomial>(maximumNumberOfTrajectorySegments));
          for (int i = 0; i < maximumNumberOfContactPhases; i++)

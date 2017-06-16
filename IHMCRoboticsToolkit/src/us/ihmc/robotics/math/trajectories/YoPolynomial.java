@@ -8,14 +8,14 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoPolynomial
 {
    private final int maximumNumberOfCoefficients;
    private double pos, vel, acc;
    private final YoDouble[] a;
-   private final IntegerYoVariable numberOfCoefficients;
+   private final YoInteger numberOfCoefficients;
    private final DenseMatrix64F constraintMatrix;
    private final DenseMatrix64F constraintVector;
    private final DenseMatrix64F coefficientVector;
@@ -35,7 +35,7 @@ public class YoPolynomial
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
 
-      numberOfCoefficients = new IntegerYoVariable(name + "_nCoeffs", registry);
+      numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
 
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
@@ -43,7 +43,7 @@ public class YoPolynomial
       }
    }
 
-   public YoPolynomial(YoDouble[] coefficients, IntegerYoVariable numberOfCoefficients)
+   public YoPolynomial(YoDouble[] coefficients, YoInteger numberOfCoefficients)
    {
       a = coefficients;
       this.numberOfCoefficients = numberOfCoefficients;
@@ -553,7 +553,7 @@ public class YoPolynomial
       return numberOfCoefficients.getIntegerValue();
    }
 
-   public IntegerYoVariable getYoNumberOfCoefficients()
+   public YoInteger getYoNumberOfCoefficients()
    {
       return numberOfCoefficients;
    }

@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -20,7 +20,7 @@ public class GroundContactPoint extends ExternalForcePoint
    private final YoFrameVector surfaceNormal;
 
    private final YoBoolean slip;    // Whether or not it is slipping.
-   private final IntegerYoVariable collisionCount;   
+   private final YoInteger collisionCount;
 
    public GroundContactPoint(String name, Robot robot)
    {
@@ -46,7 +46,7 @@ public class GroundContactPoint extends ExternalForcePoint
       fs = new YoDouble(name + "_fs", "GroundContactPoint foot switch", registry);
 
       slip = new YoBoolean(name + "_slip", "GroundContactPoint slipping", registry);
-      collisionCount = new IntegerYoVariable(name + "_coll", "GroundContactPoint colliding", registry);
+      collisionCount = new YoInteger(name + "_coll", "GroundContactPoint colliding", registry);
       
       surfaceNormal = new YoFrameVector(name + "_n", "", ReferenceFrame.getWorldFrame(), registry);
    }

@@ -15,7 +15,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -81,7 +81,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoDouble totalErrorRotation_Pitch;
    private final YoDouble totalErrorRotation_Roll;
    
-   private final IntegerYoVariable pelvisBufferSize;
+   private final YoInteger pelvisBufferSize;
    
    private final FramePose stateEstimatorInWorldFramePose = new FramePose(worldFrame);
    private final YoFramePose yoStateEstimatorInWorldFramePose;
@@ -142,7 +142,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);
       
-      this.pelvisBufferSize = new IntegerYoVariable("pelvisBufferSize", registry);
+      this.pelvisBufferSize = new YoInteger("pelvisBufferSize", registry);
       this.pelvisBufferSize.set(pelvisBufferSize);
       
       alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
