@@ -176,19 +176,21 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       radius.set(0.0, 0.0, 0.0);
    }
 
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       radius.set(Double.NaN, Double.NaN, Double.NaN);
    }
 
    @Override
    public boolean containsNaN()
    {
-      return Double.isNaN(radius.getX()) || Double.isNaN(radius.getY()) || Double.isNaN(radius.getZ());
+      return super.containsNaN() || Double.isNaN(radius.getX()) || Double.isNaN(radius.getY()) || Double.isNaN(radius.getZ());
    }
 
    @Override

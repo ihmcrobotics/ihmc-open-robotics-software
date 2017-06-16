@@ -120,6 +120,7 @@ public class Torus3d extends Shape3d<Torus3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       radius = 0.0;
       tubeRadius = 0.0;
    }
@@ -127,6 +128,7 @@ public class Torus3d extends Shape3d<Torus3d>
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       radius = Double.NaN;
       tubeRadius = Double.NaN;
    }
@@ -134,7 +136,7 @@ public class Torus3d extends Shape3d<Torus3d>
    @Override
    public boolean containsNaN()
    {
-      return Double.isNaN(radius) || Double.isNaN(tubeRadius);
+      return super.containsNaN() || Double.isNaN(radius) || Double.isNaN(tubeRadius);
    }
 
    @Override

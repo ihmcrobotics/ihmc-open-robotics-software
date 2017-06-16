@@ -37,6 +37,24 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose = new QuaternionBasedTransform();
    }
 
+   @Override
+   public boolean containsNaN()
+   {
+      return shapePose.containsNaN();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      shapePose.setToNaN();
+   }
+
+   @Override
+   public void setToZero()
+   {
+      shapePose.setToZero();
+   }
+
    /**
     * Find the distance from the closest point on this shape to the given point. Returns 0.0 if the
     * point is inside.

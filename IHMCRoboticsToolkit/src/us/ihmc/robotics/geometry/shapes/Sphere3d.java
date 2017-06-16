@@ -130,19 +130,21 @@ public class Sphere3d extends Shape3d<Sphere3d>
    @Override
    public void setToZero()
    {
+      super.setToZero();
       radius = 0.0;
    }
 
    @Override
    public void setToNaN()
    {
+      super.setToNaN();
       radius = Double.NaN;
    }
 
    @Override
    public boolean containsNaN()
    {
-      return Double.isNaN(radius);
+      return super.containsNaN() || Double.isNaN(radius);
    }
 
    @Override
