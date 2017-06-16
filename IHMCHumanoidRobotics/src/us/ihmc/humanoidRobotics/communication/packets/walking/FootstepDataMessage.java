@@ -521,17 +521,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       FootstepDataMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
       // Waypoints if they exist:
       if (positionWaypoints != null)
       {
          for (int i = 0; i < positionWaypoints.length; i++)
-            ret.positionWaypoints[i] = TransformTools.getTransformedPoint(positionWaypoints[i], transform);
+            ret.positionWaypoints[i].applyTransform(transform);
       }
 
       return ret;

@@ -14,7 +14,6 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 @RosMessagePacket(documentation =
@@ -102,25 +101,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    public void setAngularVelocity(Vector3D angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
-   }
-
-   public SO3TrajectoryPointMessage transform(RigidBodyTransform transform)
-   {
-      SO3TrajectoryPointMessage transformedTrajectoryPointMessage = new SO3TrajectoryPointMessage();
-
-      transformedTrajectoryPointMessage.time = time;
-
-      if (orientation != null)
-         transformedTrajectoryPointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
-      else
-         transformedTrajectoryPointMessage.orientation = null;
-
-      if (angularVelocity != null)
-         transformedTrajectoryPointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
-      else
-         transformedTrajectoryPointMessage.angularVelocity = null;
-
-      return transformedTrajectoryPointMessage;
    }
 
    @Override
