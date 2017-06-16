@@ -100,7 +100,12 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return isInsideOrOnSurface;
    }
 
-   protected abstract boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilonToGrowObject);
+   protected final boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilonToGrowObject)
+   {
+      return isInsideOrOnSurfaceShapeFrame(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), epsilonToGrowObject);
+   }
+
+   protected abstract boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilonToGrowObject);
 
    /**
     * Find the closest point on the surface of this shape to the given point. If the given point is

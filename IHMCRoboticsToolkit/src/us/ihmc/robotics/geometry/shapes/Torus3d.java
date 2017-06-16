@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -164,9 +165,9 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      temporaryVector.set(pointToCheck.getX(), pointToCheck.getY(), 0.0);
+      temporaryVector.set(x, y, 0.0);
       
       if (temporaryVector.length() < Epsilons.ONE_TRILLIONTH)
       {
@@ -178,7 +179,7 @@ public class Torus3d extends Shape3d<Torus3d>
       
       temporaryPoint.set(temporaryVector);
       
-      return temporaryPoint.distance(pointToCheck) <= tubeRadius + epsilon;
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint) <= tubeRadius + epsilon;
    }
 
    private void surfaceNormalAt(Vector3DBasics normalToPack, Point3DReadOnly pointToCheck)

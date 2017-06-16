@@ -60,9 +60,9 @@ public class Sphere3d extends Shape3d<Sphere3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      temporaryVector.set(pointToCheck);
+      temporaryVector.set(x, y, z);
       return temporaryVector.length() <= radius + epsilon;
    }
 

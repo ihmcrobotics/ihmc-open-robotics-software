@@ -231,7 +231,7 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly point, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
       ensureFacesAreUpToDate();
 
@@ -239,7 +239,7 @@ public class Box3d extends Shape3d<Box3d>
       for (FaceName faceName : FaceName.values)
       {
          Plane3d face = faces.get(faceName);
-         if (!face.isOnOrBelow(point, epsilon))
+         if (!face.isOnOrBelow(x, y, z, epsilon))
          {
             isInsideOrOnSurface = false;
             break;
