@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurati
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,7 +37,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
-   private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
+   private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
    private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
 
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();

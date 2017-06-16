@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -39,7 +39,7 @@ public class JointSpaceHandControlState extends HandControlState
    private final YoDouble weight;
 
    private final YoBoolean abortJointspaceControlState;
-   private final LongYoVariable lastCommandId;
+   private final YoLong lastCommandId;
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final Map<OneDoFJoint, YoInteger> numberOfQueuedCommands = new HashMap<>();
@@ -81,7 +81,7 @@ public class JointSpaceHandControlState extends HandControlState
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
       abortJointspaceControlState = new YoBoolean(namePrefix + "AbortJointspaceControlState", registry);
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       parentRegistry.addChild(registry);

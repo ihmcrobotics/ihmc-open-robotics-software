@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
@@ -18,13 +18,13 @@ public abstract class AbstractThreadedRobotController implements RobotController
    protected final YoDouble yoTime;
    protected final Robot simulatedRobot;
 
-   protected final LongYoVariable currentControlTick;
+   protected final YoLong currentControlTick;
 
    public AbstractThreadedRobotController(String name, Robot simulatedRobot)
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
-      this.currentControlTick = new LongYoVariable("currentControlTick", registry);
+      this.currentControlTick = new YoLong("currentControlTick", registry);
       this.yoTime = simulatedRobot.getYoTime();
       this.simulatedRobot = simulatedRobot;
    }
@@ -33,7 +33,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
-      this.currentControlTick = new LongYoVariable("currentControlTick", registry);
+      this.currentControlTick = new YoLong("currentControlTick", registry);
       this.yoTime = new YoDouble("time", registry);
       this.simulatedRobot = null;
    }

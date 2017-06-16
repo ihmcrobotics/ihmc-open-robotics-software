@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -36,7 +36,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final FullRobotModel fullRobotModel;
 
    private final YoDouble fingerControllerTime = new YoDouble("fingerControllerTime", registry);
-   private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("lastEstimatorStartTime", registry);
+   private final YoLong lastEstimatorStartTime = new YoLong("lastEstimatorStartTime", registry);
    private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
    private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 

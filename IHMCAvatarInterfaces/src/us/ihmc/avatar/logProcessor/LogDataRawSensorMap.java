@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -25,7 +25,7 @@ public class LogDataRawSensorMap
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
-   private final LongYoVariable timestamp, visionSensorTimestamp;
+   private final YoLong timestamp, visionSensorTimestamp;
 
    private final LinkedHashMap<String, YoDouble> rawJointPositionMap = new LinkedHashMap<>();
    private final LinkedHashMap<String, YoDouble> rawJointVelocityMap = new LinkedHashMap<>();
@@ -39,8 +39,8 @@ public class LogDataRawSensorMap
    {
       stateEstimatorSensorDefinitions = buildStateEstimatorSensorDefinitions(fullRobotModel);
 
-      timestamp = (LongYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "timestamp");
-      visionSensorTimestamp = (LongYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "visionSensorTimestamp");
+      timestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "timestamp");
+      visionSensorTimestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "visionSensorTimestamp");
       
       for (OneDoFJoint joint : stateEstimatorSensorDefinitions.getJointSensorDefinitions())
       {

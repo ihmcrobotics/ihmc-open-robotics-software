@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -152,9 +152,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
-   private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
-   private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
+   private final YoLong timestamp = new YoLong("timestamp", registry);
+   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
+   private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointVelocities = new LinkedHashMap<>();

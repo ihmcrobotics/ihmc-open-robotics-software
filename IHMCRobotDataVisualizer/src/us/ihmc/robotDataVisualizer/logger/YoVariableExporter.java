@@ -167,7 +167,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof LongYoVariable)
+      else if (variable instanceof YoLong)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
