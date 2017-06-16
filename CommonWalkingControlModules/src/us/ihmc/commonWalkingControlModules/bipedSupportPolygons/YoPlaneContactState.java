@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -30,6 +31,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
+   private final HashMap<YoContactPoint, DoubleYoVariable> maxContactPointNormalForces = new HashMap<>();
    private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
    private final YoFramePoint2d contactPointCentroid;
 
@@ -55,6 +57,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), this, registry);
          contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
+
+         DoubleYoVariable maxContactPointNormalForce = new DoubleYoVariable(namePrefix + "MaxContactPointNormalForce" + i, registry);
+         maxContactPointNormalForce.set(Double.POSITIVE_INFINITY);
+         maxContactPointNormalForces.put(contactPoint, maxContactPointNormalForce);
       }
       inContact.set(true);
 
@@ -81,6 +87,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       if (!inContact())
          return;
 
+      int contactedPointIndex = 0;
       for (int i = 0; i < getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
@@ -88,6 +95,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          {
             contactPoint.getPosition(tempContactPointPosition);
             planeContactStateCommandToPack.addPointInContact(tempContactPointPosition);
+
+            DoubleYoVariable maxForce = maxContactPointNormalForces.get(contactPoint);
+            planeContactStateCommandToPack.setMaxContactPointNormalForce(contactedPointIndex, maxForce.getDoubleValue());
+            contactedPointIndex++;
          }
       }
    }
@@ -135,6 +146,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       {
          this.contactNormalFrameVector.setIncludingFrame(normalContactVector);
       }
+   }
+
+   public void setMaxContactPointNormalForce(YoContactPoint contactPoint, double maxNormalForce)
+   {
+      maxContactPointNormalForces.get(contactPoint).set(maxNormalForce);
    }
 
    @Override

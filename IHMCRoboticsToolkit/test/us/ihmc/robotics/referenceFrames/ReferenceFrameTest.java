@@ -318,59 +318,6 @@ public class ReferenceFrameTest
       EuclidCoreTestTools.assertTuple3DEquals(expectedTranslation, totalTranslation, 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testUpdateInMiddleWithCorruptors()
-   {
-      TransformReferenceFrame frame1 = new TransformReferenceFrame("frame1", ReferenceFrame.getWorldFrame());
-      TransformReferenceFrame frame2 = new TransformReferenceFrame("frame2", frame1);
-      TransformReferenceFrame frame3 = new TransformReferenceFrame("frame3", frame2);
-
-      RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setRotationRollAndZeroTranslation(0.77);
-      transform1.setTranslation(new Vector3D(0.1, 0.13, 0.45));
-
-      RigidBodyTransform transform2 = new RigidBodyTransform();
-      transform2.setRotationPitchAndZeroTranslation(0.4);
-      transform2.setTranslation(new Vector3D(0.5, 0.12, 0.35));
-
-      RigidBodyTransform transform3 = new RigidBodyTransform();
-      transform3.setRotationYawAndZeroTranslation(0.37);
-      transform3.setTranslation(new Vector3D(0.11, 0.113, 0.415));
-
-      frame1.setTransformAndUpdate(transform1);
-      frame2.setTransformAndUpdate(transform2);
-      frame3.setTransformAndUpdate(transform3);
-
-      RigidBodyTransform transformToDesiredFrame = frame3.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-
-      RigidBodyTransform expectedTransform = new RigidBodyTransform(transform1);
-      expectedTransform.multiply(transform2);
-      expectedTransform.multiply(transform3);
-
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
-
-      RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
-      preCorruptionTransform.setRotationRollAndZeroTranslation(0.35);
-      preCorruptionTransform.setTranslation(new Vector3D(0.51, 0.113, 0.7415));
-      frame2.corruptTransformToParentPreMultiply(preCorruptionTransform);
-
-      RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
-      postCorruptionTransform.setRotationPitchAndZeroTranslation(0.97);
-      postCorruptionTransform.setTranslation(new Vector3D(0.12, 0.613, 0.415));
-      frame2.corruptTransformToParentPostMultiply(postCorruptionTransform);
-
-      expectedTransform = new RigidBodyTransform(transform1);
-      expectedTransform.multiply(preCorruptionTransform);
-      expectedTransform.multiply(transform2);
-      expectedTransform.multiply(postCorruptionTransform);
-      expectedTransform.multiply(transform3);
-
-      transformToDesiredFrame = frame3.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
-   }
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFramesTwo()

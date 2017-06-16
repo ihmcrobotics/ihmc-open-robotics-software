@@ -198,5 +198,16 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
    }
+   
+   /**
+    * tells the controller if this command supports delayed execution
+    * (Spoiler alert: It does)
+    * @return
+    */
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
 
 }

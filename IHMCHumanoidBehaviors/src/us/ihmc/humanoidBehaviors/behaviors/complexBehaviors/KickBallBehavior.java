@@ -189,7 +189,7 @@ public class KickBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             FramePoint2d ballToKickLocation = new FramePoint2d();
-            getoffsetPoint().getPosition(ballToKickLocation);
+            getoffsetPoint().getPositionIncludingFrame(ballToKickLocation);
             kickBehavior.setObjectToKickPoint(ballToKickLocation);
          }
       };
