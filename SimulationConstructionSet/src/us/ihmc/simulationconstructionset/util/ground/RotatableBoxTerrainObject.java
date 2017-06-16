@@ -102,7 +102,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       for (Box3d.FaceName faceName : faceNames)
       {
          Plane3d face = box.getFace(faceName);
-         face.getIntersectionWithLine(intersection, tempPoint, zVector);
+         face.intersectionWith(intersection, tempPoint, zVector);
 
          if (EuclidCoreMissingTools.isFinite(intersection))
          {

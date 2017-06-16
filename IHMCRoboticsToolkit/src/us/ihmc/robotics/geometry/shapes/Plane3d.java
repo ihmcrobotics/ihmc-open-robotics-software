@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -14,61 +15,41 @@ public class Plane3d implements GeometryObject<Plane3d>
 {
    private Point3D point = new Point3D();
    private Vector3D normal = new Vector3D(0.0, 0.0, 1.0);
-   private Vector3D temporaryVector = new Vector3D();
 
    public Plane3d()
    {
    }
 
-   public Plane3d(Point3DReadOnly point, Vector3DReadOnly normal)
+   public Plane3d(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
    {
-      this.point.set(point);
-      this.normal.set(normal);
-      this.normal.normalize();
-   }
-   
-   public Plane3d(Point3DReadOnly pointA, Point3DReadOnly pointB, Point3DReadOnly pointC)
-   {
-      point.set(pointA);
-      double v1_x = pointB.getX() - pointA.getX();
-      double v1_y = pointB.getY() - pointA.getY();
-      double v1_z = pointB.getZ() - pointA.getZ();
-      
-      double v2_x = pointC.getX() - pointA.getX();
-      double v2_y = pointC.getY() - pointA.getY();
-      double v2_z = pointC.getZ() - pointA.getZ();
-
-      double x = v1_y*v2_z - v1_z*v2_y;
-      double y = v2_x*v1_z - v2_z*v1_x;
-      this.normal.setZ(v1_x*v2_y - v1_y*v2_x);
-      this.normal.setX(x);
-      this.normal.setY(y);
-      this.normal.normalize();
+      set(pointOnPlane, planeNormal);
    }
 
-   public Plane3d(Plane3d plane)
+   public Plane3d(Point3DReadOnly firstPointOnPlane, Point3DReadOnly secondPointOnPlane, Point3DReadOnly thirdPointOnPlane)
    {
-      this.point.set(plane.point);
-      this.normal.set(plane.normal);
+      setPoints(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane);
    }
 
-   public void getPoint(Point3DBasics pointToPack)
+   public Plane3d(Plane3d other)
    {
-      pointToPack.set(this.point);
+      set(other);
    }
-   
+
+   public void getPoint(Point3DBasics pointOnPlaneToPack)
+   {
+      pointOnPlaneToPack.set(point);
+   }
+
    public Point3D getPointCopy()
    {
-      Point3D pointToReturn = new Point3D();
-      this.getPoint(pointToReturn);
-      return pointToReturn;
+      return new Point3D(point);
    }
-   
+
    public Point3DReadOnly getPoint()
    {
       return point;
    }
-   
+
    public void setPoint(Point3DReadOnly point)
    {
       this.point.set(point);
@@ -76,62 +57,52 @@ public class Plane3d implements GeometryObject<Plane3d>
 
    public void setPoint(double x, double y, double z)
    {
-      point.set(x, y, z); 
+      point.set(x, y, z);
    }
 
-   public void setPoints(Point3DReadOnly pointA, Point3DReadOnly pointB, Point3DReadOnly pointC)
+   public void setPoints(Point3DReadOnly firstPointOnPlane, Point3DReadOnly secondPointOnPlane, Point3DReadOnly thirdPointOnPlane)
    {
-      point.set(pointA);
-      double v1_x = pointB.getX() - pointA.getX();
-      double v1_y = pointB.getY() - pointA.getY();
-      double v1_z = pointB.getZ() - pointA.getZ();
-      
-      double v2_x = pointC.getX() - pointA.getX();
-      double v2_y = pointC.getY() - pointA.getY();
-      double v2_z = pointC.getZ() - pointA.getZ();
+      point.set(firstPointOnPlane);
+      boolean success = EuclidGeometryTools.normal3DFromThreePoint3Ds(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane, normal);
 
-      double x = v1_y*v2_z - v1_z*v2_y;
-      double y = v2_x*v1_z - v2_z*v1_x;
-      this.normal.setZ(v1_x*v2_y - v1_y*v2_x);
-      this.normal.setX(x);
-      this.normal.setY(y);
-      this.normal.normalize();
+      if (!success)
+         throw new RuntimeException("Failed to compute the plane normal. Given points: " + firstPointOnPlane + ", " + secondPointOnPlane + ", "
+               + thirdPointOnPlane);
    }
-   
-   public void getNormal(Vector3DBasics normalToPack)
+
+   public void getNormal(Vector3DBasics planeNormalToPack)
    {
-      normalToPack.set(normal);
+      planeNormalToPack.set(normal);
    }
-   
+
    public Vector3D getNormalCopy()
    {
-      Vector3D normalToReturn = new Vector3D();
-      this.getNormal(normalToReturn);
-      return normalToReturn;
+      return new Vector3D(normal);
    }
-   
+
    public Vector3DReadOnly getNormal()
    {
       return normal;
    }
-   
+
    public void setNormal(double x, double y, double z)
    {
       normal.set(x, y, z);
       normal.normalize();
    }
-   
+
    @Override
    public void set(Plane3d plane3d)
    {
-      this.normal.set(plane3d.normal);
-      this.point.set(plane3d.point);
+      point.set(plane3d.point);
+      normal.set(plane3d.normal);
    }
 
    public void set(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
    {
       point.set(pointOnPlane);
       normal.set(planeNormal);
+      normal.normalize();
    }
 
    public void setNormal(Vector3DReadOnly normal)
@@ -142,7 +113,7 @@ public class Plane3d implements GeometryObject<Plane3d>
    @Override
    public boolean epsilonEquals(Plane3d plane, double epsilon)
    {
-      return ((plane.normal.epsilonEquals(normal, epsilon)) && (plane.point.epsilonEquals(point, epsilon)));
+      return plane.normal.epsilonEquals(normal, epsilon) && plane.point.epsilonEquals(point, epsilon);
    }
 
    public boolean isOnOrAbove(Point3DReadOnly pointToTest)
@@ -152,10 +123,16 @@ public class Plane3d implements GeometryObject<Plane3d>
 
    public boolean isOnOrAbove(Point3DReadOnly pointToTest, double epsilon)
    {
-      temporaryVector.set(pointToTest);
-      temporaryVector.sub(this.point);
+      return isOnOrAbove(pointToTest.getX(), pointToTest.getY(), pointToTest.getZ(), epsilon);
+   }
 
-      return (temporaryVector.dot(this.normal) >= -epsilon);  
+   public boolean isOnOrAbove(double x, double y, double z, double epsilon)
+   {
+      double dx = (x - point.getX()) * normal.getX();
+      double dy = (y - point.getY()) * normal.getY();
+      double dz = (z - point.getZ()) * normal.getZ();
+
+      return (dx + dy + dz) >= -epsilon;
    }
 
    public boolean isOnOrBelow(Point3DReadOnly pointToTest)
@@ -167,26 +144,28 @@ public class Plane3d implements GeometryObject<Plane3d>
    {
       return isOnOrBelow(pointToTest.getX(), pointToTest.getY(), pointToTest.getZ(), epsilon);
    }
-   
+
    public boolean isOnOrBelow(double x, double y, double z, double epsilon)
    {
-      temporaryVector.set(x, y, z);
-      temporaryVector.sub(this.point);
+      double dx = (x - point.getX()) * normal.getX();
+      double dy = (y - point.getY()) * normal.getY();
+      double dz = (z - point.getZ()) * normal.getZ();
 
-      return (temporaryVector.dot(this.normal) <= epsilon);
+      return (dx + dy + dz) <= epsilon;
    }
 
    /**
-    * Tests if the two planes are parallel by testing if their normals are collinear.
-    * The latter is done given a tolerance on the angle between the two normal axes in the range ]0; <i>pi</i>/2[.
-    * 
+    * Tests if the two planes are parallel by testing if their normals are collinear. The latter is
+    * done given a tolerance on the angle between the two normal axes in the range ]0; <i>pi</i>/2[.
+    *
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * <li>if the length of either normal is below {@code 1.0E-7}, this method fails and returns
+    * {@code false}.
     * </ul>
     * </p>
-    * 
+    *
     * @param otherPlane the other plane to do the test with. Not modified.
     * @param angleEpsilon tolerance on the angle in radians.
     * @return {@code true} if the two planes are parallel, {@code false} otherwise.
@@ -199,94 +178,70 @@ public class Plane3d implements GeometryObject<Plane3d>
    /**
     * Tests if this plane and the given plane are coincident:
     * <ul>
-    *    <li> {@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance {@code angleEpsilon}.
-    *    <li> the distance of {@code otherPlane.point} from the this plane is less than {@code distanceEpsilon}.
+    * <li>{@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance
+    * {@code angleEpsilon}.
+    * <li>the distance of {@code otherPlane.point} from the this plane is less than
+    * {@code distanceEpsilon}.
     * </ul>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * <li>if the length of either normal is below {@code 1.0E-7}, this method fails and returns
+    * {@code false}.
     * </ul>
     * </p>
-    * 
+    *
     * @param otherPlane the other plane to do the test with. Not modified.
-    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
-    * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point} belongs to this plane.
+    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are
+    *           collinear.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point}
+    *           belongs to this plane.
     * @return {@code true} if the two planes are coincident, {@code false} otherwise.
     */
    public boolean isCoincident(Plane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
       return EuclidGeometryTools.arePlane3DsCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
    }
-   
-   public Point3D orthogonalProjectionCopy(Point3DReadOnly point)
+
+   public boolean orthogonalProjection(Point3DBasics pointToProject)
    {
-      Point3D returnPoint = new Point3D(point);
-      orthogonalProjection(returnPoint);
-      return returnPoint;
+      return orthogonalProjection(pointToProject, pointToProject);
    }
-   
-   // this method was not tested. Use it at your own risk.
-   public void orthogonalProjection(Vector3DBasics vectorToProject)
+
+   public boolean orthogonalProjection(Point3DReadOnly pointToProject, Point3DBasics projectionToPack)
    {
-      temporaryVector.set( 0.0, 0.0, 0.0);
-      temporaryVector.sub(this.point);
-      double distA = temporaryVector.dot(this.normal);
-      
-      temporaryVector.set( vectorToProject );
-      temporaryVector.sub(this.point);
-      double distB = temporaryVector.dot(this.normal);
-      
-      temporaryVector.set(this.normal);
-      temporaryVector.scale(distB - distA);
-      vectorToProject.sub( temporaryVector );
+      return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point, normal, projectionToPack);
    }
-   
-   public void orthogonalProjection(Point3DBasics pointToProject)
+
+   public Point3D orthogonalProjectionCopy(Point3DReadOnly pointToProject)
    {
-      temporaryVector.set(pointToProject);
-      temporaryVector.sub(this.point);
-      double temporaryDouble = temporaryVector.dot(this.normal);
-      temporaryVector.set(this.normal);
-      temporaryVector.scale(temporaryDouble);
-      temporaryVector.sub(pointToProject);
-      temporaryVector.scale(-1.0);
-      pointToProject.set(temporaryVector);
+      return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point, normal);
    }
-   
+
    public double getZOnPlane(double x, double y)
    {
-     double z = (normal.getX() * (point.getX() - x) + normal.getY() * (point.getY() - y) + normal.getZ() * point.getZ())/normal.getZ();
-     if (Double.isInfinite(z)) return Double.NaN;
-     return z;
+      // The three components of the plane origin
+      double x0 = point.getX();
+      double y0 = point.getY();
+      double z0 = point.getZ();
+      // The three components of the plane normal
+      double a = normal.getX();
+      double b = normal.getY();
+      double c = normal.getZ();
+
+      // Given the plane equation: a*x + b*y + c*z + d = 0, with d = -(a*x0 + b*y0 + c*z0), we find z:
+      double z = a / c * (x0 - x) + b / c * (y0 - y) + z0;
+      return z;
    }
 
    public double distance(Point3DReadOnly point)
    {
-      temporaryVector.set(point);
-      temporaryVector.sub(this.point);
-      double temporaryDouble = temporaryVector.dot(this.normal);
-
-      return Math.abs(temporaryDouble);
+      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, this.point, normal);
    }
 
    public double signedDistance(Point3DReadOnly point)
    {
-      temporaryVector.set(point);
-      temporaryVector.sub(this.point);
-      double temporaryDouble = temporaryVector.dot(this.normal);
-
-      return temporaryDouble;
-   }
-
-
-
-   public Plane3d applyTransformCopy(Transform transformation)
-   {
-      Plane3d returnPlane = new Plane3d(this);
-      returnPlane.applyTransform(transformation);
-
-      return returnPlane;
+      return EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D(point, this.point, normal);
    }
 
    @Override
@@ -303,54 +258,39 @@ public class Plane3d implements GeometryObject<Plane3d>
       normal.applyInverseTransform(transform);
    }
 
-   public void getIntersectionWithLine(Point3DBasics intersectionToPack, Point3DReadOnly lineStart, Vector3DReadOnly lineVector)
+   public boolean intersectionWith(Point3DBasics intersectionToPack, Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection)
    {
-      // po = line start, p1 = line end
-      // v0 = point on plane
-      // n = plane normal
-      // intersection point is p(s) = p0 + s*(p1 - p0)
-      // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
+      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(point, normal, pointOnLine, lineDirection, intersectionToPack);
+   }
 
-      Vector3D fromP0toV0 = new Vector3D(point);
-      fromP0toV0.sub(lineStart);
-
-      double scaleFactor = normal.dot(fromP0toV0) / normal.dot(lineVector);
-      intersectionToPack.scaleAdd(scaleFactor, lineVector, lineStart);
+   public boolean intersectionWith(Point3DBasics intersectionToPack, Line3D line)
+   {
+      return intersectionWith(intersectionToPack, line.getPoint(), line.getDirection());
    }
 
    @Override
    public boolean containsNaN()
    {
-      if (Double.isNaN(point.getX())) return true;
-      if (Double.isNaN(point.getY())) return true;
-      if (Double.isNaN(point.getZ())) return true;
-      
-      if (Double.isNaN(normal.getX())) return true;
-      if (Double.isNaN(normal.getY())) return true;
-      if (Double.isNaN(normal.getZ())) return true;
-      
-      return false;
+      return point.containsNaN() || normal.containsNaN();
    }
 
    @Override
    public void setToNaN()
    {
-      setPoint(Double.NaN, Double.NaN, Double.NaN);
-      setNormal(Double.NaN, Double.NaN, Double.NaN);
+      point.setToNaN();
+      normal.setToNaN();
    }
-   
+
    @Override
    public void setToZero()
    {
+      point.setToZero();
+      normal.setToZero();
    }
 
    @Override
    public String toString()
    {
-      StringBuilder builder = new StringBuilder();
-      
-      builder.append("point = " + point + ", normal = " + normal + "\n");
-      
-      return builder.toString();
+      return "Plane 3D: point on plane: " + point + ", normal: " + normal;
    }
 }

@@ -195,7 +195,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       {
          Plane3d plane = cylinder.getPlane(face);
          Point3D intersectionToPack = new Point3D();
-         plane.getIntersectionWithLine(intersectionToPack, testPoint, testDirection);
+         plane.intersectionWith(intersectionToPack, testPoint, testDirection);
 
          if (EuclidCoreMissingTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius + EPS))
          {
