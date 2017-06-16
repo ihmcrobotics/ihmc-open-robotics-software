@@ -134,7 +134,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
@@ -205,12 +205,12 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FramePose desiredHandPoseR = new FramePose(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);
+      desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
       FramePose desiredHandPoseL = new FramePose(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseL.translate(0.20, 0.0, 0.0);
+      desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
       ik.holdCurrentChestOrientation();
@@ -301,7 +301,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.setOrientation(offsetOrientation);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
@@ -383,7 +383,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPoseR.getOrientation(handQuatRight);
       handQuatRight.multiply(handQuatRight, offsetOrientationRight);
       desiredHandPoseR.setOrientation(handQuatRight);
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);
+      desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlOnly(RobotSide.RIGHT);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
@@ -398,7 +398,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPoseL.getOrientation(handQuatLeft);
       handQuatLeft.multiply(handQuatLeft, offsetOrientationLeft);
       desiredHandPoseL.setOrientation(handQuatLeft);
-      desiredHandPoseL.translate(0.20, 0.0, 0.0);
+      desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlOnly(RobotSide.LEFT);
       ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
@@ -488,7 +488,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPose.getOrientation(handQuat);
       handQuat.multiply(handQuat, offsetOrientation);
       desiredHandPose.setOrientation(handQuat);
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlAndYawPitchOnly(RobotSide.RIGHT);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);

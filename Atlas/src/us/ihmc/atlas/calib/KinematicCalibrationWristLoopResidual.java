@@ -80,7 +80,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 //            rightEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),+0.01,-0.13,0);
          FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.01, +0.13, 0), CalibUtil.quat0);
          FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.01, -0.13, 0), CalibUtil.quat0);
-         leftEE.translate(constantOffset);
+         leftEE.prependTranslation(constantOffset);
 
          leftEE.changeFrame(ReferenceFrame.getWorldFrame());
          rightEE.changeFrame(ReferenceFrame.getWorldFrame());

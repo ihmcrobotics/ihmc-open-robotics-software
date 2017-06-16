@@ -104,7 +104,7 @@ public class SimulateCutforceController implements RobotController
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
       handControlFramePose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
-      handControlFramePose.translate(tangentVector);
+      handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose = new YoFramePose("handControlFrame",HumanoidReferenceFrames.getWorldFrame(), registry);
       yoHandControlFramePose.set(handControlFramePose);
       YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoHandControlFramePose, 0.1, YoAppearance.Yellow());
@@ -154,7 +154,7 @@ public class SimulateCutforceController implements RobotController
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
       handControlFramePose.setPose(transform);
-      handControlFramePose.translate(tangentVector);
+      handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose.set(handControlFramePose);
       handControlFramePose.getPosition(handControlFramePositionInWorld);
 

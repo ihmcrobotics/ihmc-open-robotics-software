@@ -46,7 +46,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public FrameBox3d(ReferenceFrame referenceFrame, Pose pose, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(pose.getPoint(), pose.getOrientation(), lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3d(pose.getPosition(), pose.getOrientation(), lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
@@ -114,7 +114,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
    
    public void setPose(Pose pose)
    {
-      box3d.setPose(pose.getPoint(), pose.getOrientation());
+      box3d.setPose(pose.getPosition(), pose.getOrientation());
    }
    
    public void setTransform(RigidBodyTransform transform3D)
@@ -135,7 +135,8 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void getFramePose(FramePose framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(referenceFrame, box3d.getPosition(), box3d.getOrientation());
+      framePoseToPack.setToZero(referenceFrame);
+      box3d.getPose(framePoseToPack.getGeometryObject());
    }
 
    public void scale(double scale)
