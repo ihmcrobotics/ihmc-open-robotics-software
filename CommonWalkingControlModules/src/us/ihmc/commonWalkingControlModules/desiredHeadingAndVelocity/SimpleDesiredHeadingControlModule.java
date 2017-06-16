@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDe
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
@@ -14,10 +14,10 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    private SimpleDesiredHeadingControlModuleVisualizer simpleDesiredHeadingControlModuleVisualizer;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal",
+   private final YoDouble desiredHeadingFinal = new YoDouble("desiredHeadingFinal",
          "Yaw of the desired heading frame with respect to the world.", registry);
-   private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
-   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", "In units of rad/sec", registry);
+   private final YoDouble desiredHeading = new YoDouble("desiredHeading", registry);
+   private final YoDouble maxHeadingDot = new YoDouble("maxHeadingDot", "In units of rad/sec", registry);
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
    private final DesiredHeadingFrame predictedHeadingFrame = new DesiredHeadingFrame();

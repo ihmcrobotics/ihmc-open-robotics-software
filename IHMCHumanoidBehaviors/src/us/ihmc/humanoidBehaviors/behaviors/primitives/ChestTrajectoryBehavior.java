@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ChestTrajectoryBehavior extends AbstractBehavior
 {
@@ -17,21 +17,21 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    private ChestTrajectoryMessage outgoingChestTrajectoryMessage;
 
    private final YoBoolean hasPacketBeenSent;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeHasElapsed;
 
-   public ChestTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public ChestTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
-      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime = new YoDouble(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeHasElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
    }

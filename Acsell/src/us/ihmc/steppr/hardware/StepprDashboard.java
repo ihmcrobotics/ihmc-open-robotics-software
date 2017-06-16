@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
@@ -109,10 +109,10 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       final YoBoolean enabledOutput = (YoBoolean)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
       final YoBoolean startStandPrep = (YoBoolean)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
       final EnumYoVariable requestedHighLevelState = (EnumYoVariable) yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
-      final DoubleYoVariable controlRatio = (DoubleYoVariable) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
+      final YoDouble controlRatio = (YoDouble) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
       
-      final DoubleYoVariable leftFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
-      final DoubleYoVariable rightFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
+      final YoDouble leftFootForce = (YoDouble)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
+      final YoDouble rightFootForce = (YoDouble)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
             
       final JButton enabledOutputButton = new JButton("Enable torque output");
       enabledOutputButton.addActionListener(new ActionListener()

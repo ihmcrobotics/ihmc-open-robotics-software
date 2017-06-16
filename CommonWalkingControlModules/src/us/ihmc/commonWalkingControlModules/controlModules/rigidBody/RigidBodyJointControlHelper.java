@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -37,8 +37,8 @@ public class RigidBodyJointControlHelper
    private final List<IntegerYoVariable> numberOfPointsInGenerator = new ArrayList<>();
    private final List<IntegerYoVariable> numberOfPoints = new ArrayList<>();
 
-   private final List<DoubleYoVariable> defaultWeights = new ArrayList<>();
-   private final List<DoubleYoVariable> currentWeights = new ArrayList<>();
+   private final List<YoDouble> defaultWeights = new ArrayList<>();
+   private final List<YoDouble> currentWeights = new ArrayList<>();
    private final List<YoPIDGains> gains = new ArrayList<>();
 
    private final YoBoolean hasWeights;
@@ -79,8 +79,8 @@ public class RigidBodyJointControlHelper
          numberOfPointsInGenerator.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
          numberOfPoints.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry));
 
-         defaultWeights.add(new DoubleYoVariable(prefix + "_" + jointName + "_defaultWeight", registry));
-         currentWeights.add(new DoubleYoVariable(prefix + "_" + jointName + "_currentWeight", registry));
+         defaultWeights.add(new YoDouble(prefix + "_" + jointName + "_defaultWeight", registry));
+         currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
       }
 
       parentRegistry.addChild(registry);

@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -37,7 +37,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
 {
 
    private final YoBoolean DEBUG = new YoBoolean("DEBUG", registry);
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private double searchStartTime = 0;
 
    private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> inputListeningQueue = new ConcurrentListeningQueue<WalkToGoalBehaviorPacket>(20);
@@ -71,7 +71,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
-   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime,
+   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime,
                              double ankleHeight)
    {
       super(outgoingCommunicationBridge);

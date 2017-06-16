@@ -15,7 +15,7 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -87,7 +87,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);
 

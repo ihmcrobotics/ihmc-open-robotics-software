@@ -28,7 +28,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -59,18 +59,18 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final GetUserValidationBehavior userValidationExampleBehavior;
    private final ReferenceFrame midZupFrame;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
    private final String prefix = getClass().getSimpleName();
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
+   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
 
    private final FullRobotModel fullRobotModel;
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                               HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);

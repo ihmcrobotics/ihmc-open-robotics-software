@@ -13,7 +13,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
@@ -38,23 +38,23 @@ public class PelvisICPBasedTranslationManager
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
-   private final DoubleYoVariable frozenOffsetDecayAlpha = new DoubleYoVariable("frozenOffsetDecayAlpha", registry);
+   private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
+   private final YoDouble frozenOffsetDecayAlpha = new YoDouble("frozenOffsetDecayAlpha", registry);
 
    private final YoFramePoint2d desiredPelvisPosition = new YoFramePoint2d("desiredPelvis", worldFrame, registry);
 
-   private final DoubleYoVariable initialPelvisPositionTime = new DoubleYoVariable("initialPelvisPositionTime", registry);
+   private final YoDouble initialPelvisPositionTime = new YoDouble("initialPelvisPositionTime", registry);
 
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
    private final YoFrameVector2d pelvisPositionError = new YoFrameVector2d("pelvisPositionError", worldFrame, registry);
-   private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisPositionProportionalGain", registry);
+   private final YoDouble proportionalGain = new YoDouble("pelvisPositionProportionalGain", registry);
    private final YoFrameVector2d proportionalTerm = new YoFrameVector2d("pelvisPositionProportionalTerm", worldFrame, registry);
 
    private final YoFrameVector2d pelvisPositionCumulatedError = new YoFrameVector2d("pelvisPositionCumulatedError", worldFrame, registry);
-   private final DoubleYoVariable integralGain = new DoubleYoVariable("pelvisPositionIntegralGain", registry);
+   private final YoDouble integralGain = new YoDouble("pelvisPositionIntegralGain", registry);
    private final YoFrameVector2d integralTerm = new YoFrameVector2d("pelvisPositionIntegralTerm", worldFrame, registry);
-   private final DoubleYoVariable maximumIntegralError = new DoubleYoVariable("maximumPelvisPositionIntegralError", registry);
+   private final YoDouble maximumIntegralError = new YoDouble("maximumPelvisPositionIntegralError", registry);
 
    private final YoFrameVector2d desiredICPOffset = new YoFrameVector2d("desiredICPOffset", worldFrame, registry);
 
@@ -64,7 +64,7 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean manualMode = new YoBoolean("manualModeICPOffset", registry);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final double controlDT;
 
    private final YoBoolean isTrajectoryStopped = new YoBoolean("isPelvisTranslationalTrajectoryStopped", registry);

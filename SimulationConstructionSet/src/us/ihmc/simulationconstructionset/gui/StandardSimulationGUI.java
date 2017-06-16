@@ -76,7 +76,7 @@ import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
@@ -1454,21 +1454,21 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setCameraTrackingVars(String xName, String yName, String zName)
    {
-      DoubleYoVariable xVar, yVar, zVar;
+      YoDouble xVar, yVar, zVar;
 
-      xVar = (DoubleYoVariable) rootRegistry.getVariable(xName);
-      yVar = (DoubleYoVariable) rootRegistry.getVariable(yName);
-      zVar = (DoubleYoVariable) rootRegistry.getVariable(zName);
+      xVar = (YoDouble) rootRegistry.getVariable(xName);
+      yVar = (YoDouble) rootRegistry.getVariable(yName);
+      zVar = (YoDouble) rootRegistry.getVariable(zName);
       viewportPanel.setCameraTrackingVars(xVar, yVar, zVar);
    }
 
    public void setCameraDollyVars(String xName, String yName, String zName)
    {
-      DoubleYoVariable xVar, yVar, zVar;
+      YoDouble xVar, yVar, zVar;
 
-      xVar = (DoubleYoVariable) rootRegistry.getVariable(xName);
-      yVar = (DoubleYoVariable) rootRegistry.getVariable(yName);
-      zVar = (DoubleYoVariable) rootRegistry.getVariable(zName);
+      xVar = (YoDouble) rootRegistry.getVariable(xName);
+      yVar = (YoDouble) rootRegistry.getVariable(yName);
+      zVar = (YoDouble) rootRegistry.getVariable(zName);
       viewportPanel.setCameraDollyVars(xVar, yVar, zVar);
    }
 

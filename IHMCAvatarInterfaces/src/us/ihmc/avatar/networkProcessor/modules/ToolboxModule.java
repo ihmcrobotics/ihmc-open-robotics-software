@@ -34,7 +34,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -52,7 +52,7 @@ public abstract class ToolboxModule
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
-   protected final DoubleYoVariable yoTime = new DoubleYoVariable("localTime", registry);
+   protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
@@ -70,8 +70,8 @@ public abstract class ToolboxModule
    protected Runnable toolboxRunnable = null;
    protected final int updatePeriodMilliseconds = 1;
 
-   protected final DoubleYoVariable timeWithoutInputsBeforeGoingToSleep = new DoubleYoVariable("timeWithoutInputsBeforeGoingToSleep", registry);
-   protected final DoubleYoVariable timeOfLastInput = new DoubleYoVariable("timeOfLastInput", registry);
+   protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
+   protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;

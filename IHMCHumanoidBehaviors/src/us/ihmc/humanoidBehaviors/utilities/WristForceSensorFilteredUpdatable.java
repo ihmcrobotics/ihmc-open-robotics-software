@@ -10,7 +10,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -39,7 +39,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final ForceSensorData forceSensorData;
    private final Wrench wristSensorWrench;
 
-   private final DoubleYoVariable yoWristSensorForceMagnitude;
+   private final YoDouble yoWristSensorForceMagnitude;
    private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
    private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
@@ -47,7 +47,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final YoBoolean yoForceLimitExceeded;
    private final YoBoolean yoStiffnessLimitExceeded;
    private final YoBoolean yoImpactDetected;
-   private final DoubleYoVariable yoImpactTime;
+   private final YoDouble yoImpactTime;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
@@ -55,8 +55,8 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final TaskSpaceStiffnessCalculator taskspaceStiffnessCalc;
 
-   private final DoubleYoVariable yoImpactStiffnessThreshold_NperM;
-   private final DoubleYoVariable yoImpactForceThreshold_N;
+   private final YoDouble yoImpactStiffnessThreshold_NperM;
+   private final YoDouble yoImpactForceThreshold_N;
 
    private final PacketCommunicator controllerCommunicator;
 
@@ -89,15 +89,15 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
-      yoWristSensorForceMagnitude = new DoubleYoVariable(forceSensorName + "ForceMag", registry);
+      yoWristSensorForceMagnitude = new YoDouble(forceSensorName + "ForceMag", registry);
       yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS, registry);
       yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered", "",
             forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, DT, registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);
 
-      yoImpactStiffnessThreshold_NperM = new DoubleYoVariable(forceSensorName + "ImpactStiffnessThreshold_NperM", registry);
-      yoImpactForceThreshold_N = new DoubleYoVariable(forceSensorName + "ImpactForceThreshold_N", registry);
+      yoImpactStiffnessThreshold_NperM = new YoDouble(forceSensorName + "ImpactStiffnessThreshold_NperM", registry);
+      yoImpactForceThreshold_N = new YoDouble(forceSensorName + "ImpactForceThreshold_N", registry);
 
       yoCollisionSeverityLevelOneToThree = new IntegerYoVariable(forceSensorName + "CollisionSeverity", "", registry, 1, 3);
       yoForceLimitExceeded = new YoBoolean(forceSensorName + "forceLimitExceeded", registry);
@@ -105,7 +105,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoImpactDetected = new YoBoolean(forceSensorName + "ImpactDetected", registry);
       yoImpactDetected.set(false);
 
-      yoImpactTime = new DoubleYoVariable(forceSensorName + "ImpactTime", registry);
+      yoImpactTime = new YoDouble(forceSensorName + "ImpactTime", registry);
 
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
@@ -151,12 +151,12 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       return sensorMassCompensator.getSensorForceMassCompensated(world);
    }
 
-   public DoubleYoVariable getWristForceMagnitude()
+   public YoDouble getWristForceMagnitude()
    {
       return yoWristSensorForceMagnitude;
    }
 
-   public DoubleYoVariable getWristForceBandPassFiltered()
+   public YoDouble getWristForceBandPassFiltered()
    {
       return yoWristSensorForceMagnitudeBandPassFiltered;
    }

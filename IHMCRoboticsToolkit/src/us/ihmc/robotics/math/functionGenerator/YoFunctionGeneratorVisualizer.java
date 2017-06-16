@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 
@@ -10,14 +10,14 @@ public class YoFunctionGeneratorVisualizer implements RobotController
 {
    private YoVariableRegistry registry = new YoVariableRegistry("YoFunGenViz");
    
-   private DoubleYoVariable valueCheck;
+   private YoDouble valueCheck;
    
    private YoFunctionGenerator yoFunctionGenerator;
-   private DoubleYoVariable time;
+   private YoDouble time;
    
-   private DoubleYoVariable resetTime;
-   private DoubleYoVariable maxSweepFreq;
-   private DoubleYoVariable amplitude;
+   private YoDouble resetTime;
+   private YoDouble maxSweepFreq;
+   private YoDouble amplitude;
 
    private YoBoolean hasBeenReset;
 
@@ -30,17 +30,17 @@ public class YoFunctionGeneratorVisualizer implements RobotController
       
       mode = EnumYoVariable.create("Mode", YoFunctionGeneratorMode.class, registry);
       
-      resetTime = new DoubleYoVariable("resetTime", registry);
+      resetTime = new YoDouble("resetTime", registry);
       
       resetTime.set(20.0);
       
-      maxSweepFreq = new DoubleYoVariable("maxSweepFreq", registry);
+      maxSweepFreq = new YoDouble("maxSweepFreq", registry);
       maxSweepFreq.set(60.0);
       
-      amplitude = new DoubleYoVariable("amplitude", registry);
+      amplitude = new YoDouble("amplitude", registry);
       amplitude.set(1.0);
       
-      valueCheck = new DoubleYoVariable("valueCheck", registry);
+      valueCheck = new YoDouble("valueCheck", registry);
       
       hasBeenReset = new YoBoolean("hasBeenReset", registry);
       hasBeenReset.set(true);
@@ -70,7 +70,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
       return null;
    }
    
-   public void setTimeVariable(DoubleYoVariable time)
+   public void setTimeVariable(YoDouble time)
    {
       this.time = time;
    }

@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -38,7 +38,7 @@ public class FootCoPOccupancyGrid
 
    private final IntegerYoVariable nLengthSubdivisions;
    private final IntegerYoVariable nWidthSubdivisions;
-   private final DoubleYoVariable thresholdForCellActivation;
+   private final YoDouble thresholdForCellActivation;
 
    private final IntegerYoVariable currentXIndex;
    private final IntegerYoVariable currentYIndex;
@@ -47,7 +47,7 @@ public class FootCoPOccupancyGrid
    private final YoFramePoint[][] cellViz;
 
    private final YoFrameVector2d cellSize;
-   private final DoubleYoVariable cellArea;
+   private final YoDouble cellArea;
 
    private final ReferenceFrame soleFrame;
    private final Point2D tempPoint = new Point2D();
@@ -59,7 +59,7 @@ public class FootCoPOccupancyGrid
    private final DenseMatrix64F counterGrid = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F occupancyGrid = new DenseMatrix64F(1, 1);
 
-   private final DoubleYoVariable decayRate;
+   private final YoDouble decayRate;
    private final YoBoolean resetGridToEmpty;
 
    public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
@@ -94,9 +94,9 @@ public class FootCoPOccupancyGrid
       }
       else
       {
-         thresholdForCellActivation = new DoubleYoVariable(namePrefix + "ThresholdForCellActivation", registry);
+         thresholdForCellActivation = new YoDouble(namePrefix + "ThresholdForCellActivation", registry);
          thresholdForCellActivation.set(defaultThresholdForCellActivation);
-         decayRate = new DoubleYoVariable(namePrefix + "DecayRate", registry);
+         decayRate = new YoDouble(namePrefix + "DecayRate", registry);
          decayRate.set(defaultDecayRate);
       }
 
@@ -108,7 +108,7 @@ public class FootCoPOccupancyGrid
       areCurrentCoPIndicesValid = new YoBoolean(namePrefix + "IsCurrentCoPIndicesValid", registry);
 
       cellSize = new YoFrameVector2d(namePrefix + "CellSize", soleFrame, registry);
-      cellArea = new DoubleYoVariable(namePrefix + "CellArea", registry);
+      cellArea = new YoDouble(namePrefix + "CellArea", registry);
 
       setupChangedGridParameterListeners();
 

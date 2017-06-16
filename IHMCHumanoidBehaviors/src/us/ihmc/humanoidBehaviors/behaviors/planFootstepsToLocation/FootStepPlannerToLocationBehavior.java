@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -61,7 +61,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private final EnumYoVariable<RobotSide> currentlySwingingFoot;
 
    private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
-   private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
+   private final YoDouble headPitchToFindFucdicial = new YoDouble(prefix + "HeadPitchToFindFucdicial", registry);
 
    private final YoFramePose footstepPlannerInitialStancePose;
 
@@ -79,8 +79,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
 
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
+   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
 
    public FootStepPlannerToLocationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
    {

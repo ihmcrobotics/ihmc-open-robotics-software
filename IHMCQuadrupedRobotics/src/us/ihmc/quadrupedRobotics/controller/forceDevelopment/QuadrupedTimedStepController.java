@@ -24,7 +24,7 @@ import us.ihmc.quadrupedRobotics.util.*;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -51,7 +51,7 @@ public class QuadrupedTimedStepController
    private final DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
 
    // control variables
-   private final DoubleYoVariable timestamp;
+   private final YoDouble timestamp;
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
@@ -81,7 +81,7 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, DoubleYoVariable timestamp,
+   public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, YoDouble timestamp,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // control variables

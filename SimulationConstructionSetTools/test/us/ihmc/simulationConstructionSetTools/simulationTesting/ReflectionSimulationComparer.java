@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
@@ -116,7 +116,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
       Collection<Field> fieldsToIgnore = new ArrayList<Field>();
       Collection<String> fieldNamesToNeverIgnore = new ArrayList<String>();
       fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.IntegerYoVariable.val");
-      fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.DoubleYoVariable.val");
+      fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.YoDouble.val");
       fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.YoBoolean.val");
 
       for (Field field : preRewindFieldDifferences)
@@ -175,7 +175,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
          stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(IntegerYoVariable.class, YoVariable.class.getDeclaredField("name"),
                  ".*StopTimeNano");
 
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(DoubleYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoDouble.class, YoVariable.class.getDeclaredField("name"),
                  ".*DurationMilli");
          stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(AlphaFilteredYoVariable.class, YoVariable.class.getDeclaredField("name"),
                  ".*DurationMilli");

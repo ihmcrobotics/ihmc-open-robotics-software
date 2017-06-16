@@ -6,7 +6,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AtlasPrimitiveActions
@@ -41,7 +41,7 @@ public class AtlasPrimitiveActions
    public HumanoidReferenceFrames referenceFrames;
 
    public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime,
+         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
       this.referenceFrames = referenceFrames;

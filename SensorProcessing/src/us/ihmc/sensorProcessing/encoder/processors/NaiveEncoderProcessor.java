@@ -1,24 +1,23 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
-
 
 public class NaiveEncoderProcessor extends AbstractEncoderProcessor
 {
    private final IntegerYoVariable previousPosition;
-   private final DoubleYoVariable previousTime, dx, dt;
+   private final YoDouble previousTime, dx, dt;
 
-   public NaiveEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public NaiveEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
       this.previousPosition = new IntegerYoVariable(name + "PrevPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
+      this.previousTime = new YoDouble(name + "PrevTime", registry);
       
-      this.dx = new DoubleYoVariable(name + "DX", registry);
-      this.dt = new DoubleYoVariable(name + "DT", registry);
+      this.dx = new YoDouble(name + "DX", registry);
+      this.dt = new YoDouble(name + "DT", registry);
    }
    
    public void initialize()

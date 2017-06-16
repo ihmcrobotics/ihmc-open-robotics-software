@@ -1062,7 +1062,7 @@ public final class YoProtoHandshakeProto {
       public enum YoProtoType
           implements com.google.protobuf.ProtocolMessageEnum {
         /**
-         * <code>DoubleYoVariable = 1;</code>
+         * <code>YoDouble = 1;</code>
          */
         DoubleYoVariable(0, 1),
         /**
@@ -1084,7 +1084,7 @@ public final class YoProtoHandshakeProto {
         ;
 
         /**
-         * <code>DoubleYoVariable = 1;</code>
+         * <code>YoDouble = 1;</code>
          */
         public static final int DoubleYoVariable_VALUE = 1;
         /**

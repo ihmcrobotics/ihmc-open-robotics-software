@@ -9,7 +9,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfile;
 
@@ -42,7 +42,7 @@ public class DRCDoubleElevationChangeSimulation
                                                                useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
       
       ((YoBoolean) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
-      ((DoubleYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);
+      ((YoDouble) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);
    }
 
    

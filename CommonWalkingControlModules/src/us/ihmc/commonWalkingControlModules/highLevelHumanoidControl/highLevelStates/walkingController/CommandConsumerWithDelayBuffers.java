@@ -10,7 +10,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.PriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -23,7 +23,7 @@ public class CommandConsumerWithDelayBuffers
 {
    public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 10;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CommandInputManager commandInputManager;
    
    /** Controller's copy of the new commands to be processed. */
@@ -33,7 +33,7 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Packet<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
-   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
+   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, YoDouble yoTime)
    {
       this.yoTime = yoTime;
       this.commandInputManager = commandInputManager;

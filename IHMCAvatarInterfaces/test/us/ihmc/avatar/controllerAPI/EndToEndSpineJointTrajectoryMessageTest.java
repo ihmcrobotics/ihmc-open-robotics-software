@@ -29,7 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMes
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -452,11 +452,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJoint joint, double desired)
    {
-      DoubleYoVariable scsDesired = findJointDesired(scs, joint);
+      YoDouble scsDesired = findJointDesired(scs, joint);
       assertEquals(desired, scsDesired.getDoubleValue(), DESIRED_EPSILON);
    }
 
-   private static DoubleYoVariable findJointDesired(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoDouble findJointDesired(SimulationConstructionSet scs, OneDoFJoint joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -484,10 +484,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       String bodyName = body.getName();
       String namespace = "FeedbackControllerToolbox";
-      DoubleYoVariable qx = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQx", namespace);
-      DoubleYoVariable qy = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQy", namespace);
-      DoubleYoVariable qz = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQz", namespace);
-      DoubleYoVariable qs = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQs", namespace);
+      YoDouble qx = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQx", namespace);
+      YoDouble qy = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQy", namespace);
+      YoDouble qz = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQz", namespace);
+      YoDouble qs = getDoubleYoVariable(scs, bodyName + "DesiredOrientationQs", namespace);
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
    }
 
@@ -501,9 +501,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getYoVariable(scs, name, namespace, IntegerYoVariable.class);
    }
 
-   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoDouble getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
    private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
@@ -566,7 +566,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final RigidBody chestClone;
 
       private final Map<OneDoFJoint, YoBoolean> jointControlEnabled = new HashMap<>();
-      private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredsMap = new HashMap<>();
+      private final Map<OneDoFJoint, YoDouble> jointDesiredsMap = new HashMap<>();
 
       private final YoBoolean orientationControlEnabled;
       private final YoFrameQuaternion desiredOrientation;
@@ -575,7 +575,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final YoFrameQuaternion previousDesiredOrientation = new YoFrameQuaternion("PreviousDesired", ReferenceFrame.getWorldFrame(), registry);
 
       private final YoBoolean inconsistentControl = new YoBoolean("InconsistentControl", registry);
-      private final DoubleYoVariable maxSpeed = new DoubleYoVariable("maxSpeed", registry);
+      private final YoDouble maxSpeed = new YoDouble("maxSpeed", registry);
 
       private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @author jrebula
@@ -26,13 +26,13 @@ import us.ihmc.yoVariables.variable.DoubleYoVariable;
  *            filtered_{n} = alpha * filtered_{n-1} + 1/2 * (1 - alpha) * (raw_{n} + raw{n-1}}
  *         </pre>
  */
-public class ButterworthFilteredYoVariable extends DoubleYoVariable
+public class ButterworthFilteredYoVariable extends YoDouble
 {
    private final double alpha;
-   private final DoubleYoVariable alphaVariable;
+   private final YoDouble alphaVariable;
 
-   private final DoubleYoVariable position;
-   private final DoubleYoVariable previousInput;
+   private final YoDouble position;
+   private final YoDouble previousInput;
 
    private final YoBoolean hasBeenCalled;
 
@@ -47,14 +47,14 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
       this.alphaVariable = null;
 
       this.position = null;
-      this.previousInput = new DoubleYoVariable(name + "_prevIn", registry);
+      this.previousInput = new YoDouble(name + "_prevIn", registry);
 
       this.butterworthFilterType = butterworthFilterType;
 
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, DoubleYoVariable positionVariable,
+   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, YoDouble positionVariable,
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
@@ -64,14 +64,14 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
       this.alphaVariable = null;
 
       this.position = positionVariable;
-      this.previousInput = new DoubleYoVariable(name + "_prevIn", registry);
+      this.previousInput = new YoDouble(name + "_prevIn", registry);
 
       this.butterworthFilterType = butterworthFilterType;
 
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, ButterworthFilterType butterworthFilterType)
+   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -80,14 +80,14 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
       this.alphaVariable = alphaVariable;
 
       this.position = null;
-      this.previousInput = new DoubleYoVariable(name + "_prevIn", registry);
+      this.previousInput = new YoDouble(name + "_prevIn", registry);
 
       this.butterworthFilterType = butterworthFilterType;
 
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable,
+   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable,
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
@@ -97,7 +97,7 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
       this.alphaVariable = alphaVariable;
 
       this.position = positionVariable;
-      this.previousInput = new DoubleYoVariable(name + "_prevIn", registry);
+      this.previousInput = new YoDouble(name + "_prevIn", registry);
 
       this.butterworthFilterType = butterworthFilterType;
 

@@ -153,7 +153,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * </p>
     */
    private final int[] yoPolynomialSizes;
-   private final DoubleYoVariable[] waypointTimes;
+   private final YoDouble[] waypointTimes;
 
    /** Notification for this YoGraphic of what task should be fulfilled see {@link CurrentTask}. */
    private final EnumYoVariable<?> currentGraphicType;
@@ -192,7 +192,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, YoPolynomial3D yoPolynomial3D, DoubleYoVariable trajectoryTime, double radius, int resolution,
+   public YoGraphicPolynomial3D(String name, YoPolynomial3D yoPolynomial3D, YoDouble trajectoryTime, double radius, int resolution,
                                 int radialResolution, YoVariableRegistry registry)
    {
       this(name, null, yoPolynomial3D, trajectoryTime, radius, resolution, radialResolution, registry);
@@ -222,7 +222,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     *            waypoint times.
     */
    public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D yoPolynomial3D,
-                                DoubleYoVariable trajectoryTime, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+                                YoDouble trajectoryTime, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       this(name, poseFromTrajectoryFrameToWorldFrame, singletonList(yoPolynomial3D), singletonList(trajectoryTime), radius, resolution, radialResolution,
            registry);
@@ -257,7 +257,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, List<YoPolynomial3D> yoPolynomial3Ds, List<DoubleYoVariable> waypointTimes, double radius, int resolution,
+   public YoGraphicPolynomial3D(String name, List<YoPolynomial3D> yoPolynomial3Ds, List<YoDouble> waypointTimes, double radius, int resolution,
                                 int radialResolution, YoVariableRegistry registry)
    {
       this(name, null, yoPolynomial3Ds, waypointTimes, radius, resolution, radialResolution, registry);
@@ -292,7 +292,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, YoPolynomial3D[] yoPolynomial3Ds, DoubleYoVariable[] waypointTimes, double radius, int resolution,
+   public YoGraphicPolynomial3D(String name, YoPolynomial3D[] yoPolynomial3Ds, YoDouble[] waypointTimes, double radius, int resolution,
                                 int radialResolution, YoVariableRegistry registry)
    {
       this(name, null, yoPolynomial3Ds, waypointTimes, radius, resolution, radialResolution, registry);
@@ -325,7 +325,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     *            waypoint times.
     */
    public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, List<YoPolynomial3D> yoPolynomial3Ds,
-                                List<DoubleYoVariable> waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+                                List<YoDouble> waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       this(name, poseFromTrajectoryFrameToWorldFrame, yoPolynomial3Ds.toArray(new YoPolynomial3D[0]), toArray(waypointTimes), radius, resolution,
            radialResolution, registry);
@@ -358,7 +358,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     *            waypoint times.
     */
    public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D[] yoPolynomial3Ds,
-                                DoubleYoVariable[] waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+                                YoDouble[] waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       super(name);
 
@@ -447,14 +447,14 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       if (hasPoseDefined)
       {
-         DoubleYoVariable xVariable = (DoubleYoVariable) yoVariables[index++];
-         DoubleYoVariable yVariable = (DoubleYoVariable) yoVariables[index++];
-         DoubleYoVariable zVariable = (DoubleYoVariable) yoVariables[index++];
+         YoDouble xVariable = (YoDouble) yoVariables[index++];
+         YoDouble yVariable = (YoDouble) yoVariables[index++];
+         YoDouble zVariable = (YoDouble) yoVariables[index++];
          YoFramePoint position = new YoFramePoint(xVariable, yVariable, zVariable, ReferenceFrame.getWorldFrame());
-         DoubleYoVariable qx = (DoubleYoVariable) yoVariables[index++];
-         DoubleYoVariable qy = (DoubleYoVariable) yoVariables[index++];
-         DoubleYoVariable qz = (DoubleYoVariable) yoVariables[index++];
-         DoubleYoVariable qs = (DoubleYoVariable) yoVariables[index++];
+         YoDouble qx = (YoDouble) yoVariables[index++];
+         YoDouble qy = (YoDouble) yoVariables[index++];
+         YoDouble qz = (YoDouble) yoVariables[index++];
+         YoDouble qs = (YoDouble) yoVariables[index++];
          YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
          poseToWorldFrame = new YoFramePoseUsingQuaternions(position, orientation);
       }
@@ -525,16 +525,16 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       return subArray;
    }
 
-   private static DoubleYoVariable[] toArray(List<DoubleYoVariable> list)
+   private static YoDouble[] toArray(List<YoDouble> list)
    {
-      return list.toArray(new DoubleYoVariable[0]);
+      return list.toArray(new YoDouble[0]);
    }
 
-   private static DoubleYoVariable[] subArray(YoVariable<?>[] source, int start, int length)
+   private static YoDouble[] subArray(YoVariable<?>[] source, int start, int length)
    {
-      DoubleYoVariable[] subArray = new DoubleYoVariable[length];
+      YoDouble[] subArray = new YoDouble[length];
       for (int i = 0; i < length; i++)
-         subArray[i] = (DoubleYoVariable) source[i + start];
+         subArray[i] = (YoDouble) source[i + start];
       return subArray;
    }
 
@@ -796,12 +796,12 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
             YoPolynomial yoPolynomial = yoPolynomial3Ds[i].getYoPolynomial(index);
 
             graphicVariables.add(yoPolynomial.getYoNumberOfCoefficients());
-            for (DoubleYoVariable coefficient : yoPolynomial.getYoCoefficients())
+            for (YoDouble coefficient : yoPolynomial.getYoCoefficients())
                graphicVariables.add(coefficient);
          }
       }
 
-      for (DoubleYoVariable waypointTime : waypointTimes)
+      for (YoDouble waypointTime : waypointTimes)
          graphicVariables.add(waypointTime);
 
       graphicVariables.add(currentGraphicType);

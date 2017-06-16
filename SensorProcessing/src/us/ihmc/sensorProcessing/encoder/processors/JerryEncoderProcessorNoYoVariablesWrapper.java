@@ -1,16 +1,16 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 
 public class JerryEncoderProcessorNoYoVariablesWrapper extends JerryEncoderProcessorNoYoVariables implements EncoderProcessor
 {
    private final IntegerYoVariable rawTicks;
-   private final DoubleYoVariable time;
+   private final YoDouble time;
    
-   public JerryEncoderProcessorNoYoVariablesWrapper(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt)
+   public JerryEncoderProcessorNoYoVariablesWrapper(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, double dt)
    {
       super(dt, distancePerTick);
       

@@ -8,15 +8,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToWalkingSingleSupportState extends TransferState
 {
-   private final DoubleYoVariable minimumTransferTime = new DoubleYoVariable("minimumTransferTime", registry);
+   private final YoDouble minimumTransferTime = new YoDouble("minimumTransferTime", registry);
 
    private final KneeAngleManager kneeAngleManager;
-   private final DoubleYoVariable fractionOfTransferToCollapseLeg = new DoubleYoVariable("fractionOfTransferToCollapseLeg", registry);
+   private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -29,13 +29,13 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 {
    private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
-   private final DoubleYoVariable contactThresholdForce;
-   private final DoubleYoVariable secondContactThresholdForce;
+   private final YoDouble contactThresholdForce;
+   private final YoDouble secondContactThresholdForce;
 
    private final YoVariableRegistry registry;
 
    private final ForceSensorDataReadOnly forceSensorData;
-   private final DoubleYoVariable footSwitchCoPThresholdFraction;
+   private final YoDouble footSwitchCoPThresholdFraction;
 
    private final YoBoolean isForceMagnitudePastThreshold;
    private final GlitchFilteredYoBoolean filteredIsForceMagnitudePastThreshold;
@@ -44,8 +44,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final YoBoolean trustFootSwitch, controllerDetectedTouchdown;
    private final GlitchFilteredYoBoolean filteredHasFootHitGround;
 
-   private final DoubleYoVariable footForceMagnitude;
-   private final DoubleYoVariable alphaFootLoadFiltering;
+   private final YoDouble footForceMagnitude;
+   private final YoDouble alphaFootLoadFiltering;
    private final AlphaFilteredYoVariable footLoadPercentage;
 
    private final Wrench footWrench;
@@ -90,9 +90,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      this.contactThresholdForce = new DoubleYoVariable(namePrefix + "ContactThresholdForce", registry);
+      this.contactThresholdForce = new YoDouble(namePrefix + "ContactThresholdForce", registry);
       this.contactThresholdForce.set(contactThresholdForce);
-      this.secondContactThresholdForce = new DoubleYoVariable(namePrefix + "SecondContactThresholdForce", registry);
+      this.secondContactThresholdForce = new YoDouble(namePrefix + "SecondContactThresholdForce", registry);
       this.secondContactThresholdForce.set(Double.POSITIVE_INFINITY);
 
       yoFootForce = new YoFrameVector(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
@@ -118,7 +118,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          yoGraphicForceSensorFootFrame = null;
       }
 
-      footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
+      footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
       isForceMagnitudePastThreshold = new YoBoolean(namePrefix + "ForcePastThreshold", registry);
       hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
 
@@ -133,7 +133,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       isCoPPastThreshold = new YoBoolean(namePrefix + "CoPPastThresh", registry);
 
       this.robotTotalWeight = robotTotalWeight;
-      this.alphaFootLoadFiltering = new DoubleYoVariable(namePrefix + "AlphaFootLoadFiltering", registry);
+      this.alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
       alphaFootLoadFiltering.set(0.5);
       this.footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
@@ -156,7 +156,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       resolvedCoP = new FramePoint2d(contactablePlaneBody.getSoleFrame());
 
       this.forceSensorData = forceSensorData;
-      this.footSwitchCoPThresholdFraction = new DoubleYoVariable(namePrefix + "footSwitchCoPThresholdFraction", registry);
+      this.footSwitchCoPThresholdFraction = new YoDouble(namePrefix + "footSwitchCoPThresholdFraction", registry);
       this.footSwitchCoPThresholdFraction.set(footSwitchCoPThresholdFraction);
 
       this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), null);

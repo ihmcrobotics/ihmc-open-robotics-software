@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 
 /**
@@ -12,25 +12,25 @@ import us.ihmc.yoVariables.variable.EnumYoVariable;
  * which might have a true velocity but due to the noise seems to switch direction often.
  *
  */
-public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private final double dt;
 
    private final FilteredVelocityYoVariable finiteDifferenceVelocity;
    
-   private final DoubleYoVariable alphaVariable;
-   private final DoubleYoVariable position;
+   private final YoDouble alphaVariable;
+   private final YoDouble position;
 
-   private final DoubleYoVariable lastPosition;
+   private final YoDouble lastPosition;
    private final YoBoolean hasBeenCalled;
 
    private final EnumYoVariable<BacklashState> backlashState;
-   private final DoubleYoVariable slopTime;
+   private final YoDouble slopTime;
 
-   private final DoubleYoVariable timeSinceSloppy;
+   private final YoDouble timeSinceSloppy;
 
-   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable,
-           double dt, DoubleYoVariable slopTime, YoVariableRegistry registry)
+   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable,
+           double dt, YoDouble slopTime, YoVariableRegistry registry)
    {
       super(name, description, registry);
       
@@ -41,7 +41,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
 
       backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
-      timeSinceSloppy = new DoubleYoVariable(name + "TimeSinceSloppy", registry);
+      timeSinceSloppy = new YoDouble(name + "TimeSinceSloppy", registry);
 
       position = positionVariable;
 
@@ -50,12 +50,12 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }
 
-   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, double dt, DoubleYoVariable slopTime,
+   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, double dt, YoDouble slopTime,
            YoVariableRegistry registry)
    {
       super(name, description, registry);
@@ -66,7 +66,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
 
       backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
-      timeSinceSloppy = new DoubleYoVariable(name + "timeInState", registry);
+      timeSinceSloppy = new YoDouble(name + "timeInState", registry);
 
       this.position = null;
 
@@ -75,7 +75,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }

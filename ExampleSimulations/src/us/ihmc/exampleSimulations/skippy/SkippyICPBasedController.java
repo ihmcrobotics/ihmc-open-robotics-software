@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -24,11 +24,11 @@ public class SkippyICPBasedController extends SimpleRobotController
 
    private final double dt;
 
-   private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
-   private final DoubleYoVariable kMomentum = new DoubleYoVariable("kMomentum", registry);
-   private final DoubleYoVariable kAngle = new DoubleYoVariable("kAngle", registry);
-   private final DoubleYoVariable hipSetpoint = new DoubleYoVariable("hipSetpoint", registry);
-   private final DoubleYoVariable shoulderSetpoint = new DoubleYoVariable("shoulderSetpoint", registry);
+   private final YoDouble kCapture = new YoDouble("kCapture", registry);
+   private final YoDouble kMomentum = new YoDouble("kMomentum", registry);
+   private final YoDouble kAngle = new YoDouble("kAngle", registry);
+   private final YoDouble hipSetpoint = new YoDouble("hipSetpoint", registry);
+   private final YoDouble shoulderSetpoint = new YoDouble("shoulderSetpoint", registry);
 
    private final IntegerYoVariable tickCounter = new IntegerYoVariable("tickCounter", registry);
    private final IntegerYoVariable ticksForDesiredForce = new IntegerYoVariable("ticksForDesiredForce", registry);

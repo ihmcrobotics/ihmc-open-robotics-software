@@ -404,7 +404,7 @@ public class YoWhiteBoardTest
          {
             case DOUBLE :
             {
-               variablesToCopyTo.add(new DoubleYoVariable(name, registry));
+               variablesToCopyTo.add(new YoDouble(name, registry));
 
                break;
             }
@@ -476,7 +476,7 @@ public class YoWhiteBoardTest
          {
             case 0 :
             {
-               variables.add(new DoubleYoVariable(name, registry));
+               variables.add(new YoDouble(name, registry));
 
                break;
             }

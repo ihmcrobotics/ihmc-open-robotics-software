@@ -29,7 +29,7 @@ import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -57,7 +57,7 @@ public class FixedBaseRobotArmController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final FixedBaseRobotArm robotArm;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
 
    public enum FeedbackControlType
@@ -79,15 +79,15 @@ public class FixedBaseRobotArmController implements RobotController
 
    private final WholeBodyControllerCore controllerCore;
 
-   private final DoubleYoVariable handWeight = new DoubleYoVariable("handWeight", registry);
+   private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
    private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
    private final YoBoolean goToTarget = new YoBoolean("goToTarget", registry);
-   private final DoubleYoVariable trajectoryDuration = new DoubleYoVariable("handTrajectoryDuration", registry);
-   private final DoubleYoVariable trajectoryStartTime = new DoubleYoVariable("handTrajectoryStartTime", registry);
+   private final YoDouble trajectoryDuration = new YoDouble("handTrajectoryDuration", registry);
+   private final YoDouble trajectoryStartTime = new YoDouble("handTrajectoryStartTime", registry);
 
    private final StraightLinePoseTrajectoryGenerator trajectory;
 

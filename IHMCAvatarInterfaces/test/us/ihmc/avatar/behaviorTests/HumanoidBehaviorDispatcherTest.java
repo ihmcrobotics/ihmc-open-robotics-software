@@ -55,7 +55,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -125,7 +125,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private CommunicationBridge communicationBridge;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private HumanoidFloatingRootJointRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
@@ -147,7 +147,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      this.yoTime = new DoubleYoVariable("yoTime", registry);
+      this.yoTime = new YoDouble("yoTime", registry);
 
       behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(
             NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());

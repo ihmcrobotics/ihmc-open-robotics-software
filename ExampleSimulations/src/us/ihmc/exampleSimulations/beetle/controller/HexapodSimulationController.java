@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -62,7 +62,7 @@ public class HexapodSimulationController implements RobotController
 
    private final HexapodReferenceFrames referenceFrames;
    private LongYoVariable totalTimeToCompleteTick = new LongYoVariable("totalTimeToCompleteTick", registry);
-   private DoubleYoVariable totalTimeToCompleteTickInSeconds = new DoubleYoVariable("totalTimeToCompleteTickInSeconds", registry);
+   private YoDouble totalTimeToCompleteTickInSeconds = new YoDouble("totalTimeToCompleteTickInSeconds", registry);
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFrameGraphics = new ArrayList<>();
    private ContactPointVisualizer contactPointVisualizer;

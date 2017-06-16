@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
+import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -40,9 +40,9 @@ public class PerfectSimulatedIMURawSensorReader extends SimulatedIMURawSensorRea
       compassZ.update();
    }
 
-   private void setIsNoisyToFalse(NoisyDoubleYoVariable[] list)
+   private void setIsNoisyToFalse(NoisyYoDouble[] list)
    {
-      for (NoisyDoubleYoVariable i : list)
+      for (NoisyYoDouble i : list)
       {
          i.setIsNoisy(false);
       }

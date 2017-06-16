@@ -9,7 +9,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -26,7 +26,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    protected final IntegerYoVariable step = new IntegerYoVariable("step", registry);
 
-   protected final DoubleYoVariable yoTime;
+   protected final YoDouble yoTime;
 
    protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointPositionSensor>> jointPositionSensors = new ArrayList<>();
    protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>> jointVelocitySensors = new ArrayList<>();
@@ -39,7 +39,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    protected final SensorProcessing sensorProcessing;
 
    public SimulatedSensorHolderAndReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-         SensorProcessingConfiguration sensorProcessingConfiguration, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         SensorProcessingConfiguration sensorProcessingConfiguration, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       this.yoTime = yoTime;

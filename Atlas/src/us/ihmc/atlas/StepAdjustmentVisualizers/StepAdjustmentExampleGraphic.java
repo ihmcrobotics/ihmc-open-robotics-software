@@ -36,7 +36,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -87,15 +87,15 @@ public class StepAdjustmentExampleGraphic
    private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
-   private final DoubleYoVariable doubleSupportDuration;
-   private final DoubleYoVariable singleSupportDuration;
-   private final DoubleYoVariable omega0;
+   private final YoDouble doubleSupportDuration;
+   private final YoDouble singleSupportDuration;
+   private final YoDouble omega0;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable timeToConsiderAdjustment;
+   private final YoDouble yoTime;
+   private final YoDouble timeToConsiderAdjustment;
 
-   private final DoubleYoVariable pointFootFeedbackWeight;
-   private final DoubleYoVariable pointFootFootstepWeight;
+   private final YoDouble pointFootFeedbackWeight;
+   private final YoDouble pointFootFootstepWeight;
 
    private final YoFramePoint2d yoDesiredCMP;
    private final YoFramePoint2d yoCurrentICP;
@@ -143,8 +143,8 @@ public class StepAdjustmentExampleGraphic
       usePointFeet = new YoBoolean("usePointFoot", registry);
       usePointFeet.set(true);
 
-      pointFootFeedbackWeight = new DoubleYoVariable("pointFootFeedbackWeight", registry);
-      pointFootFootstepWeight = new DoubleYoVariable("pointFootFootstepWeight", registry);
+      pointFootFeedbackWeight = new YoDouble("pointFootFeedbackWeight", registry);
+      pointFootFootstepWeight = new YoDouble("pointFootFootstepWeight", registry);
       pointFootFeedbackWeight.set(10000.0);
       pointFootFootstepWeight.set(0.1);
 
@@ -152,15 +152,15 @@ public class StepAdjustmentExampleGraphic
       yoCurrentICP = new YoFramePoint2d("currentICP", worldFrame, registry);
       yoDesiredICP = new YoFramePoint2d("desiredICP", worldFrame, registry);
 
-      doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
-      singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
-      omega0 = new DoubleYoVariable("omega0", registry);
+      doubleSupportDuration = new YoDouble("doubleSupportDuration", registry);
+      singleSupportDuration = new YoDouble("singleSupportDuration", registry);
+      omega0 = new YoDouble("omega0", registry);
       doubleSupportDuration.set(0.25);
       singleSupportDuration.set(0.75);
       omega0.set(3.0);
 
       yoTime = robot.getYoTime();
-      timeToConsiderAdjustment = new DoubleYoVariable("timeToConsiderAdjustment", registry);
+      timeToConsiderAdjustment = new YoDouble("timeToConsiderAdjustment", registry);
       timeToConsiderAdjustment.set(0.5 * singleSupportDuration.getDoubleValue());
 
       setupFeetFrames(yoGraphicsListRegistry);

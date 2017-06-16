@@ -42,7 +42,7 @@ public class YoVariableThreadAccessValidator
          yoVariable.toClass();
 
          
-         CtClass doubleYoVariable = pool.get("us.ihmc.simulationconstructionset.DoubleYoVariable");
+         CtClass doubleYoVariable = pool.get("us.ihmc.simulationconstructionset.YoDouble");
          CtMethod method = doubleYoVariable.getDeclaredMethod("getDoubleValue");
          method.insertBefore("if(validator != null) { validator.validateReadAccess(this); }");
          doubleYoVariable.toClass();

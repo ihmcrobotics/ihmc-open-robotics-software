@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -10,8 +10,8 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
 {
    private final EnumYoVariable<QuadrupedPositionControllerRequestedEvent> userTrigger;
    private final EnumYoVariable<QuadrupedPositionControllerState> positionControllerState;
-   private final DoubleYoVariable swingDuration;
-   private final DoubleYoVariable desiredCoMPositionZ;
+   private final YoDouble swingDuration;
+   private final YoDouble desiredCoMPositionZ;
 
    @SuppressWarnings("unchecked")
    public QuadrupedPositionTestYoVariables(SimulationConstructionSet scs)
@@ -20,8 +20,8 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
       
       userTrigger = (EnumYoVariable<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("userTrigger");
       positionControllerState = (EnumYoVariable<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
-      swingDuration = (DoubleYoVariable) scs.getVariable("swingDuration");
-      desiredCoMPositionZ = (DoubleYoVariable) scs.getVariable("desiredCoMPositionZ");
+      swingDuration = (YoDouble) scs.getVariable("swingDuration");
+      desiredCoMPositionZ = (YoDouble) scs.getVariable("desiredCoMPositionZ");
    }
 
    public EnumYoVariable<QuadrupedPositionControllerRequestedEvent> getUserTrigger()
@@ -34,12 +34,12 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
       return positionControllerState;
    }
 
-   public DoubleYoVariable getSwingDuration()
+   public YoDouble getSwingDuration()
    {
       return swingDuration;
    }
 
-   public DoubleYoVariable getDesiredCoMPositionZ()
+   public YoDouble getDesiredCoMPositionZ()
    {
       return desiredCoMPositionZ;
    }

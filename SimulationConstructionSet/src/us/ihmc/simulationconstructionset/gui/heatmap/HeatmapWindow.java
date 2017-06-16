@@ -30,7 +30,7 @@ import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HeatmapWindow
 {
@@ -126,7 +126,7 @@ public class HeatmapWindow
       }
    }
 
-   public JavaFXHeatmapGraph addHeatmapGraph(String name, DoubleYoVariable x, DoubleYoVariable y)
+   public JavaFXHeatmapGraph addHeatmapGraph(String name, YoDouble x, YoDouble y)
    {
       JavaFXHeatmapGraph heatmapGraph = new JavaFXHeatmapGraph(registry, graphIndicesHolder, selectedVariableHolder, dataEntryHolder, dataBuffer);
       heatmapGraph.setXVariable(x);

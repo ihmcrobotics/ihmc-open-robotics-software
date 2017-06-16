@@ -3,11 +3,11 @@ package us.ihmc.valkyrieRosControl;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
+public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 {
    public enum HysteresisState
    {
@@ -15,35 +15,35 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    };
 
    private final OneDoFJoint joint;
-   private final DoubleYoVariable torqueHysteresisAmplitude;
-   private final DoubleYoVariable jointAccelerationMin;
-   private final DoubleYoVariable jointVelocityMax;
+   private final YoDouble torqueHysteresisAmplitude;
+   private final YoDouble jointAccelerationMin;
+   private final YoDouble jointVelocityMax;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable ramp;
-   private final DoubleYoVariable rampUpTime;
-   private final DoubleYoVariable rampDownTime;
-   private final DoubleYoVariable rampStartTime;
+   private final YoDouble yoTime;
+   private final YoDouble ramp;
+   private final YoDouble rampUpTime;
+   private final YoDouble rampDownTime;
+   private final YoDouble rampStartTime;
 
    private final EnumYoVariable<HysteresisState> hysteresisState;
 
    private final YoBoolean isAccelerationHigh;
    private final YoBoolean isVelocityLow;
 
-   private final DoubleYoVariable hysteresisSign;
+   private final YoDouble hysteresisSign;
 
    private final YoBoolean enabled;
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, DoubleYoVariable torqueHysteresisAmplitude,
-         DoubleYoVariable jointAccelerationMin, DoubleYoVariable jointVelocityMax, DoubleYoVariable rampTime, DoubleYoVariable yoTime,
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, YoDouble torqueHysteresisAmplitude,
+         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
          YoVariableRegistry registry)
    {
       this(prefix, joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, DoubleYoVariable torqueHysteresisAmplitude,
-         DoubleYoVariable jointAccelerationMin, DoubleYoVariable jointVelocityMax, DoubleYoVariable rampUpTime, DoubleYoVariable rampDownTime,
-         DoubleYoVariable yoTime, YoVariableRegistry registry)
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, YoDouble torqueHysteresisAmplitude,
+         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
+         YoDouble yoTime, YoVariableRegistry registry)
    {
       super(prefix + joint.getName(), registry);
       this.joint = joint;
@@ -54,14 +54,14 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
       this.rampDownTime = rampDownTime;
       this.yoTime = yoTime;
 
-      ramp = new DoubleYoVariable(getName() + "Ramp", registry);
-      rampStartTime = new DoubleYoVariable(getName() + "RampStartTime", registry);
+      ramp = new YoDouble(getName() + "Ramp", registry);
+      rampStartTime = new YoDouble(getName() + "RampStartTime", registry);
       hysteresisState = new EnumYoVariable<>(getName() + "State", registry, HysteresisState.class, false);
 
       isAccelerationHigh = new YoBoolean(getName() + "IsQddHigh", registry);
       isVelocityLow = new YoBoolean(getName() + "IsQdLow", registry);
 
-      hysteresisSign = new DoubleYoVariable(getName() + "HysteresisSign", registry);
+      hysteresisSign = new YoDouble(getName() + "HysteresisSign", registry);
 
       enabled = new YoBoolean(getName() + "Enabled", registry);
    }

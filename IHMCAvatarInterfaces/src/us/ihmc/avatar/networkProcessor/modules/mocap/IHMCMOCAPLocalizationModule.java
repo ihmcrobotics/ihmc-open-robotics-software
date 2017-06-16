@@ -29,7 +29,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -83,20 +83,20 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       }
    };
    
-   private final DoubleYoVariable computedPelvisPositionX = new DoubleYoVariable("computedPelvisPositionX", registry);
-   private final DoubleYoVariable computedPelvisPositionY = new DoubleYoVariable("computedPelvisPositionY", registry);
-   private final DoubleYoVariable computedPelvisPositionZ = new DoubleYoVariable("computedPelvisPositionZ", registry);
+   private final YoDouble computedPelvisPositionX = new YoDouble("computedPelvisPositionX", registry);
+   private final YoDouble computedPelvisPositionY = new YoDouble("computedPelvisPositionY", registry);
+   private final YoDouble computedPelvisPositionZ = new YoDouble("computedPelvisPositionZ", registry);
 
-   private final DoubleYoVariable computedPelvisYaw = new DoubleYoVariable("computedPelvisYaw", registry);
-   private final DoubleYoVariable computedPelvisPitch = new DoubleYoVariable("computedPelvisPitch", registry);
-   private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable("computedPelvisRoll", registry);
+   private final YoDouble computedPelvisYaw = new YoDouble("computedPelvisYaw", registry);
+   private final YoDouble computedPelvisPitch = new YoDouble("computedPelvisPitch", registry);
+   private final YoDouble computedPelvisRoll = new YoDouble("computedPelvisRoll", registry);
    
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformX = new DoubleYoVariable("mocapWorldToRobotWorldTransformX", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformY = new DoubleYoVariable("mocapWorldToRobotWorldTransformY", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformZ = new DoubleYoVariable("mocapWorldToRobotWorldTransformZ", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformYaw = new DoubleYoVariable("mocapWorldToRobotWorldTransformYaw", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformX = new YoDouble("mocapWorldToRobotWorldTransformX", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformY = new YoDouble("mocapWorldToRobotWorldTransformY", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformZ = new YoDouble("mocapWorldToRobotWorldTransformZ", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformYaw = new YoDouble("mocapWorldToRobotWorldTransformYaw", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformPitch = new YoDouble("mocapWorldToRobotWorldTransformPitch", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformRoll = new YoDouble("mocapWorldToRobotWorldTransformRoll", registry);
 
    private final YoBoolean requestReInitialization = new YoBoolean("requestReInitialization", registry);
    private final YoBoolean requestFootsteps = new YoBoolean("requestFootsteps", registry);

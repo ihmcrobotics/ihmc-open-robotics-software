@@ -8,11 +8,11 @@ import net.java.games.input.Component;
 import net.java.games.input.Event;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static org.junit.Assert.assertEquals;
 
-public class DoubleYoVariableJoystickEventListenerTest
+public class YoDoubleJoystickEventListenerTest
 {
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -20,7 +20,7 @@ public class DoubleYoVariableJoystickEventListenerTest
    public void testMinMaxAverage()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DoubleYoVariable variable = new DoubleYoVariable("test", registry);
+      YoDouble variable = new YoDouble("test", registry);
       TestComponent component = new TestComponent();
       component.setAnalog(true);
       component.setDeadZone(0.0f);

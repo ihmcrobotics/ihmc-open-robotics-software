@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -201,14 +201,14 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
+      YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
+      YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
+      YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint position = new YoFramePoint(x, y, z, ReferenceFrame.getWorldFrame());
 
-      DoubleYoVariable yaw = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
-      DoubleYoVariable pitch = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
-      DoubleYoVariable roll = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
+      YoDouble yaw = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
+      YoDouble pitch = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
+      YoDouble roll = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
       YoFrameOrientation orientation = new YoFrameOrientation(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
       return new YoFramePose(position, orientation);
    }

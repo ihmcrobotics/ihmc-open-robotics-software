@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
@@ -23,24 +23,24 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
    private static final int DEFAULT_MAX_ABS_LAG = 25;
    private static final int DEFAULT_NUMBER_OF_OBSERVATIONS = 100;
 
-   private final DoubleYoVariable referenceSignal;
-   private final DoubleYoVariable delayedSignal;
-   private final DoubleYoVariable estimatedDelay;
+   private final YoDouble referenceSignal;
+   private final YoDouble delayedSignal;
+   private final YoDouble estimatedDelay;
 
    private final YoBoolean enabled;
 
    private final DenseMatrix64F referenceSignalBuffer;
    private final DenseMatrix64F delayedSignalBuffer;
    private final SimpleRegression correlationCalculator = new SimpleRegression();
-   private final DoubleYoVariable correlationForDelay;
-   private final DoubleYoVariable maxCorrelation;
+   private final YoDouble correlationForDelay;
+   private final YoDouble maxCorrelation;
    private final IntegerYoVariable nTicksOfDelay;
 
    private final IntegerYoVariable maxLeadInTicks;
    private final IntegerYoVariable maxLagInTicks;
    private final IntegerYoVariable numberOfObservations;
 
-   private final DoubleYoVariable correlationAlpha;
+   private final YoDouble correlationAlpha;
    private final DenseMatrix64F correlationBuffer;
    private final DenseMatrix64F filteredCorrelationBuffer;
 
@@ -58,16 +58,16 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
     * @param referenceSignal is the signal used as ground truth to estimate the delay of {@code delayedSignal}.
     * @param delayedSignal is the signal for which the delay is estimated.
     */
-   public DelayEstimatorBetweenTwoSignals(String namePrefix, DoubleYoVariable referenceSignal, DoubleYoVariable delayedSignal, double dt, YoVariableRegistry registry)
+   public DelayEstimatorBetweenTwoSignals(String namePrefix, YoDouble referenceSignal, YoDouble delayedSignal, double dt, YoVariableRegistry registry)
    {
       this.dt = dt;
       this.referenceSignal = referenceSignal;
       this.delayedSignal = delayedSignal;
 
       nTicksOfDelay = new IntegerYoVariable(namePrefix + "_estimatedNTicksOfDelay", registry);
-      estimatedDelay = new DoubleYoVariable(namePrefix + "_estimatedDelay", registry);
-      correlationForDelay = new DoubleYoVariable(namePrefix + "_correlationForDelay", registry);
-      maxCorrelation = new DoubleYoVariable(namePrefix + "_maxCorrelation", registry);
+      estimatedDelay = new YoDouble(namePrefix + "_estimatedDelay", registry);
+      correlationForDelay = new YoDouble(namePrefix + "_correlationForDelay", registry);
+      maxCorrelation = new YoDouble(namePrefix + "_maxCorrelation", registry);
       enabled = new YoBoolean(namePrefix + "_enabled", registry);
 
       maxLeadInTicks = new IntegerYoVariable(namePrefix + "_maxPhaseLeadInTicks", registry);
@@ -81,7 +81,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       referenceSignalBuffer = new DenseMatrix64F(bufferSize, 1);
       delayedSignalBuffer = new DenseMatrix64F(bufferSize, 1);
 
-      correlationAlpha = new DoubleYoVariable(namePrefix + "CorrelationApha", registry);
+      correlationAlpha = new YoDouble(namePrefix + "CorrelationApha", registry);
       correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
       correlationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
       filteredCorrelationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);

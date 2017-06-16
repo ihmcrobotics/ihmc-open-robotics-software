@@ -7,20 +7,20 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootTrajectoryBehavior extends AbstractBehavior
 {
    private FootTrajectoryMessage outgoingFootTrajectoryMessage;
 
    private final YoBoolean hasPacketBeenSent;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeElapsed;
    private final YoBoolean doubleSupport;
 
-   public FootTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport)
+   public FootTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport)
    {
       super(outgoingCommunicationBridge);
 
@@ -29,9 +29,9 @@ public class FootTrajectoryBehavior extends AbstractBehavior
 
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
-      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime = new YoDouble(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }

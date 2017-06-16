@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -42,13 +42,13 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
 
    private final LinkedHashMap<OneDoFJoint, PDController> pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
    private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
 
-   private final DoubleYoVariable ditherAmplitude = new DoubleYoVariable("ditherAmplitude", registry);
-   private final DoubleYoVariable ditherFrequency = new DoubleYoVariable("ditherFrequency", registry);
+   private final YoDouble ditherAmplitude = new YoDouble("ditherAmplitude", registry);
+   private final YoDouble ditherFrequency = new YoDouble("ditherFrequency", registry);
 
-   private final DoubleYoVariable maximumTorqueOffset = new DoubleYoVariable("maximumTorqueOffset", registry);
+   private final YoDouble maximumTorqueOffset = new YoDouble("maximumTorqueOffset", registry);
 
    private final YoBoolean estimateTorqueOffset = new YoBoolean("estimateTorqueOffset", registry);
    private final YoBoolean transferTorqueOffsets = new YoBoolean("transferTorqueOffsets", registry);
@@ -103,7 +103,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          PDController controller = new PDController(jointName + "Calibration", registry);
          pdControllers.put(joint, controller);
 
-         DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_calib_" + jointName, registry);
+         YoDouble desiredPosition = new YoDouble("q_d_calib_" + jointName, registry);
          desiredPositions.put(joint, desiredPosition);
       }
 

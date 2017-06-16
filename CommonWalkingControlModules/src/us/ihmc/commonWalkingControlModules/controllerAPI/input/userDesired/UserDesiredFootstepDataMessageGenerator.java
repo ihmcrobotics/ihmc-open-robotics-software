@@ -33,26 +33,26 @@ public class UserDesiredFootstepDataMessageGenerator
    private final String namePrefix = "userDesiredStep";
    private final IntegerYoVariable stepsToTake = new IntegerYoVariable(namePrefix + "sToTake", registry);
    private final EnumYoVariable<RobotSide> firstStepSide = new EnumYoVariable<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
-   private final DoubleYoVariable minimumWidth = new DoubleYoVariable(namePrefix + "MinWidth", registry);
+   private final YoDouble minimumWidth = new YoDouble(namePrefix + "MinWidth", registry);
 
    private final YoBoolean stepSquareUp = new YoBoolean(namePrefix + "SquareUp", registry);
 
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(namePrefix + "TransferTime", registry);
+   private final YoDouble swingTime = new YoDouble(namePrefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(namePrefix + "TransferTime", registry);
 
-   private final DoubleYoVariable swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
+   private final YoDouble swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
 
-   private final DoubleYoVariable stepHeelPercentage = new DoubleYoVariable(namePrefix + "HeelPercentage", registry);
-   private final DoubleYoVariable stepToePercentage = new DoubleYoVariable(namePrefix + "ToePercentage", registry);
+   private final YoDouble stepHeelPercentage = new YoDouble(namePrefix + "HeelPercentage", registry);
+   private final YoDouble stepToePercentage = new YoDouble(namePrefix + "ToePercentage", registry);
 
-   private final DoubleYoVariable stepLength = new DoubleYoVariable(namePrefix + "Length", registry);
-   private final DoubleYoVariable stepWidth = new DoubleYoVariable(namePrefix + "Width", registry);
-   private final DoubleYoVariable stepHeight = new DoubleYoVariable(namePrefix + "Height", registry);
-   private final DoubleYoVariable stepSideways = new DoubleYoVariable(namePrefix + "Sideways", registry);
+   private final YoDouble stepLength = new YoDouble(namePrefix + "Length", registry);
+   private final YoDouble stepWidth = new YoDouble(namePrefix + "Width", registry);
+   private final YoDouble stepHeight = new YoDouble(namePrefix + "Height", registry);
+   private final YoDouble stepSideways = new YoDouble(namePrefix + "Sideways", registry);
 
-   private final DoubleYoVariable stepYaw = new DoubleYoVariable(namePrefix + "Yaw", registry);
-   private final DoubleYoVariable stepPitch = new DoubleYoVariable(namePrefix + "Pitch", registry);
-   private final DoubleYoVariable stepRoll = new DoubleYoVariable(namePrefix + "Roll", registry);
+   private final YoDouble stepYaw = new YoDouble(namePrefix + "Yaw", registry);
+   private final YoDouble stepPitch = new YoDouble(namePrefix + "Pitch", registry);
+   private final YoDouble stepRoll = new YoDouble(namePrefix + "Roll", registry);
 
    private final YoBoolean sendSteps = new YoBoolean(namePrefix + "Send", registry);
 

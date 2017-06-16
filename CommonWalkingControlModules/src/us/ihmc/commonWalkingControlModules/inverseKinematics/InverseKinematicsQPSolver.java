@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -37,8 +37,8 @@ public class InverseKinematicsQPSolver
    private final IntegerYoVariable numberOfEqualityConstraints = new IntegerYoVariable("numberOfEqualityConstraints", registry);
    private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
-   private final DoubleYoVariable jointVelocityRegularization = new DoubleYoVariable("jointVelocityRegularization", registry);
-   private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
+   private final YoDouble jointVelocityRegularization = new YoDouble("jointVelocityRegularization", registry);
+   private final YoDouble jointAccelerationRegularization = new YoDouble("jointAccelerationRegularization", registry);
 
    private final int numberOfDoFs;
 

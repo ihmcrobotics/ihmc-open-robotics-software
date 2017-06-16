@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class DataBufferToolsTest
    private YoVariableRegistry registry;
    private DataBuffer dataBuffer = new DataBuffer(testBufferSize);
 
-   private DoubleYoVariable a, b, c;
+   private YoDouble a, b, c;
    private DataBufferEntry aBuffer, bBuffer, cBuffer;
 
    @Before
@@ -31,9 +31,9 @@ public class DataBufferToolsTest
    {
       registry = new YoVariableRegistry("testRegistry");
 
-      a = new DoubleYoVariable("a_arm", registry);
-      b = new DoubleYoVariable("b_arm", registry);
-      c = new DoubleYoVariable("c_arm", registry);
+      a = new YoDouble("a_arm", registry);
+      b = new YoDouble("b_arm", registry);
+      c = new YoDouble("c_arm", registry);
 
       aBuffer = new DataBufferEntry(a, testBufferSize);
       bBuffer = new DataBufferEntry(b, testBufferSize);

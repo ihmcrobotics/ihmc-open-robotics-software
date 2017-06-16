@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -30,7 +30,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
    private final YoBoolean userDoHandPose = new YoBoolean("userDoHandPose", registry);
    private final YoBoolean userDesiredSetHandPoseToActual = new YoBoolean("userDesiredSetHandPoseToActual", registry);
 
-   private final DoubleYoVariable userDesiredHandPoseTrajectoryTime = new DoubleYoVariable("userDesiredHandPoseTrajectoryTime", registry);
+   private final YoDouble userDesiredHandPoseTrajectoryTime = new YoDouble("userDesiredHandPoseTrajectoryTime", registry);
 
    private final EnumYoVariable<RobotSide> userHandPoseSide = new EnumYoVariable<RobotSide>("userHandPoseSide", registry, RobotSide.class);
    private final EnumYoVariable<BaseForControl> userHandPoseBaseForControl = new EnumYoVariable<BaseForControl>("userHandPoseBaseForControl", registry, BaseForControl.class);

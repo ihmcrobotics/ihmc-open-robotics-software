@@ -5,20 +5,19 @@ import java.util.Random;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GaussianDoubleCorruptor implements SignalCorruptor<MutableDouble>
 {
    private final YoVariableRegistry registry;
    private final Random random;
-   private final DoubleYoVariable standardDeviation;
+   private final YoDouble standardDeviation;
 
    public GaussianDoubleCorruptor(long seed, String namePrefix, YoVariableRegistry parentRegistry)
    {
       this.random = new Random(seed);
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", parentRegistry);
+      this.standardDeviation = new YoDouble(namePrefix + "StdDev", parentRegistry);
 
       parentRegistry.addChild(registry);
    }

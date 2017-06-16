@@ -28,7 +28,7 @@ import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -55,14 +55,14 @@ public class MovingBaseRobotArmController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final MovingBaseRobotArm robotArm;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
 
    private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry,
                                                                                                        WholeBodyControllerCoreMode.class);
    private final AtomicBoolean controllerCoreModeHasChanged = new AtomicBoolean(false);
    private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
-   private final DoubleYoVariable baseWeight = new DoubleYoVariable("baseWeight", registry);
+   private final YoDouble baseWeight = new YoDouble("baseWeight", registry);
    private final YoSymmetricSE3PIDGains basePositionGains = new YoSymmetricSE3PIDGains("basePosition", registry);
    private final PointFeedbackControlCommand basePointCommand = new PointFeedbackControlCommand();
    private final YoSineGenerator3D sineGenerator = new YoSineGenerator3D("baseTrajectory", worldFrame, registry);
@@ -72,15 +72,15 @@ public class MovingBaseRobotArmController implements RobotController
 
    private final WholeBodyControllerCore controllerCore;
 
-   private final DoubleYoVariable handWeight = new DoubleYoVariable("handWeight", registry);
+   private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
    private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
    private final YoBoolean goToTarget = new YoBoolean("goToTarget", registry);
-   private final DoubleYoVariable trajectoryDuration = new DoubleYoVariable("handTrajectoryDuration", registry);
-   private final DoubleYoVariable trajectoryStartTime = new DoubleYoVariable("handTrajectoryStartTime", registry);
+   private final YoDouble trajectoryDuration = new YoDouble("handTrajectoryDuration", registry);
+   private final YoDouble trajectoryStartTime = new YoDouble("handTrajectoryStartTime", registry);
 
    private final StraightLinePoseTrajectoryGenerator trajectory;
 

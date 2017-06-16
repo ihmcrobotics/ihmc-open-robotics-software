@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class DiagnosticTaskExecutor
@@ -17,14 +17,14 @@ public class DiagnosticTaskExecutor
    private final IntegerYoVariable numberOfTasksRemaining;
    private final YoBoolean isDone;
    private final YoBoolean hasAborted;
-   private final DoubleYoVariable timeInCurrentTask;
-   private final DoubleYoVariable switchTime;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble timeInCurrentTask;
+   private final YoDouble switchTime;
+   private final YoDouble yoTime;
 
    private DiagnosticTask currentTask;
    private final ArrayDeque<DiagnosticTask> taskQueue = new ArrayDeque<>();
 
-   public DiagnosticTaskExecutor(String namePrefix, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public DiagnosticTaskExecutor(String namePrefix, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -32,8 +32,8 @@ public class DiagnosticTaskExecutor
       numberOfTasksRemaining = new IntegerYoVariable(namePrefix + "TasksRemaining", registry);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
       hasAborted = new YoBoolean(namePrefix + "HasAborted", registry);
-      timeInCurrentTask = new DoubleYoVariable(namePrefix + "TimeInCurrentTask", registry);
-      switchTime = new DoubleYoVariable(namePrefix + "SwitchTime", registry);
+      timeInCurrentTask = new YoDouble(namePrefix + "TimeInCurrentTask", registry);
+      switchTime = new YoDouble(namePrefix + "SwitchTime", registry);
       this.yoTime = yoTime;
 
       clear();

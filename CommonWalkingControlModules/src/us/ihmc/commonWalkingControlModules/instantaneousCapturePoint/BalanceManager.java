@@ -34,7 +34,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -81,7 +81,7 @@ public class BalanceManager
 
    private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -107,14 +107,14 @@ public class BalanceManager
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable safeDistanceFromSupportEdgesToStopCancelICPPlan = new DoubleYoVariable("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
-   private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
+   private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
+   private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
    private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
-   private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
-   private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);
+   private final YoDouble maxICPErrorBeforeSingleSupportX = new YoDouble("maxICPErrorBeforeSingleSupportX", registry);
+   private final YoDouble maxICPErrorBeforeSingleSupportY = new YoDouble("maxICPErrorBeforeSingleSupportY", registry);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 

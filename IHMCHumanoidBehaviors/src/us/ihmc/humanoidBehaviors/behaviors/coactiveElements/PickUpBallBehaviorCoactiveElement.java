@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
@@ -40,10 +40,10 @@ public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactive
    public final YoBoolean abortAcknowledged = new YoBoolean("abortAcknowledged", machineWritableRegistry);
    public final YoBoolean searchingForBall = new YoBoolean("searchingForBall", machineWritableRegistry);
    public final YoBoolean foundBall = new YoBoolean("foundBall", machineWritableRegistry);
-   public final DoubleYoVariable ballX = new DoubleYoVariable("ballX", machineWritableRegistry);
-   public final DoubleYoVariable ballY = new DoubleYoVariable("ballY", machineWritableRegistry);
-   public final DoubleYoVariable ballZ = new DoubleYoVariable("ballZ", machineWritableRegistry);
-   public final DoubleYoVariable ballRadius = new DoubleYoVariable("ballRadius", machineWritableRegistry);
+   public final YoDouble ballX = new YoDouble("ballX", machineWritableRegistry);
+   public final YoDouble ballY = new YoDouble("ballY", machineWritableRegistry);
+   public final YoDouble ballZ = new YoDouble("ballZ", machineWritableRegistry);
+   public final YoDouble ballRadius = new YoDouble("ballRadius", machineWritableRegistry);
    public final YoBoolean validAcknowledged = new YoBoolean("validAcknowledged", machineWritableRegistry);
    public final YoBoolean waitingForValidation = new YoBoolean("waitingForValidation", machineWritableRegistry);
 

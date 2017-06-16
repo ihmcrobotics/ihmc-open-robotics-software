@@ -15,12 +15,12 @@ public abstract class YoWhiteBoard
    private final String name;
    private final YoBoolean variablesToReadHaveBeenSet, variablesToWriteHaveBeenSet;
 
-   private DoubleYoVariable[] doubleVariablesToRead;
+   private YoDouble[] doubleVariablesToRead;
    private IntegerYoVariable[] intVariablesToRead;
    private YoBoolean[] booleanVariablesToRead;
    private EnumYoVariable<?>[] enumVariablesToRead;
 
-   private DoubleYoVariable[] doubleVariablesToWrite;
+   private YoDouble[] doubleVariablesToWrite;
    private IntegerYoVariable[] intVariablesToWrite;
    private YoBoolean[] booleanVariablesToWrite;
    private EnumYoVariable<?>[] enumVariablesToWrite;
@@ -309,7 +309,7 @@ public abstract class YoWhiteBoard
 
    public void setVariablesToWrite(ArrayList<YoVariable<?>> variablesToWrite)
    {
-      ArrayList<DoubleYoVariable> doubleVariablesToWrite = new ArrayList<DoubleYoVariable>();
+      ArrayList<YoDouble> doubleVariablesToWrite = new ArrayList<YoDouble>();
       ArrayList<IntegerYoVariable> intVariablesToWrite = new ArrayList<IntegerYoVariable>();
       ArrayList<YoBoolean> booleanVariablesToWrite = new ArrayList<YoBoolean>();
       ArrayList<EnumYoVariable<?>> enumVariablesToWrite = new ArrayList<EnumYoVariable<?>>();
@@ -322,7 +322,7 @@ public abstract class YoWhiteBoard
          {
             case DOUBLE :
             {
-               doubleVariablesToWrite.add((DoubleYoVariable) variableToWrite);
+               doubleVariablesToWrite.add((YoDouble) variableToWrite);
 
                break;
             }
@@ -355,7 +355,7 @@ public abstract class YoWhiteBoard
          }
       }
 
-      this.doubleVariablesToWrite = new DoubleYoVariable[doubleVariablesToWrite.size()];
+      this.doubleVariablesToWrite = new YoDouble[doubleVariablesToWrite.size()];
       this.intVariablesToWrite = new IntegerYoVariable[intVariablesToWrite.size()];
       this.booleanVariablesToWrite = new YoBoolean[booleanVariablesToWrite.size()];
       this.enumVariablesToWrite = new EnumYoVariable[enumVariablesToWrite.size()];
@@ -378,7 +378,7 @@ public abstract class YoWhiteBoard
 
    public void setVariablesToRead(ArrayList<YoVariable<?>> variablesToRead)
    {
-      ArrayList<DoubleYoVariable> doubleVariablesToRead = new ArrayList<DoubleYoVariable>();
+      ArrayList<YoDouble> doubleVariablesToRead = new ArrayList<YoDouble>();
       ArrayList<IntegerYoVariable> intVariablesToRead = new ArrayList<IntegerYoVariable>();
       ArrayList<YoBoolean> booleanVariablesToRead = new ArrayList<YoBoolean>();
       ArrayList<EnumYoVariable<?>> enumVariablesToRead = new ArrayList<EnumYoVariable<?>>();
@@ -391,7 +391,7 @@ public abstract class YoWhiteBoard
          {
             case DOUBLE :
             {
-               doubleVariablesToRead.add((DoubleYoVariable) variableToRead);
+               doubleVariablesToRead.add((YoDouble) variableToRead);
 
                break;
             }
@@ -425,7 +425,7 @@ public abstract class YoWhiteBoard
 
       }
 
-      this.doubleVariablesToRead = new DoubleYoVariable[doubleVariablesToRead.size()];
+      this.doubleVariablesToRead = new YoDouble[doubleVariablesToRead.size()];
       this.intVariablesToRead = new IntegerYoVariable[intVariablesToRead.size()];
       this.booleanVariablesToRead = new YoBoolean[booleanVariablesToRead.size()];
       this.enumVariablesToRead = new EnumYoVariable[enumVariablesToRead.size()];

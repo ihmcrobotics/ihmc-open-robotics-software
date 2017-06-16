@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -82,7 +82,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");
-      DoubleYoVariable yoTime = robot.getYoTime();
+      YoDouble yoTime = robot.getYoTime();
       SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);

@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -398,16 +398,16 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 			}
 		}
 		
-		public DoubleYoVariable getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
+		public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
 		{
 			String variable = "q_d_" + joint.getName();
-			return (DoubleYoVariable)humanoidRobotModel.getVariable(variable);
+			return (YoDouble)humanoidRobotModel.getVariable(variable);
 		}
 		
-		public DoubleYoVariable getJointDesiredPosition(RobotSide side, ArmJointName jointName)
+		public YoDouble getJointDesiredPosition(RobotSide side, ArmJointName jointName)
 		{
 			String variable = "q_d_" + fullRobotModel.getArmJoint(side, jointName).getName();
-			return (DoubleYoVariable)humanoidRobotModel.getVariable(variable);
+			return (YoDouble)humanoidRobotModel.getVariable(variable);
 		}
 		
 		public boolean getFootCheckPointFlag(int index)

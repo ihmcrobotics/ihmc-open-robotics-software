@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SwingInitialICPMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable startOfSplineTime;
+   private final YoDouble startOfSplineTime;
 
    private final boolean blendFromInitial;
    private final double minimumBlendingTime;
 
-   public SwingInitialICPMatrix(DoubleYoVariable startOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
+   public SwingInitialICPMatrix(YoDouble startOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 

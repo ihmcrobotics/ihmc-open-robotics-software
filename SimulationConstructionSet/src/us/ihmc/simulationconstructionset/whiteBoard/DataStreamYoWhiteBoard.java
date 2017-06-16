@@ -10,11 +10,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableType;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.tools.thread.ThreadTools;
 
 
@@ -367,7 +364,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       {
       case DOUBLE:
       {
-         yoVariable = new DoubleYoVariable(variableName, registry);
+         yoVariable = new YoDouble(variableName, registry);
          break;
       }
       

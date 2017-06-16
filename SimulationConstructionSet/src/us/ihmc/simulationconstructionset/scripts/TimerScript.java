@@ -2,8 +2,7 @@ package us.ihmc.simulationconstructionset.scripts;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TimerScript implements Script
 {
@@ -11,16 +10,16 @@ public class TimerScript implements Script
    private final YoVariableRegistry registry;
    private final YoBoolean startTimer;
    private final YoBoolean timerEnabled;
-   private final DoubleYoVariable timeElapsed;
-   private final DoubleYoVariable startTime;
+   private final YoDouble timeElapsed;
+   private final YoDouble startTime;
    
    public TimerScript(String name, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
       startTimer = new YoBoolean("startTimer", registry);
       timerEnabled = new YoBoolean("timerEnabled", registry);
-      timeElapsed = new DoubleYoVariable("timeElapsed", registry);
-      startTime = new DoubleYoVariable("startTime", registry);
+      timeElapsed = new YoDouble("timeElapsed", registry);
+      startTime = new YoDouble("startTime", registry);
       parentRegistry.addChild(registry);
    }
    
@@ -43,7 +42,7 @@ public class TimerScript implements Script
       startTimer.set(true);
    }
 
-   public DoubleYoVariable getTimeElapsed()
+   public YoDouble getTimeElapsed()
    {
       return timeElapsed;
    }
