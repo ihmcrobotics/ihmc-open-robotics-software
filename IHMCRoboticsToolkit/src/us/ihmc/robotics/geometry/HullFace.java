@@ -9,14 +9,14 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 /**
  * @author agrabertilton
  */
 public class HullFace
 {
-   private Plane3d plane = new Plane3d();
+   private Plane3D plane = new Plane3D();
    private List<Point3D> facePoints = new ArrayList<Point3D>();
    private double slopeAngle;
    private double area;
@@ -97,7 +97,7 @@ public class HullFace
       return area;
    }
 
-   public void getPlane(Plane3d planeToPack)
+   public void getPlane(Plane3D planeToPack)
    {
       planeToPack.set(plane);
    }

@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -62,10 +62,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final TransformReferenceFrame planarRegionReferenceFrame;
    private final FramePoint midGroundPoint;
    private final Vector3D waypointAdjustmentVector;
-   private final Plane3d waypointAdjustmentPlane;
-   private final Plane3d swingFloorPlane;
-   private final Plane3d swingStartToeFacingSwingEndPlane;
-   private final Plane3d swingEndHeelFacingSwingStartPlane;
+   private final Plane3D waypointAdjustmentPlane;
+   private final Plane3D swingFloorPlane;
+   private final Plane3D swingStartToeFacingSwingEndPlane;
+   private final Plane3D swingEndHeelFacingSwingStartPlane;
    private final AxisAngle axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
 
@@ -133,10 +133,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       planarRegionReferenceFrame = new TransformReferenceFrame("planarRegionReferenceFrame", WORLD);
       midGroundPoint = new FramePoint();
       waypointAdjustmentVector = new Vector3D();
-      waypointAdjustmentPlane = new Plane3d();
-      swingFloorPlane = new Plane3d();
-      swingStartToeFacingSwingEndPlane = new Plane3d();
-      swingEndHeelFacingSwingStartPlane = new Plane3d();
+      waypointAdjustmentPlane = new Plane3D();
+      swingFloorPlane = new Plane3D();
+      swingStartToeFacingSwingEndPlane = new Plane3D();
+      swingEndHeelFacingSwingStartPlane = new Plane3D();
       axisAngle = new AxisAngle();
       rigidBodyTransform = new RigidBodyTransform();
 

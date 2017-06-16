@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 /**
  * Represents an infinitely wide and long 3D plane defined by a 3D point and a 3D unit-vector.
  */
-public class Plane3d implements GeometryObject<Plane3d>
+public class Plane3D implements GeometryObject<Plane3D>
 {
    private final static double minAllowableVectorPart = Math.sqrt(Double.MIN_NORMAL);
 
@@ -33,7 +33,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * Default constructor that initializes both {@link #point} and {@link #normal} to zero. This
     * point and vector have to be set to valid values to make this plane usable.
     */
-   public Plane3d()
+   public Plane3D()
    {
       hasPointBeenSet = false;
       hasNormalBeenSet = false;
@@ -45,7 +45,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @param other the other plane used to initialize this plane. Not modified.
     * @throws RuntimeException if the other plane has not been initialized yet.
     */
-   public Plane3d(Plane3d other)
+   public Plane3D(Plane3D other)
    {
       set(other);
    }
@@ -60,7 +60,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @throws RuntimeException if the plane normal could not be computed from the three given
     *            points.
     */
-   public Plane3d(Point3DReadOnly firstPointOnPlane, Point3DReadOnly secondPointOnPlane, Point3DReadOnly thirdPointOnPlane)
+   public Plane3D(Point3DReadOnly firstPointOnPlane, Point3DReadOnly secondPointOnPlane, Point3DReadOnly thirdPointOnPlane)
    {
       set(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane);
    }
@@ -72,7 +72,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @param planeNormal normal of this plane. Not modified.
     * @throws RuntimeException if the new normal is unreasonably small.
     */
-   public Plane3d(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
+   public Plane3D(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
    {
       set(pointOnPlane, planeNormal);
    }
@@ -168,7 +168,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @throws RuntimeException if this plane has not been initialized yet.
     */
    @Override
-   public boolean epsilonEquals(Plane3d other, double epsilon)
+   public boolean epsilonEquals(Plane3D other, double epsilon)
    {
       checkHasBeenInitialized();
       return other.normal.epsilonEquals(normal, epsilon) && other.point.epsilonEquals(point, epsilon);
@@ -181,7 +181,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @return {@code true} if the two planes are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(Plane3d other)
+   public boolean equals(Plane3D other)
    {
       if (other == null)
          return false;
@@ -201,7 +201,7 @@ public class Plane3d implements GeometryObject<Plane3d>
    {
       try
       {
-         return equals((Plane3d) obj);
+         return equals((Plane3D) obj);
       }
       catch (ClassCastException e)
       {
@@ -455,7 +455,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @return {@code true} if the two planes are coincident, {@code false} otherwise.
     * @throws RuntimeException if this plane has not been initialized yet.
     */
-   public boolean isCoincident(Plane3d otherPlane, double angleEpsilon, double distanceEpsilon)
+   public boolean isCoincident(Plane3D otherPlane, double angleEpsilon, double distanceEpsilon)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.arePlane3DsCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
@@ -638,7 +638,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @return {@code true} if the two planes are parallel, {@code false} otherwise.
     * @throws RuntimeException if this plane has not been initialized yet.
     */
-   public boolean isParallel(Plane3d otherPlane, double angleEpsilon)
+   public boolean isParallel(Plane3D otherPlane, double angleEpsilon)
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.areVector3DsParallel(normal, otherPlane.normal, angleEpsilon);
@@ -694,7 +694,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     * @throws RuntimeException if the other plane has not been initialized yet.
     */
    @Override
-   public void set(Plane3d other)
+   public void set(Plane3D other)
    {
       point.set(other.getPoint());
       normal.set(other.getNormal());

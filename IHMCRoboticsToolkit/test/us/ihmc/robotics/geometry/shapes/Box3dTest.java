@@ -151,19 +151,19 @@ public class Box3dTest
    public void testScale()
    {
       Box3d box3d = new Box3d();
-      Plane3d xFace = box3d.getFace(FaceName.PLUSX);
-      Plane3d yFace = box3d.getFace(FaceName.PLUSY);
-      Plane3d zFace = box3d.getFace(FaceName.PLUSZ);
-      Plane3d xFaceMinus = box3d.getFace(FaceName.MINUSX);
-      Plane3d yFaceMinus = box3d.getFace(FaceName.MINUSY);
-      Plane3d zFaceMinus = box3d.getFace(FaceName.MINUSZ);
+      Plane3D xFace = box3d.getFace(FaceName.PLUSX);
+      Plane3D yFace = box3d.getFace(FaceName.PLUSY);
+      Plane3D zFace = box3d.getFace(FaceName.PLUSZ);
+      Plane3D xFaceMinus = box3d.getFace(FaceName.MINUSX);
+      Plane3D yFaceMinus = box3d.getFace(FaceName.MINUSY);
+      Plane3D zFaceMinus = box3d.getFace(FaceName.MINUSZ);
       
-      Plane3d expectedXFace = new Plane3d(new Point3D(0.5, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
-      Plane3d expectedYFace = new Plane3d(new Point3D(0.0, 0.5, 0.0), new Vector3D(0.0, 1.0, 0.0));
-      Plane3d expectedZFace = new Plane3d(new Point3D(0.0, 0.0, 0.5), new Vector3D(0.0, 0.0, 1.0));
-      Plane3d expectedXFaceMinus = new Plane3d(new Point3D(-0.5, 0.0, 0.0), new Vector3D(-1.0, 0.0, 0.0));
-      Plane3d expectedYFaceMinus = new Plane3d(new Point3D(0.0, -0.5, 0.0), new Vector3D(0.0, -1.0, 0.0));
-      Plane3d expectedZFaceMinus = new Plane3d(new Point3D(0.0, 0.0, -0.5), new Vector3D(0.0, 0.0, -1.0));
+      Plane3D expectedXFace = new Plane3D(new Point3D(0.5, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
+      Plane3D expectedYFace = new Plane3D(new Point3D(0.0, 0.5, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      Plane3D expectedZFace = new Plane3D(new Point3D(0.0, 0.0, 0.5), new Vector3D(0.0, 0.0, 1.0));
+      Plane3D expectedXFaceMinus = new Plane3D(new Point3D(-0.5, 0.0, 0.0), new Vector3D(-1.0, 0.0, 0.0));
+      Plane3D expectedYFaceMinus = new Plane3D(new Point3D(0.0, -0.5, 0.0), new Vector3D(0.0, -1.0, 0.0));
+      Plane3D expectedZFaceMinus = new Plane3D(new Point3D(0.0, 0.0, -0.5), new Vector3D(0.0, 0.0, -1.0));
       
       double epsilon = 1e-14;
       assertTrue(xFace.epsilonEquals(expectedXFace, epsilon));
@@ -181,12 +181,12 @@ public class Box3dTest
       yFaceMinus = box3d.getFace(FaceName.MINUSY);
       zFaceMinus = box3d.getFace(FaceName.MINUSZ);
       
-      expectedXFace = new Plane3d(new Point3D(1.0, 0.0, 0.0), new Vector3D(2.0, 0.0, 0.0));
-      expectedYFace = new Plane3d(new Point3D(0.0, 1.0, 0.0), new Vector3D(0.0, 2.0, 0.0));
-      expectedZFace = new Plane3d(new Point3D(0.0, 0.0, 1.0), new Vector3D(0.0, 0.0, 2.0));
-      expectedXFaceMinus = new Plane3d(new Point3D(-1.0, 0.0, 0.0), new Vector3D(-2.0, 0.0, 0.0));
-      expectedYFaceMinus = new Plane3d(new Point3D(0.0, -1.0, 0.0), new Vector3D(0.0, -2.0, 0.0));
-      expectedZFaceMinus = new Plane3d(new Point3D(0.0, 0.0, -1.0), new Vector3D(0.0, 0.0, -2.0));
+      expectedXFace = new Plane3D(new Point3D(1.0, 0.0, 0.0), new Vector3D(2.0, 0.0, 0.0));
+      expectedYFace = new Plane3D(new Point3D(0.0, 1.0, 0.0), new Vector3D(0.0, 2.0, 0.0));
+      expectedZFace = new Plane3D(new Point3D(0.0, 0.0, 1.0), new Vector3D(0.0, 0.0, 2.0));
+      expectedXFaceMinus = new Plane3D(new Point3D(-1.0, 0.0, 0.0), new Vector3D(-2.0, 0.0, 0.0));
+      expectedYFaceMinus = new Plane3D(new Point3D(0.0, -1.0, 0.0), new Vector3D(0.0, -2.0, 0.0));
+      expectedZFaceMinus = new Plane3D(new Point3D(0.0, 0.0, -1.0), new Vector3D(0.0, 0.0, -2.0));
       
       assertTrue(xFace.epsilonEquals(expectedXFace, epsilon));
       assertTrue(yFace.epsilonEquals(expectedYFace, epsilon));
@@ -423,7 +423,7 @@ public class Box3dTest
          Collections.shuffle(faces);
          for (ImmutablePair<FaceName, Integer> face : faces)
          {
-            Plane3d plane = box.getFace(face.getLeft());
+            Plane3D plane = box.getFace(face.getLeft());
             Vector3D normal = plane.getNormalCopy();
             
             Vector3D rotationMatrixColumn = new Vector3D();

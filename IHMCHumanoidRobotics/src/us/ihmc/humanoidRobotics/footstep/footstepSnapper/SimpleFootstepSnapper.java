@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -116,7 +116,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
          pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), searchWidth, searchLength, footstepMask);
       }
 
-      Plane3d fittedPlane = new Plane3d();
+      Plane3D fittedPlane = new Plane3D();
 
       planeFitter.fitPlaneToPoints(new Point2D(position.getX(), position.getY()), pointList, fittedPlane);
       double height = fittedPlane.getZOnPlane(position.getX(), position.getY());
@@ -155,7 +155,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
          pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), searchWidth, searchLength, footstepMask);
       }
 
-      Plane3d fittedPlane = new Plane3d();
+      Plane3D fittedPlane = new Plane3D();
 
       planeFitter.fitPlaneToPoints(new Point2D(footPose2d.getX(), footPose2d.getY()), pointList, fittedPlane);
       double height = fittedPlane.getZOnPlane(footPose2d.getX(), footPose2d.getY());

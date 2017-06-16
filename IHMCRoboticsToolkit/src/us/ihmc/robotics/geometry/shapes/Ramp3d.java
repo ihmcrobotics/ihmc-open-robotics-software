@@ -22,7 +22,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    
    private double rampLength;
    private double angleOfRampIncline;
-   private final Plane3d rampPlane;
+   private final Plane3D rampPlane;
 
    private final Point3D temporaryPoint;
 
@@ -30,7 +30,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       setPose(ramp3d);
       size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
-      rampPlane = new Plane3d();
+      rampPlane = new Plane3D();
       temporaryPoint = new Point3D();
 
       updateRamp();
@@ -39,7 +39,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    public Ramp3d(double width, double length, double height)
    {
       size = new Size3d(length, width, height);
-      rampPlane = new Plane3d();
+      rampPlane = new Plane3D();
       temporaryPoint = new Point3D();
 
       updateRamp();
@@ -49,7 +49,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       setPose(transform);
       size = new Size3d(length, width, height);
-      rampPlane = new Plane3d();
+      rampPlane = new Plane3D();
       temporaryPoint = new Point3D();
 
       updateRamp();
@@ -59,7 +59,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       setPose(pose);
       size = new Size3d(length, width, height);
-      rampPlane = new Plane3d();
+      rampPlane = new Plane3D();
       temporaryPoint = new Point3D();
 
       updateRamp();

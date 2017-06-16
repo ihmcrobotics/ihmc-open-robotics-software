@@ -21,12 +21,12 @@ public class Plane3dTest
    {
       Point3D point = new Point3D();
       Vector3D normal = new Vector3D(1.0, 2.0, 3.0);
-      Plane3d plane = new Plane3d(point, normal);
+      Plane3D plane = new Plane3D(point, normal);
       assertTrue(point.equals(plane.getPointCopy()));
       assertFalse(point == plane.getPointCopy());
       normal.normalize();
       assertTrue(normal.equals(plane.getNormalCopy()));
-      Plane3d plane2 = new Plane3d(point,normal);
+      Plane3D plane2 = new Plane3D(point,normal);
       assertTrue(plane2.epsilonEquals(plane, 1e-17));
    }
 
@@ -34,7 +34,7 @@ public class Plane3dTest
 	@Test(timeout = 30000)
    public void testEmptyConstructor()
    {
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       assertTrue(plane.getNormalCopy().getX() == 0.0);
       assertTrue(plane.getNormalCopy().getY() == 0.0);
       assertTrue(plane.getNormalCopy().getZ() == 1.0);
@@ -47,7 +47,7 @@ public class Plane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       Point3D Q = new Point3D(0.0, 0.0, 2.0);
       assertTrue(plane.isOnOrAbove(Q));
       Q = new Point3D(0.0, 0.0, 0.0);
@@ -60,7 +60,7 @@ public class Plane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       Point3D Q = new Point3D(0.0, 0.0, -2.0);
       assertTrue(plane.isOnOrBelow(Q));
       Q = new Point3D(0.0, 0.0, 2.0);
@@ -73,7 +73,7 @@ public class Plane3dTest
    {
       Point3D q = new Point3D(1.0, 2.0, -3.0);
       Point3D v = new Point3D(1.0, 2.0, 0.0);
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       assertTrue(v.equals(plane.orthogonalProjectionCopy(q)));
 
       q.set(3.0, 3.0, -4.0);
@@ -89,7 +89,7 @@ public class Plane3dTest
    {
       Point3D point = new Point3D(1.0, 2.0, -3.0);
       Vector3D normal = new Vector3D(0.2, 1.7, 0.4);
-      Plane3d plane = new Plane3d(point, normal);
+      Plane3D plane = new Plane3D(point, normal);
 
       double x = 2.33;
       double y = 1.97;
@@ -100,7 +100,7 @@ public class Plane3dTest
       assertTrue(plane.distance(testPoint) < 1e-10);
 
       normal = new Vector3D(0.2, 1.7, 0.0);
-      plane = new Plane3d(point, normal);
+      plane = new Plane3D(point, normal);
 
       z = plane.getZOnPlane(x, y);
       assertTrue(Double.isNaN(z));
@@ -111,7 +111,7 @@ public class Plane3dTest
    public void testDistance()
    {
       Point3D q = new Point3D(1.0, 1.0, 1.0);
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       assertEquals(1.0, plane.distance(q), 1e-14);
    }
 
@@ -121,14 +121,14 @@ public class Plane3dTest
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
       transformation.setRotationYawAndZeroTranslation(2.3);
-      Plane3d plane = new Plane3d();
+      Plane3D plane = new Plane3D();
       plane.applyTransform(transformation);
       EuclidCoreTestTools.assertTuple3DEquals(plane.getNormalCopy(), new Vector3D(0.0, 0.0, 1.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane.getPointCopy(), new Point3D(0.0, 0.0, 0.0), 1e-14);
 
       RigidBodyTransform transformation2 = new RigidBodyTransform();
       transformation2.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      Plane3d plane2 = new Plane3d();
+      Plane3D plane2 = new Plane3D();
       plane2.applyTransform(transformation2);
       EuclidCoreTestTools.assertTuple3DEquals(plane2.getNormalCopy(), new Vector3D(0.0, 0.0, 1.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane2.getPointCopy(), new Point3D(1.0, 2.0, 3.0), 1e-14);
@@ -136,7 +136,7 @@ public class Plane3dTest
       RigidBodyTransform transformation3 = new RigidBodyTransform();
       transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      Plane3d plane3 = new Plane3d();
+      Plane3D plane3 = new Plane3D();
       plane3.applyTransform(transformation3);
       EuclidCoreTestTools.assertTuple3DEquals(plane3.getNormalCopy(), new Vector3D(1.0, 0.0, 0.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane3.getPointCopy(), new Point3D(1.0, 2.0, 3.0), 1e-14);

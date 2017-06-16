@@ -11,7 +11,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 
 public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
@@ -101,7 +101,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       double maxHeight = Double.NEGATIVE_INFINITY;
       for (Box3d.FaceName faceName : faceNames)
       {
-         Plane3d face = box.getFace(faceName);
+         Plane3D face = box.getFace(faceName);
          face.intersectionWith(intersection, tempPoint, zVector);
 
          if (EuclidCoreMissingTools.isFinite(intersection))

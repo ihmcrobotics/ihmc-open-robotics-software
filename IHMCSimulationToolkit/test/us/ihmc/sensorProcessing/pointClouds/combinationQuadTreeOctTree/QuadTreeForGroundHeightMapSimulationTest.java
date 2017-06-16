@@ -25,7 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -202,7 +202,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       normal.normalize();
 
       BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
-      Plane3d plane3d = new Plane3d(center, normal);
+      Plane3D plane3d = new Plane3D(center, normal);
       ArrayList<Point3D> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
 //      Collections.shuffle(points);
@@ -230,7 +230,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       normal.normalize();
 
       BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
-      Plane3d plane3d = new Plane3d(center, normal);
+      Plane3D plane3d = new Plane3D(center, normal);
       ArrayList<Point3D> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       
       int pointsPerBallUpdate = 1;
@@ -255,7 +255,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    }
 
 
-   private static ArrayList<Point3D> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
+   private static ArrayList<Point3D> generatePointsForStairs(Plane3D plane3d, double halfWidth, double stepSize, double stairSeparation,
            double oneStairLandingHeight)
    {
       ArrayList<Point3D> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
@@ -264,7 +264,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       return ret;
    }
 
-   private static ArrayList<Point3D> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
+   private static ArrayList<Point3D> generatePointsForSlope(Plane3D plane3d, double halfWidth, double stepSize)
    {
       Point3D centerPoint = plane3d.getPointCopy();
 

@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -193,7 +193,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    {
       for (Cylinder3d.CylinderFaces face : Cylinder3d.CylinderFaces.values())
       {
-         Plane3d plane = cylinder.getPlane(face);
+         Plane3D plane = cylinder.getPlane(face);
          Point3D intersectionToPack = new Point3D();
          plane.intersectionWith(intersectionToPack, testPoint, testDirection);
 
