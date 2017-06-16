@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 @HighBandwidthPacket
@@ -123,10 +122,11 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    @Override
    public VideoPacket transform(RigidBodyTransform transform)
    {
-      Point3D newPoint = TransformTools.getTransformedPoint(getPosition(), transform);
-      Quaternion newOrientation = TransformTools.getTransformedQuat(getOrientation(), transform);
-
-      return new VideoPacket(getVideoSource(), getTimeStamp(), getData(), newPoint, newOrientation, getIntrinsicParameters());
+      Point3D newPosition = new Point3D(position);
+      Quaternion newOrientation = new Quaternion(orientation);
+      newPosition.applyTransform(transform);
+      newOrientation.applyTransform(transform);
+      return new VideoPacket(getVideoSource(), getTimeStamp(), getData(), newPosition, newOrientation, getIntrinsicParameters());
    }
 
    @Override

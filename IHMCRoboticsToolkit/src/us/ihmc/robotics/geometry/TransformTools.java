@@ -23,7 +23,7 @@ public class TransformTools
    public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint point, FrameVector zAxis)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVectorCopy()));
+      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVector()));
       ret.setTranslation(point.getPoint());
       return ret;
    }
@@ -163,22 +163,20 @@ public class TransformTools
 
    public static void rotate(RigidBodyTransform transform, double angle, Axis axis)
    {
-      RigidBodyTransform rotator = new RigidBodyTransform();
-
-      if (axis == Axis.X)
+      switch (axis)
       {
-         rotator.setRotationRollAndZeroTranslation(angle);
+      case X:
+         transform.appendRollRotation(angle);
+         break;
+      case Y:
+         transform.appendPitchRotation(angle);
+         break;
+      case Z:
+         transform.appendYawRotation(angle);
+         break;
+      default:
+         throw new RuntimeException("Unhandled value of Axis: " + axis);
       }
-      else if (axis == Axis.Y)
-      {
-         rotator.setRotationPitchAndZeroTranslation(angle);
-      }
-      else if (axis == Axis.Z)
-      {
-         rotator.setRotationYawAndZeroTranslation(angle);
-      }
-
-      transform.multiply(rotator);
    }
 
    public static void rotate(AffineTransform transform, double angle, Axis axis)
