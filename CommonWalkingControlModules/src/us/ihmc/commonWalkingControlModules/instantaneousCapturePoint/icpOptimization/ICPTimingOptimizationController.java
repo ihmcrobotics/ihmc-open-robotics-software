@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,8 +45,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final List<YoDouble> costToGos = new ArrayList<>();
    private final List<YoDouble> costToGoGradients = new ArrayList<>();
 
-   private final IntegerYoVariable numberOfGradientIterations = new IntegerYoVariable("numberOfGradientIterations", registry);
-   private final IntegerYoVariable numberOfGradientReductionIterations = new IntegerYoVariable("numberOfGradientReductionIterations", registry);
+   private final YoInteger numberOfGradientIterations = new YoInteger("numberOfGradientIterations", registry);
+   private final YoInteger numberOfGradientReductionIterations = new YoInteger("numberOfGradientReductionIterations", registry);
    private final YoDouble estimatedMinimumCostSwingTime = new YoDouble("estimatedMinimumCostSwingTime", registry);
 
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();

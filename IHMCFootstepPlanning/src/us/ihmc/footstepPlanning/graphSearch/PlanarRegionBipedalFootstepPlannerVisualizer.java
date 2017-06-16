@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -36,8 +36,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final IntegerYoVariable plannerUpdateIndex = new IntegerYoVariable("plannerUpdateIndex", registry);
-   private final IntegerYoVariable planarRegionUpdateIndex = new IntegerYoVariable("planarRegionUpdateIndex", registry);
+   private final YoInteger plannerUpdateIndex = new YoInteger("plannerUpdateIndex", registry);
+   private final YoInteger planarRegionUpdateIndex = new YoInteger("planarRegionUpdateIndex", registry);
    private final YoDouble plannerTime = new YoDouble("plannerTime", registry);
 
    private final YoFrameConvexPolygon2d leftFootstepStart, rightFootstepStart;

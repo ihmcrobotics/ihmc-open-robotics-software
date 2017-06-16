@@ -1,15 +1,15 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SensorMCUTime implements AcsellSlowSensor
 {
-   private final IntegerYoVariable time;
+   private final YoInteger time;
    
    public SensorMCUTime(String name, YoVariableRegistry slowSensorRegistry)
    {
-      time = new IntegerYoVariable(name + "SensorMCUTime", slowSensorRegistry);
+      time = new YoInteger(name + "SensorMCUTime", slowSensorRegistry);
    }
 
    @Override

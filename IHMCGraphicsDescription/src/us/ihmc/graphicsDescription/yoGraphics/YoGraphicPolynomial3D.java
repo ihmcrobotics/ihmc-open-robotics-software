@@ -471,13 +471,13 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          int ySize = yoPolynomialSizes[3 * i + 1];
          int zSize = yoPolynomialSizes[3 * i + 2];
 
-         YoPolynomial xPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, xSize - 1), (IntegerYoVariable) yoVariables[index]);
+         YoPolynomial xPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, xSize - 1), (YoInteger) yoVariables[index]);
          index += xSize;
 
-         YoPolynomial yPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, ySize - 1), (IntegerYoVariable) yoVariables[index]);
+         YoPolynomial yPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, ySize - 1), (YoInteger) yoVariables[index]);
          index += ySize;
 
-         YoPolynomial zPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, zSize - 1), (IntegerYoVariable) yoVariables[index]);
+         YoPolynomial zPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, zSize - 1), (YoInteger) yoVariables[index]);
          index += zSize;
 
          yoPolynomial3Ds[i] = new YoPolynomial3D(xPolynomial, yPolynomial, zPolynomial);

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -20,7 +20,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final YoEnum<HeadingAndVelocityEvaluationEvent> evaluationEvent = new YoEnum<HeadingAndVelocityEvaluationEvent>("evaluationEvent",
          registry, HeadingAndVelocityEvaluationEvent.class);
 
-   private final IntegerYoVariable evaluationEventOrderingIndex = new IntegerYoVariable("evaluationEventOrderingIndex", registry);
+   private final YoInteger evaluationEventOrderingIndex = new YoInteger("evaluationEventOrderingIndex", registry);
 
    private final double controlDT;
    private final YoDouble acceleration = new YoDouble("acceleration", registry);

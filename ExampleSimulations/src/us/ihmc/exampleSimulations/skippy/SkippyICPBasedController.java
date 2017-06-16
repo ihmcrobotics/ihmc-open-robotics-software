@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -30,8 +30,8 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final YoDouble hipSetpoint = new YoDouble("hipSetpoint", registry);
    private final YoDouble shoulderSetpoint = new YoDouble("shoulderSetpoint", registry);
 
-   private final IntegerYoVariable tickCounter = new IntegerYoVariable("tickCounter", registry);
-   private final IntegerYoVariable ticksForDesiredForce = new IntegerYoVariable("ticksForDesiredForce", registry);
+   private final YoInteger tickCounter = new YoInteger("tickCounter", registry);
+   private final YoInteger ticksForDesiredForce = new YoInteger("ticksForDesiredForce", registry);
    private final PIDController hipAngleController = new PIDController("hipAngleController", registry);
    private final PIDController shoulderAngleController = new PIDController("shoulderAngleController", registry);
    private final FrameVector angularMomentum = new FrameVector(worldFrame);

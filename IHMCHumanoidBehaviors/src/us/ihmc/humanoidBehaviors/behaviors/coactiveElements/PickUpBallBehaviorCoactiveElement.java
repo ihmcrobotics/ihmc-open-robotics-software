@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactiveElement
 {
@@ -21,22 +21,22 @@ public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactive
    }
 
    //UI SIDE YOVARS
-   public final IntegerYoVariable minHue = new IntegerYoVariable("minHue", userInterfaceWritableRegistry);
-   public final IntegerYoVariable minSat = new IntegerYoVariable("minSat", userInterfaceWritableRegistry);
-   public final IntegerYoVariable minVal = new IntegerYoVariable("minVal", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxHue = new IntegerYoVariable("maxHue", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxSat = new IntegerYoVariable("maxSat", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxVal = new IntegerYoVariable("maxVal", userInterfaceWritableRegistry);
+   public final YoInteger minHue = new YoInteger("minHue", userInterfaceWritableRegistry);
+   public final YoInteger minSat = new YoInteger("minSat", userInterfaceWritableRegistry);
+   public final YoInteger minVal = new YoInteger("minVal", userInterfaceWritableRegistry);
+   public final YoInteger maxHue = new YoInteger("maxHue", userInterfaceWritableRegistry);
+   public final YoInteger maxSat = new YoInteger("maxSat", userInterfaceWritableRegistry);
+   public final YoInteger maxVal = new YoInteger("maxVal", userInterfaceWritableRegistry);
    
-   public final IntegerYoVariable userInterfaceSideCount = new IntegerYoVariable("userInterfaceSideCount", userInterfaceWritableRegistry);
+   public final YoInteger userInterfaceSideCount = new YoInteger("userInterfaceSideCount", userInterfaceWritableRegistry);
    public final YoBoolean abortClicked = new YoBoolean("abortClicked", userInterfaceWritableRegistry);
    public final YoBoolean validClicked = new YoBoolean("validClicked", userInterfaceWritableRegistry);
 
    //BEHAVIOR SIDE YOVARS
    public final YoEnum<PickUpBallBehaviorState> currentState = new YoEnum<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
          PickUpBallBehaviorState.class);
-   public final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
-   public final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);
+   public final YoInteger machineSideCount = new YoInteger("machineSideCount", machineWritableRegistry);
+   public final YoInteger abortCount = new YoInteger("abortCount", machineWritableRegistry);
    public final YoBoolean abortAcknowledged = new YoBoolean("abortAcknowledged", machineWritableRegistry);
    public final YoBoolean searchingForBall = new YoBoolean("searchingForBall", machineWritableRegistry);
    public final YoBoolean foundBall = new YoBoolean("foundBall", machineWritableRegistry);

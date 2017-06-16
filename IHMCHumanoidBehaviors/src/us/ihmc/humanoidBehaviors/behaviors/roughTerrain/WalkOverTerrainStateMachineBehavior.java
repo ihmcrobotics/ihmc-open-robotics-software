@@ -30,7 +30,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -66,7 +66,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final String prefix = getClass().getSimpleName();
    private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
    private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
-   private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
+   private final YoInteger maxNumberOfStepsToTake = new YoInteger(prefix + "NumberOfStepsToTake", registry);
 
    private final FullRobotModel fullRobotModel;
 

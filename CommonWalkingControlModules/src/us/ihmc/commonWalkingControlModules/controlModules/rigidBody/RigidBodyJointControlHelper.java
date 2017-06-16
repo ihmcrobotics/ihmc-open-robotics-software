@@ -15,7 +15,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -33,9 +33,9 @@ public class RigidBodyJointControlHelper
    private final List<MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new ArrayList<>();
    private final List<RecyclingArrayDeque<SimpleTrajectoryPoint1D>> pointQueues = new ArrayList<>();
 
-   private final List<IntegerYoVariable> numberOfPointsInQueue = new ArrayList<>();
-   private final List<IntegerYoVariable> numberOfPointsInGenerator = new ArrayList<>();
-   private final List<IntegerYoVariable> numberOfPoints = new ArrayList<>();
+   private final List<YoInteger> numberOfPointsInQueue = new ArrayList<>();
+   private final List<YoInteger> numberOfPointsInGenerator = new ArrayList<>();
+   private final List<YoInteger> numberOfPoints = new ArrayList<>();
 
    private final List<YoDouble> defaultWeights = new ArrayList<>();
    private final List<YoDouble> currentWeights = new ArrayList<>();
@@ -75,9 +75,9 @@ public class RigidBodyJointControlHelper
 
          feedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
 
-         numberOfPointsInQueue.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInQueue", registry));
-         numberOfPointsInGenerator.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
-         numberOfPoints.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry));
+         numberOfPointsInQueue.add(new YoInteger(prefix + "_" + jointName + "_numberOfPointsInQueue", registry));
+         numberOfPointsInGenerator.add(new YoInteger(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
+         numberOfPoints.add(new YoInteger(prefix + "_" + jointName + "_numberOfPoints", registry));
 
          defaultWeights.add(new YoDouble(prefix + "_" + jointName + "_defaultWeight", registry));
          currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
@@ -192,9 +192,9 @@ public class RigidBodyJointControlHelper
             feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
          }
 
-         IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
-         IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
-         IntegerYoVariable numberOfPoints = this.numberOfPoints.get(jointIdx);
+         YoInteger numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
+         YoInteger numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
+         YoInteger numberOfPoints = this.numberOfPoints.get(jointIdx);
          numberOfPointsInQueue.set(pointQueues.get(jointIdx).size());
          numberOfPointsInGenerator.set(generator.getCurrentNumberOfWaypoints());
          numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());

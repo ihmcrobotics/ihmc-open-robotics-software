@@ -10,7 +10,7 @@ import java.util.LinkedHashSet;
 
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -115,7 +115,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
 
       Collection<Field> fieldsToIgnore = new ArrayList<Field>();
       Collection<String> fieldNamesToNeverIgnore = new ArrayList<String>();
-      fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.IntegerYoVariable.val");
+      fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.YoInteger.val");
       fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.YoDouble.val");
       fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.YoBoolean.val");
 
@@ -170,9 +170,9 @@ public class ReflectionSimulationComparer implements SimulationComparer
       try
       {
          StringFieldMatcher stringFieldMatcherToIgnore = new StringFieldMatcher();
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(IntegerYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoInteger.class, YoVariable.class.getDeclaredField("name"),
                  ".*StartTimeNano");
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(IntegerYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoInteger.class, YoVariable.class.getDeclaredField("name"),
                  ".*StopTimeNano");
 
          stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoDouble.class, YoVariable.class.getDeclaredField("name"),

@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -36,12 +36,12 @@ public class FootCoPOccupancyGrid
 
    private final YoVariableRegistry registry;
 
-   private final IntegerYoVariable nLengthSubdivisions;
-   private final IntegerYoVariable nWidthSubdivisions;
+   private final YoInteger nLengthSubdivisions;
+   private final YoInteger nWidthSubdivisions;
    private final YoDouble thresholdForCellActivation;
 
-   private final IntegerYoVariable currentXIndex;
-   private final IntegerYoVariable currentYIndex;
+   private final YoInteger currentXIndex;
+   private final YoInteger currentYIndex;
    private final YoBoolean areCurrentCoPIndicesValid;
 
    private final YoFramePoint[][] cellViz;
@@ -81,9 +81,9 @@ public class FootCoPOccupancyGrid
 
       registry = new YoVariableRegistry(namePrefix + name);
 
-      this.nLengthSubdivisions = new IntegerYoVariable(namePrefix + "NLengthSubdivisions", registry);
+      this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
       this.nLengthSubdivisions.set(nLengthSubdivisions);
-      this.nWidthSubdivisions = new IntegerYoVariable(namePrefix + "NWidthSubdivisions", registry);
+      this.nWidthSubdivisions = new YoInteger(namePrefix + "NWidthSubdivisions", registry);
       this.nWidthSubdivisions.set(nWidthSubdivisions);
 
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
@@ -103,8 +103,8 @@ public class FootCoPOccupancyGrid
       resetGridToEmpty = new YoBoolean(namePrefix + name + "Reset", registry);
       resetGridToEmpty.set(false);
 
-      currentXIndex = new IntegerYoVariable(namePrefix + "CurrentXIndex", registry);
-      currentYIndex = new IntegerYoVariable(namePrefix + "CurrentYIndex", registry);
+      currentXIndex = new YoInteger(namePrefix + "CurrentXIndex", registry);
+      currentYIndex = new YoInteger(namePrefix + "CurrentYIndex", registry);
       areCurrentCoPIndicesValid = new YoBoolean(namePrefix + "IsCurrentCoPIndicesValid", registry);
 
       cellSize = new YoFrameVector2d(namePrefix + "CellSize", soleFrame, registry);

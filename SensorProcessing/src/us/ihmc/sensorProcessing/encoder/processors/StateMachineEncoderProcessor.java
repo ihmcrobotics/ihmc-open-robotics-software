@@ -4,7 +4,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * <p>Title: </p>
@@ -24,7 +24,7 @@ public class StateMachineEncoderProcessor extends AbstractEncoderProcessor
    private final YoDouble previousPosition;
    private final YoDouble previousTime;
 
-   public StateMachineEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
       this.state = YoEnum.create(name + "EncoderState", EncoderState.class, registry);

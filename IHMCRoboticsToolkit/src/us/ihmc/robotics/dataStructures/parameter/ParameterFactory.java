@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -170,14 +170,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoInteger variable = new YoInteger("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((IntegerYoVariable) v).getIntegerValue());
+               parameter.set(((YoInteger) v).getIntegerValue());
             }
          });
 
@@ -204,14 +204,14 @@ public class ParameterFactory
          {
             final int count = i;
 
-            final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final YoInteger variable = new YoInteger("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
-                  parameter.set(count, ((IntegerYoVariable) v).getIntegerValue());
+                  parameter.set(count, ((YoInteger) v).getIntegerValue());
                }
             });
 

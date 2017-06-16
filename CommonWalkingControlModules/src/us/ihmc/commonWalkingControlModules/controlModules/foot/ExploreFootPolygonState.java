@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -69,7 +69,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    private final YoDouble copCommandWeight;
    private final YoFrameVector2d copCommandWeightVector;
 
-   private final IntegerYoVariable yoCurrentCorner;
+   private final YoInteger yoCurrentCorner;
 
    private final YoDouble timeBeforeExploring;
 
@@ -130,7 +130,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      yoCurrentCorner = new IntegerYoVariable(footName + "CurrentCornerExplored", registry);
+      yoCurrentCorner = new YoInteger(footName + "CurrentCornerExplored", registry);
    }
 
    public void setWeight(double weight)

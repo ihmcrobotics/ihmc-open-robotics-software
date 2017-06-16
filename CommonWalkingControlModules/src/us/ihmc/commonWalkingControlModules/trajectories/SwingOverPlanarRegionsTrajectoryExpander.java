@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -39,7 +39,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
-   private final IntegerYoVariable numberOfCheckpoints;
+   private final YoInteger numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
    private final YoDouble minimumClearance;
    private final YoDouble incrementalAdjustmentDistance;
@@ -104,7 +104,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;
       System.out.println("soltotoelength: " + soleToToeLength);
 
-      numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
+      numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);

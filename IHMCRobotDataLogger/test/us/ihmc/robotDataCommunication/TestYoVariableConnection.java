@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
@@ -22,14 +22,14 @@ public class TestYoVariableConnection
    private final YoVariableRegistry registry = new YoVariableRegistry("tester");
    private final YoDouble var1 = new YoDouble("var1", registry);
    private final YoDouble var2 = new YoDouble("var2", registry);
-   private final IntegerYoVariable var4 = new IntegerYoVariable("var4", registry);
-   private final IntegerYoVariable var5 = new IntegerYoVariable("var5", registry);
+   private final YoInteger var4 = new YoInteger("var4", registry);
+   private final YoInteger var5 = new YoInteger("var5", registry);
    private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
    
-   private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
-   private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
+   private final YoInteger echoIn = new YoInteger("echoIn", registry);
+   private final YoInteger echoOut = new YoInteger("echoOut", registry);
    
-   private final IntegerYoVariable timeout = new IntegerYoVariable("timeout", registry);
+   private final YoInteger timeout = new YoInteger("timeout", registry);
    
    private final YoBoolean startVariableSummary = new YoBoolean("startVariableSummary", registry);
    private final YoBoolean gc = new YoBoolean("gc", registry);

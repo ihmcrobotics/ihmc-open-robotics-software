@@ -19,7 +19,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -76,7 +76,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<YoFrameVector2d> entryCMPUserOffsets = new SideDependentList<>();
    private final SideDependentList<YoFrameVector2d> exitCMPUserOffsets = new SideDependentList<>();
 
-   private final IntegerYoVariable numberOfUpcomingFootsteps;
+   private final YoInteger numberOfUpcomingFootsteps;
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final FramePoint cmp = new FramePoint();
@@ -130,7 +130,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       stepLengthToCMPOffsetFactor = new YoDouble(namePrefix + "StepLengthToCMPOffsetFactor", registry);
       footstepLengthThresholdToPutExitCMPOnToes = new YoDouble(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToes", registry);
 
-      numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
+      numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
       putExitCMPOnToes = new YoBoolean(namePrefix + "PutExitCMPOnToes", registry);
       exitCMPForwardSafetyMarginOnToes = new YoDouble(namePrefix + "ExitCMPForwardSafetyMarginOnToes", registry);

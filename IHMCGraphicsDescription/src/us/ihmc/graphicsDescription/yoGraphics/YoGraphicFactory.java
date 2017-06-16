@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -76,7 +76,7 @@ public class YoGraphicFactory
       {
          ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
          int i = 0;
-         IntegerYoVariable yoNumVertices = (IntegerYoVariable) vars[i++];
+         YoInteger yoNumVertices = (YoInteger) vars[i++];
          ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
          while (i < vars.length - 6)
          {
@@ -111,7 +111,7 @@ public class YoGraphicFactory
       {
          ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
          int i = 0;
-         IntegerYoVariable yoNumVertices = (IntegerYoVariable) vars[i++];
+         YoInteger yoNumVertices = (YoInteger) vars[i++];
          ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
          while (i < vars.length)
          {

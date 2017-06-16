@@ -6,7 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
@@ -34,11 +34,11 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
    private final SimpleRegression correlationCalculator = new SimpleRegression();
    private final YoDouble correlationForDelay;
    private final YoDouble maxCorrelation;
-   private final IntegerYoVariable nTicksOfDelay;
+   private final YoInteger nTicksOfDelay;
 
-   private final IntegerYoVariable maxLeadInTicks;
-   private final IntegerYoVariable maxLagInTicks;
-   private final IntegerYoVariable numberOfObservations;
+   private final YoInteger maxLeadInTicks;
+   private final YoInteger maxLagInTicks;
+   private final YoInteger numberOfObservations;
 
    private final YoDouble correlationAlpha;
    private final DenseMatrix64F correlationBuffer;
@@ -64,17 +64,17 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       this.referenceSignal = referenceSignal;
       this.delayedSignal = delayedSignal;
 
-      nTicksOfDelay = new IntegerYoVariable(namePrefix + "_estimatedNTicksOfDelay", registry);
+      nTicksOfDelay = new YoInteger(namePrefix + "_estimatedNTicksOfDelay", registry);
       estimatedDelay = new YoDouble(namePrefix + "_estimatedDelay", registry);
       correlationForDelay = new YoDouble(namePrefix + "_correlationForDelay", registry);
       maxCorrelation = new YoDouble(namePrefix + "_maxCorrelation", registry);
       enabled = new YoBoolean(namePrefix + "_enabled", registry);
 
-      maxLeadInTicks = new IntegerYoVariable(namePrefix + "_maxPhaseLeadInTicks", registry);
+      maxLeadInTicks = new YoInteger(namePrefix + "_maxPhaseLeadInTicks", registry);
       maxLeadInTicks.set(DEFAULT_MAX_ABS_LEAD);
-      maxLagInTicks = new IntegerYoVariable(namePrefix + "_maxPhaseLagInTicks", registry);
+      maxLagInTicks = new YoInteger(namePrefix + "_maxPhaseLagInTicks", registry);
       maxLagInTicks.set(DEFAULT_MAX_ABS_LAG);
-      numberOfObservations = new IntegerYoVariable(namePrefix + "_nObservationsForDelayEstimation", registry);
+      numberOfObservations = new YoInteger(namePrefix + "_nObservationsForDelayEstimation", registry);
       numberOfObservations.set(DEFAULT_NUMBER_OF_OBSERVATIONS);
 
       int bufferSize = numberOfObservations.getIntegerValue() + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue();

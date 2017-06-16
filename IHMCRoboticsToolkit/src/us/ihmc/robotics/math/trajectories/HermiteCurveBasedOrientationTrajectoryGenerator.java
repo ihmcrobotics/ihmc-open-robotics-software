@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -40,7 +40,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
    private final YoDouble trajectoryTimeScale;
-   private final IntegerYoVariable piInteger;
+   private final YoInteger piInteger;
 
    private final YoDouble[] cumulativeBeziers;
 
@@ -78,7 +78,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       registry = new YoVariableRegistry(name);
       trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
       trajectoryTimeScale = new YoDouble(name + "TrajectoryTimeScale", registry);
-      piInteger = new IntegerYoVariable(name + "PiInteger", registry);
+      piInteger = new YoInteger(name + "PiInteger", registry);
       currentTime = new YoDouble(name + "Time", registry);
       trajectoryFrame = referenceFrame;
 

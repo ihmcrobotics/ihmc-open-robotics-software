@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -31,7 +31,7 @@ public class FootstepNodeVisualization implements GraphVisualization
    private final HashMap<FootstepNode, YoGraphicPosition> activeNodes = new HashMap<>();
    private final HashMap<FootstepNode, YoGraphicPosition> inactiveNodes = new HashMap<>();
 
-   private final IntegerYoVariable nodeCount = new IntegerYoVariable("NodeCount", registry);
+   private final YoInteger nodeCount = new YoInteger("NodeCount", registry);
 
    private final Queue<YoGraphicPosition> activeNodeGraphicsQueue = new ArrayDeque<>();
    private final Queue<YoGraphicPosition> inactiveNodeGraphicsQueue = new ArrayDeque<>();

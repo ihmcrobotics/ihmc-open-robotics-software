@@ -21,7 +21,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -70,9 +70,9 @@ public class DynamicReachabilityCalculator
    private final YoBoolean isStepReachable = new YoBoolean("isStepReachable", registry);
    private final YoBoolean isModifiedStepReachable = new YoBoolean("isModifiedStepReachable", registry);
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfTimingAdjustmentIterations", registry);
-   private final IntegerYoVariable numberOfAdjustments = new IntegerYoVariable("numberOfCoMAdjustments", registry);
-   private final IntegerYoVariable maximumNumberOfAdjustments = new IntegerYoVariable("maxNumberOfCoMAdjustments", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfTimingAdjustmentIterations", registry);
+   private final YoInteger numberOfAdjustments = new YoInteger("numberOfCoMAdjustments", registry);
+   private final YoInteger maximumNumberOfAdjustments = new YoInteger("maxNumberOfCoMAdjustments", registry);
 
    private final YoDouble currentTransferAdjustment = new YoDouble("currentTransferAdjustment", registry);
    private final YoDouble currentSwingAdjustment = new YoDouble("currentSwingAdjustment", registry);

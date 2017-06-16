@@ -48,7 +48,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -72,8 +72,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    }
 
    private final YoDouble yoTime;
-   private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
-   private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
+   private final YoInteger maxNumberOfStepsToTake = new YoInteger(prefix + "NumberOfStepsToTake", registry);
+   private final YoInteger indexOfNextFootstepToSendFromCurrentPlan = new YoInteger(prefix + "NextFootstepToSendFromCurrentPlan", registry);
 
    private final BipedalFootstepPlannerParameters footstepPlanningParameters;
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
@@ -88,7 +88,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final HumanoidReferenceFrames referenceFrames;
    private final YoBoolean havePlanarRegionsBeenSet = new YoBoolean(prefix + "HavePlanarRegionsBeenSet", registry);
    private FootstepPlan currentPlan;
-   private final IntegerYoVariable numberOfFootstepsInCurrentPlan = new IntegerYoVariable(prefix + "NumberOfFootstepsInCurrentPlan", registry);
+   private final YoInteger numberOfFootstepsInCurrentPlan = new YoInteger(prefix + "NumberOfFootstepsInCurrentPlan", registry);
 
    private final LocateGoalBehavior locateGoalBehavior;
    private final RequestAndWaitForPlanarRegionsListBehavior requestAndWaitForPlanarRegionsListBehavior;
@@ -108,8 +108,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
    private SimpleFootstep lastFootstepSentForExecution;
    
-   private final IntegerYoVariable stepCounterForClearingLidar = new IntegerYoVariable("StepCounterForClearingLidar", registry);
-   private final IntegerYoVariable stepsBeforeClearingLidar = new IntegerYoVariable("StepsBeforeClearingLidar", registry);
+   private final YoInteger stepCounterForClearingLidar = new YoInteger("StepCounterForClearingLidar", registry);
+   private final YoInteger stepsBeforeClearingLidar = new YoInteger("StepsBeforeClearingLidar", registry);
 
    public enum AnytimePlanningState
    {

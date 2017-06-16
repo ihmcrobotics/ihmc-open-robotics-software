@@ -12,7 +12,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -48,7 +48,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final String namePrefix;
 
    private final TrajectoryPointOptimizer optimizer;
-   private final IntegerYoVariable maxIterations;
+   private final YoInteger maxIterations;
    private final RecyclingArrayList<TDoubleArrayList> coefficients;
    private final EnumMap<Direction, ArrayList<YoPolynomial>> trajectories = new EnumMap<>(Direction.class);
    private final double[] tempCoeffs = new double[order.getCoefficients()];
@@ -70,8 +70,8 @@ public class PositionOptimizedTrajectoryGenerator
    private final YoBoolean isDone;
    private final YoBoolean optimizeInOneTick;
    private final YoBoolean hasConverged;
-   private final IntegerYoVariable segments;
-   private final IntegerYoVariable activeSegment;
+   private final YoInteger segments;
+   private final YoInteger activeSegment;
    private final ArrayList<YoDouble> waypointTimes = new ArrayList<>();
 
    private final YoFramePoint desiredPosition;
@@ -130,13 +130,13 @@ public class PositionOptimizedTrajectoryGenerator
 
       registry = new YoVariableRegistry(namePrefix + "Trajectory");
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, order, registry);
-      this.maxIterations = new IntegerYoVariable(namePrefix + "MaxIterations", registry);
+      this.maxIterations = new YoInteger(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
       optimizeInOneTick = new YoBoolean(namePrefix + "OptimizeInOneTick", registry);
       hasConverged = new YoBoolean(namePrefix + "HasConverged", registry);
-      segments = new IntegerYoVariable(namePrefix + "Segments", registry);
-      activeSegment = new IntegerYoVariable(namePrefix + "ActiveSegment", registry);
+      segments = new YoInteger(namePrefix + "Segments", registry);
+      activeSegment = new YoInteger(namePrefix + "ActiveSegment", registry);
 
       optimizeInOneTick.set(maxIterations >= 0);
       hasConverged.set(optimizeInOneTick.getBooleanValue());

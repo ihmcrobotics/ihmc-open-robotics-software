@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -768,7 +768,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPoints";
-      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    public static SimpleTrajectoryPoint1D findTrajectoryPoint(OneDoFJoint armJoint, int trajectoryPointIndex, SimulationConstructionSet scs)
@@ -798,7 +798,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPointsInQueue";
-      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    private ArmTrajectoryMessage generateRandomArmTrajectoryMessage(Random random, int numberOfTrajectoryPoints, double trajectoryTime, RobotSide robotSide,

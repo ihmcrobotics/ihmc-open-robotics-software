@@ -180,7 +180,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof IntegerYoVariable)
+      else if (variable instanceof YoInteger)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {

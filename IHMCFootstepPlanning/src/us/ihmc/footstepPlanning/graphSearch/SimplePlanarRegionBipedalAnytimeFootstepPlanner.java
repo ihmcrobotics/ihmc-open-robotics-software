@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.ThreadTools;
@@ -33,7 +33,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private boolean isBestPlanYetOptimal = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
    private final AtomicReference<SimpleFootstep> latestExecutedFootstepReference = new AtomicReference<>(null);
-   private final IntegerYoVariable stackSize = new IntegerYoVariable(namePrefix + "stackSize", registry);
+   private final YoInteger stackSize = new YoInteger(namePrefix + "stackSize", registry);
    private final YoDouble smallestCostToGoal = new YoDouble(namePrefix + "SmallestCostToGoal", registry);
    private BipedalFootstepPlannerNode parentOfStartNode = null;
 
