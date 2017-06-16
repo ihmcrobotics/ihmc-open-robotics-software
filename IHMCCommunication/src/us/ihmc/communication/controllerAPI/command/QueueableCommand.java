@@ -34,7 +34,8 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
-      setExecutionDelayTime(0.0);
+      executionDelayTime = 0.0;
+      adjustedExecutionTime = 0.0;
    }
 
    /**
@@ -169,6 +170,31 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    @Override
    public boolean isDelayedExecutionSupported()
    {
+      return true;
+   }
+   
+   public boolean epsilonEquals(C other, double epsilon)
+   {
+      if(commandId != other.getCommandId())
+      {
+         return false;
+      }
+      if(previousCommandId != other.getPreviousCommandId())
+      {
+         return false;
+      }
+      if(executionMode != other.getExecutionMode())
+      {
+         return false;
+      }
+      if(executionDelayTime != other.getExecutionDelayTime())
+      {
+         return false;
+      }
+      if(adjustedExecutionTime != other.getExecutionTime())
+      {
+         return false;
+      }
       return true;
    }
 }
