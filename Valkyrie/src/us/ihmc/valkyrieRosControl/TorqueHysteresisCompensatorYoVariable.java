@@ -4,7 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class TorqueHysteresisCompensatorYoVariable extends YoDouble
@@ -25,7 +25,7 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
    private final YoDouble rampDownTime;
    private final YoDouble rampStartTime;
 
-   private final EnumYoVariable<HysteresisState> hysteresisState;
+   private final YoEnum<HysteresisState> hysteresisState;
 
    private final YoBoolean isAccelerationHigh;
    private final YoBoolean isVelocityLow;
@@ -56,7 +56,7 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
       ramp = new YoDouble(getName() + "Ramp", registry);
       rampStartTime = new YoDouble(getName() + "RampStartTime", registry);
-      hysteresisState = new EnumYoVariable<>(getName() + "State", registry, HysteresisState.class, false);
+      hysteresisState = new YoEnum<>(getName() + "State", registry, HysteresisState.class, false);
 
       isAccelerationHigh = new YoBoolean(getName() + "IsQddHigh", registry);
       isVelocityLow = new YoBoolean(getName() + "IsQdLow", registry);

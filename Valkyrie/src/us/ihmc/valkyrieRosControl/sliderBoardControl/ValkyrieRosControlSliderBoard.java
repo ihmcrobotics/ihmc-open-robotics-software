@@ -16,7 +16,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
@@ -71,8 +71,8 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    /* package private */ final YoDouble jointVelocityAlphaFilter = new YoDouble("jointVelocityAlphaFilter", registry);
    /* package private */ final YoDouble jointVelocitySlopTime = new YoDouble("jointBacklashSlopTime", registry);
 
-   private EnumYoVariable<?> selectedJoint;
-   private EnumYoVariable<?> previousSelectedJoint;
+   private YoEnum<?> selectedJoint;
+   private YoEnum<?> previousSelectedJoint;
    private final YoDouble qDesiredSelected = new YoDouble("qDesiredSelected", registry);
    private final YoDouble qdDesiredSelected = new YoDouble("qdDesiredSelected", registry);
 
@@ -93,7 +93,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private YoFunctionGenerator selectedFunctionGenerator;
 
    private YoFunctionGenerator secondaryFunctionGenerator;
-   private EnumYoVariable<?> secondaryJoint;
+   private YoEnum<?> secondaryJoint;
    private final YoDouble tauFunctionSecondary = new YoDouble("tauFunctionSecondary", registry);
 
    @Override
@@ -142,12 +142,12 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       }
 
       String[] jointNameArray = jointNames.toArray(new String[jointNames.size()]);
-      selectedJoint = new EnumYoVariable<>("selectedJoint", "", registry, false, jointNameArray);
+      selectedJoint = new YoEnum<>("selectedJoint", "", registry, false, jointNameArray);
       System.out.println(Arrays.toString(selectedJoint.getEnumValuesAsString()));
-      previousSelectedJoint = new EnumYoVariable<>("previousSelectedJoint", "", registry, true, jointNameArray);
-      previousSelectedJoint.set(EnumYoVariable.NULL_VALUE);
-      secondaryJoint = new EnumYoVariable<>("secondaryJoint", "", registry, true, jointNameArray);
-      secondaryJoint.set(EnumYoVariable.NULL_VALUE);
+      previousSelectedJoint = new YoEnum<>("previousSelectedJoint", "", registry, true, jointNameArray);
+      previousSelectedJoint.set(YoEnum.NULL_VALUE);
+      secondaryJoint = new YoEnum<>("secondaryJoint", "", registry, true, jointNameArray);
+      secondaryJoint.set(YoEnum.NULL_VALUE);
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
@@ -163,10 +163,10 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
             tauOffsetSelected.set(selected.tau_offset.getDoubleValue());
 
-            if (previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+            if (previousSelectedJoint.getOrdinal() != YoEnum.NULL_VALUE)
                jointHolders.get(previousSelectedJoint.getOrdinal()).jointCommand_function.set(0.0);
 
-            if (RESET_FUNCTIONS_ON_JOINT_CHANGE || selectedJoint.getOrdinal() != secondaryJoint.getOrdinal() || previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+            if (RESET_FUNCTIONS_ON_JOINT_CHANGE || selectedJoint.getOrdinal() != secondaryJoint.getOrdinal() || previousSelectedJoint.getOrdinal() != YoEnum.NULL_VALUE)
             {
                selectedFunctionGenerator.setAmplitude(0.0);
                selectedFunctionGenerator.setFrequency(0.0);
@@ -250,7 +250,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       selected.jointCommand_function.set(tauFunctionSelected.getDoubleValue());
       selected.tau_offset.set(tauOffsetSelected.getDoubleValue());
 
-      if (secondaryJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
+      if (secondaryJoint.getOrdinal() != YoEnum.NULL_VALUE)
       {
          ValkyrieSliderBoardJointHolder secondary = jointHolders.get(secondaryJoint.getOrdinal());
          if (secondaryJoint.getOrdinal() != selectedJoint.getOrdinal())

@@ -29,7 +29,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -46,8 +46,8 @@ public class RigidBodyControlManager
    private final String bodyName;
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
-   private final EnumYoVariable<RigidBodyControlMode> requestedState;
-   private final EnumYoVariable<RigidBodyControlMode> defaultControlMode;
+   private final YoEnum<RigidBodyControlMode> requestedState;
+   private final YoEnum<RigidBodyControlMode> defaultControlMode;
 
    private final RigidBodyPositionControlHelper positionControlHelper;
 
@@ -78,10 +78,10 @@ public class RigidBodyControlManager
       registry = new YoVariableRegistry(namePrefix);
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
-      defaultControlMode = new EnumYoVariable<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
+      defaultControlMode = new YoEnum<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
       defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
 
       jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);

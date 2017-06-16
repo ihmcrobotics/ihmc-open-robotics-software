@@ -15,7 +15,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -45,7 +45,7 @@ public class SwingState extends AbstractUnconstrainedState
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
-   private final EnumYoVariable<TrajectoryType> activeTrajectoryType;
+   private final YoEnum<TrajectoryType> activeTrajectoryType;
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
@@ -208,7 +208,7 @@ public class SwingState extends AbstractUnconstrainedState
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
-      activeTrajectoryType = new EnumYoVariable<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
+      activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
       swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
 

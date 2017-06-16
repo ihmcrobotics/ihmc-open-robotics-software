@@ -109,7 +109,7 @@ public class PelvisLinearStateUpdater
       LOAD_THRESHOLD, MIN_PELVIS_ACCEL
    };
 
-   private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode",
+   private final YoEnum<SlippageCompensatorMode> slippageCompensatorMode = new YoEnum<SlippageCompensatorMode>("slippageCompensatorMode",
          registry, SlippageCompensatorMode.class);
 
    private final YoBoolean requestStopEstimationOfPelvisLinearState = new YoBoolean("userRequestStopEstimationOfPelvisLinearState", registry);

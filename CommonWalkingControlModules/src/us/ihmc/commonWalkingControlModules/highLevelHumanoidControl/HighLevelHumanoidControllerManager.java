@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotController.RobotController;
@@ -45,7 +45,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final HighLevelState initialBehavior;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
+   private final YoEnum<HighLevelState> requestedHighLevelState = new YoEnum<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);

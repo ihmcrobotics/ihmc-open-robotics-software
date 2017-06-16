@@ -27,7 +27,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -67,9 +67,9 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble calibrationStartTime = new YoDouble("calibrationStartTime", registry);
    private final YoDouble timeInCalibration = new YoDouble("timeInCalibration", registry);
 
-   private final EnumYoVariable<ValkyrieLowLevelControlModeMessage.ControlMode> currentControlMode = new EnumYoVariable<>("lowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class);
+   private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> currentControlMode = new YoEnum<>("lowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class);
 
-   private final EnumYoVariable<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new EnumYoVariable<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
+   private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new YoEnum<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
    private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
 
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;

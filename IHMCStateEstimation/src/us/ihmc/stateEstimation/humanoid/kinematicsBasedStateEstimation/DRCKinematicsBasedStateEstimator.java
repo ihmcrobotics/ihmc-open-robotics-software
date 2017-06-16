@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -51,7 +51,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoDouble yoTime = new YoDouble("t_stateEstimator", registry);
    private final AtomicReference<StateEstimatorMode> atomicOperationMode = new AtomicReference<>(null);
-   private final EnumYoVariable<StateEstimatorMode> operatingMode = new EnumYoVariable<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
+   private final YoEnum<StateEstimatorMode> operatingMode = new YoEnum<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
 
    private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;

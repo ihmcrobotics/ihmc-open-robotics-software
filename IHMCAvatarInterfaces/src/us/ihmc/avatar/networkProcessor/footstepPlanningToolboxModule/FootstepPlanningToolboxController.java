@@ -46,7 +46,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -65,7 +65,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       PLAN_THEN_SNAP,
       A_STAR
    }
-   private final EnumYoVariable<Planners> activePlanner = new EnumYoVariable<>("activePlanner", registry, Planners.class);
+   private final YoEnum<Planners> activePlanner = new YoEnum<>("activePlanner", registry, Planners.class);
    private final EnumMap<Planners, FootstepPlanner> plannerMap = new EnumMap<>(Planners.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);

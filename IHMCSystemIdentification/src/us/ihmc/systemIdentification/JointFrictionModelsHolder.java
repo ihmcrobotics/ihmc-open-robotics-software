@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
@@ -27,8 +27,8 @@ public abstract class JointFrictionModelsHolder
    private final YoDouble accelerationThreshold;
 
    protected final YoDouble frictionForce;
-   protected final EnumYoVariable<FrictionState> frictionCompensationState;
-   protected final EnumYoVariable<FrictionModel> activeFrictionModel;
+   protected final YoEnum<FrictionState> frictionCompensationState;
+   protected final YoEnum<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
    public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity,
@@ -37,8 +37,8 @@ public abstract class JointFrictionModelsHolder
       alphaForFilteredVelocity = new YoDouble(name + "_alphaForFilteredVelocity", registry);
       alphaForFilteredVelocity.set(alpha);
       frictionModels = new EnumMap<FrictionModel, JointFrictionModel>(FrictionModel.class);
-      frictionCompensationState = new EnumYoVariable<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
-      activeFrictionModel = new EnumYoVariable<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
+      frictionCompensationState = new YoEnum<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
+      activeFrictionModel = new YoEnum<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
       frictionForce = new YoDouble(name + "_frictionForce", registry);
       this.stictionTransitionVelocity = new YoDouble(name + "_stictionTransitionVelocity", registry);
       this.stictionTransitionVelocity.set(Math.abs(stictionTransitionVelocity));

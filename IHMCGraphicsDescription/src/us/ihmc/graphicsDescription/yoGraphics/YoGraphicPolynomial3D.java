@@ -156,8 +156,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    private final YoDouble[] waypointTimes;
 
    /** Notification for this YoGraphic of what task should be fulfilled see {@link CurrentTask}. */
-   private final EnumYoVariable<?> currentGraphicType;
-   private final EnumYoVariable<?> currentColorType;
+   private final YoEnum<?> currentGraphicType;
+   private final YoEnum<?> currentColorType;
    /**
     * When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns
     * on this flag to let the WRITER know that it has to synchronize.
@@ -387,8 +387,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          yoPolynomialSizes[3 * i + 2] = yoPolynomial3Ds[i].getYoPolynomialZ().getMaximumNumberOfCoefficients() + 1;
       }
 
-      currentGraphicType = new EnumYoVariable<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
-      currentColorType = new EnumYoVariable<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
+      currentGraphicType = new YoEnum<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
+      currentColorType = new YoEnum<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
       readerExists = new YoBoolean(name + "ReaderExists", registry);
 
       intermediatePositions = new Point3D[resolution];
@@ -486,8 +486,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       waypointTimes = subArray(yoVariables, index, numberOfPolynomials);
       index += numberOfPolynomials;
 
-      currentGraphicType = (EnumYoVariable<?>) yoVariables[index++];
-      currentColorType = (EnumYoVariable<?>) yoVariables[index++];
+      currentGraphicType = (YoEnum<?>) yoVariables[index++];
+      currentColorType = (YoEnum<?>) yoVariables[index++];
       readerExists = (YoBoolean) yoVariables[index++];
 
       intermediatePositions = new Point3D[resolution];

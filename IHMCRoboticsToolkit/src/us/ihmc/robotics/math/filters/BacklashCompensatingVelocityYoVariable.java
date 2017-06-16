@@ -4,7 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BacklashCompensatingVelocityYoVariable extends YoDouble implements ProcessingYoVariable
 {
@@ -16,7 +16,7 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
    private final YoDouble lastPosition;
    private final YoBoolean hasBeenCalled;
 
-   private final EnumYoVariable<BacklashState> backlashState;
+   private final YoEnum<BacklashState> backlashState;
    private final YoDouble slopTime;
 
    private final YoDouble timeInState;
@@ -27,7 +27,7 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
-      backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
+      backlashState = new YoEnum<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
       timeInState = new YoDouble(name + "TimeInState", registry);
 
@@ -49,7 +49,7 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
-      backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
+      backlashState = new YoEnum<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
       timeInState = new YoDouble(name + "timeInState", registry);
 

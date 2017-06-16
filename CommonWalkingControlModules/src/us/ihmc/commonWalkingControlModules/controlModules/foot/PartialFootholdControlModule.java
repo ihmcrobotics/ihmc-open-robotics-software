@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -38,7 +38,7 @@ public class PartialFootholdControlModule
 
    private final YoVariableRegistry registry;
 
-   private final EnumYoVariable<PartialFootholdState> footholdState;
+   private final YoEnum<PartialFootholdState> footholdState;
 
    public enum RotationCalculatorType
    {
@@ -47,7 +47,7 @@ public class PartialFootholdControlModule
    }
    private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
    private final EnumMap<RotationCalculatorType, FrameLine2d> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
-   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
+   private final YoEnum<RotationCalculatorType> rotationCalculatorType;
 
    private final RotationVerificator rotationVerificator;
 
@@ -123,7 +123,7 @@ public class PartialFootholdControlModule
       parentRegistry.addChild(registry);
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
 
-      footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
+      footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
       yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
       yoFullSupportAfterShrinking = new YoFrameConvexPolygon2d(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);

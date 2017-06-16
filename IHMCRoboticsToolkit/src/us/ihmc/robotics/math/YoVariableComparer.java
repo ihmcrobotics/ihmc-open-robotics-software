@@ -2,11 +2,11 @@ package us.ihmc.robotics.math;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoVariableComparer
 {
-   private final EnumYoVariable<CompareStatus> status;
+   private final YoEnum<CompareStatus> status;
    private final YoDouble yoVariableA;
    private final YoDouble yoVariableB;
    private final YoDouble difference;
@@ -22,7 +22,7 @@ public class YoVariableComparer
       this.compareType = thresholdType;
       this.threshold = threshold;
       this.nonChangingThreshold = Double.NaN;
-      this.status = new EnumYoVariable<CompareStatus>(name + "_status", registry, CompareStatus.class);
+      this.status = new YoEnum<CompareStatus>(name + "_status", registry, CompareStatus.class);
       this.difference = new YoDouble(name, registry);
    }
    
@@ -35,7 +35,7 @@ public class YoVariableComparer
       this.threshold = null;
       this.nonChangingThreshold = threshold;
       this.difference = new YoDouble(name, registry);
-      this.status = new EnumYoVariable<CompareStatus>(name + "_status", registry, CompareStatus.class);
+      this.status = new YoEnum<CompareStatus>(name + "_status", registry, CompareStatus.class);
    }
 
    public void update()

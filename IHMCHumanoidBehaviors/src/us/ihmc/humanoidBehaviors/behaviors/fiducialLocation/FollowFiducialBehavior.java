@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -56,7 +56,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
    private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<EnumYoVariable<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<YoEnum<FootstepStatus.Status>> latestFootstepStatusEnum;
    private final SideDependentList<YoFramePose> desiredFootStatusPoses;
    private final SideDependentList<YoFramePose> actualFootStatusPoses;
 
@@ -65,8 +65,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
 
-   private final EnumYoVariable<RobotSide> nextSideToSwing;
-   private final EnumYoVariable<RobotSide> currentlySwingingFoot;
+   private final YoEnum<RobotSide> nextSideToSwing;
+   private final YoEnum<RobotSide> currentlySwingingFoot;
 
    private final FootstepPlanner footstepPlanner;
 
@@ -98,10 +98,10 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       footstepPlanner = createFootstepPlanner();
 
-      nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
+      nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
-      currentlySwingingFoot = new EnumYoVariable<>("currentlySwingingFoot", registry, RobotSide.class, true);
+      currentlySwingingFoot = new YoEnum<>("currentlySwingingFoot", registry, RobotSide.class, true);
 
       footstepSentTimer.start();
 
@@ -118,9 +118,9 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       latestFootstepStatus = new SideDependentList<>();
 
-      EnumYoVariable<FootstepStatus.Status> leftFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("leftFootstepStatus", registry,
+      YoEnum<FootstepStatus.Status> leftFootstepStatus = new YoEnum<FootstepStatus.Status>("leftFootstepStatus", registry,
             FootstepStatus.Status.class);
-      EnumYoVariable<FootstepStatus.Status> rightFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("rightFootstepStatus", registry,
+      YoEnum<FootstepStatus.Status> rightFootstepStatus = new YoEnum<FootstepStatus.Status>("rightFootstepStatus", registry,
             FootstepStatus.Status.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 

@@ -4,7 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.FormattingTools;
 
@@ -149,20 +149,20 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
       };
    }
 
-   public static <T extends Enum<T>> YoVariableTestGoal enumEquals(final EnumYoVariable<T> enumYoVariable, final Enum<T> enumValue)
+   public static <T extends Enum<T>> YoVariableTestGoal enumEquals(final YoEnum<T> yoEnum, final Enum<T> enumValue)
    {
-      return new YoVariableTestGoal(enumYoVariable)
+      return new YoVariableTestGoal(yoEnum)
       {
          @Override
          public boolean currentlyMeetsGoal()
          {
-            return enumYoVariable.getEnumValue().equals(enumValue);
+            return yoEnum.getEnumValue().equals(enumValue);
          }
 
          @Override
          public String toString()
          {
-            return getFormattedEnumYoVariable(enumYoVariable) + " == " + enumValue.name();
+            return getFormattedEnumYoVariable(yoEnum) + " == " + enumValue.name();
          }
       };
    }
@@ -252,9 +252,9 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
       return yoBoolean.getName() + ":" + yoBoolean.getBooleanValue();
    }
 
-   private static <T extends Enum<T>> String getFormattedEnumYoVariable(final EnumYoVariable<T> enumYoVariable)
+   private static <T extends Enum<T>> String getFormattedEnumYoVariable(final YoEnum<T> yoEnum)
    {
-      return enumYoVariable.getName() + ":" + enumYoVariable.getEnumValue().name();
+      return yoEnum.getName() + ":" + yoEnum.getEnumValue().name();
    }
 
    public static String getFormattedDoubleYoVariable(YoDouble yoDouble)

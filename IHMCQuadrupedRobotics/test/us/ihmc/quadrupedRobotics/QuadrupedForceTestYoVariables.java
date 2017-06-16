@@ -3,14 +3,14 @@ package us.ihmc.quadrupedRobotics;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> userTrigger;
-   private final EnumYoVariable<QuadrupedForceControllerState> forceControllerState;
+   private final YoEnum<QuadrupedForceControllerRequestedEvent> userTrigger;
+   private final YoEnum<QuadrupedForceControllerState> forceControllerState;
    
    private final YoDouble stanceHeight;
    private final YoDouble groundPlanePointZ;
@@ -24,7 +24,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble xGaitStepDurationInput;
    
    // Step
-   private final EnumYoVariable<RobotQuadrant> timedStepQuadrant;
+   private final YoEnum<RobotQuadrant> timedStepQuadrant;
    private final YoDouble timedStepDuration;
    private final YoDouble timedStepGroundClearance;
    private final YoDouble timedStepGoalPositionX;
@@ -40,8 +40,8 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (EnumYoVariable<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
-      forceControllerState = (EnumYoVariable<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
+      userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
+      forceControllerState = (YoEnum<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
       
       stanceHeight = (YoDouble) scs.getVariable("param__stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
@@ -57,7 +57,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       comPositionEstimateY = (YoDouble) scs.getVariable("comPositionEstimateY");
       comPositionEstimateZ = (YoDouble) scs.getVariable("comPositionEstimateZ");
       
-      timedStepQuadrant = (EnumYoVariable<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
+      timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
       timedStepDuration = (YoDouble) scs.getVariable("timedStepDuration");
       timedStepGroundClearance = (YoDouble) scs.getVariable("timedStepGroundClearance");
       timedStepGoalPositionX = (YoDouble) scs.getVariable("timedStepGoalPositionX");
@@ -65,12 +65,12 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
    }
 
-   public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
+   public YoEnum<QuadrupedForceControllerRequestedEvent> getUserTrigger()
    {
       return userTrigger;
    }
 
-   public EnumYoVariable<QuadrupedForceControllerState> getForceControllerState()
+   public YoEnum<QuadrupedForceControllerState> getForceControllerState()
    {
       return forceControllerState;
    }
@@ -130,7 +130,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return comPositionEstimateZ;
    }
    
-   public EnumYoVariable<RobotQuadrant> getTimedStepQuadrant()
+   public YoEnum<RobotQuadrant> getTimedStepQuadrant()
    {
       return timedStepQuadrant;
    }

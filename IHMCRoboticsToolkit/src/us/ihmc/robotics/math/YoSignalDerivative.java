@@ -2,7 +2,7 @@ package us.ihmc.robotics.math;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * This class computes the derivative of the input signal in two different ways.
@@ -23,7 +23,7 @@ public class YoSignalDerivative
    private static final double DEFAULT_TOLERANCE = Double.MIN_VALUE;
    private final String name;
 
-   private EnumYoVariable<DifferentiationMode> differentiationMode;
+   private YoEnum<DifferentiationMode> differentiationMode;
    private YoDouble previousSignal;
    private YoDouble previousDerivative;
    private YoDouble previousTime;
@@ -35,7 +35,7 @@ public class YoSignalDerivative
    {
       this.name = name;
 
-      differentiationMode = new EnumYoVariable<DifferentiationMode>(name + "_differentiationMode", registry, DifferentiationMode.class);
+      differentiationMode = new YoEnum<DifferentiationMode>(name + "_differentiationMode", registry, DifferentiationMode.class);
       previousDerivative = new YoDouble(name + "_previousDerivative", registry);
       previousSignal = new YoDouble(name + "_previousSignal", registry);
       timeAtLastSignalChange = new YoDouble(name + "_timeAtLastSignalChange", registry);

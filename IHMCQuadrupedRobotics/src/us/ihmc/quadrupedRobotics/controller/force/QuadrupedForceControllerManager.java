@@ -41,7 +41,7 @@ import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineS
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -55,7 +55,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 public class QuadrupedForceControllerManager implements QuadrupedControllerManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> lastEvent = new EnumYoVariable<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
+   private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
    private final QuadrupedPostureInputProviderInterface postureProvider;

@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -49,7 +49,7 @@ public class FootControlModule
    private static final double coefficientOfFriction = 0.8;
 
    private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
-   private final EnumYoVariable<ConstraintType> requestedState;
+   private final YoEnum<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -112,7 +112,7 @@ public class FootControlModule
       // set up states and state machine
       YoDouble time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
-      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+      requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);
 
       setupContactStatesMap();

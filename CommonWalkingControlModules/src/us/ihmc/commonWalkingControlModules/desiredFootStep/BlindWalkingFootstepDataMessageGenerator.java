@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class BlindWalkingFootstepDataMessageGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
+   private final YoEnum<RobotSide> nextSwingLeg = YoEnum.create("nextSwingLeg", RobotSide.class, registry);
    private final YoBoolean walk = new YoBoolean("walk", registry);
 
    private final BlindWalkingDesiredFootstepCalculator blindWalkingDesiredFootstepCalculator;
