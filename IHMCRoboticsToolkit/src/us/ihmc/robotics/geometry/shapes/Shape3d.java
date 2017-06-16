@@ -26,7 +26,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 {
@@ -243,7 +243,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return shapePose.toString();
    }
 
-   public void setPose(Pose pose)
+   public void setPose(Pose3D pose)
    {
       pose.get(this.shapePose);
    }
@@ -279,7 +279,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       transformToPack.set(shapePose);
    }
 
-   public void getPose(Pose poseToPack)
+   public void getPose(Pose3D poseToPack)
    {
       poseToPack.set(shapePose);
    }

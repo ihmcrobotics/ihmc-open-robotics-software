@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 /**
  * Ramp where the center of ramp start side is origin.
@@ -56,7 +56,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
       updateRamp();
    }
 
-   public Ramp3d(Pose pose, double width, double length, double height)
+   public Ramp3d(Pose3D pose, double width, double length, double height)
    {
       setPose(pose);
       size = new Size3d(length, width, height);

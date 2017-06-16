@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 public class Cylinder3d extends Shape3d<Cylinder3d>
 {
@@ -44,7 +44,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       this.radius = radius;
    }
    
-   public Cylinder3d(Pose pose, double height, double radius)
+   public Cylinder3d(Pose3D pose, double height, double radius)
    {
       setPose(pose);
       this.height = height;

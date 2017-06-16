@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
@@ -38,7 +38,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
       tempPoint3d = new Point3D();
    }
 
-   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, Pose pose)
+   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, Pose3D pose)
    {
       setPose(pose);
       radius = new Vector3D(xRadius, yRadius, zRadius);

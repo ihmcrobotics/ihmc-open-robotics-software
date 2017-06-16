@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 /**
  * The torus is built in the XY plane, around the z axis
@@ -62,7 +62,7 @@ public class Torus3d extends Shape3d<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d(Pose pose, double radius, double thickness)
+   public Torus3d(Pose3D pose, double radius, double thickness)
    {
       setPose(pose);
       this.radius = radius;

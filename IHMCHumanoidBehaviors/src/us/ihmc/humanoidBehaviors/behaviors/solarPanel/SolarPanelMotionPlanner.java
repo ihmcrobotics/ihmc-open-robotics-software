@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SolarPanelMotionPlanner
@@ -22,7 +22,7 @@ public class SolarPanelMotionPlanner
    private double motionTime;
    
    // For debug
-   public ArrayList<Pose> debugPose = new ArrayList<Pose>();
+   public ArrayList<Pose3D> debugPose = new ArrayList<Pose3D>();
    
    public SolarPanelMotionPlanner(SolarPanel panel)
    {

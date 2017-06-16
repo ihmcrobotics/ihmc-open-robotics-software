@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
@@ -44,7 +44,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       box3d = getGeometryObject();
    }
 
-   public FrameBox3d(ReferenceFrame referenceFrame, Pose pose, double lengthX, double widthY, double heightZ)
+   public FrameBox3d(ReferenceFrame referenceFrame, Pose3D pose, double lengthX, double widthY, double heightZ)
    {
       super(referenceFrame, new Box3d(pose.getPosition(), pose.getOrientation(), lengthX, widthY, heightZ));
       box3d = getGeometryObject();
@@ -112,7 +112,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       box3d.setPose(position, orientation);
    }
    
-   public void setPose(Pose pose)
+   public void setPose(Pose3D pose)
    {
       box3d.setPose(pose.getPosition(), pose.getOrientation());
    }

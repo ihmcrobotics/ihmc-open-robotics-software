@@ -32,7 +32,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -152,7 +152,7 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
-      Pose homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
+      Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
       Map<String, JointAccelerationIntegrationSettings> integrationSettings = walkingControllerParameters.getOrCreateIntegrationSettings();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
