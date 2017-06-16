@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
@@ -48,7 +48,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final LongYoVariable planningStartTime = new LongYoVariable("planningStartTime", registry);
 
    protected final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-   protected final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
+   protected final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
    protected BipedalFootstepPlannerNode startNode, bestGoalNode;
    protected FootstepPlan footstepPlan = null;
 

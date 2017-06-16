@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -87,7 +87,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ReferenceFrame pelvisZUpFrame;
 
 
-   public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);

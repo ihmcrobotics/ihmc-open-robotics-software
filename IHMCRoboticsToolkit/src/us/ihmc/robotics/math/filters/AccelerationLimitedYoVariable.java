@@ -2,15 +2,14 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
 
 public class AccelerationLimitedYoVariable extends DoubleYoVariable
 {
    private final double dt;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final YoBoolean hasBeenInitialized;
 
    private final DoubleYoVariable smoothedRate;
    private final DoubleYoVariable smoothedAcceleration;
@@ -52,7 +51,7 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
 
       this.dt = dt;
 
-      hasBeenInitialized = new BooleanYoVariable(name + "HasBeenInitialized", registry);
+      hasBeenInitialized = new YoBoolean(name + "HasBeenInitialized", registry);
 
       smoothedRate = new DoubleYoVariable(name + "SmoothedRate", registry);
       smoothedAcceleration = new DoubleYoVariable(name + "SmoothedAcceleration", registry);

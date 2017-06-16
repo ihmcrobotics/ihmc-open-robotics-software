@@ -50,7 +50,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -185,7 +185,7 @@ public class IHMCHumanoidBehaviorManager
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
       AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters, yoTime, wholeBodyControllerParameters, registry);
-      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
@@ -291,7 +291,7 @@ public class IHMCHumanoidBehaviorManager
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 

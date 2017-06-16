@@ -6,18 +6,18 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class PelvisTrajectoryBehavior extends AbstractBehavior
 {
    private PelvisTrajectoryMessage outgoingPelvisTrajectoryMessage;
 
-   private final BooleanYoVariable hasPacketBeenSent;
+   private final YoBoolean hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
-   private final BooleanYoVariable trajectoryTimeElapsed;
+   private final YoBoolean trajectoryTimeElapsed;
 
    public PelvisTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -25,12 +25,12 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(PelvisTrajectoryMessage pelvisTrajectoryMessage)

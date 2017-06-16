@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,9 +21,9 @@ public class VirtualHoist implements RobotController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VirtualHoist");
 
-   private final BooleanYoVariable hoistOn = new BooleanYoVariable("hoistOn", registry);
-   private final BooleanYoVariable hoistUp = new BooleanYoVariable("hoistUp", registry);
-   private final BooleanYoVariable hoistDown = new BooleanYoVariable("hoistDown", registry);
+   private final YoBoolean hoistOn = new YoBoolean("hoistOn", registry);
+   private final YoBoolean hoistUp = new YoBoolean("hoistUp", registry);
+   private final YoBoolean hoistDown = new YoBoolean("hoistDown", registry);
 
    private final List<DoubleYoVariable> cableLengths = new ArrayList<>();
    private final DoubleYoVariable physicalCableLength = new DoubleYoVariable("hoistPhysicalCableLength", registry);

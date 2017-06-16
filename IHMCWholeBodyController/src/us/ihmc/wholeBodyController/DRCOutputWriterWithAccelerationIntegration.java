@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -233,7 +233,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
    }
 
-   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
    public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
@@ -288,7 +288,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         final BooleanYoVariable doAccelerationIntegration = new BooleanYoVariable("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
+         final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
          DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_" + oneDoFJoint.getName(), registry);
          DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_" + oneDoFJoint.getName(), registry);
 

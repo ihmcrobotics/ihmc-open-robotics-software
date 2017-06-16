@@ -17,7 +17,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -56,8 +56,8 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoPlaneContactState yoPlaneContactState;
 
    private final LongYoVariable lastCommandId;
-   private final BooleanYoVariable hasReset;
-   private final BooleanYoVariable resetRequested;
+   private final YoBoolean hasReset;
+   private final YoBoolean resetRequested;
 
    private final YoMatrix yoRho;
 
@@ -70,8 +70,8 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoFramePoint desiredCoP;
    private final YoFramePoint previousCoP;
 
-   private final BooleanYoVariable hasReceivedCenterOfPressureCommand;
-   private final BooleanYoVariable isFootholdAreaLargeEnough;
+   private final YoBoolean hasReceivedCenterOfPressureCommand;
+   private final YoBoolean isFootholdAreaLargeEnough;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
@@ -116,8 +116,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.clear();
       yoPlaneContactState.computeSupportPolygon();
 
-      hasReset = new BooleanYoVariable(namePrefix + "HasReset", registry);
-      resetRequested = new BooleanYoVariable(namePrefix + "ResetRequested", registry);
+      hasReset = new YoBoolean(namePrefix + "HasReset", registry);
+      resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
@@ -127,8 +127,8 @@ public class PlaneContactStateToWrenchMatrixHelper
          maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
       }
 
-      hasReceivedCenterOfPressureCommand = new BooleanYoVariable(namePrefix + "HasReceivedCoPCommand", registry);
-      isFootholdAreaLargeEnough = new BooleanYoVariable(namePrefix + "isFootholdAreaLargeEnough", registry);
+      hasReceivedCenterOfPressureCommand = new YoBoolean(namePrefix + "HasReceivedCoPCommand", registry);
+      isFootholdAreaLargeEnough = new YoBoolean(namePrefix + "isFootholdAreaLargeEnough", registry);
       desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
 
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);

@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -18,7 +18,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final OneDoFJoint joint;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final DoubleYoVariable qCurrent;
    private final DoubleYoVariable qDCurrent;
@@ -58,7 +58,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
 
       this.joint = joint;
-      isEnabled = new BooleanYoVariable("control_enabled_" + jointName, registry);
+      isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
       isEnabled.set(false);
 
       qCurrent = new DoubleYoVariable("q_" + jointName, registry);

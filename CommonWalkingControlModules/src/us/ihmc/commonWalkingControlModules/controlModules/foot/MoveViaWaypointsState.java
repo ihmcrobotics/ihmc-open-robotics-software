@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
 public class MoveViaWaypointsState extends AbstractFootControlState
 {
-   private final BooleanYoVariable isPerformingTouchdown;
+   private final YoBoolean isPerformingTouchdown;
    private final SettableDoubleProvider touchdownInitialTimeProvider = new SettableDoubleProvider(0.0);
    private final SettablePositionProvider currentDesiredFootPosition = new SettablePositionProvider();
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
@@ -55,7 +55,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";
 
-      isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);
+      isPerformingTouchdown = new YoBoolean(namePrefix + "IsPerformingTouchdown", registry);
       positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
 

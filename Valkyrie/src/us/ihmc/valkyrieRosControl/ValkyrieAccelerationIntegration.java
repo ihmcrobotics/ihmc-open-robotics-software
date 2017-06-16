@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -25,7 +25,7 @@ public class ValkyrieAccelerationIntegration
 
    private final List<DoubleYoVariable> tauFromVelocityList = new ArrayList<>();
 
-   private final List<BooleanYoVariable> enabledList = new ArrayList<>();
+   private final List<YoBoolean> enabledList = new ArrayList<>();
 
    private final double updateDT;
 
@@ -53,7 +53,7 @@ public class ValkyrieAccelerationIntegration
          DoubleYoVariable kVelocity = new DoubleYoVariable("kVelocity_" + jointName, registry);
          DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_AccInt_" + jointName, registry);
          DoubleYoVariable tauFromVelocity = new DoubleYoVariable("tau_vel_" + jointName, registry);
-         BooleanYoVariable enabled = new BooleanYoVariable(jointName + "AccelIntEnabled", registry);
+         YoBoolean enabled = new YoBoolean(jointName + "AccelIntEnabled", registry);
 
          kVelocityList.add(kVelocity);
          desiredVelocityList.add(desiredVelocity);

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -57,7 +57,7 @@ public class IndividualRobotiqHandController implements RobotController
    private final YoPolynomial yoPolynomial;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
-   private final BooleanYoVariable hasTrajectoryTimeChanged, isStopped;
+   private final YoBoolean hasTrajectoryTimeChanged, isStopped;
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
@@ -120,8 +120,8 @@ public class IndividualRobotiqHandController implements RobotController
       currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
       endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
       this.trajectoryTime = trajectoryTime;
-      hasTrajectoryTimeChanged = new BooleanYoVariable(sidePrefix + "HasTrajectoryTimeChanged", registry);
-      isStopped = new BooleanYoVariable(sidePrefix + "IsStopped", registry);
+      hasTrajectoryTimeChanged = new YoBoolean(sidePrefix + "HasTrajectoryTimeChanged", registry);
+      isStopped = new YoBoolean(sidePrefix + "IsStopped", registry);
       isStopped.set(false);
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {

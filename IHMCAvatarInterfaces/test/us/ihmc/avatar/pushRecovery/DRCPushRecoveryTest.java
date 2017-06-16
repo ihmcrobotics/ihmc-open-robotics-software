@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
@@ -351,9 +351,9 @@ public abstract class DRCPushRecoveryTest
       }
 
       // get rid of this once push recovery is enabled by default
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       enable.set(enablePushRecoveryControlModule);
-      BooleanYoVariable enableOnFailure = (BooleanYoVariable) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+      YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
             "enablePushRecoveryOnFailure");
       enableOnFailure.set(enablePushRecoveryOnFailure);
 

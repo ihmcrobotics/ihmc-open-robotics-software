@@ -13,9 +13,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
 
 public class StateFileComparerTest
 {
@@ -135,8 +134,8 @@ public class StateFileComparerTest
       DoubleYoVariable variable3 = new DoubleYoVariable("variable3", registry00);
       DoubleYoVariable variable4 = new DoubleYoVariable("variable4", registry01);
 
-      BooleanYoVariable boolean1 = new BooleanYoVariable("boolean1", root);
-      BooleanYoVariable boolean2 = new BooleanYoVariable("boolean2", registry01);
+      YoBoolean boolean1 = new YoBoolean("boolean1", root);
+      YoBoolean boolean2 = new YoBoolean("boolean2", registry01);
 
       DoubleYoVariable repeatNameVariable_root = new DoubleYoVariable("repeatNameVariable", root);
       DoubleYoVariable repeatNameVariable_0 = new DoubleYoVariable("repeatNameVariable", registry0);

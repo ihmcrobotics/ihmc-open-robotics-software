@@ -11,11 +11,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -38,7 +35,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private final EnumYoVariable<RobotSide> firstStepSide = new EnumYoVariable<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
    private final DoubleYoVariable minimumWidth = new DoubleYoVariable(namePrefix + "MinWidth", registry);
 
-   private final BooleanYoVariable stepSquareUp = new BooleanYoVariable(namePrefix + "SquareUp", registry);
+   private final YoBoolean stepSquareUp = new YoBoolean(namePrefix + "SquareUp", registry);
 
    private final DoubleYoVariable swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(namePrefix + "TransferTime", registry);
@@ -57,7 +54,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private final DoubleYoVariable stepPitch = new DoubleYoVariable(namePrefix + "Pitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable(namePrefix + "Roll", registry);
 
-   private final BooleanYoVariable sendSteps = new BooleanYoVariable(namePrefix + "Send", registry);
+   private final YoBoolean sendSteps = new YoBoolean(namePrefix + "Send", registry);
 
    private List<FramePoint2d> contactFramePoints;
    private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);

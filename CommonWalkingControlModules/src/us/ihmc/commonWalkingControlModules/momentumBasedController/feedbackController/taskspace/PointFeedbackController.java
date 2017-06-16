@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -33,7 +33,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -104,7 +104,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, DESIRED, isEnabled);

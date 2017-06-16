@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -17,7 +17,7 @@ public class GroundContactForceQPSolver
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
-   private final BooleanYoVariable firstCall = new BooleanYoVariable("firstCall", registry);
+   private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;

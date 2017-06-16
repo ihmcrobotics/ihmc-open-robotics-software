@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -36,7 +36,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private CommunicationBridge communicationBridge;
 
-   public PickUpBallBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public PickUpBallBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {

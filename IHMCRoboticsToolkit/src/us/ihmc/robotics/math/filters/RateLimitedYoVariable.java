@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class RateLimitedYoVariable extends DoubleYoVariable
@@ -9,17 +9,17 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    private final DoubleYoVariable maxRateVariable;
 
    private final DoubleYoVariable position;
-   private final BooleanYoVariable limited;
+   private final YoBoolean limited;
 
    private final double dt;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
       this.maxRateVariable.set(maxRate);
@@ -34,8 +34,8 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRateVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       this.maxRateVariable = maxRateVariable;
       this.position = null;
@@ -47,8 +47,8 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, DoubleYoVariable positionVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       position = positionVariable;
 
@@ -63,8 +63,8 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRateVariable, DoubleYoVariable positionVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       position = positionVariable;
       this.maxRateVariable = maxRateVariable;

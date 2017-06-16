@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -31,7 +31,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
-   private final BooleanYoVariable isDone;
+   private final YoBoolean isDone;
    private final DoubleYoVariable swingHeight;
    private final DoubleYoVariable maxSwingHeight;
    private final DoubleYoVariable minSwingHeight;
@@ -68,7 +68,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
-      isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
+      isDone = new YoBoolean(namePrefix + "IsDone", registry);
       swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
       swingHeight.set(minSwingHeight);
 

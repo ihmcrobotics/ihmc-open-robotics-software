@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
@@ -13,7 +13,7 @@ public class DeltaLimitedYoVariable extends DoubleYoVariable
    private final DoubleYoVariable maxDelta;
    private final DoubleYoVariable actual;
    private final DoubleYoVariable desired;
-   private final BooleanYoVariable isLimitingActive;
+   private final YoBoolean isLimitingActive;
 
    public DeltaLimitedYoVariable(String name, YoVariableRegistry registry, double maxDelta)
    {
@@ -23,7 +23,7 @@ public class DeltaLimitedYoVariable extends DoubleYoVariable
       this.maxDelta.set(Math.abs(maxDelta));
       this.actual = new DoubleYoVariable(name + "Actual", registry);
       this.desired = new DoubleYoVariable(name + "Desired", registry);
-      this.isLimitingActive = new BooleanYoVariable(name + "IsLimitingActive", registry);
+      this.isLimitingActive = new YoBoolean(name + "IsLimitingActive", registry);
       isLimitingActive.set(false);
    }
 

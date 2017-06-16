@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.utilities;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -34,7 +34,7 @@ public class TaskSpaceStiffnessCalculator
    private final YoFrameVector yoCrossProductOfCurrentVelWithForce;
    private final YoFrameVector yoDirectionOfFreeMotion;
 
-   private final BooleanYoVariable addSimulatedSensorNoise;
+   private final YoBoolean addSimulatedSensorNoise;
 
 
    public TaskSpaceStiffnessCalculator(String namePrefix, double controlDT, YoVariableRegistry registry)
@@ -59,7 +59,7 @@ public class TaskSpaceStiffnessCalculator
       yoCrossProductOfCurrentVelWithForce = new YoFrameVector(namePrefix + "VelocityCrossForce", world, registry);
       yoDirectionOfFreeMotion = new YoFrameVector(namePrefix + "DirOfFreeMotion", world, registry);
 
-      addSimulatedSensorNoise = new BooleanYoVariable(namePrefix + "AddSimulatedNoise", registry);
+      addSimulatedSensorNoise = new YoBoolean(namePrefix + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);
    }
 

@@ -27,7 +27,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -173,7 +173,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final DoubleYoVariable desiredGaitPeriod = new DoubleYoVariable("desiredGaitPeriod", registry);
    private final DoubleYoVariable currentGaitCompletion = new DoubleYoVariable("currentGaitCompletion", registry);
    private final DoubleYoVariable currentGaitPhaseCompletion = new DoubleYoVariable("currentPhaseCompletion", registry);
-   private final BooleanYoVariable gaitCompleted = new BooleanYoVariable("gaitCompleted", registry);
+   private final YoBoolean gaitCompleted = new YoBoolean("gaitCompleted", registry);
    private final DoubleYoVariable swingImpactVelocityZ = new DoubleYoVariable("swingImpactVelocityZ", registry);
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuadrupedSupportPolygon targetSupportPolygon = new YoQuadrupedSupportPolygon("targetSupportPolygon", registry);
@@ -212,8 +212,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private double ratioFromMidToClosest;
-   private final BooleanYoVariable isInFrontOfLeftTrotLine = new BooleanYoVariable("isInFrontOfLeftTrotLine", registry);
-   private final BooleanYoVariable isInFrontOfRightTrotLine = new BooleanYoVariable("isInFrontOfRightTrotLine", registry);
+   private final YoBoolean isInFrontOfLeftTrotLine = new YoBoolean("isInFrontOfLeftTrotLine", registry);
+   private final YoBoolean isInFrontOfRightTrotLine = new YoBoolean("isInFrontOfRightTrotLine", registry);
 
    // Swing PD Controllers
    private final YoFrameVector kp_swing = new YoFrameVector("kp_swing_", ReferenceFrame.getWorldFrame(), registry);

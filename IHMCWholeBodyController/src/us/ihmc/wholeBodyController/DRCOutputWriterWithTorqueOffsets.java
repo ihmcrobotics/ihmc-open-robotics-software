@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -19,7 +19,7 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
    private final DoubleYoVariable alphaTorqueOffset = new DoubleYoVariable("alphaTorqueOffset",
          "Filter for integrating acceleration to get a torque offset at each joint", registry);
 
-   private final BooleanYoVariable resetTorqueOffsets = new BooleanYoVariable("resetTorqueOffsets", registry);
+   private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
    private ArrayList<OneDoFJoint> oneDoFJoints;
    private LinkedHashMap<OneDoFJoint, DoubleYoVariable> torqueOffsetMap;

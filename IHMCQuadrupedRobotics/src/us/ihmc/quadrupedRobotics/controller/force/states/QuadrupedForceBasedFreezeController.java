@@ -16,7 +16,7 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -41,7 +41,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final DoubleParameter feedForwardRampTimeParameter = parameterFactory.createDouble("feedForwardRampTime", 2.0);
 
    // Yo variables
-   private final BooleanYoVariable yoUseForceFeedbackControl;
+   private final YoBoolean yoUseForceFeedbackControl;
 
    private final QuadrantDependentList<Double[]> initialSoleForces;
    // Reference frames
@@ -68,7 +68,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Reference frames
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       // Yo variables
-      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
       initialSoleForces = new QuadrantDependentList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {

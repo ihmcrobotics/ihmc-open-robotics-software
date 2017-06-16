@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -37,12 +37,12 @@ public class CapturePointUpdatable implements Updatable
    private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
    private final SideDependentList<YoFrameConvexPolygon2d> yoFootSupportPolygons = new SideDependentList<>();
    private final EnumYoVariable<RobotSide> yoSupportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
-   private final BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
+   private final YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
    // Computed Stuff
    private final DoubleYoVariable icpError = new DoubleYoVariable("icpError", registry);
    private final DoubleYoVariable minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
-   private final BooleanYoVariable tippingDetected = new BooleanYoVariable("tippingDetected", registry);
+   private final YoBoolean tippingDetected = new YoBoolean("tippingDetected", registry);
    private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
 
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
@@ -150,7 +150,7 @@ public class CapturePointUpdatable implements Updatable
       }
    }
 
-   public BooleanYoVariable getTippingDetectedBoolean()
+   public YoBoolean getTippingDetectedBoolean()
    {
       return tippingDetected;
    }
@@ -180,7 +180,7 @@ public class CapturePointUpdatable implements Updatable
       return yoSupportLeg;
    }
 
-   public BooleanYoVariable getYoDoubleSupport()
+   public YoBoolean getYoDoubleSupport()
    {
       return yoDoubleSupport;
    }

@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -38,10 +38,10 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
-   private final BooleanYoVariable yoSetDesiredAccelerationToZero;
-   private final BooleanYoVariable yoSetDesiredVelocityToZero;
+   private final YoBoolean yoSetDesiredAccelerationToZero;
+   private final YoBoolean yoSetDesiredVelocityToZero;
 
-   protected final BooleanYoVariable scaleSecondaryJointWeights;
+   protected final YoBoolean scaleSecondaryJointWeights;
    protected final DoubleYoVariable secondaryJointWeightScale;
 
    private final YoFrameVector angularWeight;
@@ -66,10 +66,10 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
-      yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
-      yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
+      yoSetDesiredAccelerationToZero = new YoBoolean(namePrefix + "SetDesiredAccelerationToZero", registry);
+      yoSetDesiredVelocityToZero = new YoBoolean(namePrefix + "SetDesiredVelocityToZero", registry);
 
-      scaleSecondaryJointWeights = new BooleanYoVariable(namePrefix + "ScaleSecondaryJointWeights", registry);
+      scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
       secondaryJointWeightScale = new DoubleYoVariable(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
 

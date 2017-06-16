@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -28,7 +28,7 @@ public class JointPrivilegedConfigurationHandler
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isJointPrivilegedConfigurationEnabled = new BooleanYoVariable("isJointPrivilegedConfigurationEnabled", registry);
+   private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
    private final DoubleYoVariable defaultConfigurationWeight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
    private final DoubleYoVariable defaultConfigurationGain = new DoubleYoVariable("jointPrivilegedConfigurationDefaultGain", registry);
    private final DoubleYoVariable defaultVelocityGain = new DoubleYoVariable("jointPrivilegedVelocityDefaultGain", registry);

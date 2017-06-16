@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -77,7 +77,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final FramePoint currentContactPosition = new FramePoint(worldFrame);
    private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
 
-   private final BooleanYoVariable hybridModeActive;
+   private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, DoubleYoVariable yoTime,
@@ -107,7 +107,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       this.jointControlHelper = jointControlHelper;
       String prefix = bodyName + "Loadbearing";
-      hybridModeActive = new BooleanYoVariable(prefix + "HybridModeActive", registry);
+      hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
 
       setupViz(graphicsListRegistry, bodyName);
    }

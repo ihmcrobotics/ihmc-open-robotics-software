@@ -72,7 +72,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    
    private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
    
-//   private final BooleanYoVariable miniCircleRadiusSuccess = new BooleanYoVariable("miniCircleRadiusSuccess", registry);
+//   private final YoBoolean miniCircleRadiusSuccess = new YoBoolean("miniCircleRadiusSuccess", registry);
    private final DoubleYoVariable miniCircleRadius = new DoubleYoVariable("miniCircleRadius", registry);
    private final YoArtifactOval miniCircle = new YoArtifactOval("miniCircle", miniCircleCenter, miniCircleRadius, Color.YELLOW);
    

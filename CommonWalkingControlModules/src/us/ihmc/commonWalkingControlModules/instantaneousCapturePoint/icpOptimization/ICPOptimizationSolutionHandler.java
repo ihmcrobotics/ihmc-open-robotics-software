@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -41,7 +41,7 @@ public class ICPOptimizationSolutionHandler
    private final DoubleYoVariable footstepDeadband;
    private final DoubleYoVariable footstepSolutionResolution;
 
-   private final BooleanYoVariable footstepWasAdjusted;
+   private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2d footstepAdjustment;
 
    private final DoubleYoVariable residualCostToGo;
@@ -117,7 +117,7 @@ public class ICPOptimizationSolutionHandler
       footstepDeadband = new DoubleYoVariable(yoNamePrefix + "FootstepDeadband", registry);
       footstepSolutionResolution = new DoubleYoVariable(yoNamePrefix + "FootstepSolutionResolution", registry);
 
-      footstepWasAdjusted = new BooleanYoVariable(yoNamePrefix + "FootstepWasAdjusted", registry);
+      footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2d(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());

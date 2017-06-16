@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.trebuchet;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -14,7 +14,7 @@ public class TrebuchetController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
 
-   private final BooleanYoVariable isBallAttachedToRope = new BooleanYoVariable("isBallAttachedToRope", registry);
+   private final YoBoolean isBallAttachedToRope = new YoBoolean("isBallAttachedToRope", registry);
 
    private final YoFrameVector poleToBallPosition = new YoFrameVector("poleToBallPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector poleToBallVelocity = new YoFrameVector("poleToBallVelocity", ReferenceFrame.getWorldFrame(), registry);

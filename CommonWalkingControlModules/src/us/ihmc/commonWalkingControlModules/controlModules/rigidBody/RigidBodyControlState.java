@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
@@ -27,7 +27,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected final YoVariableRegistry registry;
    protected final String warningPrefix;
 
-   protected final BooleanYoVariable trajectoryDone;
+   protected final YoBoolean trajectoryDone;
 
    private final LongYoVariable lastCommandId;
    private final DoubleYoVariable trajectoryStartTime;
@@ -47,7 +47,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
+      trajectoryDone = new YoBoolean(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
 
       parentRegistry.addChild(registry);

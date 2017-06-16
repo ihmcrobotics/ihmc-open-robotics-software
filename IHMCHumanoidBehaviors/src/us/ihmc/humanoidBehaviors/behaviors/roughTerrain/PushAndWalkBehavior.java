@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -39,7 +39,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
    private final YoGraphicPosition desiredCapturePointViz;
    private final YoGraphicPosition capturePointViz;
 
-   private final BooleanYoVariable walking = new BooleanYoVariable("Walking", registry);
+   private final YoBoolean walking = new YoBoolean("Walking", registry);
    private final DoubleYoVariable errorThreshold = new DoubleYoVariable("ErrorThreshold", registry);
    private final DoubleYoVariable errorFilterAlpha = new DoubleYoVariable("ErrorFilterAlpha", registry);
    private final AlphaFilteredYoVariable filteredError = new AlphaFilteredYoVariable("FilteredError", registry, errorFilterAlpha);

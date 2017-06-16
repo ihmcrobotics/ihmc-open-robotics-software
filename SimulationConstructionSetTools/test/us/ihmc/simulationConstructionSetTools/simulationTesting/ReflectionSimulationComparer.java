@@ -117,7 +117,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
       Collection<String> fieldNamesToNeverIgnore = new ArrayList<String>();
       fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.IntegerYoVariable.val");
       fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.DoubleYoVariable.val");
-      fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.BooleanYoVariable.val");
+      fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.YoBoolean.val");
 
       for (Field field : preRewindFieldDifferences)
       {

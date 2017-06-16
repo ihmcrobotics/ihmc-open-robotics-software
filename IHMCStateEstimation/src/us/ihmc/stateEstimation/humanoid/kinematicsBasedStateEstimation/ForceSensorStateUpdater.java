@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -47,7 +47,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final SideDependentList<ForceSensorDefinition> wristForceSensorDefinitions;
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
-   private final BooleanYoVariable calibrateWristForceSensors;
+   private final YoBoolean calibrateWristForceSensors;
    private final SideDependentList<DoubleYoVariable> wristSubtreeMass;
    private final SideDependentList<YoFrameVector> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector> wristTorquesSubtreeWeightCancelled;
@@ -55,7 +55,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
 
-   private final BooleanYoVariable calibrateFootForceSensors;
+   private final YoBoolean calibrateFootForceSensors;
    private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
@@ -109,7 +109,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          footForceCalibrationOffsets = new SideDependentList<>();
          footTorqueCalibrationOffsets = new SideDependentList<>();
 
-         calibrateFootForceSensors = new BooleanYoVariable("calibrateFootForceSensors", registry);
+         calibrateFootForceSensors = new YoBoolean("calibrateFootForceSensors", registry);
          calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
@@ -161,7 +161,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          wristSubtreeMass = new SideDependentList<>();
          wristsubtreeCenterOfMassFrames = new SideDependentList<>();
 
-         calibrateWristForceSensors = new BooleanYoVariable("calibrateWristForceSensors", registry);
+         calibrateWristForceSensors = new YoBoolean("calibrateWristForceSensors", registry);
          calibrateWristForceSensors.set(stateEstimatorParameters.requestWristForceSensorCalibrationAtStart());
 
          for (RobotSide robotSide : RobotSide.values)

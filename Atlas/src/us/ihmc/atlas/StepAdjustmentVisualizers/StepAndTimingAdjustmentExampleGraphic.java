@@ -29,7 +29,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -113,7 +113,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon;
    private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon;
 
-   private final BooleanYoVariable usePointFeet;
+   private final YoBoolean usePointFeet;
 
    private BipedSupportPolygons bipedSupportPolygons;
    private FootstepTestHelper footstepTestHelper;
@@ -136,7 +136,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       capturePointPlannerParameters = createICPPlannerParameters();
       icpOptimizationParameters = createICPOptimizationParameters();
 
-      usePointFeet = new BooleanYoVariable("usePointFoot", registry);
+      usePointFeet = new YoBoolean("usePointFoot", registry);
       usePointFeet.set(true);
 
       pointFootFeedbackWeight = new DoubleYoVariable("pointFootFeedbackWeight", registry);

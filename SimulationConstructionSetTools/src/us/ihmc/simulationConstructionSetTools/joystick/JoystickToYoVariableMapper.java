@@ -6,7 +6,7 @@ import java.util.HashMap;
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.YoVariableHolder;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -45,7 +45,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         BooleanYoVariable yoVariable = (BooleanYoVariable) yoVariableHolder.getVariable(variableName);
+         YoBoolean yoVariable = (YoBoolean) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             BooleanYoVariableJoystickEventListener joystickEventListener = new BooleanYoVariableJoystickEventListener(yoVariable, component, toggle, flip);

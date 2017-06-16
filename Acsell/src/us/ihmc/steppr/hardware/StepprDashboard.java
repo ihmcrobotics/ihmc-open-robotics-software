@@ -20,7 +20,7 @@ import javax.swing.table.TableCellRenderer;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -106,8 +106,8 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
       JPanel initializationPanel = new JPanel();
       initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
-      final BooleanYoVariable enabledOutput = (BooleanYoVariable)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
-      final BooleanYoVariable startStandPrep = (BooleanYoVariable)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
+      final YoBoolean enabledOutput = (YoBoolean)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
+      final YoBoolean startStandPrep = (YoBoolean)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
       final EnumYoVariable requestedHighLevelState = (EnumYoVariable) yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
       final DoubleYoVariable controlRatio = (DoubleYoVariable) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
       

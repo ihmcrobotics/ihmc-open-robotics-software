@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -34,11 +34,11 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
    private final DoubleYoVariable groundAlphaStick = new DoubleYoVariable("groundAlphaStick",
                                                         "LinearStickSlipGroundContactModel stick coefficient of friction", registry);
 
-   private final BooleanYoVariable groundEnableSlip = new BooleanYoVariable("groundEnableSlip", "LinearStickSlipGroundContactModel. If true can slip",
+   private final YoBoolean groundEnableSlip = new YoBoolean("groundEnableSlip", "LinearStickSlipGroundContactModel. If true can slip",
                                                          registry);
 
    
-   private final BooleanYoVariable groundEnableSurfaceNormal = new BooleanYoVariable("groundEnableSurfaceNormal", "LinearStickSlipGroundContactModel. If true will take into account surface normals in computations.",
+   private final YoBoolean groundEnableSurfaceNormal = new YoBoolean("groundEnableSurfaceNormal", "LinearStickSlipGroundContactModel. If true will take into account surface normals in computations.",
          registry);
 
    private ArrayList<GroundContactPoint> groundContactPoints;

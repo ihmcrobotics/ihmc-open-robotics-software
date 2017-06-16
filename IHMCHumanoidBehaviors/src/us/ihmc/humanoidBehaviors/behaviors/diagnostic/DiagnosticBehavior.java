@@ -59,11 +59,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -106,13 +103,13 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
    private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>(40);
-   private final BooleanYoVariable diagnosticBehaviorEnabled;
-   private final BooleanYoVariable hasControllerWakenUp;
-   private final BooleanYoVariable automaticDiagnosticRoutineRequested;
-   private final BooleanYoVariable automaticDiagnosticRoutineHasStarted;
+   private final YoBoolean diagnosticBehaviorEnabled;
+   private final YoBoolean hasControllerWakenUp;
+   private final YoBoolean automaticDiagnosticRoutineRequested;
+   private final YoBoolean automaticDiagnosticRoutineHasStarted;
    private final DoubleYoVariable timeWhenControllerWokeUp;
    private final DoubleYoVariable timeToWaitBeforeEnable;
-   private final BooleanYoVariable enableHandOrientation;
+   private final YoBoolean enableHandOrientation;
 
    private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
    private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
@@ -133,14 +130,14 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
    private final DoubleYoVariable sleepTimeBetweenPoses;
-   private final BooleanYoVariable doPelvisAndChestYaw;
+   private final YoBoolean doPelvisAndChestYaw;
    private final IntegerYoVariable numberOfCyclesToRun;
    private final DoubleYoVariable minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
    private final FullHumanoidRobotModel fullRobotModel;
 
    //Icp Offset generator variables
-   private final BooleanYoVariable isIcpOffsetSenderEnabled;
+   private final YoBoolean isIcpOffsetSenderEnabled;
    private final DoubleYoVariable minMaxIcpAngularOffset;
    private final DoubleYoVariable minMaxIcpTranslationOffset;
    private final DoubleYoVariable previousIcpPacketSentTime;
@@ -243,7 +240,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
+         DoubleYoVariable yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -253,13 +250,13 @@ public class DiagnosticBehavior extends AbstractBehavior
       this.yoSupportPolygon = yoSupportPolygon;
       this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
-      diagnosticBehaviorEnabled = new BooleanYoVariable("diagnosticBehaviorEnabled", registry);
-      hasControllerWakenUp = new BooleanYoVariable("diagnostBehaviorHasControllerWakenUp", registry);
-      automaticDiagnosticRoutineRequested = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
-      automaticDiagnosticRoutineHasStarted = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
+      diagnosticBehaviorEnabled = new YoBoolean("diagnosticBehaviorEnabled", registry);
+      hasControllerWakenUp = new YoBoolean("diagnostBehaviorHasControllerWakenUp", registry);
+      automaticDiagnosticRoutineRequested = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
+      automaticDiagnosticRoutineHasStarted = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
       timeWhenControllerWokeUp = new DoubleYoVariable("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
       timeToWaitBeforeEnable = new DoubleYoVariable("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
-      enableHandOrientation = new BooleanYoVariable("diagnosticEnableHandOrientation", registry);
+      enableHandOrientation = new YoBoolean("diagnosticEnableHandOrientation", registry);
 
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
@@ -269,7 +266,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       //icp variables
-      isIcpOffsetSenderEnabled = new BooleanYoVariable("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
+      isIcpOffsetSenderEnabled = new YoBoolean("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
       isIcpOffsetSenderEnabled.set(false);
       isIcpOffsetSenderEnabled.addVariableChangedListener(new VariableChangedListener()
       {
@@ -388,7 +385,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);
       numberOfCyclesToRun.set(1);
 
-      doPelvisAndChestYaw = new BooleanYoVariable("diagnosticDoPelvisAndChestYaw", registry);
+      doPelvisAndChestYaw = new YoBoolean("diagnosticDoPelvisAndChestYaw", registry);
       doPelvisAndChestYaw.set(true);
 
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);

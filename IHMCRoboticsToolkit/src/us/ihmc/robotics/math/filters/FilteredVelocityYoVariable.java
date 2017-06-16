@@ -1,10 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
-
 
 /**
  * @author jrebula
@@ -31,12 +30,12 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
 
 // private double lastPosition;
    private final DoubleYoVariable lastPosition;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public FilteredVelocityYoVariable(String name, String description, double alpha, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alphaDouble = alpha;
       this.dt = dt;
@@ -52,7 +51,7 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
    public FilteredVelocityYoVariable(String name, String description, double alpha, DoubleYoVariable positionVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alphaDouble = alpha;
       this.position = positionVariable;
@@ -69,7 +68,7 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
    public FilteredVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       position = positionVariable;
       this.alphaVariable = alphaVariable;
@@ -85,7 +84,7 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
    public FilteredVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.position = null;
       this.alphaVariable = alphaVariable;

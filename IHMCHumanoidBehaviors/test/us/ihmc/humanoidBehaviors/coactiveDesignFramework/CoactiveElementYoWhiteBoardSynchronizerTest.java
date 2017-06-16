@@ -13,7 +13,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
@@ -107,7 +107,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
    {
       private final YoVariableRegistry userInterfaceWritableRegistry = new YoVariableRegistry("userInterfaceWritable");
       private final IntegerYoVariable uiTickCount = new IntegerYoVariable("uiTickCount", userInterfaceWritableRegistry);
-      private final BooleanYoVariable buttonWasClicked = new BooleanYoVariable("buttonWasClicked", userInterfaceWritableRegistry);
+      private final YoBoolean buttonWasClicked = new YoBoolean("buttonWasClicked", userInterfaceWritableRegistry);
       private final DoubleYoVariable variableForUserInterfaceToWrite = new DoubleYoVariable("variableForUserInterfaceToWrite", userInterfaceWritableRegistry);
 
       private final YoVariableRegistry machineWritableRegistry = new YoVariableRegistry("machineWritableRegistry");

@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 /**
@@ -32,7 +32,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
    private final DoubleYoVariable alphaVariable;
 
    private final DoubleYoVariable position;
-   protected final BooleanYoVariable hasBeenCalled;
+   protected final YoBoolean hasBeenCalled;
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
    {
@@ -42,7 +42,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, DoubleYoVariable positionVariable)
    {
       super(name,registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
       this.alphaVariable = new DoubleYoVariable(name + "AlphaVariable", registry);
       this.alphaVariable.set(alpha);
       this.position = positionVariable;
@@ -68,7 +68,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
    public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", description, registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", description, registry);
       this.position = positionVariable;
       this.alphaVariable = alphaVariable;
 

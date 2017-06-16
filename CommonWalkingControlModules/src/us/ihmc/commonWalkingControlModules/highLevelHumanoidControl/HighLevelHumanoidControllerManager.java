@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -48,7 +48,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
 
-   private final BooleanYoVariable isListeningToHighLevelStateMessage = new BooleanYoVariable("isListeningToHighLevelStateMessage", registry);
+   private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final CommandInputManager commandInputManager;
