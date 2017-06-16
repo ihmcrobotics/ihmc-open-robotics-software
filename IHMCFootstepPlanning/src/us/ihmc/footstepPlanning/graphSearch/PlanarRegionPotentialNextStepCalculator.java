@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.scoring.BipedalStepAdjustmentCostCalculator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -41,7 +41,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final DoubleYoVariable totalArea = new DoubleYoVariable("totalArea", registry);
    private final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
    
-   private final BooleanYoVariable enableStepAdjustmentCosts;
+   private final YoBoolean enableStepAdjustmentCosts;
 
    private final BipedalFootstepPlannerParameters parameters;
 
@@ -71,7 +71,7 @@ public class PlanarRegionPotentialNextStepCalculator
       
       baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, yoGraphicsListRegistry); 
 
-      enableStepAdjustmentCosts = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
+      enableStepAdjustmentCosts = new YoBoolean("enablePenalizationHeatmapScoring", registry);
       enableStepAdjustmentCosts.set(true);
 
       stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(parentRegistry, null);

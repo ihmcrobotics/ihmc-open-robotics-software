@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSenso
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -70,14 +70,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final CenterOfPressureVisualizer copVisualizer;
 
-   private final BooleanYoVariable usePelvisCorrector;
+   private final YoBoolean usePelvisCorrector;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
-   private final BooleanYoVariable reinitializeStateEstimator = new BooleanYoVariable("reinitializeStateEstimator", registry);
+   private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
@@ -89,7 +89,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
-      usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
+      usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       if(forceSensorDataHolderToUpdate != null)
       {

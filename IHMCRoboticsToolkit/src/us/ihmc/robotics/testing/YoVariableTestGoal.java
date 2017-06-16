@@ -2,7 +2,7 @@ package us.ihmc.robotics.testing;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -167,20 +167,20 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
       };
    }
 
-   public static YoVariableTestGoal booleanEquals(final BooleanYoVariable booleanYoVariable, final boolean booleanValue)
+   public static YoVariableTestGoal booleanEquals(final YoBoolean yoBoolean, final boolean booleanValue)
    {
-      return new YoVariableTestGoal(booleanYoVariable)
+      return new YoVariableTestGoal(yoBoolean)
       {
          @Override
          public boolean currentlyMeetsGoal()
          {
-            return booleanYoVariable.getBooleanValue() == booleanValue;
+            return yoBoolean.getBooleanValue() == booleanValue;
          }
 
          @Override
          public String toString()
          {
-            return getFormattedBooleanYoVariable(booleanYoVariable) + " == " + booleanValue;
+            return getFormattedBooleanYoVariable(yoBoolean) + " == " + booleanValue;
          }
 
       };
@@ -247,9 +247,9 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
       return doubleGreaterThan(timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
    }
 
-   private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)
+   private static String getFormattedBooleanYoVariable(final YoBoolean yoBoolean)
    {
-      return booleanYoVariable.getName() + ":" + booleanYoVariable.getBooleanValue();
+      return yoBoolean.getName() + ":" + yoBoolean.getBooleanValue();
    }
 
    private static <T extends Enum<T>> String getFormattedEnumYoVariable(final EnumYoVariable<T> enumYoVariable)

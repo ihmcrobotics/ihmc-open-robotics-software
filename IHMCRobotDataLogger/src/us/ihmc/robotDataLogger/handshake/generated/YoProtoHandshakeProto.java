@@ -1066,7 +1066,7 @@ public final class YoProtoHandshakeProto {
          */
         DoubleYoVariable(0, 1),
         /**
-         * <code>BooleanYoVariable = 2;</code>
+         * <code>YoBoolean = 2;</code>
          */
         BooleanYoVariable(1, 2),
         /**
@@ -1088,7 +1088,7 @@ public final class YoProtoHandshakeProto {
          */
         public static final int DoubleYoVariable_VALUE = 1;
         /**
-         * <code>BooleanYoVariable = 2;</code>
+         * <code>YoBoolean = 2;</code>
          */
         public static final int BooleanYoVariable_VALUE = 2;
         /**

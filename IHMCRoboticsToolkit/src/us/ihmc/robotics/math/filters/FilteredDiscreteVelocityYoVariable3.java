@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
 
@@ -39,7 +39,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 	private final DoubleYoVariable velocityIfEncoderTicksNowConstantAccel;
 
 	private boolean updateHasBeenCalled;
-	private final BooleanYoVariable assumeConstantAccel;
+	private final YoBoolean assumeConstantAccel;
 	
 	private final double alpha;
 	private final DoubleYoVariable alphaVariable;
@@ -58,7 +58,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alpha = alpha;
 		this.alphaVariable = null;
@@ -81,7 +81,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alpha = alpha;
 		this.alphaVariable = null;
@@ -104,7 +104,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
 		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alphaVariable = alphaVariable;
 		this.alpha = 0.0;

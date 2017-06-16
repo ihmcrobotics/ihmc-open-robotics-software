@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 
@@ -55,8 +55,8 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
 {
    private static final long serialVersionUID = 8152020075993223818L;
 
-   private final BooleanYoVariable isNoisy;
-   private final BooleanYoVariable useBias;
+   private final YoBoolean isNoisy;
+   private final YoBoolean useBias;
    private final EnumYoVariable<NoiseType> noiseType;
 
    private final long randomSeed = System.nanoTime();
@@ -75,11 +75,11 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
    public NoisyDoubleYoVariable(String name, YoVariableRegistry registry)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(false);
       this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
       this.randomBound.set(0.0);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(false);
       this.bias = new DoubleYoVariable(name + "_Bias", registry);
       this.bias.set(0.0);
@@ -102,11 +102,11 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
    public NoisyDoubleYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable perfect)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(false);
       this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
       this.randomBound.set(0.0);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(false);
       this.bias = new DoubleYoVariable(name + "_Bias", registry);
       this.bias.set(0.0);
@@ -130,11 +130,11 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
                                 double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(isNoisy);
       this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
       this.randomBound.set(randomBound);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(useBias);
       this.bias = new DoubleYoVariable(name + "_Bias", registry);
       this.bias.set(bias);
@@ -158,11 +158,11 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
                                 double bias, double biasMax, double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(isNoisy);
       this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
       this.randomBound.set(randomBound);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(useBias);
       this.bias = new DoubleYoVariable(name + "_Bias", registry);
       this.bias.set(bias);

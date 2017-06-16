@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -32,7 +32,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFrameQuaternion yoDesiredOrientation;
    private final YoFrameQuaternion yoCurrentOrientation;
@@ -109,7 +109,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "IsOrientationFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "IsOrientationFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredOrientation = feedbackControllerToolbox.getOrientation(endEffector, DESIRED, isEnabled);

@@ -4,9 +4,8 @@ import java.util.Random;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
 
 /**
  * User: pneuhaus
@@ -26,7 +25,7 @@ public class YoRandomPulseGenerator
    private final DoubleYoVariable timeStartPulse;
    private final DoubleYoVariable timeLastRolledTheDie;
 
-   private final BooleanYoVariable pulseStarted;
+   private final YoBoolean pulseStarted;
    private final DoubleYoVariable value;
    private final DoubleYoVariable randomNumber;
 
@@ -49,7 +48,7 @@ public class YoRandomPulseGenerator
 
       timeStartPulse = new DoubleYoVariable(name + "TimeStartPulse", registry);
       timeLastRolledTheDie = new DoubleYoVariable(name + "TimeLastRolledTheDie", registry);
-      pulseStarted = new BooleanYoVariable(name + "PulseStarted", registry);
+      pulseStarted = new YoBoolean(name + "PulseStarted", registry);
       value = new DoubleYoVariable(name + "Value", registry);
       randomNumber = new DoubleYoVariable(name + "RandomNumber", registry);
 

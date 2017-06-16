@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -26,7 +26,7 @@ public class Online1DSignalFourierAnalysis
    private final IntegerYoVariable minFrequencyIndex;
    private final DoubleYoVariable minimumMagnitude;
 
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
 
    private final DoubleFFT_1D fft;
    private final double[] signalBuffer;
@@ -52,7 +52,7 @@ public class Online1DSignalFourierAnalysis
       registry = new YoVariableRegistry(namePrefix + "FrequencyAnalysis");
       parentRegistry.addChild(registry);
 
-      enabled = new BooleanYoVariable(registry.getName() + "_enabled", registry);
+      enabled = new YoBoolean(registry.getName() + "_enabled", registry);
 
       int windowSize = 10;
       principalOscillationIndex = new GlitchFilteredIntegerYoVariable(namePrefix + "PrincipalOscillationIndex", windowSize, registry);

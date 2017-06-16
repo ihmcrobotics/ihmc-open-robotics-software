@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -14,8 +14,8 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    private final DoubleYoVariable maxRateVariable;
 
    private final YoFrameOrientation rawOrientation;
-   private final BooleanYoVariable limited;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean limited;
+   private final YoBoolean hasBeenCalled;
    private final double dt;
 
    private final FrameVector differenceVector = new FrameVector();
@@ -49,8 +49,8 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
-      this.hasBeenCalled = new BooleanYoVariable(namePrefix + "HasBeenCalled" + nameSuffix, registry);
-      this.limited = new BooleanYoVariable(namePrefix + "Limited" + nameSuffix, registry);
+      this.hasBeenCalled = new YoBoolean(namePrefix + "HasBeenCalled" + nameSuffix, registry);
+      this.limited = new YoBoolean(namePrefix + "Limited" + nameSuffix, registry);
 
       if (maxRate != null)
          this.maxRateVariable = maxRate;

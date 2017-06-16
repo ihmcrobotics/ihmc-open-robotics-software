@@ -10,14 +10,14 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,12 +37,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final ForceSensorDataReadOnly forceSensorData;
    private final DoubleYoVariable footSwitchCoPThresholdFraction;
 
-   private final BooleanYoVariable isForceMagnitudePastThreshold;
-   private final GlitchFilteredBooleanYoVariable filteredIsForceMagnitudePastThreshold;
-   private final BooleanYoVariable isForceMagnitudePastSecondThreshold;
-   private final BooleanYoVariable hasFootHitGround, isCoPPastThreshold;
-   private final BooleanYoVariable trustFootSwitch, controllerDetectedTouchdown;
-   private final GlitchFilteredBooleanYoVariable filteredHasFootHitGround;
+   private final YoBoolean isForceMagnitudePastThreshold;
+   private final GlitchFilteredYoBoolean filteredIsForceMagnitudePastThreshold;
+   private final YoBoolean isForceMagnitudePastSecondThreshold;
+   private final YoBoolean hasFootHitGround, isCoPPastThreshold;
+   private final YoBoolean trustFootSwitch, controllerDetectedTouchdown;
+   private final GlitchFilteredYoBoolean filteredHasFootHitGround;
 
    private final DoubleYoVariable footForceMagnitude;
    private final DoubleYoVariable alphaFootLoadFiltering;
@@ -50,12 +50,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private final Wrench footWrench;
    private final BagOfBalls footswitchCOPBagOfBalls;
-   private final BooleanYoVariable pastThreshold;
-   private final BooleanYoVariable heelHitGround;
-   private final BooleanYoVariable toeHitGround;
-   private final GlitchFilteredBooleanYoVariable pastThresholdFilter;
-   private final GlitchFilteredBooleanYoVariable heelHitGroundFilter;
-   private final GlitchFilteredBooleanYoVariable toeHitGroundFilter;
+   private final YoBoolean pastThreshold;
+   private final YoBoolean heelHitGround;
+   private final YoBoolean toeHitGround;
+   private final GlitchFilteredYoBoolean pastThresholdFilter;
+   private final GlitchFilteredYoBoolean heelHitGroundFilter;
+   private final GlitchFilteredYoBoolean toeHitGroundFilter;
 
    private final YoFramePoint2d yoResolvedCoP;
    private final FramePoint2d resolvedCoP;
@@ -119,18 +119,18 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       }
 
       footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
-      isForceMagnitudePastThreshold = new BooleanYoVariable(namePrefix + "ForcePastThreshold", registry);
-      hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
+      isForceMagnitudePastThreshold = new YoBoolean(namePrefix + "ForcePastThreshold", registry);
+      hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
 
-      trustFootSwitch = new BooleanYoVariable(namePrefix + "TrustFootSwitch", registry);
-      controllerDetectedTouchdown = new BooleanYoVariable(namePrefix + "ControllerDetectedTouchdown", registry);
+      trustFootSwitch = new YoBoolean(namePrefix + "TrustFootSwitch", registry);
+      controllerDetectedTouchdown = new YoBoolean(namePrefix + "ControllerDetectedTouchdown", registry);
       trustFootSwitch.set(true);
 
       //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
-      filteredHasFootHitGround = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1);
-      filteredIsForceMagnitudePastThreshold = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
-      isForceMagnitudePastSecondThreshold = new BooleanYoVariable(namePrefix + "ForcePastSecondThresh", registry);
-      isCoPPastThreshold = new BooleanYoVariable(namePrefix + "CoPPastThresh", registry);
+      filteredHasFootHitGround = new GlitchFilteredYoBoolean(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1);
+      filteredIsForceMagnitudePastThreshold = new GlitchFilteredYoBoolean(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
+      isForceMagnitudePastSecondThreshold = new YoBoolean(namePrefix + "ForcePastSecondThresh", registry);
+      isCoPPastThreshold = new YoBoolean(namePrefix + "CoPPastThresh", registry);
 
       this.robotTotalWeight = robotTotalWeight;
       this.alphaFootLoadFiltering = new DoubleYoVariable(namePrefix + "AlphaFootLoadFiltering", registry);
@@ -140,15 +140,15 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       double copVisualizerSize = 0.025;
       this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry, yoGraphicsListRegistry);
 
-      this.pastThreshold = new BooleanYoVariable(namePrefix + "PastFootswitchThreshold", registry);
-      this.heelHitGround = new BooleanYoVariable(namePrefix + "HeelHitGround", registry);
-      this.toeHitGround = new BooleanYoVariable(namePrefix + "ToeHitGround", registry);
+      this.pastThreshold = new YoBoolean(namePrefix + "PastFootswitchThreshold", registry);
+      this.heelHitGround = new YoBoolean(namePrefix + "HeelHitGround", registry);
+      this.toeHitGround = new YoBoolean(namePrefix + "ToeHitGround", registry);
 
       int filterWindowSize = 3;
 
-      this.pastThresholdFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "PastFootswitchThresholdFilter", registry, pastThreshold, filterWindowSize);
-      this.heelHitGroundFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "HeelHitGroundFilter", registry, heelHitGround, filterWindowSize);
-      this.toeHitGroundFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "ToeHitGroundFilter", registry, toeHitGround, filterWindowSize);
+      this.pastThresholdFilter = new GlitchFilteredYoBoolean(namePrefix + "PastFootswitchThresholdFilter", registry, pastThreshold, filterWindowSize);
+      this.heelHitGroundFilter = new GlitchFilteredYoBoolean(namePrefix + "HeelHitGroundFilter", registry, heelHitGround, filterWindowSize);
+      this.toeHitGroundFilter = new GlitchFilteredYoBoolean(namePrefix + "ToeHitGroundFilter", registry, toeHitGround, filterWindowSize);
 
       this.contactablePlaneBody = contactablePlaneBody;
 

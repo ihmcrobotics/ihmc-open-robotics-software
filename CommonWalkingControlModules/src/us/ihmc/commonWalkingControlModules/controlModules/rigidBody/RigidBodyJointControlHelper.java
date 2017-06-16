@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointT
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -28,7 +28,7 @@ public class RigidBodyJointControlHelper
 
    private final YoVariableRegistry registry;
    private final String warningPrefix;
-   private final BooleanYoVariable trajectoryDone;
+   private final YoBoolean trajectoryDone;
 
    private final List<MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new ArrayList<>();
    private final List<RecyclingArrayDeque<SimpleTrajectoryPoint1D>> pointQueues = new ArrayList<>();
@@ -41,8 +41,8 @@ public class RigidBodyJointControlHelper
    private final List<DoubleYoVariable> currentWeights = new ArrayList<>();
    private final List<YoPIDGains> gains = new ArrayList<>();
 
-   private final BooleanYoVariable hasWeights;
-   private final BooleanYoVariable hasGains;
+   private final YoBoolean hasWeights;
+   private final YoBoolean hasGains;
 
    private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
@@ -54,14 +54,14 @@ public class RigidBodyJointControlHelper
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(bodyName + shortName);
-      trajectoryDone = new BooleanYoVariable(shortName + "Done", registry);
+      trajectoryDone = new YoBoolean(shortName + "Done", registry);
 
       this.joints = jointsToControl;
       numberOfJoints = joints.length;
 
       String prefix = bodyName + "Jointspace";
-      hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
-      hasGains = new BooleanYoVariable(prefix + "HasGains", registry);
+      hasWeights = new YoBoolean(prefix + "HasWeights", registry);
+      hasGains = new YoBoolean(prefix + "HasGains", registry);
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {

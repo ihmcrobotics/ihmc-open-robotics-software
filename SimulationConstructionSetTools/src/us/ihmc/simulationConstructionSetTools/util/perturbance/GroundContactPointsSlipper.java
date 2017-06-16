@@ -7,7 +7,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -28,7 +28,7 @@ public class GroundContactPointsSlipper implements RobotController
    private final YoFrameOrientation slipRotation;
 
    private final DoubleYoVariable percentToSlipPerTick;
-   private final BooleanYoVariable doSlip;
+   private final YoBoolean doSlip;
 
    
    public GroundContactPointsSlipper(String registryPrefix)
@@ -40,7 +40,7 @@ public class GroundContactPointsSlipper implements RobotController
       slipRotation = new YoFrameOrientation("slipRotation", ReferenceFrame.getWorldFrame(), registry);
 
       percentToSlipPerTick = new DoubleYoVariable("percentToSlipPerTick", registry);
-      doSlip = new BooleanYoVariable("doSlip", registry);
+      doSlip = new YoBoolean("doSlip", registry);
    }
 
    public void addGroundContactPoints(List<GroundContactPoint> footGroundContactPoints)

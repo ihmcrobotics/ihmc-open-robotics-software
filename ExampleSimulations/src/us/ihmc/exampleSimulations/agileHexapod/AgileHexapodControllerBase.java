@@ -2,9 +2,8 @@ package us.ihmc.exampleSimulations.agileHexapod;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
 
 public class AgileHexapodControllerBase
 {
@@ -13,8 +12,8 @@ public class AgileHexapodControllerBase
    // These are the variables that are automatically created when the robot is created:
    DoubleYoVariable t;
    
-   BooleanYoVariable gc_body1_slip, gc_body2_slip, gc_body3_slip, gc_body4_slip, gc_foot1_slip, gc_foot2_slip, gc_foot3_slip, gc_foot4_slip;
-   BooleanYoVariable  gc_foot5_slip, gc_foot6_slip, gc_pend_end_slip;
+   YoBoolean gc_body1_slip, gc_body2_slip, gc_body3_slip, gc_body4_slip, gc_foot1_slip, gc_foot2_slip, gc_foot3_slip, gc_foot4_slip;
+   YoBoolean gc_foot5_slip, gc_foot6_slip, gc_pend_end_slip;
    
    DoubleYoVariable q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z, q_qs;
    DoubleYoVariable q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
@@ -108,7 +107,7 @@ public class AgileHexapodControllerBase
       gc_body1_tdy = (DoubleYoVariable)rob.getVariable("gc_body1_tdy");
       gc_body1_tdz = (DoubleYoVariable)rob.getVariable("gc_body1_tdz");
       gc_body1_fs = (DoubleYoVariable)rob.getVariable("gc_body1_fs");
-      gc_body1_slip = (BooleanYoVariable)rob.getVariable("gc_body1_slip");
+      gc_body1_slip = (YoBoolean)rob.getVariable("gc_body1_slip");
       gc_body2_x = (DoubleYoVariable)rob.getVariable("gc_body2_x");
       gc_body2_y = (DoubleYoVariable)rob.getVariable("gc_body2_y");
       gc_body2_z = (DoubleYoVariable)rob.getVariable("gc_body2_z");
@@ -125,7 +124,7 @@ public class AgileHexapodControllerBase
       gc_body2_tdy = (DoubleYoVariable)rob.getVariable("gc_body2_tdy");
       gc_body2_tdz = (DoubleYoVariable)rob.getVariable("gc_body2_tdz");
       gc_body2_fs = (DoubleYoVariable)rob.getVariable("gc_body2_fs");
-      gc_body2_slip = (BooleanYoVariable)rob.getVariable("gc_body2_slip");
+      gc_body2_slip = (YoBoolean)rob.getVariable("gc_body2_slip");
       gc_body3_x = (DoubleYoVariable)rob.getVariable("gc_body3_x");
       gc_body3_y = (DoubleYoVariable)rob.getVariable("gc_body3_y");
       gc_body3_z = (DoubleYoVariable)rob.getVariable("gc_body3_z");
@@ -142,7 +141,7 @@ public class AgileHexapodControllerBase
       gc_body3_tdy = (DoubleYoVariable)rob.getVariable("gc_body3_tdy");
       gc_body3_tdz = (DoubleYoVariable)rob.getVariable("gc_body3_tdz");
       gc_body3_fs = (DoubleYoVariable)rob.getVariable("gc_body3_fs");
-      gc_body3_slip = (BooleanYoVariable)rob.getVariable("gc_body3_slip");
+      gc_body3_slip = (YoBoolean)rob.getVariable("gc_body3_slip");
       gc_body4_x = (DoubleYoVariable)rob.getVariable("gc_body4_x");
       gc_body4_y = (DoubleYoVariable)rob.getVariable("gc_body4_y");
       gc_body4_z = (DoubleYoVariable)rob.getVariable("gc_body4_z");
@@ -159,7 +158,7 @@ public class AgileHexapodControllerBase
       gc_body4_tdy = (DoubleYoVariable)rob.getVariable("gc_body4_tdy");
       gc_body4_tdz = (DoubleYoVariable)rob.getVariable("gc_body4_tdz");
       gc_body4_fs = (DoubleYoVariable)rob.getVariable("gc_body4_fs");
-      gc_body4_slip = (BooleanYoVariable)rob.getVariable("gc_body4_slip");
+      gc_body4_slip = (YoBoolean)rob.getVariable("gc_body4_slip");
       q_hip1_z = (DoubleYoVariable)rob.getVariable("q_hip1_z");
       qd_hip1_z = (DoubleYoVariable)rob.getVariable("qd_hip1_z");
       qdd_hip1_z = (DoubleYoVariable)rob.getVariable("qdd_hip1_z");
@@ -191,7 +190,7 @@ public class AgileHexapodControllerBase
       gc_foot1_tdy = (DoubleYoVariable)rob.getVariable("gc_foot1_tdy");
       gc_foot1_tdz = (DoubleYoVariable)rob.getVariable("gc_foot1_tdz");
       gc_foot1_fs = (DoubleYoVariable)rob.getVariable("gc_foot1_fs");
-      gc_foot1_slip = (BooleanYoVariable)rob.getVariable("gc_foot1_slip");
+      gc_foot1_slip = (YoBoolean)rob.getVariable("gc_foot1_slip");
       q_hip2_z = (DoubleYoVariable)rob.getVariable("q_hip2_z");
       qd_hip2_z = (DoubleYoVariable)rob.getVariable("qd_hip2_z");
       qdd_hip2_z = (DoubleYoVariable)rob.getVariable("qdd_hip2_z");
@@ -223,7 +222,7 @@ public class AgileHexapodControllerBase
       gc_foot2_tdy = (DoubleYoVariable)rob.getVariable("gc_foot2_tdy");
       gc_foot2_tdz = (DoubleYoVariable)rob.getVariable("gc_foot2_tdz");
       gc_foot2_fs = (DoubleYoVariable)rob.getVariable("gc_foot2_fs");
-      gc_foot2_slip = (BooleanYoVariable)rob.getVariable("gc_foot2_slip");
+      gc_foot2_slip = (YoBoolean)rob.getVariable("gc_foot2_slip");
       q_hip3_z = (DoubleYoVariable)rob.getVariable("q_hip3_z");
       qd_hip3_z = (DoubleYoVariable)rob.getVariable("qd_hip3_z");
       qdd_hip3_z = (DoubleYoVariable)rob.getVariable("qdd_hip3_z");
@@ -255,7 +254,7 @@ public class AgileHexapodControllerBase
       gc_foot3_tdy = (DoubleYoVariable)rob.getVariable("gc_foot3_tdy");
       gc_foot3_tdz = (DoubleYoVariable)rob.getVariable("gc_foot3_tdz");
       gc_foot3_fs = (DoubleYoVariable)rob.getVariable("gc_foot3_fs");
-      gc_foot3_slip = (BooleanYoVariable)rob.getVariable("gc_foot3_slip");
+      gc_foot3_slip = (YoBoolean)rob.getVariable("gc_foot3_slip");
       q_hip4_z = (DoubleYoVariable)rob.getVariable("q_hip4_z");
       qd_hip4_z = (DoubleYoVariable)rob.getVariable("qd_hip4_z");
       qdd_hip4_z = (DoubleYoVariable)rob.getVariable("qdd_hip4_z");
@@ -287,7 +286,7 @@ public class AgileHexapodControllerBase
       gc_foot4_tdy = (DoubleYoVariable)rob.getVariable("gc_foot4_tdy");
       gc_foot4_tdz = (DoubleYoVariable)rob.getVariable("gc_foot4_tdz");
       gc_foot4_fs = (DoubleYoVariable)rob.getVariable("gc_foot4_fs");
-      gc_foot4_slip = (BooleanYoVariable)rob.getVariable("gc_foot4_slip");
+      gc_foot4_slip = (YoBoolean)rob.getVariable("gc_foot4_slip");
       q_hip5_z = (DoubleYoVariable)rob.getVariable("q_hip5_z");
       qd_hip5_z = (DoubleYoVariable)rob.getVariable("qd_hip5_z");
       qdd_hip5_z = (DoubleYoVariable)rob.getVariable("qdd_hip5_z");
@@ -319,7 +318,7 @@ public class AgileHexapodControllerBase
       gc_foot5_tdy = (DoubleYoVariable)rob.getVariable("gc_foot5_tdy");
       gc_foot5_tdz = (DoubleYoVariable)rob.getVariable("gc_foot5_tdz");
       gc_foot5_fs = (DoubleYoVariable)rob.getVariable("gc_foot5_fs");
-      gc_foot5_slip = (BooleanYoVariable)rob.getVariable("gc_foot5_slip");
+      gc_foot5_slip = (YoBoolean)rob.getVariable("gc_foot5_slip");
       q_hip6_z = (DoubleYoVariable)rob.getVariable("q_hip6_z");
       qd_hip6_z = (DoubleYoVariable)rob.getVariable("qd_hip6_z");
       qdd_hip6_z = (DoubleYoVariable)rob.getVariable("qdd_hip6_z");
@@ -351,7 +350,7 @@ public class AgileHexapodControllerBase
       gc_foot6_tdy = (DoubleYoVariable)rob.getVariable("gc_foot6_tdy");
       gc_foot6_tdz = (DoubleYoVariable)rob.getVariable("gc_foot6_tdz");
       gc_foot6_fs = (DoubleYoVariable)rob.getVariable("gc_foot6_fs");
-      gc_foot6_slip = (BooleanYoVariable)rob.getVariable("gc_foot6_slip");
+      gc_foot6_slip = (YoBoolean)rob.getVariable("gc_foot6_slip");
       q_pend1 = (DoubleYoVariable)rob.getVariable("q_pend1");
       qd_pend1 = (DoubleYoVariable)rob.getVariable("qd_pend1");
       qdd_pend1 = (DoubleYoVariable)rob.getVariable("qdd_pend1");
@@ -376,7 +375,7 @@ public class AgileHexapodControllerBase
       gc_pend_end_tdy = (DoubleYoVariable)rob.getVariable("gc_pend_end_tdy");
       gc_pend_end_tdz = (DoubleYoVariable)rob.getVariable("gc_pend_end_tdz");
       gc_pend_end_fs = (DoubleYoVariable)rob.getVariable("gc_pend_end_fs");
-      gc_pend_end_slip = (BooleanYoVariable)rob.getVariable("gc_pend_end_slip");
+      gc_pend_end_slip = (YoBoolean)rob.getVariable("gc_pend_end_slip");
 
    }
 }

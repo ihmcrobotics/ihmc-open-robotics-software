@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -66,8 +66,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    private final DoubleYoVariable maxAngularVelocityMagnitudeAtLimits;
    private final DoubleYoVariable initialAngularVelocityMagnitude;
    private final DoubleYoVariable finalAngularVelocityMagnitude;
-   private final BooleanYoVariable initialDriftSaturated;
-   private final BooleanYoVariable finalDriftSaturated;
+   private final YoBoolean initialDriftSaturated;
+   private final YoBoolean finalDriftSaturated;
    private final DoubleYoVariable initialAlphaSaturation;
    private final DoubleYoVariable finalAlphaSaturation;
 
@@ -152,8 +152,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       initialAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "InitialAngularVelocityMagnitude", registry);
       finalAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "FinalAngularVelocityMagnitude", registry);
 
-      initialDriftSaturated = new BooleanYoVariable(namePrefix + "InitialDriftSaturated", registry);
-      finalDriftSaturated = new BooleanYoVariable(namePrefix + "FinalDriftSaturated", registry);
+      initialDriftSaturated = new YoBoolean(namePrefix + "InitialDriftSaturated", registry);
+      finalDriftSaturated = new YoBoolean(namePrefix + "FinalDriftSaturated", registry);
       initialAlphaSaturation = new DoubleYoVariable(namePrefix + "InitialAlphaSaturation", registry);
       finalAlphaSaturation = new DoubleYoVariable(namePrefix + "FinalAlphaSaturation", registry);
 

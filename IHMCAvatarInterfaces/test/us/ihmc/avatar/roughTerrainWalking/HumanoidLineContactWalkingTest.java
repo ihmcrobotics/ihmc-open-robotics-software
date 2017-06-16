@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
@@ -76,20 +76,20 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private ContactPointController contactPointController;
    private SideDependentList<EnumYoVariable<ConstraintType>> footStates = new SideDependentList<>();
 
-   private BooleanYoVariable doFootExplorationInTransferToStanding;
+   private YoBoolean doFootExplorationInTransferToStanding;
    private DoubleYoVariable transferTime;
    private DoubleYoVariable swingTime;
    private DoubleYoVariable percentageChickenSupport;
    private DoubleYoVariable timeBeforeExploring;
-   private SideDependentList<BooleanYoVariable> autoCropToLineAfterExploration = new SideDependentList<>();
-   private SideDependentList<BooleanYoVariable> holdFlatDuringExploration = new SideDependentList<>();
-   private SideDependentList<BooleanYoVariable> holdFlatDuringHoldPosition = new SideDependentList<>();
-   private SideDependentList<BooleanYoVariable> smartHoldPosition = new SideDependentList<>();
+   private SideDependentList<YoBoolean> autoCropToLineAfterExploration = new SideDependentList<>();
+   private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>();
+   private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>();
+   private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
    private SideDependentList<EnumYoVariable<ExplorationMethod>> explorationMethods = new SideDependentList<>();
-   private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
-   private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
-   private BooleanYoVariable allowUsingHighMomentumWeight;
-   private BooleanYoVariable doToeOffIfPossible;
+   private YoBoolean allowUpperBodyMomentumInSingleSupport;
+   private YoBoolean allowUpperBodyMomentumInDoubleSupport;
+   private YoBoolean allowUsingHighMomentumWeight;
+   private YoBoolean doToeOffIfPossible;
 
    @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
@@ -379,7 +379,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
 
       // get a bunch of relevant variables
-      doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
+      doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       transferTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("transferTime");
       swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
       percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
@@ -389,21 +389,21 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();
          String footControlNamespace = robotSide.getLowerCaseName() + "FootControlModule";
 
-         BooleanYoVariable autoCrop = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "AutoCropToLineAfterExploration");
+         YoBoolean autoCrop = (YoBoolean) drcSimulationTestHelper.getYoVariable(footName + "AutoCropToLineAfterExploration");
          autoCropToLineAfterExploration.put(robotSide, autoCrop);
-         BooleanYoVariable holdFlatDuringExploration = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoHoldFootFlatOrientation");
+         YoBoolean holdFlatDuringExploration = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoHoldFootFlatOrientation");
          this.holdFlatDuringExploration.put(robotSide, holdFlatDuringExploration);
-         BooleanYoVariable holdFlatDuringHoldPosition = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("ExploreFootPolygon", footName + "DoHoldFootFlatOrientation");
+         YoBoolean holdFlatDuringHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable("ExploreFootPolygon", footName + "DoHoldFootFlatOrientation");
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
-         BooleanYoVariable smartHoldPosition = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
+         YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
          EnumYoVariable<ExplorationMethod> explorationMethod = (EnumYoVariable<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
          explorationMethods.put(robotSide, explorationMethod);
       }
-      allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
-      allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-      doToeOffIfPossible = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doToeOffIfPossible");
+      allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
+      allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
+      allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
+      doToeOffIfPossible = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossible");
 
       // setup camera
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);

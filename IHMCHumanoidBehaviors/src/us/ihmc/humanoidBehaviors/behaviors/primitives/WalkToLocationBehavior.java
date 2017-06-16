@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFoots
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -55,9 +55,9 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
 
-   private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
-   private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
-   private final BooleanYoVariable haveFootstepsBeenGenerated = new BooleanYoVariable("haveFootstepsBeenGenerated", registry);
+   private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
+   private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
+   private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);

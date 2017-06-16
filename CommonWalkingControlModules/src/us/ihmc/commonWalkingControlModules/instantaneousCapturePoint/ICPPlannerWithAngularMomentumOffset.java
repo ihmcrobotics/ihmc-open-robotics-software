@@ -16,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 
 public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreezer
@@ -24,7 +24,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String namePrefix = "icpPlanner";
 
-   private final BooleanYoVariable modifyICPPlanByAngularMomentum;
+   private final YoBoolean modifyICPPlanByAngularMomentum;
 
    private final YoFrameVector modifiedICPVelocity;
    private final YoFrameVector modifiedICPAcceleration;
@@ -48,7 +48,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
-      modifyICPPlanByAngularMomentum = new BooleanYoVariable(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
+      modifyICPPlanByAngularMomentum = new YoBoolean(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
       modifyICPPlanByAngularMomentum.set(capturePointPlannerParameters.getModifyICPPlanByAngularMomentumRate());
 
       modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);

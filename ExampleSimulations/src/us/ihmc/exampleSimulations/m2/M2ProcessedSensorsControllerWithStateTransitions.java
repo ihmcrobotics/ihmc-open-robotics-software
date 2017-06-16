@@ -5,7 +5,7 @@ import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -159,8 +159,8 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    private final DoubleYoVariable velocityHeadingInBodyFrame = new DoubleYoVariable("velocityHeadingInBodyFrame",
                                                             "This is the heading angle of the body velocity relative to body frame x", registry);
 
-   private final BooleanYoVariable doneWithStateRight = new BooleanYoVariable("doneWithStateRight", registry);
-   private final BooleanYoVariable doneWithStateLeft = new BooleanYoVariable("doneWithStateLeft", registry);
+   private final YoBoolean doneWithStateRight = new YoBoolean("doneWithStateRight", registry);
+   private final YoBoolean doneWithStateLeft = new YoBoolean("doneWithStateLeft", registry);
 
    private final SideDependentList<DoubleYoVariable> ffHipYaw = new SideDependentList<DoubleYoVariable>(ff_left_hip_yaw, ff_right_hip_yaw);
    private final SideDependentList<DoubleYoVariable> ffHipRoll = new SideDependentList<DoubleYoVariable>(ff_left_hip_roll, ff_right_hip_roll);
@@ -172,7 +172,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    private final SideDependentList<DoubleYoVariable> ankleRollError = new SideDependentList<DoubleYoVariable>(left_ankle_roll_error, right_ankle_roll_error);
    private final SideDependentList<DoubleYoVariable> ffAnkleRollSpeed = new SideDependentList<DoubleYoVariable>(ff_left_ankle_roll_speed, ff_right_ankle_roll_speed);
    private final SideDependentList<DoubleYoVariable> footForceFiltered = new SideDependentList<DoubleYoVariable>(leftFootForceFiltered, rightFootForceFiltered);
-   private final SideDependentList<BooleanYoVariable> doneWithState = new SideDependentList<BooleanYoVariable>(doneWithStateLeft, doneWithStateRight);
+   private final SideDependentList<YoBoolean> doneWithState = new SideDependentList<YoBoolean>(doneWithStateLeft, doneWithStateRight);
    private final SideDependentList<DoubleYoVariable> activeAnkle = new SideDependentList<DoubleYoVariable>(act_left_ankle, act_right_ankle);
    private final SideDependentList<DoubleYoVariable> passiveAnkle = new SideDependentList<DoubleYoVariable>(pas_left_ankle, pas_right_ankle);
 

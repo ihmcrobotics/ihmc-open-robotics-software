@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryCo
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.Direction;
@@ -67,9 +67,9 @@ public class PositionOptimizedTrajectoryGenerator
    private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimensions);
 
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable optimizeInOneTick;
-   private final BooleanYoVariable hasConverged;
+   private final YoBoolean isDone;
+   private final YoBoolean optimizeInOneTick;
+   private final YoBoolean hasConverged;
    private final IntegerYoVariable segments;
    private final IntegerYoVariable activeSegment;
    private final ArrayList<DoubleYoVariable> waypointTimes = new ArrayList<>();
@@ -132,9 +132,9 @@ public class PositionOptimizedTrajectoryGenerator
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, order, registry);
       this.maxIterations = new IntegerYoVariable(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
-      isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
-      optimizeInOneTick = new BooleanYoVariable(namePrefix + "OptimizeInOneTick", registry);
-      hasConverged = new BooleanYoVariable(namePrefix + "HasConverged", registry);
+      isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      optimizeInOneTick = new YoBoolean(namePrefix + "OptimizeInOneTick", registry);
+      hasConverged = new YoBoolean(namePrefix + "HasConverged", registry);
       segments = new IntegerYoVariable(namePrefix + "Segments", registry);
       activeSegment = new IntegerYoVariable(namePrefix + "ActiveSegment", registry);
 

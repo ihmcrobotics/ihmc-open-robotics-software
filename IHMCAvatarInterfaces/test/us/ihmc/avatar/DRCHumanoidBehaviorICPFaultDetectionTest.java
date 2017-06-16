@@ -17,7 +17,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -72,7 +72,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private RobotVisualizer robotVisualizer;
    private SimulationConstructionSet scs;
    
-   private  BooleanYoVariable enablePushing;
+   private YoBoolean enablePushing;
 
 
    @After
@@ -271,7 +271,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       cameraConfiguration.setCameraTracking(true, true, false, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
-      enablePushing = new BooleanYoVariable("enablePushing", scs.getRootRegistry());
+      enablePushing = new YoBoolean("enablePushing", scs.getRootRegistry());
       enablePushing.set(false);
 
       if (VISUALIZE_FORCE)
@@ -282,8 +282,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0);
 
       // get YoVariables
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean walk = (YoBoolean) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       for (RobotSide robotSide : RobotSide.values)
       {

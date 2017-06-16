@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class ExplorationHelper
 {
-   private final BooleanYoVariable footholdExplorationActive;
+   private final YoBoolean footholdExplorationActive;
    private final ExplorationParameters explorationParameters;
    private final ReferenceFrame soleFrame;
 
@@ -50,7 +50,7 @@ public class ExplorationHelper
 
    public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoVariableRegistry registry)
    {
-      footholdExplorationActive = new BooleanYoVariable(prefix + "FootholdExplorationActive", registry);
+      footholdExplorationActive = new YoBoolean(prefix + "FootholdExplorationActive", registry);
       timeExploring = new DoubleYoVariable(prefix + "TimeExploring", registry);
       startTime = new DoubleYoVariable(prefix + "StartTime", registry);
       yoCurrentCorner = new IntegerYoVariable(prefix + "CurrentCornerExplored", registry);

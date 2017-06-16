@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -59,7 +59,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final long estimatorTicksPerControlTick;
 
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
-   private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
+   private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
    private final OutputProcessor outputProcessor;
@@ -94,7 +94,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final LongYoVariable timePassedSinceEstimator = new LongYoVariable("timePassedSinceEstimator", registry);
    private final LongYoVariable timePassedBetweenEstimatorTicks = new LongYoVariable("timePassedBetweenEstimatorTicks", registry);
 
-   private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
+   private final YoBoolean runController = new YoBoolean("runController", registry);
 
    private final GlobalDataProducer globalDataProducer;
 

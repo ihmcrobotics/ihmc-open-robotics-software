@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -19,7 +19,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
    private DoubleYoVariable maxSweepFreq;
    private DoubleYoVariable amplitude;
 
-   private BooleanYoVariable hasBeenReset;
+   private YoBoolean hasBeenReset;
 
    private final EnumYoVariable<YoFunctionGeneratorMode> mode;
 
@@ -42,7 +42,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
       
       valueCheck = new DoubleYoVariable("valueCheck", registry);
       
-      hasBeenReset = new BooleanYoVariable("hasBeenReset", registry);
+      hasBeenReset = new YoBoolean("hasBeenReset", registry);
       hasBeenReset.set(true);
    }
    

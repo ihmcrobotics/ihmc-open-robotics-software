@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -46,11 +46,11 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private final DoubleYoVariable solutionStableThreshold;
    private final DoubleYoVariable jointLimitThreshold;
    private final DoubleYoVariable currentSolutionQuality;
-   private final BooleanYoVariable isPaused;
-   private final BooleanYoVariable isStopped;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable hasSolverFailed;
-   private final BooleanYoVariable hasSentMessageToController;
+   private final YoBoolean isPaused;
+   private final YoBoolean isStopped;
+   private final YoBoolean isDone;
+   private final YoBoolean hasSolverFailed;
+   private final YoBoolean hasSentMessageToController;
 
    private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
    private final SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
@@ -101,11 +101,11 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       solutionStableThreshold.set(0.005);
       jointLimitThreshold = new DoubleYoVariable(behaviorName + "jointLimitThreshold", registry);
       jointLimitThreshold.set(Math.PI/180 * 2.5);
-      isPaused = new BooleanYoVariable(behaviorName + "IsPaused", registry);
-      isStopped = new BooleanYoVariable(behaviorName + "IsStopped", registry);
-      isDone = new BooleanYoVariable(behaviorName + "IsDone", registry);
-      hasSolverFailed = new BooleanYoVariable(behaviorName + "HasSolverFailed", registry);
-      hasSentMessageToController = new BooleanYoVariable(behaviorName + "HasSentMessageToController", registry);
+      isPaused = new YoBoolean(behaviorName + "IsPaused", registry);
+      isStopped = new YoBoolean(behaviorName + "IsStopped", registry);
+      isDone = new YoBoolean(behaviorName + "IsDone", registry);
+      hasSolverFailed = new YoBoolean(behaviorName + "HasSolverFailed", registry);
+      hasSentMessageToController = new YoBoolean(behaviorName + "HasSentMessageToController", registry);
 
       currentSolutionQuality = new DoubleYoVariable(behaviorName + "CurrentSolutionQuality", registry);
 

@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -18,8 +18,8 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final String namePrefix = "icpPlanner";
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final BooleanYoVariable doTimeFreezing;
-   private final BooleanYoVariable isTimeBeingFrozen;
+   private final YoBoolean doTimeFreezing;
+   private final YoBoolean isTimeBeingFrozen;
    private final DoubleYoVariable timeDelay;
    private final DoubleYoVariable capturePointPositionError;
    private final DoubleYoVariable distanceToFreezeLine;
@@ -44,8 +44,8 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable(namePrefix + "MaxCapturePointErrorAllowedToBeginSwingPhase", registry);
       this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable(namePrefix + "MaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
       this.previousTime = new DoubleYoVariable(namePrefix + "PreviousTime", registry);
-      this.doTimeFreezing = new BooleanYoVariable(namePrefix + "DoTimeFreezing", registry);
-      this.isTimeBeingFrozen = new BooleanYoVariable(namePrefix + "IsTimeBeingFrozen", registry);
+      this.doTimeFreezing = new YoBoolean(namePrefix + "DoTimeFreezing", registry);
+      this.isTimeBeingFrozen = new YoBoolean(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
 

@@ -8,7 +8,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -41,7 +41,7 @@ public class ValkyrieFingerSetController implements RobotController
    private final YoPolynomial yoPolynomial;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
-   private final BooleanYoVariable hasTrajectoryTimeChanged, isStopped;
+   private final YoBoolean hasTrajectoryTimeChanged, isStopped;
 
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
@@ -70,8 +70,8 @@ public class ValkyrieFingerSetController implements RobotController
       currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
       endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
       this.trajectoryTime = trajectoryTime;
-      hasTrajectoryTimeChanged = new BooleanYoVariable(sidePrefix + "HasTrajectoryTimeChanged", registry);
-      isStopped = new BooleanYoVariable(sidePrefix + "IsStopped", registry);
+      hasTrajectoryTimeChanged = new YoBoolean(sidePrefix + "HasTrajectoryTimeChanged", registry);
+      isStopped = new YoBoolean(sidePrefix + "IsStopped", registry);
       isStopped.set(false);
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {

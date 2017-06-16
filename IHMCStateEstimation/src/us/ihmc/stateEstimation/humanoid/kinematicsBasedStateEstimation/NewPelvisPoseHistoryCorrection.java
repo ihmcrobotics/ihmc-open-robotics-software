@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPac
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -32,7 +32,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private static final double X_DEADZONE_SIZE = 0.014;
    private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
    
-   private final BooleanYoVariable enableProcessNewPackets;
+   private final YoBoolean enableProcessNewPackets;
    
    private static final boolean ENABLE_GRAPHICS = true;
    
@@ -92,7 +92,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final ReferenceFrame iterativeClosestPointReferenceFrame;
    private final FramePose correctedPelvisPoseInWorldFrame = new FramePose(worldFrame);
    
-   private final BooleanYoVariable hasOneIcpPacketEverBeenReceived;
+   private final YoBoolean hasOneIcpPacketEverBeenReceived;
    
    private final Vector3D localizationTranslation = new Vector3D();
    private final Vector3D correctedPelvisTranslation = new Vector3D();
@@ -103,7 +103,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
    private final Quaternion errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quaternion();
    
-   private final BooleanYoVariable isErrorTooBig;
+   private final YoBoolean isErrorTooBig;
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
    
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
@@ -139,7 +139,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
       yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
       
-      enableProcessNewPackets = new BooleanYoVariable("enableProcessNewPackets", registry);
+      enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);
       
       this.pelvisBufferSize = new IntegerYoVariable("pelvisBufferSize", registry);
@@ -167,10 +167,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Pitch = new DoubleYoVariable("totalErrorRotation_Pitch", registry);
       totalErrorRotation_Roll = new DoubleYoVariable("totalErrorRotation_Roll", registry);
       
-      hasOneIcpPacketEverBeenReceived = new BooleanYoVariable("hasOneIcpPacketEverBeenReceived", registry);
+      hasOneIcpPacketEverBeenReceived = new YoBoolean("hasOneIcpPacketEverBeenReceived", registry);
       hasOneIcpPacketEverBeenReceived.set(false);
       
-      isErrorTooBig = new BooleanYoVariable("isErrorTooBig", registry);
+      isErrorTooBig = new YoBoolean("isErrorTooBig", registry);
       isErrorTooBig.set(false);
       
       if(ENABLE_GRAPHICS && yoGraphicsListRegistry != null)

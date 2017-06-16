@@ -28,7 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -464,7 +464,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getDoubleYoVariable(scs, variable, namespace);
    }
 
-   private static BooleanYoVariable findOrientationControlEnabled(SimulationConstructionSet scs, RigidBody body)
+   private static YoBoolean findOrientationControlEnabled(SimulationConstructionSet scs, RigidBody body)
    {
       String bodyName = body.getName();
       String namespace = bodyName + "SpatialFBController";
@@ -472,7 +472,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getBooleanYoVariable(scs, variable, namespace);
    }
 
-   private static BooleanYoVariable findJointControlEnabled(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoBoolean findJointControlEnabled(SimulationConstructionSet scs, OneDoFJoint joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -491,9 +491,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
    }
 
-   private static BooleanYoVariable getBooleanYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoBoolean getBooleanYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, BooleanYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoBoolean.class);
    }
 
    private static IntegerYoVariable getIntegerYoVariable(SimulationConstructionSet scs, String name, String namespace)
@@ -565,16 +565,16 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final OneDoFJoint[] spineJointClones;
       private final RigidBody chestClone;
 
-      private final Map<OneDoFJoint, BooleanYoVariable> jointControlEnabled = new HashMap<>();
+      private final Map<OneDoFJoint, YoBoolean> jointControlEnabled = new HashMap<>();
       private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredsMap = new HashMap<>();
 
-      private final BooleanYoVariable orientationControlEnabled;
+      private final YoBoolean orientationControlEnabled;
       private final YoFrameQuaternion desiredOrientation;
 
       private final YoFrameQuaternion currentDesiredOrientation = new YoFrameQuaternion("CurrentDesired", ReferenceFrame.getWorldFrame(), registry);
       private final YoFrameQuaternion previousDesiredOrientation = new YoFrameQuaternion("PreviousDesired", ReferenceFrame.getWorldFrame(), registry);
 
-      private final BooleanYoVariable inconsistentControl = new BooleanYoVariable("InconsistentControl", registry);
+      private final YoBoolean inconsistentControl = new YoBoolean("InconsistentControl", registry);
       private final DoubleYoVariable maxSpeed = new DoubleYoVariable("maxSpeed", registry);
 
       private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();

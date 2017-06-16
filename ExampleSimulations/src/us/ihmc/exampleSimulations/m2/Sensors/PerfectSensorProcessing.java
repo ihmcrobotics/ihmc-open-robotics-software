@@ -8,7 +8,7 @@ import us.ihmc.exampleSimulations.m2.M2Robot;
 import us.ihmc.exampleSimulations.m2.M2Simulation;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,8 +36,8 @@ public class PerfectSensorProcessing
 
    // These are the variables that are automatically created when the robot is
    // created:
-   private BooleanYoVariable gc_right_toe_in_slip, gc_right_toe_out_slip, gc_right_heel_in_slip, gc_right_heel_out_slip, gc_left_toe_in_slip, gc_left_toe_out_slip;
-   private BooleanYoVariable gc_left_heel_in_slip, gc_left_heel_out_slip;
+   private YoBoolean gc_right_toe_in_slip, gc_right_toe_out_slip, gc_right_heel_in_slip, gc_right_heel_out_slip, gc_left_toe_in_slip, gc_left_toe_out_slip;
+   private YoBoolean gc_left_heel_in_slip, gc_left_heel_out_slip;
    private DoubleYoVariable t;
 
    private DoubleYoVariable q_yaw;
@@ -191,7 +191,7 @@ public class PerfectSensorProcessing
       gc_right_toe_in_tdy = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_tdy");
       gc_right_toe_in_tdz = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_tdz");
       gc_right_toe_in_fs = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_fs");
-      gc_right_toe_in_slip = (BooleanYoVariable)robot.getVariable("gc_right_toe_in_slip");
+      gc_right_toe_in_slip = (YoBoolean)robot.getVariable("gc_right_toe_in_slip");
       gc_right_toe_in_coll = (IntegerYoVariable)robot.getVariable("gc_right_toe_in_coll");
       gc_right_toe_out_x = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_x");
       gc_right_toe_out_y = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_y");
@@ -209,7 +209,7 @@ public class PerfectSensorProcessing
       gc_right_toe_out_tdy = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_tdy");
       gc_right_toe_out_tdz = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_tdz");
       gc_right_toe_out_fs = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_fs");
-      gc_right_toe_out_slip = (BooleanYoVariable)robot.getVariable("gc_right_toe_out_slip");
+      gc_right_toe_out_slip = (YoBoolean)robot.getVariable("gc_right_toe_out_slip");
       gc_right_toe_out_coll = (IntegerYoVariable)robot.getVariable("gc_right_toe_out_coll");
       gc_right_heel_in_x = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_x");
       gc_right_heel_in_y = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_y");
@@ -227,7 +227,7 @@ public class PerfectSensorProcessing
       gc_right_heel_in_tdy = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_tdy");
       gc_right_heel_in_tdz = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_tdz");
       gc_right_heel_in_fs = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_fs");
-      gc_right_heel_in_slip = (BooleanYoVariable)robot.getVariable("gc_right_heel_in_slip");
+      gc_right_heel_in_slip = (YoBoolean)robot.getVariable("gc_right_heel_in_slip");
       gc_right_heel_in_coll = (IntegerYoVariable)robot.getVariable("gc_right_heel_in_coll");
       gc_right_heel_out_x = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_x");
       gc_right_heel_out_y = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_y");
@@ -245,7 +245,7 @@ public class PerfectSensorProcessing
       gc_right_heel_out_tdy = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_tdy");
       gc_right_heel_out_tdz = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_tdz");
       gc_right_heel_out_fs = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_fs");
-      gc_right_heel_out_slip = (BooleanYoVariable)robot.getVariable("gc_right_heel_out_slip");
+      gc_right_heel_out_slip = (YoBoolean)robot.getVariable("gc_right_heel_out_slip");
       gc_right_heel_out_coll = (IntegerYoVariable)robot.getVariable("gc_right_heel_out_coll");
       q_left_hip_yaw = (DoubleYoVariable)robot.getVariable("q_left_hip_yaw");
       qd_left_hip_yaw = (DoubleYoVariable)robot.getVariable("qd_left_hip_yaw");
@@ -288,7 +288,7 @@ public class PerfectSensorProcessing
       gc_left_toe_in_tdy = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_tdy");
       gc_left_toe_in_tdz = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_tdz");
       gc_left_toe_in_fs = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_fs");
-      gc_left_toe_in_slip = (BooleanYoVariable)robot.getVariable("gc_left_toe_in_slip");
+      gc_left_toe_in_slip = (YoBoolean)robot.getVariable("gc_left_toe_in_slip");
       gc_left_toe_in_coll = (IntegerYoVariable)robot.getVariable("gc_left_toe_in_coll");
       gc_left_toe_out_x = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_x");
       gc_left_toe_out_y = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_y");
@@ -306,7 +306,7 @@ public class PerfectSensorProcessing
       gc_left_toe_out_tdy = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_tdy");
       gc_left_toe_out_tdz = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_tdz");
       gc_left_toe_out_fs = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_fs");
-      gc_left_toe_out_slip = (BooleanYoVariable)robot.getVariable("gc_left_toe_out_slip");
+      gc_left_toe_out_slip = (YoBoolean)robot.getVariable("gc_left_toe_out_slip");
       gc_left_toe_out_coll = (IntegerYoVariable)robot.getVariable("gc_left_toe_out_coll");
       gc_left_heel_in_x = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_x");
       gc_left_heel_in_y = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_y");
@@ -324,7 +324,7 @@ public class PerfectSensorProcessing
       gc_left_heel_in_tdy = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_tdy");
       gc_left_heel_in_tdz = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_tdz");
       gc_left_heel_in_fs = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_fs");
-      gc_left_heel_in_slip = (BooleanYoVariable)robot.getVariable("gc_left_heel_in_slip");
+      gc_left_heel_in_slip = (YoBoolean)robot.getVariable("gc_left_heel_in_slip");
       gc_left_heel_in_coll = (IntegerYoVariable)robot.getVariable("gc_left_heel_in_coll");
       gc_left_heel_out_x = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_x");
       gc_left_heel_out_y = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_y");
@@ -342,7 +342,7 @@ public class PerfectSensorProcessing
       gc_left_heel_out_tdy = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_tdy");
       gc_left_heel_out_tdz = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_tdz");
       gc_left_heel_out_fs = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_fs");
-      gc_left_heel_out_slip = (BooleanYoVariable)robot.getVariable("gc_left_heel_out_slip");
+      gc_left_heel_out_slip = (YoBoolean)robot.getVariable("gc_left_heel_out_slip");
       gc_left_heel_out_coll = (IntegerYoVariable)robot.getVariable("gc_left_heel_out_coll");
 
       limbJointPositions = new DoubleYoVariable[][]

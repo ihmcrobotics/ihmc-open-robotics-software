@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -76,13 +76,13 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
 
-   private final BooleanYoVariable doPartialFootholdDetection;
+   private final YoBoolean doPartialFootholdDetection;
 
    private final FrameLine2d lineOfRotation;
 
-   private final BooleanYoVariable useCoPOccupancyGrid;
-   private final BooleanYoVariable cropToConvexHullOfCoPs;
-   private final BooleanYoVariable fitLineToCoPs;
+   private final YoBoolean useCoPOccupancyGrid;
+   private final YoBoolean cropToConvexHullOfCoPs;
+   private final YoBoolean fitLineToCoPs;
 
    private final int footCornerPoints;
 
@@ -95,9 +95,9 @@ public class PartialFootholdControlModule
     */
    private final DoubleYoVariable unsafeArea;
    private final DoubleYoVariable minAreaToConsider;
-   private final BooleanYoVariable unsafeAreaAboveThreshold;
+   private final YoBoolean unsafeAreaAboveThreshold;
 
-   private final BooleanYoVariable expectingLineContact;
+   private final YoBoolean expectingLineContact;
    private final FramePoint2d dummyDesiredCop = new FramePoint2d();
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -154,16 +154,16 @@ public class PartialFootholdControlModule
       rotationCalculatorType = explorationParameters.getRotationCalculatorType();
       minAreaToConsider = explorationParameters.getMinAreaToConsider();
 
-      doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
+      doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
 
-      cropToConvexHullOfCoPs = new BooleanYoVariable(namePrefix + "CropToConvexHullOfCoPs", registry);
+      cropToConvexHullOfCoPs = new YoBoolean(namePrefix + "CropToConvexHullOfCoPs", registry);
       cropToConvexHullOfCoPs.set(false);
 
-      fitLineToCoPs = new BooleanYoVariable(namePrefix + "FitLineToCoPs", registry);
+      fitLineToCoPs = new YoBoolean(namePrefix + "FitLineToCoPs", registry);
       fitLineToCoPs.set(false);
 
-      expectingLineContact = new BooleanYoVariable(namePrefix + "ExpectingLineContact", registry);
+      expectingLineContact = new YoBoolean(namePrefix + "ExpectingLineContact", registry);
       expectingLineContact.set(false);
 
       double dt = controllerToolbox.getControlDT();
@@ -180,7 +180,7 @@ public class PartialFootholdControlModule
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
 
       unsafeArea = new DoubleYoVariable(namePrefix + "UnsafeArea", registry);
-      unsafeAreaAboveThreshold = new BooleanYoVariable(namePrefix + "UnsafeAreaAboveThreshold", registry);
+      unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)

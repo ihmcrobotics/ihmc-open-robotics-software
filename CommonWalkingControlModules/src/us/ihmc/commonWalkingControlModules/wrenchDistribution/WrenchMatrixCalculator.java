@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -35,7 +35,7 @@ public class WrenchMatrixCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable useForceRateHighWeight = new BooleanYoVariable("useForceRateHighWeight", registry);
+   private final YoBoolean useForceRateHighWeight = new YoBoolean("useForceRateHighWeight", registry);
 
    private final DoubleYoVariable rhoWeight = new DoubleYoVariable("rhoWeight", registry);
    private final DoubleYoVariable rhoRateDefaultWeight = new DoubleYoVariable("rhoRateDefaultWeight", registry);

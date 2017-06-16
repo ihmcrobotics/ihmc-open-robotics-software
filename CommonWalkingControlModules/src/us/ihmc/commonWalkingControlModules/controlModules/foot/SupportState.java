@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -45,8 +45,8 @@ public class SupportState extends AbstractFootControlState
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
-   private final BooleanYoVariable footBarelyLoaded;
-   private final BooleanYoVariable copOnEdge;
+   private final YoBoolean footBarelyLoaded;
+   private final YoBoolean copOnEdge;
    private final DoubleYoVariable footLoadThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
@@ -76,17 +76,17 @@ public class SupportState extends AbstractFootControlState
    private final FrameOrientation footOrientation = new FrameOrientation();
 
    // For testing:
-   private final BooleanYoVariable assumeCopOnEdge;
-   private final BooleanYoVariable assumeFootBarelyLoaded;
-   private final BooleanYoVariable neverHoldRotation;
+   private final YoBoolean assumeCopOnEdge;
+   private final YoBoolean assumeFootBarelyLoaded;
+   private final YoBoolean neverHoldRotation;
 
    // For line contact walking and balancing:
-   private final BooleanYoVariable holdFootOrientationFlat;
+   private final YoBoolean holdFootOrientationFlat;
 
    // For foothold exploration:
    private final ExplorationHelper explorationHelper;
    private final PartialFootholdControlModule partialFootholdControlModule;
-   private final BooleanYoVariable requestFootholdExploration;
+   private final YoBoolean requestFootholdExploration;
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
 
@@ -111,8 +111,8 @@ public class SupportState extends AbstractFootControlState
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
-      footBarelyLoaded = new BooleanYoVariable(prefix + "BarelyLoaded", registry);
-      copOnEdge = new BooleanYoVariable(prefix + "CopOnEdge", registry);
+      footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
+      copOnEdge = new YoBoolean(prefix + "CopOnEdge", registry);
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
 
@@ -140,14 +140,14 @@ public class SupportState extends AbstractFootControlState
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      assumeCopOnEdge = new BooleanYoVariable(prefix + "AssumeCopOnEdge", registry);
-      assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
-      neverHoldRotation = new BooleanYoVariable(prefix + "NeverHoldRotation", registry);
-      holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
+      assumeCopOnEdge = new YoBoolean(prefix + "AssumeCopOnEdge", registry);
+      assumeFootBarelyLoaded = new YoBoolean(prefix + "AssumeFootBarelyLoaded", registry);
+      neverHoldRotation = new YoBoolean(prefix + "NeverHoldRotation", registry);
+      holdFootOrientationFlat = new YoBoolean(prefix + "HoldFlatOrientation", registry);
 
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
+      requestFootholdExploration = new YoBoolean(prefix + "RequestFootholdExploration", registry);
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {

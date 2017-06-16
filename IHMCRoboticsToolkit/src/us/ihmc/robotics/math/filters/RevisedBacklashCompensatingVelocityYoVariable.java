@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 
@@ -22,7 +22,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
    private final DoubleYoVariable position;
 
    private final DoubleYoVariable lastPosition;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    private final EnumYoVariable<BacklashState> backlashState;
    private final DoubleYoVariable slopTime;
@@ -37,7 +37,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
       finiteDifferenceVelocity = new FilteredVelocityYoVariable(name + "finiteDifferenceVelocity", "", alphaVariable, dt, registry);
       
       
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
@@ -62,7 +62,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
       
       finiteDifferenceVelocity = new FilteredVelocityYoVariable(name + "finiteDifferenceVelocity", "", alphaVariable, dt, registry);
 
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);

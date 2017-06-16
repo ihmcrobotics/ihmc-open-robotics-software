@@ -3,7 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
@@ -25,7 +25,7 @@ public class ForceSensorHysteresisCreator extends ModularRobotController
    private DoubleYoVariable hysteresisInZDirection;
    
    private boolean hasNormalForceGonePastLimit = false;
-   private final GlitchFilteredBooleanYoVariable isForcePastThresholdFiltered;
+   private final GlitchFilteredYoBoolean isForcePastThresholdFiltered;
    private boolean unfilteredIsForcePastThresh = false;
    private int hysteresisSampleCounter = 0;
    private double normalForceThreshold;
@@ -42,7 +42,7 @@ public class ForceSensorHysteresisCreator extends ModularRobotController
       hysteresisInZDirection = new DoubleYoVariable(parentJointName + "ForceSensorZHysteresis", registry);
       hysteresisInZDirection.set(0);
       
-      this.isForcePastThresholdFiltered = new GlitchFilteredBooleanYoVariable(parentJointName + "ForceSensorZHysteresisIsForcePastThreshold", registry, ITERS_BEFORE_HYSTERESIS_TRIGGERS);
+      this.isForcePastThresholdFiltered = new GlitchFilteredYoBoolean(parentJointName + "ForceSensorZHysteresisIsForcePastThreshold", registry, ITERS_BEFORE_HYSTERESIS_TRIGGERS);
    }
 
    @Override

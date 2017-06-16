@@ -12,12 +12,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableType;
-
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class YoWhiteBoardTest
 {
@@ -422,7 +418,7 @@ public class YoWhiteBoardTest
 
             case BOOLEAN :
             {
-               variablesToCopyTo.add(new BooleanYoVariable(name, registry));
+               variablesToCopyTo.add(new YoBoolean(name, registry));
 
                break;
             }
@@ -494,7 +490,7 @@ public class YoWhiteBoardTest
 
             case 2 :
             {
-               variables.add(new BooleanYoVariable(name, registry));
+               variables.add(new YoBoolean(name, registry));
 
                break;
             }

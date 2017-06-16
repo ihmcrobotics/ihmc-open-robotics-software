@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -132,8 +132,8 @@ public class FiducialDetectorFromCameraImagesTest
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
-      BooleanYoVariable fiducialTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
-      BooleanYoVariable fiducialTargetIDHasBeenLocatedFiltered = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocatedFiltered");
+      YoBoolean fiducialTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
+      YoBoolean fiducialTargetIDHasBeenLocatedFiltered = (YoBoolean) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocatedFiltered");
 
       DoubleYoVariable fiducialReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameX");
       DoubleYoVariable fiducialReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameY");

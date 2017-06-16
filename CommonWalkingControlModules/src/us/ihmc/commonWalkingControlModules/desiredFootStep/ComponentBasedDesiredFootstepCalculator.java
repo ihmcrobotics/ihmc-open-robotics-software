@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFootstepCalculator
 {
-   private final BooleanYoVariable matchSupportFootPlane = new BooleanYoVariable("matchSupportFootPlane", registry);
+   private final YoBoolean matchSupportFootPlane = new YoBoolean("matchSupportFootPlane", registry);
 
    private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);

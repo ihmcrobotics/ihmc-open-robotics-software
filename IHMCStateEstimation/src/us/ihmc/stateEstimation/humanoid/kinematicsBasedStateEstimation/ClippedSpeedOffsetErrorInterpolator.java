@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -37,11 +37,11 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final BooleanYoVariable isRotationCorrectionEnabled;
+   private final YoBoolean isRotationCorrectionEnabled;
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    private final DoubleYoVariable alphaFilter_BreakFrequency;
    private final DoubleYoVariable dt;
@@ -173,10 +173,10 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       this.stateEstimatorReferenceFrame = referenceFrame;
 
-      isRotationCorrectionEnabled = new BooleanYoVariable("isRotationCorrectionEnabled", registry);
+      isRotationCorrectionEnabled = new YoBoolean("isRotationCorrectionEnabled", registry);
       isRotationCorrectionEnabled.set(correctRotation);
 
-      hasBeenCalled = new BooleanYoVariable("hasbeenCalled", registry);
+      hasBeenCalled = new YoBoolean("hasbeenCalled", registry);
       hasBeenCalled.set(false);
 
       alphaFilter_AlphaValue = new DoubleYoVariable("alphaFilter_AlphaValue", registry);

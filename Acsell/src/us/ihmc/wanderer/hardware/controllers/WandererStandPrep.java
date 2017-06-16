@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -39,16 +39,16 @@ public class WandererStandPrep implements WandererController
 
    private final EnumDoubleMap<WandererJoint> initialPositions = new EnumDoubleMap<>(WandererJoint.class);
 
-   private final BooleanYoVariable startStandprep = new BooleanYoVariable("startStandprep", registry);
+   private final YoBoolean startStandprep = new YoBoolean("startStandprep", registry);
    private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
 
    private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableStandPrepOutput", registry);
 
    private double springCalibration_t0;
-   private final BooleanYoVariable springCalibration_wasEnabled = new BooleanYoVariable("springCalibrationEnabled",registry);
-   private final BooleanYoVariable springCalibration_isEnabled = new BooleanYoVariable("startSpringCalibration", registry);
+   private final YoBoolean springCalibration_wasEnabled = new YoBoolean("springCalibrationEnabled",registry);
+   private final YoBoolean springCalibration_isEnabled = new YoBoolean("startSpringCalibration", registry);
    private final DoubleYoVariable springTime = new DoubleYoVariable("springTime",registry);
 
    @Override

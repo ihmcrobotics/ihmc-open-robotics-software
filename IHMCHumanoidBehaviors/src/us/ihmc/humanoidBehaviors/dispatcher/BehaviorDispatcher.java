@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPa
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
@@ -62,7 +62,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
    private E stopBehavior;
    private E currentBehavior;

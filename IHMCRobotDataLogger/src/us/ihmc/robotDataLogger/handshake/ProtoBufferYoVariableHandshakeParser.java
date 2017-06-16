@@ -30,7 +30,7 @@ import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProto
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
@@ -144,7 +144,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
                break;
 
             case BooleanYoVariable:
-               BooleanYoVariable boolVar = new BooleanYoVariable(name, parent);
+               YoBoolean boolVar = new YoBoolean(name, parent);
                variableList.add(boolVar);
                break;
 

@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -26,7 +26,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final YoVariableRegistry registry;
    private final RigidBody rigidBody;
    private final ReferenceFrame planeFrame;
-   private final BooleanYoVariable inContact;
+   private final YoBoolean inContact;
    private final DoubleYoVariable coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
@@ -35,13 +35,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
    private final YoFramePoint2d contactPointCentroid;
 
-   private final BooleanYoVariable hasContactStateChanged;
+   private final YoBoolean hasContactStateChanged;
 
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
+      this.inContact = new YoBoolean(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
       this.rigidBody = rigidBody;
@@ -69,7 +69,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, registry);
       contactPointCentroid.setToNaN();
 
-      hasContactStateChanged = new BooleanYoVariable(namePrefix + "HasChanged", registry);
+      hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);
    }
 
    private final FramePoint tempContactPointPosition = new FramePoint();

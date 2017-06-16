@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -58,16 +58,16 @@ public class PelvisICPBasedTranslationManager
 
    private final YoFrameVector2d desiredICPOffset = new YoFrameVector2d("desiredICPOffset", worldFrame, registry);
 
-   private final BooleanYoVariable isEnabled = new BooleanYoVariable("isPelvisTranslationManagerEnabled", registry);
-   private final BooleanYoVariable isRunning = new BooleanYoVariable("isPelvisTranslationManagerRunning", registry);
-   private final BooleanYoVariable isFrozen = new BooleanYoVariable("isPelvisTranslationManagerFrozen", registry);
+   private final YoBoolean isEnabled = new YoBoolean("isPelvisTranslationManagerEnabled", registry);
+   private final YoBoolean isRunning = new YoBoolean("isPelvisTranslationManagerRunning", registry);
+   private final YoBoolean isFrozen = new YoBoolean("isPelvisTranslationManagerFrozen", registry);
 
-   private final BooleanYoVariable manualMode = new BooleanYoVariable("manualModeICPOffset", registry);
+   private final YoBoolean manualMode = new YoBoolean("manualModeICPOffset", registry);
 
    private final DoubleYoVariable yoTime;
    private final double controlDT;
 
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisTranslationalTrajectoryStopped", registry);
+   private final YoBoolean isTrajectoryStopped = new YoBoolean("isPelvisTranslationalTrajectoryStopped", registry);
 
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
@@ -86,7 +86,7 @@ public class PelvisICPBasedTranslationManager
 
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final YoBoolean isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class);
 
@@ -126,7 +126,7 @@ public class PelvisICPBasedTranslationManager
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);

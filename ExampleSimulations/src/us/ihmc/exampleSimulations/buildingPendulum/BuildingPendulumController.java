@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,7 +11,7 @@ public class BuildingPendulumController extends SimpleRobotController
    public static String variableName = "MySliderBoardTest";
 
    private final BuildingPendulumRobot robot;
-   private final BooleanYoVariable atCenter = new BooleanYoVariable("AtCenter", registry);
+   private final YoBoolean atCenter = new YoBoolean("AtCenter", registry);
 
    private RobotSide activeSide;
    private final EnumYoVariable<RobotSide> yoActiveSide = new EnumYoVariable<>("ActiveSide", registry, RobotSide.class);

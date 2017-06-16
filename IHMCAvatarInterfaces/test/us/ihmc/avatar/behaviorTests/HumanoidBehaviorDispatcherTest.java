@@ -54,7 +54,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -344,7 +344,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       WholeBodyControllerParameters wholeBodyControllerParameters = this.getRobotModel();
 
-      BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
+      YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, supportLeg, referenceFrames, yoTime, yoDoubleSupport, communicationBridge,
             wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);

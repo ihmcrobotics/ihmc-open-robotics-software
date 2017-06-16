@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -57,10 +57,10 @@ public class FootControlModule
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   private final BooleanYoVariable holdPositionIfCopOnEdge;
+   private final YoBoolean holdPositionIfCopOnEdge;
    /** For testing purpose only. */
-   private final BooleanYoVariable alwaysHoldPosition;
-   private final BooleanYoVariable neverHoldPosition;
+   private final YoBoolean alwaysHoldPosition;
+   private final YoBoolean neverHoldPosition;
 
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
@@ -76,8 +76,8 @@ public class FootControlModule
    private final FootControlHelper footControlHelper;
    private final ToeOffCalculator toeOffCalculator;
 
-   private final BooleanYoVariable requestExploration;
-   private final BooleanYoVariable resetFootPolygon;
+   private final YoBoolean requestExploration;
+   private final YoBoolean resetFootPolygon;
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
@@ -102,10 +102,10 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      holdPositionIfCopOnEdge = new BooleanYoVariable(namePrefix + "HoldPositionIfCopOnEdge", registry);
+      holdPositionIfCopOnEdge = new YoBoolean(namePrefix + "HoldPositionIfCopOnEdge", registry);
       holdPositionIfCopOnEdge.set(walkingControllerParameters.doFancyOnToesControl());
-      alwaysHoldPosition = new BooleanYoVariable(namePrefix + "AlwaysHoldPosition", registry);
-      neverHoldPosition = new BooleanYoVariable(namePrefix + "NeverHoldPosition", registry);
+      alwaysHoldPosition = new YoBoolean(namePrefix + "AlwaysHoldPosition", registry);
+      neverHoldPosition = new YoBoolean(namePrefix + "NeverHoldPosition", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -168,8 +168,8 @@ public class FootControlModule
 
       setupStateMachine(states);
 
-      requestExploration = new BooleanYoVariable(namePrefix + "RequestExploration", registry);
-      resetFootPolygon = new BooleanYoVariable(namePrefix + "ResetFootPolygon", registry);
+      requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
+      resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
    }
 
    private void setupContactStatesMap()

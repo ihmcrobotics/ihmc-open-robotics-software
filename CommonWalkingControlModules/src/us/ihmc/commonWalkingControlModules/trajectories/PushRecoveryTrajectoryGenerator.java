@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -29,7 +29,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable visualize;
+   private final YoBoolean visualize;
 
    private final int numberOfBallsInBag = 30;
    private final BagOfBalls bagOfBalls;
@@ -84,7 +84,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
-      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
+      this.visualize = new YoBoolean(namePrefix + "Visualize", registry);
       this.visualize.set(VISUALIZE);
 
       this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;

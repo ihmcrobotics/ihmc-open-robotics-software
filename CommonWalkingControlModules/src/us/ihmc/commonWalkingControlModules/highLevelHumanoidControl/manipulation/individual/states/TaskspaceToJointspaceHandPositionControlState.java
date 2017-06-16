@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplian
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -67,7 +67,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   private final BooleanYoVariable enableCompliantControl;
+   private final YoBoolean enableCompliantControl;
    private final HandCompliantControlHelper handCompliantControlHelper;
 
    private final boolean doPositionControl;
@@ -161,7 +161,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
          }
       }
 
-      enableCompliantControl = new BooleanYoVariable(namePrefix + "EnableCompliantControl", registry);
+      enableCompliantControl = new YoBoolean(namePrefix + "EnableCompliantControl", registry);
       if (controllerToolbox.getWristForceSensor(robotSide) != null)
       {
          handCompliantControlHelper = new HandCompliantControlHelper(namePrefix, robotSide, controllerToolbox, registry);

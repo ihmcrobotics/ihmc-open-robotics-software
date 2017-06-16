@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.springflamingo;
 
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
@@ -62,19 +62,19 @@ public class SpringFlamingoRobot
 
    public final DoubleYoVariable gc_rheel_x, gc_rheel_y, gc_rheel_z, gc_rheel_dx, gc_rheel_dy, gc_rheel_dz, gc_rheel_fx, gc_rheel_fy, gc_rheel_fz;
    public final DoubleYoVariable gc_rheel_px, gc_rheel_py, gc_rheel_pz, gc_rheel_tdx, gc_rheel_tdy, gc_rheel_tdz, gc_rheel_fs;
-   public final BooleanYoVariable gc_rheel_slip;
+   public final YoBoolean gc_rheel_slip;
 
    public final DoubleYoVariable gc_rtoe_x, gc_rtoe_y, gc_rtoe_z, gc_rtoe_dx, gc_rtoe_dy, gc_rtoe_dz, gc_rtoe_fx, gc_rtoe_fy, gc_rtoe_fz;
    public final DoubleYoVariable gc_rtoe_px, gc_rtoe_py, gc_rtoe_pz, gc_rtoe_tdx, gc_rtoe_tdy, gc_rtoe_tdz, gc_rtoe_fs;
-   public final BooleanYoVariable gc_rtoe_slip;
+   public final YoBoolean gc_rtoe_slip;
 
    public final DoubleYoVariable gc_lheel_x, gc_lheel_y, gc_lheel_z, gc_lheel_dx, gc_lheel_dy, gc_lheel_dz, gc_lheel_fx, gc_lheel_fy, gc_lheel_fz;
    public final DoubleYoVariable gc_lheel_px, gc_lheel_py, gc_lheel_pz, gc_lheel_tdx, gc_lheel_tdy, gc_lheel_tdz, gc_lheel_fs;
-   public final BooleanYoVariable gc_lheel_slip;
+   public final YoBoolean gc_lheel_slip;
 
    public final DoubleYoVariable gc_ltoe_x, gc_ltoe_y, gc_ltoe_z, gc_ltoe_dx, gc_ltoe_dy, gc_ltoe_dz, gc_ltoe_fx, gc_ltoe_fy, gc_ltoe_fz;
    public final DoubleYoVariable gc_ltoe_px, gc_ltoe_py, gc_ltoe_pz, gc_ltoe_tdx, gc_ltoe_tdy, gc_ltoe_tdz, gc_ltoe_fs;
-   public final BooleanYoVariable gc_ltoe_slip;
+   public final YoBoolean gc_ltoe_slip;
 
    private final Robot robot;
 
@@ -137,7 +137,7 @@ public class SpringFlamingoRobot
       gc_rheel_tdy = (DoubleYoVariable) robot.getVariable("gc_rheel_tdy");
       gc_rheel_tdz = (DoubleYoVariable) robot.getVariable("gc_rheel_tdz");
       gc_rheel_fs = (DoubleYoVariable) robot.getVariable("gc_rheel_fs");
-      gc_rheel_slip = (BooleanYoVariable) robot.getVariable("gc_rheel_slip");
+      gc_rheel_slip = (YoBoolean) robot.getVariable("gc_rheel_slip");
       gc_rtoe_x = (DoubleYoVariable) robot.getVariable("gc_rtoe_x");
       gc_rtoe_y = (DoubleYoVariable) robot.getVariable("gc_rtoe_y");
       gc_rtoe_z = (DoubleYoVariable) robot.getVariable("gc_rtoe_z");
@@ -154,7 +154,7 @@ public class SpringFlamingoRobot
       gc_rtoe_tdy = (DoubleYoVariable) robot.getVariable("gc_rtoe_tdy");
       gc_rtoe_tdz = (DoubleYoVariable) robot.getVariable("gc_rtoe_tdz");
       gc_rtoe_fs = (DoubleYoVariable) robot.getVariable("gc_rtoe_fs");
-      gc_rtoe_slip = (BooleanYoVariable) robot.getVariable("gc_rtoe_slip");
+      gc_rtoe_slip = (YoBoolean) robot.getVariable("gc_rtoe_slip");
       gc_lheel_x = (DoubleYoVariable) robot.getVariable("gc_lheel_x");
       gc_lheel_y = (DoubleYoVariable) robot.getVariable("gc_lheel_y");
       gc_lheel_z = (DoubleYoVariable) robot.getVariable("gc_lheel_z");
@@ -171,7 +171,7 @@ public class SpringFlamingoRobot
       gc_lheel_tdy = (DoubleYoVariable) robot.getVariable("gc_lheel_tdy");
       gc_lheel_tdz = (DoubleYoVariable) robot.getVariable("gc_lheel_tdz");
       gc_lheel_fs = (DoubleYoVariable) robot.getVariable("gc_lheel_fs");
-      gc_lheel_slip = (BooleanYoVariable) robot.getVariable("gc_lheel_slip");
+      gc_lheel_slip = (YoBoolean) robot.getVariable("gc_lheel_slip");
       gc_ltoe_x = (DoubleYoVariable) robot.getVariable("gc_ltoe_x");
       gc_ltoe_y = (DoubleYoVariable) robot.getVariable("gc_ltoe_y");
       gc_ltoe_z = (DoubleYoVariable) robot.getVariable("gc_ltoe_z");
@@ -188,7 +188,7 @@ public class SpringFlamingoRobot
       gc_ltoe_tdy = (DoubleYoVariable) robot.getVariable("gc_ltoe_tdy");
       gc_ltoe_tdz = (DoubleYoVariable) robot.getVariable("gc_ltoe_tdz");
       gc_ltoe_fs = (DoubleYoVariable) robot.getVariable("gc_ltoe_fs");
-      gc_ltoe_slip = (BooleanYoVariable) robot.getVariable("gc_ltoe_slip");
+      gc_ltoe_slip = (YoBoolean) robot.getVariable("gc_ltoe_slip");
 
    }
 

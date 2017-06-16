@@ -2,11 +2,10 @@ package us.ihmc.simulationconstructionset.scripts;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
-
 
 public class TimeScriptEntry implements Comparable<Object>
 {
@@ -29,7 +28,7 @@ public class TimeScriptEntry implements Comparable<Object>
       varValuePairs.add(variableValuePair);
    }
    
-   public void addVarValue(BooleanYoVariable variable, boolean value)
+   public void addVarValue(YoBoolean variable, boolean value)
    {
       if (variable == null)
          return;
@@ -119,10 +118,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class BooleanVariableValuePair implements VariableValuePair
    {
-      protected BooleanYoVariable variable;
+      protected YoBoolean variable;
       protected boolean value;
 
-      public BooleanVariableValuePair(BooleanYoVariable variable, boolean value)
+      public BooleanVariableValuePair(YoBoolean variable, boolean value)
       {
          this.variable = variable;
          this.value = value;

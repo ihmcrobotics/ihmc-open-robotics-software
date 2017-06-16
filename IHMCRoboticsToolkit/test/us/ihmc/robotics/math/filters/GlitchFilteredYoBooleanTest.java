@@ -11,21 +11,21 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class GlitchFilteredBooleanYoVariableTest
+public class GlitchFilteredYoBooleanTest
 {
    public static final int WINDOW_SIZE = 10;
    private YoVariableRegistry registry;
-   private BooleanYoVariable yoVariableToFilter;
-   private GlitchFilteredBooleanYoVariable filteredVariable;
+   private YoBoolean yoVariableToFilter;
+   private GlitchFilteredYoBoolean filteredVariable;
 
    @Before
    public void setUp()
    {
       registry = new YoVariableRegistry("testRegistry");
-      yoVariableToFilter = new BooleanYoVariable("variableToFilter", registry);
-      filteredVariable = new GlitchFilteredBooleanYoVariable("filteredVariable", registry, yoVariableToFilter, WINDOW_SIZE);
+      yoVariableToFilter = new YoBoolean("variableToFilter", registry);
+      filteredVariable = new GlitchFilteredYoBoolean("filteredVariable", registry, yoVariableToFilter, WINDOW_SIZE);
    }
 
    @After
@@ -40,13 +40,13 @@ public class GlitchFilteredBooleanYoVariableTest
 	@Test(timeout=300000)
    public void testConstructors_Set_Get()
    {
-      GlitchFilteredBooleanYoVariable number1 = new GlitchFilteredBooleanYoVariable("stringInt", WINDOW_SIZE);
-      GlitchFilteredBooleanYoVariable number2 = new GlitchFilteredBooleanYoVariable("stringYoVariableRegistryInt", registry, WINDOW_SIZE);
-      GlitchFilteredBooleanYoVariable number3 = new GlitchFilteredBooleanYoVariable("stringBooleanYoVariableInt", yoVariableToFilter, WINDOW_SIZE);
-      GlitchFilteredBooleanYoVariable number4 = new GlitchFilteredBooleanYoVariable("stringYoVariableRegistryBooleanYoVariableInt", registry,
+      GlitchFilteredYoBoolean number1 = new GlitchFilteredYoBoolean("stringInt", WINDOW_SIZE);
+      GlitchFilteredYoBoolean number2 = new GlitchFilteredYoBoolean("stringYoVariableRegistryInt", registry, WINDOW_SIZE);
+      GlitchFilteredYoBoolean number3 = new GlitchFilteredYoBoolean("stringBooleanYoVariableInt", yoVariableToFilter, WINDOW_SIZE);
+      GlitchFilteredYoBoolean number4 = new GlitchFilteredYoBoolean("stringYoVariableRegistryBooleanYoVariableInt", registry,
             yoVariableToFilter, WINDOW_SIZE);
 
-      GlitchFilteredBooleanYoVariable array[] = { number1, number2, number3, number4 };
+      GlitchFilteredYoBoolean array[] = { number1, number2, number3, number4 };
 
       for (int i = 0; i < array.length; i++)
       {

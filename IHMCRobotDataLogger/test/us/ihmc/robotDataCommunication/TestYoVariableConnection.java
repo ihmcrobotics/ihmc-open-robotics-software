@@ -5,13 +5,12 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-
 
 public class TestYoVariableConnection
 {
@@ -32,8 +31,8 @@ public class TestYoVariableConnection
    
    private final IntegerYoVariable timeout = new IntegerYoVariable("timeout", registry);
    
-   private final BooleanYoVariable startVariableSummary = new BooleanYoVariable("startVariableSummary", registry);
-   private final BooleanYoVariable gc = new BooleanYoVariable("gc", registry);
+   private final YoBoolean startVariableSummary = new YoBoolean("startVariableSummary", registry);
+   private final YoBoolean gc = new YoBoolean("gc", registry);
    
    
    

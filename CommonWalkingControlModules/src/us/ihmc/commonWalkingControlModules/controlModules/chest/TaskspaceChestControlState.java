@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.DoubleYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -50,18 +50,18 @@ public class TaskspaceChestControlState extends ChestControlState
    private final ReferenceFrame pelvisZUpFrame;
 
    private final RecyclingArrayDeque<ChestTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(ChestTrajectoryCommand.class);
-   private final BooleanYoVariable isReadyToHandleQueuedCommands = new BooleanYoVariable("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
+   private final YoBoolean isReadyToHandleQueuedCommands = new YoBoolean("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
    private final LongYoVariable numberOfQueuedCommands = new LongYoVariable("chestNumberOfQueuedCommands", registry);
 
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
-   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+   private final YoBoolean isTrajectoryStopped = new YoBoolean("isChestOrientationTrajectoryStopped", registry);
+   private final YoBoolean isTrackingOrientation = new YoBoolean("isTrackingOrientation", registry);
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
 
-   private final BooleanYoVariable followChestRollSineWave = new BooleanYoVariable("followChestRollSineWave", registry);
+   private final YoBoolean followChestRollSineWave = new YoBoolean("followChestRollSineWave", registry);
    private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
    private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
 
