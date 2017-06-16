@@ -40,6 +40,22 @@ public class Plane3D implements GeometryObject<Plane3D>
    }
 
    /**
+    * Initializes this plane to be passing through the given point, with the vector as the normal.
+    * 
+    * @param pointOnPlaneX the new x-coordinate of the point on this plane.
+    * @param pointOnPlaneY the new y-coordinate of the point on this plane.
+    * @param pointOnPlaneZ the new z-coordinate of the point on this plane.
+    * @param planeNormalX the new x-component of the normal of this plane.
+    * @param planeNormalY the new y-component of the normal of this plane.
+    * @param planeNormalZ the new z-component of the normal of this plane.
+    * @throws RuntimeException if the new normal is unreasonably small.
+    */
+   public Plane3D(double pointOnPlaneX, double pointOnPlaneY, double pointOnPlaneZ, double planeNormalX, double planeNormalY, double planeNormalZ)
+   {
+      set(pointOnPlaneX, pointOnPlaneY, pointOnPlaneZ, planeNormalX, planeNormalY, planeNormalZ);
+   }
+
+   /**
     * Creates a new plane 3D and initializes it to {@code other}.
     * 
     * @param other the other plane used to initialize this plane. Not modified.
@@ -685,6 +701,23 @@ public class Plane3D implements GeometryObject<Plane3D>
    {
       checkHasBeenInitialized();
       return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point, normal);
+   }
+
+   /**
+    * Redefines this plane with a new point and a new normal.
+    * 
+    * @param pointOnPlaneX the new x-coordinate of the point on this plane.
+    * @param pointOnPlaneY the new y-coordinate of the point on this plane.
+    * @param pointOnPlaneZ the new z-coordinate of the point on this plane.
+    * @param planeNormalX the new x-component of the normal of this plane.
+    * @param planeNormalY the new y-component of the normal of this plane.
+    * @param planeNormalZ the new z-component of the normal of this plane.
+    * @throws RuntimeException if the new normal is unreasonably small.
+    */
+   public void set(double pointOnPlaneX, double pointOnPlaneY, double pointOnPlaneZ, double planeNormalX, double planeNormalY, double planeNormalZ)
+   {
+      setPoint(pointOnPlaneX, pointOnPlaneY, pointOnPlaneZ);
+      setNormal(planeNormalX, planeNormalY, planeNormalZ);
    }
 
    /**

@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class Plane3dTest
+public class Plane3DTest
 {
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -32,9 +32,9 @@ public class Plane3dTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testEmptyConstructor()
+   public void testConstructor()
    {
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       assertTrue(plane.getNormalCopy().getX() == 0.0);
       assertTrue(plane.getNormalCopy().getY() == 0.0);
       assertTrue(plane.getNormalCopy().getZ() == 1.0);
@@ -47,7 +47,7 @@ public class Plane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       Point3D Q = new Point3D(0.0, 0.0, 2.0);
       assertTrue(plane.isOnOrAbove(Q));
       Q = new Point3D(0.0, 0.0, 0.0);
@@ -60,7 +60,7 @@ public class Plane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       Point3D Q = new Point3D(0.0, 0.0, -2.0);
       assertTrue(plane.isOnOrBelow(Q));
       Q = new Point3D(0.0, 0.0, 2.0);
@@ -73,7 +73,7 @@ public class Plane3dTest
    {
       Point3D q = new Point3D(1.0, 2.0, -3.0);
       Point3D v = new Point3D(1.0, 2.0, 0.0);
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       assertTrue(v.equals(plane.orthogonalProjectionCopy(q)));
 
       q.set(3.0, 3.0, -4.0);
@@ -111,7 +111,7 @@ public class Plane3dTest
    public void testDistance()
    {
       Point3D q = new Point3D(1.0, 1.0, 1.0);
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       assertEquals(1.0, plane.distance(q), 1e-14);
    }
 
@@ -121,14 +121,14 @@ public class Plane3dTest
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
       transformation.setRotationYawAndZeroTranslation(2.3);
-      Plane3D plane = new Plane3D();
+      Plane3D plane = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       plane.applyTransform(transformation);
       EuclidCoreTestTools.assertTuple3DEquals(plane.getNormalCopy(), new Vector3D(0.0, 0.0, 1.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane.getPointCopy(), new Point3D(0.0, 0.0, 0.0), 1e-14);
 
       RigidBodyTransform transformation2 = new RigidBodyTransform();
       transformation2.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      Plane3D plane2 = new Plane3D();
+      Plane3D plane2 = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       plane2.applyTransform(transformation2);
       EuclidCoreTestTools.assertTuple3DEquals(plane2.getNormalCopy(), new Vector3D(0.0, 0.0, 1.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane2.getPointCopy(), new Point3D(1.0, 2.0, 3.0), 1e-14);
@@ -136,7 +136,7 @@ public class Plane3dTest
       RigidBodyTransform transformation3 = new RigidBodyTransform();
       transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      Plane3D plane3 = new Plane3D();
+      Plane3D plane3 = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       plane3.applyTransform(transformation3);
       EuclidCoreTestTools.assertTuple3DEquals(plane3.getNormalCopy(), new Vector3D(1.0, 0.0, 0.0), 1e-14);
       EuclidCoreTestTools.assertTuple3DEquals(plane3.getPointCopy(), new Point3D(1.0, 2.0, 3.0), 1e-14);
