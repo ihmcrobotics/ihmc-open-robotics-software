@@ -17,7 +17,7 @@ import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotController.OutputProcessor;
@@ -76,23 +76,23 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final ModularRobotController robotController;
 
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
-   private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
-   private final LongYoVariable totalDelay = new LongYoVariable("totalDelay", registry);
-   private final LongYoVariable expectedEstimatorTick = new LongYoVariable("expectedEstimatorTick", registry);
-   private final LongYoVariable controllerLeadsEstimatorTicks = new LongYoVariable("controllerLeadsEstimatorTicks", registry);
-   private final LongYoVariable controllerLagsEstimatorTicks = new LongYoVariable("controllerLagsEstimatorTicks", registry);
+   private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
+   private final YoLong totalDelay = new YoLong("totalDelay", registry);
+   private final YoLong expectedEstimatorTick = new YoLong("expectedEstimatorTick", registry);
+   private final YoLong controllerLeadsEstimatorTicks = new YoLong("controllerLeadsEstimatorTicks", registry);
+   private final YoLong controllerLagsEstimatorTicks = new YoLong("controllerLagsEstimatorTicks", registry);
 
    /*
     * Debug variables
     */
-   private final LongYoVariable lastExpectedEstimatorTick = new LongYoVariable("lastExpectedEstimatorTick", registry);
-   private final LongYoVariable lastEstimatorTick = new LongYoVariable("lastEstimatorTick", registry);
-   private final LongYoVariable lastEstimatorClockStartTime = new LongYoVariable("lastEstimatorClockStartTime", registry);
-   private final LongYoVariable lastControllerClockTime = new LongYoVariable("lastControllerClockTime", registry);
-   private final LongYoVariable controllerStartTime = new LongYoVariable("controllerStartTime", registry);
-   private final LongYoVariable actualControlDT = new LongYoVariable("actualControlDT", registry);
-   private final LongYoVariable timePassedSinceEstimator = new LongYoVariable("timePassedSinceEstimator", registry);
-   private final LongYoVariable timePassedBetweenEstimatorTicks = new LongYoVariable("timePassedBetweenEstimatorTicks", registry);
+   private final YoLong lastExpectedEstimatorTick = new YoLong("lastExpectedEstimatorTick", registry);
+   private final YoLong lastEstimatorTick = new YoLong("lastEstimatorTick", registry);
+   private final YoLong lastEstimatorClockStartTime = new YoLong("lastEstimatorClockStartTime", registry);
+   private final YoLong lastControllerClockTime = new YoLong("lastControllerClockTime", registry);
+   private final YoLong controllerStartTime = new YoLong("controllerStartTime", registry);
+   private final YoLong actualControlDT = new YoLong("actualControlDT", registry);
+   private final YoLong timePassedSinceEstimator = new YoLong("timePassedSinceEstimator", registry);
+   private final YoLong timePassedBetweenEstimatorTicks = new YoLong("timePassedBetweenEstimatorTicks", registry);
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 

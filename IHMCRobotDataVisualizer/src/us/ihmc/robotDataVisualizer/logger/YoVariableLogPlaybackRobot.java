@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -29,7 +29,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 {
 
    private final SimulationConstructionSet scs;
-   private final LongYoVariable timestamp;
+   private final YoLong timestamp;
    private final YoDouble robotTime;
    private final FileChannel logChannel;
    private final List<YoVariable<?>> variables;
@@ -62,7 +62,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    {
       super(robotDescription);
 
-      this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
+      this.timestamp = new YoLong("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new YoDouble("robotTime", getRobotsYoVariableRegistry());
 
 
@@ -146,7 +146,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       return numberOfEntries;
    }
 
-   public LongYoVariable getTimestamp()
+   public YoLong getTimestamp()
    {
       return timestamp;
    }

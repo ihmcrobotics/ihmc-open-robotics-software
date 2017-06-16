@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -73,7 +73,7 @@ public class FiducialDetectorFromCameraImages
 
    private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
    private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
-   private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
+   private final YoLong targetIDToLocate = new YoLong(prefix + "TargetIDToLocate", registry);
 
    private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);

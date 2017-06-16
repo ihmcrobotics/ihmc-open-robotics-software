@@ -145,7 +145,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
                break;
 
             case LongYoVariable:
-               LongYoVariable longVar = new LongYoVariable(name, parent);
+               YoLong longVar = new YoLong(name, parent);
                variableList.add(longVar);
                break;
 

@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -60,8 +60,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
-   private final LongYoVariable yoWeightMatrixAngularFrameID;
-   private final LongYoVariable yoWeightMatrixLinearFrameID;
+   private final YoLong yoWeightMatrixAngularFrameID;
+   private final YoLong yoWeightMatrixLinearFrameID;
    private final YoFrameVector yoDefaultAngularWeight;
    private final YoFrameVector yoDefaultLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
@@ -143,8 +143,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", "_RO", null, registry);
       yoDefaultAngularWeight = new YoFrameVector(prefix + "DefaultAngularWeight", null, registry);
       yoDefaultLinearWeight = new YoFrameVector(prefix + "DefaultLinearWeight", null, registry);
-      yoWeightMatrixAngularFrameID = new LongYoVariable(prefix + "WeightMatrixAngularFrameID_RO", null, registry);
-      yoWeightMatrixLinearFrameID = new LongYoVariable(prefix + "WeightMatrixLinearFrameID_RO", null, registry);
+      yoWeightMatrixAngularFrameID = new YoLong(prefix + "WeightMatrixAngularFrameID_RO", null, registry);
+      yoWeightMatrixLinearFrameID = new YoLong(prefix + "WeightMatrixLinearFrameID_RO", null, registry);
 
       yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
       yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);

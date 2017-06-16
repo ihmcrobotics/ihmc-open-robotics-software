@@ -3,14 +3,14 @@ package us.ihmc.robotics.time;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class YoStopwatch
 {
    private final YoDouble timeProviderYoVariable;
 
    private YoDouble yoLapStart;
-   private LongYoVariable yoLapCount;
+   private YoLong yoLapCount;
    private YoDouble yoRecordedLapTotal;
    private YoBoolean yoSuspended;
    private YoDouble yoSuspendStart;
@@ -28,7 +28,7 @@ public class YoStopwatch
       this(timeYoVariable);
 
       yoLapStart = new YoDouble(name + "LapStart", registry);
-      yoLapCount = new LongYoVariable(name + "LapCount", registry);
+      yoLapCount = new YoLong(name + "LapCount", registry);
       yoRecordedLapTotal = new YoDouble(name + "RecordedLapTotal", registry);
       yoSuspended = new YoBoolean(name + "Suspended", registry);
       yoSuspendStart = new YoDouble(name + "SuspendStart", registry);
