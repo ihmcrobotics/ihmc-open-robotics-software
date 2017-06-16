@@ -6,7 +6,7 @@ import java.util.List;
 
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.scripts.Script;
@@ -25,14 +25,14 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    private boolean isControllerTick = true;
 
    private long lastControllerTimerCount = -1l;
-   private final LongYoVariable controllerTimerCount;
+   private final YoLong controllerTimerCount;
 
    public LogDataProcessorWrapper(SimulationConstructionSet scs)
    {
       scs.addYoVariableRegistry(logDataProcessorRegistry);
       scs.addScript(this);
 
-      controllerTimerCount = (LongYoVariable) scs.getVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
+      controllerTimerCount = (YoLong) scs.getVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
       haveFoundControllerTimerVariable = controllerTimerCount != null;
       if (!haveFoundControllerTimerVariable)
       {

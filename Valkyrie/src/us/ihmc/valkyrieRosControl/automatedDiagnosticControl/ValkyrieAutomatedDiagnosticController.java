@@ -24,7 +24,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -85,7 +85,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
    private final YoDouble diagnosticControllerTime = new YoDouble("diagnosticControllerTime", registry);
    private final ExecutionTimer diagnosticControllerTimer = new ExecutionTimer("diagnosticControllerTimer", 10.0, registry);
-   private final LongYoVariable startTime = new LongYoVariable("startTime", registry);
+   private final YoLong startTime = new YoLong("startTime", registry);
    private final YoBoolean startController = new YoBoolean("startController", registry);
 
    private final String diagnosticGainsFilePath = "diagnostic/realRobotPDGains.yaml";

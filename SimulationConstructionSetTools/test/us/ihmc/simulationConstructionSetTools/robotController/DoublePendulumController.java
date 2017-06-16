@@ -4,7 +4,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
@@ -23,7 +23,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
    private final YoDouble kp = new YoDouble("kp", registry);
    private final YoDouble kd = new YoDouble("kd", registry);
    
-   private final LongYoVariable tick = new LongYoVariable("tick", registry);
+   private final YoLong tick = new YoLong("tick", registry);
 
    private final DoublePendulum doublePendulum;
 

@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -109,10 +109,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
-   private final LongYoVariable lastCommandId;
+   private final YoLong lastCommandId;
 
    private final YoBoolean isReadyToHandleQueuedCommands;
-   private final LongYoVariable numberOfQueuedCommands;
+   private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class);
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
@@ -156,11 +156,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
 
       String namePrefix = "pelvisHeight";
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisHeightTrajectoryCommands", registry);
-      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
+      numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
 

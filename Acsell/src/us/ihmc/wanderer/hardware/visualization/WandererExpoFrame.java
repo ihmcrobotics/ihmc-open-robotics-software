@@ -47,13 +47,13 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private double lastStartWalkTime;
    private double internalPriorWalkingDuration;
    private int stepCount = 0;
-   private final LongYoVariable nanosecondstime;
+   private final YoLong nanosecondstime;
    private final YoDouble total_time;
    private final YoDouble startTime;
    private final YoDouble walking_time;
    private final YoBoolean expo_isWalking;
    private final YoDouble priorWalkingDuration;
-   private final LongYoVariable startingStepCount;
+   private final YoLong startingStepCount;
    //private final YoEnum<WalkingState> walkingState;
    private final YoDouble distanceTraveled;
    private final YoDouble startDistance;
@@ -98,12 +98,12 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       if(isStandalone)
       {
          YoVariableRegistry registry = new YoVariableRegistry("base");
-         nanosecondstime = new LongYoVariable("longtime", registry);
+         nanosecondstime = new YoLong("longtime", registry);
          total_time = new YoDouble("time", registry);
          startTime = new YoDouble("startTime", registry);
          walking_time = new YoDouble("walkingtime", registry);
          expo_isWalking = new YoBoolean("walk", registry);
-         startingStepCount = new LongYoVariable("expoStartingStepCount", registry);
+         startingStepCount = new YoLong("expoStartingStepCount", registry);
          //walkingState = new YoEnum<WalkingState>("walkingState", registry, WalkingState.class);
          priorWalkingDuration = new YoDouble("startWalkingTime", registry);
          distanceTraveled = new YoDouble("distanceTraveled", registry);
@@ -127,12 +127,12 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          indexChanged(1, 1.0);
       } else
       {
-         nanosecondstime = (LongYoVariable) parentRegistry.getVariable("SensorProcessing","timestamp");
+         nanosecondstime = (YoLong) parentRegistry.getVariable("SensorProcessing","timestamp");
          total_time = new YoDouble("expoTime", parentRegistry);
          startTime = new YoDouble("expoStartTime", parentRegistry);
          walking_time = new YoDouble("expoWalkingTime", parentRegistry);
          expo_isWalking = (YoBoolean) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
-         startingStepCount = new LongYoVariable("expoStartingStepCount", parentRegistry);
+         startingStepCount = new YoLong("expoStartingStepCount", parentRegistry);
          //walkingState = (YoEnum<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          priorWalkingDuration = new YoDouble("expoStartWalkingTime", parentRegistry);
          distanceTraveled = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");

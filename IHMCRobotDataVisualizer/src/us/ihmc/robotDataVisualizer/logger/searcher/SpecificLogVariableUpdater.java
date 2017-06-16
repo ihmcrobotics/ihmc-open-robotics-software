@@ -16,7 +16,7 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.LongYoVariable;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -24,7 +24,7 @@ import us.ihmc.tools.compression.SnappyUtils;
 public class SpecificLogVariableUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("YoVariableSpecificLogVariablePlaybackRobot");
-   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
+   private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoDouble robotTime = new YoDouble("robotTime", registry);
 
    private final FileChannel logChannel;
