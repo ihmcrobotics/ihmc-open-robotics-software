@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import java.util.EnumMap;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 /**
  * Box where base frame is in the center.
