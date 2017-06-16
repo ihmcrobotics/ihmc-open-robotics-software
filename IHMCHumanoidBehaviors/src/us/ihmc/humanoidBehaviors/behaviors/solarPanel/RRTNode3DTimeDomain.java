@@ -1,14 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WheneverWholeBodyPoseTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.WheneverWholeBodyValidityTester;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class RRTNode3DTimeDomain extends RRTNode
 {
-   public static WheneverWholeBodyPoseTester nodeValidityTester;
+   public static WheneverWholeBodyValidityTester nodeValidityTester;
    public static SolarPanelPath cleaningPath;
    
    public RRTNode3DTimeDomain()
@@ -28,29 +28,19 @@ public class RRTNode3DTimeDomain extends RRTNode
    @Override
    public boolean isValidNode()
    {
-      nodeValidityTester.setWholeBodyPose(cleaningPath, this);      
-      nodeValidityTester.setUpHasBeenDone();
+      PrintTools.info("isvalid START");
       
+      nodeValidityTester.initialize();
       
-      
-      while(true)
-      {         
-         if(nodeValidityTester.isDone())
-         {
-            PrintTools.info("try break");
-            break;
-         }  
-         else
-         {
-            ThreadTools.sleep(10);
-            nodeValidityTester.doControl();
-//            PrintTools.info("not yet");
-         }
-            
+      for(int i=0;i<50;i++)
+      {
+         PrintTools.info(""+i);
+         nodeValidityTester.updateInternal();
+         ThreadTools.sleep(10);
       }
-      PrintTools.info("return " + nodeValidityTester.isValid());
       
-      return nodeValidityTester.isValid();
+      PrintTools.info("isvalid END");
+      return true;
    }
 
    @Override

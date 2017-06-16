@@ -38,6 +38,7 @@ import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class WheneverWholeBodyPoseTester extends AbstractBehavior
 {
@@ -369,6 +370,7 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    @Override
    public void doControl()
    {  
+      ThreadTools.sleep(10);
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable())
       {
          if(isSendingPacket == true)
@@ -503,7 +505,7 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
       {
          jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
          privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-//         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
+         PrintTools.info(""+oneDoFJoints[i].getName()+" "+oneDoFJoints[i].getQ());
       }      
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
@@ -739,9 +741,6 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
-      
-      System.out.println(midFeetFrame.getTransformToWorldFrame());
-      System.out.println(midFeetFrame.getRootFrame().getTransformToWorldFrame());
       
       // Hand
       FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());

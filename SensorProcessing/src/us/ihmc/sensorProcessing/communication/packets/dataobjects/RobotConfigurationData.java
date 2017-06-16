@@ -106,6 +106,17 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
 
+   public void setJointState(OneDoFJoint[] joints)
+   {
+      ArrayList<OneDoFJoint> newJointData = new ArrayList<OneDoFJoint>();
+      for(int i=0;i<joints.length;i++)
+      {
+         newJointData.add(joints[i]);
+      }
+      
+      setJointState(newJointData);
+   }
+   
    public void setJointState(ArrayList<OneDoFJoint> newJointData)
    {
       if (newJointData.size() != jointAngles.length)

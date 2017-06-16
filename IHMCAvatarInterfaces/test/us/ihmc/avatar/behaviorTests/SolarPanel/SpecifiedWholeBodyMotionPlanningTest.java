@@ -30,14 +30,19 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode3DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WheneverWholeBodyPoseTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.WheneverWholeBodyValidityTester;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SolarPanelEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -147,12 +152,29 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
             
       setUpSolarPanel();
             
-      RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyPoseTester(getRobotModel(), 
-                                                                                drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
-            
-      drcBehaviorTestHelper.dispatchBehavior(RRTNode3DTimeDomain.nodeValidityTester);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyValidityTester(sdfFullRobotModel);
+      
+      kinematicsToolboxModule.getToolboxController().update();
+      
+      
+      
+      
+//      PrintTools.info(""+sdfFullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());
+      
+      
+      
+      ForceSensorDefinition[] forceSensorDefinitions;
+      IMUDefinition[] imuDefinitions;
+      OneDoFJoint[] joints = sdfFullRobotModel.getOneDoFJoints();
+      imuDefinitions = sdfFullRobotModel.getIMUDefinitions();
+      forceSensorDefinitions = sdfFullRobotModel.getForceSensorDefinitions();      
+      
+      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
+      
+      currentRobotConfigurationData.setJointState(joints);
+      
+      RRTNode3DTimeDomain.nodeValidityTester.updateRobotConfigurationData(currentRobotConfigurationData);
+      
       
       // ********** Planning *** //      
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
@@ -160,21 +182,17 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.05, -Math.PI*0.3), 4.0);  
             
       RRTNode3DTimeDomain.cleaningPath = cleaningPath;
-      RRTNode3DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
-      
-//      RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
-//      node0.isValidNode();
       
       RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
       RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
       RRTNode3DTimeDomain node3 = new RRTNode3DTimeDomain(1.0, 0.7, -15/180*Math.PI, 10/180*Math.PI);
       
       PrintTools.info(""+node1.isValidNode());
-      ThreadTools.sleep(1000);
-      PrintTools.info(""+node2.isValidNode());
-      ThreadTools.sleep(1000);
-      PrintTools.info(""+node3.isValidNode());
-      ThreadTools.sleep(1000);
+//      ThreadTools.sleep(1000);
+//      PrintTools.info(""+node2.isValidNode());
+//      ThreadTools.sleep(1000);
+//      PrintTools.info(""+node3.isValidNode());
+//      ThreadTools.sleep(1000);
       
       PrintTools.info("END");     
    } 
