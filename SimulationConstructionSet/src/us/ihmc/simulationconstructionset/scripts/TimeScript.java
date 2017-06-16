@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -248,10 +248,10 @@ public class TimeScript implements Script
          case ENUM:
          {
             @SuppressWarnings("rawtypes")
-            EnumYoVariable enumYoVariable = (EnumYoVariable) variable;
+            YoEnum yoEnum = (YoEnum) variable;
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            Enum value = Enum.valueOf(enumYoVariable.getEnumType(), t_part);            
-            ret.addVarValue(enumYoVariable, value);
+            Enum value = Enum.valueOf(yoEnum.getEnumType(), t_part);
+            ret.addVarValue(yoEnum, value);
             break;
          }
          case INTEGER:

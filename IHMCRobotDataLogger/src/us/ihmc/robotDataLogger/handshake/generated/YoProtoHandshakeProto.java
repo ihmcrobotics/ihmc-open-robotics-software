@@ -1078,7 +1078,7 @@ public final class YoProtoHandshakeProto {
          */
         LongYoVariable(3, 4),
         /**
-         * <code>EnumYoVariable = 5;</code>
+         * <code>YoEnum = 5;</code>
          */
         EnumYoVariable(4, 5),
         ;
@@ -1100,7 +1100,7 @@ public final class YoProtoHandshakeProto {
          */
         public static final int LongYoVariable_VALUE = 4;
         /**
-         * <code>EnumYoVariable = 5;</code>
+         * <code>YoEnum = 5;</code>
          */
         public static final int EnumYoVariable_VALUE = 5;
 

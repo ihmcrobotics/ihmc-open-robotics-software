@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
@@ -17,7 +17,7 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
       ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15;    // 0.1; //0.15;
 
-   private final EnumYoVariable<EncoderState> state;
+   private final YoEnum<EncoderState> state;
 
    private final IntegerYoVariable previousRawTicks, previousRawTicksTwoBack;
    private final IntegerYoVariable previousProcessedTicks, previousProcessedTicksTwoBack;
@@ -41,7 +41,7 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
       this.slowUpdateFactor = slowUpdateFactor;
       this.dt = dt*slowUpdateFactor;
 
-      this.state = EnumYoVariable.create(name + "state", EncoderState.class, registry);
+      this.state = YoEnum.create(name + "state", EncoderState.class, registry);
 
       this.minPriorRate = new YoDouble(name + "minPriorRate", registry);
       this.maxPriorRate = new YoDouble(name + "maxPriorRate", registry);

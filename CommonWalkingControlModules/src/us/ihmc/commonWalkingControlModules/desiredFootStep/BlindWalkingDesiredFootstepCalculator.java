@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -29,7 +29,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
    private final YoFramePoint2d desiredDestination = new YoFramePoint2d("desiredDestination", "", worldFrame, registry);
 
-   private final EnumYoVariable<BlindWalkingDirection> blindWalkingDirection = new EnumYoVariable<BlindWalkingDirection>("blindWalkingDirection", "", registry,
+   private final YoEnum<BlindWalkingDirection> blindWalkingDirection = new YoEnum<BlindWalkingDirection>("blindWalkingDirection", "", registry,
          BlindWalkingDirection.class, false);
 
    private final YoDouble distanceToDestination = new YoDouble("distanceToDestination", registry);

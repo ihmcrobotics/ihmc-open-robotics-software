@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,10 +62,10 @@ public class IndividualRobotiqHandController implements RobotController
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> finalDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
    
-   private final EnumYoVariable<RobotiqGraspMode> graspMode;
-   private final EnumYoVariable<RobotiqGraspMode> desiredGraspMode;
-   private final EnumYoVariable<HandConfiguration> handConfiguration;
-   private final EnumYoVariable<HandConfiguration> handDesiredConfiguration;
+   private final YoEnum<RobotiqGraspMode> graspMode;
+   private final YoEnum<RobotiqGraspMode> desiredGraspMode;
+   private final YoEnum<HandConfiguration> handConfiguration;
+   private final YoEnum<HandConfiguration> handDesiredConfiguration;
    
    private StateMachine<GraspState> stateMachine;
 
@@ -134,13 +134,13 @@ public class IndividualRobotiqHandController implements RobotController
       yoPolynomial = new YoPolynomial(sidePrefix + name, 4, registry);
       yoPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       
-      graspMode = new EnumYoVariable<>(sidePrefix + "RobotiqGraspMode", registry, RobotiqGraspMode.class);
+      graspMode = new YoEnum<>(sidePrefix + "RobotiqGraspMode", registry, RobotiqGraspMode.class);
       graspMode.set(RobotiqGraspMode.BASIC_MODE);
-      desiredGraspMode = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredGraspMode", registry, RobotiqGraspMode.class);
+      desiredGraspMode = new YoEnum<>(sidePrefix + "RobotiqDesiredGraspMode", registry, RobotiqGraspMode.class);
       desiredGraspMode.set(RobotiqGraspMode.BASIC_MODE);
-      handConfiguration = new EnumYoVariable<>(sidePrefix + "RobotiqHandConfiguration", registry, HandConfiguration.class);
+      handConfiguration = new YoEnum<>(sidePrefix + "RobotiqHandConfiguration", registry, HandConfiguration.class);
       handConfiguration.set(HandConfiguration.OPEN);
-      handDesiredConfiguration = new EnumYoVariable<>(sidePrefix + "RobotiqHandDesiredConfiguration", registry, HandConfiguration.class);
+      handDesiredConfiguration = new YoEnum<>(sidePrefix + "RobotiqHandDesiredConfiguration", registry, HandConfiguration.class);
       handDesiredConfiguration.set(HandConfiguration.OPEN);
       
       stateMachine = new StateMachine<>(sidePrefix + "RobotiqGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);

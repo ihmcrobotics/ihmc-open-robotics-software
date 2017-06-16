@@ -6,7 +6,7 @@ import java.util.Random;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
@@ -46,8 +46,8 @@ public class YoFunctionGenerator
    private final YoBoolean chirpUpAndDown;
    private final YoBoolean stopAfterResetTime;
 
-   private final EnumYoVariable<YoFunctionGeneratorMode> mode;
-   private final EnumYoVariable<YoFunctionGeneratorMode> modePrevious;
+   private final YoEnum<YoFunctionGeneratorMode> mode;
+   private final YoEnum<YoFunctionGeneratorMode> modePrevious;
    private final YoVariable[] createdVariables;
    private final YoSignalDerivative signalDerivative;
 
@@ -125,8 +125,8 @@ public class YoFunctionGenerator
       timeInCurrentMode = new YoDouble(name + "TimeInCurrentMode", registry);
       kRateForExponentialChirp = new YoDouble(name + "KRateForExponentialChirp", registry);
 
-      mode = EnumYoVariable.create(name + "Mode", YoFunctionGeneratorMode.class, registry);
-      modePrevious = EnumYoVariable.create(name + "ModePrevious", YoFunctionGeneratorMode.class, registry);
+      mode = YoEnum.create(name + "Mode", YoFunctionGeneratorMode.class, registry);
+      modePrevious = YoEnum.create(name + "ModePrevious", YoFunctionGeneratorMode.class, registry);
 
       // There is used to be no initialization. This makes it explicit
       mode.set(YoFunctionGeneratorMode.OFF);

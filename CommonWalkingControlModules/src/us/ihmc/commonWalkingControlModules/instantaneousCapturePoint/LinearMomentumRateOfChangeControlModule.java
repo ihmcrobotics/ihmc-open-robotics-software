@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -42,7 +42,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final YoFrameVector angularMomentumRateWeight;
    protected final YoFrameVector linearMomentumRateWeight;
 
-   protected final EnumYoVariable<RobotSide> supportLegPreviousTick;
+   protected final YoEnum<RobotSide> supportLegPreviousTick;
    protected final YoBoolean minimizeAngularMomentumRateZ;
 
    protected final YoFrameVector controlledCoMAcceleration;
@@ -115,7 +115,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
-      supportLegPreviousTick = EnumYoVariable.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
+      supportLegPreviousTick = YoEnum.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
       desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);

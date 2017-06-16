@@ -35,7 +35,7 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -61,7 +61,7 @@ public abstract class ToolboxModule
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
    private final int thisDesitination;
 
-   protected final EnumYoVariable<PacketDestination> activeMessageSource = new EnumYoVariable<>("activeMessageSource", registry, PacketDestination.class, true);
+   protected final YoEnum<PacketDestination> activeMessageSource = new YoEnum<>("activeMessageSource", registry, PacketDestination.class, true);
 
    protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;

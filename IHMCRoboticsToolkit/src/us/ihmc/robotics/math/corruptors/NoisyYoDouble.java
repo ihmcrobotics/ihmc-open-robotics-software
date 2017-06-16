@@ -6,7 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /*
 * A NoisyYoDouble is a noisy version of a YoDouble.  Both the
@@ -57,7 +57,7 @@ public class NoisyYoDouble extends YoDouble
 
    private final YoBoolean isNoisy;
    private final YoBoolean useBias;
-   private final EnumYoVariable<NoiseType> noiseType;
+   private final YoEnum<NoiseType> noiseType;
 
    private final long randomSeed = System.nanoTime();
    private final Random rand = new Random(randomSeed);
@@ -89,7 +89,7 @@ public class NoisyYoDouble extends YoDouble
       this.biasMin.set(0.0);
       this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(0.0);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(NoiseType.UNIFORM);
       this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(0.0);
@@ -116,7 +116,7 @@ public class NoisyYoDouble extends YoDouble
       this.biasMin.set(0.0);
       this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(0.0);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(NoiseType.UNIFORM);
       this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(0.0);
@@ -144,7 +144,7 @@ public class NoisyYoDouble extends YoDouble
       this.biasMin.set(biasMin);
       this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(biasDelta);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(noiseType);
       this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(standardDeviation);
@@ -172,7 +172,7 @@ public class NoisyYoDouble extends YoDouble
       this.biasMin.set(biasMin);
       this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(biasDelta);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(noiseType);
       this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(standardDeviation);

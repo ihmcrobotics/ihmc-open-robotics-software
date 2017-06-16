@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -150,10 +150,10 @@ public class SkippyController implements RobotController
    private final YoDouble z0 = new YoDouble("z0", registry);
    private final YoDouble kCapture = new YoDouble("kCapture", registry);
 
-   private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
-   private final EnumYoVariable<SkippyPlaneControlMode> hipPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("hipPlaneControlMode", registry,
+   private final YoEnum<SkippyToDo> skippyToDo = new YoEnum<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
+   private final YoEnum<SkippyPlaneControlMode> hipPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("hipPlaneControlMode", registry,
                                                                                                                          SkippyPlaneControlMode.class);
-   private final EnumYoVariable<SkippyPlaneControlMode> shoulderPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("shoulderPlaneControlMode",
+   private final YoEnum<SkippyPlaneControlMode> shoulderPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("shoulderPlaneControlMode",
                                                                                                                               registry,
                                                                                                                               SkippyPlaneControlMode.class);
    private String name;

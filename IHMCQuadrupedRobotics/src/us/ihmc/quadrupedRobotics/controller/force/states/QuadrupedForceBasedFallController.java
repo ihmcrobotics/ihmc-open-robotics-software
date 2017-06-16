@@ -18,7 +18,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -57,7 +57,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
 
    // YoVariables
    private final YoBoolean yoUseForceFeedbackControl;
-   private final EnumYoVariable<FallBehaviorType> fallBehaviorType = EnumYoVariable.create("fallBehaviorType", FallBehaviorType.class, registry);
+   private final YoEnum<FallBehaviorType> fallBehaviorType = YoEnum.create("fallBehaviorType", FallBehaviorType.class, registry);
    private final YoEuclideanPositionGains yoPositionControllerGains;
 
    // Task space controller

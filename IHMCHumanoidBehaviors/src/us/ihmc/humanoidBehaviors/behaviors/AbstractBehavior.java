@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.tools.FormattingTools;
@@ -44,7 +44,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    protected final YoVariableRegistry registry;
 
-   protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
+   protected final YoEnum<BehaviorStatus> yoBehaviorStatus;
    protected final YoBoolean hasBeenInitialized;
    protected final YoBoolean isPaused;
    protected final YoBoolean isAborted;
@@ -64,7 +64,7 @@ public abstract class AbstractBehavior implements RobotController
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
 
-      yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
+      yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
       isPaused = new YoBoolean("isPaused" + behaviorName, registry);
       isAborted = new YoBoolean("isAborted" + behaviorName, registry);

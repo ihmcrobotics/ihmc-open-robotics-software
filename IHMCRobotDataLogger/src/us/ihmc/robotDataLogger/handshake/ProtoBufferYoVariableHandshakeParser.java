@@ -30,12 +30,8 @@ import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProto
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
-import us.ihmc.yoVariables.variable.LongYoVariable;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * Depracated class to support legacy log files that still contain a description based on a protobuffer handshake
@@ -157,7 +153,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
                List<String> values = yoVariableDefinition.getEnumValuesList();
                String[] names = values.toArray(new String[values.size()]);
                boolean allowNullValues = (!yoVariableDefinition.hasAllowNullValues() || yoVariableDefinition.getAllowNullValues());
-               EnumYoVariable enumVar = new EnumYoVariable(name, "", parent, allowNullValues, names);
+               YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
                variableList.add(enumVar);
                break;
 

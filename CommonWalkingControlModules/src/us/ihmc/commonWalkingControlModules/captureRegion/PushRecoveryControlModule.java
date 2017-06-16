@@ -10,7 +10,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -44,8 +44,8 @@ public class PushRecoveryControlModule
    private final YoBoolean isICPOutside;
    private final YoBoolean isICPErrorTooLarge;
    private final YoDouble icpErrorThreshold;
-   private final EnumYoVariable<RobotSide> closestFootToICP;
-   private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
+   private final YoEnum<RobotSide> closestFootToICP;
+   private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
 
    private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isCaptureRegionEmpty;
@@ -92,8 +92,8 @@ public class PushRecoveryControlModule
       isICPErrorTooLarge = new YoBoolean("isICPErrorTooLarge", registry);
       icpErrorThreshold = new YoDouble("icpErrorThreshold", registry);
       icpErrorThreshold.set(0.05);
-      closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
-      swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
+      closestFootToICP = new YoEnum<>("ClosestFootToICP", registry, RobotSide.class, true);
+      swingSideForDoubleSupportRecovery = new YoEnum<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery.set(null);
 
       isRobotBackToSafeState = new GlitchFilteredYoBoolean("isRobotBackToSafeState", registry, 100);

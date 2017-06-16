@@ -7,7 +7,7 @@ import java.util.Random;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -32,7 +32,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private final YoDouble minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
    private final YoDouble minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;
    private final EnumMap<RobotSide, YoDouble> touchdownTimeForSlipMap = new EnumMap<RobotSide, YoDouble>(RobotSide.class);
-   private final EnumMap<RobotSide, EnumYoVariable<SlipState>> slipStateMap = new EnumMap<RobotSide, EnumYoVariable<SlipState>>(RobotSide.class);
+   private final EnumMap<RobotSide, YoEnum<SlipState>> slipStateMap = new EnumMap<RobotSide, YoEnum<SlipState>>(RobotSide.class);
    private final EnumMap<RobotSide, List<GroundContactPoint>> groundContactPointsMap = new EnumMap<RobotSide, List<GroundContactPoint>>(RobotSide.class);
 
    private final YoFrameVector maxTranslationToSlipNextStep;
@@ -67,7 +67,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
                + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
          touchdownTimeForSlipMap.put(robotSide, touchdownTimeForSlip);
 
-         EnumYoVariable<SlipState> slipState = new EnumYoVariable<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
+         YoEnum<SlipState> slipState = new YoEnum<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
                SlipState.class);
          slipState.set(SlipState.NO_CONTACT);
          slipStateMap.put(robotSide, slipState);

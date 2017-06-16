@@ -203,14 +203,14 @@ public class DiagnosticBehavior extends AbstractBehavior
       REDO_LAST_TASK // Keep that one at the end.
    };
 
-   private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
+   private final YoEnum<DiagnosticTask> lastDiagnosticTask;
 
-   private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
-   private final EnumYoVariable<HumanoidArmPose> requestedSymmetricArmPose;
-   private final EnumYoVariable<HumanoidArmPose> requestedSingleArmPose;
-   private final EnumYoVariable<RobotSide> activeSideForHandControl;
-   private final EnumYoVariable<RobotSide> activeSideForFootControl;
-   private final EnumYoVariable<RobotSide> supportLeg;
+   private final YoEnum<DiagnosticTask> requestedDiagnostic;
+   private final YoEnum<HumanoidArmPose> requestedSymmetricArmPose;
+   private final YoEnum<HumanoidArmPose> requestedSingleArmPose;
+   private final YoEnum<RobotSide> activeSideForHandControl;
+   private final YoEnum<RobotSide> activeSideForFootControl;
+   private final YoEnum<RobotSide> supportLeg;
 
    private final double maxPitchBackward = Math.toRadians(-5.0);
    private final double maxPitchForward = Math.toRadians(40.0);
@@ -239,7 +239,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoDouble pelvisOrientationScaleFactor = new YoDouble("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
    private final YoDouble bootyShakeTime = new YoDouble("diagnosticBehaviorButtyShakeTime", registry);
 
-   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
+   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
          YoDouble yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -364,22 +364,22 @@ public class DiagnosticBehavior extends AbstractBehavior
          armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
 
-      requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
+      requestedDiagnostic = new YoEnum<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
 
-      lastDiagnosticTask = new EnumYoVariable<>("lastDiagnosticTask", registry, DiagnosticTask.class, true);
+      lastDiagnosticTask = new YoEnum<>("lastDiagnosticTask", registry, DiagnosticTask.class, true);
       lastDiagnosticTask.set(null);
 
-      requestedSymmetricArmPose = new EnumYoVariable<>("requestedSymmetricArmPose", registry, HumanoidArmPose.class, true);
+      requestedSymmetricArmPose = new YoEnum<>("requestedSymmetricArmPose", registry, HumanoidArmPose.class, true);
       requestedSymmetricArmPose.set(null);
 
-      requestedSingleArmPose = new EnumYoVariable<>("requestedSingleArmPose", registry, HumanoidArmPose.class, true);
+      requestedSingleArmPose = new YoEnum<>("requestedSingleArmPose", registry, HumanoidArmPose.class, true);
       requestedSingleArmPose.set(null);
 
-      activeSideForFootControl = new EnumYoVariable<>("activeSideForFootControl", registry, RobotSide.class, true);
+      activeSideForFootControl = new YoEnum<>("activeSideForFootControl", registry, RobotSide.class, true);
       activeSideForFootControl.set(RobotSide.LEFT);
 
-      activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class, true);
+      activeSideForHandControl = new YoEnum<>("activeSideForHandControl", registry, RobotSide.class, true);
       activeSideForHandControl.set(RobotSide.LEFT);
 
       numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);

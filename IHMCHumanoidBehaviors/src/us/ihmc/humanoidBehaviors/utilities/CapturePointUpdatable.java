@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -36,7 +36,7 @@ public class CapturePointUpdatable implements Updatable
    private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("capturePoint", worldFrame, registry);
    private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
    private final SideDependentList<YoFrameConvexPolygon2d> yoFootSupportPolygons = new SideDependentList<>();
-   private final EnumYoVariable<RobotSide> yoSupportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
+   private final YoEnum<RobotSide> yoSupportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class, true);
    private final YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
    // Computed Stuff
@@ -175,7 +175,7 @@ public class CapturePointUpdatable implements Updatable
       return yoFootSupportPolygons.get(robotSide);
    }
 
-   public EnumYoVariable<RobotSide> getYoSupportLeg()
+   public YoEnum<RobotSide> getYoSupportLeg()
    {
       return yoSupportLeg;
    }

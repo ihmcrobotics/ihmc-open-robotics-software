@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
-import us.ihmc.yoVariables.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -14,14 +13,14 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
 {
    private final String namePostfix = getClass().getSimpleName();
 
-   private final EnumYoVariable<ToeOffEnum> activeToeOffCalculator;
+   private final YoEnum<ToeOffEnum> activeToeOffCalculator;
    private final EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
 
    public WrapperForMultipleToeOffCalculators(EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators, YoVariableRegistry registry)
    {
       this.toeOffCalculators = toeOffCalculators;
 
-      activeToeOffCalculator = EnumYoVariable.create("ActiveToeOffCalculator", ToeOffEnum.class, registry);
+      activeToeOffCalculator = YoEnum.create("ActiveToeOffCalculator", ToeOffEnum.class, registry);
       activeToeOffCalculator.set(ToeOffEnum.CENTROID_PROJECTION);
    }
 

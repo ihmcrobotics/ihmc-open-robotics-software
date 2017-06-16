@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -32,7 +32,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
 {
    private final boolean CONTROL_TREADMILL_WITH_JOYSTICK = true;  
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("WandererStandPrepSliderBoard");
-   private final EnumYoVariable<WandererStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
+   private final YoEnum<WandererStandPrepSetpoints> selectedJointPair = new YoEnum<>("selectedJointPair", sliderBoardRegistry,
          WandererStandPrepSetpoints.class);
 
    private final YoDouble selectedJoint_q_d = new YoDouble("selectedJoint_q_d", sliderBoardRegistry);

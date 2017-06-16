@@ -29,7 +29,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -155,9 +155,9 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FrameVector jointAxis = new FrameVector();
 
    // Walking
-   private final EnumYoVariable<QuadrupedGaitCycle> desiredGait = new EnumYoVariable<>("desiredGait", registry, QuadrupedGaitCycle.class);
-   private final EnumYoVariable<QuadrupedGaitCycle> nextGait = new EnumYoVariable<>("nextGait", registry, QuadrupedGaitCycle.class);
-   private final EnumYoVariable<QuadrupedGaitCycle> currentGait = new EnumYoVariable<>("currentGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> desiredGait = new YoEnum<>("desiredGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> nextGait = new YoEnum<>("nextGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> currentGait = new YoEnum<>("currentGait", registry, QuadrupedGaitCycle.class);
    private final QuadrantDependentList<YoPolynomial> swingZTrajectories = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> swingInitialZHeights = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> gaitCompletionAtStartOfSwing = new QuadrantDependentList<>();
@@ -166,9 +166,9 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoDouble currentGaitPhaseDuration = new YoDouble("currentPhaseDuration", registry);
    private final QuadrantDependentList<YoDouble> swingDurations = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> currentSwingCompletions = new QuadrantDependentList<>();
-   private final EnumYoVariable<QuadrupedSupportConfiguration> previousGaitPhase = new EnumYoVariable<>("previousGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
-   private final EnumYoVariable<QuadrupedSupportConfiguration> currentGaitPhase = new EnumYoVariable<>("currentGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
-   private final EnumYoVariable<QuadrupedSupportConfiguration> nextGaitPhase = new EnumYoVariable<>("nextGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoEnum<QuadrupedSupportConfiguration> previousGaitPhase = new YoEnum<>("previousGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoEnum<QuadrupedSupportConfiguration> currentGaitPhase = new YoEnum<>("currentGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoEnum<QuadrupedSupportConfiguration> nextGaitPhase = new YoEnum<>("nextGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
    private final YoDouble swingZHeight = new YoDouble("swingZHeight", registry);
    private final YoDouble desiredGaitPeriod = new YoDouble("desiredGaitPeriod", registry);
    private final YoDouble currentGaitCompletion = new YoDouble("currentGaitCompletion", registry);

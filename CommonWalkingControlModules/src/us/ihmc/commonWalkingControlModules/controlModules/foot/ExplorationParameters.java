@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdCo
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 /**
@@ -33,7 +33,7 @@ public class ExplorationParameters
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
    private final IntegerYoVariable shrinkMaxLimit;
-   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
+   private final YoEnum<RotationCalculatorType> rotationCalculatorType;
    private final YoDouble minAreaToConsider;
    private static final boolean defaultUseCopOccupancyGrid = true;
    private static final int defaultThresholdForCoPRegionOccupancy = 2;
@@ -98,7 +98,7 @@ public class ExplorationParameters
       distanceFromLineOfRotationToComputeCoPOccupancy.set(defaultDistanceFromLineOfRotationToComputeCoPOccupancy);
       shrinkMaxLimit = new IntegerYoVariable(namePrefix + "ShrinkMaxLimit", registry);
       shrinkMaxLimit.set(defaultShrinkMaxLimit);
-      rotationCalculatorType = new EnumYoVariable<>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
+      rotationCalculatorType = new YoEnum<>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
       rotationCalculatorType.set(defaultRotationCalculatorType);
       minAreaToConsider = new YoDouble(namePrefix + "MinAreaToConsider", registry);
       minAreaToConsider.set(defaultMinAreaToConsider);
@@ -174,7 +174,7 @@ public class ExplorationParameters
       return shrinkMaxLimit;
    }
 
-   public EnumYoVariable<RotationCalculatorType> getRotationCalculatorType()
+   public YoEnum<RotationCalculatorType> getRotationCalculatorType()
    {
       return rotationCalculatorType;
    }

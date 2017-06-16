@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -46,7 +46,7 @@ public class CenterOfMassHeightManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GenericStateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
-   private final EnumYoVariable<PelvisHeightControlMode> requestedState;
+   private final YoEnum<PelvisHeightControlMode> requestedState;
    
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
    private final CenterOfMassHeightControlState centerOfMassHeightControlState;
@@ -67,7 +67,7 @@ public class CenterOfMassHeightManager
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisHeightControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
       
       //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z 
       YoPDGains pdGains = walkingControllerParameters.createCoMHeightControlGains(registry);

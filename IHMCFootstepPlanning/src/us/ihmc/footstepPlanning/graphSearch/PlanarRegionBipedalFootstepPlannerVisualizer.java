@@ -16,7 +16,7 @@ import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -60,7 +60,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    private final YoBoolean leftNodeIsAtGoal, rightNodeIsAtGoal;
    private final SideDependentList<YoBoolean> nodeIsAtGoal;
 
-   private final EnumYoVariable<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
+   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
 
    private final YoFrameVector leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal;
    private final SideDependentList<YoFrameVector> acceptedFootstepSurfaceNormals;
@@ -177,7 +177,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       rightAcceptedFootstepSurfaceNormal = new YoFrameVector("rightAcceptedFootstepSurfaceNormal", worldFrame, registry);
       acceptedFootstepSurfaceNormals = new SideDependentList<>(leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal);
 
-      nodeRejectedReason = new EnumYoVariable<>("nodeRejectedReason", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
+      nodeRejectedReason = new YoEnum<>("nodeRejectedReason", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
       nodeRejectedReason.set(null);
 
       int vertexBufferSize = 100;
