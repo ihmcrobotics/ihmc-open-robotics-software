@@ -36,14 +36,10 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double CoPPointSize = 0.005;
 
-   // Some Yo declarations
+   // Storing registry and name data for YoVariable creation
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private YoVariableRegistry parentRegistry;
    private String namePrefix;
-
-   // Data storage
-   private BipedSupportPolygons bipedSupportPolygons;
 
    // State variables 
    private BooleanYoVariable isDoneWalking;
@@ -53,17 +49,18 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    private IntegerYoVariable plannedCoPIndex;
    private IntegerYoVariable orderOfSplineInterpolation;
 
-   private List<FootstepPoints> footCoPLocation = new ArrayList<>();
+   // Plan variables
+   private List<FootstepPoints> footstepLocation = new ArrayList<>();
    private List<FramePoint2d> coPLocations = new ArrayList<>();
-   private List<FrameVector2d> coPOffsets = new ArrayList<>();
-   private SideDependentList<FrameConvexPolygon2d> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
-   private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    private ArrayList<YoPolynomial3D> coPTrajectoryPolynomials = new ArrayList<>();
-
-   private List<Footstep> upcomingFootsteps = new ArrayList<>();
-
+   private SideDependentList<List<FrameVector2d>> coPOffsets = new SideDependentList<>();
+   
+   private BipedSupportPolygons bipedSupportPolygons;
+   private SideDependentList<ReferenceFrame> currentSoleZUpFrames = new SideDependentList<>();
+   private SideDependentList<FrameConvexPolygon2d> currentSupportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
+   private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    // TODO User customizable input declarations
-   private final SideDependentList<YoFrameVector2d> CoPUserOffsets = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector2d> coPUserOffsets = new SideDependentList<>();
 
    /**
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
@@ -91,8 +88,26 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
       {
          FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFeet.get(side).getContactPoints2d());
          defaultFootPolygons.put(side, defaultFootPolygon);
-         supportFootPolygonsInSoleZUpFrames.put(side, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(side));
-      }
+         currentSupportFootPolygonsInSoleZUpFrames.put(side, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(side));
+         coPOffsets.put(side, icpPlannerParameters.getCoPOffsets(side));
+         if (coPOffsets.get(side).size() != icpPlannerParameters.getNumberOfPointsPerFoot())
+         {
+            PrintTools.warn(this, "Mismatch in CoP Offsets size (" + coPOffsets.size() + " and number of CoP trajectory way points ("
+                  + icpPlannerParameters.getNumberOfPointsPerFoot() + ")");
+            if (coPOffsets.size() < icpPlannerParameters.getNumberOfPointsPerFoot())
+            {
+               for (int i = 0; i < icpPlannerParameters.getNumberOfPointsPerFoot() - coPOffsets.size(); i++)
+                  coPOffsets.get(side).add(new FrameVector2d());
+            }
+            else
+            {
+               for (int i = coPOffsets.size() - icpPlannerParameters.getNumberOfPointsPerFoot(); i > 0; i--)
+                  coPOffsets.get(side).remove(i);
+            }
+         }
+      }      
+      currentSoleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
+      this.bipedSupportPolygons = bipedSupportPolygons;
 
       this.numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfUpcomingFootsteps.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
@@ -102,24 +117,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
       this.numberOfFootstepstoConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       this.orderOfSplineInterpolation = new IntegerYoVariable(namePrefix + "OrderOfCoPInterpolation", registry);
       this.orderOfSplineInterpolation.set(icpPlannerParameters.getOrderOfCoPInterpolation());
-      this.plannedCoPIndex = new IntegerYoVariable(namePrefix + "PlannedCoPIndex", registry);
-      this.coPOffsets = icpPlannerParameters.getCoPOffsets();
-
-      if (coPOffsets.size() != icpPlannerParameters.getNumberOfPointsPerFoot())
-      {
-         PrintTools.warn(this, "Mismatch in CoP Offsets size (" + coPOffsets.size() + " and number of CoP trajectory way points ("
-               + icpPlannerParameters.getNumberOfPointsPerFoot() + ")");
-         if (coPOffsets.size() < icpPlannerParameters.getNumberOfPointsPerFoot())
-         {
-            for (int i = 0; i < icpPlannerParameters.getNumberOfPointsPerFoot() - coPOffsets.size(); i++)
-               coPOffsets.add(new FrameVector2d());
-         }
-         else
-         {
-            for (int i = coPOffsets.size() - icpPlannerParameters.getNumberOfPointsPerFoot(); i > 0; i--)
-               coPOffsets.remove(i);
-         }
-      }
+      this.plannedCoPIndex = new IntegerYoVariable(namePrefix + "PlannedCoPIndex", registry);      
    }
 
    /**
@@ -146,10 +144,10 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
     */
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      if (footstep != null)
+      if (footstep != null && timing != null)
       {
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
-            upcomingFootsteps.add(footstep);
+            footstepLocation.add(new FootstepPoints(footstep, timing));
          else
             PrintTools.warn(this, "Received bad footstep: " + footstep);
       }
@@ -180,7 +178,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
     */
    public void removeFootstep(int index)
    {
-      upcomingFootsteps.remove(index);
+      footstepLocation.remove(index);
    }
 
    /**
@@ -188,8 +186,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
     */
    public void clear()
    {
-      upcomingFootsteps.clear();
-      footCoPLocation.clear();
+      footstepLocation.clear();
       coPLocations.clear();
       plannedCoPIndex.set(0);
    }
@@ -199,7 +196,8 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
     */
    public void clearPlan()
    {
-      footCoPLocation.clear();
+      for (int i = 0; i < footstepLocation.size(); i++)
+         footstepLocation.get(i).clearFootstepPoints();
       coPLocations.clear();
       plannedCoPIndex.set(0);
    }
@@ -250,35 +248,32 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
       int plannedCoPIndex = this.plannedCoPIndex.getIntegerValue();
-      if (plannedCoPIndex + 1 < footCoPLocation.size())
+      if (plannedCoPIndex + 1 < footstepLocation.size())
       {
-         clearPlannedCoPs(plannedCoPIndex + 1, footCoPLocation.size());
+         clearPlannedCoPs(plannedCoPIndex + 1, footstepLocation.size());
          PrintTools.warn(this.getClass(), "Replanning footsteps due to index-data mismatch");
       }
-      else if (plannedCoPIndex + 1 > footCoPLocation.size())
+      else if (plannedCoPIndex + 1 > footstepLocation.size())
       {
-         plannedCoPIndex = footCoPLocation.size() - 1;
+         plannedCoPIndex = footstepLocation.size() - 1;
          PrintTools.warn(this.getClass(), "Resetting CoP plan index due to index-data mismatch");
       }
    }
 
    public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide side, boolean atAStop)
    {
-      // TODO       
+      // TODO
    }
-
-   private void computeReferenceCoPsForFootstep(ArrayList<FramePoint> coPPointsToPack, RobotSide side, ReferenceFrame soleFrame,
-                                                FrameConvexPolygon2d defaultFootPolygon)
+  
+   private void computeReferenceCoPsForFootstep(List<FramePoint2d> coPPointsToPack, ReferenceFrame supportSoleFrame,
+                                                FrameConvexPolygon2d defaultFootPolygon, List<FrameVector2d> coPOffsets, int numberOfPointsPerFoot)
    {
-      FootstepPoints newFootstepCoPs = new FootstepPoints(side, soleFrame);
-      for (int i = 0; i < numberOfPointsPerFoot.getIntegerValue(); i++)
+      for (int i = 0; i < numberOfPointsPerFoot; i++)
       {
-         FramePoint2d coPPoint = new FramePoint2d(soleFrame);
+         FramePoint2d coPPoint = new FramePoint2d(supportSoleFrame);
          coPPoint.add(coPOffsets.get(i));
-         newFootstepCoPs.addFootstepPoint(coPPoint);
-         coPLocations.add(coPPoint.changeFrameAndProjectToXYPlaneCopy(worldFrame));
+         coPPointsToPack.add(coPPoint.changeFrameAndProjectToXYPlaneCopy(worldFrame));
       }
-      footCoPLocation.add(newFootstepCoPs);
    }
 
    private void clearPlannedCoPs(int plannedCoPCountFromIndex, int plannedCoPsStored)
@@ -287,7 +282,7 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
       {
          for (int i = plannedCoPsStored; i > plannedCoPCountFromIndex; i--)
          {
-            footCoPLocation.remove(i - 1);
+            footstepLocation.remove(i - 1);
          }
       }
    }
@@ -323,6 +318,6 @@ public class ReferenceCenterOfPressureLocationsCalculator implements CMPComponen
 
    private void generatePolynomialCoefficients()
    {
-      coPTrajectoryPolynomials.clear();      
+      coPTrajectoryPolynomials.clear();
    }
 }
