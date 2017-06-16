@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -14,7 +15,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester

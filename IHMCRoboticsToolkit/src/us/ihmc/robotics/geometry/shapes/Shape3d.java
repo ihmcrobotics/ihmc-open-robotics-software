@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -26,7 +27,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.robotics.geometry.transformables.Pose3D;
 
 public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 {
