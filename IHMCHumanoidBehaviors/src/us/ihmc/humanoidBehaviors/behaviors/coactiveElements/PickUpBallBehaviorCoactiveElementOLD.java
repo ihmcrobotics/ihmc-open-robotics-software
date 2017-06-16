@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public abstract class PickUpBallBehaviorCoactiveElementOLD extends BehaviorCoactiveElement
@@ -36,7 +36,7 @@ public abstract class PickUpBallBehaviorCoactiveElementOLD extends BehaviorCoact
    public final YoBoolean validClicked = new YoBoolean("validClicked", userInterfaceWritableRegistry);
 
    //BEHAVIOR SIDE YOVARS
-   public final EnumYoVariable<PickUpBallBehaviorState> currentState = new EnumYoVariable<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
+   public final YoEnum<PickUpBallBehaviorState> currentState = new YoEnum<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
          PickUpBallBehaviorState.class);
    public final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
    public final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);

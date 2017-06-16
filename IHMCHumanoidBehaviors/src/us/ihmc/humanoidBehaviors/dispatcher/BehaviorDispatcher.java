@@ -25,7 +25,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
@@ -50,7 +50,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final YoVariableServer yoVaribleServer;
    private final BehaviorStateMachine<E> stateMachine;
 
-   private final EnumYoVariable<E> requestedBehavior;
+   private final YoEnum<E> requestedBehavior;
 
    private final BehaviorTypeSubscriber<E> desiredBehaviorSubscriber;
    private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
@@ -77,7 +77,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       this.yoVaribleServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      this.requestedBehavior = new EnumYoVariable<E>("requestedBehavior", registry, behaviourEnum, true);
+      this.requestedBehavior = new YoEnum<E>("requestedBehavior", registry, behaviourEnum, true);
 
       this.robotDataReceiver = robotDataReceiver;
       this.desiredBehaviorSubscriber = desiredBehaviorSubscriber;

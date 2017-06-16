@@ -3,14 +3,14 @@ package us.ihmc.simulationConstructionSetTools.util.gui;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 public class YoVariableToggler implements NewDataListener
 {
    private YoVariableToggleContainer parentContainer;
 
-   private final EnumYoVariable<ToggleMode> toggleMode;
+   private final YoEnum<ToggleMode> toggleMode;
    public YoBoolean currentState = null;
 
    private boolean currentStateValue;
@@ -24,7 +24,7 @@ public class YoVariableToggler implements NewDataListener
       if (currentStateVariable != null)
          this.currentState = currentStateVariable;
       this.parentContainer = parentContainer;
-      toggleMode = (EnumYoVariable<ToggleMode>) parent.getVariable(name);
+      toggleMode = (YoEnum<ToggleMode>) parent.getVariable(name);
 
       toggleMode.set(ToggleMode.NO_CHANGE);
 

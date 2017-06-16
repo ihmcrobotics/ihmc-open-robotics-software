@@ -7,7 +7,7 @@ import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -24,7 +24,7 @@ public class TestYoVariableConnection
    private final YoDouble var2 = new YoDouble("var2", registry);
    private final IntegerYoVariable var4 = new IntegerYoVariable("var4", registry);
    private final IntegerYoVariable var5 = new IntegerYoVariable("var5", registry);
-   private final EnumYoVariable<TestEnum> var3 = new EnumYoVariable<TestEnum>("var3", "", registry, TestEnum.class, true);
+   private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
    
    private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
    private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
@@ -102,8 +102,8 @@ public class TestYoVariableConnection
       private final YoDouble C = new YoDouble("C", registry);
       
       
-      private final EnumYoVariable<TestEnum> echoThreadIn = new EnumYoVariable<TestEnum>("echoThreadIn", registry, TestEnum.class, false);
-      private final EnumYoVariable<TestEnum> echoThreadOut = new EnumYoVariable<TestEnum>("echoThreadOut", registry, TestEnum.class, false);
+      private final YoEnum<TestEnum> echoThreadIn = new YoEnum<TestEnum>("echoThreadIn", registry, TestEnum.class, false);
+      private final YoEnum<TestEnum> echoThreadOut = new YoEnum<TestEnum>("echoThreadOut", registry, TestEnum.class, false);
 
       
       public ThreadTester(YoVariableServer server)

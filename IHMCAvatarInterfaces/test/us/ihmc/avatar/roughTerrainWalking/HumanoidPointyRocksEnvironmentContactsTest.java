@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -53,7 +53,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>(); // old hold position
    private SideDependentList<YoBoolean> holdFlat = new SideDependentList<>(); // new supportState
    private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
-   private SideDependentList<EnumYoVariable<ExplorationMethod>> explorationMethods = new SideDependentList<>();
+   private SideDependentList<YoEnum<ExplorationMethod>> explorationMethods = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
@@ -282,7 +282,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
          YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
-         EnumYoVariable<ExplorationMethod> explorationMethod = (EnumYoVariable<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
+         YoEnum<ExplorationMethod> explorationMethod = (YoEnum<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
          explorationMethods.put(robotSide, explorationMethod);
          YoBoolean requestExplorationForFoot = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, longFootName + "RequestExploration");
          requestExploration.put(robotSide, requestExplorationForFoot);

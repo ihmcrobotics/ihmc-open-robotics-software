@@ -13,7 +13,7 @@ import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.Robot;
@@ -45,7 +45,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
       createSliderBoard(scs, registry);
 
-      final EnumYoVariable<?> requestLowlLevelControlMode = (EnumYoVariable<?>) scs.getVariable(ValkyrieRosControlLowLevelController.class.getSimpleName(),
+      final YoEnum<?> requestLowlLevelControlMode = (YoEnum<?>) scs.getVariable(ValkyrieRosControlLowLevelController.class.getSimpleName(),
                                                                                                 "requestedLowLevelControlMode");
 
       final String[] enumValuesAsString = requestLowlLevelControlMode.getEnumValuesAsString();

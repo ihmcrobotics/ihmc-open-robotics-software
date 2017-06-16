@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -44,8 +44,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoDouble minimumClearance;
    private final YoDouble incrementalAdjustmentDistance;
    private final YoDouble maximumAdjustmentDistance;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
    private final YoFramePoint trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
@@ -109,9 +109,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
       maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
-      status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
+      status = new YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
                                                                                    SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
-      mostSevereCollisionType = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
+      mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
       trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);

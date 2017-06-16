@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,7 +23,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
 
    private final FloatingRootJointRobot robot;
 
-   private final EnumYoVariable<SlipState> slipState;
+   private final YoEnum<SlipState> slipState;
    private final YoBoolean slipNextStep;
    private final YoDouble slipAfterTimeDelta, touchdownTimeForSlip;
    private final YoFrameVector amountToSlipNextStep;
@@ -41,7 +41,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
 
       amountToSlipNextStep = new YoFrameVector(sideString + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       rotationToSlipNextStep = new YoFrameOrientation(sideString + "RotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      slipState = new EnumYoVariable<SlipState>(sideString + "SlipState", registry, SlipState.class);
+      slipState = new YoEnum<SlipState>(sideString + "SlipState", registry, SlipState.class);
       slipState.set(SlipState.NOT_SLIPPING);
 
       groundContactPoints = robot.getFootGroundContactPoints(robotSide);

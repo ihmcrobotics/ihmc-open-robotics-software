@@ -16,7 +16,7 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -65,7 +65,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private final EnumMap<WandererJoint, YoDouble> yoMotorDamping = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
    private final EnumMap<WandererJoint, YoDouble> desiredQddFeedForwardGain = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
    private final EnumMap<WandererJoint, YoDouble> desiredJointQ = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
-   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
+   private final YoEnum<WalkingStateEnum> yoWalkingState = new YoEnum<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
 
    private final YoDouble masterMotorDamping = new YoDouble("masterMotorDamping", registry);
 
@@ -84,7 +84,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       TORQUE_CONTROL, POSITION_CONTROL;
    };
 
-   private final EnumMap<WandererJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<WandererJoint, EnumYoVariable<JointControlMode>>(
+   private final EnumMap<WandererJoint, YoEnum<JointControlMode>> jointControlMode = new EnumMap<WandererJoint, YoEnum<JointControlMode>>(
          WandererJoint.class);
 
    private WalkingStateEnum currentWalkingState;
@@ -262,7 +262,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    {
       for (WandererJoint joint : WandererJoint.values)
       {
-         EnumYoVariable<JointControlMode> controlMode = new EnumYoVariable<WandererOutputWriter.JointControlMode>(joint.getSdfName()
+         YoEnum<JointControlMode> controlMode = new YoEnum<JointControlMode>(joint.getSdfName()
                + JointControlMode.class.getSimpleName(), registry, JointControlMode.class, false);
 
          controlMode.set(JointControlMode.TORQUE_CONTROL);
@@ -375,7 +375,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
-      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((YoEnum<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
       //((YoBoolean)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
 

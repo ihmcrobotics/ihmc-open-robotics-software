@@ -7,7 +7,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.tools.thread.ThreadTools;
@@ -23,7 +23,7 @@ public class YoVariableConnectionBurstTest
    private final YoVariableRegistry registry = new YoVariableRegistry("tester");
    private final LongYoVariable seq_id = new LongYoVariable("seq_id", registry);
    private final LongYoVariable sleep = new LongYoVariable("sleep", registry);
-   private final EnumYoVariable<TestEnum> var3 = new EnumYoVariable<TestEnum>("var3", "", registry, TestEnum.class, true);
+   private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
    
    
 

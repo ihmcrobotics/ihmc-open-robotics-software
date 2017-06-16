@@ -32,7 +32,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private final String namePrefix = "userDesiredStep";
    private final IntegerYoVariable stepsToTake = new IntegerYoVariable(namePrefix + "sToTake", registry);
-   private final EnumYoVariable<RobotSide> firstStepSide = new EnumYoVariable<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
+   private final YoEnum<RobotSide> firstStepSide = new YoEnum<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
    private final YoDouble minimumWidth = new YoDouble(namePrefix + "MinWidth", registry);
 
    private final YoBoolean stepSquareUp = new YoBoolean(namePrefix + "SquareUp", registry);

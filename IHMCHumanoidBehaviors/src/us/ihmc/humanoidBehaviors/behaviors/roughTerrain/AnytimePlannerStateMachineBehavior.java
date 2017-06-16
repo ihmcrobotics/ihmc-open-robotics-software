@@ -47,7 +47,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -485,7 +485,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       private final FramePose stanceFootPose = new FramePose();
       private final FramePose swingStartPose = new FramePose();
       private final FramePose swingEndPose = new FramePose();
-      private final EnumYoVariable<FootstepStatus.Status> latestFootstepStatus = new EnumYoVariable<>(prefix + "LatestFootstepStatus", registry,
+      private final YoEnum<FootstepStatus.Status> latestFootstepStatus = new YoEnum<>(prefix + "LatestFootstepStatus", registry,
                                                                                                       FootstepStatus.Status.class);
 
       public SendOverFootstepAndWaitForCompletionBehavior(CommunicationBridgeInterface communicationBridge)

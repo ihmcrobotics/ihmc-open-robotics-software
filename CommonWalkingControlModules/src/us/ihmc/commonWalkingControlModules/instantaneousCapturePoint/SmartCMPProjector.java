@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -59,7 +59,7 @@ public class SmartCMPProjector extends CMPProjector
       TOWARDS_FINAL_MIN_ANGLE,
       ORTHOGONAL_PROJECTION
    }
-   private final EnumYoVariable<ProjectionMethod> activeProjection = new EnumYoVariable<>("ActiveCMPProjection", registry, ProjectionMethod.class);
+   private final YoEnum<ProjectionMethod> activeProjection = new YoEnum<>("ActiveCMPProjection", registry, ProjectionMethod.class);
 
    public SmartCMPProjector(YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {

@@ -12,7 +12,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -35,7 +35,7 @@ public class KneeControlModule
 
    private final YoVariableRegistry registry;
 
-   private final EnumYoVariable<KneeControlType> requestedState;
+   private final YoEnum<KneeControlType> requestedState;
    private final GenericStateMachine<KneeControlType, AbstractKneeControlState> stateMachine;
 
    private final YoDouble legPitchPrivilegedWeight;
@@ -123,7 +123,7 @@ public class KneeControlModule
       // set up states and state machine
       YoDouble time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", KneeControlType.class, time, registry);
-      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", KneeControlType.class, registry, true);
+      requestedState = YoEnum.create(namePrefix + "RequestedState", "", KneeControlType.class, registry, true);
       requestedState.set(null);
 
       setupStateMachine(controllerToolbox, robotSide);

@@ -13,7 +13,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -30,7 +30,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       SPRIAL, LINES, FAST_LINE
    };
 
-   private final EnumYoVariable<ExplorationMethod> explorationMethod;
+   private final YoEnum<ExplorationMethod> explorationMethod;
 
    private final HoldPositionState internalHoldPositionState;
 
@@ -78,7 +78,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper);
       String footName = contactableFoot.getName();
 
-      explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
+      explorationMethod = new YoEnum<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
       explorationMethod.set(ExplorationMethod.LINES);
 
       dt = controllerToolbox.getControlDT();

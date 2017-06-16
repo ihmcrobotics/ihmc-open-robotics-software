@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -68,8 +68,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
    private final YoVariableRegistry dontRecordRegistry = new YoVariableRegistry("dontRecordRegistry");
 
-   private final EnumYoVariable<SliderSpace> sliderSpace = new EnumYoVariable<SliderSpace>("sliderSpace", "", registry, SliderSpace.class, false);
-   private final EnumYoVariable<SliderBodyPart> sliderBodyPart = new EnumYoVariable<SliderBodyPart>("sliderBodyPart", "", registry, SliderBodyPart.class, false);
+   private final YoEnum<SliderSpace> sliderSpace = new YoEnum<SliderSpace>("sliderSpace", "", registry, SliderSpace.class, false);
+   private final YoEnum<SliderBodyPart> sliderBodyPart = new YoEnum<SliderBodyPart>("sliderBodyPart", "", registry, SliderBodyPart.class, false);
 
    private final YoBoolean isCaptureSnapshotRequested = new YoBoolean("isCaptureSnapshotRequested", dontRecordRegistry);
    private final YoBoolean isSaveSequenceRequested = new YoBoolean("isSaveSequenceRequested", dontRecordRegistry);

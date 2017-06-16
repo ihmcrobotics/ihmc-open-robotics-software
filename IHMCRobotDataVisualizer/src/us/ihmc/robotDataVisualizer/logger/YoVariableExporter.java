@@ -154,7 +154,7 @@ public class YoVariableExporter extends YoVariableLogReader
    {
       int[] dims = { elements, 1 };
       String name =  variable.getName();
-      if (variable instanceof EnumYoVariable<?>)
+      if (variable instanceof YoEnum<?>)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {

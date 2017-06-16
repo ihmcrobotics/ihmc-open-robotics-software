@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -116,7 +116,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
       final YoBoolean enabledOutput = (YoBoolean)yoVariableHolder.getVariable("WandererOutputWriter","enableOutput");
       final YoBoolean startStandPrep = (YoBoolean)yoVariableHolder.getVariable("WandererStandPrep","startStandPrep");
-      final EnumYoVariable requestedHighLevelState = (EnumYoVariable)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
+      final YoEnum requestedHighLevelState = (YoEnum)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
       final YoDouble controlRatio = (YoDouble) yoVariableHolder.getVariable("WandererOutputWriter","controlRatio");
       
       final YoDouble leftFootForce = (YoDouble)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");

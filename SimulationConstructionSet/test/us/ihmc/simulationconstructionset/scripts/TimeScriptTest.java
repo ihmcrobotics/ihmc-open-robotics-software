@@ -12,7 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +23,7 @@ public class TimeScriptTest
    private YoDouble doubleVariable;
    private YoBoolean booleanVariable;
    private IntegerYoVariable integerVariable;
-   private EnumYoVariable<TimeScriptTestEnums> enumVariable;
+   private YoEnum<TimeScriptTestEnums> enumVariable;
    
    @Before
    public void setUp() throws Exception
@@ -38,7 +38,7 @@ public class TimeScriptTest
       doubleVariable = new YoDouble("doubleVariable", rootRegistry);
       booleanVariable = new YoBoolean("booleanVariable", registryOne);
       integerVariable = new IntegerYoVariable("integerVariable", registryTwo);
-      enumVariable = new EnumYoVariable<TimeScriptTestEnums>("enumVariable", registryTwo, TimeScriptTestEnums.class);
+      enumVariable = new YoEnum<TimeScriptTestEnums>("enumVariable", registryTwo, TimeScriptTestEnums.class);
    }
    
    private enum TimeScriptTestEnums

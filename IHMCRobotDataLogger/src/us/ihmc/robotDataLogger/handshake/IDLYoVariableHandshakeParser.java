@@ -158,7 +158,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
             String[] names = enumType.getEnumValues().toStringArray();
             boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
-            EnumYoVariable enumVar = new EnumYoVariable(name, "", parent, allowNullValues, names);
+            YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
             variableList.add(enumVar);
             break;
 

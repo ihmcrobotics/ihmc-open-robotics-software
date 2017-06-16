@@ -16,7 +16,7 @@ public class GroundContactPoint extends ExternalForcePoint
  
    private final YoFramePoint touchdownLocation;
    
-   private final YoDouble fs;    // Foot Switch TODO: YoBoolean or EnumYoVariable
+   private final YoDouble fs;    // Foot Switch TODO: YoBoolean or YoEnum
    private final YoFrameVector surfaceNormal;
 
    private final YoBoolean slip;    // Whether or not it is slipping.

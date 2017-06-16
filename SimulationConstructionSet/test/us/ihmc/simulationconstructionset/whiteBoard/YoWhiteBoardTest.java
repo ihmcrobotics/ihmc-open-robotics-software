@@ -427,9 +427,9 @@ public class YoWhiteBoardTest
             {
                throw new RuntimeException("Help Twan!");
 
-//             EnumYoVariable enumYoVariable = (EnumYoVariable) variable;
+//             YoEnum enumYoVariable = (YoEnum) variable;
 //             
-//             variablesToCopyTo.add(new EnumYoVariable(name, registry));
+//             variablesToCopyTo.add(new YoEnum(name, registry));
 //             break;
             }
 

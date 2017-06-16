@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,7 +23,7 @@ public class QuadrupedPreplannedStepInputProvider
    private final QuadrupedTimedStepPacket emptyTimedStepPacket;
    private final QuadrupedTimedStepPacket debugTimedStepPacket;
 
-   private final EnumYoVariable<RobotQuadrant> yoTimedStepQuadrant;
+   private final YoEnum<RobotQuadrant> yoTimedStepQuadrant;
    private final YoDouble yoTimedStepDuration;
    private final YoDouble yoTimedStepGroundClearance;
    private final YoFramePoint yoTimedStepGoalPosition;
@@ -34,7 +34,7 @@ public class QuadrupedPreplannedStepInputProvider
       emptyTimedStepPacket = new QuadrupedTimedStepPacket();
       debugTimedStepPacket = new QuadrupedTimedStepPacket(Collections.singletonList(new QuadrupedTimedStep()), false);
 
-      yoTimedStepQuadrant = new EnumYoVariable<>("timedStepQuadrant", registry, RobotQuadrant.class);
+      yoTimedStepQuadrant = new YoEnum<>("timedStepQuadrant", registry, RobotQuadrant.class);
       yoTimedStepDuration = new YoDouble("timedStepDuration", registry);
       yoTimedStepGroundClearance = new YoDouble("timedStepGroundClearance", registry);
       yoTimedStepGoalPosition = new YoFramePoint("timedStepGoalPosition", ReferenceFrame.getWorldFrame(), registry);

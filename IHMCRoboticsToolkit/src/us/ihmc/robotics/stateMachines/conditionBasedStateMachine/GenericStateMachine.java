@@ -5,13 +5,13 @@ import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 /**
  * GenericStateMachine. Class for construction a finite state machine. Requires an Enum, which lists all the possible state names.
- * An EnumYoVariable keeps track of the current state and a YoDouble keeps track of the time since the state was switched.
+ * An YoEnum keeps track of the current state and a YoDouble keeps track of the time since the state was switched.
  * A GenericStateMachine is not dynamic. New states cannot be constructed on the fly.
  * The user is given the option to set the initial state in the constructor.
  * If they do not set an initialState, then it defaults to the first state in the Enum list.
@@ -27,7 +27,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    private final EnumMap<E, T> enumsToStates;
 
-   private final EnumYoVariable<E> stateYoVariable, previousStateYoVariable;
+   private final YoEnum<E> stateYoVariable, previousStateYoVariable;
    private final YoDouble switchTimeYoVariable;
    private final DoubleProvider time;
    private ArrayList<StateChangedListener<E>> stateChangedListeners;
@@ -52,8 +52,8 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider,
          YoVariableRegistry registry)
    {
-      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
-      previousStateYoVariable = new EnumYoVariable<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.",
+      stateYoVariable = new YoEnum<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
+      previousStateYoVariable = new YoEnum<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.",
             registry, enumType, true);
 
       enumsToStates = new EnumMap<>(enumType);
@@ -240,7 +240,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       return stringBuffer.toString();
    }
 
-   public EnumYoVariable<E> getStateYoVariable()
+   public YoEnum<E> getStateYoVariable()
    {
       return stateYoVariable;
    }

@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotController.RobotController;
@@ -50,8 +50,8 @@ public class ValkyrieFingerSetController implements RobotController
    private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
 
-   private final EnumYoVariable<HandConfiguration> handConfiguration;
-   private final EnumYoVariable<HandConfiguration> handDesiredConfiguration;
+   private final YoEnum<HandConfiguration> handConfiguration;
+   private final YoEnum<HandConfiguration> handDesiredConfiguration;
    private StateMachine<GraspState> stateMachine;
 
    public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
@@ -84,9 +84,9 @@ public class ValkyrieFingerSetController implements RobotController
       yoPolynomial = new YoPolynomial(sidePrefix + name, 4, registry);
       yoPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
 
-      handConfiguration = new EnumYoVariable<>(sidePrefix + "ValkyrieHandConfiguration", registry, HandConfiguration.class);
+      handConfiguration = new YoEnum<>(sidePrefix + "ValkyrieHandConfiguration", registry, HandConfiguration.class);
       handConfiguration.set(HandConfiguration.OPEN);
-      handDesiredConfiguration = new EnumYoVariable<>(sidePrefix + "ValkyrieHandDesiredConfiguration", registry, HandConfiguration.class);
+      handDesiredConfiguration = new YoEnum<>(sidePrefix + "ValkyrieHandDesiredConfiguration", registry, HandConfiguration.class);
       handDesiredConfiguration.set(HandConfiguration.OPEN);
 
       stateMachine = new StateMachine<>(sidePrefix + "ValkyrieGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
