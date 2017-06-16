@@ -8,21 +8,20 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TimestampedVelocityYoVariableTest
 {
-   private DoubleYoVariable position;
-   private DoubleYoVariable timestamp;
+   private YoDouble position;
+   private YoDouble timestamp;
    private TimestampedVelocityYoVariable velocityYoVariable;
    
    @Before
    public void setUp() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      position = new DoubleYoVariable("testPosition", registry);
-      timestamp = new DoubleYoVariable("testTimestamp", registry);
+      position = new YoDouble("testPosition", registry);
+      timestamp = new YoDouble("testTimestamp", registry);
       velocityYoVariable = new TimestampedVelocityYoVariable("testVelVar", "", position, timestamp, registry, 1e-9);
    }
 

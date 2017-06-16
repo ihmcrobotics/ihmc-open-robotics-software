@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GoHomeBehavior extends AbstractBehavior
 {
@@ -21,31 +21,31 @@ public class GoHomeBehavior extends AbstractBehavior
    protected GoHomeMessage outgoingMessage;
 
    protected final YoBoolean hasPacketBeenSent;
-   protected final DoubleYoVariable yoTime;
-   protected final DoubleYoVariable startTime;
-   protected final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable trajectoryTimeElapsed;
+   protected final YoDouble yoTime;
+   protected final YoDouble startTime;
+   protected final YoDouble trajectoryTime;
+   private final YoDouble trajectoryTimeElapsed;
 
    protected final YoBoolean hasInputBeenSet;
    private final YoBoolean isDone;
 
-   public GoHomeBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
 
-   public GoHomeBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
-      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime = new YoDouble(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
       trajectoryTimeElapsed.set(Double.NaN);
 
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);

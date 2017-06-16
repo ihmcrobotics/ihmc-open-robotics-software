@@ -48,21 +48,21 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private double internalPriorWalkingDuration;
    private int stepCount = 0;
    private final LongYoVariable nanosecondstime;
-   private final DoubleYoVariable total_time;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable walking_time;
+   private final YoDouble total_time;
+   private final YoDouble startTime;
+   private final YoDouble walking_time;
    private final YoBoolean expo_isWalking;
-   private final DoubleYoVariable priorWalkingDuration;
+   private final YoDouble priorWalkingDuration;
    private final LongYoVariable startingStepCount;
    //private final EnumYoVariable<WalkingState> walkingState;
-   private final DoubleYoVariable distanceTraveled;
-   private final DoubleYoVariable startDistance;
-   private final DoubleYoVariable batteryLevel;
+   private final YoDouble distanceTraveled;
+   private final YoDouble startDistance;
+   private final YoDouble batteryLevel;
    //private final AlphaFilteredYoVariable batteryLevel_filt;
    
-   private final DoubleYoVariable avgpower;
-   private final DoubleYoVariable averageVelocity;
-   private final DoubleYoVariable COT;
+   private final YoDouble avgpower;
+   private final YoDouble averageVelocity;
+   private final YoDouble COT;
    
    private final Font titleFont = new Font("Calibri",Font.ITALIC, 75);
    private final Font mainLabelFont = new Font("Calibri",Font.PLAIN, 100);
@@ -99,19 +99,19 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       {
          YoVariableRegistry registry = new YoVariableRegistry("base");
          nanosecondstime = new LongYoVariable("longtime", registry);
-         total_time = new DoubleYoVariable("time", registry);
-         startTime = new DoubleYoVariable("startTime", registry);
-         walking_time = new DoubleYoVariable("walkingtime", registry);
+         total_time = new YoDouble("time", registry);
+         startTime = new YoDouble("startTime", registry);
+         walking_time = new YoDouble("walkingtime", registry);
          expo_isWalking = new YoBoolean("walk", registry);
          startingStepCount = new LongYoVariable("expoStartingStepCount", registry);
          //walkingState = new EnumYoVariable<WalkingState>("walkingState", registry, WalkingState.class);
-         priorWalkingDuration = new DoubleYoVariable("startWalkingTime", registry);
-         distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
-         startDistance = new DoubleYoVariable("startDistance", registry);
-         batteryLevel = new DoubleYoVariable("batteryLevel", registry);
-         avgpower = new DoubleYoVariable("averagePower", registry);
-         averageVelocity = new DoubleYoVariable("averageVelocity", registry);
-         COT = new DoubleYoVariable("COT", registry);
+         priorWalkingDuration = new YoDouble("startWalkingTime", registry);
+         distanceTraveled = new YoDouble("distanceTraveled", registry);
+         startDistance = new YoDouble("startDistance", registry);
+         batteryLevel = new YoDouble("batteryLevel", registry);
+         avgpower = new YoDouble("averagePower", registry);
+         averageVelocity = new YoDouble("averageVelocity", registry);
+         COT = new YoDouble("COT", registry);
          
          nanosecondstime.set(1234567890);
          startTime.set(0.0);
@@ -128,21 +128,21 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       } else
       {
          nanosecondstime = (LongYoVariable) parentRegistry.getVariable("SensorProcessing","timestamp");
-         total_time = new DoubleYoVariable("expoTime", parentRegistry);
-         startTime = new DoubleYoVariable("expoStartTime", parentRegistry);
-         walking_time = new DoubleYoVariable("expoWalkingTime", parentRegistry);
+         total_time = new YoDouble("expoTime", parentRegistry);
+         startTime = new YoDouble("expoStartTime", parentRegistry);
+         walking_time = new YoDouble("expoWalkingTime", parentRegistry);
          expo_isWalking = (YoBoolean) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
          startingStepCount = new LongYoVariable("expoStartingStepCount", parentRegistry);
          //walkingState = (EnumYoVariable<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
-         priorWalkingDuration = new DoubleYoVariable("expoStartWalkingTime", parentRegistry);
-         distanceTraveled = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");         
-         startDistance = new DoubleYoVariable("expoStartDistance", parentRegistry);
-         batteryLevel = (DoubleYoVariable) parentRegistry.getVariable("WandererBatteryMonitor","totalBatteryVoltage");
+         priorWalkingDuration = new YoDouble("expoStartWalkingTime", parentRegistry);
+         distanceTraveled = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");
+         startDistance = new YoDouble("expoStartDistance", parentRegistry);
+         batteryLevel = (YoDouble) parentRegistry.getVariable("WandererBatteryMonitor","totalBatteryVoltage");
          
-         avgpower = (DoubleYoVariable) parentRegistry.getVariable("powerDistribution","averageRobotPower");
-         averageVelocity = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","averageVelocity");
-         COT = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","costOfTransport");
-         //power = (DoubleYoVariable) parentRegistry.getVariable("Wanderer","totalMotorPower");
+         avgpower = (YoDouble) parentRegistry.getVariable("powerDistribution","averageRobotPower");
+         averageVelocity = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","averageVelocity");
+         COT = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","costOfTransport");
+         //power = (YoDouble) parentRegistry.getVariable("Wanderer","totalMotorPower");
       }
       
       if(isStandalone) setupExitOnClose();

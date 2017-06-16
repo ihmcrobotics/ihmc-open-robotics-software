@@ -22,7 +22,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -64,7 +64,7 @@ public class CenterOfMassHeightManager
          YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisHeightControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);

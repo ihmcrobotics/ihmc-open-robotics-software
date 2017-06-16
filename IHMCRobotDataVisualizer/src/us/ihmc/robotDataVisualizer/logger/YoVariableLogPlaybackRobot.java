@@ -17,7 +17,7 @@ import us.ihmc.robotDataVisualizer.VisualizerRobot;
 import us.ihmc.robotDataVisualizer.visualizer.JointUpdater;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -30,7 +30,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
-   private final DoubleYoVariable robotTime;
+   private final YoDouble robotTime;
    private final FileChannel logChannel;
    private final List<YoVariable<?>> variables;
 
@@ -63,7 +63,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       super(robotDescription);
 
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
-      this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
+      this.robotTime = new YoDouble("robotTime", getRobotsYoVariableRegistry());
 
 
 

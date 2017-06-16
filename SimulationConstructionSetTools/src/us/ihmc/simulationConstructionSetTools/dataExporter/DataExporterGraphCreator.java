@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.Color;
 import java.io.File;
 
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
@@ -14,7 +14,7 @@ public class DataExporterGraphCreator
    protected final DataBuffer dataBuffer;
    private final DataBufferEntry timeEntry;
 
-   public DataExporterGraphCreator(DoubleYoVariable timeYoVariable, DataBuffer dataBuffer)
+   public DataExporterGraphCreator(YoDouble timeYoVariable, DataBuffer dataBuffer)
    {
       this.dataBuffer = dataBuffer;
       this.timeEntry = dataBuffer.getEntry(timeYoVariable);

@@ -24,7 +24,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -62,10 +62,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final YoBoolean hasBeenInitializedWithNextStep = new YoBoolean("hasBeenInitializedWithNextStep", registry);
 
-   private final DoubleYoVariable offsetHeightAboveGround = new DoubleYoVariable("offsetHeightAboveGround", registry);
+   private final YoDouble offsetHeightAboveGround = new YoDouble("offsetHeightAboveGround", registry);
 
-   private final DoubleYoVariable offsetHeightAboveGroundPrevValue = new DoubleYoVariable("offsetHeightAboveGroundPrevValue", registry);
-   private final DoubleYoVariable offsetHeightAboveGroundChangedTime = new DoubleYoVariable("offsetHeightAboveGroundChangedTime", registry);
+   private final YoDouble offsetHeightAboveGroundPrevValue = new YoDouble("offsetHeightAboveGroundPrevValue", registry);
+   private final YoDouble offsetHeightAboveGroundChangedTime = new YoDouble("offsetHeightAboveGroundChangedTime", registry);
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput",
          registry);
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
@@ -73,17 +73,17 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final MultipleWaypointsTrajectoryGenerator offsetHeightTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(
          "pelvisHeightOffset", registry);
 
-   private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
-   private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
-   private final DoubleYoVariable maximumHeightAboveGround = new DoubleYoVariable("maximumHeightAboveGround", registry);
+   private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
+   private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
+   private final YoDouble maximumHeightAboveGround = new YoDouble("maximumHeightAboveGround", registry);
 
-   private final DoubleYoVariable doubleSupportPercentageIn = new DoubleYoVariable("doubleSupportPercentageIn", registry);
+   private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
 
-   private final DoubleYoVariable previousZFinalLeft = new DoubleYoVariable("previousZFinalLeft", registry);
-   private final DoubleYoVariable previousZFinalRight = new DoubleYoVariable("previousZFinalRight", registry);
-   private final SideDependentList<DoubleYoVariable> previousZFinals = new SideDependentList<DoubleYoVariable>(previousZFinalLeft, previousZFinalRight);
+   private final YoDouble previousZFinalLeft = new YoDouble("previousZFinalLeft", registry);
+   private final YoDouble previousZFinalRight = new YoDouble("previousZFinalRight", registry);
+   private final SideDependentList<YoDouble> previousZFinals = new SideDependentList<YoDouble>(previousZFinalLeft, previousZFinalRight);
 
-   private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
+   private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private LineSegment2D projectionSegment;
@@ -100,7 +100,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final BagOfBalls bagOfBalls;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
@@ -117,7 +117,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
-         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final DoubleYoVariable yoTime,
+         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final YoDouble yoTime,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
@@ -289,7 +289,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         DoubleYoVariable previousZFinal = previousZFinals.get(robotSide);
+         YoDouble previousZFinal = previousZFinals.get(robotSide);
          tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, previousZFinal.getDoubleValue());
          tempFramePoint.changeFrame(newFrame);
          previousZFinal.set(tempFramePoint.getZ());

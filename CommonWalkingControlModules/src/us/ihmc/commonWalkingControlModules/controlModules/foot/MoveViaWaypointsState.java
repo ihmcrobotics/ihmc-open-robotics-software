@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -62,7 +62,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
 
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();

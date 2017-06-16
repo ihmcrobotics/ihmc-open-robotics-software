@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
@@ -18,8 +18,8 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable input;
-   private final DoubleYoVariable inputPrevious;
+   private final YoDouble input;
+   private final YoDouble inputPrevious;
    private final YoBoolean hasBeenCalled;
 
    private final YoBoolean isVariableDead;
@@ -40,12 +40,12 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
       this(inputName, null, parentRegistry);
    }
 
-   public DoubleYoVariableValidityChecker(DoubleYoVariable input, YoVariableRegistry parentRegistry)
+   public DoubleYoVariableValidityChecker(YoDouble input, YoVariableRegistry parentRegistry)
    {
       this(input.getName(), input, parentRegistry);
    }
 
-   private DoubleYoVariableValidityChecker(String inputName, DoubleYoVariable input, YoVariableRegistry parentRegistry)
+   private DoubleYoVariableValidityChecker(String inputName, YoDouble input, YoVariableRegistry parentRegistry)
    {
       this.input = input;
       this.inputName = inputName;
@@ -53,7 +53,7 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
       registry = new YoVariableRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);
 
-      inputPrevious = new DoubleYoVariable(inputName + "Previous", registry);
+      inputPrevious = new YoDouble(inputName + "Previous", registry);
       hasBeenCalled = new YoBoolean(inputName + "ValidityCheckerHasBeenCalled", registry);
 
       isVariableDead = new YoBoolean(inputName + "IsDead", registry);

@@ -16,7 +16,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -37,23 +37,23 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
    private final YoPolynomial steeringAnglePolynomial;
 
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable desiredSteeringSpeed;
-   private final DoubleYoVariable steeringWheelRadius;
-   private final DoubleYoVariable initialZ;
+   private final YoDouble trajectoryTime;
+   private final YoDouble desiredSteeringSpeed;
+   private final YoDouble steeringWheelRadius;
+   private final YoDouble initialZ;
 
-   private final DoubleYoVariable initialSteeringAngle;
-   private final DoubleYoVariable currentRelativeSteeringAngle;
-   private final DoubleYoVariable finalSteeringAngle;
+   private final YoDouble initialSteeringAngle;
+   private final YoDouble currentRelativeSteeringAngle;
+   private final YoDouble finalSteeringAngle;
 
    private final YoBoolean isCurrentAngleBeingAdjusted;
-   private final DoubleYoVariable maximumAngleTrackingErrorTolerated;
-   private final DoubleYoVariable currentControlledFrameRelativeAngle;
-   private final DoubleYoVariable currentAngleTrackingError;
-   private final DoubleYoVariable currentAdjustedRelativeAngle;
+   private final YoDouble maximumAngleTrackingErrorTolerated;
+   private final YoDouble currentControlledFrameRelativeAngle;
+   private final YoDouble currentAngleTrackingError;
+   private final YoDouble currentAdjustedRelativeAngle;
 
    private final YoFramePoint yoInitialPosition;
    private final YoFramePoint yoFinalPosition;
@@ -112,28 +112,28 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "SteeringTrajectoryTime", registry);
-      this.desiredSteeringSpeed = new DoubleYoVariable(namePrefix + "DesiredSteeringSpeed", registry);
-      this.currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "SteeringTrajectoryTime", registry);
+      this.desiredSteeringSpeed = new YoDouble(namePrefix + "DesiredSteeringSpeed", registry);
+      this.currentTime = new YoDouble(namePrefix + "Time", registry);
 
       this.steeringAnglePolynomial = new YoPolynomial(namePrefix + "SteeringParameterPolynomial", 2, registry);
 
       this.trajectoryFrame = trajectoryFrame;
 
-      initialZ = new DoubleYoVariable(namePrefix + "SteeringZPosition", registry);
+      initialZ = new YoDouble(namePrefix + "SteeringZPosition", registry);
 
       isCurrentAngleBeingAdjusted = new YoBoolean(namePrefix + "IsCurrentSteeringAngleBeingAdjusted", registry);
-      maximumAngleTrackingErrorTolerated = new DoubleYoVariable(namePrefix + "MaxSteeringAngleTrackingErrorTolerated", registry);
+      maximumAngleTrackingErrorTolerated = new YoDouble(namePrefix + "MaxSteeringAngleTrackingErrorTolerated", registry);
       maximumAngleTrackingErrorTolerated.set(Math.toRadians(30.0));
-      currentControlledFrameRelativeAngle = new DoubleYoVariable(namePrefix + "CurrentControlledFrameSteeringAngle", registry);
-      currentAngleTrackingError = new DoubleYoVariable(namePrefix + "CurrentSteeringAngleTrackingError", registry);
-      currentAdjustedRelativeAngle = new DoubleYoVariable(namePrefix + "CurrentAdjustedRelativeSteeringAngle", registry);
+      currentControlledFrameRelativeAngle = new YoDouble(namePrefix + "CurrentControlledFrameSteeringAngle", registry);
+      currentAngleTrackingError = new YoDouble(namePrefix + "CurrentSteeringAngleTrackingError", registry);
+      currentAdjustedRelativeAngle = new YoDouble(namePrefix + "CurrentAdjustedRelativeSteeringAngle", registry);
 
-      steeringWheelRadius = new DoubleYoVariable(namePrefix + "SteeringWheelRadius", registry);
+      steeringWheelRadius = new YoDouble(namePrefix + "SteeringWheelRadius", registry);
 
-      initialSteeringAngle = new DoubleYoVariable(namePrefix + "InitialSteeringAngle", registry);
-      currentRelativeSteeringAngle = new DoubleYoVariable(namePrefix + "CurrentRelativeSteeringAngle", registry);
-      finalSteeringAngle = new DoubleYoVariable(namePrefix + "FinalSteeringAngle", registry);
+      initialSteeringAngle = new YoDouble(namePrefix + "InitialSteeringAngle", registry);
+      currentRelativeSteeringAngle = new YoDouble(namePrefix + "CurrentRelativeSteeringAngle", registry);
+      finalSteeringAngle = new YoDouble(namePrefix + "FinalSteeringAngle", registry);
 
       yoInitialPosition = new YoFramePoint(namePrefix + "InitialSteeringPosition", trajectoryFrame, registry);
       yoFinalPosition = new YoFramePoint(namePrefix + "FinalSteeringPosition", trajectoryFrame, registry);

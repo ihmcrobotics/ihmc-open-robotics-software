@@ -14,7 +14,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
@@ -128,7 +128,7 @@ public class SimulationConstructionSetFestTest
       testFixture.middleClickInNthGraph(2);
 
       testFixture.selectVariableAndSetValueInSearchTab("q_z", 1.31);
-      DoubleYoVariable q_z = (DoubleYoVariable) scs.getVariable("q_z");
+      YoDouble q_z = (YoDouble) scs.getVariable("q_z");
       assertEquals(1.31, q_z.getDoubleValue(), 1e-9);
 
       // Simulate and replay

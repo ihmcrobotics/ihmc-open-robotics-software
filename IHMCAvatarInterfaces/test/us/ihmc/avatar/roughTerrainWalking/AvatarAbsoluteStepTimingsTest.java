@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -146,13 +146,13 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithAngularMomentumOffset.class.getSimpleName());
+      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithAngularMomentumOffset.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 
-   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoDouble getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
    private WalkingStateEnum getWalkingState(SimulationConstructionSet scs)

@@ -3,7 +3,7 @@ package us.ihmc.robotics.time;
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
@@ -12,10 +12,10 @@ public class ExecutionTimer
    private final long measurementDelay;
    private long timeOfFirstMeasurement = Long.MAX_VALUE;
 
-   private final DoubleYoVariable current;
-   private final DoubleYoVariable average;
-   private final DoubleYoVariable standardDeviation;
-   private final DoubleYoVariable maximum;
+   private final YoDouble current;
+   private final YoDouble average;
+   private final YoDouble standardDeviation;
+   private final YoDouble maximum;
    private final SimpleMovingAverageFilteredYoVariable movingAverage;
    private final LongYoVariable count;
 
@@ -30,11 +30,11 @@ public class ExecutionTimer
    {
       this.measurementDelay = Conversions.secondsToNanoseconds(measurementDelayInSeconds);
 
-      current = new DoubleYoVariable(name + "Current", registry);
-      average = new DoubleYoVariable(name + "Average", registry);
+      current = new YoDouble(name + "Current", registry);
+      average = new YoDouble(name + "Average", registry);
       movingAverage = new SimpleMovingAverageFilteredYoVariable(name + "MovingAverage", 100, current, registry);
-      standardDeviation = new DoubleYoVariable(name + "StandardDeviation", registry);
-      maximum = new DoubleYoVariable(name + "Maximum", registry);
+      standardDeviation = new YoDouble(name + "StandardDeviation", registry);
+      maximum = new YoDouble(name + "Maximum", registry);
       count = new LongYoVariable(name + "Count", registry);
    }
 
@@ -75,27 +75,27 @@ public class ExecutionTimer
       }
    }
 
-   public DoubleYoVariable getCurrentTime()
+   public YoDouble getCurrentTime()
    {
       return current;
    }
 
-   public DoubleYoVariable getAverageTime()
+   public YoDouble getAverageTime()
    {
       return average;
    }
 
-   public DoubleYoVariable getMovingAverage()
+   public YoDouble getMovingAverage()
    {
       return movingAverage;
    }
 
-   public DoubleYoVariable getStandardDeviation()
+   public YoDouble getStandardDeviation()
    {
       return standardDeviation;
    }
 
-   public DoubleYoVariable getMaxTime()
+   public YoDouble getMaxTime()
    {
       return maximum;
    }

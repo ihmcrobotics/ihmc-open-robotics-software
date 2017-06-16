@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -146,14 +146,14 @@ public class ICPPlanner
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
-   protected final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
+   protected final YoDouble omega0 = new YoDouble(namePrefix + "Omega0", registry);
 
    /** Time at which the current state was initialized. */
-   private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "CurrentStateInitialTime", registry);
+   private final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
    /** Time spent in the current state. */
-   protected final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
+   protected final YoDouble timeInCurrentState = new YoDouble(namePrefix + "TimeInCurrentState", registry);
    /** Time remaining before the end of the current state. */
-   protected final DoubleYoVariable timeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
+   protected final YoDouble timeInCurrentStateRemaining = new YoDouble(namePrefix + "RemainingTime", registry);
 
    private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
@@ -169,9 +169,9 @@ public class ICPPlanner
     * {@code useTwoConstantCMPsPerSupport == true}.
     * </p>
     */
-   private final DoubleYoVariable defaultSwingDurationAlpha = new DoubleYoVariable(namePrefix + "DefaultSwingDurationAlpha",
+   private final YoDouble defaultSwingDurationAlpha = new YoDouble(namePrefix + "DefaultSwingDurationAlpha",
                                                                             "Repartition of the swing duration around the exit corner point.", registry);
-   private final ArrayList<DoubleYoVariable> swingDurationAlphas = new ArrayList<>();
+   private final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
 
    /**
     * Repartition of the transfer duration around the entry corner point:
@@ -182,9 +182,9 @@ public class ICPPlanner
     * corner point.
     * </ul>
     */
-   private final DoubleYoVariable defaultTransferDurationAlpha = new DoubleYoVariable(namePrefix + "DefaultTransferDurationAlpha",
+   private final YoDouble defaultTransferDurationAlpha = new YoDouble(namePrefix + "DefaultTransferDurationAlpha",
                                                                                "Repartition of the transfer duration around the entry corner point.", registry);
-   private final ArrayList<DoubleYoVariable> transferDurationAlphas = new ArrayList<>();
+   private final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
 
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
 
@@ -196,7 +196,7 @@ public class ICPPlanner
     * when the robot is getting stuck at the end of transfer.
     * </p>
     */
-   private final DoubleYoVariable velocityDecayDurationWhenDone = new DoubleYoVariable(namePrefix + "VelocityDecayDurationWhenDone", registry);
+   private final YoDouble velocityDecayDurationWhenDone = new YoDouble(namePrefix + "VelocityDecayDurationWhenDone", registry);
    /**
     * Output of the linear reduction being applied on the desired ICP velocity when the current
     * state is done.
@@ -205,7 +205,7 @@ public class ICPPlanner
     * when the robot is getting stuck at the end of transfer.
     true* </p>
     */
-   private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
+   private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
 
    private final YoFramePointInMultipleFrames singleSupportInitialICP;
    private final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
@@ -228,11 +228,11 @@ public class ICPPlanner
    private final List<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final List<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
 
-   private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
-   private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   private final DoubleYoVariable defaultFinalTransferDuration = new DoubleYoVariable(namePrefix + "DefaultFinalTransferDuration", registry);
-   private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(namePrefix + "FinalTransferDuration", registry);
-   private final DoubleYoVariable finalTransferDurationAlpha = new DoubleYoVariable(namePrefix + "FinalTransferDurationAlpha", registry);
+   private final List<YoDouble> swingDurations = new ArrayList<>();
+   private final List<YoDouble> transferDurations = new ArrayList<>();
+   private final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
+   private final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
 
    private final ICPPlannerTrajectoryGenerator icpDoubleSupportTrajectoryGenerator;
    private final ICPPlannerSegmentedTrajectoryGenerator icpSingleSupportTrajectoryGenerator;
@@ -313,18 +313,18 @@ public class ICPPlanner
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
       {
-         DoubleYoVariable swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration" + i, registry);
+         YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
-         DoubleYoVariable transferDuration = new DoubleYoVariable(namePrefix + "TransferDuration" + i, registry);
+         YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
 
-         DoubleYoVariable transferDurationAlpha = new DoubleYoVariable(namePrefix + "TransferDurationAlpha" + i,
+         YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          transferDurationAlpha.setToNaN();
          transferDurationAlphas.add(transferDurationAlpha);
-         DoubleYoVariable swingDurationAlpha = new DoubleYoVariable(namePrefix + "SwingDurationAlpha" + i,
+         YoDouble swingDurationAlpha = new YoDouble(namePrefix + "SwingDurationAlpha" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);

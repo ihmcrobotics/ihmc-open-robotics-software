@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -48,7 +48,7 @@ public abstract class AbstractBehavior implements RobotController
    protected final YoBoolean hasBeenInitialized;
    protected final YoBoolean isPaused;
    protected final YoBoolean isAborted;
-   protected final DoubleYoVariable percentCompleted;
+   protected final YoDouble percentCompleted;
 
    private final List<BehaviorService> behaviorsServices;
 
@@ -68,7 +68,7 @@ public abstract class AbstractBehavior implements RobotController
       hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
       isPaused = new YoBoolean("isPaused" + behaviorName, registry);
       isAborted = new YoBoolean("isAborted" + behaviorName, registry);
-      percentCompleted = new DoubleYoVariable("percentCompleted", registry);
+      percentCompleted = new YoDouble("percentCompleted", registry);
 
       behaviorsServices = new ArrayList<>();
    }

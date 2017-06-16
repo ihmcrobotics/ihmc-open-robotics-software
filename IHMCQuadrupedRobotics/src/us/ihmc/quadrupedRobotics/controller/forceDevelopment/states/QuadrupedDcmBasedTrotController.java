@@ -28,7 +28,7 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -42,7 +42,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    private final QuadrupedPostureInputProviderInterface inputProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
    private final double mass;

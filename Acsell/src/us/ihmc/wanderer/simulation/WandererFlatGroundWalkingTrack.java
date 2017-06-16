@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Wa
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.joystick.BooleanYoVariableJoystickEventListener;
@@ -80,7 +80,7 @@ public class WandererFlatGroundWalkingTrack
       final double minVelocityX = -0.10;
       
       
-      DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      YoDouble desiredVelocityX = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if(desiredVelocityX==null || joystickUpdater==null)
          return;
 
@@ -97,12 +97,12 @@ public class WandererFlatGroundWalkingTrack
          }
       });
 */      
-      DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
+      YoDouble desiredVelocityY = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
     		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, true));
 
-      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+      YoDouble desiredHeadingDot = (YoDouble) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));

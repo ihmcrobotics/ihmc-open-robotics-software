@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -231,8 +231,8 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       for (int vertexIndex = 0; vertexIndex < vertexBufferSize; vertexIndex++)
       {
-         DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
+         YoDouble x = (YoDouble) yoVariables[variableIndex++];
+         YoDouble y = (YoDouble) yoVariables[variableIndex++];
          YoFramePoint2d vertex = new YoFramePoint2d(x, y, worldFrame);
          vertexBuffer.add(vertex);
       }
@@ -242,13 +242,13 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       isPlanarRegionsListComplete = (YoBoolean) yoVariables[variableIndex++];
       clear = (YoBoolean) yoVariables[variableIndex++];
 
-      DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable z = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qx = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qy = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qz = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qs = (DoubleYoVariable) yoVariables[variableIndex++];
+      YoDouble x = (YoDouble) yoVariables[variableIndex++];
+      YoDouble y = (YoDouble) yoVariables[variableIndex++];
+      YoDouble z = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qx = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qy = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qz = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qs = (YoDouble) yoVariables[variableIndex++];
       YoFramePoint position = new YoFramePoint(x, y, z, worldFrame);
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, worldFrame);
       currentRegionPose = new YoFramePoseUsingQuaternions(position, orientation);

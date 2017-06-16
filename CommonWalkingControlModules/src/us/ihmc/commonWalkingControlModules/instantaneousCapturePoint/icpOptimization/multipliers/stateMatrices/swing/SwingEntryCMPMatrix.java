@@ -2,20 +2,20 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class SwingEntryCMPMatrix extends DenseMatrix64F
 {
-   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
 
-   private final DoubleYoVariable startOfSplineTime;
+   private final YoDouble startOfSplineTime;
 
    private final boolean blendFromInitial;
    private final double minimumBlendingTime;
 
-   public SwingEntryCMPMatrix(List<DoubleYoVariable> swingSplitFractions, DoubleYoVariable startOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
+   public SwingEntryCMPMatrix(List<YoDouble> swingSplitFractions, YoDouble startOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
@@ -31,7 +31,7 @@ public class SwingEntryCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(List<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(List<YoDouble> singleSupportDurations, double omega0)
    {
       zero();
 

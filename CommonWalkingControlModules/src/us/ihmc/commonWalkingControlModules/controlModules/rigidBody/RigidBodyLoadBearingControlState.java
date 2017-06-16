@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -65,7 +65,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final PoseReferenceFrame desiredContactFrame;
 
    private final ContactablePlaneBody contactableBody;
-   private final DoubleYoVariable coefficientOfFriction;
+   private final YoDouble coefficientOfFriction;
    private final YoFrameVector contactNormal;
    private final ReferenceFrame contactFrame;
 
@@ -80,7 +80,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
-   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, DoubleYoVariable yoTime,
+   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -96,7 +96,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
 
       String bodyName = bodyToControl.getName();
-      coefficientOfFriction = new DoubleYoVariable(bodyName + "CoefficientOfFriction", registry);
+      coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
       contactPoint = new YoFramePoint(bodyName + "ContactPoint", contactFrame, parentRegistry);
       contactPointInWorld = new YoFramePoint(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);

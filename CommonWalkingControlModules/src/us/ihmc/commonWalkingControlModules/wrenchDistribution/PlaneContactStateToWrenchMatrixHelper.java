@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -77,7 +77,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector> basisVectors = new ArrayList<>();
-   private final HashMap<YoContactPoint, DoubleYoVariable> maxContactForces = new HashMap<>();
+   private final HashMap<YoContactPoint, YoDouble> maxContactForces = new HashMap<>();
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
@@ -122,7 +122,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
-         DoubleYoVariable maxContactForce = new DoubleYoVariable(namePrefix + "MaxContactForce" + i, registry);
+         YoDouble maxContactForce = new YoDouble(namePrefix + "MaxContactForce" + i, registry);
          maxContactForce.set(Double.POSITIVE_INFINITY);
          maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
       }

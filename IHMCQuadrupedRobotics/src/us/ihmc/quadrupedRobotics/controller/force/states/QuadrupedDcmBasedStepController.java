@@ -19,7 +19,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterfac
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -34,7 +34,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private static int STEP_SEQUENCE_CAPACITY = 100;
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
    private final double mass;
@@ -113,7 +113,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
-   private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
+   private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);

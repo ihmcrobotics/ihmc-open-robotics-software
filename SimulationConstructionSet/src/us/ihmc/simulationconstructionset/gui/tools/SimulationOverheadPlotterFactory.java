@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
@@ -114,21 +114,21 @@ public class SimulationOverheadPlotterFactory
          {
             YoVariable<?> trackingVariable;
             if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "X")) != null
-                  && trackingVariable instanceof DoubleYoVariable)
+                  && trackingVariable instanceof YoDouble)
             {
-               simulationOverheadPlotter.setXVariableToTrack((DoubleYoVariable) trackingVariable);
+               simulationOverheadPlotter.setXVariableToTrack((YoDouble) trackingVariable);
             }
             if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Y")) != null
-                  && trackingVariable instanceof DoubleYoVariable)
+                  && trackingVariable instanceof YoDouble)
             {
-               simulationOverheadPlotter.setYVariableToTrack((DoubleYoVariable) trackingVariable);
+               simulationOverheadPlotter.setYVariableToTrack((YoDouble) trackingVariable);
             }
             if (TRACK_YAW)
             {
                if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Yaw")) != null
-                     && trackingVariable instanceof DoubleYoVariable)
+                     && trackingVariable instanceof YoDouble)
                {
-                  simulationOverheadPlotter.setYawVariableToTrack((DoubleYoVariable) trackingVariable);
+                  simulationOverheadPlotter.setYawVariableToTrack((YoDouble) trackingVariable);
                }
             }
          }

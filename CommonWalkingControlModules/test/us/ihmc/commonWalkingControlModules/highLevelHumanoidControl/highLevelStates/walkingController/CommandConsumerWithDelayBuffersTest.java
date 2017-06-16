@@ -22,7 +22,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 
 public class CommandConsumerWithDelayBuffersTest
@@ -33,7 +33,7 @@ public class CommandConsumerWithDelayBuffersTest
    {
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       assertNotNull(commandConsumer);
       
@@ -51,7 +51,7 @@ public class CommandConsumerWithDelayBuffersTest
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
@@ -101,7 +101,7 @@ public class CommandConsumerWithDelayBuffersTest
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
@@ -170,7 +170,7 @@ public class CommandConsumerWithDelayBuffersTest
       Random random = new Random(10);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
@@ -241,7 +241,7 @@ public class CommandConsumerWithDelayBuffersTest
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
       controllerSupportedCommands.add(TestCommand.class);
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       yoTime.set(random.nextDouble() * random.nextInt(1000));
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
@@ -297,7 +297,7 @@ public class CommandConsumerWithDelayBuffersTest
       controllerSupportedCommands.add(TestCommand.class);
       controllerSupportedCommands.add(ClearDelayQueueCommand.class);
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
       TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE - 1];
@@ -343,7 +343,7 @@ public class CommandConsumerWithDelayBuffersTest
       controllerSupportedCommands.add(ClearDelayQueueCommand.class);
       controllerSupportedCommands.add(StopAllTrajectoryCommand.class);
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
       TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE - 1];
@@ -404,7 +404,7 @@ public class CommandConsumerWithDelayBuffersTest
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
       controllerSupportedCommands.add(TestCommand.class);
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
       TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE];
@@ -444,7 +444,7 @@ public class CommandConsumerWithDelayBuffersTest
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
       controllerSupportedCommands.add(TestCommand.class);
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
-      DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", null);
+      YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       
       TestCommand[] commands = new TestCommand[CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1];

@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldWithFiducialEnvironment;
@@ -87,7 +87,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
-      DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
+      YoDouble yoTime = drcBehaviorTestHelper.getYoTime();
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       YoVariableRegistry scsRootRegistry = drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry();

@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -22,7 +22,7 @@ public class TaskspaceHeadControlState extends HeadControlState
 
    private final MultipleWaypointsOrientationTrajectoryGenerator trajectoryGenerator;
 
-   private final DoubleYoVariable weight = new DoubleYoVariable("headTaskspaceWeight", registry);
+   private final YoDouble weight = new YoDouble("headTaskspaceWeight", registry);
    private final YoFrameQuaternion homeOrientation;
    private final YoOrientationPIDGainsInterface gains;
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();

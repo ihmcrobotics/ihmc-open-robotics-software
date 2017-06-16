@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.IndexChangedListener;
 import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
@@ -24,8 +24,8 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
    private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
 
-   private final DoubleYoVariable selectedJoint_tau_d = new DoubleYoVariable("selectedJoint_tau_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
+   private final YoDouble selectedJoint_tau_d = new YoDouble("selectedJoint_tau_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_damping = new YoDouble("selectedJoint_damping", sliderBoardRegistry);
 
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
 
@@ -75,14 +75,14 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
 
    private class StandPrepVariables
    {
-      private final DoubleYoVariable tau_d;
-      private final DoubleYoVariable damping;
+      private final YoDouble tau_d;
+      private final YoDouble damping;
 
       public StandPrepVariables(StepprStandPrepSetpoints setpoint, YoVariableHolder variableHolder)
       {
          String prefix = setpoint.getName();
-         tau_d = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_tau_d");
-         damping = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
+         tau_d = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_tau_d");
+         damping = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
       }
 
       public void update()

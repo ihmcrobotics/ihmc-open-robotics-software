@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -66,8 +66,8 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       pointThree.attachVariableChangedListener(listener);
    }
 
-   public YoGraphicTriangle(String name, DoubleYoVariable pointOneX, DoubleYoVariable pointOneY, DoubleYoVariable pointOneZ, DoubleYoVariable pointTwoX, DoubleYoVariable pointTwoY, DoubleYoVariable pointTwoZ,
-         DoubleYoVariable pointThreeX, DoubleYoVariable pointThreeY, DoubleYoVariable pointThreeZ, AppearanceDefinition appearance)
+   public YoGraphicTriangle(String name, YoDouble pointOneX, YoDouble pointOneY, YoDouble pointOneZ, YoDouble pointTwoX, YoDouble pointTwoY, YoDouble pointTwoZ,
+         YoDouble pointThreeX, YoDouble pointThreeY, YoDouble pointThreeZ, AppearanceDefinition appearance)
    {
       this(name, new YoFramePoint(pointOneX, pointOneY, pointOneZ, ReferenceFrame.getWorldFrame()), new YoFramePoint(pointTwoX, pointTwoY, pointTwoZ, ReferenceFrame.getWorldFrame()),
             new YoFramePoint(pointThreeX, pointThreeY, pointThreeZ, ReferenceFrame.getWorldFrame()), appearance);

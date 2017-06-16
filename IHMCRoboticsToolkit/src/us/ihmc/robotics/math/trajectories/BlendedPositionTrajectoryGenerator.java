@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,10 +16,10 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
-   private final DoubleYoVariable initialBlendStartTime;
-   private final DoubleYoVariable initialBlendEndTime;
-   private final DoubleYoVariable finalBlendStartTime;
-   private final DoubleYoVariable finalBlendEndTime;
+   private final YoDouble initialBlendStartTime;
+   private final YoDouble initialBlendEndTime;
+   private final YoDouble finalBlendStartTime;
+   private final YoDouble finalBlendEndTime;
 
    private final Vector3D initialConstraintPositionError = new Vector3D();
    private final Vector3D initialConstraintVelocityError = new Vector3D();
@@ -53,10 +53,10 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       this.finalConstraintPolynomial[0] = new YoPolynomial(prefix + "FinalConstraintPolynomialX", 6, registry);
       this.finalConstraintPolynomial[1] = new YoPolynomial(prefix + "FinalConstraintPolynomialY", 6, registry);
       this.finalConstraintPolynomial[2] = new YoPolynomial(prefix + "FinalConstraintPolynomialZ", 6, registry);
-      this.initialBlendStartTime = new DoubleYoVariable(prefix + "InitialBlendStartTime", registry);
-      this.initialBlendEndTime = new DoubleYoVariable(prefix + "InitialBlendEndTime", registry);
-      this.finalBlendStartTime = new DoubleYoVariable(prefix + "FinalBlendStartTime", registry);
-      this.finalBlendEndTime = new DoubleYoVariable(prefix + "FinalBlendEndTime", registry);
+      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", registry);
+      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", registry);
+      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", registry);
+      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", registry);
       this.position.changeFrame(trajectoryFrame);
       this.velocity.changeFrame(trajectoryFrame);
       this.acceleration.changeFrame(trajectoryFrame);

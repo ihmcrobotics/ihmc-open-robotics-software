@@ -61,7 +61,7 @@ public class PelvisLinearStateUpdater
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
 
-   private final DoubleYoVariable yoInitialComHeight = new DoubleYoVariable("initialComHeight", registry);
+   private final YoDouble yoInitialComHeight = new YoDouble("initialComHeight", registry);
    private final YoFramePoint yoInitialCenterOfMassPosition = new YoFramePoint("initialCenterOfMassPosition", worldFrame, registry);
    private final YoFramePoint yoInitialFootPosition = new YoFramePoint("initialFootPosition", worldFrame, registry);
 
@@ -73,22 +73,22 @@ public class PelvisLinearStateUpdater
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
    
    private final YoFrameVector totalGroundReactionForce = new YoFrameVector("totalGroundForce", worldFrame, registry);
-   private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
+   private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoFrameVector comAcceleration = new YoFrameVector("comAcceleration", worldFrame, registry);
 
-   private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
-   private final DoubleYoVariable alphaGRFAgainstIMUAndKinematicsForVelocity = new DoubleYoVariable("alphaGRFAgainstIMUAndKinematicsForVelocity", registry);
-   private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
+   private final YoDouble alphaIMUAgainstKinematicsForVelocity = new YoDouble("alphaIMUAgainstKinematicsForVelocity", registry);
+   private final YoDouble alphaGRFAgainstIMUAndKinematicsForVelocity = new YoDouble("alphaGRFAgainstIMUAndKinematicsForVelocity", registry);
+   private final YoDouble alphaIMUAgainstKinematicsForPosition = new YoDouble("alphaIMUAgainstKinematicsForPosition", registry);
 
    private final YoBoolean useGroundReactionForcesToComputeCenterOfMassVelocity = new YoBoolean("useGRFToComputeCoMVelocity", registry);
    private final IntegerYoVariable numberOfEndEffectorsTrusted = new IntegerYoVariable("numberOfEndEffectorsTrusted", registry);
 
-   private final Map<RigidBody, DoubleYoVariable> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, DoubleYoVariable>();
-   private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
+   private final Map<RigidBody, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, YoDouble>();
+   private final YoDouble forceZInPercentThresholdToFilterFoot = new YoDouble("forceZInPercentThresholdToFilterFootUserParameter", registry);
 
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Map<RigidBody, Wrench> footWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final DoubleYoVariable delayTimeBeforeTrustingFoot = new DoubleYoVariable("delayTimeBeforeTrustingFoot", registry);
+   private final YoDouble delayTimeBeforeTrustingFoot = new YoDouble("delayTimeBeforeTrustingFoot", registry);
    private final Map<RigidBody, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
    private final Map<RigidBody, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final List<RigidBody> listOfTrustedFeet = new ArrayList<RigidBody>();
@@ -137,7 +137,7 @@ public class PelvisLinearStateUpdater
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, Map<RigidBody, FootSwitchInterface> footSwitches, 
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, DoubleYoVariable yoTime,
+         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, YoDouble yoTime,
          StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -252,7 +252,7 @@ public class PelvisLinearStateUpdater
          }
          areFeetTrusted.put(foot, isFootTrusted);
 
-         DoubleYoVariable footForceZInPercentOfTotalForce = new DoubleYoVariable(footPrefix + "FootForceZInPercentOfTotalForce", registry);
+         YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
 
          footWrenches.put(foot, new Wrench());

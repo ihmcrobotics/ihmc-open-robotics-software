@@ -59,7 +59,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -87,7 +87,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final HighLevelControlManagerFactory managerFactory;
 
@@ -112,7 +112,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final WalkingMessageHandler walkingMessageHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
-   private final DoubleYoVariable controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
+   private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 

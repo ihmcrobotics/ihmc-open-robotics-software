@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -57,7 +57,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private double initialTime;
 
    private FullQuadrupedRobotModel fullRobotModel;

@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -35,14 +35,14 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
 
-   private final DoubleYoVariable selectedJoint_q_d = new DoubleYoVariable("selectedJoint_q_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kp = new DoubleYoVariable("selectedJoint_kp", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_positionerror = new DoubleYoVariable("selectedJoint_positionerror", sliderBoardRegistry);
-   //private final DoubleYoVariable maxDesiredVelocityX = new DoubleYoVariable("maxDesiredVelocityX", sliderBoardRegistry);
-   private final DoubleYoVariable desiredVelX_Setpoint = new DoubleYoVariable("DesiredVelocityX_setpoint", sliderBoardRegistry);
-   private final DoubleYoVariable desiredVelX_Adjust = new DoubleYoVariable("DesiredVelocityX_adjustment", sliderBoardRegistry);
+   private final YoDouble selectedJoint_q_d = new YoDouble("selectedJoint_q_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kp = new YoDouble("selectedJoint_kp", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kd = new YoDouble("selectedJoint_kd", sliderBoardRegistry);
+   private final YoDouble selectedJoint_damping = new YoDouble("selectedJoint_damping", sliderBoardRegistry);
+   private final YoDouble selectedJoint_positionerror = new YoDouble("selectedJoint_positionerror", sliderBoardRegistry);
+   //private final YoDouble maxDesiredVelocityX = new YoDouble("maxDesiredVelocityX", sliderBoardRegistry);
+   private final YoDouble desiredVelX_Setpoint = new YoDouble("DesiredVelocityX_setpoint", sliderBoardRegistry);
+   private final YoDouble desiredVelX_Adjust = new YoDouble("DesiredVelocityX_adjustment", sliderBoardRegistry);
    
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
    
@@ -172,7 +172,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       final double minVelocityX = -0.35;
       
       
-      final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      final YoDouble desiredVelocityX = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if(desiredVelocityX==null || joystickUpdater==null)
          return;
       
@@ -208,12 +208,12 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          }
       });
       
-      DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
+      YoDouble desiredVelocityY = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
     		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, false));
 
-      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+      YoDouble desiredHeadingDot = (YoDouble) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
@@ -227,21 +227,21 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
    private class StandPrepVariables
    {
-      private final DoubleYoVariable q_d;
-      private final DoubleYoVariable kp;
-      private final DoubleYoVariable kd;
-      private final DoubleYoVariable damping;
-      private final DoubleYoVariable positionerror;
+      private final YoDouble q_d;
+      private final YoDouble kp;
+      private final YoDouble kd;
+      private final YoDouble damping;
+      private final YoDouble positionerror;
 
       public StandPrepVariables(StepprStandPrepSetpoints setpoint, YoVariableHolder variableHolder)
       {
          String prefix = setpoint.getName();
          String ajoint = setpoint.getJoints()[0].getSdfName();
-         q_d = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_q_d");
-         kp = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_kp");
-         kd = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_kd");
-         damping = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
-         positionerror = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", "positionError_" + ajoint);
+         q_d = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_q_d");
+         kp = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_kp");
+         kd = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_kd");
+         damping = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
+         positionerror = (YoDouble) variableHolder.getVariable("StepprStandPrep", "positionError_" + ajoint);
       }
 
       public void update()

@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -65,10 +65,10 @@ public class WalkingMessageHandler
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
-   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
-   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
-   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
-   private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
+   private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
+   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
+   private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
+   private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
@@ -78,8 +78,8 @@ public class WalkingMessageHandler
 
    private final FootstepListVisualizer footstepListVisualizer;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable footstepDataListRecievedTime = new DoubleYoVariable("footstepDataListRecievedTime", registry);
+   private final YoDouble yoTime;
+   private final YoDouble footstepDataListRecievedTime = new YoDouble("footstepDataListRecievedTime", registry);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -88,7 +88,7 @@ public class WalkingMessageHandler
    }
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         StatusMessageOutputManager statusOutputManager, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;

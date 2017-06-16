@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -41,7 +41,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFixedFrame = pelvis.getBodyFixedFrame();
       baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Orientation", pelvis, elevator, elevator, trajectoryFrames, pelvisFixedFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);

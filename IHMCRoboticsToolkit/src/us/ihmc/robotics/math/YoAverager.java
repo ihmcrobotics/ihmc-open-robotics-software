@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
 public class YoAverager
 {
-   private final DoubleYoVariable average;
+   private final YoDouble average;
    private final IntegerYoVariable nUpdates;
 
    public YoAverager(String prefix, YoVariableRegistry registry)
    {
-      average = new DoubleYoVariable(prefix + "Average", registry);
+      average = new YoDouble(prefix + "Average", registry);
       nUpdates = new IntegerYoVariable(prefix + "AverageNUpdates", registry);
    }
 
@@ -34,7 +34,7 @@ public class YoAverager
       nUpdates.set(0);
    }
 
-   public DoubleYoVariable getAverageYoVariable()
+   public YoDouble getAverageYoVariable()
    {
       return average;
    }

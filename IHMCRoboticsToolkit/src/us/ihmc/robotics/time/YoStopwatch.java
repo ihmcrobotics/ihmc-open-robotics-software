@@ -2,19 +2,19 @@ package us.ihmc.robotics.time;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 
 public class YoStopwatch
 {
-   private final DoubleYoVariable timeProviderYoVariable;
+   private final YoDouble timeProviderYoVariable;
 
-   private DoubleYoVariable yoLapStart;
+   private YoDouble yoLapStart;
    private LongYoVariable yoLapCount;
-   private DoubleYoVariable yoRecordedLapTotal;
+   private YoDouble yoRecordedLapTotal;
    private YoBoolean yoSuspended;
-   private DoubleYoVariable yoSuspendStart;
-   private DoubleYoVariable yoResumedSuspensionTotal;
+   private YoDouble yoSuspendStart;
+   private YoDouble yoResumedSuspensionTotal;
 
    private double lapStart;
    private long lapCount;
@@ -23,20 +23,20 @@ public class YoStopwatch
    private double suspendStart;
    private double resumedSuspensionTotal;
 
-   public YoStopwatch(String name, DoubleYoVariable timeYoVariable, YoVariableRegistry registry)
+   public YoStopwatch(String name, YoDouble timeYoVariable, YoVariableRegistry registry)
    {
       this(timeYoVariable);
 
-      yoLapStart = new DoubleYoVariable(name + "LapStart", registry);
+      yoLapStart = new YoDouble(name + "LapStart", registry);
       yoLapCount = new LongYoVariable(name + "LapCount", registry);
-      yoRecordedLapTotal = new DoubleYoVariable(name + "RecordedLapTotal", registry);
+      yoRecordedLapTotal = new YoDouble(name + "RecordedLapTotal", registry);
       yoSuspended = new YoBoolean(name + "Suspended", registry);
-      yoSuspendStart = new DoubleYoVariable(name + "SuspendStart", registry);
-      yoResumedSuspensionTotal = new DoubleYoVariable(name + "ResumedSuspensionTotal", registry);
+      yoSuspendStart = new YoDouble(name + "SuspendStart", registry);
+      yoResumedSuspensionTotal = new YoDouble(name + "ResumedSuspensionTotal", registry);
       yoLapStart.setToNaN();
    }
 
-   public YoStopwatch(DoubleYoVariable timeYoVariable)
+   public YoStopwatch(YoDouble timeYoVariable)
    {
       this.timeProviderYoVariable = timeYoVariable;
       lapStart = Double.NaN;

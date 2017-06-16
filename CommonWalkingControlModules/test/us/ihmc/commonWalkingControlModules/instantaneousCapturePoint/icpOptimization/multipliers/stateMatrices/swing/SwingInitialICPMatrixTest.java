@@ -6,7 +6,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class SwingInitialICPMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
 
       SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false, minimumBlendingTime);
 
@@ -42,13 +42,13 @@ public class SwingInitialICPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("currentDoubleSupportDuration", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("currentDoubleSupportDuration", registry));
+      doubleSupportDurations.add(new YoDouble("upcomingDoubleSupportDuration", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, false, minimumBlendingTime);
 
@@ -98,13 +98,13 @@ public class SwingInitialICPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("currentDoubleSupportDuration", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("currentDoubleSupportDuration", registry));
+      doubleSupportDurations.add(new YoDouble("upcomingDoubleSupportDuration", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime, true, minimumBlendingTime);
 

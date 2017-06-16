@@ -20,7 +20,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -53,7 +53,7 @@ public class ChestOrientationManager
    public ChestOrientationManager(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       String className = getClass().getSimpleName();
-      DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
+      YoDouble yoTime = humanoidControllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(className, className + "SwitchTime", ChestControlMode.class, yoTime, registry);
 
       RigidBody chest = humanoidControllerToolbox.getFullRobotModel().getChest();

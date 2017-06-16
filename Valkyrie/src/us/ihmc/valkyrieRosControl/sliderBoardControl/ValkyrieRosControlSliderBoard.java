@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -66,35 +66,35 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
          robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
 
-   /* package private */ final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
+   /* package private */ final YoDouble masterScaleFactor = new YoDouble("masterScaleFactor", registry);
 
-   /* package private */ final DoubleYoVariable jointVelocityAlphaFilter = new DoubleYoVariable("jointVelocityAlphaFilter", registry);
-   /* package private */ final DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
+   /* package private */ final YoDouble jointVelocityAlphaFilter = new YoDouble("jointVelocityAlphaFilter", registry);
+   /* package private */ final YoDouble jointVelocitySlopTime = new YoDouble("jointBacklashSlopTime", registry);
 
    private EnumYoVariable<?> selectedJoint;
    private EnumYoVariable<?> previousSelectedJoint;
-   private final DoubleYoVariable qDesiredSelected = new DoubleYoVariable("qDesiredSelected", registry);
-   private final DoubleYoVariable qdDesiredSelected = new DoubleYoVariable("qdDesiredSelected", registry);
+   private final YoDouble qDesiredSelected = new YoDouble("qDesiredSelected", registry);
+   private final YoDouble qdDesiredSelected = new YoDouble("qdDesiredSelected", registry);
 
-   private final DoubleYoVariable kpSelected = new DoubleYoVariable("kpSelected", registry);
-   private final DoubleYoVariable kdSelected = new DoubleYoVariable("kdSelected", registry);
+   private final YoDouble kpSelected = new YoDouble("kpSelected", registry);
+   private final YoDouble kdSelected = new YoDouble("kdSelected", registry);
 
-   private final DoubleYoVariable qSelected = new DoubleYoVariable("qSelected", registry);
-   private final DoubleYoVariable qdSelected = new DoubleYoVariable("qdSelected", registry);
+   private final YoDouble qSelected = new YoDouble("qSelected", registry);
+   private final YoDouble qdSelected = new YoDouble("qdSelected", registry);
 
-   private final DoubleYoVariable tauSelected = new DoubleYoVariable("tauSelected", registry);
-   private final DoubleYoVariable tauOffsetSelected = new DoubleYoVariable("tauOffsetSelected", registry);
-   private final DoubleYoVariable tauPDSelected = new DoubleYoVariable("tauPDSelected", registry);
-   private final DoubleYoVariable tauFunctionSelected = new DoubleYoVariable("tauFunctionSelected", registry);
-   private final DoubleYoVariable tauDesiredSelected = new DoubleYoVariable("tauDesiredSelected", registry);
+   private final YoDouble tauSelected = new YoDouble("tauSelected", registry);
+   private final YoDouble tauOffsetSelected = new YoDouble("tauOffsetSelected", registry);
+   private final YoDouble tauPDSelected = new YoDouble("tauPDSelected", registry);
+   private final YoDouble tauFunctionSelected = new YoDouble("tauFunctionSelected", registry);
+   private final YoDouble tauDesiredSelected = new YoDouble("tauDesiredSelected", registry);
 
    private long startTime = -1;
-   private final DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
+   private final YoDouble yoTime = new YoDouble("time", registry);
    private YoFunctionGenerator selectedFunctionGenerator;
 
    private YoFunctionGenerator secondaryFunctionGenerator;
    private EnumYoVariable<?> secondaryJoint;
-   private final DoubleYoVariable tauFunctionSecondary = new DoubleYoVariable("tauFunctionSecondary", registry);
+   private final YoDouble tauFunctionSecondary = new YoDouble("tauFunctionSecondary", registry);
 
    @Override
    protected void init()

@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -41,9 +41,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final IntegerYoVariable numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
-   private final DoubleYoVariable minimumClearance;
-   private final DoubleYoVariable incrementalAdjustmentDistance;
-   private final DoubleYoVariable maximumAdjustmentDistance;
+   private final YoDouble minimumClearance;
+   private final YoDouble incrementalAdjustmentDistance;
+   private final YoDouble maximumAdjustmentDistance;
    private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
    private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
@@ -106,9 +106,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
-      minimumClearance = new DoubleYoVariable(namePrefix + "MinimumClearance", parentRegistry);
-      incrementalAdjustmentDistance = new DoubleYoVariable(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
-      maximumAdjustmentDistance = new DoubleYoVariable(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
+      minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
+      incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
+      maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
       status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
                                                                                    SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
       mostSevereCollisionType = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,

@@ -18,7 +18,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -58,12 +58,12 @@ public class TaskspaceChestControlState extends ChestControlState
    private final YoBoolean isTrajectoryStopped = new YoBoolean("isChestOrientationTrajectoryStopped", registry);
    private final YoBoolean isTrackingOrientation = new YoBoolean("isTrackingOrientation", registry);
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
+   private final YoDouble yoTime;
+   private final YoDouble receivedNewChestOrientationTime = new YoDouble("receivedNewChestOrientationTime", registry);
 
    private final YoBoolean followChestRollSineWave = new YoBoolean("followChestRollSineWave", registry);
-   private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
-   private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
+   private final YoDouble chestRollSineFrequency = new YoDouble("chestRollSineFrequency", registry);
+   private final YoDouble chestRollSineMagnitude = new YoDouble("chestRollSineMagnitude", registry);
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
 

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -25,17 +25,17 @@ public class JointspaceChestControlState extends ChestControlState
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
    private final Map<OneDoFJoint, YoBoolean> jointTrackingPosition = new HashMap<>();
 
-   private final DoubleYoVariable weight = new DoubleYoVariable("chestJointspaceWeight", registry);
+   private final YoDouble weight = new YoDouble("chestJointspaceWeight", registry);
    private final YoPIDGains gains;
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
 
    private final OneDoFJoint[] jointsOriginal;
 
    private final YoBoolean isTrajectoryStopped = new YoBoolean("isSpineTrajectoryStopped", registry);
-   private final DoubleYoVariable receivedNewCommandTime = new DoubleYoVariable("receivedNewCommandTime", registry);
-   private final DoubleYoVariable yoTime;
+   private final YoDouble receivedNewCommandTime = new YoDouble("receivedNewCommandTime", registry);
+   private final YoDouble yoTime;
 
-   public JointspaceChestControlState(OneDoFJoint[] spineJoints, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public JointspaceChestControlState(OneDoFJoint[] spineJoints, YoPIDGains gains, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       super(ChestControlMode.JOINTSPACE);
 

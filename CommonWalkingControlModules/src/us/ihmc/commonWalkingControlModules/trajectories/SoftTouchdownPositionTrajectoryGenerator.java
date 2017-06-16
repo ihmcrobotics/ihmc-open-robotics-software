@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -31,8 +31,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    
    private final DoubleProvider startTimeProvider;
    
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable timeIntoTouchdown;
+   private final YoDouble startTime;
+   private final YoDouble timeIntoTouchdown;
    
    private final FramePoint p0;
    private final FrameVector pd0;
@@ -71,10 +71,10 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       
       this.startTimeProvider = startTimeProvider;
       
-      startTime = new DoubleYoVariable(namePrefix + "startTime", registry);
+      startTime = new YoDouble(namePrefix + "startTime", registry);
       startTime.set(startTimeProvider.getValue());
 
-      timeIntoTouchdown = new DoubleYoVariable(namePrefix + "timeIntoTouchdown", registry);
+      timeIntoTouchdown = new YoDouble(namePrefix + "timeIntoTouchdown", registry);
 
       trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
    }

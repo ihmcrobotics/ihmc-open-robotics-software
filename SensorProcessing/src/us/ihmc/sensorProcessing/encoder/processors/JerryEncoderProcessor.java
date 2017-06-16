@@ -2,10 +2,9 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
-
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
@@ -22,20 +21,20 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
    private final IntegerYoVariable previousRawTicks, previousRawTicksTwoBack;
    private final IntegerYoVariable previousProcessedTicks, previousProcessedTicksTwoBack;
-   private final DoubleYoVariable previousTime, previousTimeTwoBack;
+   private final YoDouble previousTime, previousTimeTwoBack;
 
    private final double dt;
 
-   private final DoubleYoVariable maxPossibleRate;
-   private final DoubleYoVariable minPriorRate, maxPriorRate, averagePriorRate;
+   private final YoDouble maxPossibleRate;
+   private final YoDouble minPriorRate, maxPriorRate, averagePriorRate;
    private int updateCount=0;
    private final int slowUpdateFactor;
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, double dt,YoVariableRegistry registry)
    {
       this( name,  rawTicks,  time,  distancePerTick,  dt, 1, registry);
    }
 
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
@@ -44,20 +43,20 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
       this.state = EnumYoVariable.create(name + "state", EncoderState.class, registry);
 
-      this.minPriorRate = new DoubleYoVariable(name + "minPriorRate", registry);
-      this.maxPriorRate = new DoubleYoVariable(name + "maxPriorRate", registry);
+      this.minPriorRate = new YoDouble(name + "minPriorRate", registry);
+      this.maxPriorRate = new YoDouble(name + "maxPriorRate", registry);
 
 
-      this.maxPossibleRate = new DoubleYoVariable(name + "maxPossibleRate", registry);
-      this.averagePriorRate = new DoubleYoVariable(name + "averagePriorRate", registry);
+      this.maxPossibleRate = new YoDouble(name + "maxPossibleRate", registry);
+      this.averagePriorRate = new YoDouble(name + "averagePriorRate", registry);
 
       this.previousRawTicksTwoBack = new IntegerYoVariable(name + "prevRawPos2", registry);
       this.previousRawTicks = new IntegerYoVariable(name + "prevRawPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "prevTime", registry);
+      this.previousTime = new YoDouble(name + "prevTime", registry);
 
       this.previousProcessedTicks = new IntegerYoVariable(name + "prevPos", registry);
       this.previousProcessedTicksTwoBack = new IntegerYoVariable(name + "prevPos2", registry);
-      this.previousTimeTwoBack = new DoubleYoVariable(name + "prevTime2", registry);
+      this.previousTimeTwoBack = new YoDouble(name + "prevTime2", registry);
    }
 
    public void initialize()

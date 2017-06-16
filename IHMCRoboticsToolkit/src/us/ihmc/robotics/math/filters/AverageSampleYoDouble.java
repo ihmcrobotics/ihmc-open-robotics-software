@@ -1,34 +1,34 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 
-public class AverageSampleDoubleYoVariable extends DoubleYoVariable
+public class AverageSampleYoDouble extends YoDouble
 {
    private final IntegerYoVariable dataLength;
-   private final DoubleYoVariable dataSource;
-   private final DoubleYoVariable dataCumulated;
+   private final YoDouble dataSource;
+   private final YoDouble dataCumulated;
 
-   public AverageSampleDoubleYoVariable(String name, YoVariableRegistry registry)
+   public AverageSampleYoDouble(String name, YoVariableRegistry registry)
    {
       this(name, null, registry);
    }
 
-   public AverageSampleDoubleYoVariable(String name, DoubleYoVariable dataSource, YoVariableRegistry registry)
+   public AverageSampleYoDouble(String name, YoDouble dataSource, YoVariableRegistry registry)
    {
       super(name, registry);
 
       this.dataSource = dataSource;
       dataLength = new IntegerYoVariable(name + "DataLength", registry);
-      dataCumulated = new DoubleYoVariable(name + "DataCumulated", registry);
+      dataCumulated = new YoDouble(name + "DataCumulated", registry);
    }
 
    public void update()
    {
       if (dataSource == null)
       {
-         throw new NullPointerException("AverageSampleDoubleYoVariable must be constructed with a non null "
+         throw new NullPointerException("AverageSampleYoDouble must be constructed with a non null "
                + "dataSource variable to call update(), otherwise use update(double)");
       }
 

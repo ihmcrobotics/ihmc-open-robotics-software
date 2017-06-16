@@ -40,7 +40,7 @@ import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineS
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
@@ -136,7 +136,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
     */
    public void warmup(int iterations)
    {
-      DoubleYoVariable robotTimestamp = runtimeEnvironment.getRobotTimestamp();
+      YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
       for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
       {

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessor;
@@ -24,12 +24,12 @@ public class EncorderProcessorEvalRealData
 {
    private final YoVariableRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
-   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedPositions = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
-   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedRates = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
+   private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
+   private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final IntegerYoVariable rawTicks, heartBeat;
-   private final DoubleYoVariable rawPosition;
-   private final DoubleYoVariable time;
-   private final DoubleYoVariable turboJerryRate,fdRate;
+   private final YoDouble rawPosition;
+   private final YoDouble time;
+   private final YoDouble turboJerryRate,fdRate;
    private final DataBuffer dataBuffer;
 
    private final double dt;
@@ -41,11 +41,11 @@ public class EncorderProcessorEvalRealData
       Robot nullRobot = new Robot("nullRobot");
       registry = nullRobot.getRobotsYoVariableRegistry();
       rawTicks = new IntegerYoVariable("rawTicks", registry);
-      rawPosition = new DoubleYoVariable("rawPosition", registry);
+      rawPosition = new YoDouble("rawPosition", registry);
       heartBeat = new IntegerYoVariable("turboHeartBeat", registry);
       
-      turboJerryRate = new DoubleYoVariable("turboJerryProcRate", registry);
-      fdRate = new DoubleYoVariable("fdRate", registry);
+      turboJerryRate = new YoDouble("turboJerryProcRate", registry);
+      fdRate = new YoDouble("fdRate", registry);
       time = nullRobot.getYoTime();
       this.encoder = new RealLifeEncoderTrajectory("data/JointAPSData.m","trunk.wj2");
 
@@ -69,8 +69,8 @@ public class EncorderProcessorEvalRealData
 
       for (EncoderProcessor encoderProcessor : encoderProcessors.keySet())
       {
-         processedPositions.put(encoderProcessor, new DoubleYoVariable("p_" + encoderProcessors.get(encoderProcessor), registry));
-         processedRates.put(encoderProcessor, new DoubleYoVariable("pd_" + encoderProcessors.get(encoderProcessor), registry));
+         processedPositions.put(encoderProcessor, new YoDouble("p_" + encoderProcessors.get(encoderProcessor), registry));
+         processedRates.put(encoderProcessor, new YoDouble("pd_" + encoderProcessors.get(encoderProcessor), registry));
       }
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();

@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -36,7 +36,7 @@ public class QuadrupedFallDetector
    private final QuadrupedSupportPolygon supportPolygon;
 
    // Yo Variables
-   private final DoubleYoVariable yoDcmDistanceOutsideSupportPolygon = new DoubleYoVariable("dcmDistanceOutsideSupportPolygon", registry);
+   private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final EnumYoVariable<FallDetectionType> fallDetectionType = EnumYoVariable.create("fallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 

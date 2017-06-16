@@ -6,7 +6,7 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.tools.thread.ThreadTools;
@@ -20,8 +20,8 @@ public class TestYoVariableConnection
    }
    
    private final YoVariableRegistry registry = new YoVariableRegistry("tester");
-   private final DoubleYoVariable var1 = new DoubleYoVariable("var1", registry);
-   private final DoubleYoVariable var2 = new DoubleYoVariable("var2", registry);
+   private final YoDouble var1 = new YoDouble("var1", registry);
+   private final YoDouble var2 = new YoDouble("var2", registry);
    private final IntegerYoVariable var4 = new IntegerYoVariable("var4", registry);
    private final IntegerYoVariable var5 = new IntegerYoVariable("var5", registry);
    private final EnumYoVariable<TestEnum> var3 = new EnumYoVariable<TestEnum>("var3", "", registry, TestEnum.class, true);
@@ -97,9 +97,9 @@ public class TestYoVariableConnection
    private class ThreadTester extends Thread
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("Thread");
-      private final DoubleYoVariable A = new DoubleYoVariable("A", registry);
-      private final DoubleYoVariable B = new DoubleYoVariable("B", registry);
-      private final DoubleYoVariable C = new DoubleYoVariable("C", registry);
+      private final YoDouble A = new YoDouble("A", registry);
+      private final YoDouble B = new YoDouble("B", registry);
+      private final YoDouble C = new YoDouble("C", registry);
       
       
       private final EnumYoVariable<TestEnum> echoThreadIn = new EnumYoVariable<TestEnum>("echoThreadIn", registry, TestEnum.class, false);

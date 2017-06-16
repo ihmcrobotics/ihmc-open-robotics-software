@@ -6,7 +6,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -24,9 +24,9 @@ public class DataProcessingFunctionTest
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      final DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
-      final DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", registry);
-      final DoubleYoVariable variableThree = new DoubleYoVariable("variableThree", registry);
+      final YoDouble variableOne = new YoDouble("variableOne", registry);
+      final YoDouble variableTwo = new YoDouble("variableTwo", registry);
+      final YoDouble variableThree = new YoDouble("variableThree", registry);
 
       robot.addYoVariableRegistry(registry);
 

@@ -20,7 +20,7 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -44,18 +44,18 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
 
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
-   private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityFromTrajectory = new DoubleYoVariable("desiredCoMHeightVelocityFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationFromTrajectory = new DoubleYoVariable("desiredCoMHeightAccelerationFromTrajectory", registry);
-   //   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightCorrected = new DoubleYoVariable("desiredCoMHeightCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityCorrected = new DoubleYoVariable("desiredCoMHeightVelocityCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationCorrected = new DoubleYoVariable("desiredCoMHeightAccelerationCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
+   private final YoDouble desiredCoMHeightFromTrajectory = new YoDouble("desiredCoMHeightFromTrajectory", registry);
+   private final YoDouble desiredCoMHeightVelocityFromTrajectory = new YoDouble("desiredCoMHeightVelocityFromTrajectory", registry);
+   private final YoDouble desiredCoMHeightAccelerationFromTrajectory = new YoDouble("desiredCoMHeightAccelerationFromTrajectory", registry);
+   //   private final YoDouble desiredCoMHeightBeforeSmoothing = new YoDouble("desiredCoMHeightBeforeSmoothing", registry);
+   //   private final YoDouble desiredCoMHeightVelocityBeforeSmoothing = new YoDouble("desiredCoMHeightVelocityBeforeSmoothing", registry);
+   //   private final YoDouble desiredCoMHeightAccelerationBeforeSmoothing = new YoDouble("desiredCoMHeightAccelerationBeforeSmoothing", registry);
+   private final YoDouble desiredCoMHeightCorrected = new YoDouble("desiredCoMHeightCorrected", registry);
+   private final YoDouble desiredCoMHeightVelocityCorrected = new YoDouble("desiredCoMHeightVelocityCorrected", registry);
+   private final YoDouble desiredCoMHeightAccelerationCorrected = new YoDouble("desiredCoMHeightAccelerationCorrected", registry);
+   private final YoDouble desiredCoMHeightAfterSmoothing = new YoDouble("desiredCoMHeightAfterSmoothing", registry);
+   private final YoDouble desiredCoMHeightVelocityAfterSmoothing = new YoDouble("desiredCoMHeightVelocityAfterSmoothing", registry);
+   private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
    
    private final PDController centerOfMassHeightController;
 
@@ -85,10 +85,10 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       controlPelvisHeightInsteadOfCoMHeight.set(true);
       
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
-      DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
-      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
-      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
+      YoDouble kpCoMHeight = comHeightControlGains.getYoKp();
+      YoDouble kdCoMHeight = comHeightControlGains.getYoKd();
+      YoDouble maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
+      YoDouble maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
       
       double controlDT = controllerToolbox.getControlDT();
       // TODO Need to extract the maximum velocity parameter.
@@ -121,7 +121,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       SideDependentList<? extends ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,

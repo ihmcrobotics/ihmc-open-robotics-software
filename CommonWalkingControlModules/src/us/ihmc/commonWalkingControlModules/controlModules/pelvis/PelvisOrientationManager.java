@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,7 +41,7 @@ public class PelvisOrientationManager
                                    HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisOrientationControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);

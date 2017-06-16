@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPa
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
@@ -46,7 +46,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final YoVariableServer yoVaribleServer;
    private final BehaviorStateMachine<E> stateMachine;
 
@@ -67,7 +67,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private E stopBehavior;
    private E currentBehavior;
 
-   public BehaviorDispatcher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
+   public BehaviorDispatcher(YoDouble yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
          BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum,
          E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

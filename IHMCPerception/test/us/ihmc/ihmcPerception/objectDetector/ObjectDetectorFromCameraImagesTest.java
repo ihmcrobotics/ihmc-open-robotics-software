@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingObjectBoxRobot;
@@ -123,15 +123,15 @@ public class ObjectDetectorFromCameraImagesTest
 
       YoBoolean objectTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
 
-      DoubleYoVariable objectReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
-      DoubleYoVariable objectReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");
-      DoubleYoVariable objectReportedPoseWorldFrameZ = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameZ");
+      YoDouble objectReportedPoseWorldFrameX = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
+      YoDouble objectReportedPoseWorldFrameY = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");
+      YoDouble objectReportedPoseWorldFrameZ = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameZ");
 
-      DoubleYoVariable q_object_x = (DoubleYoVariable) scsForDetecting.getVariable("q_object_x");
-      DoubleYoVariable q_object_y = (DoubleYoVariable) scsForDetecting.getVariable("q_object_y");
-      DoubleYoVariable q_object_z = (DoubleYoVariable) scsForDetecting.getVariable("q_object_z");
+      YoDouble q_object_x = (YoDouble) scsForDetecting.getVariable("q_object_x");
+      YoDouble q_object_y = (YoDouble) scsForDetecting.getVariable("q_object_y");
+      YoDouble q_object_z = (YoDouble) scsForDetecting.getVariable("q_object_z");
 
-      final DoubleYoVariable time = simpleRobotWithCamera.getYoTime();
+      final YoDouble time = simpleRobotWithCamera.getYoTime();
 
       time.addVariableChangedListener(new VariableChangedListener()
       {

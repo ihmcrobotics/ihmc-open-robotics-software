@@ -26,7 +26,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -166,9 +166,9 @@ public class AtlasSDFVerificationTest
 
       for (YoVariable var : robot.getAllVariables())
       {
-         if (var instanceof DoubleYoVariable)
+         if (var instanceof YoDouble)
          {
-            yoVariables.put(var.getName(), ((DoubleYoVariable) var).getDoubleValue());
+            yoVariables.put(var.getName(), ((YoDouble) var).getDoubleValue());
          }
       }
 

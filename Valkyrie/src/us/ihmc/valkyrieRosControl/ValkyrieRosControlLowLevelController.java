@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.EnumYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -52,20 +52,20 @@ public class ValkyrieRosControlLowLevelController
    private final ArrayList<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlPositionJointControlCommandCalculator> positionJointToControlCommandCalculatorMap = new LinkedHashMap<>();
 
-   private final DoubleYoVariable yoTime = new DoubleYoVariable("lowLevelControlTime", registry);
-   private final DoubleYoVariable wakeUpTime = new DoubleYoVariable("lowLevelControlWakeUpTime", registry);
+   private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
+   private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final DoubleYoVariable timeInStandprep = new DoubleYoVariable("timeInStandprep", registry);
-   private final DoubleYoVariable standPrepStartTime = new DoubleYoVariable("standPrepStartTime", registry);
+   private final YoDouble timeInStandprep = new YoDouble("timeInStandprep", registry);
+   private final YoDouble standPrepStartTime = new YoDouble("standPrepStartTime", registry);
 
-   private final DoubleYoVariable doIHMCControlRatio = new DoubleYoVariable("doIHMCControlRatio", registry);
-   private final DoubleYoVariable standPrepRampDuration = new DoubleYoVariable("standPrepRampDuration", registry);
-   private final DoubleYoVariable masterGain = new DoubleYoVariable("standPrepMasterGain", registry);
+   private final YoDouble doIHMCControlRatio = new YoDouble("doIHMCControlRatio", registry);
+   private final YoDouble standPrepRampDuration = new YoDouble("standPrepRampDuration", registry);
+   private final YoDouble masterGain = new YoDouble("standPrepMasterGain", registry);
 
-   private final DoubleYoVariable controlRatioRampDuration = new DoubleYoVariable("controlRatioRampDuration", registry);
-   private final DoubleYoVariable calibrationDuration = new DoubleYoVariable("calibrationDuration", registry);
-   private final DoubleYoVariable calibrationStartTime = new DoubleYoVariable("calibrationStartTime", registry);
-   private final DoubleYoVariable timeInCalibration = new DoubleYoVariable("timeInCalibration", registry);
+   private final YoDouble controlRatioRampDuration = new YoDouble("controlRatioRampDuration", registry);
+   private final YoDouble calibrationDuration = new YoDouble("calibrationDuration", registry);
+   private final YoDouble calibrationStartTime = new YoDouble("calibrationStartTime", registry);
+   private final YoDouble timeInCalibration = new YoDouble("timeInCalibration", registry);
 
    private final EnumYoVariable<ValkyrieLowLevelControlModeMessage.ControlMode> currentControlMode = new EnumYoVariable<>("lowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class);
 

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -11,7 +11,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
 {
    private final OneDoFJoint joint;
    private final AlphaFilteredYoVariable velocityFiniteDifferenceFiltered;
-   private final DoubleYoVariable footInSwingThreshold, touchdownThreshold, finiteDifferenceAlphaFilter;
+   private final YoDouble footInSwingThreshold, touchdownThreshold, finiteDifferenceAlphaFilter;
    private final GlitchFilteredYoBoolean footInSwingFiltered;
    private final YoBoolean controllerSetFootSwitch, touchdownDetected;
 
@@ -23,11 +23,11 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       this.joint = joint;
       this.controllerSetFootSwitch = controllerSetFootSwitch;
 
-      finiteDifferenceAlphaFilter = new DoubleYoVariable(joint.getName() + "_velocityFiniteDifferenceAlpha", registry);
+      finiteDifferenceAlphaFilter = new YoDouble(joint.getName() + "_velocityFiniteDifferenceAlpha", registry);
       finiteDifferenceAlphaFilter.set(0.99);
       velocityFiniteDifferenceFiltered = new AlphaFilteredYoVariable(joint.getName() + "_velocityFiniteDifferenceFiltered", registry, finiteDifferenceAlphaFilter);
-      footInSwingThreshold = new DoubleYoVariable(joint.getName() + "_footInSwingThreshold", registry);
-      touchdownThreshold = new DoubleYoVariable(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);
+      footInSwingThreshold = new YoDouble(joint.getName() + "_footInSwingThreshold", registry);
+      touchdownThreshold = new YoDouble(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);
       footInSwingFiltered = new GlitchFilteredYoBoolean(joint.getName() + "_footInSwingFiltered", registry, 50);
       touchdownDetected = new YoBoolean(joint.getName() + "_velocityFiniteDifferenceTouchdownDetected", registry);
    }

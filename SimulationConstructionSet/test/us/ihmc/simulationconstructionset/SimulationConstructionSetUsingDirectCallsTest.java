@@ -45,7 +45,7 @@ import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
@@ -177,7 +177,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private CameraConfiguration cameraConfiguration;
    private ViewportConfiguration viewportConfiguration;
    private GraphConfiguration[] graphConfigurations;
-   private DoubleYoVariable realTimeRateInSCS;
+   private YoDouble realTimeRateInSCS;
    private YoBoolean processDataHasBeenCalled;
    private YoBoolean toggleKeyPointModeCommandListenerHasBeenCalled;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -212,7 +212,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       viewportConfiguration.addCameraView("Back View", 0, 0, 1, 1);
 
       graphConfigurations = createGraphConfigurations(graphConfigurationNames);
-      realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
+      realTimeRateInSCS = new YoDouble("realTimeRate", dummyRegistry);
       processDataHasBeenCalled = new YoBoolean("processDataHasBeenCalled", dummyRegistry);
       toggleKeyPointModeCommandListenerHasBeenCalled = new YoBoolean("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
       yoGraphicsListRegistry = createYoGraphicsListRegistryWithObject();
@@ -1432,47 +1432,47 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private YoVariableList createVarListOfDoubleYoVariableWithDummyRegistry(String[] variableNames, double[] varValues)
    {
-      DoubleYoVariable[] doubleYoVariables = null;
+      YoDouble[] yoDoubles = null;
 
       if (variableNames.length == varValues.length)
       {
          YoVariableRegistry registry = new YoVariableRegistry("dummy");
-         doubleYoVariables = createAndSetDoubleYoVariableToRegistry(variableNames, varValues, registry);
+         yoDoubles = createAndSetDoubleYoVariableToRegistry(variableNames, varValues, registry);
       }
       else
       {
          System.out.print("Input arrays have different length.");
       }
 
-      return createYoVariableList("yoVariableList", doubleYoVariables);
+      return createYoVariableList("yoVariableList", yoDoubles);
    }
 
    private YoVariableList[] createTwoVarListOfDoubleYoVariablesWithDummyRegistry(String[] variableNames1, double[] varValues1, String[] variableNames2,
          double[] varValues2)
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable[] doubleYoVariables1 = createAndSetDoubleYoVariableToRegistry(variableNames1, varValues1, registry);
-      DoubleYoVariable[] doubleYoVariables2 = createAndSetDoubleYoVariableToRegistry(variableNames2, varValues2, registry);
+      YoDouble[] yoVariables1 = createAndSetDoubleYoVariableToRegistry(variableNames1, varValues1, registry);
+      YoDouble[] yoVariables2 = createAndSetDoubleYoVariableToRegistry(variableNames2, varValues2, registry);
 
       YoVariableList[] yoVariableLists = new YoVariableList[2];
-      yoVariableLists[0] = createYoVariableList("yoVariableList1", doubleYoVariables1);
-      yoVariableLists[1] = createYoVariableList("yoVariableList2", doubleYoVariables2);
+      yoVariableLists[0] = createYoVariableList("yoVariableList1", yoVariables1);
+      yoVariableLists[1] = createYoVariableList("yoVariableList2", yoVariables2);
 
       return yoVariableLists;
    }
 
-   private DoubleYoVariable[] createAndSetDoubleYoVariableToRegistry(String[] varNames, double[] varValues, YoVariableRegistry registry)
+   private YoDouble[] createAndSetDoubleYoVariableToRegistry(String[] varNames, double[] varValues, YoVariableRegistry registry)
    {
-      DoubleYoVariable[] doubleYoVariables = new DoubleYoVariable[varNames.length];
+      YoDouble[] yoDoubles = new YoDouble[varNames.length];
 
       for (int i = 0; i < varNames.length; i++)
       {
-         DoubleYoVariable doubleYoVariable = new DoubleYoVariable(varNames[i], registry);
-         doubleYoVariable.set(varValues[i]);
-         doubleYoVariables[i] = doubleYoVariable;
+         YoDouble yoDouble = new YoDouble(varNames[i], registry);
+         yoDouble.set(varValues[i]);
+         yoDoubles[i] = yoDouble;
       }
 
-      return doubleYoVariables;
+      return yoDoubles;
    }
 
    private YoVariableList createYoVariableList(String name, YoVariable<?>[] yoVariables)
@@ -2010,21 +2010,21 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return (CameraTrackAndDollyYoVariablesHolder) classicCameraController.getCameraTrackAndDollyVariablesHolder();
    }
 
-   private DoubleYoVariable[] addDoubleYoVariablesInSCSRegistry(String[] varNames, double[] varValues, SimulationConstructionSet scs)
+   private YoDouble[] addDoubleYoVariablesInSCSRegistry(String[] varNames, double[] varValues, SimulationConstructionSet scs)
    {
-      DoubleYoVariable[] doubleYoVariables = null;
+      YoDouble[] yoDoubles = null;
 
       if (varNames.length == varValues.length)
       {
          YoVariableRegistry scsRegistry = scs.getRootRegistry();
-         doubleYoVariables = createAndSetDoubleYoVariableToRegistry(varNames, varValues, scsRegistry);
+         yoDoubles = createAndSetDoubleYoVariableToRegistry(varNames, varValues, scsRegistry);
       }
       else
       {
          System.out.print("Input arrays have different length.");
       }
 
-      return doubleYoVariables;
+      return yoDoubles;
    }
 
    private String getRegistryNameSpaceFromRobot(Robot robotModel)

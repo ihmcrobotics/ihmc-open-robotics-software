@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -42,7 +42,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final YoBoolean yoSetDesiredVelocityToZero;
 
    protected final YoBoolean scaleSecondaryJointWeights;
-   protected final DoubleYoVariable secondaryJointWeightScale;
+   protected final YoDouble secondaryJointWeightScale;
 
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
@@ -70,7 +70,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredVelocityToZero = new YoBoolean(namePrefix + "SetDesiredVelocityToZero", registry);
 
       scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
-      secondaryJointWeightScale = new DoubleYoVariable(namePrefix + "SecondaryJointWeightScale", registry);
+      secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);

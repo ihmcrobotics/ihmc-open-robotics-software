@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.IntegerYoVariable;
 import us.ihmc.yoVariables.variable.LongYoVariable;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -44,7 +44,7 @@ public class JVMStatisticsGenerator
    private final LongYoVariable totalCompilationTime = new LongYoVariable("totalCompilationTimeMs", registry);
 
    private final IntegerYoVariable availableProcessors = new IntegerYoVariable("availableProcessors", registry);
-   private final DoubleYoVariable systemLoadAverage = new DoubleYoVariable("systemLoadAverage", registry);
+   private final YoDouble systemLoadAverage = new YoDouble("systemLoadAverage", registry);
 
    private final ArrayList<GCBeanHolder> gcBeanHolders = new ArrayList<>();
    private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();

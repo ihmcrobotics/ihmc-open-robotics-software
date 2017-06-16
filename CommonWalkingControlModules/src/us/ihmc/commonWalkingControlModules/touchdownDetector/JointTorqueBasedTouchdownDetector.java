@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 {
    private final OneDoFJoint joint;
-   private final DoubleYoVariable jointTorque;
-   private final DoubleYoVariable torqueThreshold;
+   private final YoDouble jointTorque;
+   private final YoDouble torqueThreshold;
    private final YoBoolean touchdownDetected;
 
    private double signum;
@@ -17,8 +17,8 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, YoVariableRegistry registry)
    {
       this.joint = joint;
-      jointTorque = new DoubleYoVariable(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
-      torqueThreshold = new DoubleYoVariable(joint.getName() + "_touchdownTorqueThreshold", registry);
+      jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
+      torqueThreshold = new YoDouble(joint.getName() + "_touchdownTorqueThreshold", registry);
       touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetected", registry);
    }
 

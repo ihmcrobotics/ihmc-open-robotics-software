@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -197,7 +197,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            DoubleYoVariable variable = (DoubleYoVariable) registry.getVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.getVariable(name + "_" + row + "_" + column);
 
             if ((row < smallerRows) && (column < smallerColumns))
             {
@@ -218,7 +218,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            DoubleYoVariable variable = (DoubleYoVariable) registry.getVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.getVariable(name + "_" + row + "_" + column);
             assertTrue(Double.isNaN(variable.getDoubleValue()));
          }
       }

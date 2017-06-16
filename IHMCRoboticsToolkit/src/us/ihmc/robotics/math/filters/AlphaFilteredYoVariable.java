@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @author jrebula
@@ -27,11 +27,11 @@ import us.ihmc.yoVariables.variable.DoubleYoVariable;
  *          For alpha=0 -> no filtered
  *         For alpha=1 -> 100% filtered, no use of raw signal
  */
-public class AlphaFilteredYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final DoubleYoVariable alphaVariable;
+   private final YoDouble alphaVariable;
 
-   private final DoubleYoVariable position;
+   private final YoDouble position;
    protected final YoBoolean hasBeenCalled;
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
@@ -39,33 +39,33 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
       this(name, registry, alpha, null);
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, DoubleYoVariable positionVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, YoDouble positionVariable)
    {
       super(name,registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
-      this.alphaVariable = new DoubleYoVariable(name + "AlphaVariable", registry);
+      this.alphaVariable = new YoDouble(name + "AlphaVariable", registry);
       this.alphaVariable.set(alpha);
       this.position = positionVariable;
       reset();
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable)
    {
       this(name, "", registry, alphaVariable, null);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable)
    {
       this(name, description, registry, alphaVariable, null);
    }
 
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
    {
       this(name, "", registry, alphaVariable, positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", description, registry);

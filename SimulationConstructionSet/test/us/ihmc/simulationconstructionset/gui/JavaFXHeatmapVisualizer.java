@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SimpleGraphIndicesHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.tools.thread.ThreadTools;
@@ -33,8 +33,8 @@ public class JavaFXHeatmapVisualizer
    private SelectedVariableHolder selectedVariableHolder;
    private GraphIndicesHolder graphIndicesHolder;
    private DataBuffer dataBuffer;
-   private DoubleYoVariable x;
-   private DoubleYoVariable y;
+   private YoDouble x;
+   private YoDouble y;
 
    public JavaFXHeatmapVisualizer()
    {
@@ -42,9 +42,9 @@ public class JavaFXHeatmapVisualizer
 
       registry = new YoVariableRegistry("root");
 
-      DoubleYoVariable yoTime = new DoubleYoVariable("t", registry);
-      x = new DoubleYoVariable("qd_LEFT_KNEE_PITCH", registry);
-      y = new DoubleYoVariable("tau_LEFT_KNEE_PITCH", registry);
+      YoDouble yoTime = new YoDouble("t", registry);
+      x = new YoDouble("qd_LEFT_KNEE_PITCH", registry);
+      y = new YoDouble("tau_LEFT_KNEE_PITCH", registry);
 
       DataBufferEntry tDataBufferEntry = new DataBufferEntry(yoTime, dataBufferSize);
       DataBufferEntry xDataBufferEntry = new DataBufferEntry(x, dataBufferSize);
