@@ -122,9 +122,9 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly point, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      tempPoint3d.set(point);
+      tempPoint3d.set(x, y, z);
       double scaledX = tempPoint3d.getX() / radius.getX();
       double scaledY = tempPoint3d.getY() / radius.getY();
       double scaledZ = tempPoint3d.getZ() / radius.getZ();

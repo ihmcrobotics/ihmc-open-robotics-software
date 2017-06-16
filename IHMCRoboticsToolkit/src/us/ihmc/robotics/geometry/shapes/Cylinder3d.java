@@ -216,9 +216,9 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
       
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilonToGrowObject)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilonToGrowObject)
    {
-      temporaryPoint.set(pointToCheck);
+      temporaryPoint.set(x, y, z);
 
       if (temporaryPoint.getZ() < 0.0 - epsilonToGrowObject)
          return false;

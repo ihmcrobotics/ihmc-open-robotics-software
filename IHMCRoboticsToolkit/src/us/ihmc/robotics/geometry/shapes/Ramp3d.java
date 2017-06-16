@@ -189,12 +189,12 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      return MathTools.intervalContains(pointToCheck.getX(), 0.0, size.getX(), epsilon * 2.0)
-          && MathTools.intervalContains(pointToCheck.getY(), -size.getY() / 2.0, size.getY() / 2.0, epsilon * 2.0)
-          && MathTools.intervalContains(pointToCheck.getZ(), 0.0, size.getZ(), epsilon * 2.0)
-          && rampPlane.isOnOrBelow(pointToCheck, epsilon);
+      return MathTools.intervalContains(x, 0.0, size.getX(), epsilon * 2.0)
+          && MathTools.intervalContains(y, -size.getY() / 2.0, size.getY() / 2.0, epsilon * 2.0)
+          && MathTools.intervalContains(z, 0.0, size.getZ(), epsilon * 2.0)
+          && rampPlane.isOnOrBelow(x, y, z, epsilon);
    }
 
    @Override
