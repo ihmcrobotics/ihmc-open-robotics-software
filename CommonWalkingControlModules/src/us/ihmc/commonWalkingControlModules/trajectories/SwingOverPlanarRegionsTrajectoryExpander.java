@@ -69,6 +69,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final AxisAngle axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
 
+   private final Point3D tempPointOnPlane = new Point3D();
+   private final Vector3D tempPlaneNormal = new Vector3D();
+
    // Boilerplate variables
    private final FrameVector initialVelocity;
    private final FrameVector touchdownVelocity;
@@ -189,24 +192,20 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
       rigidBodyTransform.setRotation(axisAngle);
-      swingFloorPlane.setPoint(swingStartPosition.getPoint());
-      swingFloorPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
-      rigidBodyTransform.transform(swingFloorPlane.getNormal());
-      swingFloorPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      rigidBodyTransform.transform(tempPlaneNormal);
+      tempPlaneNormal.normalize();
+      swingFloorPlane.set(swingStartPosition.getPoint(), tempPlaneNormal);
 
-      swingStartToeFacingSwingEndPlane.setPoint(swingStartPosition.getPoint());
-      swingStartToeFacingSwingEndPlane.getNormal().sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
-      swingStartToeFacingSwingEndPlane.getNormal().normalize();
-      swingStartToeFacingSwingEndPlane.getNormal().scale(soleToToeLength);
-      swingStartToeFacingSwingEndPlane.getPoint().add(swingStartToeFacingSwingEndPlane.getNormal());
-      swingStartToeFacingSwingEndPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
+      tempPlaneNormal.normalize();
+      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingStartPosition.getPoint());
+      swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
 
-      swingEndHeelFacingSwingStartPlane.setPoint(swingEndPosition.getPoint());
-      swingEndHeelFacingSwingStartPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
-      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
-      swingEndHeelFacingSwingStartPlane.getNormal().scale(soleToToeLength);
-      swingEndHeelFacingSwingStartPlane.getPoint().add(swingEndHeelFacingSwingStartPlane.getNormal());
-      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.normalize();
+      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingEndPosition.getPoint());
+      swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
       numberOfTriesCounter.resetCount();

@@ -81,7 +81,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return returnVector;
    }
    
-   public Vector3D getNormal()
+   public Vector3DReadOnly getNormal()
    {
       return plane3d.getNormal();
    }
@@ -110,7 +110,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return pointToReturn;
    }
    
-   public Point3D getPoint()
+   public Point3DReadOnly getPoint()
    {
       return plane3d.getPoint();
    }
