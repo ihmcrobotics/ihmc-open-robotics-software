@@ -105,8 +105,7 @@ public class SolarPanelMotionPlanner
          
          rrtPlanner.expandingTreesAndShortCut(200);
          
-        
-         PrintTools.info("END shortcutting "+RRTNode3DTimeDomain.nodeValidityTester.numberOfTest);
+//         PrintTools.info("END shortcutting "+RRTNode3DTimeDomain.nodeValidityTester.numberOfTest);
 
          // *** message *** //
          PrintTools.info("Putting on Message");
