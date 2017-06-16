@@ -90,14 +90,14 @@ public class JMEGPULidarParallelSceneGraphTest
 
             RigidBodyTransform newTransform = new RigidBodyTransform(currentTransform);
 
-            TransformTools.rotate(newTransform, Math.PI / 1e2, Axis.X);
+            TransformTools.appendRotation(newTransform, Math.PI / 1e2, Axis.X);
 
             renderer.enqueue(new Callable<Object>()
             {
                @Override
                public Object call() throws Exception
                {
-                  TransformTools.rotate(lidarNode.getTransform(), Math.PI / 1e2, Axis.X);
+                  TransformTools.appendRotation(lidarNode.getTransform(), Math.PI / 1e2, Axis.X);
 
                   return null;
                }
