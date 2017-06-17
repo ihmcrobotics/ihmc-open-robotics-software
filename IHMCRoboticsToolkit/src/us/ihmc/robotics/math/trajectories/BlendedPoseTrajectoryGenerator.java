@@ -16,10 +16,8 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
-   private final FrameVector tempAcceleration = new FrameVector();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
-   private final FrameVector tempAngularAcceleration = new FrameVector();
 
    public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry)
    {
@@ -63,19 +61,6 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.blendInitialConstraint(tempOrientation, tempAngularVelocity, initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePose initialPose, Twist initialTwist, SpatialAccelerationVector initialAcceleration, double initialTime,
-         double blendDuration)
-   {
-      initialPose.getPositionIncludingFrame(tempPosition);
-      initialPose.getOrientationIncludingFrame(tempOrientation);
-      initialTwist.getLinearPart(tempVelocity);
-      initialTwist.getAngularPart(tempAngularVelocity);
-      initialAcceleration.getLinearPart(tempAcceleration);
-      initialAcceleration.getAngularPart(tempAngularAcceleration);
-      blendedPositionTrajectory.blendInitialConstraint(tempPosition, tempVelocity, tempAcceleration, initialTime, blendDuration);
-      blendedOrientationTrajectory.blendInitialConstraint(tempOrientation, tempAngularVelocity, tempAngularAcceleration, initialTime, blendDuration);
-   }
-
    public void blendFinalConstraint(FramePose finalPose, double finalTime, double blendDuration)
    {
       finalPose.getPositionIncludingFrame(tempPosition);
@@ -92,18 +77,6 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       finalTwist.getAngularPart(tempAngularVelocity);
       blendedPositionTrajectory.blendFinalConstraint(tempPosition, tempVelocity, finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(tempOrientation, tempAngularVelocity, finalTime, blendDuration);
-   }
-
-   public void blendFinalConstraint(FramePose finalPose, Twist finalTwist, SpatialAccelerationVector finalAcceleration, double finalTime, double blendDuration)
-   {
-      finalPose.getPositionIncludingFrame(tempPosition);
-      finalPose.getOrientationIncludingFrame(tempOrientation);
-      finalTwist.getLinearPart(tempVelocity);
-      finalTwist.getAngularPart(tempAngularVelocity);
-      finalAcceleration.getLinearPart(tempAcceleration);
-      finalAcceleration.getAngularPart(tempAngularAcceleration);
-      blendedPositionTrajectory.blendFinalConstraint(tempPosition, tempVelocity, tempAcceleration, finalTime, blendDuration);
-      blendedOrientationTrajectory.blendFinalConstraint(tempOrientation, tempAngularVelocity, tempAngularAcceleration, finalTime, blendDuration);
    }
 
    @Override
