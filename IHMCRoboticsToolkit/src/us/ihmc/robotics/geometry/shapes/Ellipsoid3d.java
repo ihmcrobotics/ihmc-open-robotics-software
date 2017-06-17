@@ -143,11 +143,11 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      double scaledX = pointToCheckAndPack.getX() / radius.getX();
-      double scaledY = pointToCheckAndPack.getY() / radius.getY();
-      double scaledZ = pointToCheckAndPack.getZ() / radius.getZ();
+      double scaledX = x / radius.getX();
+      double scaledY = y / radius.getY();
+      double scaledZ = z / radius.getZ();
       
       double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
       boolean isInside = sumOfSquares <= 1.0;
@@ -158,7 +158,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
          scaledX = scaledX * scaleFactor;
          scaledY = scaledY * scaleFactor;
          scaledZ = scaledZ * scaleFactor;
-         pointToCheckAndPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
+         projectionToPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
       }
    }
    
