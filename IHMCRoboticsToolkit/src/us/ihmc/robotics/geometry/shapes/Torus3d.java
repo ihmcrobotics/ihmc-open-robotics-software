@@ -144,22 +144,22 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      surfaceNormalAt(normalToPack, pointInWorldToCheck);
-      closestPointToPack.set(pointInWorldToCheck);
+      surfaceNormalAt(x, y, z, normalToPack);
+      closestPointToPack.set(x, y, z);
       orthogonalProjectionShapeFrame(closestPointToPack);
 
-      return isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, Epsilons.ONE_TEN_MILLIONTH);
+      return isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TEN_MILLIONTH);
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryPoint.set(point);
+      temporaryPoint.set(x, y, z);
       orthogonalProjectionShapeFrame(temporaryPoint);
 
-      return temporaryPoint.distance(point);
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
    }
 
    @Override
@@ -180,9 +180,9 @@ public class Torus3d extends Shape3d<Torus3d>
       return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint) <= tubeRadius + epsilon;
    }
 
-   private void surfaceNormalAt(Vector3DBasics normalToPack, Point3DReadOnly pointToCheck)
+   private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      computeCompositeVectorsForPoint(pointToCheck, originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector);
+      computeCompositeVectorsForPoint(x, y, z, originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector);
 
       tubeCenterToPointTemporaryVector.normalize();
       normalToPack.set(tubeCenterToPointTemporaryVector);

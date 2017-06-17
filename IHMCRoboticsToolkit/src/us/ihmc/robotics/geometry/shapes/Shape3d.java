@@ -70,7 +70,12 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return distance;
    }
 
-   protected abstract double distanceShapeFrame(Point3DReadOnly point);
+   protected final double distanceShapeFrame(Point3DReadOnly point)
+   {
+      return distanceShapeFrame(point.getX(), point.getY(), point.getZ());
+   }
+
+   protected abstract double distanceShapeFrame(double x, double y, double z);
 
    /**
     * Determine whether the given point is on or inside the surface of this shape.
@@ -157,7 +162,12 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return isInside;
    }
 
-   protected abstract boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack);
+   protected final boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
+   {
+      return checkIfInsideShapeFrame(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), closestPointOnSurfaceToPack, normalToPack);
+   }
+
+   protected abstract boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack);
 
    @Override
    public final void applyTransform(Transform transform)

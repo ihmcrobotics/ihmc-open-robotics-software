@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -138,11 +139,11 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0);
+      boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0);
       
-      closestPointToPack.set(pointInWorldToCheck);
+      closestPointToPack.set(x, y, z);
       
       if (!isInsideOrOnSurface)
       {
@@ -199,11 +200,11 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryPoint.set(point);
+      temporaryPoint.set(x, y, z);
       orthogonalProjectionShapeFrame(temporaryPoint);
-      return temporaryPoint.distance(point);
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
    }
 
    @Override

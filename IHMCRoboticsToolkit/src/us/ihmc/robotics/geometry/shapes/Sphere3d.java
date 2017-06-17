@@ -67,9 +67,9 @@ public class Sphere3d extends Shape3d<Sphere3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryVector.set(point);
+      temporaryVector.set(x, y, z);
       return temporaryVector.length() - radius;
    }
 
@@ -90,11 +90,11 @@ public class Sphere3d extends Shape3d<Sphere3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      boolean isInside = isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, Epsilons.ONE_TRILLIONTH);
+      boolean isInside = isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TRILLIONTH);
 
-      surfaceNormalAt(pointInWorldToCheck, normalToPack);
+      surfaceNormalAt(x, y, z, normalToPack);
 
       temporaryVector.set(normalToPack);
       temporaryVector.scale(radius);
@@ -104,9 +104,9 @@ public class Sphere3d extends Shape3d<Sphere3d>
       return isInside;
    }
 
-   private void surfaceNormalAt(Point3DReadOnly pointToCheck, Vector3DBasics normalToPack)
+   private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      normalToPack.set(pointToCheck);
+      normalToPack.set(x, y, z);
       GeometryTools.normalizeSafelyZUp(normalToPack);
    }
 

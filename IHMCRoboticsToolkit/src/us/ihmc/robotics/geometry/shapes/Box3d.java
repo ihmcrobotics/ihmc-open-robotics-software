@@ -4,6 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -108,7 +109,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       return dimensions.get(direction);
    }
-   
+
    public double getSizeX()
    {
       return dimensions.get(Direction.X);
@@ -144,7 +145,7 @@ public class Box3d extends Shape3d<Box3d>
       planeToPack.set(faces.get(FaceName.get(positive, direction)));
       transformToWorld(planeToPack);
    }
-   
+
    @Override
    public void setToZero()
    {
@@ -208,13 +209,13 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
       ensureFacesAreUpToDate();
-      temporaryPoint.set(point);
+      temporaryPoint.set(x, y, z);
       orthogonalProjectionShapeFrame(temporaryPoint);
 
-      return temporaryPoint.distance(point);
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
    }
 
    @Override
@@ -246,23 +247,23 @@ public class Box3d extends Shape3d<Box3d>
             break;
          }
       }
-      
+
       return isInsideOrOnSurface;
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       ensureFacesAreUpToDate();
 
       if (closestPointToPack == null)
          closestPointToPack = new Point3D();
 
-      if (isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0))
+      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
       {
-         Plane3D nearestFace = getClosestFace(pointInWorldToCheck);
+         Plane3D nearestFace = getClosestFace(x, y, z);
 
-         closestPointToPack.set(pointInWorldToCheck);
+         closestPointToPack.set(x, y, z);
          nearestFace.orthogonalProjection(closestPointToPack);
 
          if (normalToPack != null)
@@ -274,19 +275,19 @@ public class Box3d extends Shape3d<Box3d>
       }
       else
       {
-         closestPointToPack.set(pointInWorldToCheck);
+         closestPointToPack.set(x, y, z);
          orthogonalProjectionShapeFrame(closestPointToPack);
 
          if (normalToPack != null)
          {
-            if (closestPointToPack.distance(pointInWorldToCheck) == 0.0)
+            if (EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestPointToPack) == 0.0)
             {
                Plane3D nearestFace = getClosestFace(closestPointToPack);
                nearestFace.getNormal(normalToPack);
             }
             else
             {
-               normalToPack.set(pointInWorldToCheck);
+               normalToPack.set(x, y, z);
                normalToPack.sub(closestPointToPack);
                normalToPack.normalize();
             }
@@ -298,6 +299,11 @@ public class Box3d extends Shape3d<Box3d>
 
    private Plane3D getClosestFace(Point3DReadOnly point)
    {
+      return getClosestFace(point.getX(), point.getY(), point.getZ());
+   }
+
+   private Plane3D getClosestFace(double x, double y, double z)
+   {
       ensureFacesAreUpToDate();
 
       double nearestDistance = Double.POSITIVE_INFINITY;
@@ -306,7 +312,7 @@ public class Box3d extends Shape3d<Box3d>
       for (FaceName faceName : FaceName.values)
       {
          Plane3D face = faces.get(faceName);
-         double distance = face.distance(point);
+         double distance = face.distance(x, y, z);
          if (distance < nearestDistance)
          {
             nearestDistance = distance;
@@ -340,15 +346,15 @@ public class Box3d extends Shape3d<Box3d>
       computeVerticesShapeFrame(verticesToPack);
       transformVerticesFromShapeFrame(verticesToPack);
    }
-   
+
    private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack)
    {
       MathTools.checkEquals(NUM_VERTICES, verticesToPack.length);
-      
+
       double dx = dimensions.get(Direction.X) / 2.0;
       double dy = dimensions.get(Direction.Y) / 2.0;
       double dz = dimensions.get(Direction.Z) / 2.0;
-      
+
       verticesToPack[0].set(-dx, -dy, -dz);
       verticesToPack[1].set(-dx, -dy, +dz);
       verticesToPack[2].set(-dx, +dy, -dz);
@@ -364,15 +370,15 @@ public class Box3d extends Shape3d<Box3d>
       computeVerticesShapeFrame(verticesToPack, faceName);
       transformVerticesFromShapeFrame(verticesToPack);
    }
-   
+
    private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack, FaceName faceName)
    {
       MathTools.checkEquals(NUM_VERTICES_PER_FACE, verticesToPack.length);
-      
+
       double dx = dimensions.get(Direction.X) / 2.0;
       double dy = dimensions.get(Direction.Y) / 2.0;
       double dz = dimensions.get(Direction.Z) / 2.0;
-      
+
       if (faceName.getDirection() == Direction.X)
       {
          verticesToPack[0].set(faceName.sign() * dx, -dy, -dz);
@@ -395,7 +401,7 @@ public class Box3d extends Shape3d<Box3d>
          verticesToPack[3].set(+dx, +dy, faceName.sign() * dz);
       }
    }
-   
+
    private void transformVerticesFromShapeFrame(Point3DBasics[] verticesInShapeFrame)
    {
       for (int i = 0; i < verticesInShapeFrame.length; i++)
@@ -411,17 +417,17 @@ public class Box3d extends Shape3d<Box3d>
          for (FaceName faceName : faces.keySet())
          {
             Plane3D face = faces.get(faceName);
-            
+
             double xNormal = faceName.getDirection() == Direction.X ? faceName.sign() * 1.0 : 0.0;
             double yNormal = faceName.getDirection() == Direction.Y ? faceName.sign() * 1.0 : 0.0;
             double zNormal = faceName.getDirection() == Direction.Z ? faceName.sign() * 1.0 : 0.0;
-            
+
             face.setNormal(xNormal, yNormal, zNormal);
 
             double xPoint = faceName.getDirection() == Direction.X ? faceName.sign() * dimensions.get(Direction.X) / 2.0 : 0.0;
             double yPoint = faceName.getDirection() == Direction.Y ? faceName.sign() * dimensions.get(Direction.Y) / 2.0 : 0.0;
             double zPoint = faceName.getDirection() == Direction.Z ? faceName.sign() * dimensions.get(Direction.Z) / 2.0 : 0.0;
-            
+
             face.setPoint(xPoint, yPoint, zPoint);
          }
       }
@@ -512,7 +518,7 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    /**
-    * @deprecated Use getOrientation(Matrix3d) 
+    * @deprecated Use getOrientation(Matrix3d)
     */
    public RotationMatrix getRotationCopy()
    {
@@ -527,7 +533,7 @@ public class Box3d extends Shape3d<Box3d>
    public Plane3D getFace(FaceName faceName)
    {
       ensureFacesAreUpToDate();
-   
+
       Plane3D facePlane = new Plane3D();
       facePlane.set(faces.get(faceName));
       transformToWorld(facePlane);
