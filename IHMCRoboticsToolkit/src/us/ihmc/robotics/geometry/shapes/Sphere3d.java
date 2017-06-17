@@ -1,7 +1,9 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static us.ihmc.euclid.tools.EuclidCoreTools.*;
+import static us.ihmc.robotics.MathTools.*;
+
 import us.ihmc.commons.Epsilons;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -11,8 +13,6 @@ import us.ihmc.robotics.geometry.GeometryTools;
 public class Sphere3d extends Shape3d<Sphere3d>
 {
    private double radius;
-   
-   private final Vector3D temporaryVector;
 
    public Sphere3d()
    {
@@ -38,15 +38,13 @@ public class Sphere3d extends Shape3d<Sphere3d>
    {
       this.radius = radius;
       setPosition(x, y, z);
-      
-      temporaryVector = new Vector3D();
    }
 
    public double getRadius()
    {
       return radius;
    }
-   
+
    public void setRadius(double radius)
    {
       this.radius = radius;
@@ -62,46 +60,33 @@ public class Sphere3d extends Shape3d<Sphere3d>
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      temporaryVector.set(x, y, z);
-      return temporaryVector.length() <= radius + epsilon;
+      return normSquared(x, y, z) <= square(radius + epsilon);
    }
 
    @Override
    protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryVector.set(x, y, z);
-      return temporaryVector.length() - radius;
+      return Math.sqrt(normSquared(x, y, z)) - radius;
    }
 
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      temporaryVector.set(x, y, z);
-
-      double distance = temporaryVector.length();
+      double distance = Math.sqrt(normSquared(x, y, z));
 
       if (distance >= Epsilons.ONE_TRILLIONTH)
       {
-         temporaryVector.normalize();
-         temporaryVector.scale(radius);
-         
-         projectionToPack.set(temporaryVector);
+         projectionToPack.set(x, y, z);
+         projectionToPack.scale(radius / distance);
       }
    }
 
    @Override
    protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      boolean isInside = isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TRILLIONTH);
-
       surfaceNormalAt(x, y, z, normalToPack);
-
-      temporaryVector.set(normalToPack);
-      temporaryVector.scale(radius);
-
-      closestPointToPack.set(temporaryVector);
-
-      return isInside;
+      closestPointToPack.setAndScale(radius, normalToPack);
+      return isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TRILLIONTH);
    }
 
    private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
