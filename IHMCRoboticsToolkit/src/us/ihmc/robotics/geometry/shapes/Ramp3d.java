@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
