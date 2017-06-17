@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,10 +12,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * @author Apoorv S
  */
 
-public class FootstepPoints
+public class FootstepTrajectoryPoint
 {
-   private List<FramePoint2d> footstepPoints;
-   private Footstep footstep;
+   private Footstep footstep;   
    private FootstepTiming timing;
    private ReferenceFrame footFrame;
       
@@ -27,7 +24,7 @@ public class FootstepPoints
     * @param refFrame Provide corresponding foot reference frame. This will be stored and accessed to get updated values
     */
    
-   public FootstepPoints(Footstep footstep, FootstepTiming timing)
+   public FootstepTrajectoryPoint(Footstep footstep, FootstepTiming timing)
    {
       this(footstep, timing, 0);     
    }
@@ -39,9 +36,8 @@ public class FootstepPoints
     * @param estimatedSize Initial estimate of the number of points to be stored
     */
    
-   public FootstepPoints(Footstep footstep, FootstepTiming timing, int estimatedSize)
+   public FootstepTrajectoryPoint(Footstep footstep, FootstepTiming timing, int estimatedSize)
    {
-      this.footstepPoints = new ArrayList<>(estimatedSize);
       this.footstep = footstep;
       this.timing = timing;      
       this.footFrame = footstep.getSoleReferenceFrame();
@@ -67,23 +63,46 @@ public class FootstepPoints
       {
          if(newPoint.getReferenceFrame() != footFrame)
             newPoint.changeFrame(footFrame);
-         
-         footstepPoints.add(newPoint);
       }
    }
-      
-   public void clearFootstepPoints()
+
+   public FramePoint getCentroidOfExpectedFootPolygonLocation()
    {
-      footstepPoints.clear();
+      return footstep.getFootstepPose().getFramePointCopy();
+   } 
+   
+   public RobotSide getSwingSide()
+   {
+      return footstep.getRobotSide();
    }
    
-   public int getNumberOfPoints()
+   public RobotSide getSupportSide()
    {
-      return footstepPoints.size();      
+      return footstep.getRobotSide().getOppositeSide();
    }
    
-   public FramePoint2d getFootStepPointInFeetFrame(int index)
+   public double getTransferStartTime()
    {
-      return footstepPoints.get(index);
+      return timing.getExecutionStartTime();
    }
+   
+   public double getSwingStartTime()
+   {
+      return timing.getSwingStartTime();
+   }
+   
+   public double getSwingTime()
+   {
+      return timing.getSwingTime();
+   }
+   
+   public double getTransferTime()
+   {
+      return timing.getTransferTime();
+   }
+   
+   public double getStepTime()
+   {
+      return timing.getStepTime();
+   }   
 }
