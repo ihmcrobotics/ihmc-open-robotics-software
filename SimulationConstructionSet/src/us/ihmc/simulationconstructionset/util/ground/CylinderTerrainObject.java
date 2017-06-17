@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
-import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {

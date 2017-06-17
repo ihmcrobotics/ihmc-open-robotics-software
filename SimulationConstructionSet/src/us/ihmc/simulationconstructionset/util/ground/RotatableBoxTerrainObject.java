@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 
 public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWithNormals

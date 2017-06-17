@@ -2,9 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.shapes.Plane3D;
 
 public interface PlaneFitter
 {

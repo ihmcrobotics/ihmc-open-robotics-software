@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import java.util.EnumMap;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;

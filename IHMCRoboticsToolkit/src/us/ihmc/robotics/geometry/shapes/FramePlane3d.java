@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
