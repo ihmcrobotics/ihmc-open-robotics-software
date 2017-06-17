@@ -207,44 +207,50 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      if (!isInsideOrOnSurfaceShapeFrame(pointToCheckAndPack, Epsilons.ONE_BILLIONTH))
+      if (!isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_BILLIONTH))
       {
-         if (rampPlane.isOnOrAbove(pointToCheckAndPack))
+         if (rampPlane.isOnOrAbove(x, y, z))
          {
-            rampPlane.orthogonalProjection(pointToCheckAndPack);
+            rampPlane.orthogonalProjection(x, y, z, projectionToPack);
+         }
+         else
+         {
+            projectionToPack.set(x, y, z);
          }
          
-         GeometryTools.clipToBoundingBox(pointToCheckAndPack, 0.0, getLength(), -getWidth() / 2.0, getWidth() / 2.0, 0.0, getHeight());
+         GeometryTools.clipToBoundingBox(projectionToPack, 0.0, getLength(), -getWidth() / 2.0, getWidth() / 2.0, 0.0, getHeight());
       }
       else
       {
-         double distanceToNegativeYSide = Math.abs(size.getY() / 2.0 + pointToCheckAndPack.getY());
-         double distanceToPositiveYSide = Math.abs(size.getY() / 2.0 - pointToCheckAndPack.getY());
-         double distanceToFront = Math.abs(size.getX() - pointToCheckAndPack.getX());
-         double distanceToBottom = Math.abs(pointToCheckAndPack.getZ());
-         double distanceToRampPlane = Math.abs(rampPlane.distance(pointToCheckAndPack));
+         double distanceToNegativeYSide = Math.abs(size.getY() / 2.0 + y);
+         double distanceToPositiveYSide = Math.abs(size.getY() / 2.0 - y);
+         double distanceToFront = Math.abs(size.getX() - x);
+         double distanceToBottom = Math.abs(z);
+         double distanceToRampPlane = Math.abs(rampPlane.distance(x, y, z));
          
+         projectionToPack.set(x, y, z);
+
          if (firstIsLeast(distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane))
          {
-            pointToCheckAndPack.setY(-size.getY() / 2.0);
+            projectionToPack.set(x, -size.getY() / 2.0, z);
          }
          else if (firstIsLeast(distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide))
          {
-            pointToCheckAndPack.setY(size.getY() / 2.0);
+            projectionToPack.set(x, size.getY() / 2.0, z);
          }
          else if (firstIsLeast(distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide))
          {
-            pointToCheckAndPack.setX(size.getX());
+            projectionToPack.set(size.getX(), y, z);
          }
          else if (firstIsLeast(distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront))
          {
-            pointToCheckAndPack.setZ(0.0);
+            projectionToPack.set(x, y, 0.0);
          }
          else // distanceToRampPlane is least
          {
-            rampPlane.orthogonalProjection(pointToCheckAndPack);
+            rampPlane.orthogonalProjection(x, y, z, projectionToPack);
          }
       }
    }

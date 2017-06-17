@@ -122,7 +122,12 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       transformToWorld(pointToCheckAndPack);
    }
 
-   protected abstract void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack);
+   protected final void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
+   {
+      orthogonalProjectionShapeFrame(pointToCheckAndPack.getX(), pointToCheckAndPack.getY(), pointToCheckAndPack.getZ(), pointToCheckAndPack);
+   }
+
+   protected abstract void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack);
 
    /**
     * Returns true if inside the Shape3d. If inside, must pack the intersection and normal. If not

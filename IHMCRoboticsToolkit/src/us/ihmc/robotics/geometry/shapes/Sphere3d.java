@@ -74,9 +74,9 @@ public class Sphere3d extends Shape3d<Sphere3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3DBasics point)
+   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      temporaryVector.set(point);
+      temporaryVector.set(x, y, z);
 
       double distance = temporaryVector.length();
 
@@ -85,7 +85,7 @@ public class Sphere3d extends Shape3d<Sphere3d>
          temporaryVector.normalize();
          temporaryVector.scale(radius);
          
-         point.set(temporaryVector);
+         projectionToPack.set(temporaryVector);
       }
    }
 

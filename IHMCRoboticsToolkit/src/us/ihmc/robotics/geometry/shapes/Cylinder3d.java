@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -236,22 +237,21 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      if (pointToCheckAndPack.getZ() < 0.0)
-         pointToCheckAndPack.setZ(0.0);
-      if (pointToCheckAndPack.getZ() > height)
-         pointToCheckAndPack.setZ(height);
+      z = MathTools.clamp(z, 0.0, height);
       
-      double xyLengthSquared = pointToCheckAndPack.getX() * pointToCheckAndPack.getX() + pointToCheckAndPack.getY() * pointToCheckAndPack.getY();
+      double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
       if (xyLengthSquared > radius * radius)
       {
          double xyLength = Math.sqrt(xyLengthSquared);
          double scale = radius / xyLength;
       
-         pointToCheckAndPack.setX(pointToCheckAndPack.getX() * scale);
-         pointToCheckAndPack.setY(pointToCheckAndPack.getY() * scale);
+         x *= scale;
+         y *= scale;
       }
+
+      projectionToPack.set(x, y, z);
    }
 
    private final Point3D tempPointInWorldForProjectingToBottom = new Point3D();

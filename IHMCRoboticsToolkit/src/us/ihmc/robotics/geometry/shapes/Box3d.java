@@ -218,15 +218,15 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3DBasics point)
+   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
       ensureFacesAreUpToDate();
 
       for (Plane3D face : faces.values())
       {
-         if (face.isOnOrAbove(point))
+         if (face.isOnOrAbove(x, y, z))
          {
-            face.orthogonalProjection(point);
+            face.orthogonalProjection(x, y, z, projectionToPack);
          }
       }
    }
