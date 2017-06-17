@@ -2,13 +2,13 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
@@ -17,16 +17,19 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
 {
    private double radius;
    private double height;
-   
+
    private final Point3D temporaryPoint = new Point3D();
 
-   public static enum CylinderFaces {TOP, BOTTOM}
+   public static enum CylinderFaces
+   {
+      TOP, BOTTOM
+   }
 
    public Cylinder3d()
    {
       this(1.0, 0.5);
    }
-   
+
    public Cylinder3d(Cylinder3d cylinder3d)
    {
       this(cylinder3d.radius, cylinder3d.height);
@@ -44,7 +47,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       this.height = height;
       this.radius = radius;
    }
-   
+
    public Cylinder3d(Pose3D pose, double height, double radius)
    {
       setPose(pose);
@@ -88,16 +91,16 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       Plane3D plane;
       switch (face)
       {
-         case TOP :
-            plane = new Plane3D(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
-            break;
-         case BOTTOM :
-            plane = new Plane3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
-            break;
-         default :
-            throw(new RuntimeException("Unrecognized cylinder face"));
+      case TOP:
+         plane = new Plane3D(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
+         break;
+      case BOTTOM:
+         plane = new Plane3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
+         break;
+      default:
+         throw (new RuntimeException("Unrecognized cylinder face"));
       }
-      
+
       transformToWorld(plane);
       return plane;
    }
@@ -131,17 +134,17 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
       boolean insideOrOnSurfaceLocal = true;
-      
-      closestPointOnSurfaceToPack.set(0.0, 0.0, pointToCheck.getZ());
-      double radialDistance = pointToCheck.distance(closestPointOnSurfaceToPack);
-      
-      closestPointOnSurfaceToPack.set(pointToCheck);
+
+      closestPointOnSurfaceToPack.set(0.0, 0.0, z);
+      double radialDistance = EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestPointOnSurfaceToPack);
+
+      closestPointOnSurfaceToPack.set(x, y, z);
       double xyLengthSquared = closestPointOnSurfaceToPack.getX() * closestPointOnSurfaceToPack.getX()
             + closestPointOnSurfaceToPack.getY() * closestPointOnSurfaceToPack.getY();
-      
+
       if (closestPointOnSurfaceToPack.getZ() < 0.0)
       {
          closestPointOnSurfaceToPack.setZ(0.0);
@@ -152,33 +155,33 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
          closestPointOnSurfaceToPack.setZ(height);
          insideOrOnSurfaceLocal = false;
       }
-      
+
       if (radialDistance > radius)
       {
          double xyLength = Math.sqrt(xyLengthSquared);
          double scale = radius / xyLength;
-         
+
          closestPointOnSurfaceToPack.setX(closestPointOnSurfaceToPack.getX() * scale);
          closestPointOnSurfaceToPack.setY(closestPointOnSurfaceToPack.getY() * scale);
          insideOrOnSurfaceLocal = false;
       }
-      
+
       if (insideOrOnSurfaceLocal)
       {
          double distanceSquaredToSide = radius * radius - xyLengthSquared;
-         double distanceSquaredToTop = (height - pointToCheck.getZ()) * (height - pointToCheck.getZ());
-         double distanceSquaredToBottom = pointToCheck.getZ() * pointToCheck.getZ();
-         
+         double distanceSquaredToTop = (height - z) * (height - z);
+         double distanceSquaredToBottom = z * z;
+
          if ((distanceSquaredToSide < distanceSquaredToTop) && (distanceSquaredToSide < distanceSquaredToBottom))
          {
             double xyLength = Math.sqrt(xyLengthSquared);
             if (xyLength > 1e-10)
             {
                double scale = radius / xyLength;
-      
+
                closestPointOnSurfaceToPack.setX(closestPointOnSurfaceToPack.getX() * scale);
                closestPointOnSurfaceToPack.setY(closestPointOnSurfaceToPack.getY() * scale);
-               normalToPack.set(pointToCheck.getX(), pointToCheck.getY(), 0.0);
+               normalToPack.set(x, y, 0.0);
                normalToPack.normalize();
             }
             else
@@ -201,22 +204,22 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       }
       else
       {
-         normalToPack.set(pointToCheck);
+         normalToPack.set(x, y, z);
          normalToPack.sub(closestPointOnSurfaceToPack);
          normalToPack.normalize();
       }
-      
+
       return insideOrOnSurfaceLocal;
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryPoint.set(point);
+      temporaryPoint.set(x, y, z);
       orthogonalProjectionShapeFrame(temporaryPoint);
-      return temporaryPoint.distance(point);
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
    }
-      
+
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilonToGrowObject)
    {
@@ -226,13 +229,13 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
          return false;
       if (temporaryPoint.getZ() > height + epsilonToGrowObject)
          return false;
-      
+
       double radiusSquared = (radius + epsilonToGrowObject) * (radius + epsilonToGrowObject);
       double xySquared = temporaryPoint.getX() * temporaryPoint.getX() + temporaryPoint.getY() * temporaryPoint.getY();
-      
+
       if (xySquared > radiusSquared)
          return false;
-      
+
       return true;
    }
 
@@ -240,13 +243,13 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
       z = MathTools.clamp(z, 0.0, height);
-      
+
       double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
       if (xyLengthSquared > radius * radius)
       {
          double xyLength = Math.sqrt(xyLengthSquared);
          double scale = radius / xyLength;
-      
+
          x *= scale;
          y *= scale;
       }
@@ -256,11 +259,14 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
 
    private final Point3D tempPointInWorldForProjectingToBottom = new Point3D();
    private final Vector3D tempVectorInWorldForProjectingToBottom = new Vector3D();
-   
+
    /**
-    * Projects the pointToProject to the bottom of a curved surface given the surfaceNormal defining how the curved surface is
-    * contacting another surface, as when the two surfaces roll on each other. 
-    * @param surfaceNormal defining another surface in which this object is in rolling contact on the other surface.
+    * Projects the pointToProject to the bottom of a curved surface given the surfaceNormal defining
+    * how the curved surface is contacting another surface, as when the two surfaces roll on each
+    * other.
+    * 
+    * @param surfaceNormal defining another surface in which this object is in rolling contact on
+    *           the other surface.
     * @param pointToProject point to project to the bottom of the curved surface.
     * @return true if the point was projected. Otherwise false.
     */
@@ -293,7 +299,8 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       tempVectorInShapeFrameForProjectingToBottom.normalize();
       tempVectorInShapeFrameForProjectingToBottom.scale(radius);
 
-      pointToRollInShapeFrame.set(tempVectorInShapeFrameForProjectingToBottom.getX(), tempVectorInShapeFrameForProjectingToBottom.getY(), pointToRollInShapeFrame.getZ());
+      pointToRollInShapeFrame.set(tempVectorInShapeFrameForProjectingToBottom.getX(), tempVectorInShapeFrameForProjectingToBottom.getY(),
+                                  pointToRollInShapeFrame.getZ());
       return true;
    }
 

@@ -1,11 +1,11 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
@@ -86,9 +86,9 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      tempPoint3d.set(pointToCheck);
+      tempPoint3d.set(x, y, z);
       double scaledX = tempPoint3d.getX() / radius.getX();
       double scaledY = tempPoint3d.getY() / radius.getY();
       double scaledZ = tempPoint3d.getZ() / radius.getZ();
@@ -135,11 +135,11 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3DReadOnly point)
+   protected double distanceShapeFrame(double x, double y, double z)
    {
-      tempPoint3d.set(point);
+      tempPoint3d.set(x, y, z);
       orthogonalProjectionShapeFrame(tempPoint3d);
-      return tempPoint3d.distance(point);
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, tempPoint3d);
    }
 
    @Override
