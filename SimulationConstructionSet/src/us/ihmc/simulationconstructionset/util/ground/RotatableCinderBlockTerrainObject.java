@@ -4,7 +4,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 
 
@@ -18,10 +17,11 @@ public class RotatableCinderBlockTerrainObject extends RotatableBoxTerrainObject
    @Override
    protected void addGraphics()
    {      
-      RigidBodyTransform transformCenterConventionToBottomConvention = box.getTransformCopy();
-      transformCenterConventionToBottomConvention.appendTranslation(0.0, 0.0, -box.getDimension(Direction.Z) / 2.0);
+      RigidBodyTransform transformCenterConventionToBottomConvention = new RigidBodyTransform();
+      box.getPose(transformCenterConventionToBottomConvention);
+      transformCenterConventionToBottomConvention.appendTranslation(0.0, 0.0, -box.getSizeZ() / 2.0);
 
-      Vector3D vector = new Vector3D(box.getDimension(Direction.X), box.getDimension(Direction.Y), box.getDimension(Direction.Z));
+      Vector3D vector = new Vector3D(box.getSizeX(), box.getSizeY(), box.getSizeZ());
       
       linkGraphics = new Graphics3DObject();
       linkGraphics.transform(transformCenterConventionToBottomConvention);

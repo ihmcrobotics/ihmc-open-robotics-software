@@ -4,7 +4,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 
@@ -73,12 +72,13 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	@Override
    protected void addGraphics()
 	{
-		RigidBodyTransform transformCenterConventionToBottomConvention = box.getTransformCopy();
+		RigidBodyTransform transformCenterConventionToBottomConvention = new RigidBodyTransform();
+		box.getPose(transformCenterConventionToBottomConvention);
 //		transformCenterConventionToBottomConvention = TransformTools.transformLocalZ(transformCenterConventionToBottomConvention, -box.getDimension(Direction.Z) / 2.0);
 		
 		double graphicSide=.291;
 		double graphicLength=1.524;
-		Vector3D vector = new Vector3D(box.getDimension(Direction.X)/graphicSide, box.getDimension(Direction.Y)/graphicLength, box.getDimension(Direction.Z)/graphicSide);
+		Vector3D vector = new Vector3D(box.getSizeX()/graphicSide, box.getSizeY()/graphicLength, box.getSizeZ()/graphicSide);
 
 		linkGraphics = new Graphics3DObject();
 		linkGraphics.transform(transformCenterConventionToBottomConvention);
