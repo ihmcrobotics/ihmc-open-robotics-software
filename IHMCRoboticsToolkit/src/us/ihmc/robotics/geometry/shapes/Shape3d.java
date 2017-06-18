@@ -364,6 +364,16 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return shapePose.getQuaternion().getRoll();
    }
 
+   public QuaternionReadOnly getOrientation()
+   {
+      return shapePose.getQuaternion();
+   }
+
+   public Tuple3DReadOnly getPosition()
+   {
+      return shapePose.getTranslationVector();
+   }
+
    // Pose transform
 
    public final void transformToWorld(Transformable transformable)

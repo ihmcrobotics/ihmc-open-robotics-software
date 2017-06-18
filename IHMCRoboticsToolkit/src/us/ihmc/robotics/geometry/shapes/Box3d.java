@@ -1,34 +1,29 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import java.util.EnumMap;
-
-import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
 
 /**
  * Box where base frame is in the center.
  */
 public class Box3d extends Shape3d<Box3d>
 {
-   public static final int NUM_VERTICES = 8;
-   public static final int NUM_SIDES = 6;
-   public static final int NUM_VERTICES_PER_FACE = 4;
+   private final Point3D temporaryPoint = new Point3D();
+   private final Vector3D temporaryVector = new Vector3D();
 
-   private final EnumMap<Direction, Double> dimensions;
-   private final EnumMap<FaceName, Plane3D> faces;
-   private boolean facesAreOutOfDate;
-
-   private final Point3D temporaryPoint;
+   private final Size3d size = new Size3d();
 
    public Box3d()
    {
@@ -37,67 +32,35 @@ public class Box3d extends Shape3d<Box3d>
 
    public Box3d(Box3d other)
    {
-      setPose(other);
-      dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
-      temporaryPoint = new Point3D();
-
-      commonConstructor(other.getLength(), other.getWidth(), other.getHeight());
+      set(other);
    }
 
-   public Box3d(RigidBodyTransform configuration, double[] dimensions)
+   public Box3d(RigidBodyTransform pose, double[] dimensions)
    {
-      this(configuration, dimensions[0], dimensions[1], dimensions[2]);
+      this(pose, dimensions[0], dimensions[1], dimensions[2]);
    }
 
    public Box3d(double lengthX, double widthY, double heightZ)
    {
-      dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
-      temporaryPoint = new Point3D();
-
-      commonConstructor(lengthX, widthY, heightZ);
+      size.setLengthWidthHeight(lengthX, widthY, heightZ);
    }
 
-   public Box3d(RigidBodyTransform transform, double length, double width, double height)
+   public Box3d(RigidBodyTransform pose, double length, double width, double height)
    {
-      setPose(transform);
-      dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
-      temporaryPoint = new Point3D();
-
-      commonConstructor(length, width, height);
+      setPose(pose);
+      size.setLengthWidthHeight(length, width, height);
    }
 
    public Box3d(Pose3D pose, double length, double width, double height)
    {
       setPose(pose);
-      dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
-      temporaryPoint = new Point3D();
-
-      commonConstructor(length, width, height);
+      size.setLengthWidthHeight(length, width, height);
    }
 
    public Box3d(Point3DReadOnly position, QuaternionReadOnly orientation, double length, double width, double height)
    {
       setPose(position, orientation);
-      dimensions = new EnumMap<Direction, Double>(Direction.class);
-      faces = new EnumMap<FaceName, Plane3D>(FaceName.class);
-      temporaryPoint = new Point3D();
-
-      commonConstructor(length, width, height);
-   }
-
-   public void commonConstructor(double length, double width, double height)
-   {
-      for (FaceName faceName : FaceName.values())
-      {
-         faces.put(faceName, new Plane3D());
-      }
-
-      setDimensions(length, width, height);
-      facesAreOutOfDate = true;
+      size.setLengthWidthHeight(length, width, height);
    }
 
    public void getCenter(Point3DBasics centerToPack)
@@ -105,438 +68,243 @@ public class Box3d extends Shape3d<Box3d>
       getPosition(centerToPack);
    }
 
-   public double getDimension(Direction direction)
-   {
-      return dimensions.get(direction);
-   }
-
    public double getSizeX()
    {
-      return dimensions.get(Direction.X);
+      return size.getX();
    }
 
    public double getSizeY()
    {
-      return dimensions.get(Direction.Y);
+      return size.getY();
    }
 
    public double getSizeZ()
    {
-      return dimensions.get(Direction.Z);
+      return size.getZ();
    }
 
    public double getLength()
    {
-      return dimensions.get(Direction.X);
+      return size.getLength();
    }
 
    public double getWidth()
    {
-      return dimensions.get(Direction.Y);
+      return size.getWidth();
    }
 
    public double getHeight()
    {
-      return dimensions.get(Direction.Z);
-   }
-
-   public void getFace(Direction direction, boolean positive, Plane3D planeToPack)
-   {
-      planeToPack.set(faces.get(FaceName.get(positive, direction)));
-      transformToWorld(planeToPack);
+      return size.getHeight();
    }
 
    @Override
    public void setToZero()
    {
       super.setToZero();
-      setDimensions(0.0, 0.0, 0.0);
+      size.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
       super.setToNaN();
-      setDimensions(Double.NaN, Double.NaN, Double.NaN);
+      size.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      return super.containsNaN() || Double.isNaN(getHeight()) || Double.isNaN(getLength()) || Double.isNaN(getWidth());
+      return super.containsNaN() || size.containsNaN();
    }
 
    @Override
    public boolean epsilonEquals(Box3d other, double epsilon)
    {
-      return MathTools.epsilonEquals(getWidth(), other.getWidth(), epsilon) && MathTools.epsilonEquals(getLength(), other.getLength(), epsilon)
-            && MathTools.epsilonEquals(getHeight(), other.getHeight(), epsilon);
+      return super.epsilonEqualsPose(other, epsilon) && size.epsilonEquals(other.size, epsilon);
    }
 
    @Override
-   public synchronized void set(Box3d other)
+   public void set(Box3d other)
    {
-      if (other != this)
-      {
-         setPose(other);
-         setDimensions(other.dimensions);
-         facesAreOutOfDate = true;
-      }
+      setPose(other);
+      size.set(other.size);
    }
 
-   public void setDimensions(EnumMap<Direction, Double> dimensions)
+   public void setSize(double lengthX, double widthY, double heightZ)
    {
-      this.dimensions.putAll(dimensions);
-      facesAreOutOfDate = true;
-   }
-
-   public void setDimensions(double lengthX, double widthY, double heightZ)
-   {
-      dimensions.put(Direction.X, lengthX);
-      dimensions.put(Direction.Y, widthY);
-      dimensions.put(Direction.Z, heightZ);
-      facesAreOutOfDate = true;
+      size.setLengthWidthHeight(lengthX, widthY, heightZ);
    }
 
    public void scale(double scale)
    {
-      for (Direction direction : Direction.values())
-      {
-         dimensions.put(direction, dimensions.get(direction) * scale);
-      }
-
-      this.facesAreOutOfDate = true;
+      size.scale(scale);
    }
 
    @Override
    protected double distanceShapeFrame(double x, double y, double z)
    {
-      ensureFacesAreUpToDate();
-      temporaryPoint.set(x, y, z);
-      orthogonalProjectionShapeFrame(temporaryPoint);
-
-      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
+      if (!isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
+      {
+         double dx = EuclidCoreTools.max(-x - 0.5 * size.getX(), 0.0, x - 0.5 * size.getX());
+         double dy = EuclidCoreTools.max(-y - 0.5 * size.getY(), 0.0, y - 0.5 * size.getY());
+         double dz = EuclidCoreTools.max(-z - 0.5 * size.getZ(), 0.0, z - 0.5 * size.getZ());
+         //         double dx = Math.max(0.0, Math.abs(x) - 0.5 * size.getX());
+         //         double dy = Math.max(0.0, Math.abs(y) - 0.5 * size.getY());
+         //         double dz = Math.max(0.0, Math.abs(z) - 0.5 * size.getZ());
+         return Math.sqrt(EuclidCoreTools.normSquared(dx, dy, dz));
+      }
+      else
+      {
+         double distance = Double.NEGATIVE_INFINITY;
+         distance = Math.max(distance, Math.abs(x) - 0.5 * size.getX());
+         distance = Math.max(distance, Math.abs(y) - 0.5 * size.getY());
+         distance = Math.max(distance, Math.abs(z) - 0.5 * size.getZ());
+         return distance;
+      }
    }
 
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      ensureFacesAreUpToDate();
-
-      for (Plane3D face : faces.values())
+      if (!isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
       {
-         if (face.isOnOrAbove(x, y, z))
-         {
-            face.orthogonalProjection(x, y, z, projectionToPack);
-         }
+         projectionToPack.setX(MathTools.clamp(x, 0.5 * size.getX()));
+         projectionToPack.setY(MathTools.clamp(y, 0.5 * size.getY()));
+         projectionToPack.setZ(MathTools.clamp(z, 0.5 * size.getZ()));
+      }
+      else
+      {
+         projectionToPack.setX(Math.copySign(0.5 * size.getX(), x));
+         projectionToPack.setY(Math.copySign(0.5 * size.getY(), y));
+         projectionToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
       }
    }
 
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      ensureFacesAreUpToDate();
-
-      boolean isInsideOrOnSurface = true;
-      for (FaceName faceName : FaceName.values)
-      {
-         Plane3D face = faces.get(faceName);
-         if (!face.isOnOrBelow(x, y, z, epsilon))
-         {
-            isInsideOrOnSurface = false;
-            break;
-         }
-      }
-
-      return isInsideOrOnSurface;
+      return Math.abs(x) <= 0.5 * size.getX() + epsilon && Math.abs(y) <= 0.5 * size.getY() + epsilon && Math.abs(z) <= 0.5 * size.getZ() + epsilon;
    }
 
    @Override
    protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      ensureFacesAreUpToDate();
-
-      if (closestPointToPack == null)
-         closestPointToPack = new Point3D();
-
-      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
+      if (closestPointToPack != null)
       {
-         Plane3D nearestFace = getClosestFace(x, y, z);
+         orthogonalProjectionShapeFrame(x, y, z, closestPointToPack);
+      }
 
-         closestPointToPack.set(x, y, z);
-         nearestFace.orthogonalProjection(closestPointToPack);
-
+      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 1.0e-12))
+      {
          if (normalToPack != null)
          {
-            nearestFace.getNormal(normalToPack);
+            double distanceX = Math.abs(x - 0.5 * size.getX());
+            double distanceY = Math.abs(y - 0.5 * size.getY());
+            double distanceZ = Math.abs(z - 0.5 * size.getZ());
+
+            normalToPack.set(Math.copySign(1.0, x), 0.0, 0.0);
+
+            double distance = distanceX;
+
+            if (distanceY < distance)
+            {
+               distance = distanceY;
+               normalToPack.set(0.0, Math.copySign(1.0, y), 0.0);
+            }
+
+            if (distanceZ < distance)
+            {
+               normalToPack.set(0.0, 0.0, Math.copySign(1.0, z));
+            }
          }
 
          return true;
       }
       else
       {
-         closestPointToPack.set(x, y, z);
-         orthogonalProjectionShapeFrame(closestPointToPack);
-
          if (normalToPack != null)
          {
-            if (EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestPointToPack) == 0.0)
-            {
-               Plane3D nearestFace = getClosestFace(closestPointToPack);
-               nearestFace.getNormal(normalToPack);
-            }
-            else
-            {
-               normalToPack.set(x, y, z);
-               normalToPack.sub(closestPointToPack);
-               normalToPack.normalize();
-            }
+            normalToPack.setX(x - MathTools.clamp(x, 0.5 * size.getX()));
+            normalToPack.setY(y - MathTools.clamp(y, 0.5 * size.getY()));
+            normalToPack.setZ(z - MathTools.clamp(z, 0.5 * size.getZ()));
+
+            normalToPack.normalize();
          }
 
          return false;
       }
    }
 
-   private Plane3D getClosestFace(Point3DReadOnly point)
+   public void computeBoundingBox3D(BoundingBox3D boundingBoxToPack)
    {
-      return getClosestFace(point.getX(), point.getY(), point.getZ());
-   }
+      boundingBoxToPack.setToNaN();
 
-   private Plane3D getClosestFace(double x, double y, double z)
-   {
-      ensureFacesAreUpToDate();
-
-      double nearestDistance = Double.POSITIVE_INFINITY;
-      Plane3D nearestFace = null;
-
-      for (FaceName faceName : FaceName.values)
+      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
       {
-         Plane3D face = faces.get(faceName);
-         double distance = face.distance(x, y, z);
-         if (distance < nearestDistance)
-         {
-            nearestDistance = distance;
-            nearestFace = face;
-         }
+         getVertex(vertexIndex, temporaryPoint);
+         boundingBoxToPack.updateToIncludePoint(temporaryPoint);
       }
-      return nearestFace;
    }
 
-   /**
-    * Not real-time
-    */
+   public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
+   {
+      return intersectionWith(line.getPoint(), line.getDirection(), firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
+                               Point3DBasics secondIntersectionToPack)
+   {
+      double minX = -0.5 * size.getX();
+      double minY = -0.5 * size.getY();
+      double minZ = -0.5 * size.getZ();
+      double maxX = 0.5 * size.getX();
+      double maxY = 0.5 * size.getY();
+      double maxZ = 0.5 * size.getZ();
+      transformToLocal(pointOnLine, temporaryPoint);
+      transformToLocal(lineDirection, temporaryVector);
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndBoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ, temporaryPoint,
+                                                                                                temporaryVector, firstIntersectionToPack,
+                                                                                                secondIntersectionToPack);
+      if (firstIntersectionToPack != null && numberOfIntersections >= 1)
+         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+      if (secondIntersectionToPack != null && numberOfIntersections == 2)
+         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+      return numberOfIntersections;
+   }
+
+   public void getVertex(int vertexIndex, Point3DBasics vertexToPack)
+   {
+      if (vertexIndex < 0 || vertexIndex >= 8)
+         throw new IndexOutOfBoundsException("The vertex index has to be in [0, 7], was: " + vertexIndex);
+
+      vertexToPack.setX((vertexIndex & 1) == 0 ? size.getX() : -size.getX());
+      vertexToPack.setY((vertexIndex & 2) == 0 ? size.getY() : -size.getY());
+      vertexToPack.setZ((vertexIndex & 4) == 0 ? size.getZ() : -size.getZ());
+      vertexToPack.scale(0.5);
+      transformToWorld(vertexToPack, vertexToPack);
+   }
+
+   public void getVertices(Point3DBasics[] verticesToPack)
+   {
+      if (verticesToPack.length < 8)
+         throw new RuntimeException("Array is too small, has to be at least 8 element long, was: " + verticesToPack.length);
+
+      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
+         getVertex(vertexIndex, verticesToPack[vertexIndex]);
+   }
+
    public Point3D[] getVertices()
    {
-      Point3D[] vertices = new Point3D[NUM_VERTICES];
-      vertices[0] = new Point3D();
-      vertices[1] = new Point3D();
-      vertices[2] = new Point3D();
-      vertices[3] = new Point3D();
-      vertices[4] = new Point3D();
-      vertices[5] = new Point3D();
-      vertices[6] = new Point3D();
-      vertices[7] = new Point3D();
-      computeVerticesShapeFrame(vertices);
-      transformVerticesFromShapeFrame(vertices);
+      Point3D[] vertices = new Point3D[8];
+      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
+         getVertex(vertexIndex, vertices[vertexIndex] = new Point3D());
       return vertices;
-   }
-
-   public void computeVertices(Point3DBasics[] verticesToPack)
-   {
-      computeVerticesShapeFrame(verticesToPack);
-      transformVerticesFromShapeFrame(verticesToPack);
-   }
-
-   private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack)
-   {
-      MathTools.checkEquals(NUM_VERTICES, verticesToPack.length);
-
-      double dx = dimensions.get(Direction.X) / 2.0;
-      double dy = dimensions.get(Direction.Y) / 2.0;
-      double dz = dimensions.get(Direction.Z) / 2.0;
-
-      verticesToPack[0].set(-dx, -dy, -dz);
-      verticesToPack[1].set(-dx, -dy, +dz);
-      verticesToPack[2].set(-dx, +dy, -dz);
-      verticesToPack[3].set(-dx, +dy, +dz);
-      verticesToPack[4].set(+dx, -dy, -dz);
-      verticesToPack[5].set(+dx, -dy, +dz);
-      verticesToPack[6].set(+dx, +dy, -dz);
-      verticesToPack[7].set(+dx, +dy, +dz);
-   }
-
-   public void computeVertices(Point3DBasics[] verticesToPack, FaceName faceName)
-   {
-      computeVerticesShapeFrame(verticesToPack, faceName);
-      transformVerticesFromShapeFrame(verticesToPack);
-   }
-
-   private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack, FaceName faceName)
-   {
-      MathTools.checkEquals(NUM_VERTICES_PER_FACE, verticesToPack.length);
-
-      double dx = dimensions.get(Direction.X) / 2.0;
-      double dy = dimensions.get(Direction.Y) / 2.0;
-      double dz = dimensions.get(Direction.Z) / 2.0;
-
-      if (faceName.getDirection() == Direction.X)
-      {
-         verticesToPack[0].set(faceName.sign() * dx, -dy, -dz);
-         verticesToPack[1].set(faceName.sign() * dx, -dy, +dz);
-         verticesToPack[2].set(faceName.sign() * dx, +dy, -dz);
-         verticesToPack[3].set(faceName.sign() * dx, +dy, +dz);
-      }
-      else if (faceName.getDirection() == Direction.Y)
-      {
-         verticesToPack[0].set(-dx, faceName.sign() * dy, -dz);
-         verticesToPack[1].set(-dx, faceName.sign() * dy, +dz);
-         verticesToPack[2].set(+dx, faceName.sign() * dy, -dz);
-         verticesToPack[3].set(+dx, faceName.sign() * dy, +dz);
-      }
-      else if (faceName.getDirection() == Direction.Z)
-      {
-         verticesToPack[0].set(-dx, -dy, faceName.sign() * dz);
-         verticesToPack[1].set(+dx, -dy, faceName.sign() * dz);
-         verticesToPack[2].set(-dx, +dy, faceName.sign() * dz);
-         verticesToPack[3].set(+dx, +dy, faceName.sign() * dz);
-      }
-   }
-
-   private void transformVerticesFromShapeFrame(Point3DBasics[] verticesInShapeFrame)
-   {
-      for (int i = 0; i < verticesInShapeFrame.length; i++)
-      {
-         transformToWorld(verticesInShapeFrame[i]);
-      }
-   }
-
-   private void ensureFacesAreUpToDate()
-   {
-      if (facesAreOutOfDate)
-      {
-         for (FaceName faceName : faces.keySet())
-         {
-            Plane3D face = faces.get(faceName);
-
-            double xNormal = faceName.getDirection() == Direction.X ? faceName.sign() * 1.0 : 0.0;
-            double yNormal = faceName.getDirection() == Direction.Y ? faceName.sign() * 1.0 : 0.0;
-            double zNormal = faceName.getDirection() == Direction.Z ? faceName.sign() * 1.0 : 0.0;
-
-            face.setNormal(xNormal, yNormal, zNormal);
-
-            double xPoint = faceName.getDirection() == Direction.X ? faceName.sign() * dimensions.get(Direction.X) / 2.0 : 0.0;
-            double yPoint = faceName.getDirection() == Direction.Y ? faceName.sign() * dimensions.get(Direction.Y) / 2.0 : 0.0;
-            double zPoint = faceName.getDirection() == Direction.Z ? faceName.sign() * dimensions.get(Direction.Z) / 2.0 : 0.0;
-
-            face.setPoint(xPoint, yPoint, zPoint);
-         }
-      }
-
-      facesAreOutOfDate = false;
-   }
-
-   public static enum FaceName
-   {
-      PLUSX(true, Direction.X),
-      PLUSY(true, Direction.Y),
-      PLUSZ(true, Direction.Z),
-      MINUSX(false, Direction.X),
-      MINUSY(false, Direction.Y),
-      MINUSZ(false, Direction.Z);
-
-      private final boolean positive;
-      private final Direction direction;
-      public static final FaceName[] values = values();
-
-      private FaceName(boolean positive, Direction direction)
-      {
-         this.positive = positive;
-         this.direction = direction;
-      }
-
-      public int sign()
-      {
-         return positive ? 1 : -1;
-      }
-
-      public Direction getDirection()
-      {
-         return direction;
-      }
-
-      public static FaceName get(boolean positive, Direction direction)
-      {
-         if (direction == null)
-            throw new RuntimeException("direction == null");
-
-         for (FaceName faceName : FaceName.values())
-         {
-            if ((faceName.positive == positive) && (faceName.direction == direction))
-               return faceName;
-         }
-
-         throw new RuntimeException("should never get here");
-      }
    }
 
    @Override
    public String toString()
    {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("dimensions: (" + dimensions.get(Direction.X) + ", " + dimensions.get(Direction.Y) + ", " + dimensions.get(Direction.Z) + ")\n");
-      builder.append("faces: \n");
-
-      ensureFacesAreUpToDate();
-
-      for (Plane3D face : faces.values())
-      {
-         builder.append(face.toString());
-      }
-
-      return builder.toString();
-   }
-
-   /**
-    * @deprecated Use getCenter(Point3D)
-    */
-   public Point3D getCenterCopy()
-   {
-      Point3D ret = new Point3D();
-      getCenter(ret);
-      return ret;
-   }
-
-   /**
-    * @deprecated Use getTransform(RigidBodyTransform)
-    */
-   public RigidBodyTransform getTransformCopy()
-   {
-      RigidBodyTransform ret = new RigidBodyTransform();
-      getPose(ret);
-      return ret;
-   }
-
-   /**
-    * @deprecated Use getOrientation(Matrix3d)
-    */
-   public RotationMatrix getRotationCopy()
-   {
-      RotationMatrix ret = new RotationMatrix();
-      getOrientation(ret);
-      return ret;
-   }
-
-   /**
-    * @deprecated Makes garbage. Use getFace(Direction, boolean, Plane3d)
-    */
-   public Plane3D getFace(FaceName faceName)
-   {
-      ensureFacesAreUpToDate();
-
-      Plane3D facePlane = new Plane3D();
-      facePlane.set(faces.get(faceName));
-      transformToWorld(facePlane);
-      return facePlane;
+      return "Box 3D: size = " + size + ", pose = " + getPoseString();
    }
 }

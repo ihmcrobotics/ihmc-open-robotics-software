@@ -226,7 +226,7 @@ public class FrameBox3dTest
          FrameBox3d biggerBox = new FrameBox3d(box);
          biggerBox.scale(2.0);
 
-         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[8];
          for (int i = 0; i < vertices.length; i++)
          {
             vertices[i] = new Point3D();

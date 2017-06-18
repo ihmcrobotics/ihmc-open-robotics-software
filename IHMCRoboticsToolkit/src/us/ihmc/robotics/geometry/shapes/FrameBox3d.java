@@ -6,7 +6,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -76,11 +75,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       return ret;
    }
 
-   public double getDimension(Direction direction)
-   {
-      return box3d.getDimension(direction);
-   }
-
    public void getTransform(RigidBodyTransform transformToPack)
    {
       this.box3d.getPose(transformToPack);
@@ -146,6 +140,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void computeVertices(Point3D[] vertices)
    {
-      box3d.computeVertices(vertices);
+      box3d.getVertices(vertices);
    }
 }
