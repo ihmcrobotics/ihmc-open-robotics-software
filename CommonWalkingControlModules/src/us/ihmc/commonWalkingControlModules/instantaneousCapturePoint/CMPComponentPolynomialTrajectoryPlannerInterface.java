@@ -19,8 +19,7 @@ public interface CMPComponentPolynomialTrajectoryPlannerInterface
 {
    public CMPComponentType getComponentType();
    public void initializeParameters(ExtendedCapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry, 
-                                    double defaultFinalTransferDuration);
+                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry);
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
    public List<YoPolynomial3D> getPolynomialTrajectory();
    public void setInitialCoPPosition(FramePoint2d initialCoPPosition);

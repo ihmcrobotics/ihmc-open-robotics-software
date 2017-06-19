@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public abstract class ExtendedCapturePointPlannerParameters extends CapturePointPlannerParameters
+public abstract class ExtendedCapturePointPlannerParameters
 {  
    /**
     * Provides the CoP way point list for generating CoP trajectories
@@ -20,15 +20,21 @@ public abstract class ExtendedCapturePointPlannerParameters extends CapturePoint
     * @return
     */
    public abstract List<Double> getCoPWayPointAlpha(RobotSide side);
-   public abstract List<FrameVector2d> getFinalTransferCoPOffset();
+   public abstract FrameVector2d getFinalTransferCoPOffset();
+   public abstract double getDefaultFinalTransferDuration();
    
-   public int getNumberOfPointsPerFoot()
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 3;
+   }
+   
+   public int getNumberOfWayPointsPerFoot()
    {
       return 2;
    }
    
-   public int getOrderOfCoPInterpolation()
+   public CoPSplineType getOrderOfCoPInterpolation()
    {
-      return 3;
-   }  
+      return CoPSplineType.CUBIC;
+   }
 }
