@@ -72,7 +72,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

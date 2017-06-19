@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoInteger;
