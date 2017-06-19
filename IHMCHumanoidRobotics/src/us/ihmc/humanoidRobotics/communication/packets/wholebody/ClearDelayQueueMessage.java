@@ -37,7 +37,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public void setClazz(Class<? extends Packet<?>> clazz)
+   public void setClassToClear(Class<? extends Packet<?>> clazz)
    {
       this.clazz = clazz;
    }
