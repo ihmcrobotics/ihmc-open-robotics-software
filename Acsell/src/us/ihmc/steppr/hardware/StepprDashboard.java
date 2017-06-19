@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

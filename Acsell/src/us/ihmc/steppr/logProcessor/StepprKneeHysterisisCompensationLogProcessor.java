@@ -2,7 +2,7 @@ package us.ihmc.steppr.logProcessor;
 
 import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.HysteresisFilteredYoVariable;

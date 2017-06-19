@@ -56,7 +56,7 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoVariables.IndexChangedListener;
+import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
