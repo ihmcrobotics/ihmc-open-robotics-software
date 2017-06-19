@@ -62,6 +62,8 @@ public class LegConfigurationControlModule
 
    private final BooleanYoVariable activelyControl;
 
+   private final BooleanYoVariable computeCoupledPrivilegedLegAccelerations;
+
    private final YoPDGains jointspaceGains;
    private final DoubleYoVariable jointspaceWeight;
 
@@ -122,6 +124,9 @@ public class LegConfigurationControlModule
       kneeBentPrivilegedVelocityGain.set(straightLegWalkingParameters.getKneeBentLegPrivilegedVelocityGain());
 
       privilegedMaxAcceleration.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
+
+      computeCoupledPrivilegedLegAccelerations = new BooleanYoVariable(sidePrefix + "ComputeCoupledPrivilegedLegAccelerations", registry);
+      computeCoupledPrivilegedLegAccelerations.set(straightLegWalkingParameters.couplePrivilegedAccelerationsForTheLegPitch());
 
       desiredAngle = new DoubleYoVariable(namePrefix + "DesiredAngle", registry);
       desiredAngle.set(straightLegWalkingParameters.getStraightKneeAngle());
@@ -217,7 +222,10 @@ public class LegConfigurationControlModule
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return stateMachine.getCurrentState().getPrivilegedConfigurationCommand();
+      if (computeCoupledPrivilegedLegAccelerations.getBooleanValue())
+         return stateMachine.getCurrentState().getPrivilegedAccelerationCommand();
+      else
+         return stateMachine.getCurrentState().getPrivilegedConfigurationCommand();
    }
 
    private abstract class AbstractLegConfigurationState extends FinishableState<LegConfigurationType>
