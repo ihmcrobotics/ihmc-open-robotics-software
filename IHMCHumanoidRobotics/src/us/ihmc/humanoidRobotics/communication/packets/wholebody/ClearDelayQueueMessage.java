@@ -46,7 +46,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * get the class to clear
     * @param clazz the class to clear
     */
-   public Class<? extends Packet<?>> getClazz()
+   public Class<? extends Packet<?>> getClassToClear()
    {
       return clazz;
    }
