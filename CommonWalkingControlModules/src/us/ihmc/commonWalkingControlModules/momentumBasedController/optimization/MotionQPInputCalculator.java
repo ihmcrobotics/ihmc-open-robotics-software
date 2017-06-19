@@ -105,7 +105,16 @@ public class MotionQPInputCalculator
 
    public void submitPrivilegedAccelerations(PrivilegedAccelerationCommand command)
    {
-      throw new RuntimeException("TODO"); //// TODO: 6/8/17
+      if (privilegedConfigurationHandler == null)
+         throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
+      privilegedConfigurationHandler.submitPrivilegedAccelerations(command);
+   }
+
+   public void submitPrivilegedVelocities(PrivilegedVelocityCommand command)
+   {
+      if (privilegedConfigurationHandler == null)
+         throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
+      privilegedConfigurationHandler.submitPrivilegedVelocities(command);
    }
 
 

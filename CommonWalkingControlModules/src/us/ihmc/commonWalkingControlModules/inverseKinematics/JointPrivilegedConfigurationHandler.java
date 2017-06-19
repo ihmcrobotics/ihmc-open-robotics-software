@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedVelocityCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -58,7 +59,7 @@ public class JointPrivilegedConfigurationHandler
    private final int numberOfDoFs;
 
    private final ArrayList<PrivilegedAccelerationCommand> accelerationCommandList = new ArrayList<>();
-   private final ArrayList<PrivilegedAccelerationCommand> velocityCommandList = new ArrayList<>(); // // TODO: 6/8/17  make accelerations
+   private final ArrayList<PrivilegedVelocityCommand> velocityCommandList = new ArrayList<>();
    private final ArrayList<PrivilegedConfigurationCommand> configurationCommandList = new ArrayList<>();
    private final ArrayList<OneDoFJoint> jointsWithConfiguration = new ArrayList<>();
 
@@ -168,7 +169,7 @@ public class JointPrivilegedConfigurationHandler
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
    }
 
-   public void submitPrivilegedVelocities(PrivilegedAccelerationCommand command)
+   public void submitPrivilegedVelocities(PrivilegedVelocityCommand command)
    {
       velocityCommandList.add(command);
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
@@ -241,7 +242,7 @@ public class JointPrivilegedConfigurationHandler
    {
       for (int commandIndex = 0; commandIndex < velocityCommandList.size(); commandIndex++)
       {
-         PrivilegedAccelerationCommand command = velocityCommandList.get(commandIndex);
+         PrivilegedVelocityCommand command = velocityCommandList.get(commandIndex);
 
          for (int jointNumber = 0; jointNumber < command.getNumberOfJoints(); jointNumber++)
          {
@@ -253,13 +254,13 @@ public class JointPrivilegedConfigurationHandler
             int jointIndex = mutableIndex.intValue();
             OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
 
-            if (command.hasNewPrivilegedAcceleration(jointNumber))
+            if (command.hasNewPrivilegedVelocity(jointNumber))
             {
-               double qdd = command.getPrivilegedAcceleration(jointIndex);
-               qdd = MathTools.clamp(qdd, privilegedMaxVelocities.get(jointIndex, 0));
+               double qd = command.getPrivilegedVelocity(jointIndex);
+               qd = MathTools.clamp(qd, privilegedMaxVelocities.get(jointIndex, 0));
 
-               privilegedVelocities.set(jointIndex, 0, qdd);
-               yoJointPrivilegedVelocities.get(joint).set(qdd);
+               privilegedVelocities.set(jointIndex, 0, qd);
+               yoJointPrivilegedVelocities.get(joint).set(qd);
             }
 
             if (command.hasWeight(jointNumber))
