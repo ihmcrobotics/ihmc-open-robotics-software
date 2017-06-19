@@ -118,7 +118,7 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
       
       ClearDelayQueueMessage clearMessage = new ClearDelayQueueMessage();
-      clearMessage.setClazz(SpineTrajectoryMessage.class);
+      clearMessage.setClassToClear(SpineTrajectoryMessage.class);
       drcSimulationTestHelper.send(clearMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
