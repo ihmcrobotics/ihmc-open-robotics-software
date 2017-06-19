@@ -4,11 +4,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 
 public class StraightLegWalkingParameters
 {
-   public boolean couplePrivilegedAccelerationsForTheLegPitch()
-   {
-      return false;
-   }
-
    /**
     * This is the speed used to straighten the desire privileged configuration of the support leg's knee.
     * This is used whenever a leg is first loaded to straighten from the current configuration to the
@@ -82,38 +77,6 @@ public class StraightLegWalkingParameters
    public boolean attemptToStraightenLegs()
    {
       return false;
-   }
-
-   /**
-    * This is the configuration gain used to control the privileged joint accelerations or privileged joint velocities
-    * for the other leg pitch joints. For a typical humanoid, these joints are the hip pitch and ankle pitch.
-    * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
-    * to stand and walk with straight legs.
-    * This is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
-    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
-    *
-    * @return privileged configuration gain.
-    */
-   public double getLegPitchPrivilegedConfigurationGain()
-   {
-      return 40.0;
-   }
-
-   /**
-    * This is the velocity gain used to damp the privileged joint accelerations for the other leg pitch joints.
-    * For a typical humanoid, these joints are the hip pitch and ankle pitch.
-    * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
-    * to stand and walk with straight legs.
-    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
-    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
-    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
-    * joint accelerations.
-    *
-    * @return privileged velocity gain.
-    */
-   public double getLegPitchPrivilegedVelocityGain()
-   {
-      return 6.0;
    }
 
    /**
