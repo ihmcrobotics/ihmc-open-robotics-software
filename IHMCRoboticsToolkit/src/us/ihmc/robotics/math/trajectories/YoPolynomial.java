@@ -13,13 +13,17 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoPolynomial
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc;
+   private double pos, vel, acc, dnPos;
    private final YoDouble[] a;
    private final YoInteger numberOfCoefficients;
    private final DenseMatrix64F constraintMatrix;
    private final DenseMatrix64F constraintVector;
    private final DenseMatrix64F coefficientVector;
    private final double[] xPowers;
+   
+   private final DenseMatrix64F xPowersNthDerivativeVector;
+   
+   // stores the N-th derivative of the xPowers vector
 
    private final LinearSolver<DenseMatrix64F> solver;
 
@@ -34,6 +38,8 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
+      
+      xPowersNthDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
 
@@ -56,6 +62,8 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
+      
+      xPowersNthDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
    }
 
    public double getPosition()
@@ -546,6 +554,47 @@ public class YoPolynomial
       {
          xPowers[i] = xPowers[i - 1] * x;
       }
+   }
+   
+   public double getDerivative(int order, double x)
+   {
+      setXPowers(xPowers, x);
+      
+      dnPos = 0.0;
+      int derivativeCoefficient = 0;
+      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         derivativeCoefficient = getDerivativeCoefficient(order, i);
+         dnPos += derivativeCoefficient * a[i].getDoubleValue() * xPowers[i - order];
+      }
+      return dnPos;
+   }
+
+   // Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
+   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   {
+      setXPowers(xPowers, x);
+      
+      int derivativeCoefficient = 0;
+      for(int i = order; i < xPowers.length; i++)
+      {
+         derivativeCoefficient = getDerivativeCoefficient(order, i);
+         xPowersNthDerivativeVector.set(i, derivativeCoefficient*xPowers[i - order]);
+      }
+      
+      return xPowersNthDerivativeVector;
+   }
+   
+   // Returns the constant coefficient at the exponent-th entry of the order-th derivative vector
+   // Example: order = 4, exponent = 5 ==> returns 5*4*3*2
+   private int getDerivativeCoefficient(int order, int exponent)
+   {
+      int coeff = 1;
+      for(int i = exponent; i > exponent - order; i--)
+      {
+         coeff *= i;
+      }
+      return coeff;
    }
 
    public int getNumberOfCoefficients()
