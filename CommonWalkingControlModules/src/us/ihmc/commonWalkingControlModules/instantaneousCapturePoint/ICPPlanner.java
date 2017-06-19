@@ -132,28 +132,28 @@ public class ICPPlanner
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
    /** Desired position for the Instantaneous Capture Point (ICP) */
-   private final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
+   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    /** Desired velocity for the Instantaneous Capture Point (ICP) */
-   private final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
+   protected final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
    /** Desired acceleration for the Instantaneous Capture Point (ICP) */
-   private final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
+   protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
-   private final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
+   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
-   private final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
+   protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
    private final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
-   private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
+   protected final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
 
    /** Time at which the current state was initialized. */
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "CurrentStateInitialTime", registry);
    /** Time spent in the current state. */
-   private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
+   protected final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
    /** Time remaining before the end of the current state. */
-   private final DoubleYoVariable timeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
+   protected final DoubleYoVariable timeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
 
    private final BooleanYoVariable useTwoConstantCMPsPerSupport = new BooleanYoVariable(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
@@ -203,7 +203,7 @@ public class ICPPlanner
     * <p>
     * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
     * when the robot is getting stuck at the end of transfer.
-    * </p>
+    true* </p>
     */
    private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
 
@@ -222,7 +222,7 @@ public class ICPPlanner
    private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
    private final YoFramePoint icpPositionToHold = new YoFramePoint(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
 
-   private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
+   protected final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    private final List<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
@@ -239,7 +239,7 @@ public class ICPPlanner
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   protected final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();

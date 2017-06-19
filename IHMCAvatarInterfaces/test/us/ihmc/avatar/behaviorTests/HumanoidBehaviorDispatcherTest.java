@@ -506,7 +506,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
       FramePose2d ret = new FramePose2d();
-      ret.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }

@@ -47,7 +47,7 @@ public class JavaQuadProgSolver
    private static final int FALSE = 0;
 
    private static final int defaultSize = 100;
-   private static final double epsilon = 0.00001;
+   private static final double epsilon = 1.0e-7;
 
    private final DenseMatrix64F R = new DenseMatrix64F(defaultSize, defaultSize);
 
@@ -100,7 +100,7 @@ public class JavaQuadProgSolver
    private double R_norm;
    private int constraintIndexForMinimumStepLength;
 
-   private int maxNumberOfIterations = 10;
+   private int maxNumberOfIterations = 100;
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
@@ -405,7 +405,7 @@ public class JavaQuadProgSolver
                psi += Math.min(0.0, sum);
             }
 
-            if (Math.abs(psi) < numberOfInequalityConstraints * epsilon * c1 * c2 * 100.0)
+            if (Math.abs(psi) < numberOfInequalityConstraints * Double.MIN_VALUE * c1 * c2 * 100.0)
             { // numerically there are not infeasibilities anymore
                return numberOfIterations;
             }
@@ -761,12 +761,15 @@ public class JavaQuadProgSolver
       totalLinearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds);
       totalLinearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds, 1);
 
+      // add inequality constraints to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, 0, linearInequalityConstraintsCMatrix, 0, 0, problemSize, numberOfInequalityConstraints, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, 0, 0, linearInequalityConstraintsDVector, 0, 0, numberOfInequalityConstraints, 1, 1.0);
 
+      // add lower bounds to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints, lowerBoundsCMatrix, 0, 0, problemSize, numberOfLowerBounds, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, numberOfInequalityConstraints, 0, lowerBoundsDVector, 0, 0, numberOfLowerBounds, 1, 1.0);
 
+      // add upper bounds to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints + numberOfLowerBounds, upperBoundsCMatrix, 0, 0, problemSize, numberOfUpperBounds, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, numberOfInequalityConstraints + numberOfLowerBounds, 0, upperBoundsDVector, 0, 0, numberOfUpperBounds, 1, 1.0);
 

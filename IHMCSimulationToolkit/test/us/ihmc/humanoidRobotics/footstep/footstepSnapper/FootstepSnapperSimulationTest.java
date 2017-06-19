@@ -87,7 +87,7 @@ public class FootstepSnapperSimulationTest
       while (dataReader.hasAnotherFootstepAndPoints())
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
-         desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
+         desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
                                            footstepData.getOrientation().getYaw());
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);

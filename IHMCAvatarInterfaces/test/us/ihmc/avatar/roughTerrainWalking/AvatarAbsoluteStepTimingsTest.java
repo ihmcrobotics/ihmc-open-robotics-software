@@ -16,7 +16,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithAngularMomentumOffset;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
@@ -146,7 +146,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithTimeFreezer.class.getSimpleName());
+      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithAngularMomentumOffset.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 

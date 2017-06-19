@@ -68,7 +68,8 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       finalTransferDuration = other.finalTransferDuration;
       executionMode = other.executionMode;
       executionTiming = other.executionTiming;
-      executionDelayTime = other.getExecutionDelayTime();
+      executionDelayTime = other.executionDelayTime;
+      adjustedExecutionTime = other.adjustedExecutionTime;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -196,6 +197,17 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    public void setExecutionTime(double adjustedExecutionTime)
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
+   }
+   
+   /**
+    * tells the controller if this command supports delayed execution
+    * (Spoiler alert: It does)
+    * @return
+    */
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
    }
 
 }

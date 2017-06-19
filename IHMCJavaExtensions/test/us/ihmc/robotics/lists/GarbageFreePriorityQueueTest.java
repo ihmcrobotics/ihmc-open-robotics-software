@@ -19,7 +19,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testQueueablepriorityQueue()
    {
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       for(int i = 0; i < 10; i++)
       {
          TestComparable comparable = new TestComparable();
@@ -37,7 +37,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testSameDelay()
    {
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       for(int i = 0; i < 10; i++)
       {
          TestComparable comparable = new TestComparable();
@@ -59,7 +59,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testAddingInOrder()
    {
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       for(int i = 0; i < 10; i++)
       {
          TestComparable comparable = new TestComparable();
@@ -80,7 +80,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPop()
    {
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       TestComparable[] comparables = new TestComparable[10];
       for(int i = 0; i < 10; i++)
       {
@@ -104,7 +104,7 @@ public class GarbageFreePriorityQueueTest
       int numberOfCommands = 100;
       ArrayList<TestComparable> comparablesInRandomOrder = new ArrayList<>();
       Random random = new Random(100);
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(numberOfCommands, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(numberOfCommands, TestComparable.class);
       TestComparable[] comparables = new TestComparable[numberOfCommands];
       
       //get random numbers
@@ -144,7 +144,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPeek()
    { 
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       TestComparable comparable = new TestComparable();
       comparable.setData(5.0);
       assertTrue(priorityQueue.add(comparable));
@@ -155,7 +155,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPopWhenEmpty()
    { 
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       assertNull(priorityQueue.pop());
       assertEquals(0, priorityQueue.getSize());
    }
@@ -163,7 +163,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testClear()
    { 
-      GarbageFreePriorityQueue<TestComparable> priorityQueue = new GarbageFreePriorityQueue<TestComparable>(10, TestComparable.class);
+      PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
       for(int i = 0; i < 10; i++)
       {
          TestComparable comparable = new TestComparable();
@@ -222,6 +222,6 @@ public class GarbageFreePriorityQueueTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(GarbageFreePriorityQueue.class, GarbageFreePriorityQueueTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(PriorityQueue.class, GarbageFreePriorityQueueTest.class);
    }
 }
