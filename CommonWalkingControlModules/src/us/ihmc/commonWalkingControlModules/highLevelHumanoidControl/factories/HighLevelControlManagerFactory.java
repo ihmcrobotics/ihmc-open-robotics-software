@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalki
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -47,7 +47,7 @@ public class HighLevelControlManagerFactory
    private HeadOrientationManager headOrientationManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
-   private KneeAngleManager kneeAngleManager;
+   private LegConfigurationManager legConfigurationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -193,20 +193,20 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
-   public KneeAngleManager getOrCreateKneeAngleManager()
+   public LegConfigurationManager getOrCreateKneeAngleManager()
    {
-      if (kneeAngleManager != null)
-         return kneeAngleManager;
+      if (legConfigurationManager != null)
+         return legConfigurationManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(KneeAngleManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(LegConfigurationManager.class))
          return null;
-      if (!hasWalkingControllerParameters(KneeAngleManager.class))
+      if (!hasWalkingControllerParameters(LegConfigurationManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(KneeAngleManager.class))
+      if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
          return null;
 
-      kneeAngleManager = new KneeAngleManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
-      return kneeAngleManager;
+      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
+      return legConfigurationManager;
    }
 
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()
