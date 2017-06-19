@@ -218,7 +218,7 @@ public class JointPrivilegedConfigurationHandler
 
             if (command.hasNewPrivilegedAcceleration(jointNumber))
             {
-               double qdd = command.getPrivilegedAcceleration(jointIndex);
+               double qdd = command.getPrivilegedAcceleration(jointNumber);
                qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(jointIndex, 0));
 
                privilegedAccelerations.set(jointIndex, 0, qdd);
@@ -256,7 +256,7 @@ public class JointPrivilegedConfigurationHandler
 
             if (command.hasNewPrivilegedVelocity(jointNumber))
             {
-               double qd = command.getPrivilegedVelocity(jointIndex);
+               double qd = command.getPrivilegedVelocity(jointNumber);
                qd = MathTools.clamp(qd, privilegedMaxVelocities.get(jointIndex, 0));
 
                privilegedVelocities.set(jointIndex, 0, qd);
