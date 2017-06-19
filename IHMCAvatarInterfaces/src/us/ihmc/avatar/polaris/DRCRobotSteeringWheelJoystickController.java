@@ -3,7 +3,7 @@ package us.ihmc.avatar.polaris;
 import java.io.IOException;
 
 import net.java.games.input.Component;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.Joystick;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.yoVariables.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.registry.NameSpace;
