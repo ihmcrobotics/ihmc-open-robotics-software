@@ -445,13 +445,13 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    {
       for(int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints()-1;  i++)
       {
-         YoPolynomial3D peicewiseSpline = new YoPolynomial3D(namePrefix + "CoPSpline" + i, 2, registry);
+         YoPolynomial3D piecewiseSpline = new YoPolynomial3D(namePrefix + "CoPSpline" + i, 2, registry);
          FrameEuclideanTrajectoryPoint wayPoint1 = coPWayPoints.getTrajectoryPoint(i);
          FrameEuclideanTrajectoryPoint wayPoint2 = coPWayPoints.getTrajectoryPoint(i+1);
          Point3D point1 = wayPoint1.getPositionCopy().getPoint();
          Point3D point2 = wayPoint2.getPositionCopy().getPoint();
-         peicewiseSpline.setLinear(wayPoint1.getTime(), wayPoint2.getTime(), point1, point2);
-         coPTrajectoryPolynomials.add(peicewiseSpline);
+         piecewiseSpline.setLinear(wayPoint1.getTime(), wayPoint2.getTime(), point1, point2);
+         coPTrajectoryPolynomials.add(piecewiseSpline);
       }
    }
    
