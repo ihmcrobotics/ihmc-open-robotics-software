@@ -109,10 +109,13 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
-      // initial swing adjustment should be third largest
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
+      // initial swing adjustment should be about third largest
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentInitialTransferAdjustment), 0.02);
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentEndTransferAdjustment), 0.02);
       assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
+
+      // current transfer adjustments should be equal
+      assertEquals(currentInitialTransferAdjustment, currentEndTransferAdjustment, epsilon);
 
       caughtError = false;
       try
@@ -231,10 +234,13 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
-      // initial swing adjustment should be third largest
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
+      // initial swing adjustment should be about third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentInitialTransferAdjustment), 0.02);
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentEndTransferAdjustment), 0.02);
+
+      // current transfer adjustments should be equal
+      assertEquals(currentInitialTransferAdjustment, currentEndTransferAdjustment, epsilon);
 
       caughtError = false;
       try
@@ -361,10 +367,13 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
-      // initial swing adjustment should be third largest
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
+      // initial swing adjustment should be about third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentInitialTransferAdjustment), 0.02);
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentEndTransferAdjustment), 0.02);
+
+      // current transfer adjustments should be about equal
+      assertEquals(Math.abs(currentInitialTransferAdjustment), Math.abs(currentEndTransferAdjustment), epsilon);
 
       // should be able to get first higher swing adjustment
       caughtError = false;
@@ -507,10 +516,13 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
-      // initial swing adjustment should be third largest
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
+      // initial swing adjustment should be about third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentInitialTransferAdjustment), 0.02);
+      assertEquals(Math.abs(currentInitialSwingAdjustment), Math.abs(currentEndTransferAdjustment), 0.02);
+
+      // current transfer adjustments should be equal
+      assertEquals(currentInitialTransferAdjustment, currentEndTransferAdjustment, epsilon);
 
       // should be able to get first higher swing adjustment
       caughtError = false;

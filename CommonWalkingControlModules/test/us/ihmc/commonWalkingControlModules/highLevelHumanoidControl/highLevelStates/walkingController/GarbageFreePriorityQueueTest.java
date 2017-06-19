@@ -14,7 +14,7 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.robotics.lists.GarbageFreePriorityQueue;
+import us.ihmc.robotics.lists.PriorityQueue;
 
 public class GarbageFreePriorityQueueTest
 {
@@ -22,7 +22,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testQueueableCommandPriorityQueue()
    {
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
@@ -40,7 +40,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testSameDelay()
    {
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
@@ -62,7 +62,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testAddingInOrder()
    {
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
@@ -83,7 +83,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPop()
    {
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       ChestTrajectoryCommand[] commands = new ChestTrajectoryCommand[10];
       for(int i = 0; i < 10; i++)
       {
@@ -107,7 +107,7 @@ public class GarbageFreePriorityQueueTest
       int numberOfCommands = 100;
       ArrayList<ChestTrajectoryCommand> commandsInRandomOrder = new ArrayList<>();
       Random random = new Random(100);
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(numberOfCommands, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(numberOfCommands, Command.class, new CommandExecutionTimeComparator());
       ChestTrajectoryCommand[] commands = new ChestTrajectoryCommand[numberOfCommands];
       
       //get a hundred random numbers
@@ -149,7 +149,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPeek()
    { 
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
       chestTrajectoryCommand.setExecutionTime(5.0);
       assertTrue(commandPriorityQueue.add(chestTrajectoryCommand));
@@ -160,7 +160,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testPopWhenEmpty()
    { 
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       assertNull(commandPriorityQueue.pop());
       assertEquals(0, commandPriorityQueue.getSize());
    }
@@ -168,7 +168,7 @@ public class GarbageFreePriorityQueueTest
    @Test
    public void testClear()
    { 
-      GarbageFreePriorityQueue<Command<?,?>> commandPriorityQueue = new GarbageFreePriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
+      PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
       for(int i = 0; i < 10; i++)
       {
          ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
@@ -193,6 +193,6 @@ public class GarbageFreePriorityQueueTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(GarbageFreePriorityQueue.class, GarbageFreePriorityQueueTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(PriorityQueue.class, GarbageFreePriorityQueueTest.class);
    }
 }

@@ -184,6 +184,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
@@ -283,6 +284,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(ChestHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(HeadHybridJointspaceTaskspaceTrajectoryMessage.class);
+      registerPacketClass(ClearDelayQueueMessage.class);
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);
@@ -308,6 +310,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
+      registerPacketField(Class.class);
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);

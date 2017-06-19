@@ -209,7 +209,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
       else
          planningPose = path.getPoseAtS(pathSParameter);
       FramePoint2d footstepPosition2d = new FramePoint2d();
-      planningPose.getPosition(footstepPosition2d);
+      planningPose.getPositionIncludingFrame(footstepPosition2d);
       double footHeading = planningPose.getYaw();
       footstepPosition2d = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
       FramePose2d footstepPose2d = new FramePose2d(planningPose);

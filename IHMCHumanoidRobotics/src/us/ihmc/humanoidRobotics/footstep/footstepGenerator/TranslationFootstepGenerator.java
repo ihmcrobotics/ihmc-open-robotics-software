@@ -76,9 +76,9 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 
       FramePose2d poseAtS0 = footstepPath.getPoseAtS(0);
       FramePoint2d position = new FramePoint2d();
-      poseAtS0.getPosition(position);
+      poseAtS0.getPositionIncludingFrame(position);
       FramePoint2d position2 = new FramePoint2d();
-      footstepPath.getPoseAtS(1).getPosition(position2);
+      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position2);
       position2.sub(position);
       double pathAngle = Math.atan2(position2.getY(), position2.getX());
       double yaw = poseAtS0.getYaw();
@@ -194,7 +194,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       // Do two square up steps
       //    stepWidth = nominalStepWidth;//Changing to nominal at end can cause overstep if stepWidth is smaller than stepWidth for the rest of the path.
       FramePoint2d position3 = new FramePoint2d();
-      footstepPath.getPoseAtS(1).getPosition(position3);
+      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position3);
       addFootstep(ret, position3, stepWidth, yaw);
       addFootstep(ret, position3, stepWidth, yaw);
    }
