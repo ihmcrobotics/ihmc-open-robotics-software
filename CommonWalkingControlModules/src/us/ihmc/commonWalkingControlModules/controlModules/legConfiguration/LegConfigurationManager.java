@@ -1,7 +1,7 @@
-package us.ihmc.commonWalkingControlModules.controlModules.kneeAngle;
+package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeControlModule.KneeControlType;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegConfigurationType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -10,20 +10,20 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class KneeAngleManager
+public class LegConfigurationManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
 
-   private final SideDependentList<KneeControlModule> kneeControlModules = new SideDependentList<>();
+   private final SideDependentList<LegConfigurationControlModule> legConfigurationControlModules = new SideDependentList<>();
 
-   public KneeAngleManager(HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
-         YoVariableRegistry parentRegistry)
+   public LegConfigurationManager(HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
+                                  YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         kneeControlModules.put(robotSide, new KneeControlModule(robotSide, controllerToolbox, straightLegWalkingParameters, registry));
+         legConfigurationControlModules.put(robotSide, new LegConfigurationControlModule(robotSide, controllerToolbox, straightLegWalkingParameters, registry));
       }
 
       attemptToStraightenLegs.set(straightLegWalkingParameters.attemptToStraightenLegs());
@@ -35,7 +35,7 @@ public class KneeAngleManager
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         kneeControlModules.get(robotSide).initialize();
+         legConfigurationControlModules.get(robotSide).initialize();
       }
    }
 
@@ -43,7 +43,7 @@ public class KneeAngleManager
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         kneeControlModules.get(robotSide).doControl();
+         legConfigurationControlModules.get(robotSide).doControl();
       }
    }
 
@@ -51,14 +51,14 @@ public class KneeAngleManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         kneeControlModules.get(upcomingSwingSide).setKneeAngleState(KneeControlType.BENT);
+         legConfigurationControlModules.get(upcomingSwingSide).setKneeAngleState(LegConfigurationType.BENT);
       }
    }
 
    public boolean isLegCollapsed(RobotSide robotSide)
    {
-      KneeControlType kneeControlState = kneeControlModules.get(robotSide).getCurrentKneeControlState();
-      return (kneeControlState.equals(KneeControlType.BENT) || kneeControlState.equals(KneeControlType.COLLAPSE));
+      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
+      return (legConfigurationControlState.equals(LegConfigurationType.BENT) || legConfigurationControlState.equals(LegConfigurationType.COLLAPSE));
    }
 
    public void collapseLegDuringTransfer(RobotSide transferSide)
@@ -66,7 +66,7 @@ public class KneeAngleManager
 
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         kneeControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(KneeControlType.BENT);
+         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.BENT);
       }
    }
 
@@ -74,14 +74,14 @@ public class KneeAngleManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         kneeControlModules.get(supportSide).setKneeAngleState(KneeControlType.COLLAPSE);
+         legConfigurationControlModules.get(supportSide).setKneeAngleState(LegConfigurationType.COLLAPSE);
       }
    }
 
    public void straightenLegDuringSwing(RobotSide swingSide)
    {
-      if (kneeControlModules.get(swingSide).getCurrentKneeControlState() != KneeControlType.STRAIGHTEN_TO_STRAIGHT &&
-            kneeControlModules.get(swingSide).getCurrentKneeControlState() != KneeControlType.STRAIGHT)
+      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN_TO_STRAIGHT &&
+            legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHT)
       {
          //beginStraightening(swingSide);
          setStraight(swingSide);
@@ -92,7 +92,7 @@ public class KneeAngleManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         kneeControlModules.get(robotSide).setKneeAngleState(KneeControlType.STRAIGHT);
+         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHT);
       }
    }
 
@@ -100,7 +100,7 @@ public class KneeAngleManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         kneeControlModules.get(robotSide).setKneeAngleState(KneeControlType.STRAIGHTEN_TO_STRAIGHT);
+         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN_TO_STRAIGHT);
       }
    }
 
@@ -112,6 +112,6 @@ public class KneeAngleManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
-      return kneeControlModules.get(robotSide).getInverseDynamicsCommand();
+      return legConfigurationControlModules.get(robotSide).getInverseDynamicsCommand();
    }
 }
