@@ -1,18 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -38,7 +32,7 @@ public class LegConfigurationControlModule
    private final YoVariableRegistry registry;
 
    private final EnumYoVariable<LegConfigurationType> requestedState;
-   private final GenericStateMachine<LegConfigurationType, AbstractLegConfigurationState> stateMachine;
+   private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
    private final DoubleYoVariable legPitchPrivilegedWeight;
 
@@ -147,13 +141,13 @@ public class LegConfigurationControlModule
 
    private void setupStateMachine()
    {
-      List<AbstractLegConfigurationState> states = new ArrayList<>();
+      List<FinishableState<LegConfigurationType>> states = new ArrayList<>();
 
-      AbstractLegConfigurationState straighteningToStraightState = new StraightenToStraightControlState(straighteningSpeed);
-      AbstractLegConfigurationState straightState = new StraightKneeControlState();
-      AbstractLegConfigurationState bentState = new BentKneeControlState();
-      AbstractLegConfigurationState collapseState = new CollapseKneeControlState();
-      AbstractLegConfigurationState straighteningToControlState = new StraightenToControllableControlState(straighteningSpeed);
+      FinishableState<LegConfigurationType> straighteningToStraightState = new StraightenToStraightControlState(straighteningSpeed);
+      FinishableState<LegConfigurationType> straightState = new StraightKneeControlState();
+      FinishableState<LegConfigurationType> bentState = new BentKneeControlState();
+      FinishableState<LegConfigurationType> collapseState = new CollapseKneeControlState();
+      FinishableState<LegConfigurationType> straighteningToControlState = new StraightenToControllableControlState(straighteningSpeed);
       states.add(straighteningToStraightState);
       states.add(straightState);
       states.add(bentState);
@@ -163,15 +157,15 @@ public class LegConfigurationControlModule
       straighteningToStraightState.setDefaultNextState(LegConfigurationType.STRAIGHT);
       collapseState.setDefaultNextState(LegConfigurationType.BENT);
 
-      for (AbstractLegConfigurationState fromState : states)
+      for (FinishableState<LegConfigurationType> fromState : states)
       {
-         for (AbstractLegConfigurationState toState : states)
+         for (FinishableState<LegConfigurationType> toState : states)
          {
             StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
          }
       }
 
-      for (AbstractLegConfigurationState state : states)
+      for (FinishableState<LegConfigurationType> state : states)
       {
          stateMachine.addState(state);
       }
@@ -185,6 +179,26 @@ public class LegConfigurationControlModule
    {
       stateMachine.checkTransitionConditions();
       stateMachine.getCurrentState().doAction();
+
+      double privilegedKneeAcceleration = computeKneeAcceleration();
+      double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
+      double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
+
+      privilegedAccelerationCommand.setOneDoFJoint(hipPitchJointIndex, privilegedHipPitchAcceleration);
+      privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
+      privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
+
+      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+      privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
+      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+   }
+
+   private double computeKneeAcceleration()
+   {
+      double qdd = 2.0 * kneePitchPrivilegedConfigurationGain * (kneePitchPrivilegedConfiguration.getDoubleValue() - kneePitchJoint.getQ()) / kneeRangeOfMotion;
+      qdd -= kneePitchPrivilegedVelocityGain * kneePitchJoint.getQd();
+      return MathTools.clamp(qdd, privilegedMaxAcceleration.getDoubleValue());
+
    }
 
    public void setKneeAngleState(LegConfigurationType controlType)
@@ -200,21 +214,6 @@ public class LegConfigurationControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return privilegedAccelerationCommand;
-   }
-
-   private abstract class AbstractLegConfigurationState extends FinishableState<LegConfigurationType>
-   {
-      public AbstractLegConfigurationState(LegConfigurationType stateEnum)
-      {
-         super(stateEnum);
-      }
-
-      protected double computeKneeAcceleration(double kp, double kd, double desiredPosition, double currentPosition, double currentVelocity, double maxAcceleration)
-      {
-         double qdd = 2.0 * kp * (desiredPosition - currentPosition) / kneeRangeOfMotion;
-         qdd -= kd * currentVelocity;
-         return MathTools.clamp(qdd, maxAcceleration);
-      }
    }
 
    private class StraightenToStraightControlState extends StraighteningKneeControlState
@@ -233,7 +232,7 @@ public class LegConfigurationControlModule
       }
    }
 
-   private class StraighteningKneeControlState extends AbstractLegConfigurationState
+   private class StraighteningKneeControlState extends FinishableState<LegConfigurationType>
    {
       private final DoubleYoVariable yoStraighteningSpeed;
 
@@ -265,7 +264,6 @@ public class LegConfigurationControlModule
       {
          double estimatedDT = estimateDT();
          double currentPosition = kneePitchJoint.getQ();
-         double currentVelocity = kneePitchJoint.getQd();
 
          if (ONLY_MOVE_PRIV_POS_IF_NOT_BENDING)
          {
@@ -285,19 +283,6 @@ public class LegConfigurationControlModule
             double absoluteError = Math.abs(currentPosition - desiredAngleWhenStraight.getDoubleValue()) / (2.0 * Math.PI);
             gainModifier = 1.0 / (1.0 + absoluteError);
          }
-
-         double privilegedKneeAcceleration = computeKneeAcceleration(gainModifier * kneeStraightPrivilegedPositionGain.getDoubleValue(), kneeStraightPrivilegedVelocityGain.getDoubleValue(),
-                                                                     desiredPrivilegedPosition, currentPosition, currentVelocity, privilegedMaxAcceleration.getDoubleValue());
-         double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
-         double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
-
-         privilegedAccelerationCommand.setOneDoFJoint(hipPitchJointIndex, privilegedHipPitchAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
-
-         privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneeStraightPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
 
          kneePitchPrivilegedConfiguration.set(desiredPrivilegedPosition);
 
@@ -342,7 +327,7 @@ public class LegConfigurationControlModule
       }
    }
 
-   private class StraightKneeControlState extends AbstractLegConfigurationState
+   private class StraightKneeControlState extends FinishableState<LegConfigurationType>
    {
       public StraightKneeControlState()
       {
@@ -365,20 +350,6 @@ public class LegConfigurationControlModule
             gainModifier = 1.0 / (1.0 + absoluteError);
          }
 
-         double privilegedKneeAcceleration = computeKneeAcceleration(gainModifier * kneeStraightPrivilegedPositionGain.getDoubleValue(), kneeStraightPrivilegedVelocityGain.getDoubleValue(),
-                                                                     desiredAngleWhenStraight.getDoubleValue(), kneePitchJoint.getQ(), kneePitchJoint.getQd(),
-                                                                     privilegedMaxAcceleration.getDoubleValue());
-         double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
-         double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
-
-         privilegedAccelerationCommand.setOneDoFJoint(hipPitchJointIndex, privilegedHipPitchAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
-
-         privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneeStraightPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-
          kneePitchPrivilegedConfiguration.set(desiredAngleWhenStraight.getDoubleValue());
 
          kneePitchPrivilegedConfigurationGain = gainModifier * kneeStraightPrivilegedPositionGain.getDoubleValue();
@@ -397,7 +368,7 @@ public class LegConfigurationControlModule
       }
    }
 
-   private class BentKneeControlState extends AbstractLegConfigurationState
+   private class BentKneeControlState extends FinishableState<LegConfigurationType>
    {
       public BentKneeControlState()
       {
@@ -413,20 +384,6 @@ public class LegConfigurationControlModule
       @Override
       public void doAction()
       {
-         double privilegedKneeAcceleration = computeKneeAcceleration(kneeBentPrivilegedPositionGain.getDoubleValue(), kneeBentPrivilegedVelocityGain.getDoubleValue(),
-                                                                     kneeMidRangeOfMotion, kneePitchJoint.getQ(), kneePitchJoint.getQd(),
-                                                                     privilegedMaxAcceleration.getDoubleValue());
-         double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
-         double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
-
-         privilegedAccelerationCommand.setOneDoFJoint(hipPitchJointIndex, privilegedHipPitchAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
-
-         privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneeBentPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-
          kneePitchPrivilegedConfiguration.set(kneeMidRangeOfMotion);
 
          kneePitchPrivilegedConfigurationGain = kneeBentPrivilegedPositionGain.getDoubleValue();
@@ -445,7 +402,7 @@ public class LegConfigurationControlModule
       }
    }
 
-   private class CollapseKneeControlState extends AbstractLegConfigurationState
+   private class CollapseKneeControlState extends FinishableState<LegConfigurationType>
    {
       public CollapseKneeControlState()
       {
@@ -463,20 +420,6 @@ public class LegConfigurationControlModule
       {
          double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngleWhenStraight.getDoubleValue(), kneeMidRangeOfMotion,
                getTimeInCurrentState() / collapsingDuration.getDoubleValue());
-
-         double privilegedKneeAcceleration = computeKneeAcceleration(kneeBentPrivilegedPositionGain.getDoubleValue(), kneeBentPrivilegedVelocityGain.getDoubleValue(),
-                                                                     desiredKneePosition, kneePitchJoint.getQ(), kneePitchJoint.getQd(),
-                                                                     privilegedMaxAcceleration.getDoubleValue());
-         double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
-         double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
-
-         privilegedAccelerationCommand.setOneDoFJoint(hipPitchJointIndex, privilegedHipPitchAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
-         privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
-
-         privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneeBentPrivilegedWeight.getDoubleValue());
-         privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
 
          kneePitchPrivilegedConfiguration.set(desiredKneePosition);
 
