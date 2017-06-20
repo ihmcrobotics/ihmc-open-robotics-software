@@ -3,26 +3,37 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DummyExtendedCapturePointPlannerParameters extends ExtendedCapturePointPlannerParameters
 {   
-   ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    int numberOfCoPWayPointsPerFoot = 3;
-   FrameVector2d finalTransferCoPOffset = new FrameVector2d(worldFrame, 0.1, 0.1); 
-   List<FrameVector2d> leftCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
-   List<FrameVector2d> rightCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
-   List<Double> coPWayPointAlphas= new ArrayList<>(numberOfCoPWayPointsPerFoot);
+   int numberOfFootstepsToConsider = 3;
+   double finalTransferDuration = 0.1;
+   Vector2D finalTransferCoPOffset = new Vector2D(0.1, 0.1); 
+   List<Vector2D> leftCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
+   List<Vector2D> rightCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
+   List<Double> coPWayPointAlphas= new ArrayList<>(numberOfCoPWayPointsPerFoot-1);
    
    public DummyExtendedCapturePointPlannerParameters()
    {
+      leftCoPLocations.add(new Vector2D(-0.05, 0.0));
+      leftCoPLocations.add(new Vector2D(0.0, 0.0));
+      leftCoPLocations.add(new Vector2D(0.06, 0.0));
       
+      rightCoPLocations.add(new Vector2D(-0.05, 0.0));
+      rightCoPLocations.add(new Vector2D(0.0, 0.0));
+      rightCoPLocations.add(new Vector2D(0.06, 0.0));
+      
+      coPWayPointAlphas.add(0.5);
+      coPWayPointAlphas.add(0.5);
    }
    
    @Override
-   public List<FrameVector2d> getCoPWayPointLocationsFootFrame(RobotSide side)
+   public List<Vector2D> getCoPWayPointLocationsFootFrame(RobotSide side)
    {      
       if(side == RobotSide.LEFT)         
          return leftCoPLocations;
@@ -37,7 +48,7 @@ public class DummyExtendedCapturePointPlannerParameters extends ExtendedCaptureP
    }
 
    @Override
-   public FrameVector2d getFinalTransferCoPOffset()
+   public Vector2D getFinalTransferCoPOffset()
    {
       return finalTransferCoPOffset;
    }
@@ -45,13 +56,13 @@ public class DummyExtendedCapturePointPlannerParameters extends ExtendedCaptureP
    @Override
    public double getDefaultFinalTransferDuration()
    {
-      return 0.2;
+      return finalTransferDuration;
    }
    
    @Override
    public int getNumberOfFootstepsToConsider()
    {
-      return 3;
+      return numberOfFootstepsToConsider;
    }
    
    @Override
@@ -64,5 +75,27 @@ public class DummyExtendedCapturePointPlannerParameters extends ExtendedCaptureP
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
+   }
+   
+   public void setNumberOfWaypointsPerFoot(int number)
+   {
+      numberOfCoPWayPointsPerFoot = number;
+   }
+   
+   public void setNumberOfFootstepsToConsider(int number)
+   {
+      numberOfFootstepsToConsider = number;
+   }
+   
+   public void setSymmetricCoPWayPointOffsets(List<Vector2D> coPOffsets, List<Double> coPAlphas)
+   {
+      rightCoPLocations = coPOffsets;
+      leftCoPLocations = coPOffsets;
+      coPWayPointAlphas = coPAlphas;
+   }  
+   
+   public void setFinalTransferDuration(double finalTransferDuration)
+   {
+      this.finalTransferDuration = finalTransferDuration;
    }
 }

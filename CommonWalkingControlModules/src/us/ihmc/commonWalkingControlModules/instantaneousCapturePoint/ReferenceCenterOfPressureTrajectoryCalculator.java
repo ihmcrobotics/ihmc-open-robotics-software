@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -51,11 +52,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    private IntegerYoVariable numberOfFootstepstoConsider;
    private EnumYoVariable<CoPSplineType> orderOfSplineInterpolation;
    private DoubleYoVariable defaultFinalTransferDuration;
-   private FrameVector2d finalTransferOffset;   
-   private List<FootstepTrajectoryPoint> footstepLocation = new ArrayList<>();
+   private Vector2D finalTransferOffset;   
+   private List<FootstepTrajectoryPoint> footstepTrajectory = new ArrayList<>();
    private FrameEuclideanTrajectoryPointList coPWayPoints = new FrameEuclideanTrajectoryPointList();
    private ArrayList<YoPolynomial3D> coPTrajectoryPolynomials = new ArrayList<>();
-   private SideDependentList<List<FrameVector2d>> coPWayPointOffsets = new SideDependentList<>();
+   private SideDependentList<List<Vector2D>> coPWayPointOffsets = new SideDependentList<>();
    private SideDependentList<List<Double>> coPWayPointAlphas = new SideDependentList<>();
    private FrameVector2d currentCoPVelocity;
    private FramePoint2d currentCoPPosition;
@@ -97,22 +98,22 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
          coPWayPointOffsets.put(side, icpPlannerParameters.getCoPWayPointLocationsFootFrame(side));
          if (coPWayPointOffsets.get(side).size() != icpPlannerParameters.getNumberOfWayPointsPerFoot())
          {
-            PrintTools.warn(this, "Mismatch in CoP Offsets size (" + coPWayPointOffsets.size() + " and number of CoP trajectory way points ("
+            PrintTools.warn(this, "Mismatch in CoP Offsets size (" + coPWayPointOffsets.get(side).size() + ") and number of CoP trajectory way points ("
                   + icpPlannerParameters.getNumberOfWayPointsPerFoot() + ")");
-            for (int i = coPWayPointOffsets.size(); i < icpPlannerParameters.getNumberOfWayPointsPerFoot(); i++)
-               coPWayPointOffsets.get(side).add(new FrameVector2d());
-            for (int i = coPWayPointOffsets.size() - icpPlannerParameters.getNumberOfWayPointsPerFoot(); i > 0; i--)
+            for (int i = coPWayPointOffsets.get(side).size(); i < icpPlannerParameters.getNumberOfWayPointsPerFoot(); i++)
+               coPWayPointOffsets.get(side).add(new Vector2D());
+            for (int i = coPWayPointOffsets.get(side).size() - icpPlannerParameters.getNumberOfWayPointsPerFoot(); i > 0; i--)
                coPWayPointOffsets.get(side).remove(i);
          }
 
          coPWayPointAlphas.put(side, icpPlannerParameters.getCoPWayPointAlpha(side));
-         if (coPWayPointAlphas.get(side).size() != icpPlannerParameters.getNumberOfWayPointsPerFoot() - 1)
+         if (coPWayPointAlphas.get(side).size() != (icpPlannerParameters.getNumberOfWayPointsPerFoot() - 1))
          {
-            PrintTools.warn(this, "Mismatch in CoPAlpha size (" + coPWayPointAlphas.size() + " and number of CoP trajectory way points ("
+            PrintTools.warn(this, "Mismatch in CoPAlpha size (" + coPWayPointAlphas.get(side).size() + ") and number of CoP trajectory way points ("
                   + icpPlannerParameters.getNumberOfWayPointsPerFoot() + ")");
-            for (int i = coPWayPointAlphas.size(); i < icpPlannerParameters.getNumberOfWayPointsPerFoot() - 1; i++)
+            for (int i = coPWayPointAlphas.get(side).size(); i < icpPlannerParameters.getNumberOfWayPointsPerFoot() - 1; i++)
                coPWayPointAlphas.get(side).add(0.0);
-            for (int i = coPWayPointAlphas.size() - icpPlannerParameters.getNumberOfWayPointsPerFoot() + 1; i > 0; i++)
+            for (int i = coPWayPointAlphas.get(side).size() - icpPlannerParameters.getNumberOfWayPointsPerFoot() + 1; i > 0; i--)
                coPWayPointAlphas.get(side).remove(i);
          }
       }
@@ -163,11 +164,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       if (footstep != null && timing != null)
       {
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
-            footstepLocation.add(new FootstepTrajectoryPoint(footstep, timing));
+            footstepTrajectory.add(new FootstepTrajectoryPoint(footstep, timing));
          else
             PrintTools.warn(this, "Received bad footstep: " + footstep);
       }
-      numberOfUpcomingFootsteps.set(footstepLocation.size());
+      numberOfUpcomingFootsteps.set(footstepTrajectory.size());
    }
 
    /**
@@ -176,7 +177,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    public void removeFootStepQueueFront()
    {
       removeFootstep(0);
-      numberOfUpcomingFootsteps.set(footstepLocation.size());
+      numberOfUpcomingFootsteps.set(footstepTrajectory.size());
    }
 
    /**
@@ -188,7 +189,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    {
       for (int i = 0; i < numberOfFootstepsToRemove; i++)
          removeFootstep(0);
-      numberOfUpcomingFootsteps.set(footstepLocation.size());
+      numberOfUpcomingFootsteps.set(footstepTrajectory.size());
    }
 
    /**
@@ -197,8 +198,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
     */
    public void removeFootstep(int index)
    {
-      footstepLocation.remove(index);
-      numberOfUpcomingFootsteps.set(footstepLocation.size());
+      footstepTrajectory.remove(index);
+      numberOfUpcomingFootsteps.set(footstepTrajectory.size());
    }
 
    /**
@@ -206,7 +207,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
     */
    public void clear()
    {
-      footstepLocation.clear();
+      footstepTrajectory.clear();
       coPWayPoints.clear();
       coPTrajectoryPolynomials.clear();
       numberOfUpcomingFootsteps.set(0);
@@ -240,15 +241,20 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       //TODO Implement this with CoP user Offsets
       return;
    }
-
-   public void setCoPWayPoints(RobotSide side, List<FrameVector2d> coPOffsets)
+   
+   /**
+    * 
+    * @param side
+    * @param coPOffsets Offsets are to be provided from the foot polygon centroid in the soleZUpFrame
+    */
+   public void setCoPWayPoints(RobotSide side, List<Vector2D> coPOffsets)
    {
       this.coPWayPointOffsets.put(side, coPOffsets);
    }
 
    public int getNumberOfFootstepRegistered()
    {
-      return footstepLocation.size();
+      return footstepTrajectory.size();
    }
 
    public int getNumberOfCoPPlannedFootSteps()
@@ -259,19 +265,20 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide swingSide, boolean defaultStartingPosition)
    {
       FrameConvexPolygon2d currentSupportFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide.getOppositeSide());
+      //System.out.println("Here" + currentSupportFootPolygon.toString());
       FramePoint2d currentSupportFootPolygonCentroid = new FramePoint2d(currentSupportFootPolygon.getCentroid());
+      //System.out.println(currentSupportFootPolygonCentroid.toString());
       if (defaultStartingPosition)
       {
          FrameConvexPolygon2d currentSwingFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide);
          FramePoint2d currentSwingFootPolygonCentroid = currentSwingFootPolygon.getCentroid();
 
          FramePoint2d currentSupportPolygonCentroid = new FramePoint2d(currentSupportFootPolygonCentroid);
+         currentSwingFootPolygonCentroid.changeFrame(currentSupportFootPolygonCentroid.getReferenceFrame());
          currentSupportPolygonCentroid.add(currentSwingFootPolygonCentroid);
          currentSupportPolygonCentroid.scale(0.5);
-
-         FrameEuclideanTrajectoryPoint currentTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
-         currentTrajectoryPoint.setPosition(currentSupportPolygonCentroid.toFramePoint());
-
+ 
+         //System.out.println(currentSupportPolygonCentroid.toString());
          coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentSupportPolygonCentroid));
          setInitialCoPVelocity(new FrameVector(currentSoleZUpFrames.get(swingSide.getOppositeSide())));
       }
@@ -279,24 +286,24 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       {
          coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentCoPPosition));
       }
-      if (!footstepLocation.isEmpty())
+      if (!footstepTrajectory.isEmpty())
       {
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(swingSide.getOppositeSide()), coPWayPointAlphas.get(swingSide.getOppositeSide()),
-                                         currentSupportFootPolygonCentroid, footstepLocation.get(0).getSwingTime(), footstepLocation.get(0).getTransferTime());
+                                         currentSupportFootPolygonCentroid, footstepTrajectory.get(0).getSwingTime(), footstepTrajectory.get(0).getTransferTime());
          computeReferenceCoPsForUpcomingFootstep();
       }
    }
 
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide swingSide, double time)
    {
-      double percentageTime = time / footstepLocation.get(0).getSwingTime();
+      double percentageTime = time / footstepTrajectory.get(0).getSwingTime();
       int splineSegmentIndex = getSplineSegmentIndexFromTime(swingSide, percentageTime);
-      if (!footstepLocation.isEmpty())
+      if (!footstepTrajectory.isEmpty())
       {
          coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(time, currentCoPPosition));
          FramePoint2d centroidOfSupportFoot = new FramePoint2d(currentSoleZUpFrames.get(swingSide.getOppositeSide()));
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(swingSide.getOppositeSide()), coPWayPointAlphas.get(swingSide.getOppositeSide()),
-                                         centroidOfSupportFoot, footstepLocation.get(0).getSwingTime(), splineSegmentIndex);
+                                         centroidOfSupportFoot, footstepTrajectory.get(0).getSwingTime(), splineSegmentIndex);
          computeReferenceCoPsForUpcomingFootstep();
       }
    }
@@ -319,44 +326,44 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
 
    private void computeReferenceCoPsForUpcomingFootstep()
    {
-      int numberOfFootstepsToPlan = footstepLocation.size() - 1 > numberOfFootstepstoConsider.getIntegerValue() ? numberOfFootstepstoConsider.getIntegerValue()
-            : footstepLocation.size() - 1;
+      int numberOfFootstepsToPlan = footstepTrajectory.size() - 1 > numberOfFootstepstoConsider.getIntegerValue() ? numberOfFootstepstoConsider.getIntegerValue()
+            : footstepTrajectory.size() - 1;
       int index = 0;
       for (; index < numberOfFootstepsToPlan; index++)
       {
-         FootstepTrajectoryPoint planningFootstep = footstepLocation.get(index);
+         FootstepTrajectoryPoint planningFootstep = footstepTrajectory.get(index);
          FramePoint2d footstepLocation = planningFootstep.getCentroidOfExpectedFootPolygonLocation().toFramePoint2d();
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(planningFootstep.getSupportSide()),
                                          coPWayPointAlphas.get(planningFootstep.getSupportSide()), footstepLocation, planningFootstep.getSwingTime(),
                                          planningFootstep.getTransferTime());
       }
-      if (footstepLocation.size() - 1 <= numberOfFootstepstoConsider.getIntegerValue())
+      if (footstepTrajectory.size() - 1 <= numberOfFootstepstoConsider.getIntegerValue())
          computeReferenceCoPsForFinalTransfer(index);
    }
 
    private void computeReferenceCoPsForFinalTransfer(int indexOfFinalFootStep)
    {
-      FootstepTrajectoryPoint planningFootstep = footstepLocation.get(indexOfFinalFootStep);
+      FootstepTrajectoryPoint planningFootstep = footstepTrajectory.get(indexOfFinalFootStep);
       FramePoint2d lastFootstepLocation = planningFootstep.getCentroidOfExpectedFootPolygonLocation().toFramePoint2d();
 
       FramePoint2d nextCoPLocation;
-      if (footstepLocation.size() == 1)
+      if (footstepTrajectory.size() == 1)
       {
          FrameConvexPolygon2d lastSupportFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(planningFootstep.getSupportSide());
          nextCoPLocation = lastSupportFootPolygon.getCentroidCopy();
       }
       else
       {
-         nextCoPLocation = new FramePoint2d(footstepLocation.get(indexOfFinalFootStep - 1).getCentroidOfExpectedFootPolygonLocation().toFramePoint2d());
+         nextCoPLocation = new FramePoint2d(footstepTrajectory.get(indexOfFinalFootStep - 1).getCentroidOfExpectedFootPolygonLocation().toFramePoint2d());
       }
-
+      lastFootstepLocation.changeFrame(nextCoPLocation.getReferenceFrame());
       nextCoPLocation.add(lastFootstepLocation);
       nextCoPLocation.scale(0.5);
       nextCoPLocation.add(finalTransferOffset);
       coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(defaultFinalTransferDuration.getDoubleValue(), nextCoPLocation));
    }
 
-   private void computeReferenceCoPsForFootstep(FrameEuclideanTrajectoryPointList coPListToPack, List<FrameVector2d> coPOffsets, List<Double> coPWayPointAlpha,
+   private void computeReferenceCoPsForFootstep(FrameEuclideanTrajectoryPointList coPListToPack, List<Vector2D> coPOffsets, List<Double> coPWayPointAlpha,
                                                 FramePoint2d centroidOfFootstep, double swingTime, double transferTime)
    {
       FramePoint2d nextCoPLocation = new FramePoint2d(centroidOfFootstep);
@@ -374,7 +381,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
     * @param swingTime
     * @param coPOffsetIndex Must be greater than 1
     */
-   private void computeReferenceCoPsForFootstep(FrameEuclideanTrajectoryPointList coPListToPack, List<FrameVector2d> coPOffsets, List<Double> coPWayPointAlpha,
+   private void computeReferenceCoPsForFootstep(FrameEuclideanTrajectoryPointList coPListToPack, List<Vector2D> coPOffsets, List<Double> coPWayPointAlpha,
                                                 FramePoint2d centroidOfFootstep, double swingTime, int coPOffsetIndex)
    {
       for (int i = coPOffsetIndex; i < coPOffsets.size(); i++)
@@ -459,7 +466,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    {
       for (int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints(); i++)
       {
-         coPWayPoints.getTrajectoryPoint(0).changeFrame(worldFrame);
+         System.out.println("In Planner" + coPWayPoints.getTrajectoryPoint(i).toString());
+         coPWayPoints.getTrajectoryPoint(i).changeFrame(worldFrame);
       }
    }
 
