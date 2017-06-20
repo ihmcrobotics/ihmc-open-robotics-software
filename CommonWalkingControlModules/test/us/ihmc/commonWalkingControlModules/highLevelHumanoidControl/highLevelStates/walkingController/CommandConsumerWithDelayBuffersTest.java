@@ -8,9 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
@@ -172,8 +170,11 @@ public class CommandConsumerWithDelayBuffersTest
       CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
       YoDouble yoTime = new YoDouble("yoTime", null);
       CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
+      Map<Class<? extends Command<?, ?>>, int[]> validQueuedMessages = new HashMap();
+
       for(Class<? extends Command<?, ?>> clazz: controllerSupportedCommands)
       {
+         validQueuedMessages.computeIfAbsent(clazz, k -> new int[1]);
          for (int i = 0; i < CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE; i++)
          {
             Command<?, M> command = getCommand(random, clazz);
@@ -186,10 +187,12 @@ public class CommandConsumerWithDelayBuffersTest
                   commandInputManager.submitCommand((C) command);
                   commandConsumer.update();
                   assertFalse(commandConsumer.isNewCommandAvailable(clazz));
+                  validQueuedMessages.get(clazz)[0]++;
                }
                catch (NotImplementedException e)
                {
                }
+
             }
          }
       }
@@ -219,7 +222,7 @@ public class CommandConsumerWithDelayBuffersTest
          if(commandConsumer.isNewCommandAvailable(clazz))
          {
             System.out.println(clazz);
-            assertEquals(CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE, commandConsumer.pollNewCommands((Class<C>) clazz).size());
+            assertEquals(validQueuedMessages.get(clazz)[0], commandConsumer.pollNewCommands((Class<C>) clazz).size());
             //we added several commands and then popped them so now they should all be empty
             assertNull(commandConsumer.pollNewestCommand((Class<C>) clazz));
             assertFalse(commandConsumer.isNewCommandAvailable(clazz));
