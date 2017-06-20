@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
@@ -39,6 +40,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private final FrameVector angularAcceleration = new FrameVector();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BlendedOrientationTrajectoryGenerator(String prefix, OrientationTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
          YoVariableRegistry parentRegistry)
@@ -156,17 +158,23 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       angularAcceleration.changeFrame(trajectoryFrame);
 
       computeInitialConstraintOffset(time);
+      orientation.getTransform3D(tempTransform);
       initialConstraintOrientationOffset.changeFrame(trajectoryFrame);
       initialConstraintAngularVelocityOffset.changeFrame(trajectoryFrame);
+      initialConstraintAngularVelocityOffset.applyTransform(tempTransform);
       initialConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
+      initialConstraintAngularAccelerationOffset.applyTransform(tempTransform);
       orientation.multiply(initialConstraintOrientationOffset.getQuaternion());
       angularVelocity.add(initialConstraintAngularVelocityOffset);
       angularAcceleration.add(initialConstraintAngularAccelerationOffset);
 
       computeFinalConstraintOffset(time);
+      orientation.getTransform3D(tempTransform);
       finalConstraintOrientationOffset.changeFrame(trajectoryFrame);
       finalConstraintAngularVelocityOffset.changeFrame(trajectoryFrame);
+      finalConstraintAngularVelocityOffset.applyTransform(tempTransform);
       finalConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
+      finalConstraintAngularAccelerationOffset.applyTransform(tempTransform);
       orientation.multiply(finalConstraintOrientationOffset.getQuaternion());
       angularVelocity.add(finalConstraintAngularVelocityOffset);
       angularAcceleration.add(finalConstraintAngularAccelerationOffset);
@@ -226,8 +234,13 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       initialBlendEndTime.set(initialTime + blendDuration);
       initialConstraintTrajectory.setTrajectoryTime(blendDuration);
 
+      trajectory.compute(initialTime);
+      trajectory.getOrientation(tempOrientation);
+      tempOrientation.getTransform3D(tempTransform);
+
       tempOrientation.set(initialConstraintOrientationError);
       tempAngularVelocity.set(initialConstraintAngularVelocityError);
+      tempTransform.inverseTransform(tempAngularVelocity.getVector());
       initialConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
 
       tempOrientation.setToZero();
@@ -242,13 +255,18 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       finalBlendEndTime.set(finalTime);
       finalConstraintTrajectory.setTrajectoryTime(blendDuration);
 
-      tempOrientation.setToZero();
-      tempAngularVelocity.setToZero();
-      finalConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
+      trajectory.compute(finalTime);
+      trajectory.getOrientation(tempOrientation);
+      tempOrientation.getTransform3D(tempTransform);
 
       tempOrientation.set(finalConstraintOrientationError);
       tempAngularVelocity.set(finalConstraintAngularVelocityError);
+      tempTransform.inverseTransform(tempAngularVelocity.getVector());
       finalConstraintTrajectory.setFinalConditions(tempOrientation, tempAngularVelocity);
+
+      tempOrientation.setToZero();
+      tempAngularVelocity.setToZero();
+      finalConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
       finalConstraintTrajectory.initialize();
    }
 
