@@ -43,7 +43,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public abstract class AbstractICPPlanner
+public abstract class AbstractICPPlanner implements ICPPlannerInterface
 {
    /** Whether to display by default the various artifacts for debug or not. */
    private static final boolean VISUALIZE = false;
@@ -332,18 +332,7 @@ public abstract class AbstractICPPlanner
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#clearPlan()
     */
-   public void clearPlan()
-   {
-      referenceCMPsCalculator.clear();
-
-      for (int i = 0; i < swingDurations.size(); i++)
-      {
-         swingDurations.get(i).setToNaN();
-         transferDurations.get(i).setToNaN();
-         swingDurationAlphas.get(i).setToNaN();
-         transferDurationAlphas.get(i).setToNaN();
-      }
-   }
+   public abstract void clearPlan();
 
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#setSupportLeg(us.ihmc.robotics.robotSide.RobotSide)
@@ -373,22 +362,7 @@ public abstract class AbstractICPPlanner
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#addFootstepToPlan(us.ihmc.humanoidRobotics.footstep.Footstep, us.ihmc.humanoidRobotics.footstep.FootstepTiming)
     */
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
-   {
-      if (footstep == null)
-         return;
-
-      referenceCMPsCalculator.addUpcomingFootstep(footstep);
-      int footstepIndex = referenceCMPsCalculator.getNumberOfFootstepRegistered() - 1;
-      swingDurations.get(footstepIndex).set(timing.getSwingTime());
-      transferDurations.get(footstepIndex).set(timing.getTransferTime());
-
-      swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
-      transferDurationAlphas.get(footstepIndex).set(defaultTransferDurationAlpha.getDoubleValue());
-
-      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
-      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
-   }
+   public abstract void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
 
 
    /* (non-Javadoc)
