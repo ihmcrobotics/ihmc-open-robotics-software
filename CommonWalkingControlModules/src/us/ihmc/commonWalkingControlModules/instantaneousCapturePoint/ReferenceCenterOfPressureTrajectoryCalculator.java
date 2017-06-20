@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.commonWalkingControlModules.configurations.ExtendedCapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -83,7 +83,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
     * @param contactableFeet
     * @param parentRegistry
     */
-   public void initializeParameters(ExtendedCapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
+   public void initializeParameters(CenterOfPressurePlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
                                     SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
       this.parentRegistry = parentRegistry;
@@ -501,7 +501,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    {
       for (int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints(); i++)
       {
-         System.out.println("In Planner" + coPWayPoints.getTrajectoryPoint(i).toString());
          coPWayPoints.getTrajectoryPoint(i).changeFrame(worldFrame);
       }
    }
