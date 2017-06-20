@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public abstract class ExtendedCapturePointPlannerParameters
+public abstract class CenterOfPressurePlannerParameters
 {  
    /**
     * Provides the CoP way point list for generating CoP trajectories
@@ -19,7 +19,7 @@ public abstract class ExtendedCapturePointPlannerParameters
     * @param side
     * @return
     */
-   public abstract List<Double> getCoPWayPointAlpha(RobotSide side);
+   public abstract List<Double> getCoPWayPointAlpha(RobotSide side);   
    public abstract Vector2D getFinalTransferCoPOffset();
    public abstract double getDefaultFinalTransferDuration();
    public abstract int getNumberOfFootstepsToConsider();

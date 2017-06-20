@@ -10,7 +10,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.DummyExtendedCapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.DummyCoPParameters;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -44,16 +44,18 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    private final double transferTime = 0.1;
    private final double stepLength = 0.3;
    private final double stepWidth = soleFrameYDisplacement;
+   private final double EPSILON = 10e-5;
    
    ReferenceCenterOfPressureTrajectoryCalculator testCoPGenerator;
    SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
-   SideDependentList<RigidBody> feetBodies = new SideDependentList<>(); 
+   SideDependentList<RigidBody> feetBodies = new SideDependentList<>();
    YoVariableRegistry parentRegistry = new YoVariableRegistry("TestRegistry");
    MidFootZUpGroundFrame midFeetZUpFrame;
    SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
-   DummyExtendedCapturePointPlannerParameters icpPlannerParameters;
+   DummyCoPParameters icpPlannerParameters;
+
    public void setUp()
    {
       for (RobotSide side : RobotSide.values)
@@ -84,57 +86,52 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
          contactFramePoints.add(new FramePoint2d(soleFrame, point2));
          contactFramePoints.add(new FramePoint2d(soleFrame, point3));
          contactFramePoints.add(new FramePoint2d(soleFrame, point4));
-         
-         YoPlaneContactState contactState = new YoPlaneContactState("DummyRobot" + side.toString() + "FootContactState", feetBody, soleFrame, contactFramePoints, 10, parentRegistry);
+
+         YoPlaneContactState contactState = new YoPlaneContactState("DummyRobot" + side.toString() + "FootContactState", feetBody, soleFrame,
+                                                                    contactFramePoints, 10, parentRegistry);
          contactStates.put(side, contactState);
       }
-      midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT),
-                                                                        soleZUpFrames.get(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, parentRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass");
       assertTrue("Object not initialized", testCoPGenerator != null);
-      icpPlannerParameters = new DummyExtendedCapturePointPlannerParameters();
+      icpPlannerParameters = new DummyCoPParameters();
       testCoPGenerator.initializeParameters(icpPlannerParameters, bipedSupportPolygons, contactableFeet, null);
    }
-  
+
    public void sendFootStepMessages(int numberOfFootstepsToPlan)
    {
       RobotSide robotSide = RobotSide.LEFT;
       FramePoint footstepLocation = new FramePoint();
       FrameOrientation footstepOrientation = new FrameOrientation();
-      for(int i = 1; i < numberOfFootstepsToPlan + 1; i++)
+      for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
       {
          Footstep footstep = new Footstep(feetBodies.get(robotSide), robotSide);
-         footstepLocation.set(i*stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
+         footstepLocation.set(i * stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
          footstep.setPose(footstepLocation, footstepOrientation);
-         FootstepTiming timing = new FootstepTiming(swingTime, transferTime);         
+         FootstepTiming timing = new FootstepTiming(swingTime, transferTime);
          testCoPGenerator.addFootstepToPlan(footstep, timing);
          robotSide = robotSide.getOppositeSide();
       }
    }
-   
+
    @Test
-   public void testDoubleSupportFootstepPlan()   
+   public void testDoubleSupportFootstepPlan()
    {
       setUp();
       int numberOfFootsteps = 3;
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true);
-      testCoPGenerator.clearPlan();
-      FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-      testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
-      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(0.0);
       List<FramePoint> coPList = testCoPGenerator.getCoPs();
-      for (int i = 0; i < coPList.size(); i++)
-      {
-         System.out.println(coPList.get(i).toString());
-      }
+      assertTrue("Incorrect number of CoP way points generated", coPList.size() == numberOfFootsteps * 3 + 2);
+      assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
+      assertTrue(coPList.get(1).epsilonEquals(other, epsilon));
    }
 
    @Test
-   public void testSingleSupportFootstepPlan()   
+   public void testSingleSupportFootstepPlan()
    {
       setUp();
       int numberOfFootsteps = 10;
@@ -144,11 +141,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
       testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport();
       List<FramePoint> coPList = testCoPGenerator.getCoPs();
-      for (int i = 0; i < coPList.size(); i++)
-      {
-         System.out.println(coPList.get(i).toString());
-      }
    }
-
 
 }

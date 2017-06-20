@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class DummyExtendedCapturePointPlannerParameters extends ExtendedCapturePointPlannerParameters
+public class DummyCoPParameters extends CenterOfPressurePlannerParameters
 {   
    int numberOfCoPWayPointsPerFoot = 3;
    int numberOfFootstepsToConsider = 3;
@@ -18,7 +18,7 @@ public class DummyExtendedCapturePointPlannerParameters extends ExtendedCaptureP
    List<Vector2D> rightCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
    List<Double> coPWayPointAlphas= new ArrayList<>(numberOfCoPWayPointsPerFoot-1);
    
-   public DummyExtendedCapturePointPlannerParameters()
+   public DummyCoPParameters()
    {
       leftCoPLocations.add(new Vector2D(-0.05, 0.0));
       leftCoPLocations.add(new Vector2D(0.0, 0.0));
