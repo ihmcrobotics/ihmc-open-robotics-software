@@ -124,16 +124,6 @@ public class SolarPanelCleaningPose
       return pose;
    }
 
-//   public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
-//   {
-//      Point3D positionToWorld = new Point3D(getDesiredHandPosition());
-//      Quaternion orientationToWorld = new Quaternion(getDesiredHandOrientation());
-//
-//      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld, ReferenceFrame.getWorldFrame());
-//
-//      return handMessage;
-//   }
-
    public Point3D getDesiredHandPosition()
    {
       return new Point3D(this.pose.getPosition());

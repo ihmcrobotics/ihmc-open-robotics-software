@@ -52,6 +52,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SolarPanelEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -136,7 +137,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      CommonAvatarEnvironmentInterface envrionment = new SolarPanelEnvironment();
+      CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
 
       //drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, simulationTestingParameters, getRobotModel());
@@ -144,8 +145,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       setupKinematicsToolboxModule();
    }
    
-   //@Test
-   public void kinematicsToolBoxTest() throws SimulationExceededMaximumTimeException, IOException
+   @Test
+   public void wheneverWholeBodyValidityTesterTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(false)
          ThreadTools.sleep(13000);
@@ -162,27 +163,49 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
             
-      kinematicsToolboxModule.getToolboxController().update();
+      setUpSolarPanel();
+                 
+      // construct
+      WheneverWholeBodyValidityTester nodeValidityTester = new WheneverWholeBodyValidityTester(getRobotModel());
+            
+      // create initial robot configuration
+      nodeValidityTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
+
       
-      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      drcBehaviorTestHelper.send(message);
+      nodeValidityTester.initialize();      
+      nodeValidityTester.holdCurrentTrajectoryMessages();
       
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      // Hand
+      Quaternion desiredHandOrientation = new Quaternion();
+      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
+      nodeValidityTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
       
-      RigidBody chest = sdfFullRobotModel.getChest();
       Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
+      nodeValidityTester.setDesiredChestOrientation(desiredChestOrientation);
+            
+      nodeValidityTester.setDesiredPelvisHeight(0.75);
       
-      KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
-      handMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      toolboxCommunicator.send(handMessage);
+      nodeValidityTester.putTrajectoryMessages();
+      
+      for(int i=0;i<30;i++)
+      {
+         nodeValidityTester.updateInternal();
+         ThreadTools.sleep(10);
+      }
+      
+            
+      
+      FullHumanoidRobotModel createdFullRobotModel = nodeValidityTester.getDesiredFullRobotModel();
+            
+      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
       
       
       
       PrintTools.info("END");     
    } 
-   
-   @Test
+      
+   //@Test
    public void isValidTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(false)
@@ -201,39 +224,13 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       sdfFullRobotModel.updateFrames();
             
       setUpSolarPanel();
-            
-     
+                 
       // construct
       RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyValidityTester(getRobotModel());
-      
-      
-      // check current pose
-      kinematicsToolboxModule.getToolboxController().update();
-      
-      PrintTools.info("Initial right Hand ");
-      MovingReferenceFrame rightHandBodyFixedFrame;
-      rightHandBodyFixedFrame = sdfFullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame();
-      System.out.println(rightHandBodyFixedFrame.getTransformToWorldFrame());
-      System.out.println(rightHandBodyFixedFrame.getRootFrame());
-      
-      
-      
+                  
       // create initial robot configuration
-      ForceSensorDefinition[] forceSensorDefinitions;
-      IMUDefinition[] imuDefinitions;
-      OneDoFJoint[] joints = sdfFullRobotModel.getOneDoFJoints();
-      imuDefinitions = sdfFullRobotModel.getIMUDefinitions();
-      forceSensorDefinitions = sdfFullRobotModel.getForceSensorDefinitions();      
       
-      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
-
-      currentRobotConfigurationData.setRootOrientation(new Quaternion(sdfFullRobotModel.getRootJoint().getRotationForReading()));
-      currentRobotConfigurationData.setRootTranslation(new Vector3D(sdfFullRobotModel.getRootJoint().getTranslationForReading()));
-      currentRobotConfigurationData.setJointState(joints);
-      
-      RRTNode3DTimeDomain.nodeValidityTester.updateRobotConfigurationData(currentRobotConfigurationData);
-      
-      
+      RRTNode3DTimeDomain.nodeValidityTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
 
       // temporary node define
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
@@ -247,48 +244,10 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info(""+node1.isValidNode());
       
       
-            
       
       FullHumanoidRobotModel createdFullRobotModel = RRTNode3DTimeDomain.nodeValidityTester.getDesiredFullRobotModel();
-      rightHandBodyFixedFrame = createdFullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame();
-      System.out.println(rightHandBodyFixedFrame.getTransformToWorldFrame());
-      System.out.println(rightHandBodyFixedFrame.getRootFrame());
-      
-      FramePose rightHandBodyFixedFramePose = new FramePose();
-      rightHandBodyFixedFramePose.setPose(rightHandBodyFixedFrame.getTransformToWorldFrame());
-      System.out.println(rightHandBodyFixedFramePose);
-      
-      
-      for (int i = 0; i < createdFullRobotModel.getOneDoFJoints().length; i++)
-      {         
-         double jointPosition = createdFullRobotModel.getOneDoFJoints()[i].getQ();
-         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(createdFullRobotModel.getOneDoFJoints()[i].getName());
-   
-         PrintTools.info(""+ createdFullRobotModel.getOneDoFJoints()[i].getName() +" "+ jointPosition);
-         
-         if (scsJoint instanceof PinJoint)
-         {
-            PinJoint pinJoint = (PinJoint) scsJoint;
-//            if(i == 6)
-//            {
-//               jointPosition = 0.0;
-//            }
-            pinJoint.setQ(jointPosition);
-         }
-         else
-         {
-            PrintTools.info(createdFullRobotModel.getOneDoFJoints()[i].getName() + " was not a PinJoint.");
-         }
-      }
-
-      FloatingJoint scsRootJoint = drcBehaviorTestHelper.getRobot().getRootJoint();
-      scsRootJoint.setQuaternion(new Quaternion(createdFullRobotModel.getRootJoint().getRotationForReading()));
-      scsRootJoint.setPosition(new Point3D(createdFullRobotModel.getRootJoint().getTranslationForReading()));
-      
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.005);
-      
-      
-      
+            
+      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
       
       PrintTools.info("END");     
    } 
@@ -510,5 +469,30 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       ret.add(nodeTwoSphere);
 
       return ret;
+   }
+   
+   private void showUpFullRobotModelWithConfiguration(FullHumanoidRobotModel createdFullRobotModel) throws SimulationExceededMaximumTimeException
+   {
+      for (int i = 0; i < createdFullRobotModel.getOneDoFJoints().length; i++)
+      {         
+         double jointPosition = createdFullRobotModel.getOneDoFJoints()[i].getQ();
+         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(createdFullRobotModel.getOneDoFJoints()[i].getName());
+         
+         if (scsJoint instanceof PinJoint)
+         {
+            PinJoint pinJoint = (PinJoint) scsJoint;
+            pinJoint.setQ(jointPosition);
+         }
+         else
+         {
+            PrintTools.info(createdFullRobotModel.getOneDoFJoints()[i].getName() + " was not a PinJoint.");
+         }
+      }
+
+      FloatingJoint scsRootJoint = drcBehaviorTestHelper.getRobot().getRootJoint();
+      scsRootJoint.setQuaternion(new Quaternion(createdFullRobotModel.getRootJoint().getRotationForReading()));
+      scsRootJoint.setPosition(new Point3D(createdFullRobotModel.getRootJoint().getTranslationForReading()));
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.005);
    }
 }
