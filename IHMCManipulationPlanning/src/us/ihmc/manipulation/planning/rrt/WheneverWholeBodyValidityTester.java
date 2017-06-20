@@ -27,14 +27,15 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -48,6 +49,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -59,11 +61,11 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.PinJoint;
 
 /*
  * Make sure this class is for testing whole-body inverse kinematics only.
@@ -75,6 +77,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 
 public class WheneverWholeBodyValidityTester
 {
+   private boolean DEBUG = false;
    protected final String name = getClass().getSimpleName();   
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
    
@@ -127,6 +130,18 @@ public class WheneverWholeBodyValidityTester
    private final IntegerYoVariable numberOfActiveCommands = new IntegerYoVariable("numberOfActiveCommands", registry);
    
    private KinematicsToolboxOutputConverter outputConverter;
+   
+   private SideDependentList<WeightMatrix6D> handWeightMatrices = new SideDependentList<>(new WeightMatrix6D(), new WeightMatrix6D());
+   private SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
+   private SideDependentList<FramePose> handFramePoses = new SideDependentList<>(new FramePose(), new FramePose());
+   
+   private WeightMatrix6D pelvisWeightMatrix = new WeightMatrix6D();
+   private SelectionMatrix6D pelvisSelectionMatrix = new SelectionMatrix6D();
+   private FramePose pelvisFramePose = new FramePose();
+   
+   private WeightMatrix6D chestWeightMatrix = new WeightMatrix6D();
+   private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
+   private FrameOrientation chestFrameOrientation = new FrameOrientation();
    
    public WheneverWholeBodyValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
@@ -265,12 +280,14 @@ public class WheneverWholeBodyValidityTester
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
-
-      PrintTools.info("Initial posture ");      
+      if(DEBUG)
+         PrintTools.info("Initial posture ");      
       HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       desiredReferenceFrames.updateFrames(); 
-      printOutRobotModel(desiredFullRobotModel, worldFrame);
-      printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
+      if(DEBUG)
+         printOutRobotModel(desiredFullRobotModel, worldFrame);
+      if(DEBUG)
+         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
       
       return true;
    }
@@ -299,11 +316,10 @@ public class WheneverWholeBodyValidityTester
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-
+      
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
-
       // Calculating the solution quality based on sum of all the commands' tracking error.
       solutionQuality.set(wholeBodyFunctions.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
 
@@ -316,13 +332,6 @@ public class WheneverWholeBodyValidityTester
       
       
       
-      PrintTools.info("Update Internal ");    
-      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      desiredReferenceFrames.updateFrames();
-      printOutRobotModel(desiredFullRobotModel, worldFrame);
-      printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
-      System.out.println(desiredReferenceFrames.getMidFootZUpGroundFrame().getTransformToWorldFrame());
-      System.out.println(desiredReferenceFrames.getMidFootZUpGroundFrame());
    }
 
    public void updateTools()
@@ -423,7 +432,24 @@ public class WheneverWholeBodyValidityTester
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void updateRobotConfigurationData(OneDoFJoint[] joints, FloatingInverseDynamicsJoint rootJoint)
+   {
+      ForceSensorDefinition[] forceSensorDefinitions;
+      IMUDefinition[] imuDefinitions;
+      
+      imuDefinitions = desiredFullRobotModel.getIMUDefinitions();
+      forceSensorDefinitions = desiredFullRobotModel.getForceSensorDefinitions();      
+      
+      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
+
+      currentRobotConfigurationData.setRootOrientation(new Quaternion(rootJoint.getRotationForReading()));
+      currentRobotConfigurationData.setRootTranslation(new Vector3D(rootJoint.getTranslationForReading()));
+      currentRobotConfigurationData.setJointState(joints);
+      
+      updateRobotConfigurationData(currentRobotConfigurationData);
+   }
+   
+   private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
@@ -448,9 +474,7 @@ public class WheneverWholeBodyValidityTester
    {                  
       KinematicsToolboxOutputStatus currentOutputStatus = new KinematicsToolboxOutputStatus(oneDoFJoints);      
       for (int i = 0; i < oneDoFJoints.length; i++)
-      {
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
-      }
       
       currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
       
@@ -463,9 +487,12 @@ public class WheneverWholeBodyValidityTester
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
       currentReferenceFrames.updateFrames();
       
-      PrintTools.info("Posture to be hold is ");      
-      printOutRobotModel(currentFullRobotModel, worldFrame);
-      printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
+      if(DEBUG)
+         PrintTools.info("Posture to be hold is ");      
+      if(DEBUG)
+         printOutRobotModel(currentFullRobotModel, worldFrame);
+      if(DEBUG)
+         printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
       
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -473,8 +500,9 @@ public class WheneverWholeBodyValidityTester
          handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
          handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);      
           
-         handWeightMatrices.get(robotSide).setLinearWeights(20.0, 20.0, 20.0);
-         handWeightMatrices.get(robotSide).setAngularWeights(20.0, 20.0, 20.0);
+         double handWeight = 20.0;
+         handWeightMatrices.get(robotSide).setLinearWeights(handWeight, handWeight, handWeight);
+         handWeightMatrices.get(robotSide).setAngularWeights(handWeight, handWeight, handWeight);
                             
          ReferenceFrame desiredHandReferenceFrame = currentFullRobotModel.getHand(robotSide).getBodyFixedFrame();
          FramePose desiredHandFramePose = new FramePose(desiredHandReferenceFrame);
@@ -492,7 +520,7 @@ public class WheneverWholeBodyValidityTester
       pelvisSelectionMatrix.setLinearAxisSelection(false, false, true);
       pelvisSelectionMatrix.setAngularAxisSelection(true, true, true);      
        
-      double pelvisWeight = 2.0;
+      double pelvisWeight = 10.0;
       pelvisWeightMatrix.setLinearWeights(pelvisWeight, pelvisWeight, pelvisWeight);
       pelvisWeightMatrix.setAngularWeights(pelvisWeight, pelvisWeight, pelvisWeight);
        
@@ -506,73 +534,87 @@ public class WheneverWholeBodyValidityTester
       chestSelectionMatrix.setLinearAxisSelection(false, false, false);
       chestSelectionMatrix.setAngularAxisSelection(true, true, true);      
        
-      double chestWeight = 2.0;
+      double chestWeight = 10.0;
       chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
       chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
        
       chestFrameOrientation.set(desiredChestFrameOrientation);
    }
    
-   public void setDesiredHandPose(RobotSide robotSide, FramePose desiredPose)
-   {            
-      System.out.println(""+robotSide+" "+desiredPose);
+   public void setDesiredHandPose(RobotSide robotSide, Pose desiredPoseToMidZUp)
+   {  
       handSelectionMatrices.get(robotSide).clearSelection();
       handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
       handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);      
        
       handWeightMatrices.get(robotSide).setLinearWeights(20.0, 20.0, 20.0);
       handWeightMatrices.get(robotSide).setAngularWeights(20.0, 20.0, 20.0);
-       
-      handFramePoses.get(robotSide).set(desiredPose);
+      
+      /*
+       * The Z coordinate is upward like as robot coordinate and matched when human thumb up ahead.
+       * The X coordinate is forward like as robot coordinate and matched when human punch out ahead. 
+       */
+      FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getPosition());
+      FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
+      
+      desiredOrientationToWorld.appendPitchRotation(Math.PI*0.5);
+      desiredOrientationToWorld.appendRollRotation(-Math.PI*0.5);
+      
+      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
+      desiredPoseToWorld.changeFrame(worldFrame);
+      handFramePoses.get(robotSide).set(desiredPoseToWorld);
    }
    
-   public void setDesiredPelvisHeight(double desiredHeight)
+   public void setDesiredPelvisHeight(double desiredHeightToMidZUp)
    {                  
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
       
-      FramePose desiredPelvisFramePose = new FramePose(new FramePoint(worldFrame, 0, 0, desiredHeight), new FrameOrientation());
-      desiredPelvisFramePose.changeFrame(worldFrame);
+      FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), new Point3D(0, 0, desiredHeightToMidZUp));
+      FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), new Quaternion());
+            
+      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);      
+      desiredPoseToWorld.changeFrame(worldFrame);
       
-      pelvisFramePose.set(desiredPelvisFramePose);
+      pelvisFramePose.set(desiredPoseToWorld);
    }
    
-   private SideDependentList<WeightMatrix6D> handWeightMatrices = new SideDependentList<>(new WeightMatrix6D(), new WeightMatrix6D());
-   private SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
-   private SideDependentList<FramePose> handFramePoses = new SideDependentList<>(new FramePose(), new FramePose());
-   
-   private WeightMatrix6D pelvisWeightMatrix = new WeightMatrix6D();
-   private SelectionMatrix6D pelvisSelectionMatrix = new SelectionMatrix6D();
-   private FramePose pelvisFramePose = new FramePose();
-   
-   private WeightMatrix6D chestWeightMatrix = new WeightMatrix6D();
-   private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
-   private FrameOrientation chestFrameOrientation = new FrameOrientation();
+   public void setDesiredChestOrientation(Quaternion desiredOrientationToMidZUp)
+   {      
+      FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredOrientationToMidZUp);
+      desiredOrientationToWorld.changeFrame(worldFrame);
+      
+      chestSelectionMatrix.clearSelection();
+      chestSelectionMatrix.setLinearAxisSelection(false, false, false);
+      chestSelectionMatrix.setAngularAxisSelection(true, true, true);      
+       
+      double chestWeight = 10.0;
+      chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
+      chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
+      
+      chestFrameOrientation.set(desiredOrientationToWorld);
+   }
    
    public void putTrajectoryMessages()
    {
-      PrintTools.info("putHand");
       putHandTrajectoryMessages();
-      PrintTools.info("putPelvis");
       putPelvisTrajectoryMessages();
-      PrintTools.info("putChest");
       putChestTrajectoryMessages();
-      PrintTools.info("putEND");
    }
    
    private void putHandTrajectoryMessages()
-   {
-      SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
-      
+   { 
       for(RobotSide robotSide : RobotSide.values)
       {
          if(handFramePoses.get(robotSide).containsNaN())
          {
-            PrintTools.info(""+robotSide);
+            PrintTools.warn("The desired "+robotSide+" has Nan Value");
          }
          else
          {
+            SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
+            
             feedbackControlCommand.set(rootBody, desiredFullRobotModel.getHand(robotSide));
             feedbackControlCommand.setGains((SE3PIDGainsInterface) gains);
             
@@ -612,7 +654,7 @@ public class WheneverWholeBodyValidityTester
    }
    
    
-   public void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
+   private void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
    {
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(printFullRobotModel);
       currentReferenceFrames.updateFrames();
@@ -620,7 +662,6 @@ public class WheneverWholeBodyValidityTester
       for (int i = 0; i < printFullRobotModel.getOneDoFJoints().length; i++)
       {         
          double jointPosition = printFullRobotModel.getOneDoFJoints()[i].getQ();         
-//         PrintTools.info(""+ printFullRobotModel.getOneDoFJoints()[i].getName() +" "+ jointPosition +" " +oneDoFJoints[i].getQ());
       }
       
       for(RobotSide robotSide : RobotSide.values)
