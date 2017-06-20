@@ -45,6 +45,10 @@ public class LegConfigurationControlModule
    private final DoubleYoVariable kneeBentPrivilegedVelocityGain;
 
    private final DoubleYoVariable kneePitchPrivilegedConfiguration;
+   private final DoubleYoVariable kneePitchPrivilegedError;
+
+   private final DoubleYoVariable kneePrivilegedPAction;
+   private final DoubleYoVariable kneePrivilegedDAction;
    private final DoubleYoVariable privilegedMaxAcceleration;
 
    private final DoubleYoVariable desiredAngleWhenStraight;
@@ -101,6 +105,10 @@ public class LegConfigurationControlModule
 
       kneePitchPrivilegedConfiguration = new DoubleYoVariable(sidePrefix + "KneePitchPrivilegedConfiguration", registry);
       privilegedMaxAcceleration = new DoubleYoVariable(namePrefix + "PrivilegedMaxAcceleration", registry);
+
+      kneePitchPrivilegedError = new DoubleYoVariable(sidePrefix + "KneePitchPrivilegedError", registry);
+      kneePrivilegedPAction = new DoubleYoVariable(sidePrefix + "KneePrivilegedPAction", registry);
+      kneePrivilegedDAction = new DoubleYoVariable(sidePrefix + "KneePrivilegedDAction", registry);
 
       legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
 
@@ -195,10 +203,14 @@ public class LegConfigurationControlModule
 
    private double computeKneeAcceleration()
    {
-      double qdd = 2.0 * kneePitchPrivilegedConfigurationGain * (kneePitchPrivilegedConfiguration.getDoubleValue() - kneePitchJoint.getQ()) / kneeRangeOfMotion;
-      qdd -= kneePitchPrivilegedVelocityGain * kneePitchJoint.getQd();
-      return MathTools.clamp(qdd, privilegedMaxAcceleration.getDoubleValue());
+      double error = kneePitchPrivilegedConfiguration.getDoubleValue() - kneePitchJoint.getQ();
+      kneePitchPrivilegedError.set(error);
 
+      double kp = 2.0 * kneePitchPrivilegedConfigurationGain / kneeRangeOfMotion;
+      kneePrivilegedPAction.set(kp * error);
+      kneePrivilegedDAction.set(kneePitchPrivilegedVelocityGain * -kneePitchJoint.getQd());
+
+      return MathTools.clamp(kneePrivilegedPAction.getDoubleValue() + kneePrivilegedDAction.getDoubleValue(), privilegedMaxAcceleration.getDoubleValue());
    }
 
    public void setKneeAngleState(LegConfigurationType controlType)
