@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -95,6 +96,12 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    }
 
    // SCALAR FORMULATION
+   /**
+    * Compute the i-th derivative of the reference ICP at the current time: &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param icpQuantityDesiredOutput
+    * @param icpDerivativeOrder
+    * @param time
+    */
    private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
    {
       for(Direction dir : Direction.values())
@@ -105,8 +112,11 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       icpQuantityDesiredOutput.setIncludingFrame(trajectoryFrame, icpQuantityDesiredCurrent);
    }
 
+   /**
+    * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
+    */
    private void calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar()
-   {       
+   {
       setICPTerminalConditionScalar();
       
       for(int i = numberOfSegments-1; i >= 0; i--)
@@ -130,6 +140,12 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
                                   icpPositionDesiredFinalMatrix.get(firstSegment, Direction.Z.ordinal()));
    }
    
+   /**
+    * Setting the terminal DCMequal to corresponding CMP to initialize the DCM backward iteration
+    * <P>
+    * &xi;<sub>ref,T,n<sub>&phi;</sub></sub> = &nu;<sub>ref,T,n<sub>&phi;</sub></sub>
+    * 
+    */
    private void setICPTerminalConditionScalar()
    {
       for(int i = 0; i < 3; i++)
@@ -140,7 +156,17 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       }
    }
    
-   
+   /**
+    * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
+    * <br>
+    * The approach for calculating DCMs is based on CMP polynomials instead of discrete waypoints
+    * 
+    * @param icpDerivativeOrder
+    * @param cmpPolynomial
+    * @param icpPositionDesiredFinal
+    * @param time
+    * @return
+    */
    private double calculateICPQuantityFromCorrespondingCMPPolynomialScalar(int icpDerivativeOrder, YoPolynomial cmpPolynomial, double icpPositionDesiredFinal, double time)
    {            
       DenseMatrix64F polynomialCoefficientVector =  cmpPolynomial.getCoefficientsVector();
@@ -153,6 +179,20 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       return calculateICPQuantityScalar(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal);
    }
    
+   /**
+    * Compute the i-th derivative of &xi;<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
+    * <P>
+    * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
+    * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
+    *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
+    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    * 
+    * @param generalizedAlphaBetaPrimeMatrix
+    * @param generalizedGammaPrimeMatrix
+    * @param polynomialCoefficientVector
+    * @param icpPositionDesiredFinal
+    * @return
+    */
    private double calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
                                              DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
    {
@@ -172,7 +212,17 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       return icpQuantityDesired;
    }
 
-   
+   /**
+    * Compute the i-th derivative of &alpha;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
+    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
+    * 
+    * @param generalizedAlphaPrime
+    * @param alphaDerivativeOrder
+    * @param cmpPolynomial
+    * @param time
+    */
    private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoPolynomial cmpPolynomial, double time)
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
@@ -193,6 +243,17 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       }
    }
    
+   /**
+    * Compute the i-th derivative of &beta;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-(j-i)</sup> *
+    * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
+    * 
+    * @param generalizedBetaPrime
+    * @param betaDerivativeOrder
+    * @param cmpPolynomial
+    * @param time
+    */
    private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoPolynomial cmpPolynomial, double time)
    {            
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
@@ -214,7 +275,18 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
       }
    }
 
-   void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoPolynomial cmpPolynomial, double time)
+   /**
+    * Compute the i-th derivative of &gamma;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
+    * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
+    * 
+    * @param generalizedGammaPrime
+    * @param gammaDerivativeOrder
+    * @param cmpPolynomial
+    * @param time
+    */
+   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoPolynomial cmpPolynomial, double time)
    {      
       double timeTrajectory = cmpPolynomial.getXFinal();
       
