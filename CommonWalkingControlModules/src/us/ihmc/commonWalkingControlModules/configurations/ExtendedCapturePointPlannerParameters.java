@@ -22,19 +22,8 @@ public abstract class ExtendedCapturePointPlannerParameters
    public abstract List<Double> getCoPWayPointAlpha(RobotSide side);
    public abstract Vector2D getFinalTransferCoPOffset();
    public abstract double getDefaultFinalTransferDuration();
-   
-   public int getNumberOfFootstepsToConsider()
-   {
-      return 3;
-   }
-   
-   public int getNumberOfWayPointsPerFoot()
-   {
-      return 2;
-   }
-   
-   public CoPSplineType getOrderOfCoPInterpolation()
-   {
-      return CoPSplineType.CUBIC;
-   }
+   public abstract int getNumberOfFootstepsToConsider();
+   public abstract int getNumberOfWayPointsPerFoot();
+   public abstract CoPSplineType getOrderOfCoPInterpolation();   
+   public abstract double getDefaultStationaryTransferTime();
 }

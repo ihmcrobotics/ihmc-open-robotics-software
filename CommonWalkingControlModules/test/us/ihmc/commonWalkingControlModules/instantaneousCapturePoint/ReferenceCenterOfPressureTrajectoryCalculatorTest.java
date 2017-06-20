@@ -115,17 +115,40 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    }
    
    @Test
-   public void testFootStepPlan()   
+   public void testDoubleSupportFootstepPlan()   
    {
       setUp();
       int numberOfFootsteps = 3;
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
-      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(RobotSide.LEFT, true);
+      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true);
+      testCoPGenerator.clearPlan();
+      FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
+      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(0.0);
       List<FramePoint> coPList = testCoPGenerator.getCoPs();
       for (int i = 0; i < coPList.size(); i++)
       {
          System.out.println(coPList.get(i).toString());
       }
    }
+
+   @Test
+   public void testSingleSupportFootstepPlan()   
+   {
+      setUp();
+      int numberOfFootsteps = 10;
+      sendFootStepMessages(numberOfFootsteps);
+      assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
+      FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
+      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport();
+      List<FramePoint> coPList = testCoPGenerator.getCoPs();
+      for (int i = 0; i < coPList.size(); i++)
+      {
+         System.out.println(coPList.get(i).toString());
+      }
+   }
+
+
 }

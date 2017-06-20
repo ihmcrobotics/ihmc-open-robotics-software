@@ -98,4 +98,9 @@ public class DummyExtendedCapturePointPlannerParameters extends ExtendedCaptureP
    {
       this.finalTransferDuration = finalTransferDuration;
    }
+   
+   public double getDefaultStationaryTransferTime()
+   {
+      return getDefaultFinalTransferDuration();
+   }
 }
