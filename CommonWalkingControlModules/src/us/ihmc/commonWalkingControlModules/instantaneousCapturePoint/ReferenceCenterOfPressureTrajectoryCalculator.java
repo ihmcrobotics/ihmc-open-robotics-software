@@ -361,8 +361,13 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
 
    private void computeReferenceCoPsForUpcomingFootstep()
    {
-      int numberOfFootstepsToPlan = footstepTrajectory.size() - 1 > numberOfFootstepstoConsider.getIntegerValue() ? numberOfFootstepstoConsider.getIntegerValue()
+      int numberOfFootstepsToPlan = footstepTrajectory.size() - 1 > numberOfFootstepstoConsider.getIntegerValue() - 1 ? numberOfFootstepstoConsider.getIntegerValue() - 1
             : footstepTrajectory.size() - 1;
+      computeReferenceCoPsForUpcomingFootstep(numberOfFootstepsToPlan);
+   }
+   
+   private void computeReferenceCoPsForUpcomingFootstep(int numberOfFootstepsToPlan)
+   {
       int index = 0;
       for (; index < numberOfFootstepsToPlan; index++)
       {
@@ -406,7 +411,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       coPListToPack.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(transferTime, nextCoPLocation));
       computeReferenceCoPsForFootstep(coPListToPack, coPOffsets, coPWayPointAlpha, centroidOfFootstep, swingTime, 1);
    }
-
    /**
     * 
     * @param coPListToPack
