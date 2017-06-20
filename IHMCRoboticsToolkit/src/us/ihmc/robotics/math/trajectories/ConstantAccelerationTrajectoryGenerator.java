@@ -1,9 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-
 
 public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -12,9 +11,9 @@ public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectory
    private final DoubleProvider finalPositionProvider;
    private final DoubleProvider initialVelocityProvider;
    private final YoPolynomial polynomial;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble trajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
    private final int numberOfCoefficients = 3;
 
    public ConstantAccelerationTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider finalPositionProvider,
@@ -25,8 +24,8 @@ public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectory
       this.finalPositionProvider = finalPositionProvider;
       this.initialVelocityProvider = initialVelocityProvider;
       this.polynomial = new YoPolynomial(namePrefix + "Polynomial", numberOfCoefficients, registry);
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      this.currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      this.currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
    }

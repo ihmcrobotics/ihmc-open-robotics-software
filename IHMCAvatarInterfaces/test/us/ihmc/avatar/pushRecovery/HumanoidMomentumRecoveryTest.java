@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,9 +40,9 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
 
-   private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
-   private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
-   private BooleanYoVariable allowUsingHighMomentumWeight;
+   private YoBoolean allowUpperBodyMomentumInSingleSupport;
+   private YoBoolean allowUpperBodyMomentumInDoubleSupport;
+   private YoBoolean allowUsingHighMomentumWeight;
 
    protected double getDoubleSupportPushMagnitude()
    {
@@ -246,9 +246,9 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       Vector3D forcePointOffset = new Vector3D(0.0, 0.0, 0.1);
       pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
 
-      allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
-      allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
+      allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
+      allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
+      allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
 
       ThreadTools.sleep(1000);
    }
@@ -294,16 +294,16 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private class ControllerSpy extends SimpleRobotController
    {
-      private final BooleanYoVariable usingUpperBodyMomentum;
-      private final BooleanYoVariable usingHighMomentumWeight;
+      private final YoBoolean usingUpperBodyMomentum;
+      private final YoBoolean usingHighMomentumWeight;
 
-      private final BooleanYoVariable momentumWasTriggered = new BooleanYoVariable("momentumWasTriggered", registry);
-      private final BooleanYoVariable weightWasTriggered = new BooleanYoVariable("weightWasTriggered", registry);
+      private final YoBoolean momentumWasTriggered = new YoBoolean("momentumWasTriggered", registry);
+      private final YoBoolean weightWasTriggered = new YoBoolean("weightWasTriggered", registry);
 
       public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper)
       {
-         usingUpperBodyMomentum = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("usingUpperBodyMomentum");
-         usingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("usingHighMomentumWeight");
+         usingUpperBodyMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("usingUpperBodyMomentum");
+         usingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("usingHighMomentumWeight");
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
       }
 

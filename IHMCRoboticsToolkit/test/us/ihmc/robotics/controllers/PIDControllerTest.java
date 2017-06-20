@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.tools.MemoryTools;
 
 public class PIDControllerTest
@@ -35,16 +35,16 @@ public class PIDControllerTest
    public void testPIDControllerConstructor()
    {
       YoVariableRegistry registry = new YoVariableRegistry("mike");
-      DoubleYoVariable proportional = new DoubleYoVariable("proportional", registry);
+      YoDouble proportional = new YoDouble("proportional", registry);
       proportional.set(2.0);
 
-      DoubleYoVariable integral = new DoubleYoVariable("integral", registry);
+      YoDouble integral = new YoDouble("integral", registry);
       integral.set(3.0);
 
-      DoubleYoVariable derivative = new DoubleYoVariable("derivative", registry);
+      YoDouble derivative = new YoDouble("derivative", registry);
       derivative.set(4.0);
 
-      DoubleYoVariable maxError = new DoubleYoVariable("maxError", registry);
+      YoDouble maxError = new YoDouble("maxError", registry);
       maxError.set(10.0);
 
       new PIDController(proportional, integral, derivative, maxError, "", registry);
@@ -335,7 +335,7 @@ public class PIDControllerTest
       YoVariableRegistry registry = new YoVariableRegistry("robert");
       PIDController pid = new PIDController("", registry);
 
-      DoubleYoVariable yoLeakRatio = (DoubleYoVariable)registry.getVariable("leak_");
+      YoDouble yoLeakRatio = (YoDouble)registry.getVariable("leak_");
 
       double leakRatio = random.nextDouble();
       yoLeakRatio.set(leakRatio);
@@ -358,16 +358,16 @@ public class PIDControllerTest
    public void testCompute()
    {
       YoVariableRegistry registry = new YoVariableRegistry("mike");
-      DoubleYoVariable proportional = new DoubleYoVariable("proportional", registry);
+      YoDouble proportional = new YoDouble("proportional", registry);
       proportional.set(3.0);
 
-      DoubleYoVariable integral = new DoubleYoVariable("integral", registry);
+      YoDouble integral = new YoDouble("integral", registry);
       integral.set(2.0);
 
-      DoubleYoVariable derivative = new DoubleYoVariable("derivative", registry);
+      YoDouble derivative = new YoDouble("derivative", registry);
       derivative.set(1.0);
 
-      DoubleYoVariable maxError = new DoubleYoVariable("maxError", registry);
+      YoDouble maxError = new YoDouble("maxError", registry);
       maxError.set(10.0);
 
       PIDController pid = new PIDController(proportional, integral, derivative, maxError, "", registry);

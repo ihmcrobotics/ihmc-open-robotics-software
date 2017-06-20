@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DelayedDoubleYoVariableTest
+public class DelayedYoDoubleTest
 {
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -16,14 +16,14 @@ public class DelayedDoubleYoVariableTest
    public void testDelayedYoVariableMultipleTickDelays()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable variableToDelay = new DoubleYoVariable("variableToDelay", registry);
+      YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       for (int ticksToDelay = 0; ticksToDelay < 10; ticksToDelay++)
       {
          double firstValue = Math.random();
          variableToDelay.set(firstValue);
 
-         DelayedDoubleYoVariable delayedYoVariable = new DelayedDoubleYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+         DelayedYoDouble delayedYoVariable = new DelayedYoDouble("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
 
          int ticksToTest = 100;
          double[] valuesToSet = new double[ticksToTest];
@@ -58,12 +58,12 @@ public class DelayedDoubleYoVariableTest
    public void testDelayedYoVariableOneTickDelay()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable variableToDelay = new DoubleYoVariable("variableToDelay", registry);
+      YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       int ticksToDelay = 1;
 
       variableToDelay.set(0.0);
-      DelayedDoubleYoVariable delayedYoVariable = new DelayedDoubleYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoDouble delayedYoVariable = new DelayedYoDouble("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       assertEquals(delayedYoVariable.getDoubleValue(), 0.0, 1e-7);
 
       variableToDelay.set(1.0);
@@ -93,12 +93,12 @@ public class DelayedDoubleYoVariableTest
    public void testDelayedYoVariableZeroTickDelay()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable variableToDelay = new DoubleYoVariable("variableToDelay", registry);
+      YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       int ticksToDelay = 0;
 
       variableToDelay.set(0.0);
-      DelayedDoubleYoVariable delayedYoVariable = new DelayedDoubleYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoDouble delayedYoVariable = new DelayedYoDouble("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       assertEquals(delayedYoVariable.getDoubleValue(), 0.0, 1e-7);
 
       variableToDelay.set(1.0);

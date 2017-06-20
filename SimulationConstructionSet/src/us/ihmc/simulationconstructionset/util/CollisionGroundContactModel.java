@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.MovingGroundContactModel;
@@ -23,7 +23,7 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
    private final Robot robot; 
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CollisionGroundContactModel");
-   private DoubleYoVariable groundRestitution, groundFriction;
+   private YoDouble groundRestitution, groundFriction;
    
    private ArrayList<GroundContactPoint> gcPoints;
    private GroundProfile3D profile3D;
@@ -51,8 +51,8 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
       this.robot = robot;
       this.gcPoints = robot.getGroundContactPoints(groundContactGroupIdentifier);
 
-      groundRestitution = new DoubleYoVariable("groundRestitution", "CollisionGroundContactModel coefficient Of Restitution", registry);
-      groundFriction = new DoubleYoVariable("groundFriction", "CollisionGroundContactModel coefficient Of Friction", registry);
+      groundRestitution = new YoDouble("groundRestitution", "CollisionGroundContactModel coefficient Of Restitution", registry);
+      groundFriction = new YoDouble("groundFriction", "CollisionGroundContactModel coefficient Of Friction", registry);
      
       addRegistryToParent(parentRegistry);
 

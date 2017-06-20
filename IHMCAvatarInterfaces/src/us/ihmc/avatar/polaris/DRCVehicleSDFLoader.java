@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelVisual;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

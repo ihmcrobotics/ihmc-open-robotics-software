@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeControlM
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -14,7 +14,7 @@ public class KneeAngleManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
+   private final YoBoolean attemptToStraightenLegs = new YoBoolean("attemptToStraightenLegs", registry);
 
    private final SideDependentList<KneeControlModule> kneeControlModules = new SideDependentList<>();
 

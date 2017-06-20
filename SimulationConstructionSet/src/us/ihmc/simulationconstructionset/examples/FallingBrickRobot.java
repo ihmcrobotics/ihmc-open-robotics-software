@@ -5,8 +5,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -28,11 +28,11 @@ public class FallingBrickRobot extends Robot implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry("FallingBrickController");
 
    // position, velocity, and acceleration variables
-   DoubleYoVariable q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z;
-   DoubleYoVariable q_qs, q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
+   YoDouble q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z;
+   YoDouble q_qs, q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
 
-   DoubleYoVariable energy, q_qlength, theta_x;
-   DoubleYoVariable qdd2_wx, qdd2_wy, qdd2_wz;
+   YoDouble energy, q_qlength, theta_x;
+   YoDouble qdd2_wx, qdd2_wy, qdd2_wz;
 
    Joint floatingJoint;
 
@@ -115,31 +115,31 @@ public class FallingBrickRobot extends Robot implements RobotController
     */
    public void initRobot()
    {
-      q_qlength = new DoubleYoVariable("q_qlength", registry);
-      theta_x = new DoubleYoVariable("theta_x", registry);
+      q_qlength = new YoDouble("q_qlength", registry);
+      theta_x = new YoDouble("theta_x", registry);
 
       t.set(0.0);
 
-      q_x = (DoubleYoVariable)this.getVariable("q_x");
-      q_y = (DoubleYoVariable)this.getVariable("q_y");
-      q_z = (DoubleYoVariable)this.getVariable("q_z");
-      qd_x = (DoubleYoVariable)this.getVariable("qd_x");
-      qd_y = (DoubleYoVariable)this.getVariable("qd_y");
-      qd_z = (DoubleYoVariable)this.getVariable("qd_z");
-      qdd_x = (DoubleYoVariable)this.getVariable("qdd_x");
-      qdd_y = (DoubleYoVariable)this.getVariable("qdd_y");
-      qdd_z = (DoubleYoVariable)this.getVariable("qdd_z");
+      q_x = (YoDouble)this.getVariable("q_x");
+      q_y = (YoDouble)this.getVariable("q_y");
+      q_z = (YoDouble)this.getVariable("q_z");
+      qd_x = (YoDouble)this.getVariable("qd_x");
+      qd_y = (YoDouble)this.getVariable("qd_y");
+      qd_z = (YoDouble)this.getVariable("qd_z");
+      qdd_x = (YoDouble)this.getVariable("qdd_x");
+      qdd_y = (YoDouble)this.getVariable("qdd_y");
+      qdd_z = (YoDouble)this.getVariable("qdd_z");
 
-      q_qs = (DoubleYoVariable)this.getVariable("q_qs");
-      q_qx = (DoubleYoVariable)this.getVariable("q_qx");
-      q_qy = (DoubleYoVariable)this.getVariable("q_qy");
-      q_qz = (DoubleYoVariable)this.getVariable("q_qz");
-      qd_wx = (DoubleYoVariable)this.getVariable("qd_wx");
-      qd_wy = (DoubleYoVariable)this.getVariable("qd_wy");
-      qd_wz = (DoubleYoVariable)this.getVariable("qd_wz");
-      qdd_wx = (DoubleYoVariable)this.getVariable("qdd_wx");
-      qdd_wy = (DoubleYoVariable)this.getVariable("qdd_wy");
-      qdd_wz = (DoubleYoVariable)this.getVariable("qdd_wz");
+      q_qs = (YoDouble)this.getVariable("q_qs");
+      q_qx = (YoDouble)this.getVariable("q_qx");
+      q_qy = (YoDouble)this.getVariable("q_qy");
+      q_qz = (YoDouble)this.getVariable("q_qz");
+      qd_wx = (YoDouble)this.getVariable("qd_wx");
+      qd_wy = (YoDouble)this.getVariable("qd_wy");
+      qd_wz = (YoDouble)this.getVariable("qd_wz");
+      qdd_wx = (YoDouble)this.getVariable("qdd_wx");
+      qdd_wy = (YoDouble)this.getVariable("qdd_wy");
+      qdd_wz = (YoDouble)this.getVariable("qdd_wz");
 
       q_x.set(0.0);
       q_y.set(0.0);
@@ -162,11 +162,11 @@ public class FallingBrickRobot extends Robot implements RobotController
 
    public void initControl()
    {
-      qdd2_wx = new DoubleYoVariable("qdd2_wx", registry);
-      qdd2_wy = new DoubleYoVariable("qdd2_wy", registry);
-      qdd2_wz = new DoubleYoVariable("qdd2_wz", registry);
+      qdd2_wx = new YoDouble("qdd2_wx", registry);
+      qdd2_wy = new YoDouble("qdd2_wy", registry);
+      qdd2_wz = new YoDouble("qdd2_wz", registry);
 
-      energy = new DoubleYoVariable("energy", registry);
+      energy = new YoDouble("energy", registry);
    }
 
    @Override

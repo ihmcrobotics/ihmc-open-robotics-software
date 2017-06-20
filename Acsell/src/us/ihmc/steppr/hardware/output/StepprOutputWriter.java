@@ -14,10 +14,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -46,29 +46,29 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final StepprCommand command = new StepprCommand(registry);
 
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
-   private EnumMap<StepprJoint, DoubleYoVariable> tauControllerOutput;
+   private EnumMap<StepprJoint, YoDouble> tauControllerOutput;
    private final EnumMap<StepprJoint, OneDoFJoint> standPrepJoints;
    private final StepprStandPrep standPrep = new StepprStandPrep();
 
-   private final DoubleYoVariable controlRatio = new DoubleYoVariable("controlRatio", registry);
+   private final YoDouble controlRatio = new YoDouble("controlRatio", registry);
 
    private boolean outputEnabled;
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableOutput", registry);
 
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
    private final UDPAcsellOutputWriter outputWriter;
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpringCorrection = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauTotal = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoAngleSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoReflectedMotorInertia = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauInertiaViz = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> desiredJointQ = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
+   private final EnumMap<StepprJoint, YoDouble> yoTauSpringCorrection = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> yoTauTotal = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> yoAngleSpring = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> yoReflectedMotorInertia = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> yoTauInertiaViz = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> yoMotorDamping = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> desiredQddFeedForwardGain = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> desiredJointQ = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
+   private final YoEnum<WalkingStateEnum> yoWalkingState = new YoEnum<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
 
-   private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
+   private final YoDouble masterMotorDamping = new YoDouble("masterMotorDamping", registry);
 
    private final HystereticSpringProperties leftHipXSpringProperties = new StepprLeftHipXSpringProperties();
    private final HystereticSpringProperties rightHipXSpringProperties = new StepprRightHipXSpringProperties();
@@ -85,7 +85,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       TORQUE_CONTROL, POSITION_CONTROL;
    };
 
-   private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
+   private final EnumMap<StepprJoint, YoEnum<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, YoEnum<JointControlMode>>(
          StepprJoint.class);
 
    private WalkingStateEnum currentWalkingState;
@@ -96,33 +96,33 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       FullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
-      tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+      tauControllerOutput = new EnumMap<StepprJoint, YoDouble>(StepprJoint.class);
       for (StepprJoint joint : StepprJoint.values)
       {
-         tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
-         yoMotorDamping.put(joint, new DoubleYoVariable(joint.getSdfName() + "motorDamping", registry));
+         tauControllerOutput.put(joint, new YoDouble(joint.getSdfName() + "tauControllerOutput", registry));
+         yoMotorDamping.put(joint, new YoDouble(joint.getSdfName() + "motorDamping", registry));
 
 
-         DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
+         YoDouble inertia = new YoDouble(joint.getSdfName()+"ReflectedMotorInertia", registry);
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
          yoReflectedMotorInertia.put(joint, inertia);
-         yoTauInertiaViz.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
-         desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));
-         desiredJointQ.put(joint, new DoubleYoVariable(joint.getSdfName()+"_Q_desired",registry));
+         yoTauInertiaViz.put(joint, new YoDouble(joint.getSdfName()+"TauInertia", registry));
+         desiredQddFeedForwardGain.put(joint, new YoDouble(joint.getSdfName()+"QddFeedForwardGain", registry));
+         desiredJointQ.put(joint, new YoDouble(joint.getSdfName()+"_Q_desired",registry));
       }
 
-      yoTauSpringCorrection.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(StepprJoint.LEFT_ANKLE_Y, new DoubleYoVariable(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(StepprJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauTotal.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(StepprJoint.LEFT_ANKLE_Y, new DoubleYoVariable(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(StepprJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoAngleSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(StepprJoint.LEFT_ANKLE_Y, new DoubleYoVariable(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(StepprJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
+      yoTauSpringCorrection.put(StepprJoint.LEFT_HIP_X, new YoDouble(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(StepprJoint.RIGHT_HIP_X, new YoDouble(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(StepprJoint.LEFT_ANKLE_Y, new YoDouble(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(StepprJoint.RIGHT_ANKLE_Y, new YoDouble(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauTotal.put(StepprJoint.LEFT_HIP_X, new YoDouble(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(StepprJoint.RIGHT_HIP_X, new YoDouble(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(StepprJoint.LEFT_ANKLE_Y, new YoDouble(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(StepprJoint.RIGHT_ANKLE_Y, new YoDouble(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoAngleSpring.put(StepprJoint.LEFT_HIP_X, new YoDouble(StepprJoint.LEFT_HIP_X.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(StepprJoint.RIGHT_HIP_X, new YoDouble(StepprJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(StepprJoint.LEFT_ANKLE_Y, new YoDouble(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(StepprJoint.RIGHT_ANKLE_Y, new YoDouble(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
 
       leftHipXSpringCalculator = new HystereticSpringCalculator(leftHipXSpringProperties,StepprJoint.LEFT_HIP_X.getSdfName(),registry);
       rightHipXSpringCalculator = new HystereticSpringCalculator(rightHipXSpringProperties,StepprJoint.RIGHT_HIP_X.getSdfName(),registry);
@@ -259,7 +259,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    {
       for (StepprJoint joint : StepprJoint.values)
       {
-         EnumYoVariable<JointControlMode> controlMode = new EnumYoVariable<StepprOutputWriter.JointControlMode>(joint.getSdfName()
+         YoEnum<JointControlMode> controlMode = new YoEnum<JointControlMode>(joint.getSdfName()
                + JointControlMode.class.getSimpleName(), registry, JointControlMode.class, false);
 
          controlMode.set(JointControlMode.TORQUE_CONTROL);
@@ -366,8 +366,8 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
-      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
-      //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
+      //((YoEnum<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((YoBoolean)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
 
 

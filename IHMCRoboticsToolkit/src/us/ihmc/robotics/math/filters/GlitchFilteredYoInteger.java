@@ -1,29 +1,29 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
-public class GlitchFilteredIntegerYoVariable extends IntegerYoVariable
+public class GlitchFilteredYoInteger extends YoInteger
 {
-   private final IntegerYoVariable position;
-   private final IntegerYoVariable previousPosition;
-   private final IntegerYoVariable windowSize;
-   private final IntegerYoVariable counter;
+   private final YoInteger position;
+   private final YoInteger previousPosition;
+   private final YoInteger windowSize;
+   private final YoInteger counter;
 
-   public GlitchFilteredIntegerYoVariable(String name, int windowSize, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, int windowSize, YoVariableRegistry registry)
    {
       this(name, windowSize, null, registry);
    }
 
-   public GlitchFilteredIntegerYoVariable(String name, int windowSize, IntegerYoVariable position, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, int windowSize, YoInteger position, YoVariableRegistry registry)
    {
-      super(name, GlitchFilteredIntegerYoVariable.class.getSimpleName(), registry);
+      super(name, GlitchFilteredYoInteger.class.getSimpleName(), registry);
 
       this.position = position;
 
-      previousPosition = new IntegerYoVariable(name + "PrevValue", registry);
-      counter = new IntegerYoVariable(name + "Count", registry);
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", registry);
+      previousPosition = new YoInteger(name + "PrevValue", registry);
+      counter = new YoInteger(name + "Count", registry);
+      this.windowSize = new YoInteger(name + "WindowSize", registry);
       this.windowSize.set(windowSize);
    }
 
@@ -48,7 +48,7 @@ public class GlitchFilteredIntegerYoVariable extends IntegerYoVariable
       if (position == null)
       {
          throw new NullPointerException(
-               "GlitchFilteredIntegerYoVariable must be constructed with a non null position variable to call update(), otherwise use update(int)");
+               "GlitchFilteredYoInteger must be constructed with a non null position variable to call update(), otherwise use update(int)");
       }
 
       update(position.getIntegerValue());

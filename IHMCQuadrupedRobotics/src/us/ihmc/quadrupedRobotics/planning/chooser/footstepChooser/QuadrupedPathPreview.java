@@ -8,8 +8,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -33,7 +33,7 @@ public class QuadrupedPathPreview
    private final QuadrupedSupportPolygon tempCommonSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
-   private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
+   private final YoDouble inscribedCircleRadius = new YoDouble("inscribedCircleRadius", registry);
    private final YoFramePoint[] circleCenters = new YoFramePoint[iterations]; //new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactOval[] inscribedCircles = new YoArtifactOval[iterations];//new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
 

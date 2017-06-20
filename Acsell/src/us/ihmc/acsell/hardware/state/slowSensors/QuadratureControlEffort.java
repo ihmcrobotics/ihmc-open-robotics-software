@@ -1,17 +1,17 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadratureControlEffort implements AcsellSlowSensor
 {
-   private final DoubleYoVariable quadratureControlEffort;
+   private final YoDouble quadratureControlEffort;
    private final double conversionFactor;
    
    public QuadratureControlEffort(String name, double conversionFactor, YoVariableRegistry registry)
    {
       this.conversionFactor = conversionFactor;
-      quadratureControlEffort = new DoubleYoVariable(name + "QuadratureControlEffort", registry);
+      quadratureControlEffort = new YoDouble(name + "QuadratureControlEffort", registry);
    }
 
    @Override

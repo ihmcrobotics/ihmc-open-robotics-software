@@ -19,9 +19,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -42,17 +42,17 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
 
    private final LinkedHashMap<OneDoFJoint, PDController> pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
    private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
 
-   private final DoubleYoVariable ditherAmplitude = new DoubleYoVariable("ditherAmplitude", registry);
-   private final DoubleYoVariable ditherFrequency = new DoubleYoVariable("ditherFrequency", registry);
+   private final YoDouble ditherAmplitude = new YoDouble("ditherAmplitude", registry);
+   private final YoDouble ditherFrequency = new YoDouble("ditherFrequency", registry);
 
-   private final DoubleYoVariable maximumTorqueOffset = new DoubleYoVariable("maximumTorqueOffset", registry);
+   private final YoDouble maximumTorqueOffset = new YoDouble("maximumTorqueOffset", registry);
 
-   private final BooleanYoVariable estimateTorqueOffset = new BooleanYoVariable("estimateTorqueOffset", registry);
-   private final BooleanYoVariable transferTorqueOffsets = new BooleanYoVariable("transferTorqueOffsets", registry);
-   private final BooleanYoVariable exportJointTorqueOffsetsToFile = new BooleanYoVariable("recordTorqueOffsets", registry);
+   private final YoBoolean estimateTorqueOffset = new YoBoolean("estimateTorqueOffset", registry);
+   private final YoBoolean transferTorqueOffsets = new YoBoolean("transferTorqueOffsets", registry);
+   private final YoBoolean exportJointTorqueOffsetsToFile = new YoBoolean("recordTorqueOffsets", registry);
 
    private final boolean useArms = true;
 
@@ -65,7 +65,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final BooleanYoVariable hasReachedMaximumTorqueOffset = new BooleanYoVariable("hasReachedMaximumTorqueOffset", registry);
+   private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
 
    public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
    {
@@ -103,7 +103,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          PDController controller = new PDController(jointName + "Calibration", registry);
          pdControllers.put(joint, controller);
 
-         DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_calib_" + jointName, registry);
+         YoDouble desiredPosition = new YoDouble("q_d_calib_" + jointName, registry);
          desiredPositions.put(joint, desiredPosition);
       }
 

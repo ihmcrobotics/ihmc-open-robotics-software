@@ -14,13 +14,13 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountList;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.robotdefinition.ExternalForcePointDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.robotdefinition.GroundContactDefinitionFixedFrame;
@@ -51,12 +51,12 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
    private final String name;
 
-   protected DoubleYoVariable t;
+   protected YoDouble t;
 
    // The gravitational constants for each axis
-   public DoubleYoVariable gravityX;
-   public DoubleYoVariable gravityY;
-   public DoubleYoVariable gravityZ;
+   public YoDouble gravityX;
+   public YoDouble gravityY;
+   public YoDouble gravityZ;
 
 // protected double gX = 0.0, gY = 0.0, gZ = -9.81;
 
@@ -148,10 +148,10 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
       this.rootJoints = new ArrayList<Joint>();
 
-      t = new DoubleYoVariable("t", yoVariableRegistry);
-      gravityX = new DoubleYoVariable("gravityX", yoVariableRegistry);
-      gravityY = new DoubleYoVariable("gravityY", yoVariableRegistry);
-      gravityZ = new DoubleYoVariable("gravityZ", yoVariableRegistry);
+      t = new YoDouble("t", yoVariableRegistry);
+      gravityX = new YoDouble("gravityX", yoVariableRegistry);
+      gravityY = new YoDouble("gravityY", yoVariableRegistry);
+      gravityZ = new YoDouble("gravityZ", yoVariableRegistry);
 
       setDefaultGravityToEarthWithMetricUnits();
    }
@@ -196,7 +196,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * Gets this robot's time
     * @return YoVariable
     */
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return t;
    }

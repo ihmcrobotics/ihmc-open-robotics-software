@@ -7,7 +7,7 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -64,12 +64,12 @@ public class BonoStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
-      Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
-      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", 25.0); //16
+      YoDouble maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
+      Map<OneDoFJoint, YoDouble> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+      YoDouble jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", 25.0); //16
 
-      DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", 16.0);
-      DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
+      YoDouble angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", 16.0);
+      YoDouble linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, maxDeflection, false);

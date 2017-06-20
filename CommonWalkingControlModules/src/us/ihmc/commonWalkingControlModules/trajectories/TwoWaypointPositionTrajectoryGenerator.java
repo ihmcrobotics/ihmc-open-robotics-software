@@ -7,9 +7,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -39,29 +39,29 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final int numberOfVisualizationMarkers = 50;
-   private final BooleanYoVariable visualize;
+   private final YoBoolean visualize;
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
 
-   private final DoubleYoVariable linearSplineLengthFactor;
+   private final YoDouble linearSplineLengthFactor;
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
    private final PositionProvider stancePositionSource;
    private final VectorProvider[] velocitySources = new VectorProvider[2];
 
-   private final DoubleYoVariable stepTime;
-   private final DoubleYoVariable timeIntoStep;
+   private final YoDouble stepTime;
+   private final YoDouble timeIntoStep;
 
-   private final BooleanYoVariable setInitialSwingVelocityToZero;
+   private final YoBoolean setInitialSwingVelocityToZero;
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
-   private final DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
+   private final YoDouble[] allTimes = new YoDouble[6];
    protected final YoFramePoint[] allPositions = new YoFramePoint[6];
    protected final YoFramePoint stancePosition;
    private final YoFrameVector[] allVelocities = new YoFrameVector[6];
@@ -99,7 +99,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          yoGraphicsListRegistry = null;
       }
 
-      setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
+      setInitialSwingVelocityToZero = new YoBoolean(namePrefix + "SetInitialSwingVelocityToZero", registry);
       setInitialSwingVelocityToZero.set(false);
 
       if (visualize)
@@ -125,20 +125,20 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       velocitySources[0] = initialVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
 
-      stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
-      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+      stepTime = new YoDouble(namePrefix + "StepTime", registry);
+      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
-      linearSplineLengthFactor = new DoubleYoVariable(namePrefix + "LinearSplineLengthFactor", registry);
+      linearSplineLengthFactor = new YoDouble(namePrefix + "LinearSplineLengthFactor", registry);
 
       this.trajectoryParametersProvider = trajectoryParametersProvider;
 
       for (int i = 0; i < 6; i++)
       {
-         allTimes[i] = new DoubleYoVariable(namePrefix + "FixedPointTime" + i, registry);
+         allTimes[i] = new YoDouble(namePrefix + "FixedPointTime" + i, registry);
          allPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
          allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
@@ -149,7 +149,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame, 2, registry,
             namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
 
-      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
+      this.visualize = new YoBoolean(namePrefix + "Visualize", registry);
       this.visualize.set(visualize);
       this.maxSwingHeightFromStanceFoot = maxSwingHeightFromStanceFoot;
    }

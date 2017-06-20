@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.reflect.RecursiveObjectComparer;
@@ -115,9 +115,9 @@ public class ReflectionSimulationComparer implements SimulationComparer
 
       Collection<Field> fieldsToIgnore = new ArrayList<Field>();
       Collection<String> fieldNamesToNeverIgnore = new ArrayList<String>();
-      fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.IntegerYoVariable.val");
-      fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.DoubleYoVariable.val");
-      fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.BooleanYoVariable.val");
+      fieldNamesToNeverIgnore.add("private int us.ihmc.simulationconstructionset.YoInteger.val");
+      fieldNamesToNeverIgnore.add("private double us.ihmc.simulationconstructionset.YoDouble.val");
+      fieldNamesToNeverIgnore.add("private boolean us.ihmc.simulationconstructionset.YoBoolean.val");
 
       for (Field field : preRewindFieldDifferences)
       {
@@ -170,12 +170,12 @@ public class ReflectionSimulationComparer implements SimulationComparer
       try
       {
          StringFieldMatcher stringFieldMatcherToIgnore = new StringFieldMatcher();
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(IntegerYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoInteger.class, YoVariable.class.getDeclaredField("name"),
                  ".*StartTimeNano");
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(IntegerYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoInteger.class, YoVariable.class.getDeclaredField("name"),
                  ".*StopTimeNano");
 
-         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(DoubleYoVariable.class, YoVariable.class.getDeclaredField("name"),
+         stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(YoDouble.class, YoVariable.class.getDeclaredField("name"),
                  ".*DurationMilli");
          stringFieldMatcherToIgnore.addStringFieldToMatchRegularExpression(AlphaFilteredYoVariable.class, YoVariable.class.getDeclaredField("name"),
                  ".*DurationMilli");

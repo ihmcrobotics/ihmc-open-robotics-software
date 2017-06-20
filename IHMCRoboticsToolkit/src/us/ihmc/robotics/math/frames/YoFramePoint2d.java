@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.frames;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -20,7 +20,7 @@ public class YoFramePoint2d extends YoFrameTuple2d<YoFramePoint2d, FramePoint2d>
       super(namePrefix, nameSuffix, frame, registry);
    }
 
-   public YoFramePoint2d(DoubleYoVariable xVariable, DoubleYoVariable yVariable, ReferenceFrame frame)
+   public YoFramePoint2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame frame)
    {
       super(xVariable, yVariable, frame);
    }

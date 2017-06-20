@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.scripts;
 
-import static org.junit.Assert.*;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.Random;
@@ -11,20 +9,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
+import static org.junit.Assert.assertEquals;
 
 public class TimeScriptTest
 {
    private YoVariableRegistry rootRegistry, registryOne, registryTwo;
-   private DoubleYoVariable doubleVariable;
-   private BooleanYoVariable booleanVariable;
-   private IntegerYoVariable integerVariable;
-   private EnumYoVariable<TimeScriptTestEnums> enumVariable;
+   private YoDouble doubleVariable;
+   private YoBoolean booleanVariable;
+   private YoInteger integerVariable;
+   private YoEnum<TimeScriptTestEnums> enumVariable;
    
    @Before
    public void setUp() throws Exception
@@ -36,10 +35,10 @@ public class TimeScriptTest
       rootRegistry.addChild(registryOne);
       registryOne.addChild(registryTwo);
 
-      doubleVariable = new DoubleYoVariable("doubleVariable", rootRegistry);
-      booleanVariable = new BooleanYoVariable("booleanVariable", registryOne);
-      integerVariable = new IntegerYoVariable("integerVariable", registryTwo);
-      enumVariable = new EnumYoVariable<TimeScriptTestEnums>("enumVariable", registryTwo, TimeScriptTestEnums.class);
+      doubleVariable = new YoDouble("doubleVariable", rootRegistry);
+      booleanVariable = new YoBoolean("booleanVariable", registryOne);
+      integerVariable = new YoInteger("integerVariable", registryTwo);
+      enumVariable = new YoEnum<TimeScriptTestEnums>("enumVariable", registryTwo, TimeScriptTestEnums.class);
    }
    
    private enum TimeScriptTestEnums

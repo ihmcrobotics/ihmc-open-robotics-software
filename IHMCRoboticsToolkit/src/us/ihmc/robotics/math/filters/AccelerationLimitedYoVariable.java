@@ -1,46 +1,45 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-
-public class AccelerationLimitedYoVariable extends DoubleYoVariable
+public class AccelerationLimitedYoVariable extends YoDouble
 {
    private final double dt;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final YoBoolean hasBeenInitialized;
 
-   private final DoubleYoVariable smoothedRate;
-   private final DoubleYoVariable smoothedAcceleration;
+   private final YoDouble smoothedRate;
+   private final YoDouble smoothedAcceleration;
 
-   private final DoubleYoVariable positionGain;
-   private final DoubleYoVariable velocityGain;
+   private final YoDouble positionGain;
+   private final YoDouble velocityGain;
 
-   private DoubleYoVariable maximumRate;
-   private DoubleYoVariable maximumAcceleration;
+   private YoDouble maximumRate;
+   private YoDouble maximumAcceleration;
 
-   private final DoubleYoVariable inputVariable;
+   private final YoDouble inputVariable;
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double maxAcceleration, DoubleYoVariable inputVariable, double dt)
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double maxAcceleration, YoDouble inputVariable, double dt)
    {
       this(name, registry, null, null, inputVariable, dt);
 
-      maximumRate = new DoubleYoVariable(name + "MaxRate", registry);
-      maximumAcceleration = new DoubleYoVariable(name + "MaxAcceleration", registry);
+      maximumRate = new YoDouble(name + "MaxRate", registry);
+      maximumAcceleration = new YoDouble(name + "MaxAcceleration", registry);
 
       maximumRate.set(maxRate);
       maximumAcceleration.set(maxAcceleration);
    }
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRate, DoubleYoVariable maxAcceleration, double dt)
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRate, YoDouble maxAcceleration, double dt)
    {
       this(name, registry, maxRate, maxAcceleration, null, dt);
    }
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRate, DoubleYoVariable maxAcceleration,
-         DoubleYoVariable inputVariable, double dt)
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRate, YoDouble maxAcceleration,
+         YoDouble inputVariable, double dt)
    {
       super(name, registry);
 
@@ -52,13 +51,13 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
 
       this.dt = dt;
 
-      hasBeenInitialized = new BooleanYoVariable(name + "HasBeenInitialized", registry);
+      hasBeenInitialized = new YoBoolean(name + "HasBeenInitialized", registry);
 
-      smoothedRate = new DoubleYoVariable(name + "SmoothedRate", registry);
-      smoothedAcceleration = new DoubleYoVariable(name + "SmoothedAcceleration", registry);
+      smoothedRate = new YoDouble(name + "SmoothedRate", registry);
+      smoothedAcceleration = new YoDouble(name + "SmoothedAcceleration", registry);
 
-      positionGain = new DoubleYoVariable(name + "PositionGain", registry);
-      velocityGain = new DoubleYoVariable(name + "VelocityGain", registry);
+      positionGain = new YoDouble(name + "PositionGain", registry);
+      velocityGain = new YoDouble(name + "VelocityGain", registry);
 
       double w0 = 2.0 * Math.PI * 16.0;
       double zeta = 1.0;
@@ -85,12 +84,12 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
       velocityGain.set(2.0 * zeta * w0);
    }
    
-   public DoubleYoVariable getPositionGain()
+   public YoDouble getPositionGain()
    {
       return positionGain;
    }
    
-   public DoubleYoVariable getVelocityGain()
+   public YoDouble getVelocityGain()
    {
       return velocityGain;
    }
@@ -131,12 +130,12 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
       smoothedAcceleration.set(0.0);
    }
 
-   public DoubleYoVariable getSmoothedRate()
+   public YoDouble getSmoothedRate()
    {
       return smoothedRate;
    }
 
-   public DoubleYoVariable getSmoothedAcceleration()
+   public YoDouble getSmoothedAcceleration()
    {
       return smoothedAcceleration;
    }

@@ -1,37 +1,37 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {
    protected final YoVariableRegistry registry;
-   protected final IntegerYoVariable rawTicks;
-   protected final DoubleYoVariable time;
+   protected final YoInteger rawTicks;
+   protected final YoDouble time;
 
-   protected final DoubleYoVariable processedTicks;
-   protected final DoubleYoVariable processedTickRate;
+   protected final YoDouble processedTicks;
+   protected final YoDouble processedTickRate;
 
-   private final DoubleYoVariable processedPosition;
-   private final DoubleYoVariable processedVelocity;
+   private final YoDouble processedPosition;
+   private final YoDouble processedVelocity;
 
    private final String name;
    
-   public AbstractEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public AbstractEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       this.name = name;
       
       this.registry = registry;
       this.rawTicks = rawTicks;
       this.time = time;
-      this.processedTicks = new DoubleYoVariable(name + "ProcTicks", registry);
-      this.processedTickRate = new DoubleYoVariable(name + "ProcTickRate", registry);
-      this.processedPosition = new DoubleYoVariable(name + "ProcPos", registry);
-      this.processedVelocity = new DoubleYoVariable(name + "ProcVel", registry);
+      this.processedTicks = new YoDouble(name + "ProcTicks", registry);
+      this.processedTickRate = new YoDouble(name + "ProcTickRate", registry);
+      this.processedPosition = new YoDouble(name + "ProcPos", registry);
+      this.processedVelocity = new YoDouble(name + "ProcVel", registry);
 
       processedTicks.addVariableChangedListener(new MultiplicationVariableChangedListener(processedPosition, distancePerTick));
       processedTickRate.addVariableChangedListener(new MultiplicationVariableChangedListener(processedVelocity, distancePerTick));

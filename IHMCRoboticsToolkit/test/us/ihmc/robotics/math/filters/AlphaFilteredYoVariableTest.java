@@ -7,8 +7,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredYoVariableTest
 {
@@ -22,7 +22,7 @@ public class AlphaFilteredYoVariableTest
       double alpha = 0.8;
 
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
+      YoDouble positionVariable = new YoDouble("positionVariable", registry);
       AlphaFilteredYoVariable alphaFilteredYoVariable = new AlphaFilteredYoVariable("alphaFilteredYoVariable", registry, alpha, positionVariable);
 
       double pseudoNoise = 0;

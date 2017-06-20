@@ -3,8 +3,8 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 import java.util.ArrayDeque;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
@@ -24,7 +24,7 @@ public class DiagnosticParallelTask extends DiagnosticTask
    }
 
    @Override
-   void setYoTimeInCurrentTask(DoubleYoVariable timeInCurrentTask)
+   void setYoTimeInCurrentTask(YoDouble timeInCurrentTask)
    {
       super.setYoTimeInCurrentTask(timeInCurrentTask);
 

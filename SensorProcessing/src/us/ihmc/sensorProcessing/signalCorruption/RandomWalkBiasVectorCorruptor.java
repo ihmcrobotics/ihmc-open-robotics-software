@@ -4,8 +4,8 @@ import java.util.Random;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -15,7 +15,7 @@ public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3DBas
    private final YoVariableRegistry registry;
    private final Random random;
    private final Vector3D biasVector = new Vector3D();
-   private final DoubleYoVariable standardDeviation;
+   private final YoDouble standardDeviation;
    private final YoFrameVector biasYoFrameVector;
    private final double squareRootOfUpdateDT;
    
@@ -23,7 +23,7 @@ public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3DBas
    {
       this.random = new Random(seed);
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", registry);
+      this.standardDeviation = new YoDouble(namePrefix + "StdDev", registry);
       this.biasYoFrameVector = new YoFrameVector(namePrefix + "Bias", ReferenceFrame.getWorldFrame(), registry);
 
       this.squareRootOfUpdateDT = Math.sqrt(updateDT);

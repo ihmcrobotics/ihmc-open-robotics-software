@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /* ** leg_kinematics.c                                   * * */
 /* ** Kinematics for one Bug Leg                         * **/
@@ -18,7 +18,7 @@ public class LegKinematics
 
 /* finding x,y,z of foot as a function of hip(x&z) and knee angles */
 
-   public static void leg_kin(double hip1, double hip2, double knee, double pos_x, double pos_y, DoubleYoVariable foot_x, DoubleYoVariable foot_y, DoubleYoVariable foot_z)
+   public static void leg_kin(double hip1, double hip2, double knee, double pos_x, double pos_y, YoDouble foot_x, YoDouble foot_y, YoDouble foot_z)
    {
       foot_x.set(pos_x - Math.sin(hip1) * Math.sin(hip2) * AgileHexapodRobot.LEN - Math.cos(hip1) * Math.sin(hip2) * Math.sin(knee) * AgileHexapodRobot.LEN
                    - Math.sin(hip1) * Math.sin(hip2) * Math.cos(knee) * AgileHexapodRobot.LEN);
@@ -37,8 +37,8 @@ public class LegKinematics
 
 /* finding x,y,z velocities given joint angles and angular speeds */
 
-   public static void jacobian(double hip1, double hip2, double knee, double dhip1, double dhip2, double dknee, DoubleYoVariable vel_x, DoubleYoVariable vel_y,
-                               DoubleYoVariable vel_z)
+   public static void jacobian(double hip1, double hip2, double knee, double dhip1, double dhip2, double dknee, YoDouble vel_x, YoDouble vel_y,
+                               YoDouble vel_z)
 
    {
       double J11, J12, J13;
@@ -75,7 +75,7 @@ public class LegKinematics
 
 
    public static void virtual_f(double x_d, double y_d, double z_d, double dz_d, double x, double y, double z, double dx, double dy, double dz, double K_leg,
-                                double B_leg, double Kz_leg, double Bz_leg, DoubleYoVariable Fx, DoubleYoVariable Fy, DoubleYoVariable Fz)
+                                double B_leg, double Kz_leg, double Bz_leg, YoDouble Fx, YoDouble Fy, YoDouble Fz)
 
 
    {
@@ -91,7 +91,7 @@ public class LegKinematics
    }
 
 
-   public static void torque(double hip1, double hip2, double knee, double Fx, double Fy, double Fz, DoubleYoVariable Torq_h1, DoubleYoVariable Torq_h2, DoubleYoVariable Torq_k)
+   public static void torque(double hip1, double hip2, double knee, double Fx, double Fy, double Fz, YoDouble Torq_h1, YoDouble Torq_h2, YoDouble Torq_k)
 
    {
       double JT11, JT12, JT13;

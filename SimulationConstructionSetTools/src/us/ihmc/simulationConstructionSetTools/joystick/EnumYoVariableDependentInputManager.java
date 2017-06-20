@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.EnumDependentSliderBoardMapping;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
@@ -21,20 +21,20 @@ public class EnumYoVariableDependentInputManager<T extends Enum<T>>
    private SliderBoardConfigurationManager sliderBoardConfigurationManager;
    private final HashMap<Enum<T>, ArrayList<JoystickEventListener>> joystickEventListeners = new HashMap<>();
    private final HashMap<Enum<T>, EnumDependentSliderBoardMapping<T>> sliderBoardConfigurations = new HashMap<>();
-   private final EnumYoVariable<T> enumYoVariable;
+   private final YoEnum<T> yoEnum;
    private final T[] enumValues;
    
-   protected EnumYoVariableDependentInputManager(final EnumYoVariable<T> enumYoVariable, Class<T> enumType)
+   protected EnumYoVariableDependentInputManager(final YoEnum<T> yoEnum, Class<T> enumType)
    {
       this.enumValues = enumType.getEnumConstants();
-      this.enumYoVariable = enumYoVariable;
+      this.yoEnum = yoEnum;
       
-      enumYoVariable.addVariableChangedListener(new VariableChangedListener()
+      yoEnum.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            updateListeners(enumYoVariable);
+            updateListeners(yoEnum);
          }
       });
    }
@@ -100,17 +100,17 @@ public class EnumYoVariableDependentInputManager<T extends Enum<T>>
    
    protected void initialize()
    {
-      updateListeners(enumYoVariable);
+      updateListeners(yoEnum);
    }
    
-   protected EnumYoVariable<T> getEnumYoVariable()
+   protected YoEnum<T> getYoEnum()
    {
-      return enumYoVariable;
+      return yoEnum;
    }
    
-   private void updateListeners(final EnumYoVariable<?> enumYoVariable)
+   private void updateListeners(final YoEnum<?> yoEnum)
    {
-      T enumValue = enumValues[enumYoVariable.getOrdinal()];
+      T enumValue = enumValues[yoEnum.getOrdinal()];
       
       for (Joystick joystick : joysticks)
       {

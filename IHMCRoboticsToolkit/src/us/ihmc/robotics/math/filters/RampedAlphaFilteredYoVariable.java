@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: </p>
@@ -17,20 +17,20 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  */
 public class RampedAlphaFilteredYoVariable extends AlphaFilteredYoVariable
 {
-   private final DoubleYoVariable time, startTime;
+   private final YoDouble time, startTime;
 
-   private final DoubleYoVariable startAlpha, endAlpha, rampTime;
+   private final YoDouble startAlpha, endAlpha, rampTime;
 
-   public RampedAlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable positionVariable, DoubleYoVariable time)
+   public RampedAlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble positionVariable, YoDouble time)
    {
       super(name, registry, 0.0, positionVariable);
 
       this.time = time;
 
-      this.startAlpha = new DoubleYoVariable(name + "RampStartAlpha", registry);
-      this.endAlpha = new DoubleYoVariable(name + "RampEndAlpha", registry);
-      this.rampTime = new DoubleYoVariable(name + "RampTime", registry);
-      this.startTime = new DoubleYoVariable(name + "RampStartTime", registry);
+      this.startAlpha = new YoDouble(name + "RampStartAlpha", registry);
+      this.endAlpha = new YoDouble(name + "RampEndAlpha", registry);
+      this.rampTime = new YoDouble(name + "RampTime", registry);
+      this.startTime = new YoDouble(name + "RampStartTime", registry);
    }
 
    public void resetFilter()

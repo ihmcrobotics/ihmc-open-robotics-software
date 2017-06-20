@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -12,14 +12,14 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class SettableFootSwitch implements FootSwitchInterface
 {
-   BooleanYoVariable hasFootHitGround;
+   YoBoolean hasFootHitGround;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
 
    public SettableFootSwitch(ContactablePlaneBody foot, RobotQuadrant quadrant, double totalRobotWeight, YoVariableRegistry registry)
    {
-      this.hasFootHitGround = new BooleanYoVariable(quadrant.getCamelCaseName() + "_SettableFootSwitch", registry);
+      this.hasFootHitGround = new YoBoolean(quadrant.getCamelCaseName() + "_SettableFootSwitch", registry);
       this.totalRobotWeight = totalRobotWeight;
       this.foot = foot;
       hasFootHitGround.set(false);

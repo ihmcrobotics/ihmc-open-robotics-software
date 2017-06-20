@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -17,27 +17,27 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("HeadingAndVelocityEvaluationScript");
 
-   private final EnumYoVariable<HeadingAndVelocityEvaluationEvent> evaluationEvent = new EnumYoVariable<HeadingAndVelocityEvaluationEvent>("evaluationEvent",
+   private final YoEnum<HeadingAndVelocityEvaluationEvent> evaluationEvent = new YoEnum<HeadingAndVelocityEvaluationEvent>("evaluationEvent",
          registry, HeadingAndVelocityEvaluationEvent.class);
 
-   private final IntegerYoVariable evaluationEventOrderingIndex = new IntegerYoVariable("evaluationEventOrderingIndex", registry);
+   private final YoInteger evaluationEventOrderingIndex = new YoInteger("evaluationEventOrderingIndex", registry);
 
    private final double controlDT;
-   private final DoubleYoVariable acceleration = new DoubleYoVariable("acceleration", registry);
-   private final DoubleYoVariable maxVelocity = new DoubleYoVariable("maxVelocity", registry);
+   private final YoDouble acceleration = new YoDouble("acceleration", registry);
+   private final YoDouble maxVelocity = new YoDouble("maxVelocity", registry);
 
-   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", registry);
+   private final YoDouble maxHeadingDot = new YoDouble("maxHeadingDot", registry);
 
-   private final DoubleYoVariable cruiseVelocity = new DoubleYoVariable("cruiseVelocity", registry);
-   private final DoubleYoVariable sidestepVelocity = new DoubleYoVariable("sidestepVelocity", registry);
-   private final DoubleYoVariable desiredVelocityMagnitude = new DoubleYoVariable("desiredVelocityMagnitude", registry);
+   private final YoDouble cruiseVelocity = new YoDouble("cruiseVelocity", registry);
+   private final YoDouble sidestepVelocity = new YoDouble("sidestepVelocity", registry);
+   private final YoDouble desiredVelocityMagnitude = new YoDouble("desiredVelocityMagnitude", registry);
 
-   private final DoubleYoVariable lastSwitchTime = new DoubleYoVariable("lastSwitchTime", registry);
-   private final DoubleYoVariable eventDuration = new DoubleYoVariable("eventDuration", registry);
+   private final YoDouble lastSwitchTime = new YoDouble("lastSwitchTime", registry);
+   private final YoDouble eventDuration = new YoDouble("eventDuration", registry);
 
    private final FrameVector2d desiredVelocityDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
 
-   private final DoubleYoVariable initialDesiredHeadingAngle = new DoubleYoVariable("initialDesiredHeadingAngle",
+   private final YoDouble initialDesiredHeadingAngle = new YoDouble("initialDesiredHeadingAngle",
          "Temporary variable to hold the initial heading for doing s curves", registry);
 
    private final SimpleDesiredHeadingControlModule desiredHeadingControlModule;

@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class FunctionIntegrator
@@ -12,7 +12,7 @@ public class FunctionIntegrator
 
    private double[] tempDerivative;
 
-   private DoubleYoVariable[] outputs;
+   private YoDouble[] outputs;
 
 
    public FunctionIntegrator(FunctionToIntegrate function)

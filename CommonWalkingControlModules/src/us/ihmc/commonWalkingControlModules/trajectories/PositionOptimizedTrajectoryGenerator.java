@@ -9,10 +9,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -48,7 +48,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final String namePrefix;
 
    private final TrajectoryPointOptimizer optimizer;
-   private final IntegerYoVariable maxIterations;
+   private final YoInteger maxIterations;
    private final RecyclingArrayList<TDoubleArrayList> coefficients;
    private final EnumMap<Direction, ArrayList<YoPolynomial>> trajectories = new EnumMap<>(Direction.class);
    private final double[] tempCoeffs = new double[order.getCoefficients()];
@@ -67,12 +67,12 @@ public class PositionOptimizedTrajectoryGenerator
    private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimensions);
 
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable optimizeInOneTick;
-   private final BooleanYoVariable hasConverged;
-   private final IntegerYoVariable segments;
-   private final IntegerYoVariable activeSegment;
-   private final ArrayList<DoubleYoVariable> waypointTimes = new ArrayList<>();
+   private final YoBoolean isDone;
+   private final YoBoolean optimizeInOneTick;
+   private final YoBoolean hasConverged;
+   private final YoInteger segments;
+   private final YoInteger activeSegment;
+   private final ArrayList<YoDouble> waypointTimes = new ArrayList<>();
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -80,8 +80,8 @@ public class PositionOptimizedTrajectoryGenerator
 
    private final YoGraphicPolynomial3D trajectoryViz;
 
-   private final DoubleYoVariable maxSpeed;
-   private final DoubleYoVariable maxSpeedTime;
+   private final YoDouble maxSpeed;
+   private final YoDouble maxSpeedTime;
    private final FrameVector tempVelocity = new FrameVector();
 
    public PositionOptimizedTrajectoryGenerator()
@@ -130,13 +130,13 @@ public class PositionOptimizedTrajectoryGenerator
 
       registry = new YoVariableRegistry(namePrefix + "Trajectory");
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, order, registry);
-      this.maxIterations = new IntegerYoVariable(namePrefix + "MaxIterations", registry);
+      this.maxIterations = new YoInteger(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
-      isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
-      optimizeInOneTick = new BooleanYoVariable(namePrefix + "OptimizeInOneTick", registry);
-      hasConverged = new BooleanYoVariable(namePrefix + "HasConverged", registry);
-      segments = new IntegerYoVariable(namePrefix + "Segments", registry);
-      activeSegment = new IntegerYoVariable(namePrefix + "ActiveSegment", registry);
+      isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      optimizeInOneTick = new YoBoolean(namePrefix + "OptimizeInOneTick", registry);
+      hasConverged = new YoBoolean(namePrefix + "HasConverged", registry);
+      segments = new YoInteger(namePrefix + "Segments", registry);
+      activeSegment = new YoInteger(namePrefix + "ActiveSegment", registry);
 
       optimizeInOneTick.set(maxIterations >= 0);
       hasConverged.set(optimizeInOneTick.getBooleanValue());
@@ -177,8 +177,8 @@ public class PositionOptimizedTrajectoryGenerator
       else
          trajectoryViz = null;
 
-      maxSpeed = new DoubleYoVariable("MaxVelocity", registry);
-      maxSpeedTime = new DoubleYoVariable("MaxVelocityTime", registry);
+      maxSpeed = new YoDouble("MaxVelocity", registry);
+      maxSpeedTime = new YoDouble("MaxVelocityTime", registry);
    }
 
    private void extendBySegment(YoVariableRegistry registry)
@@ -186,7 +186,7 @@ public class PositionOptimizedTrajectoryGenerator
       int size = waypointTimes.size() + 1;
       for (Direction axis : Direction.values)
          trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
-      waypointTimes.add(new DoubleYoVariable(namePrefix + "WaypointTime" + size, registry));
+      waypointTimes.add(new YoDouble(namePrefix + "WaypointTime" + size, registry));
       waypointPositions.add();
    }
 

@@ -1,12 +1,12 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class BooleanYoVariableParameterToOptimize extends BooleanParameterToOptimize
 {
-   private final BooleanYoVariable yoVariable;
+   private final YoBoolean yoVariable;
    
-   public BooleanYoVariableParameterToOptimize(BooleanYoVariable yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
+   public BooleanYoVariableParameterToOptimize(YoBoolean yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
    {
       super(yoVariable.getName(), listOfParametersToOptimize);
       this.yoVariable = yoVariable;

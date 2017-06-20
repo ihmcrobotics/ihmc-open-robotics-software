@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VariablesThatShouldMatchListTest
 {
@@ -25,7 +24,7 @@ public class VariablesThatShouldMatchListTest
       registryOne.getOrCreateAndAddRegistry(new NameSpace("root.one.two.three.four"));
       registryTwo.getOrCreateAndAddRegistry(new NameSpace("root.one.two.three.four"));
 
-      ArrayList<DoubleYoVariable[]> theseShouldMatch = new ArrayList<DoubleYoVariable[]>();
+      ArrayList<YoDouble[]> theseShouldMatch = new ArrayList<YoDouble[]>();
       
       theseShouldMatch.add(createAndAddVariable("var1", "root.one.two.three.four", registryOne, registryTwo));
       theseShouldMatch.add(createAndAddVariable("var2", "root.one.two.three.four", registryOne, registryTwo));
@@ -34,7 +33,7 @@ public class VariablesThatShouldMatchListTest
       theseShouldMatch.add(createAndAddVariable("var5", "root.one", registryOne, registryTwo));
       theseShouldMatch.add(createAndAddVariable("var6", "root", registryOne, registryTwo));
 
-      ArrayList<DoubleYoVariable[]> theseDontNeedToMatch = new ArrayList<DoubleYoVariable[]>();
+      ArrayList<YoDouble[]> theseDontNeedToMatch = new ArrayList<YoDouble[]>();
       theseDontNeedToMatch.add(createAndAddVariable("var1_exception1", "root.one.two.three.four", registryOne, registryTwo));
       theseDontNeedToMatch.add(createAndAddVariable("var2_exception2", "root.one.two.three.four", registryOne, registryTwo));
       theseDontNeedToMatch.add(createAndAddVariable("exception3", "root.one", registryOne, registryTwo));
@@ -114,8 +113,8 @@ public class VariablesThatShouldMatchListTest
       
       variableDifferences.clear();
       
-      DoubleYoVariable onlyInOne = new DoubleYoVariable("onlyInOne", registryOne);
-      DoubleYoVariable onlyInTwo = new DoubleYoVariable("onlyInTwo", registryTwo);
+      YoDouble onlyInOne = new YoDouble("onlyInOne", registryOne);
+      YoDouble onlyInTwo = new YoDouble("onlyInTwo", registryTwo);
     
       variablesThatShouldMatchList = new VariablesThatShouldMatchList(registryOne, registryTwo, exceptions);
       
@@ -130,11 +129,11 @@ public class VariablesThatShouldMatchListTest
    }
 
 
-   private DoubleYoVariable[] createAndAddVariable(String name, String fullNameSpace, YoVariableRegistry rootRegistryOne, YoVariableRegistry rootRegistryTwo)
+   private YoDouble[] createAndAddVariable(String name, String fullNameSpace, YoVariableRegistry rootRegistryOne, YoVariableRegistry rootRegistryTwo)
    {
-      DoubleYoVariable[] ret = new DoubleYoVariable[2];
-      ret[0] = new DoubleYoVariable(name, rootRegistryOne.getOrCreateAndAddRegistry(new NameSpace(fullNameSpace)));
-      ret[1] = new DoubleYoVariable(name, rootRegistryTwo.getOrCreateAndAddRegistry(new NameSpace(fullNameSpace)));
+      YoDouble[] ret = new YoDouble[2];
+      ret[0] = new YoDouble(name, rootRegistryOne.getOrCreateAndAddRegistry(new NameSpace(fullNameSpace)));
+      ret[1] = new YoDouble(name, rootRegistryTwo.getOrCreateAndAddRegistry(new NameSpace(fullNameSpace)));
 
       return ret;
    }

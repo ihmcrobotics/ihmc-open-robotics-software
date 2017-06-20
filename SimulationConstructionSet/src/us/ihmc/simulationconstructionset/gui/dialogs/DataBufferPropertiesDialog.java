@@ -15,7 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 
 import javax.swing.*;

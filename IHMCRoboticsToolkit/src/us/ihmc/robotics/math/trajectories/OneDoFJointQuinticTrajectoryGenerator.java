@@ -1,22 +1,22 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable finalPosition;
-   private final DoubleYoVariable currentPosition;
-   private final DoubleYoVariable currentVelocity;
-   private final DoubleYoVariable currentAcceleration;
+   private final YoDouble finalPosition;
+   private final YoDouble currentPosition;
+   private final YoDouble currentVelocity;
+   private final YoDouble currentAcceleration;
    private final YoPolynomial polynomial;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble trajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
    private final OneDoFJoint joint;
 
    public OneDoFJointQuinticTrajectoryGenerator(String namePrefix, OneDoFJoint joint, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
@@ -24,12 +24,12 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.joint = joint;
       this.polynomial = new YoPolynomial(namePrefix + "Polynomial", 6, registry);
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      this.currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
-      this.currentPosition = new DoubleYoVariable(namePrefix + "CurrentPosition", registry);
-      this.currentVelocity = new DoubleYoVariable(namePrefix + "CurrentVelocity", registry);
-      this.currentAcceleration = new DoubleYoVariable(namePrefix + "CurrentAcceleration", registry);
-      this.finalPosition = new DoubleYoVariable(namePrefix + "FinalPosition", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      this.currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
+      this.currentPosition = new YoDouble(namePrefix + "CurrentPosition", registry);
+      this.currentVelocity = new YoDouble(namePrefix + "CurrentVelocity", registry);
+      this.currentAcceleration = new YoDouble(namePrefix + "CurrentAcceleration", registry);
+      this.finalPosition = new YoDouble(namePrefix + "FinalPosition", registry);
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
    }

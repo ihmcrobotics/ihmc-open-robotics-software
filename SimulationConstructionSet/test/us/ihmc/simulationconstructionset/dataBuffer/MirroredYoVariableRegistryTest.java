@@ -6,10 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public class MirroredYoVariableRegistryTest
@@ -170,7 +170,7 @@ public class MirroredYoVariableRegistryTest
         YoVariableRegistry registry = new YoVariableRegistry(name);
         for (int i = 0; i < variableCount; i++)
         {
-            new DoubleYoVariable("Variable" + i, registry);
+            new YoDouble("Variable" + i, registry);
         }
         return registry;
     }

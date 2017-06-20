@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class UserDesiredBipedControllerCommandGenerators

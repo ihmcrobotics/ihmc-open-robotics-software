@@ -6,9 +6,9 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class QuinticSplineInterpolator
@@ -17,7 +17,7 @@ public class QuinticSplineInterpolator
    private final int numberOfSplines;
 
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable initialized;
+   private final YoBoolean initialized;
 
    // Matrices used internally to calculate constants
    private DenseMatrix64F h;
@@ -39,7 +39,7 @@ public class QuinticSplineInterpolator
    private DenseMatrix64F f;
 
    // Constants
-   private final DoubleYoVariable[] x;
+   private final YoDouble[] x;
    private final QuinticSpline[] splines;
 
    /**
@@ -55,7 +55,7 @@ public class QuinticSplineInterpolator
       this.numberOfSplines = numberOfSplines;
 
       registry = new YoVariableRegistry(name);
-      initialized = new BooleanYoVariable("initialized", registry);
+      initialized = new YoBoolean("initialized", registry);
       initialized.set(false);
 
       h = new DenseMatrix64F(pointsToInterpolate - 1, 1);
@@ -76,10 +76,10 @@ public class QuinticSplineInterpolator
       e = new DenseMatrix64F(pointsToInterpolate - 1, 1);
       f = new DenseMatrix64F(pointsToInterpolate - 1, 1);
 
-      x = new DoubleYoVariable[pointsToInterpolate];
+      x = new YoDouble[pointsToInterpolate];
       for (int i = 0; i < pointsToInterpolate; i++)
       {
-         x[i] = new DoubleYoVariable("x[" + i + "]", registry);
+         x[i] = new YoDouble("x[" + i + "]", registry);
       }
 
       splines = new QuinticSpline[numberOfSplines];
@@ -325,42 +325,42 @@ public class QuinticSplineInterpolator
       private final int segments;
       private final YoVariableRegistry registry;
 
-      private final DoubleYoVariable[] a;
-      private final DoubleYoVariable[] b;
-      private final DoubleYoVariable[] c;
-      private final DoubleYoVariable[] d;
-      private final DoubleYoVariable[] e;
-      private final DoubleYoVariable[] f;
+      private final YoDouble[] a;
+      private final YoDouble[] b;
+      private final YoDouble[] c;
+      private final YoDouble[] d;
+      private final YoDouble[] e;
+      private final YoDouble[] f;
 
-      private final BooleanYoVariable coefficientsSet;
+      private final YoBoolean coefficientsSet;
 
       public QuinticSpline(String name, int pointsToInterpolate, YoVariableRegistry parentRegistry)
       {
          this.segments = pointsToInterpolate - 1;
          this.registry = new YoVariableRegistry(name);
          parentRegistry.addChild(this.registry);
-         a = new DoubleYoVariable[segments];
-         b = new DoubleYoVariable[segments];
-         c = new DoubleYoVariable[segments];
-         d = new DoubleYoVariable[segments];
-         e = new DoubleYoVariable[segments];
-         f = new DoubleYoVariable[segments];
+         a = new YoDouble[segments];
+         b = new YoDouble[segments];
+         c = new YoDouble[segments];
+         d = new YoDouble[segments];
+         e = new YoDouble[segments];
+         f = new YoDouble[segments];
 
-         coefficientsSet = new BooleanYoVariable("initialized", registry);
+         coefficientsSet = new YoBoolean("initialized", registry);
          coefficientsSet.set(false);
 
          for (int i = 0; i < segments; i++)
          {
-            a[i] = new DoubleYoVariable("a[" + i + "]", registry);
-            b[i] = new DoubleYoVariable("b[" + i + "]", registry);
-            c[i] = new DoubleYoVariable("c[" + i + "]", registry);
-            d[i] = new DoubleYoVariable("d[" + i + "]", registry);
-            e[i] = new DoubleYoVariable("e[" + i + "]", registry);
-            f[i] = new DoubleYoVariable("f[" + i + "]", registry);
+            a[i] = new YoDouble("a[" + i + "]", registry);
+            b[i] = new YoDouble("b[" + i + "]", registry);
+            c[i] = new YoDouble("c[" + i + "]", registry);
+            d[i] = new YoDouble("d[" + i + "]", registry);
+            e[i] = new YoDouble("e[" + i + "]", registry);
+            f[i] = new YoDouble("f[" + i + "]", registry);
          }
       }
 
-      private void set(DoubleYoVariable[] var, DenseMatrix64F value)
+      private void set(YoDouble[] var, DenseMatrix64F value)
       {
          for (int i = 0; i < segments; i++)
          {

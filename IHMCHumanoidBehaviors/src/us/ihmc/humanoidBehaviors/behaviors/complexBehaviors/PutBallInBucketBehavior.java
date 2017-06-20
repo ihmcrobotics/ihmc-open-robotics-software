@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
@@ -19,7 +19,7 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PutBallInBucketBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+   public PutBallInBucketBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
          HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(outgoingCommunicationBridge);

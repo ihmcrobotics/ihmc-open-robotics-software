@@ -12,9 +12,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,10 +22,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FlamingoStanceState extends SingleSupportState
 {
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final BooleanYoVariable loadFoot;
-   private final DoubleYoVariable loadFootStartTime;
-   private final DoubleYoVariable loadFootDuration;
-   private final DoubleYoVariable loadFootTransferDuration;
+   private final YoBoolean loadFoot;
+   private final YoDouble loadFootStartTime;
+   private final YoDouble loadFootDuration;
+   private final YoDouble loadFootTransferDuration;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -52,10 +52,10 @@ public class FlamingoStanceState extends SingleSupportState
       kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
-      loadFoot = new BooleanYoVariable(namePrefix + "LoadFoot", registry);
-      loadFootStartTime = new DoubleYoVariable(namePrefix + "LoadFootStartTime", registry);
-      loadFootDuration = new DoubleYoVariable(namePrefix + "LoadFootDuration", registry);
-      loadFootTransferDuration = new DoubleYoVariable(namePrefix + "LoadFootTransferDuration", registry);
+      loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);
+      loadFootStartTime = new YoDouble(namePrefix + "LoadFootStartTime", registry);
+      loadFootDuration = new YoDouble(namePrefix + "LoadFootDuration", registry);
+      loadFootTransferDuration = new YoDouble(namePrefix + "LoadFootTransferDuration", registry);
 
       loadFoot.set(false);
       loadFootDuration.set(1.2);

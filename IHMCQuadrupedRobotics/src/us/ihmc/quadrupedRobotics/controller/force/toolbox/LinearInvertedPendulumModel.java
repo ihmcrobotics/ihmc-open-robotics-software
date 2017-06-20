@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +14,7 @@ public class LinearInvertedPendulumModel
    private final ReferenceFrame comZUpFrame;
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   DoubleYoVariable yoLipNaturalFrequency = new DoubleYoVariable("lipNaturalFrequency", registry);
+   YoDouble yoLipNaturalFrequency = new YoDouble("lipNaturalFrequency", registry);
 
    public LinearInvertedPendulumModel(ReferenceFrame comZUpFrame, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {

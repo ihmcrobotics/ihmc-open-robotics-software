@@ -3,21 +3,18 @@ package us.ihmc.atlas.StepAdjustmentVisualizers;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,12 +31,12 @@ public class SpeedUpExampleGraphic
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final SimulationConstructionSet scs;
 
-   private final DoubleYoVariable speedUpTime;
-   private final DoubleYoVariable omega0;
-   private final DoubleYoVariable segmentTime;
-   private final DoubleYoVariable timeInSegment;
+   private final YoDouble speedUpTime;
+   private final YoDouble omega0;
+   private final YoDouble segmentTime;
+   private final YoDouble timeInSegment;
 
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
 
    private final YoFramePoint2d stanceCMP;
    private final YoFramePoint2d endICP;
@@ -63,12 +60,12 @@ public class SpeedUpExampleGraphic
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
 
       currentTime = robot.getYoTime();
-      speedUpTime = new DoubleYoVariable("speedUpTime", registry);
-      omega0 = new DoubleYoVariable("omega0", registry);
+      speedUpTime = new YoDouble("speedUpTime", registry);
+      omega0 = new YoDouble("omega0", registry);
       omega0.set(3.0);
-      segmentTime = new DoubleYoVariable("segmentTime", registry);
+      segmentTime = new YoDouble("segmentTime", registry);
       segmentTime.set(0.5);
-      timeInSegment = new DoubleYoVariable("timeInSegment", registry);
+      timeInSegment = new YoDouble("timeInSegment", registry);
 
       stanceCMP = new YoFramePoint2d("stanceCMP", worldFrame, registry);
       endICP = new YoFramePoint2d("endICP", worldFrame, registry);

@@ -13,7 +13,7 @@ import us.ihmc.acsell.hardware.state.AcsellLinearTransmissionJointState;
 import us.ihmc.acsell.hardware.state.AcsellState;
 import us.ihmc.acsell.hardware.state.slowSensors.PressureSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererJoint;

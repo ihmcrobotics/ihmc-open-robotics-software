@@ -7,11 +7,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -48,57 +48,57 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final YoVariableRegistry registry;
 
    /** Alpha filter to filter the foot angular velocity. */
-   private final DoubleYoVariable anglularVelocityFilterBreakFrequeny;
-   private final DoubleYoVariable yoAngularVelocityAlphaFilter;
+   private final YoDouble anglularVelocityFilterBreakFrequeny;
+   private final YoDouble yoAngularVelocityAlphaFilter;
    private final double controllerDt;
    /** Foot filtered angular velocity in the sole frame. The yaw rate is intentionally ignored. */
    private final AlphaFilteredYoFrameVector2d yoFootAngularVelocityFiltered;
    /** Foot angular velocity around the estimated line of rotation. */
-   private final DoubleYoVariable yoAngularVelocityAroundLoR;
+   private final YoDouble yoAngularVelocityAroundLoR;
    /** Point located on the line of rotation. The measured center of pressure is used to compute it. */
 
    /** Alpha filter to filter the foot angular velocity. */
-   private final DoubleYoVariable yoCoRPositionAlphaFilter;
+   private final YoDouble yoCoRPositionAlphaFilter;
    private final AlphaFilteredYoFramePoint2d yoCoRPositionFiltered;
    /** Alpha filter to filter the linear velocity of the center of rotation. */
-   private final DoubleYoVariable yoCoRVelocityAlphaFilter;
+   private final YoDouble yoCoRVelocityAlphaFilter;
    /** Filtered data of the center of rotation linear velocity. */
    private final FilteredVelocityYoFrameVector2d yoCoRVelocityFiltered;
    /** Linear velocity of the center of rotation that is transversal (perpendicular) to the line of rotation. */
-   private final DoubleYoVariable yoCoRTransversalVelocity;
+   private final YoDouble yoCoRTransversalVelocity;
    /** Estimated line of rotation of the foot. It is actually here a line segment that remains contained in the foot. */
    private final YoFrameLineSegment2d yoLineOfRotation;
    /** Absolute angle of the line of rotation. */
-   private final DoubleYoVariable yoAngleOfLoR;
+   private final YoDouble yoAngleOfLoR;
    /** Alpha filter used to filter the yaw rate of the line of rotation. */
-   private final DoubleYoVariable yoLoRAngularVelocityAlphaFilter;
+   private final YoDouble yoLoRAngularVelocityAlphaFilter;
    /** Filtered yaw rate of the line of rotation. */
    private final FilteredVelocityYoVariable yoLoRAngularVelocityFiltered;
    /** Amount that the foot drops or lifts around the axis of rotation */
-   private final DoubleYoVariable yoFootDropOrLift;
+   private final YoDouble yoFootDropOrLift;
 
    private final Footstep currentDesiredFootstep;
 
    /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
-   private final DoubleYoVariable yoStableLoRAngularVelocityThreshold;
-   private final BooleanYoVariable yoIsLoRStable;
+   private final YoDouble yoStableLoRAngularVelocityThreshold;
+   private final YoBoolean yoIsLoRStable;
 
    /** Threshold on the transversal velocity of the CoR w.r.t. the LoR to determine whether or not the CoR is stable. */
-   private final DoubleYoVariable yoStableCoRLinearVelocityThreshold;
-   private final BooleanYoVariable yoIsCoRStable;
+   private final YoDouble yoStableCoRLinearVelocityThreshold;
+   private final YoBoolean yoIsCoRStable;
 
    /** Threshold on the foot angular velocity around the line of rotation. */
-   private final DoubleYoVariable yoAngularVelocityAroundLoRThreshold;
-   private final BooleanYoVariable yoIsAngularVelocityAroundLoRPastThreshold;
+   private final YoDouble yoAngularVelocityAroundLoRThreshold;
+   private final YoBoolean yoIsAngularVelocityAroundLoRPastThreshold;
 
    /** Threshold on the foot drop around the line of rotation. */
-   private final DoubleYoVariable yoFootDropThreshold;
-   private final BooleanYoVariable yoIsFootDropPastThreshold;
+   private final YoDouble yoFootDropThreshold;
+   private final YoBoolean yoIsFootDropPastThreshold;
 
    /** Main output of this class that informs on wether or not the foot is rotating. */
-   private final BooleanYoVariable yoIsFootRotating;
+   private final YoBoolean yoIsFootRotating;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final YoBoolean hasBeenInitialized;
 
    private final FrameVector angularVelocity = new FrameVector();
    private final FrameVector2d angularVelocity2d = new FrameVector2d();
@@ -135,7 +135,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
-      yoAngularVelocityAlphaFilter = new DoubleYoVariable(namePrefix + name + "AngularVelocityAlphaFilter", generalDescription, registry);
+      yoAngularVelocityAlphaFilter = new YoDouble(namePrefix + name + "AngularVelocityAlphaFilter", generalDescription, registry);
       anglularVelocityFilterBreakFrequeny = explorationParameters.getAngularVelocityFilterBreakFrequency();
       anglularVelocityFilterBreakFrequeny.addVariableChangedListener(new VariableChangedListener()
       {
@@ -153,39 +153,39 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoFootAngularVelocityFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "",
             generalDescription, registry, yoAngularVelocityAlphaFilter, soleFrame);
 
-      yoCoRPositionAlphaFilter = new DoubleYoVariable(namePrefix + "CoRPositionAlphaFilter", registry);
+      yoCoRPositionAlphaFilter = new YoDouble(namePrefix + "CoRPositionAlphaFilter", registry);
       yoCoRPositionFiltered = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CoRFiltered", "", generalDescription, registry,
             yoCoRPositionAlphaFilter, soleFrame);
-      yoCoRVelocityAlphaFilter = new DoubleYoVariable(namePrefix + "CoRVelocityAlphaFilter", generalDescription, registry);
-      yoCoRTransversalVelocity = new DoubleYoVariable(namePrefix + "CoRTransversalVelocity", generalDescription, registry);
+      yoCoRVelocityAlphaFilter = new YoDouble(namePrefix + "CoRVelocityAlphaFilter", generalDescription, registry);
+      yoCoRTransversalVelocity = new YoDouble(namePrefix + "CoRTransversalVelocity", generalDescription, registry);
       yoCoRVelocityFiltered = FilteredVelocityYoFrameVector2d.createFilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity", "", generalDescription,
             yoCoRVelocityAlphaFilter, dt, registry, yoCoRPositionFiltered);
 
       yoLineOfRotation = new YoFrameLineSegment2d(namePrefix + "LoRPosition", "", generalDescription, worldFrame, registry);
-      yoAngleOfLoR = new DoubleYoVariable(namePrefix + "AngleOfLoR", generalDescription, registry);
-      yoLoRAngularVelocityAlphaFilter = new DoubleYoVariable(namePrefix + "LoRAngularVelocityAlphaFilter", generalDescription, registry);
+      yoAngleOfLoR = new YoDouble(namePrefix + "AngleOfLoR", generalDescription, registry);
+      yoLoRAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LoRAngularVelocityAlphaFilter", generalDescription, registry);
       yoLoRAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered", generalDescription,
             yoLoRAngularVelocityAlphaFilter, yoAngleOfLoR, dt, registry);
 
-      yoAngularVelocityAroundLoR = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLoR", generalDescription, registry);
+      yoAngularVelocityAroundLoR = new YoDouble(namePrefix + "AngularVelocityAroundLoR", generalDescription, registry);
 
-      yoFootDropOrLift = new DoubleYoVariable(namePrefix + "FootDropOrLift", generalDescription, registry);
+      yoFootDropOrLift = new YoDouble(namePrefix + "FootDropOrLift", generalDescription, registry);
 
       yoStableLoRAngularVelocityThreshold = explorationParameters.getStableLoRAngularVelocityThreshold();
-      yoIsLoRStable = new BooleanYoVariable(namePrefix + "IsLoRStable", generalDescription, registry);
+      yoIsLoRStable = new YoBoolean(namePrefix + "IsLoRStable", generalDescription, registry);
 
       yoStableCoRLinearVelocityThreshold = explorationParameters.getStableCoRLinearVelocityThreshold();
-      yoIsCoRStable = new BooleanYoVariable(namePrefix + "IsCoRStable", generalDescription, registry);
+      yoIsCoRStable = new YoBoolean(namePrefix + "IsCoRStable", generalDescription, registry);
 
       yoAngularVelocityAroundLoRThreshold = explorationParameters.getAngularVelocityAroundLoRThreshold();
-      yoIsAngularVelocityAroundLoRPastThreshold = new BooleanYoVariable(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
+      yoIsAngularVelocityAroundLoRPastThreshold = new YoBoolean(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
 
       yoFootDropThreshold = explorationParameters.getFootDropThreshold();
-      yoIsFootDropPastThreshold = new BooleanYoVariable(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
+      yoIsFootDropPastThreshold = new YoBoolean(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
 
-      yoIsFootRotating = new BooleanYoVariable(namePrefix + "RotatingVelocity", generalDescription, registry);
+      yoIsFootRotating = new YoBoolean(namePrefix + "RotatingVelocity", generalDescription, registry);
 
-      hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
+      hasBeenInitialized = new YoBoolean(namePrefix + "HasBeenInitialized", registry);
 
       angularVelocity2d.setToZero(soleFrame);
       lineOfRotationInSoleFrame.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0, 0.0);

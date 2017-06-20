@@ -4,11 +4,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-
 
 public class TwoLinkRobotForTesting extends Robot
 {
@@ -32,7 +31,7 @@ public class TwoLinkRobotForTesting extends Robot
 
    private final PinJoint upperJoint;
    private final PinJoint elbowJoint;
-   private DoubleYoVariable bodyPitch;
+   private YoDouble bodyPitch;
 
    public TwoLinkRobotForTesting()
    {

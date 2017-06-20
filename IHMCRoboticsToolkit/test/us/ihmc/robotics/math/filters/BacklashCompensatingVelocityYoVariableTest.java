@@ -11,8 +11,8 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
@@ -29,9 +29,9 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
       BacklashCompensatingVelocityYoVariable unprocessed = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, dt, slopTime, registry);
 
       double rawPosition = 0.0, rawPositionPrevValue = 0.0;
@@ -57,10 +57,10 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       BacklashCompensatingVelocityYoVariable unprocessed = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
 
@@ -87,11 +87,11 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
       BacklashCompensatingVelocityYoVariable filteredOnly = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, dt, slopTime, registry);
 
@@ -116,11 +116,11 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
       BacklashCompensatingVelocityYoVariable filteredOnly = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
@@ -146,11 +146,11 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
       BacklashCompensatingVelocityYoVariable backlashAndFiltered = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
@@ -177,11 +177,11 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
       BacklashCompensatingVelocityYoVariable backlashAndFiltered = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
@@ -208,10 +208,10 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = 0.001;
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       BacklashCompensatingVelocityYoVariable backlashOnly = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
 
@@ -273,10 +273,10 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random rand = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = 0.001; //1e-5; //RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
-      DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
+      YoDouble slopTime = new YoDouble("slop", registry);
+      YoDouble rawPosition = new YoDouble("rawPosition", registry);
       BacklashCompensatingVelocityYoVariable backlashOnly = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
             registry);
 
@@ -339,21 +339,21 @@ public class BacklashCompensatingVelocityYoVariableTest
       Random random = new Random(1798L);
 
       YoVariableRegistry registry = new YoVariableRegistry("Registry");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slopTime", registry);
-      DoubleYoVariable cleanPosition = new DoubleYoVariable("cleanPosition", registry);
-      DoubleYoVariable noisyPosition = new DoubleYoVariable("noisyPosition", registry);
-      DoubleYoVariable cleanVelocity = new DoubleYoVariable("cleanVelocity", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
+      YoDouble slopTime = new YoDouble("slopTime", registry);
+      YoDouble cleanPosition = new YoDouble("cleanPosition", registry);
+      YoDouble noisyPosition = new YoDouble("noisyPosition", registry);
+      YoDouble cleanVelocity = new YoDouble("cleanVelocity", registry);
 
       
-      DoubleYoVariable reconstructedPosition = new DoubleYoVariable("reconstructedPosition", registry);
-      DoubleYoVariable reconstructedPosition2 = new DoubleYoVariable("reconstructedPosition2", registry);
+      YoDouble reconstructedPosition = new YoDouble("reconstructedPosition", registry);
+      YoDouble reconstructedPosition2 = new YoDouble("reconstructedPosition2", registry);
 
-      DoubleYoVariable totalReconstructedPositionError1 = new DoubleYoVariable("totalReconstructedPositionError1", registry);
-      DoubleYoVariable totalReconstructedPositionError2 = new DoubleYoVariable("totalReconstructedPositionError2", registry);
+      YoDouble totalReconstructedPositionError1 = new YoDouble("totalReconstructedPositionError1", registry);
+      YoDouble totalReconstructedPositionError2 = new YoDouble("totalReconstructedPositionError2", registry);
       
-      DoubleYoVariable averageReconstructedPositionError1 = new DoubleYoVariable("averageReconstructedPositionError1", registry);
-      DoubleYoVariable averageReconstructedPositionError2 = new DoubleYoVariable("averageReconstructedPositionError2", registry);
+      YoDouble averageReconstructedPositionError1 = new YoDouble("averageReconstructedPositionError1", registry);
+      YoDouble averageReconstructedPositionError2 = new YoDouble("averageReconstructedPositionError2", registry);
 
       double dt = 0.001;
       double totalTime = 5.0;
@@ -411,22 +411,22 @@ public class BacklashCompensatingVelocityYoVariableTest
    public void testSignalWithBacklash()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Registry");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slopTime", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
+      YoDouble slopTime = new YoDouble("slopTime", registry);
       
-      DoubleYoVariable cleanPosition = new DoubleYoVariable("cleanPosition", registry);
-      DoubleYoVariable backlashyPosition = new DoubleYoVariable("backlashyPosition", registry);
-      DoubleYoVariable cleanVelocity = new DoubleYoVariable("cleanVelocity", registry);
+      YoDouble cleanPosition = new YoDouble("cleanPosition", registry);
+      YoDouble backlashyPosition = new YoDouble("backlashyPosition", registry);
+      YoDouble cleanVelocity = new YoDouble("cleanVelocity", registry);
 
       
-      DoubleYoVariable reconstructedPosition = new DoubleYoVariable("reconstructedPosition", registry);
-      DoubleYoVariable reconstructedPosition2 = new DoubleYoVariable("reconstructedPosition2", registry);
+      YoDouble reconstructedPosition = new YoDouble("reconstructedPosition", registry);
+      YoDouble reconstructedPosition2 = new YoDouble("reconstructedPosition2", registry);
 
-      DoubleYoVariable totalReconstructedPositionError1 = new DoubleYoVariable("totalReconstructedPositionError1", registry);
-      DoubleYoVariable totalReconstructedPositionError2 = new DoubleYoVariable("totalReconstructedPositionError2", registry);
+      YoDouble totalReconstructedPositionError1 = new YoDouble("totalReconstructedPositionError1", registry);
+      YoDouble totalReconstructedPositionError2 = new YoDouble("totalReconstructedPositionError2", registry);
       
-      DoubleYoVariable averageReconstructedPositionError1 = new DoubleYoVariable("averageReconstructedPositionError1", registry);
-      DoubleYoVariable averageReconstructedPositionError2 = new DoubleYoVariable("averageReconstructedPositionError2", registry);
+      YoDouble averageReconstructedPositionError1 = new YoDouble("averageReconstructedPositionError1", registry);
+      YoDouble averageReconstructedPositionError2 = new YoDouble("averageReconstructedPositionError2", registry);
 
       double dt = 0.001;
       double totalTime = 5.0;
@@ -486,10 +486,10 @@ public class BacklashCompensatingVelocityYoVariableTest
    public void testRemoveSquareWaveBacklash()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Registry");
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      DoubleYoVariable slopTime = new DoubleYoVariable("slopTime", registry);
+      YoDouble alphaVariable = new YoDouble("alpha", registry);
+      YoDouble slopTime = new YoDouble("slopTime", registry);
       
-      DoubleYoVariable backlashyPosition = new DoubleYoVariable("backlashyPosition", registry);
+      YoDouble backlashyPosition = new YoDouble("backlashyPosition", registry);
 
       double dt = 0.001;
       double totalTime = 5.0;

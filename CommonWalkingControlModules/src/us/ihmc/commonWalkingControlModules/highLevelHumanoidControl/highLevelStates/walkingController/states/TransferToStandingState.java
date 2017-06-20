@@ -9,16 +9,16 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToStandingState extends WalkingState
 {
-   private final DoubleYoVariable maxICPErrorToSwitchToStanding = new DoubleYoVariable("maxICPErrorToSwitchToStanding", registry);
+   private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
 
-   private final BooleanYoVariable doFootExplorationInTransferToStanding = new BooleanYoVariable("doFootExplorationInTransferToStanding", registry);
+   private final YoBoolean doFootExplorationInTransferToStanding = new YoBoolean("doFootExplorationInTransferToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;

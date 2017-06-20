@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Created by Peter on 9/11/2016.
@@ -19,10 +19,10 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    public void testInvalidYoVariables()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable startOfRampUp = new DoubleYoVariable("startOfRampUp", registry);
-      DoubleYoVariable endOfRamp = new DoubleYoVariable("endOfRamp", registry);
-      DoubleYoVariable startOfRampDown = new DoubleYoVariable("startOfRampDown", registry);
-      DoubleYoVariable endOfRampDown = new DoubleYoVariable("endOfRampDown", registry);
+      YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
+      YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
+      YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
+      YoDouble endOfRampDown = new YoDouble("endOfRampDown", registry);
 
       YoMiniJerkUpAndDownAlphaToAlpha yoMiniJerkUpAndDownAlphaToAlpha = new YoMiniJerkUpAndDownAlphaToAlpha(startOfRampUp, endOfRamp, startOfRampDown, endOfRampDown);
 
@@ -52,10 +52,10 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    public void testValidYoVariables()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable startOfRampUp = new DoubleYoVariable("startOfRampUp", registry);
-      DoubleYoVariable endOfRamp = new DoubleYoVariable("endOfRamp", registry);
-      DoubleYoVariable startOfRampDown = new DoubleYoVariable("startOfRampDown", registry);
-      DoubleYoVariable endOfRampDown = new DoubleYoVariable("endOfRampDown", registry);
+      YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
+      YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
+      YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
+      YoDouble endOfRampDown = new YoDouble("endOfRampDown", registry);
 
       YoMiniJerkUpAndDownAlphaToAlpha yoVariableRampUpAndDownAlphaToAlpha = new YoMiniJerkUpAndDownAlphaToAlpha(startOfRampUp, endOfRamp, startOfRampDown, endOfRampDown);
 
@@ -121,10 +121,10 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    public void testHalfWay()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable startOfRampUp = new DoubleYoVariable("startOfRampUp", registry);
-      DoubleYoVariable endOfRamp = new DoubleYoVariable("endOfRamp", registry);
-      DoubleYoVariable startOfRampDown = new DoubleYoVariable("startOfRampDown", registry);
-      DoubleYoVariable endOfRampDown = new DoubleYoVariable("endOfRampDown", registry);
+      YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
+      YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
+      YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
+      YoDouble endOfRampDown = new YoDouble("endOfRampDown", registry);
 
       YoMiniJerkUpAndDownAlphaToAlpha yoVariableRampUpAndDownAlphaToAlpha = new YoMiniJerkUpAndDownAlphaToAlpha(startOfRampUp, endOfRamp, startOfRampDown, endOfRampDown);
 
@@ -165,10 +165,10 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    public void testSmallDifferences()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable startOfRampUp = new DoubleYoVariable("startOfRampUp", registry);
-      DoubleYoVariable endOfRamp = new DoubleYoVariable("endOfRamp", registry);
-      DoubleYoVariable startOfRampDown = new DoubleYoVariable("startOfRampDown", registry);
-      DoubleYoVariable endOfRampDown = new DoubleYoVariable("endOfRampDown", registry);
+      YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
+      YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
+      YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
+      YoDouble endOfRampDown = new YoDouble("endOfRampDown", registry);
 
       YoMiniJerkUpAndDownAlphaToAlpha yoVariableRampUpAndDownAlphaToAlpha = new YoMiniJerkUpAndDownAlphaToAlpha(startOfRampUp, endOfRamp, startOfRampDown, endOfRampDown);
 

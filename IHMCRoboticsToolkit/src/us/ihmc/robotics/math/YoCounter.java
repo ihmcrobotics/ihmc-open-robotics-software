@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoCounter
 {
-   private final IntegerYoVariable count;
-   private final IntegerYoVariable maxCount;
+   private final YoInteger count;
+   private final YoInteger maxCount;
    
    public YoCounter(String namePrefix, YoVariableRegistry registry)
    {
-      count = new IntegerYoVariable(namePrefix + "Count", registry);
-      maxCount = new IntegerYoVariable(namePrefix + "MaxCount", registry);
+      count = new YoInteger(namePrefix + "Count", registry);
+      maxCount = new YoInteger(namePrefix + "MaxCount", registry);
    }
    
    public void countOne()

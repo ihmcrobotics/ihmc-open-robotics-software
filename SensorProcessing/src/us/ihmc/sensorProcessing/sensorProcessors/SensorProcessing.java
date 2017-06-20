@@ -15,10 +15,10 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -152,14 +152,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
-   private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
-   private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
+   private final YoLong timestamp = new YoLong("timestamp", registry);
+   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
+   private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointPositions = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointVelocities = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointAccelerations = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointTaus = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointAccelerations = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointTaus = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> inputOrientations = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, YoFrameVector> inputAngularVelocities = new LinkedHashMap<>();
@@ -187,10 +187,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedForces = new LinkedHashMap<>();
    private final LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedTorques = new LinkedHashMap<>();
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointPositions = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointVelocities = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointAccelerations = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointTaus = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> outputJointPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> outputJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> outputJointAccelerations = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> outputJointTaus = new LinkedHashMap<>();
 
    private final ArrayList<DiagnosticUpdatable> diagnosticModules = new ArrayList<>();
 
@@ -208,7 +208,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final List<String> allIMUSensorNames = new ArrayList<>();
    private final List<String> allForceSensorNames = new ArrayList<>();
 
-   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> jointEnabledIndicators = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoBoolean> jointEnabledIndicators = new LinkedHashMap<>();
 
    private final double updateDT;
 
@@ -243,33 +243,33 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          prefix = JOINT_POSITION.getProcessorNamePrefix(RAW);
          suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, -1);
-         DoubleYoVariable rawJointPosition = new DoubleYoVariable(prefix + suffix, registry);
+         YoDouble rawJointPosition = new YoDouble(prefix + suffix, registry);
          inputJointPositions.put(oneDoFJoint, rawJointPosition);
          outputJointPositions.put(oneDoFJoint, rawJointPosition);
          processedJointPositions.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
          prefix = JOINT_VELOCITY.getProcessorNamePrefix(RAW);
          suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, -1);
-         DoubleYoVariable rawJointVelocity = new DoubleYoVariable(prefix + suffix, registry);
+         YoDouble rawJointVelocity = new YoDouble(prefix + suffix, registry);
          inputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          outputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          processedJointVelocities.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
          prefix = JOINT_ACCELERATION.getProcessorNamePrefix(RAW);
          suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, -1);
-         DoubleYoVariable rawJointAcceleration = new DoubleYoVariable(prefix + suffix, registry);
+         YoDouble rawJointAcceleration = new YoDouble(prefix + suffix, registry);
          inputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
          outputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
          processedJointAccelerations.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
          prefix = JOINT_TAU.getProcessorNamePrefix(RAW);
          suffix = JOINT_TAU.getProcessorNameSuffix(jointName, -1);
-         DoubleYoVariable rawJointTau = new DoubleYoVariable(prefix + suffix, registry);
+         YoDouble rawJointTau = new YoDouble(prefix + suffix, registry);
          inputJointTaus.put(oneDoFJoint, rawJointTau);
          outputJointTaus.put(oneDoFJoint, rawJointTau);
          processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
-         BooleanYoVariable jointEnabledIndicator = new BooleanYoVariable("joint_enabled_" + jointName, registry);
+         YoBoolean jointEnabledIndicator = new YoBoolean("joint_enabled_" + jointName, registry);
          jointEnabledIndicator.set(true);
          jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
       }
@@ -420,7 +420,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public Map<String, Integer> addSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType)
+   public Map<String, Integer> addSensorAlphaFilter(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType)
    {
       return addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType);
    }
@@ -432,7 +432,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be processed.
     */
-   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
+   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
    {
       return addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
    }
@@ -444,7 +444,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
+   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDMap;
       List<String> sensorToIgnoreList = new ArrayList<>();
@@ -468,7 +468,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return Collections.unmodifiableMap(processorIDMap);
    }
 
-   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
@@ -499,7 +499,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return processorsIDs;
    }
 
-   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
@@ -530,11 +530,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return processorsIDs;
    }
 
-   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> jointsToIgnore)
+   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(YoDouble alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> jointsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
-      LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointSignals = getOutputJointSignals(sensorType);
+      LinkedHashMap<OneDoFJoint, YoDouble> outputJointSignals = getOutputJointSignals(sensorType);
       LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointSignals = getProcessedJointSignals(sensorType);
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -545,7 +545,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointSignal = outputJointSignals.get(oneDoFJoint);
+         YoDouble intermediateJointSignal = outputJointSignals.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointSignals.get(oneDoFJoint);
          String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
          int newProcessorID = processors.size();
@@ -613,8 +613,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          String velocityPrefix = JOINT_VELOCITY.getProcessorNamePrefix(CONSTANT);
          String velocitySuffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, velocityProcessors.size());
 
-         DoubleYoVariable yoConstantPosition = new DoubleYoVariable(positionPrefix + positionSuffix, registry);
-         DoubleYoVariable yoConstantVelocity = new DoubleYoVariable(velocityPrefix + velocitySuffix, registry);
+         YoDouble yoConstantPosition = new YoDouble(positionPrefix + positionSuffix, registry);
+         YoDouble yoConstantVelocity = new YoDouble(velocityPrefix + velocitySuffix, registry);
 
          yoConstantPosition.set(constantPosition);
          yoConstantVelocity.set(constantVelocity);
@@ -677,7 +677,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         YoDouble intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(POLYNOMIAL);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
@@ -689,12 +689,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
@@ -707,12 +707,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -726,16 +726,16 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
+         YoDouble stiffness = stiffnesses.get(oneDoFJoint);
          if (stiffness == null)
             continue;
-         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         YoDouble intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
 
-         DoubleYoVariable intermediateJointTau;
+         YoDouble intermediateJointTau;
          if (torqueProcessorIDs == null || !torqueProcessorIDs.containsKey(jointName))
             intermediateJointTau = outputJointTaus.get(oneDoFJoint);
          else
-            intermediateJointTau = (DoubleYoVariable) processedJointTaus.get(oneDoFJoint).get(torqueProcessorIDs.get(jointName));
+            intermediateJointTau = (YoDouble) processedJointTaus.get(oneDoFJoint).get(torqueProcessorIDs.get(jointName));
 
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
@@ -748,12 +748,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly)
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
-   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
@@ -766,12 +766,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -785,16 +785,16 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
+         YoDouble stiffness = stiffnesses.get(oneDoFJoint);
          if (stiffness == null)
             continue;
-         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         YoDouble intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
 
-         DoubleYoVariable intermediateJointTau;
+         YoDouble intermediateJointTau;
          if (torqueProcessorIDs == null || !torqueProcessorIDs.containsKey(jointName))
             intermediateJointTau = outputJointTaus.get(oneDoFJoint);
          else
-            intermediateJointTau = (DoubleYoVariable) processedJointTaus.get(oneDoFJoint).get(torqueProcessorIDs.get(jointName));
+            intermediateJointTau = (YoDouble) processedJointTaus.get(oneDoFJoint).get(torqueProcessorIDs.get(jointName));
 
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
@@ -814,7 +814,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public void computeJointVelocityFromFiniteDifference(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   public void computeJointVelocityFromFiniteDifference(YoDouble alphaFilter, boolean forVizOnly)
    {
       computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly);
    }
@@ -826,7 +826,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be processed.
     */
-   public void computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
+   public void computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(YoDouble alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
    {
       computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
@@ -838,7 +838,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   public void computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(YoDouble alphaFilter, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -852,7 +852,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         YoDouble intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
@@ -871,7 +871,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public void computeJointVelocityWithBacklashCompensator(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly)
+   public void computeJointVelocityWithBacklashCompensator(YoDouble alphaFilter, YoDouble slopTime, boolean forVizOnly)
    {
       computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly);
    }
@@ -883,7 +883,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be processed.
     */
-   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
+   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(YoDouble alphaFilter, YoDouble slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
       computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
@@ -895,7 +895,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToIgnore)
+   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(YoDouble alphaFilter, YoDouble slopTime, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -909,7 +909,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         YoDouble intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
 
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
@@ -930,7 +930,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public void addJointVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
+   public void addJointVelocityBacklashFilter(YoDouble slopTime, boolean forVizOnly)
    {
       addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly);
    }
@@ -943,7 +943,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
-   public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
+   public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(YoDouble slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
       addJointVelocityBacklashFilterWithJointsToIgnore(slopTime, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
@@ -956,7 +956,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointVelocityBacklashFilterWithJointsToIgnore(DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointVelocityBacklashFilterWithJointsToIgnore(YoDouble slopTime, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -970,7 +970,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         YoDouble intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
@@ -987,7 +987,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public void computeJointAccelerationFromFiniteDifference(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   public void computeJointAccelerationFromFiniteDifference(YoDouble alphaFilter, boolean forVizOnly)
    {
       computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly);
    }
@@ -998,7 +998,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   public void computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(YoDouble alphaFilter, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1012,7 +1012,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         YoDouble intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
          String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
@@ -1031,7 +1031,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the sensors to ignore.
     */
-   private Map<String, Integer> addIMUOrientationAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
+   private Map<String, Integer> addIMUOrientationAlphaFilterWithSensorsToIgnore(YoDouble alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorIDs = new HashMap<>();
 
@@ -1066,7 +1066,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public Map<String, Integer> addIMUAngularVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilter(YoDouble slopTime, boolean forVizOnly)
    {
       return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly);
    }
@@ -1079,7 +1079,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleYoVariable slopTime, boolean forVizOnly, String... sensorsToBeProcessed)
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(YoDouble slopTime, boolean forVizOnly, String... sensorsToBeProcessed)
    {
       return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly, invertSensorSelection(IMU_ANGULAR_VELOCITY, sensorsToBeProcessed));
    }
@@ -1092,7 +1092,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(DoubleYoVariable slopTime, boolean forVizOnly, String... sensorsToIgnore)
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(YoDouble slopTime, boolean forVizOnly, String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDs = new HashMap<>();
 
@@ -1141,9 +1141,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         DoubleYoVariable position = outputJointPositions.get(jointToCheck);
-         DoubleYoVariable velocity = outputJointVelocities.get(jointToCheck);
-         DoubleYoVariable tau = outputJointTaus.get(jointToCheck);
+         YoDouble position = outputJointPositions.get(jointToCheck);
+         YoDouble velocity = outputJointVelocities.get(jointToCheck);
+         YoDouble tau = outputJointTaus.get(jointToCheck);
          OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, position, velocity, tau, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
@@ -1204,10 +1204,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         DoubleYoVariable rawPosition = inputJointPositions.get(jointToCheck);
-         DoubleYoVariable rawVelocity = inputJointVelocities.get(jointToCheck);
-         DoubleYoVariable processedPosition = outputJointPositions.get(jointToCheck);
-         DoubleYoVariable processedVelocity = outputJointVelocities.get(jointToCheck);
+         YoDouble rawPosition = inputJointPositions.get(jointToCheck);
+         YoDouble rawVelocity = inputJointVelocities.get(jointToCheck);
+         YoDouble processedPosition = outputJointPositions.get(jointToCheck);
+         YoDouble processedVelocity = outputJointVelocities.get(jointToCheck);
          PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(), rawPosition, rawVelocity, processedPosition, processedVelocity, updateDT, registry);
          consistencyCheckerMap.put(jointToCheck, consistencyChecker);
          diagnosticModules.add(consistencyChecker);
@@ -1277,34 +1277,34 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
     * @param name name of the variable.
     * @param breakFrequency break frequency in Hertz
-    * @return a {@code DoubleYoVariable} to be used when adding a low-pass filter stage using the methods in this class such as {@link SensorProcessing#addJointVelocityAlphaFilter(DoubleYoVariable, boolean)}.
+    * @return a {@code YoDouble} to be used when adding a low-pass filter stage using the methods in this class such as {@link SensorProcessing#addJointVelocityAlphaFilter(YoDouble, boolean)}.
     */
-   public DoubleYoVariable createAlphaFilter(String name, double breakFrequency)
+   public YoDouble createAlphaFilter(String name, double breakFrequency)
    {
-      DoubleYoVariable alphaFilter = new DoubleYoVariable(name, registry);
+      YoDouble alphaFilter = new YoDouble(name, registry);
       alphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, updateDT));
       return alphaFilter;
    }
 
    /**
-    * Helper to create easily a {@code Map<OneDoFJoint, DoubleYoVariable>} referring to the stiffness for each joint.
+    * Helper to create easily a {@code Map<OneDoFJoint, YoDouble>} referring to the stiffness for each joint.
     * @param nameSuffix suffix to be used in the variables' name.
     * @param defaultStiffness default value of stiffness to use when not referred in the jointSpecificStiffness.
     * @param jointSpecificStiffness {@code Map<String, Double>} referring the specific stiffness value to be used for each joint. Does not need to be exhaustive, can also be empty or null in which the defaultStiffness is used for every joint.
-    * @return {@code Map<OneDoFJoint, DoubleYoVariable>} to be used when calling {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
+    * @return {@code Map<OneDoFJoint, YoDouble>} to be used when calling {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
     */
-   public Map<OneDoFJoint, DoubleYoVariable> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
+   public Map<OneDoFJoint, YoDouble> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
    {
       return createStiffnessWithJointsToIgnore(nameSuffix, defaultStiffness, jointSpecificStiffness);
    }
 
-   public Map<OneDoFJoint, DoubleYoVariable> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
+   public Map<OneDoFJoint, YoDouble> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
          jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
 
-      LinkedHashMap<OneDoFJoint, DoubleYoVariable> stiffesses = new LinkedHashMap<>();
+      LinkedHashMap<OneDoFJoint, YoDouble> stiffesses = new LinkedHashMap<>();
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
@@ -1313,7 +1313,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointToIgnoreList.contains(jointName))
             continue;
 
-         DoubleYoVariable stiffness = new DoubleYoVariable(jointName + nameSuffix, registry);
+         YoDouble stiffness = new YoDouble(jointName + nameSuffix, registry);
 
          if (jointSpecificStiffness != null && jointSpecificStiffness.containsKey(jointName))
             stiffness.set(jointSpecificStiffness.get(jointName));
@@ -1327,29 +1327,29 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Helper to convert easily a map from joint name to @{@code DoubleYoVariable} ({@code Map<String, DoubleYoVariable>}) to a {@code Map<OneDoFJoint, DoubleYoVariable>}.
-    * @param mapToConvert {@code Map<String, DoubleYoVariable>} the map to be converted, not modified.
-    * @return {@code Map<OneDoFJoint, DoubleYoVariable>} the converted map.
+    * Helper to convert easily a map from joint name to @{@code YoDouble} ({@code Map<String, YoDouble>}) to a {@code Map<OneDoFJoint, YoDouble>}.
+    * @param mapToConvert {@code Map<String, YoDouble>} the map to be converted, not modified.
+    * @return {@code Map<OneDoFJoint, YoDouble>} the converted map.
     */
-   public Map<OneDoFJoint, DoubleYoVariable> convertFromJointNameToJointMap(Map<String, DoubleYoVariable> mapToConvert)
+   public Map<OneDoFJoint, YoDouble> convertFromJointNameToJointMap(Map<String, YoDouble> mapToConvert)
    {
-      LinkedHashMap<OneDoFJoint, DoubleYoVariable> newMap = new LinkedHashMap<>();
+      LinkedHashMap<OneDoFJoint, YoDouble> newMap = new LinkedHashMap<>();
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
          
-         DoubleYoVariable doubleYoVariable = mapToConvert.get(jointName);
-         if (doubleYoVariable != null)
-            newMap.put(oneDoFJoint, doubleYoVariable);
+         YoDouble yoDouble = mapToConvert.get(jointName);
+         if (yoDouble != null)
+            newMap.put(oneDoFJoint, yoDouble);
       }
       
       return newMap;
    }
 
-   public DoubleYoVariable createMaxDeflection(String name, double defaultValue)
+   public YoDouble createMaxDeflection(String name, double defaultValue)
    {
-      DoubleYoVariable maxDeflection = new DoubleYoVariable(name, registry);
+      YoDouble maxDeflection = new YoDouble(name, registry);
       maxDeflection.set(defaultValue);
       return maxDeflection;
    }
@@ -1399,7 +1399,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> getOutputJointSignals(SensorType sensorType)
+   private LinkedHashMap<OneDoFJoint, YoDouble> getOutputJointSignals(SensorType sensorType)
    {
       switch (sensorType)
       {

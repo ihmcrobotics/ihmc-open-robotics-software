@@ -1,22 +1,22 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Defines parameters to use in the EuclideanTangentialDampingCalculator. This reduces the damping ratio when incurring large tracking errors.
  */
 public class YoTangentialDampingGains implements TangentialDampingGains
 {
-   private final DoubleYoVariable kdParallelMaxReductionRatio;
-   private final DoubleYoVariable dampingParallelToMotionDeadband;
-   private final DoubleYoVariable positionErrorForMinimumKd;
+   private final YoDouble kdParallelMaxReductionRatio;
+   private final YoDouble dampingParallelToMotionDeadband;
+   private final YoDouble positionErrorForMinimumKd;
 
    public YoTangentialDampingGains(String suffix, YoVariableRegistry registry)
    {
-      kdParallelMaxReductionRatio = new DoubleYoVariable("kdParallelMaxReductionRatio" + suffix, registry);
-      dampingParallelToMotionDeadband = new DoubleYoVariable("parallelDampingDeadband" + suffix, registry);
-      positionErrorForMinimumKd = new DoubleYoVariable("maxParallelDampingError" + suffix, registry);
+      kdParallelMaxReductionRatio = new YoDouble("kdParallelMaxReductionRatio" + suffix, registry);
+      dampingParallelToMotionDeadband = new YoDouble("parallelDampingDeadband" + suffix, registry);
+      positionErrorForMinimumKd = new YoDouble("maxParallelDampingError" + suffix, registry);
 
       reset();
    }
