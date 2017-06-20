@@ -95,6 +95,11 @@ public class YoPolynomial
       }
       return ret;
    }
+   
+   public DenseMatrix64F getCoefficientsVector()
+   {
+      return coefficientVector;
+   }
 
    public YoDouble[] getYoCoefficients()
    {
