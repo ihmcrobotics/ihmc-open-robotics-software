@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,5 +212,15 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       assertTrue(coPList.get(5).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.55, -0.2), EPSILON));
       assertTrue(coPList.get(6).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.6, -0.2), EPSILON));
       assertTrue(coPList.get(7).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.2), EPSILON));
+   }
+   
+   @Test
+   public void testTransferFootstepPlan()
+   {
+      testCoPGenerator.computeReferenceCoPsForTransfer(RobotSide.LEFT);
+      List<FramePoint> coPList = testCoPGenerator.getCoPs();
+      assertTrue("Incorrect number of CoP way points generated", coPList.size() == 2);
+      assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
+      assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));      
    }
 }
