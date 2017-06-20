@@ -2,5 +2,5 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 public enum CoPSplineType
 {
-   LINEAR, CUBIC, PENTIC, NATURAL_SPLINES;
+   LINEAR, CUBIC, NATURAL_CUBIC, CLAMPED_CUBIC;
 }

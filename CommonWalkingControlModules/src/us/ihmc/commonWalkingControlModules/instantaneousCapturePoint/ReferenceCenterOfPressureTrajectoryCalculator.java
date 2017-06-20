@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -59,8 +61,9 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    private ArrayList<YoPolynomial3D> coPTrajectoryPolynomials = new ArrayList<>();
    private SideDependentList<List<Vector2D>> coPWayPointOffsets = new SideDependentList<>();
    private SideDependentList<List<Double>> coPWayPointAlphas = new SideDependentList<>();
-   private FrameVector2d currentCoPVelocity;
-   private FramePoint2d currentCoPPosition;
+   private FramePoint currentCoPPosition;
+   private FrameVector currentCoPVelocity;
+   private FrameVector currentCoPAcceleration;
 
    private BipedSupportPolygons bipedSupportPolygons;
    private SideDependentList<ReferenceFrame> currentSoleZUpFrames = new SideDependentList<>();
@@ -475,27 +478,58 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       coPTrajectoryPolynomials.clear();
       if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CUBIC)
          generateCubicCoefficients();
-      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.PENTIC)
-         generatePenticCoefficients();
+      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.NATURAL_CUBIC)
+         generateNaturalCubicCoefficients();
+      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CLAMPED_CUBIC)
+         generateClampedCubicCoefficients();
       else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.LINEAR)
-         generateLinearCoefficients();      
+         generateLinearCoefficients();
    }
 
-   private void generatePenticCoefficients()
+   private void generateClampedCubicCoefficients()
    {
       for (int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints() - 1; i++)
       {
-         
+
       }
+   }
+
+   private void generateNaturalCubicCoefficients()
+   {
+
    }
 
    private void generateCubicCoefficients()
    {
+      Vector3D initialVelocity, initialAcceleration;
+      if (currentCoPVelocity != null)
+      {
+         currentCoPVelocity.changeFrame(worldFrame);
+         initialVelocity = currentCoPVelocity.getVector();
+      }
+      else
+         initialVelocity = new Vector3D();
+
+      if (currentCoPAcceleration != null)
+      {
+         currentCoPAcceleration.changeFrame(worldFrame);
+         initialAcceleration = currentCoPAcceleration.getVector();
+      }
+      else
+         initialAcceleration = new Vector3D();
+
       for (int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints() - 1; i++)
       {
          YoPolynomial3D piecewiseSpline = new YoPolynomial3D(namePrefix + "CoPSpline" + i, 2, registry);
          FrameEuclideanTrajectoryPoint waypoint1 = coPWayPoints.getTrajectoryPoint(i);
-         
+         FrameEuclideanTrajectoryPoint waypoint2 = coPWayPoints.getTrajectoryPoint(i + 1);
+         Point3DReadOnly point1 = waypoint1.getPositionCopy().getPoint();
+         Point3DReadOnly point2 = waypoint2.getPositionCopy().getPoint();
+         piecewiseSpline.setCubicThreeInitialConditionsFinalPosition(0.0, waypoint2.getTime(), point1, initialVelocity, initialAcceleration, point2);
+         coPTrajectoryPolynomials.add(piecewiseSpline);
+         piecewiseSpline.compute(waypoint2.getTime());
+         initialVelocity.set(piecewiseSpline.getVelocity());
+         initialAcceleration.set(piecewiseSpline.getAcceleration());
       }
    }
 
@@ -522,27 +556,40 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    }
 
    @Override
+   public void setInitialCoPAcceleration(FrameVector initialCoPAcceleration)
+   {
+      this.currentCoPAcceleration = new FrameVector(initialCoPAcceleration);
+   }
+
+   @Override
+   public void setInitialCoPAcceleration(FrameVector2d initialCoPAccel)
+   {
+      this.currentCoPAcceleration = new FrameVector(initialCoPAccel.getReferenceFrame(), initialCoPAccel.getX(), initialCoPAccel.getY(),
+                                                    0.0);
+   }
+
+   @Override
    public void setInitialCoPVelocity(FrameVector initialCoPVelocity)
    {
-      this.currentCoPVelocity = initialCoPVelocity.toFrameVector2d();
+      this.currentCoPVelocity = new FrameVector(initialCoPVelocity);
    }
 
    @Override
    public void setInitialCoPVelocity(FrameVector2d initiaCoPVelocity)
    {
-      this.currentCoPVelocity = new FrameVector2d(initiaCoPVelocity);
+      this.currentCoPVelocity = new FrameVector(initiaCoPVelocity.getReferenceFrame(), initiaCoPVelocity.getX(), initiaCoPVelocity.getY(), 0.0);
    }
 
    @Override
    public void setInitialCoPPosition(FramePoint initialCoPPosition)
    {
-      this.currentCoPPosition = initialCoPPosition.toFramePoint2d();
+      this.currentCoPPosition = new FramePoint(initialCoPPosition);
    }
 
    @Override
    public void setInitialCoPPosition(FramePoint2d initialCoPPosition)
    {
-      this.currentCoPPosition = new FramePoint2d(initialCoPPosition);
+      this.currentCoPPosition = new FramePoint(initialCoPPosition.getReferenceFrame(), initialCoPPosition.getX(), initialCoPPosition.getY(), 0.0);
    }
 
    private FrameEuclideanTrajectoryPoint convertToWorldFrameAndPackIntoTrajectoryPoint(double time, FramePoint2d position)
@@ -550,4 +597,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       position.changeFrame(worldFrame);
       return new FrameEuclideanTrajectoryPoint(time, position.toFramePoint(), new FrameVector(position.getReferenceFrame()));
    }
+
+   private FrameEuclideanTrajectoryPoint convertToWorldFrameAndPackIntoTrajectoryPoint(double time, FramePoint position)
+   {
+      position.changeFrame(worldFrame);
+      return new FrameEuclideanTrajectoryPoint(time, position, new FrameVector(position.getReferenceFrame()));
+   }
+
 }
