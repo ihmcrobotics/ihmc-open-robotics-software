@@ -52,6 +52,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    private IntegerYoVariable numberOfFootstepstoConsider;
    private EnumYoVariable<CoPSplineType> orderOfSplineInterpolation;
    private DoubleYoVariable defaultFinalTransferDuration;
+   private DoubleYoVariable defaultStationaryTransferDuration;
    private Vector2D finalTransferOffset;   
    private List<FootstepTrajectoryPoint> footstepTrajectory = new ArrayList<>();
    private FrameEuclideanTrajectoryPointList coPWayPoints = new FrameEuclideanTrajectoryPointList();
@@ -122,6 +123,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
 
       this.defaultFinalTransferDuration = new DoubleYoVariable(namePrefix + "FinalTransferDuration", registry);
       this.defaultFinalTransferDuration.set(icpPlannerParameters.getDefaultFinalTransferDuration());
+      this.defaultStationaryTransferDuration = new DoubleYoVariable(namePrefix + "StationaryTransferDuration", registry);
+      this.defaultStationaryTransferDuration.set(icpPlannerParameters.getDefaultStationaryTransferTime());
       this.finalTransferOffset = icpPlannerParameters.getFinalTransferCoPOffset();
       this.numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfUpcomingFootsteps.set(0);
@@ -262,44 +265,76 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       return coPWayPoints.getNumberOfTrajectoryPoints();
    }
 
-   public void computeReferenceCoPsStartingFromDoubleSupport(RobotSide swingSide, boolean defaultStartingPosition)
+   public void computeReferenceCoPsForTransfer(RobotSide transferToSide)
    {
-      FrameConvexPolygon2d currentSupportFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide.getOppositeSide());
-      //System.out.println("Here" + currentSupportFootPolygon.toString());
-      FramePoint2d currentSupportFootPolygonCentroid = new FramePoint2d(currentSupportFootPolygon.getCentroid());
-      //System.out.println(currentSupportFootPolygonCentroid.toString());
-      if (defaultStartingPosition)
-      {
-         FrameConvexPolygon2d currentSwingFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide);
-         FramePoint2d currentSwingFootPolygonCentroid = currentSwingFootPolygon.getCentroid();
-
-         FramePoint2d currentSupportPolygonCentroid = new FramePoint2d(currentSupportFootPolygonCentroid);
-         currentSwingFootPolygonCentroid.changeFrame(currentSupportFootPolygonCentroid.getReferenceFrame());
-         currentSupportPolygonCentroid.add(currentSwingFootPolygonCentroid);
-         currentSupportPolygonCentroid.scale(0.5);
- 
-         //System.out.println(currentSupportPolygonCentroid.toString());
-         coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentSupportPolygonCentroid));
-         setInitialCoPVelocity(new FrameVector(currentSoleZUpFrames.get(swingSide.getOppositeSide())));
-      }
-      else
-      {
-         coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentCoPPosition));
-      }
+      FramePoint2d currentSupportPolygonCentroid = getSupportPolygonCentroid();
+      coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentSupportPolygonCentroid));
+      FramePoint2d finalSupportPolygonCentroid = getFootSupportPolygonCentroid(transferToSide);
+      coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(defaultStationaryTransferDuration.getDoubleValue(), finalSupportPolygonCentroid));
+   }
+   
+   private FrameConvexPolygon2d getFootSupportPolygon(RobotSide side)
+   {
+      return currentSupportFootPolygonsInSoleZUpFrames.get(side);
+   }
+   
+   private FramePoint2d getFootSupportPolygonCentroid(RobotSide side)
+   {
+      return getFootSupportPolygon(side).getCentroid();
+   }
+   
+   private FramePoint2d getSupportPolygonCentroid()
+   {
+      FramePoint2d p1 = getFootSupportPolygonCentroid(RobotSide.LEFT);
+      FramePoint2d p2 = getFootSupportPolygonCentroid(RobotSide.RIGHT);
+      FramePoint2d ret = new FramePoint2d(p1);
+      ret.add(p2);
+      ret.scale(0.5);
+      return ret;
+   }
+   
+   public void computeReferenceCoPsStartingFromDoubleSupport(boolean defaultStartingPosition)
+   {
       if (!footstepTrajectory.isEmpty())
       {
+         RobotSide swingSide = footstepTrajectory.get(0).getSwingSide();
+         FrameConvexPolygon2d currentSupportFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide.getOppositeSide());
+         FramePoint2d currentSupportFootPolygonCentroid = new FramePoint2d(currentSupportFootPolygon.getCentroid());
+         if (defaultStartingPosition)
+         {
+            FrameConvexPolygon2d currentSwingFootPolygon = currentSupportFootPolygonsInSoleZUpFrames.get(swingSide);
+            FramePoint2d currentSwingFootPolygonCentroid = currentSwingFootPolygon.getCentroid();
+
+            FramePoint2d currentSupportPolygonCentroid = new FramePoint2d(currentSupportFootPolygonCentroid);
+            currentSwingFootPolygonCentroid.changeFrame(currentSupportFootPolygonCentroid.getReferenceFrame());
+            currentSupportPolygonCentroid.add(currentSwingFootPolygonCentroid);
+            currentSupportPolygonCentroid.scale(0.5);
+
+            coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentSupportPolygonCentroid));
+            setInitialCoPVelocity(new FrameVector(currentSoleZUpFrames.get(swingSide.getOppositeSide())));
+         }
+         else
+         {
+            coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(0.0, currentCoPPosition));
+         }
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(swingSide.getOppositeSide()), coPWayPointAlphas.get(swingSide.getOppositeSide()),
                                          currentSupportFootPolygonCentroid, footstepTrajectory.get(0).getSwingTime(), footstepTrajectory.get(0).getTransferTime());
          computeReferenceCoPsForUpcomingFootstep();
       }
    }
 
-   public void computeReferenceCoPsStartingFromSingleSupport(RobotSide swingSide, double time)
+   public void computeReferenceCoPsStartingFromSingleSupport()
    {
-      double percentageTime = time / footstepTrajectory.get(0).getSwingTime();
-      int splineSegmentIndex = getSplineSegmentIndexFromTime(swingSide, percentageTime);
+      computeReferenceCoPsStartingFromSingleSupport(0.0);
+   }
+   
+   public void computeReferenceCoPsStartingFromSingleSupport(double time)
+   {
       if (!footstepTrajectory.isEmpty())
-      {
+      {         
+         RobotSide swingSide = footstepTrajectory.get(0).getSwingSide();
+         double percentageTime = time / footstepTrajectory.get(0).getSwingTime();
+         int splineSegmentIndex = getSplineSegmentIndexFromTime(swingSide, percentageTime);
          coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(time, currentCoPPosition));
          FramePoint2d centroidOfSupportFoot = new FramePoint2d(currentSoleZUpFrames.get(swingSide.getOppositeSide()));
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(swingSide.getOppositeSide()), coPWayPointAlphas.get(swingSide.getOppositeSide()),
