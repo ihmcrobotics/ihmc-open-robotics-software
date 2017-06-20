@@ -204,15 +204,27 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getKneeStraightLegPrivilegedConfigurationGain()
+                     public double getStraightLegJointSpacePrivilegedConfigurationGain()
                      {
-                        return 50.0;
+                        return 40.0;
                      }
 
                      @Override
-                     public double getKneeStraightLegPrivilegedVelocityGain()
+                     public double getStraightLegActuatorSpacePrivilegedConfigurationGain()
+                     {
+                        return 60.0;
+                     }
+
+                     @Override
+                     public double getStraightLegJointSpacePrivilegedVelocityGain()
                      {
                         return 4.0; // 6.0;
+                     }
+
+                     @Override
+                     public double getStraightLegActuatorSpacePrivilegedVelocityGain()
+                     {
+                        return 6.0; // 6.0;
                      }
 
                      @Override
@@ -222,15 +234,27 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getKneeBentLegPrivilegedConfigurationGain()
+                     public double getBentLegJointSpacePrivilegedConfigurationGain()
                      {
                         return 150.0;
                      }
 
                      @Override
-                     public double getKneeBentLegPrivilegedVelocityGain()
+                     public double getBentLegActuatorSpacePrivilegedConfigurationGain()
+                     {
+                        return 200.0;
+                     }
+
+                     @Override
+                     public double getBentLegJointSpacePrivilegedVelocityGain()
                      {
                         return 4.0;
+                     }
+
+                     @Override
+                     public double getBentLegActuatorSpacePrivilegedVelocityGain()
+                     {
+                        return 6.0;
                      }
 
                      @Override
