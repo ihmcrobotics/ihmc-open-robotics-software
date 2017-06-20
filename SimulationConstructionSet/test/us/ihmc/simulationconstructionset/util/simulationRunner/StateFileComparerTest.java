@@ -12,10 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateFileComparerTest
 {
@@ -108,12 +107,12 @@ public class StateFileComparerTest
       ArrayList<VariableDifference> variableDifferences = StateFileComparer.compareVarLists(registry1.createVarList(), registry2.createVarList(), 1e-7, false, exceptions);
       assertEquals(0, variableDifferences.size());
    
-      ((DoubleYoVariable) registry1.getVariable("exceptionalVariable")).set(5678.0);
+      ((YoDouble) registry1.getVariable("exceptionalVariable")).set(5678.0);
       
       variableDifferences = StateFileComparer.compareVarLists(registry1.createVarList(), registry2.createVarList(), 1e-7, false, exceptions);
       assertEquals(0, variableDifferences.size());
       
-      ((DoubleYoVariable) registry1.getVariable("variable1")).set(3.5);
+      ((YoDouble) registry1.getVariable("variable1")).set(3.5);
       
       variableDifferences = StateFileComparer.compareVarLists(registry1.createVarList(), registry2.createVarList(), 1e-7, false, exceptions);
       assertEquals(1, variableDifferences.size());
@@ -130,20 +129,20 @@ public class StateFileComparerTest
       registry0.addChild(registry00);
       registry0.addChild(registry01);
       
-      DoubleYoVariable variable1 = new DoubleYoVariable("variable1", root);
-      DoubleYoVariable variable2 = new DoubleYoVariable("variable2", registry0);
-      DoubleYoVariable variable3 = new DoubleYoVariable("variable3", registry00);
-      DoubleYoVariable variable4 = new DoubleYoVariable("variable4", registry01);
+      YoDouble variable1 = new YoDouble("variable1", root);
+      YoDouble variable2 = new YoDouble("variable2", registry0);
+      YoDouble variable3 = new YoDouble("variable3", registry00);
+      YoDouble variable4 = new YoDouble("variable4", registry01);
 
-      BooleanYoVariable boolean1 = new BooleanYoVariable("boolean1", root);
-      BooleanYoVariable boolean2 = new BooleanYoVariable("boolean2", registry01);
+      YoBoolean boolean1 = new YoBoolean("boolean1", root);
+      YoBoolean boolean2 = new YoBoolean("boolean2", registry01);
 
-      DoubleYoVariable repeatNameVariable_root = new DoubleYoVariable("repeatNameVariable", root);
-      DoubleYoVariable repeatNameVariable_0 = new DoubleYoVariable("repeatNameVariable", registry0);
-      DoubleYoVariable repeatNameVariable_00 = new DoubleYoVariable("repeatNameVariable", registry00);
-      DoubleYoVariable repeatNameVariable_01 = new DoubleYoVariable("repeatNameVariable", registry01);
+      YoDouble repeatNameVariable_root = new YoDouble("repeatNameVariable", root);
+      YoDouble repeatNameVariable_0 = new YoDouble("repeatNameVariable", registry0);
+      YoDouble repeatNameVariable_00 = new YoDouble("repeatNameVariable", registry00);
+      YoDouble repeatNameVariable_01 = new YoDouble("repeatNameVariable", registry01);
 
-      DoubleYoVariable exceptionalVariable = new DoubleYoVariable("exceptionalVariable", root);
+      YoDouble exceptionalVariable = new YoDouble("exceptionalVariable", root);
 
       variable1.set(0.1);
       variable2.set(0.2);

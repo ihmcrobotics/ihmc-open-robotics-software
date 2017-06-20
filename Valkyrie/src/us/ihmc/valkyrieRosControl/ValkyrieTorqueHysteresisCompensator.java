@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
@@ -17,19 +17,19 @@ public class ValkyrieTorqueHysteresisCompensator
    private final List<YoEffortJointHandleHolder> processedJointHandles = new ArrayList<>();
    private final List<TorqueHysteresisCompensatorYoVariable> hysteresisCompensators = new ArrayList<>();
 
-   private final DoubleYoVariable torqueHysteresisAmplitude = new DoubleYoVariable("torqueHysteresisAmplitude", registry);
-   private final DoubleYoVariable jointAccelerationMin = new DoubleYoVariable("hysteresisJointAccelerationMin", registry);
-   private final DoubleYoVariable jointVelocityMax = new DoubleYoVariable("hysteresisJointVelocityMax", registry);
+   private final YoDouble torqueHysteresisAmplitude = new YoDouble("torqueHysteresisAmplitude", registry);
+   private final YoDouble jointAccelerationMin = new YoDouble("hysteresisJointAccelerationMin", registry);
+   private final YoDouble jointVelocityMax = new YoDouble("hysteresisJointVelocityMax", registry);
 
-   private final DoubleYoVariable rampUpTime = new DoubleYoVariable("torqueHysteresisRampUpTime", registry);
-   private final DoubleYoVariable rampDownTime = new DoubleYoVariable("torqueHysteresisRampDownTime", registry);
+   private final YoDouble rampUpTime = new YoDouble("torqueHysteresisRampUpTime", registry);
+   private final YoDouble rampDownTime = new YoDouble("torqueHysteresisRampDownTime", registry);
 
    /**
     * Need to be extracted to a config file
     */
    private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Torso", "Shoulder", "Elbow"};
 
-   public ValkyrieTorqueHysteresisCompensator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public ValkyrieTorqueHysteresisCompensator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 

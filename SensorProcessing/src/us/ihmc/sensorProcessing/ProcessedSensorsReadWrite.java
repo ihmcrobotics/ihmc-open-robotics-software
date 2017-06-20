@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,26 +14,26 @@ import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
 public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInterface, ProcessedIMUSensorsWriteOnlyInterface
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry("ProcessedSensors");
-   protected final DoubleYoVariable p_qs;
-   protected final DoubleYoVariable p_qx;
-   protected final DoubleYoVariable p_qy;
-   protected final DoubleYoVariable p_qz;
-   protected final DoubleYoVariable p_roll;
-   protected final DoubleYoVariable p_pitch;
-   protected final DoubleYoVariable p_yaw;
+   protected final YoDouble p_qs;
+   protected final YoDouble p_qx;
+   protected final YoDouble p_qy;
+   protected final YoDouble p_qz;
+   protected final YoDouble p_roll;
+   protected final YoDouble p_pitch;
+   protected final YoDouble p_yaw;
    protected final YoFrameVector pd_w;
    protected final YoFrameVector pdd_world;
 
    public ProcessedSensorsReadWrite(ReferenceFrame imuReferenceFrame, YoVariableRegistry yoVariableRegistry)
    {
-      p_qs = new DoubleYoVariable("p_q", registry);
-      p_qx = new DoubleYoVariable("p_qx", registry);
-      p_qy = new DoubleYoVariable("p_qy", registry);
-      p_qz = new DoubleYoVariable("p_qz", registry);
+      p_qs = new YoDouble("p_q", registry);
+      p_qx = new YoDouble("p_qx", registry);
+      p_qy = new YoDouble("p_qy", registry);
+      p_qz = new YoDouble("p_qz", registry);
 
-      p_pitch = new DoubleYoVariable("p_pitch", registry);
-      p_roll = new DoubleYoVariable("p_roll", registry);
-      p_yaw = new DoubleYoVariable("p_yaw", registry);
+      p_pitch = new YoDouble("p_pitch", registry);
+      p_roll = new YoDouble("p_roll", registry);
+      p_yaw = new YoDouble("p_yaw", registry);
 
       pd_w = new YoFrameVector("pd_w", "", imuReferenceFrame, registry);
       pdd_world = new YoFrameVector("pdd_", "_world", ReferenceFrame.getWorldFrame(), registry);

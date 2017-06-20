@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
 
 public class SimpleToeOffCalculator implements ToeOffCalculator
 {
@@ -18,15 +17,15 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
-   private final BooleanYoVariable hasComputedToeOffContactPoint;
-   private final BooleanYoVariable hasComputedToeOffContactLine;
+   private final YoBoolean hasComputedToeOffContactPoint;
+   private final YoBoolean hasComputedToeOffContactLine;
 
    public SimpleToeOffCalculator(SideDependentList<ContactableFoot> feet, YoVariableRegistry parentRegistry)
    {
       this.feet = feet;
 
-      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
-      hasComputedToeOffContactLine = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactLine", registry);
+      hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactLine = new YoBoolean(namePrefix + "HasComputedToeOffContactLine", registry);
 
       parentRegistry.addChild(registry);
    }

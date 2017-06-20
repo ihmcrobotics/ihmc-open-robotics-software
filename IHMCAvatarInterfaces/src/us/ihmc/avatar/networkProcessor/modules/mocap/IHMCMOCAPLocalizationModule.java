@@ -27,10 +27,10 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -83,24 +83,24 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       }
    };
    
-   private final DoubleYoVariable computedPelvisPositionX = new DoubleYoVariable("computedPelvisPositionX", registry);
-   private final DoubleYoVariable computedPelvisPositionY = new DoubleYoVariable("computedPelvisPositionY", registry);
-   private final DoubleYoVariable computedPelvisPositionZ = new DoubleYoVariable("computedPelvisPositionZ", registry);
+   private final YoDouble computedPelvisPositionX = new YoDouble("computedPelvisPositionX", registry);
+   private final YoDouble computedPelvisPositionY = new YoDouble("computedPelvisPositionY", registry);
+   private final YoDouble computedPelvisPositionZ = new YoDouble("computedPelvisPositionZ", registry);
 
-   private final DoubleYoVariable computedPelvisYaw = new DoubleYoVariable("computedPelvisYaw", registry);
-   private final DoubleYoVariable computedPelvisPitch = new DoubleYoVariable("computedPelvisPitch", registry);
-   private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable("computedPelvisRoll", registry);
+   private final YoDouble computedPelvisYaw = new YoDouble("computedPelvisYaw", registry);
+   private final YoDouble computedPelvisPitch = new YoDouble("computedPelvisPitch", registry);
+   private final YoDouble computedPelvisRoll = new YoDouble("computedPelvisRoll", registry);
    
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformX = new DoubleYoVariable("mocapWorldToRobotWorldTransformX", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformY = new DoubleYoVariable("mocapWorldToRobotWorldTransformY", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformZ = new DoubleYoVariable("mocapWorldToRobotWorldTransformZ", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformYaw = new DoubleYoVariable("mocapWorldToRobotWorldTransformYaw", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformX = new YoDouble("mocapWorldToRobotWorldTransformX", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformY = new YoDouble("mocapWorldToRobotWorldTransformY", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformZ = new YoDouble("mocapWorldToRobotWorldTransformZ", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformYaw = new YoDouble("mocapWorldToRobotWorldTransformYaw", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformPitch = new YoDouble("mocapWorldToRobotWorldTransformPitch", registry);
+   private final YoDouble mocapWorldToRobotWorldTransformRoll = new YoDouble("mocapWorldToRobotWorldTransformRoll", registry);
 
-   private final BooleanYoVariable requestReInitialization = new BooleanYoVariable("requestReInitialization", registry);
-   private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
-   private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
+   private final YoBoolean requestReInitialization = new YoBoolean("requestReInitialization", registry);
+   private final YoBoolean requestFootsteps = new YoBoolean("requestFootsteps", registry);
+   private final YoBoolean walkingAround = new YoBoolean("walkingAround", registry);
       
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel, MocapPlanarRegionsListManager planarRegionsListManager)
    {
@@ -339,8 +339,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       
    private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
    {
-      private final IntegerYoVariable footstepsCompleted = new IntegerYoVariable("footstepsCompleted", registry);
-      private final IntegerYoVariable numberOfFootstepsToTake = new IntegerYoVariable("numberOfFootstepsToTake", registry);
+      private final YoInteger footstepsCompleted = new YoInteger("footstepsCompleted", registry);
+      private final YoInteger numberOfFootstepsToTake = new YoInteger("numberOfFootstepsToTake", registry);
       
       @Override
       public void receivedPacket(FootstepStatus packet)

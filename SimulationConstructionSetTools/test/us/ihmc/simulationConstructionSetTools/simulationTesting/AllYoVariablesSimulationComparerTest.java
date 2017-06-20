@@ -11,9 +11,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -29,12 +29,12 @@ public class AllYoVariablesSimulationComparerTest
 	YoVariableRegistry rootRegistry1;
 	YoVariableRegistry rootRegistry2;
 	
-	DoubleYoVariable doubleYoVariable1;
-	DoubleYoVariable doubleYoVariable2;
-	DoubleYoVariable doubleYoVariable3;
-	DoubleYoVariable doubleYoVariable4;
+	YoDouble yoDouble1;
+	YoDouble yoDouble2;
+	YoDouble yoDouble3;
+	YoDouble yoDouble4;
 	
-	DoubleYoVariable doubleYoVariableA12;
+	YoDouble yoDoubleA12;
 
 	 @Before
 	   public void showMemoryUsageBeforeTest()
@@ -57,18 +57,18 @@ public class AllYoVariablesSimulationComparerTest
 		rootRegistry1 = new YoVariableRegistry("rootRegistry");
 		rootRegistry2 = new YoVariableRegistry("rootRegistry");
 
-		doubleYoVariable1 = new DoubleYoVariable("doubleYoVariableA1", rootRegistry1);
-		doubleYoVariable2 = new DoubleYoVariable("doubleYoVariableA2", rootRegistry1);
+		yoDouble1 = new YoDouble("doubleYoVariableA1", rootRegistry1);
+		yoDouble2 = new YoDouble("doubleYoVariableA2", rootRegistry1);
 		
 		// Only put in registry 1;
-		doubleYoVariableA12 = new DoubleYoVariable("doubleYoVariableA12", rootRegistry1);
+		yoDoubleA12 = new YoDouble("yoDoubleA12", rootRegistry1);
 		
-		doubleYoVariable3 = new DoubleYoVariable("doubleYoVariableA1", rootRegistry2);
-		doubleYoVariable4 = new DoubleYoVariable("doubleYoVariableA2", rootRegistry2);
+		yoDouble3 = new YoDouble("doubleYoVariableA1", rootRegistry2);
+		yoDouble4 = new YoDouble("doubleYoVariableA2", rootRegistry2);
 		
 		// Only put in registry 2;
-		new DoubleYoVariable("aIgnore", rootRegistry2);
-		new DoubleYoVariable("zIgnore", rootRegistry2);
+		new YoDouble("aIgnore", rootRegistry2);
+		new YoDouble("zIgnore", rootRegistry2);
 	}
 	
 	private Robot createSimpleRobotOne(String name)
@@ -133,25 +133,25 @@ public class AllYoVariablesSimulationComparerTest
 		scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
-		doubleYoVariable1.set(1.0);
-		doubleYoVariable2.set(2.0);
-		doubleYoVariable3.set(1.0);
-		doubleYoVariable4.set(2.0);
+		yoDouble1.set(1.0);
+		yoDouble2.set(2.0);
+		yoDouble3.set(1.0);
+		yoDouble4.set(2.0);
 		
 		assertFalse(comparerWithZeroEpsilon.compare(scs1, scs2)); 
-		comparerWithZeroEpsilon.addException("doubleYoVariableA12");
+		comparerWithZeroEpsilon.addException("yoDoubleA12");
 		comparerWithZeroEpsilon.addException("Ignore");
 		assertTrue(comparerWithZeroEpsilon.compare(scs1, scs2)); 
 
-		doubleYoVariable1.set(1.0);
-		doubleYoVariable2.set(3.0);
-		doubleYoVariable3.set(1.0);
-		doubleYoVariable4.set(2.0);
+		yoDouble1.set(1.0);
+		yoDouble2.set(3.0);
+		yoDouble3.set(1.0);
+		yoDouble4.set(2.0);
 		assertFalse(comparerWithZeroEpsilon.compare(scs1, scs2));
 		ArrayList<YoVariable<?>[]> differences = comparerWithZeroEpsilon.getDifferences();
 		assertEquals(1, differences.size());
-		assertEquals(doubleYoVariable2, differences.get(0)[0]);
-		assertEquals(doubleYoVariable4, differences.get(0)[1]);
+		assertEquals(yoDouble2, differences.get(0)[0]);
+		assertEquals(yoDouble4, differences.get(0)[1]);
 	}
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.4)
@@ -167,19 +167,19 @@ public class AllYoVariablesSimulationComparerTest
 		scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
-		doubleYoVariable1.set(1.8);
-		doubleYoVariable2.set(2.0);
-		doubleYoVariable3.set(1.791);
-		doubleYoVariable4.set(2.009);
+		yoDouble1.set(1.8);
+		yoDouble2.set(2.0);
+		yoDouble3.set(1.791);
+		yoDouble4.set(2.009);
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2));
-		comparerWithLowEpsilon.addException("doubleYoVariableA12");
+		comparerWithLowEpsilon.addException("yoDoubleA12");
 		comparerWithLowEpsilon.addException("Ignore");
 		assertTrue(comparerWithLowEpsilon.compare(scs1, scs2));
 
-		doubleYoVariable1.set(1.80);
-		doubleYoVariable2.set(2.0);
-		doubleYoVariable3.set(1.79);
-		doubleYoVariable4.set(2.009);
+		yoDouble1.set(1.80);
+		yoDouble2.set(2.0);
+		yoDouble3.set(1.79);
+		yoDouble4.set(2.009);
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
 
@@ -197,19 +197,19 @@ public class AllYoVariablesSimulationComparerTest
 	   scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
-		doubleYoVariable1.set(98.56);
-		doubleYoVariable2.set(97.01);
-		doubleYoVariable3.set(94.98);
-		doubleYoVariable4.set(92.02);
+		yoDouble1.set(98.56);
+		yoDouble2.set(97.01);
+		yoDouble3.set(94.98);
+		yoDouble4.set(92.02);
 		assertFalse(comparerWithLargeEpsilon.compare(scs1, scs2));
-		comparerWithLargeEpsilon.addException("doubleYoVariableA12");
+		comparerWithLargeEpsilon.addException("yoDoubleA12");
 		comparerWithLargeEpsilon.addException("Ignore");
 		assertTrue(comparerWithLargeEpsilon.compare(scs1, scs2));
 
-		doubleYoVariable1.set(97.02);
-		doubleYoVariable2.set(95.01);
-		doubleYoVariable3.set(9);
-		doubleYoVariable4.set(92.02);
+		yoDouble1.set(97.02);
+		yoDouble2.set(95.01);
+		yoDouble3.set(9);
+		yoDouble4.set(92.02);
 		assertFalse(comparerWithLargeEpsilon.compare(scs1, scs2));
 	}
 }

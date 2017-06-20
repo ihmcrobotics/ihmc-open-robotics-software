@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * This class produces a square dither signal in the case were the controller frequency is close to the dither
@@ -15,17 +15,17 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 public class DitherProducer
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable desiredDitherFrequency;
-   private final DoubleYoVariable ditherFrequency;
-   private final DoubleYoVariable amplitude;
+   private final YoDouble desiredDitherFrequency;
+   private final YoDouble ditherFrequency;
+   private final YoDouble amplitude;
    private final double maxFrequency;
 
-   private final DoubleYoVariable dither;
+   private final YoDouble dither;
 
    public DitherProducer(String namePrefix, YoVariableRegistry parentRegistry, double controlDT)
    {
       registry = new YoVariableRegistry(namePrefix);
-      desiredDitherFrequency = new DoubleYoVariable(namePrefix + "_dither_frequency_desired", registry);
+      desiredDitherFrequency = new YoDouble(namePrefix + "_dither_frequency_desired", registry);
       desiredDitherFrequency.set(0.0);
       desiredDitherFrequency.addVariableChangedListener(new VariableChangedListener()
       {
@@ -36,13 +36,13 @@ public class DitherProducer
          }
       });
 
-      ditherFrequency = new DoubleYoVariable(namePrefix + "_dither_frequency", registry);
+      ditherFrequency = new YoDouble(namePrefix + "_dither_frequency", registry);
       ditherFrequency.set(0.0);
 
-      amplitude = new DoubleYoVariable(namePrefix + "_dither_amplitude", registry);
+      amplitude = new YoDouble(namePrefix + "_dither_amplitude", registry);
       amplitude.set(0.0);
 
-      dither = new DoubleYoVariable(namePrefix + "_dither_output", registry);
+      dither = new YoDouble(namePrefix + "_dither_output", registry);
       dither.set(0.0);
 
       maxFrequency = 1.0 / (2.0 * controlDT);
@@ -128,8 +128,8 @@ public class DitherProducer
 //      double controlDT = 0.004;
 //      double desFreq = 1000;
 //      YoVariableRegistry registry = new YoVariableRegistry("test");
-//      DoubleYoVariable time = new DoubleYoVariable("time", registry);
-//      DoubleYoVariable signal = new DoubleYoVariable("signal", registry);
+//      YoDouble time = new YoDouble("time", registry);
+//      YoDouble signal = new YoDouble("signal", registry);
 //      DitherProducer ditherProducer = new DitherProducer("dither", registry, controlDT);
 //
 //      ditherProducer.setFrequency(desFreq);

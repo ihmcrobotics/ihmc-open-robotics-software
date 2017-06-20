@@ -3,21 +3,21 @@ package us.ihmc.robotics.math.corruptors;
 import java.util.Random;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /*
-* A NoisyDoubleYoVariable is a noisy version of a DoubleYoVariable.  Both the
+* A NoisyYoDouble is a noisy version of a YoDouble.  Both the
 * perfect and noisy values are retained over time and are accessible.
 *
-* If using NoisyDoubleYoVariable as a modifier for an existing
-* DoubleYoVariable, the passed in DoubleYoVariable will be assigned to the
+* If using NoisyYoDouble as a modifier for an existing
+* YoDouble, the passed in YoDouble will be assigned to the
 * .perfect field, where the non-noisy values will be stored.  Otherwise, a
-* new DoubleYoVariable is created as a field named .perfect. The noisy version
+* new YoDouble is created as a field named .perfect. The noisy version
 * of the perfect data is stored in the .val field of the
-* NoisyDoubleYoVariable itself (which extends DoubleYoVariable).
+* NoisyYoDouble itself (which extends YoDouble).
 *
 * The update() method generates noise and modifies .val given the current
 * value of .perfect.  The update(double) method generates noise and modifies
@@ -51,74 +51,74 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 *   * standardDeviation - 1.0
  */
 
-public class NoisyDoubleYoVariable extends DoubleYoVariable
+public class NoisyYoDouble extends YoDouble
 {
    private static final long serialVersionUID = 8152020075993223818L;
 
-   private final BooleanYoVariable isNoisy;
-   private final BooleanYoVariable useBias;
-   private final EnumYoVariable<NoiseType> noiseType;
+   private final YoBoolean isNoisy;
+   private final YoBoolean useBias;
+   private final YoEnum<NoiseType> noiseType;
 
    private final long randomSeed = System.nanoTime();
    private final Random rand = new Random(randomSeed);
 
-   private final DoubleYoVariable randomBound;
-   private final DoubleYoVariable bias;
-   private final DoubleYoVariable biasMin;
-   private final DoubleYoVariable biasMax;
-   private final DoubleYoVariable biasDelta;
-   private final DoubleYoVariable standardDeviation;
+   private final YoDouble randomBound;
+   private final YoDouble bias;
+   private final YoDouble biasMin;
+   private final YoDouble biasMax;
+   private final YoDouble biasDelta;
+   private final YoDouble standardDeviation;
 
-   private final DoubleYoVariable perfect;
+   private final YoDouble perfect;
 
 // Simple constructor
-   public NoisyDoubleYoVariable(String name, YoVariableRegistry registry)
+   public NoisyYoDouble(String name, YoVariableRegistry registry)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(false);
-      this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
+      this.randomBound = new YoDouble(name + "_RandomBound", registry);
       this.randomBound.set(0.0);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(false);
-      this.bias = new DoubleYoVariable(name + "_Bias", registry);
+      this.bias = new YoDouble(name + "_Bias", registry);
       this.bias.set(0.0);
-      this.biasMax = new DoubleYoVariable(name + "_BiasMax", registry);
+      this.biasMax = new YoDouble(name + "_BiasMax", registry);
       this.biasMax.set(0.0);
-      this.biasMin = new DoubleYoVariable(name + "_BiasMin", registry);
+      this.biasMin = new YoDouble(name + "_BiasMin", registry);
       this.biasMin.set(0.0);
-      this.biasDelta = new DoubleYoVariable(name + "_BiasDelta", registry);
+      this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(0.0);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(NoiseType.UNIFORM);
-      this.standardDeviation = new DoubleYoVariable(name + "_StandardDeviation", registry);
+      this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(0.0);
 
-      this.perfect = new DoubleYoVariable(name + "_Perfect", registry);
+      this.perfect = new YoDouble(name + "_Perfect", registry);
       this.update(0.0);
    }
 
-// Simple constructor, given existing DoubleYoVariable
-   public NoisyDoubleYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable perfect)
+// Simple constructor, given existing YoDouble
+   public NoisyYoDouble(String name, YoVariableRegistry registry, YoDouble perfect)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(false);
-      this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
+      this.randomBound = new YoDouble(name + "_RandomBound", registry);
       this.randomBound.set(0.0);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(false);
-      this.bias = new DoubleYoVariable(name + "_Bias", registry);
+      this.bias = new YoDouble(name + "_Bias", registry);
       this.bias.set(0.0);
-      this.biasMax = new DoubleYoVariable(name + "_BiasMax", registry);
+      this.biasMax = new YoDouble(name + "_BiasMax", registry);
       this.biasMax.set(0.0);
-      this.biasMin = new DoubleYoVariable(name + "_BiasMin", registry);
+      this.biasMin = new YoDouble(name + "_BiasMin", registry);
       this.biasMin.set(0.0);
-      this.biasDelta = new DoubleYoVariable(name + "_BiasDelta", registry);
+      this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(0.0);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(NoiseType.UNIFORM);
-      this.standardDeviation = new DoubleYoVariable(name + "_StandardDeviation", registry);
+      this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(0.0);
 
       this.perfect = perfect;
@@ -126,55 +126,55 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
    }
 
 // Full constructor
-   public NoisyDoubleYoVariable(String name, YoVariableRegistry registry, boolean isNoisy, double randomBound, boolean useBias, double bias, double biasMax,
+   public NoisyYoDouble(String name, YoVariableRegistry registry, boolean isNoisy, double randomBound, boolean useBias, double bias, double biasMax,
                                 double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(isNoisy);
-      this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
+      this.randomBound = new YoDouble(name + "_RandomBound", registry);
       this.randomBound.set(randomBound);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(useBias);
-      this.bias = new DoubleYoVariable(name + "_Bias", registry);
+      this.bias = new YoDouble(name + "_Bias", registry);
       this.bias.set(bias);
-      this.biasMax = new DoubleYoVariable(name + "_BiasMax", registry);
+      this.biasMax = new YoDouble(name + "_BiasMax", registry);
       this.biasMax.set(biasMax);
-      this.biasMin = new DoubleYoVariable(name + "_BiasMin", registry);
+      this.biasMin = new YoDouble(name + "_BiasMin", registry);
       this.biasMin.set(biasMin);
-      this.biasDelta = new DoubleYoVariable(name + "_BiasDelta", registry);
+      this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(biasDelta);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(noiseType);
-      this.standardDeviation = new DoubleYoVariable(name + "_StandardDeviation", registry);
+      this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(standardDeviation);
 
-      this.perfect = new DoubleYoVariable(name + "_Perfect", registry);
+      this.perfect = new YoDouble(name + "_Perfect", registry);
       this.update(0.0);
    }
 
-// Full constructor, given existing DoubleYoVariable
-   public NoisyDoubleYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable perfect, boolean isNoisy, double randomBound, boolean useBias,
+// Full constructor, given existing YoDouble
+   public NoisyYoDouble(String name, YoVariableRegistry registry, YoDouble perfect, boolean isNoisy, double randomBound, boolean useBias,
                                 double bias, double biasMax, double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);
-      this.isNoisy = new BooleanYoVariable(name + "_IsNoisy", registry);
+      this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
       this.isNoisy.set(isNoisy);
-      this.randomBound = new DoubleYoVariable(name + "_RandomBound", registry);
+      this.randomBound = new YoDouble(name + "_RandomBound", registry);
       this.randomBound.set(randomBound);
-      this.useBias = new BooleanYoVariable(name + "_UseBias", registry);
+      this.useBias = new YoBoolean(name + "_UseBias", registry);
       this.useBias.set(useBias);
-      this.bias = new DoubleYoVariable(name + "_Bias", registry);
+      this.bias = new YoDouble(name + "_Bias", registry);
       this.bias.set(bias);
-      this.biasMax = new DoubleYoVariable(name + "_BiasMax", registry);
+      this.biasMax = new YoDouble(name + "_BiasMax", registry);
       this.biasMax.set(biasMax);
-      this.biasMin = new DoubleYoVariable(name + "_BiasMin", registry);
+      this.biasMin = new YoDouble(name + "_BiasMin", registry);
       this.biasMin.set(biasMin);
-      this.biasDelta = new DoubleYoVariable(name + "_BiasDelta", registry);
+      this.biasDelta = new YoDouble(name + "_BiasDelta", registry);
       this.biasDelta.set(biasDelta);
-      this.noiseType = new EnumYoVariable<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
+      this.noiseType = new YoEnum<NoiseType>(name + "_NoiseType", registry, NoiseType.class);
       this.noiseType.set(noiseType);
-      this.standardDeviation = new DoubleYoVariable(name + "_StandardDeviation", registry);
+      this.standardDeviation = new YoDouble(name + "_StandardDeviation", registry);
       this.standardDeviation.set(standardDeviation);
 
       this.perfect = perfect;
@@ -200,7 +200,7 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
       else
          super.set(perfect.getDoubleValue());
 
-//    System.out.println("NoisyDoubleYoVariable Diff: (" + this.getName() + ")" + (super.getDoubleValue() - perfect.getDoubleValue()));
+//    System.out.println("NoisyYoDouble Diff: (" + this.getName() + ")" + (super.getDoubleValue() - perfect.getDoubleValue()));
    }
 
 // public void set(double value)

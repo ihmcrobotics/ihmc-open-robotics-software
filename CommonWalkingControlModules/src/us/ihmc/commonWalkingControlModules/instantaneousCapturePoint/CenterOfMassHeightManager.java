@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightCon
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
@@ -21,10 +20,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -47,7 +46,7 @@ public class CenterOfMassHeightManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GenericStateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
-   private final EnumYoVariable<PelvisHeightControlMode> requestedState;
+   private final YoEnum<PelvisHeightControlMode> requestedState;
    
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
    private final CenterOfMassHeightControlState centerOfMassHeightControlState;
@@ -56,7 +55,7 @@ public class CenterOfMassHeightManager
    private final PelvisHeightControlState pelvisHeightControlState;
    
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
-   private final BooleanYoVariable enableUserPelvisControlDuringWalking = new BooleanYoVariable("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
+   private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
    
    private final FramePose tempPose = new FramePose();
    private final FramePoint tempPosition = new FramePoint();
@@ -65,10 +64,10 @@ public class CenterOfMassHeightManager
          YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisHeightControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
       
       //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z 
       YoPDGains pdGains = walkingControllerParameters.createCoMHeightControlGains(registry);
@@ -164,7 +163,7 @@ public class CenterOfMassHeightManager
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
       enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-      stateMachine.getCurrentState().getCurrentDesiredHeight(tempPosition);
+      stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
       
       tempPose.setToZero(tempPosition.getReferenceFrame());
       tempPose.setPosition(tempPosition);
@@ -187,7 +186,7 @@ public class CenterOfMassHeightManager
       if(command.isEnableUserPelvisControl())
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         stateMachine.getCurrentState().getCurrentDesiredHeight(tempPosition);
+         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
          
          tempPose.setToZero(tempPosition.getReferenceFrame());
          tempPose.setPosition(tempPosition);

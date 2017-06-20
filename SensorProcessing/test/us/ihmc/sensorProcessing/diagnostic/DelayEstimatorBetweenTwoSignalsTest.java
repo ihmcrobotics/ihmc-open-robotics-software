@@ -7,9 +7,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
+import us.ihmc.robotics.math.filters.DelayedYoDouble;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 
@@ -24,7 +24,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
-      DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
+      YoDouble yoTime = new YoDouble("time", registry);
 
       YoFunctionGenerator functionGenerator = new YoFunctionGenerator("foo", yoTime, registry);
       functionGenerator.setChirpFrequencyMaxHz(40.0);
@@ -32,9 +32,9 @@ public class DelayEstimatorBetweenTwoSignalsTest
       functionGenerator.setResetTime(numberOfTicks * dt);
       functionGenerator.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);
 
-      DoubleYoVariable referenceSignal = new DoubleYoVariable("referenceSignal", registry);
+      YoDouble referenceSignal = new YoDouble("referenceSignal", registry);
       int expectedDelayInTicks = 12;
-      DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
+      DelayedYoDouble delayedSignal = new DelayedYoDouble("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, delayedSignal, dt, registry);
       delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
@@ -66,7 +66,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
-      DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
+      YoDouble yoTime = new YoDouble("time", registry);
 
       YoFunctionGenerator functionGenerator = new YoFunctionGenerator("foo", yoTime, registry);
       functionGenerator.setChirpFrequencyMaxHz(40.0);
@@ -74,10 +74,10 @@ public class DelayEstimatorBetweenTwoSignalsTest
       functionGenerator.setResetTime(numberOfTicks * dt);
       functionGenerator.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);
 
-      DoubleYoVariable referenceSignal = new DoubleYoVariable("referenceSignal", registry);
+      YoDouble referenceSignal = new YoDouble("referenceSignal", registry);
       int expectedDelayInTicks = 12;
-      DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
-      DoubleYoVariable shiftedDelayedSignal = new DoubleYoVariable("shiftedDelayedSignal", registry);
+      DelayedYoDouble delayedSignal = new DelayedYoDouble("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
+      YoDouble shiftedDelayedSignal = new YoDouble("shiftedDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, shiftedDelayedSignal, dt, registry);
       delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
@@ -110,12 +110,12 @@ public class DelayEstimatorBetweenTwoSignalsTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
-      DoubleYoVariable yoTime = new DoubleYoVariable("time", registry);
+      YoDouble yoTime = new YoDouble("time", registry);
 
-      DoubleYoVariable referenceSignal = new DoubleYoVariable("referenceSignal", registry);
+      YoDouble referenceSignal = new YoDouble("referenceSignal", registry);
       int expectedDelayInTicks = 12;
-      DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
-      DoubleYoVariable noisyDelayedSignal = new DoubleYoVariable("noisyDelayedSignal", registry);
+      DelayedYoDouble delayedSignal = new DelayedYoDouble("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
+      YoDouble noisyDelayedSignal = new YoDouble("noisyDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, noisyDelayedSignal, dt, registry);
       delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);

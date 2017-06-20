@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,8 +34,8 @@ public class StandingState extends WalkingState
    private final KneeAngleManager kneeAngleManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
-   private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
+   private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
+   private final YoBoolean doPreparePelvisForLocomotion = new YoBoolean("doPreparePelvisForLocomotion", registry);
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,

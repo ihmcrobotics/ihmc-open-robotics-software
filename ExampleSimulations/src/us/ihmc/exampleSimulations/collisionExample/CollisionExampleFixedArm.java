@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Joint;
@@ -28,10 +28,10 @@ public class CollisionExampleFixedArm
 
    public static class DoublePendulumRobot extends Robot
    {
-      private final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", getRobotsYoVariableRegistry());
-      private final DoubleYoVariable linearKineticEnergy = new DoubleYoVariable("linearKineticEnergy", getRobotsYoVariableRegistry());
-      private final DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", getRobotsYoVariableRegistry());
-      private final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", getRobotsYoVariableRegistry());
+      private final YoDouble potentialEnergy = new YoDouble("potentialEnergy", getRobotsYoVariableRegistry());
+      private final YoDouble linearKineticEnergy = new YoDouble("linearKineticEnergy", getRobotsYoVariableRegistry());
+      private final YoDouble rotationalKineticEnergy = new YoDouble("rotationalKineticEnergy", getRobotsYoVariableRegistry());
+      private final YoDouble totalEnergy = new YoDouble("totalEnergy", getRobotsYoVariableRegistry());
 
       //      ScsCollisionDetector collisionDetector = new JBulletCollisionDetector(getRobotsYoVariableRegistry(), 10000);
       private final ScsCollisionDetector collisionDetector = new GdxCollisionDetector(10000.0);
@@ -88,7 +88,7 @@ public class CollisionExampleFixedArm
             }
 
             @Override
-            public DoubleYoVariable[] getOutputVariables()
+            public YoDouble[] getOutputVariables()
             {
                return null;
             }

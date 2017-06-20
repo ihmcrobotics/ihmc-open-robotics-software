@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TurnInPlaceTask<E extends Enum<E>> extends BehaviorAction<E>
 {
@@ -12,7 +12,7 @@ public class TurnInPlaceTask<E extends Enum<E>> extends BehaviorAction<E>
    private double transferTime;
    private double swingTime;
 
-   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, DoubleYoVariable yoTime)
+   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, YoDouble yoTime)
    {
       this(null,desiredYaw, turnInPlaceBehavior,yoTime);
    }
@@ -22,7 +22,7 @@ public class TurnInPlaceTask<E extends Enum<E>> extends BehaviorAction<E>
       this(null, desiredYaw,  turnInPlaceBehavior,  transferTime,  swingTime);
    }
 
-   public TurnInPlaceTask(E stateEnum, double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, DoubleYoVariable yoTime)
+   public TurnInPlaceTask(E stateEnum, double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, YoDouble yoTime)
    {
       this(stateEnum, desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN);
    }

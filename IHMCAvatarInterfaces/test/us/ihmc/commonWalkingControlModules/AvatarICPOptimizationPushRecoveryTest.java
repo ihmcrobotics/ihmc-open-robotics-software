@@ -19,7 +19,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -548,10 +548,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
                footPrefix + "State");
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
                "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -593,9 +593,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<ConstraintType> footConstraintType;
+      private final YoEnum<ConstraintType> footConstraintType;
 
-      public SingleSupportStartCondition(EnumYoVariable<ConstraintType> footConstraintType)
+      public SingleSupportStartCondition(YoEnum<ConstraintType> footConstraintType)
       {
          this.footConstraintType = footConstraintType;
       }
@@ -609,11 +609,11 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingStateEnum> walkingState;
+      private final YoEnum<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;

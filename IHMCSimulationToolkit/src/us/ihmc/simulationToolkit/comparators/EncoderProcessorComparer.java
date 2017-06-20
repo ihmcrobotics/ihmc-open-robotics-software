@@ -3,9 +3,9 @@ package us.ihmc.simulationToolkit.comparators;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.comparison.BangBangEncoderProcessorEvaluationTrajectory;
 import us.ihmc.sensorProcessing.encoder.comparison.ChirpEncoderProcessorEvaluationTrajectory;
@@ -25,7 +25,7 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -34,13 +34,13 @@ public class EncoderProcessorComparer
 {
    private final YoVariableRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
-   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedPositions = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
-   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedRates = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
-   private final IntegerYoVariable rawTicks;
-   private final DoubleYoVariable rawPosition;
-   private final DoubleYoVariable time;
-   private final DoubleYoVariable actualPosition;
-   private final DoubleYoVariable actualRate, actualRateInTicksPerSecond;
+   private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
+   private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
+   private final YoInteger rawTicks;
+   private final YoDouble rawPosition;
+   private final YoDouble time;
+   private final YoDouble actualPosition;
+   private final YoDouble actualRate, actualRateInTicksPerSecond;
    private final DataBuffer dataBuffer;
 
    private final ArrayList<EncoderProcessorEvaluationTrajectory> jointTrajectories;
@@ -54,12 +54,12 @@ public class EncoderProcessorComparer
    {
       Robot nullRobot = new Robot("nullRobot");
       registry = nullRobot.getRobotsYoVariableRegistry();
-      rawTicks = new IntegerYoVariable("rawTicks", registry);
-      rawPosition = new DoubleYoVariable("rawPosition", registry);
+      rawTicks = new YoInteger("rawTicks", registry);
+      rawPosition = new YoDouble("rawPosition", registry);
       time = nullRobot.getYoTime();
-      actualPosition = new DoubleYoVariable("actualPosition", registry);
-      actualRate = new DoubleYoVariable("actualRate", registry);
-      actualRateInTicksPerSecond = new DoubleYoVariable("actualRateInTicksPerSecond", registry);
+      actualPosition = new YoDouble("actualPosition", registry);
+      actualRate = new YoDouble("actualRate", registry);
+      actualRateInTicksPerSecond = new YoDouble("actualRateInTicksPerSecond", registry);
 
       this.jointTrajectories = jointTrajectories;
       this.maxTime = maxTime;
@@ -82,8 +82,8 @@ public class EncoderProcessorComparer
 
       for (EncoderProcessor encoderProcessor : encoderProcessors.keySet())
       {
-         processedPositions.put(encoderProcessor, new DoubleYoVariable("p_" + encoderProcessors.get(encoderProcessor), registry));
-         processedRates.put(encoderProcessor, new DoubleYoVariable("pd_" + encoderProcessors.get(encoderProcessor), registry));
+         processedPositions.put(encoderProcessor, new YoDouble("p_" + encoderProcessors.get(encoderProcessor), registry));
+         processedRates.put(encoderProcessor, new YoDouble("pd_" + encoderProcessors.get(encoderProcessor), registry));
       }
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();

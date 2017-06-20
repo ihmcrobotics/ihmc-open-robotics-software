@@ -6,33 +6,32 @@ import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getAngu
 import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadialVelocity;
 import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadius;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class CylindricalCoordinatesPositionController implements PositionController
 {
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable positionErrorRadial;
-   private final DoubleYoVariable positionErrorAngle;
-   private final DoubleYoVariable positionErrorZ;
+   private final YoDouble positionErrorRadial;
+   private final YoDouble positionErrorAngle;
+   private final YoDouble positionErrorZ;
 
-   private final DoubleYoVariable velocityErrorRadial;
-   private final DoubleYoVariable velocityErrorAngle;
-   private final DoubleYoVariable velocityErrorZ;
+   private final YoDouble velocityErrorRadial;
+   private final YoDouble velocityErrorAngle;
+   private final YoDouble velocityErrorZ;
 
-   private final DoubleYoVariable kpRadial;
-   private final DoubleYoVariable kpAngle;
-   private final DoubleYoVariable kpZ;
+   private final YoDouble kpRadial;
+   private final YoDouble kpAngle;
+   private final YoDouble kpZ;
 
-   private final DoubleYoVariable kdRadial;
-   private final DoubleYoVariable kdAngle;
-   private final DoubleYoVariable kdZ;
+   private final YoDouble kdRadial;
+   private final YoDouble kdAngle;
+   private final YoDouble kdZ;
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame cylinderFrame;
@@ -44,23 +43,23 @@ public class CylindricalCoordinatesPositionController implements PositionControl
       this.currentPosition = new FramePoint(bodyFrame);
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      positionErrorRadial = new DoubleYoVariable(prefix + "RadialPositionError", registry);
-      positionErrorAngle = new DoubleYoVariable(prefix + "AnglePositionError", registry);
-      positionErrorZ = new DoubleYoVariable(prefix + "ZPositionError", registry);
+      positionErrorRadial = new YoDouble(prefix + "RadialPositionError", registry);
+      positionErrorAngle = new YoDouble(prefix + "AnglePositionError", registry);
+      positionErrorZ = new YoDouble(prefix + "ZPositionError", registry);
 
-      velocityErrorRadial = new DoubleYoVariable(prefix + "RadialVelocityError", registry);
-      velocityErrorAngle = new DoubleYoVariable(prefix + "AngleVelocityError", registry);
-      velocityErrorZ = new DoubleYoVariable(prefix + "ZVelocityError", registry);
+      velocityErrorRadial = new YoDouble(prefix + "RadialVelocityError", registry);
+      velocityErrorAngle = new YoDouble(prefix + "AngleVelocityError", registry);
+      velocityErrorZ = new YoDouble(prefix + "ZVelocityError", registry);
 
       String baseProportionalGainName = prefix + "Kp";
-      kpRadial = new DoubleYoVariable(baseProportionalGainName + "Radial", registry);
-      kpAngle = new DoubleYoVariable(baseProportionalGainName + "Angle", registry);
-      kpZ = new DoubleYoVariable(baseProportionalGainName + "Z", registry);
+      kpRadial = new YoDouble(baseProportionalGainName + "Radial", registry);
+      kpAngle = new YoDouble(baseProportionalGainName + "Angle", registry);
+      kpZ = new YoDouble(baseProportionalGainName + "Z", registry);
 
       String baseDerivativeGainName = prefix + "Kd";
-      kdRadial = new DoubleYoVariable(baseDerivativeGainName + "Radial", registry);
-      kdAngle = new DoubleYoVariable(baseDerivativeGainName + "Angle", registry);
-      kdZ = new DoubleYoVariable(baseDerivativeGainName + "Z", registry);
+      kdRadial = new YoDouble(baseDerivativeGainName + "Radial", registry);
+      kdAngle = new YoDouble(baseDerivativeGainName + "Angle", registry);
+      kdZ = new YoDouble(baseDerivativeGainName + "Z", registry);
       this.cylinderFrame = cylinderFrame;
 
       parentRegistry.addChild(registry);

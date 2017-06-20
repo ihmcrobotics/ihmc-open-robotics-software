@@ -4,9 +4,9 @@ import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,170 +24,170 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    // These are the control variables which need to be created now:
 
    // Things we set
-   private final DoubleYoVariable control_dt = new DoubleYoVariable("control_dt", registry);
+   private final YoDouble control_dt = new YoDouble("control_dt", registry);
 
-   private final DoubleYoVariable ff_z = new DoubleYoVariable("ff_z", registry);
+   private final YoDouble ff_z = new YoDouble("ff_z", registry);
 
-   private final DoubleYoVariable yd_gain = new DoubleYoVariable("yd_gain", registry);
-   private final DoubleYoVariable yd_ankle_gain = new DoubleYoVariable("yd_ankle_gain", registry);
-   private final DoubleYoVariable lateral_yaw_mul = new DoubleYoVariable("lateral_yaw_mul", registry);
+   private final YoDouble yd_gain = new YoDouble("yd_gain", registry);
+   private final YoDouble yd_ankle_gain = new YoDouble("yd_ankle_gain", registry);
+   private final YoDouble lateral_yaw_mul = new YoDouble("lateral_yaw_mul", registry);
 
-   private final DoubleYoVariable ceny_gain = new DoubleYoVariable("ceny_gain", registry);
+   private final YoDouble ceny_gain = new YoDouble("ceny_gain", registry);
 
    // Body orientation control during stance:
-   private final DoubleYoVariable bodyYawGain = new DoubleYoVariable("bodyYawGain", registry);
-   private final DoubleYoVariable bodyYawDamping = new DoubleYoVariable("bodyYawDamping", registry);
+   private final YoDouble bodyYawGain = new YoDouble("bodyYawGain", registry);
+   private final YoDouble bodyYawDamping = new YoDouble("bodyYawDamping", registry);
 
-   private final DoubleYoVariable desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", registry);
-   private final DoubleYoVariable bodyPitchGain = new DoubleYoVariable("bodyPitchGain", registry);
-   private final DoubleYoVariable bodyPitchDamping = new DoubleYoVariable("bodyPitchDamping", registry);
+   private final YoDouble desiredBodyPitch = new YoDouble("desiredBodyPitch", registry);
+   private final YoDouble bodyPitchGain = new YoDouble("bodyPitchGain", registry);
+   private final YoDouble bodyPitchDamping = new YoDouble("bodyPitchDamping", registry);
 
-   private final DoubleYoVariable bodyRollGain = new DoubleYoVariable("bodyRollGain", registry);
-   private final DoubleYoVariable bodyRollDamping = new DoubleYoVariable("bodyRollDamping", registry);
+   private final YoDouble bodyRollGain = new YoDouble("bodyRollGain", registry);
+   private final YoDouble bodyRollDamping = new YoDouble("bodyRollDamping", registry);
 
-   private final DoubleYoVariable hipSwingAngle = new DoubleYoVariable("hipSwingAngle", "Desired hip swing angle", registry);
+   private final YoDouble hipSwingAngle = new YoDouble("hipSwingAngle", "Desired hip swing angle", registry);
 
-   private final DoubleYoVariable hipSwingGain = new DoubleYoVariable("hipSwingGain", "Proportional gain for hip during swing", registry);
-   private final DoubleYoVariable hipSwingDamp = new DoubleYoVariable("hipSwingDamp", "Damping gain for hip during swing", registry);
-   private final DoubleYoVariable hip_k = new DoubleYoVariable("hip_k", registry);
-   private final DoubleYoVariable hip_hold = new DoubleYoVariable("hip_hold", registry);
+   private final YoDouble hipSwingGain = new YoDouble("hipSwingGain", "Proportional gain for hip during swing", registry);
+   private final YoDouble hipSwingDamp = new YoDouble("hipSwingDamp", "Damping gain for hip during swing", registry);
+   private final YoDouble hip_k = new YoDouble("hip_k", registry);
+   private final YoDouble hip_hold = new YoDouble("hip_hold", registry);
 
-   private final DoubleYoVariable knee_d = new DoubleYoVariable("knee_d", registry);
-   private final DoubleYoVariable knee_gain = new DoubleYoVariable("knee_gain", registry);
-   private final DoubleYoVariable knee_damp = new DoubleYoVariable("knee_damp", registry);
+   private final YoDouble knee_d = new YoDouble("knee_d", registry);
+   private final YoDouble knee_gain = new YoDouble("knee_gain", registry);
+   private final YoDouble knee_damp = new YoDouble("knee_damp", registry);
 
-   private final DoubleYoVariable ankle_gain = new DoubleYoVariable("ankle_gain", registry);
-   private final DoubleYoVariable ankle_damp = new DoubleYoVariable("ankle_damp", registry);
+   private final YoDouble ankle_gain = new YoDouble("ankle_gain", registry);
+   private final YoDouble ankle_damp = new YoDouble("ankle_damp", registry);
 
-   private final DoubleYoVariable ankle_d = new DoubleYoVariable("ankle_d", registry);
-   private final DoubleYoVariable ankle_k = new DoubleYoVariable("ankle_k", registry);
-   private final DoubleYoVariable ankle_b = new DoubleYoVariable("ankle_b", registry);
+   private final YoDouble ankle_d = new YoDouble("ankle_d", registry);
+   private final YoDouble ankle_k = new YoDouble("ankle_k", registry);
+   private final YoDouble ankle_b = new YoDouble("ankle_b", registry);
 
-   private final DoubleYoVariable hip_b = new DoubleYoVariable("hip_b", registry);
-   private final DoubleYoVariable footForceAlpha = new DoubleYoVariable("footForceAlpha", "Alpha for filter the foot forces", registry);
-   private final DoubleYoVariable ankle_limit_set = new DoubleYoVariable("ankle_limit_set", registry);
-   private final DoubleYoVariable ankle_limit_gain = new DoubleYoVariable("ankle_limit_gain", registry);
-   private final DoubleYoVariable flat_ankle_roll = new DoubleYoVariable("flat_ankle_roll", registry);
+   private final YoDouble hip_b = new YoDouble("hip_b", registry);
+   private final YoDouble footForceAlpha = new YoDouble("footForceAlpha", "Alpha for filter the foot forces", registry);
+   private final YoDouble ankle_limit_set = new YoDouble("ankle_limit_set", registry);
+   private final YoDouble ankle_limit_gain = new YoDouble("ankle_limit_gain", registry);
+   private final YoDouble flat_ankle_roll = new YoDouble("flat_ankle_roll", registry);
 
-   private final DoubleYoVariable swing_roll_off = new DoubleYoVariable("swing_roll_off", registry);
+   private final YoDouble swing_roll_off = new YoDouble("swing_roll_off", registry);
 
-   private final DoubleYoVariable swing_gain_knee = new DoubleYoVariable("swing_gain_knee", registry);
-   private final DoubleYoVariable swing_damp_knee1 = new DoubleYoVariable("swing_damp_knee1", registry);
-   private final DoubleYoVariable swing_damp_knee = new DoubleYoVariable("swing_damp_knee", registry);
+   private final YoDouble swing_gain_knee = new YoDouble("swing_gain_knee", registry);
+   private final YoDouble swing_damp_knee1 = new YoDouble("swing_damp_knee1", registry);
+   private final YoDouble swing_damp_knee = new YoDouble("swing_damp_knee", registry);
 
-   private final DoubleYoVariable push_set = new DoubleYoVariable("push_set", registry);
-   private final DoubleYoVariable push_gain = new DoubleYoVariable("push_gain", registry);
-   private final DoubleYoVariable push_damp = new DoubleYoVariable("push_damp", registry);
+   private final YoDouble push_set = new YoDouble("push_set", registry);
+   private final YoDouble push_gain = new YoDouble("push_gain", registry);
+   private final YoDouble push_damp = new YoDouble("push_damp", registry);
 
-   private final DoubleYoVariable tran_time = new DoubleYoVariable("tran_time", registry);
-   private final DoubleYoVariable swing_time = new DoubleYoVariable("swing_time", registry);
-   private final DoubleYoVariable min_support_time = new DoubleYoVariable("min_support_time", registry);
+   private final YoDouble tran_time = new YoDouble("tran_time", registry);
+   private final YoDouble swing_time = new YoDouble("swing_time", registry);
+   private final YoDouble min_support_time = new YoDouble("min_support_time", registry);
 
-   private final DoubleYoVariable max_hip_torque = new DoubleYoVariable("max_hip_torque", registry);
+   private final YoDouble max_hip_torque = new YoDouble("max_hip_torque", registry);
 
-   private final DoubleYoVariable force_thresh = new DoubleYoVariable("force_thresh", registry);
+   private final YoDouble force_thresh = new YoDouble("force_thresh", registry);
 
-   private final DoubleYoVariable decay_freq = new DoubleYoVariable("decay_freq", registry);
+   private final YoDouble decay_freq = new YoDouble("decay_freq", registry);
 
    // The following variables are computed as part of the controller. They are not user set parameters.
-   private final DoubleYoVariable q_d_left_hip_pitch = new DoubleYoVariable("q_d_left_hip_pitch", "Desired left hip pitch angle [rad]", registry);
-   private final DoubleYoVariable q_d_right_hip_pitch = new DoubleYoVariable("q_d_right_hip_pitch", "Desired right hip pitch angle [rad]", registry);
+   private final YoDouble q_d_left_hip_pitch = new YoDouble("q_d_left_hip_pitch", "Desired left hip pitch angle [rad]", registry);
+   private final YoDouble q_d_right_hip_pitch = new YoDouble("q_d_right_hip_pitch", "Desired right hip pitch angle [rad]", registry);
 
 
    // private final YoVariable right_hip_set = new YoVariable("right_hip_set", "Desired left hip pitch angle [rad]", registry);
-   private final DoubleYoVariable k_right_hip_yaw = new DoubleYoVariable("k_right_hip_yaw", registry);
-   private final DoubleYoVariable k_right_hip_roll = new DoubleYoVariable("k_right_hip_roll", registry);
-   private final DoubleYoVariable k_right_ankle_roll = new DoubleYoVariable("k_right_ankle_roll", registry);
-   private final DoubleYoVariable k_left_ankle_roll = new DoubleYoVariable("k_left_ankle_roll", registry);
-   private final DoubleYoVariable ff_right_knee = new DoubleYoVariable("ff_right_knee", registry);
-   private final DoubleYoVariable ff_right_hip_pitch = new DoubleYoVariable("ff_right_hip_pitch", registry);
-   private final DoubleYoVariable ff_right_ankle_pitch = new DoubleYoVariable("ff_right_ankle_pitch", registry);
-   private final DoubleYoVariable ff_left_knee = new DoubleYoVariable("ff_left_knee", registry);
-   private final DoubleYoVariable ff_left_hip_yaw = new DoubleYoVariable("ff_left_hip_yaw", registry);
-   private final DoubleYoVariable ff_left_hip_roll = new DoubleYoVariable("ff_left_hip_roll", registry);
-   private final DoubleYoVariable ff_left_hip_pitch = new DoubleYoVariable("ff_left_hip_pitch", registry);
-   private final DoubleYoVariable ff_left_ankle_roll = new DoubleYoVariable("ff_left_ankle_roll", registry);
-   private final DoubleYoVariable b_right_hip_yaw = new DoubleYoVariable("b_right_hip_yaw", registry);
-   private final DoubleYoVariable b_right_hip_roll = new DoubleYoVariable("b_right_hip_roll", registry);
-   private final DoubleYoVariable b_right_ankle_roll = new DoubleYoVariable("b_right_ankle_roll", registry);
-   private final DoubleYoVariable b_left_ankle_roll = new DoubleYoVariable("b_left_ankle_roll", registry);
-   private final DoubleYoVariable act_right_ankle = new DoubleYoVariable("act_right_ankle", registry);
-   private final DoubleYoVariable right_heel = new DoubleYoVariable("right_heel", registry);
-   private final DoubleYoVariable ramp_right = new DoubleYoVariable("ramp_right", registry);
-   private final DoubleYoVariable ramp_left = new DoubleYoVariable("ramp_left", registry);
-   private final DoubleYoVariable left_heel = new DoubleYoVariable("left_heel", registry);
-   private final DoubleYoVariable ff_hip_roll = new DoubleYoVariable("ff_hip_roll", registry);
+   private final YoDouble k_right_hip_yaw = new YoDouble("k_right_hip_yaw", registry);
+   private final YoDouble k_right_hip_roll = new YoDouble("k_right_hip_roll", registry);
+   private final YoDouble k_right_ankle_roll = new YoDouble("k_right_ankle_roll", registry);
+   private final YoDouble k_left_ankle_roll = new YoDouble("k_left_ankle_roll", registry);
+   private final YoDouble ff_right_knee = new YoDouble("ff_right_knee", registry);
+   private final YoDouble ff_right_hip_pitch = new YoDouble("ff_right_hip_pitch", registry);
+   private final YoDouble ff_right_ankle_pitch = new YoDouble("ff_right_ankle_pitch", registry);
+   private final YoDouble ff_left_knee = new YoDouble("ff_left_knee", registry);
+   private final YoDouble ff_left_hip_yaw = new YoDouble("ff_left_hip_yaw", registry);
+   private final YoDouble ff_left_hip_roll = new YoDouble("ff_left_hip_roll", registry);
+   private final YoDouble ff_left_hip_pitch = new YoDouble("ff_left_hip_pitch", registry);
+   private final YoDouble ff_left_ankle_roll = new YoDouble("ff_left_ankle_roll", registry);
+   private final YoDouble b_right_hip_yaw = new YoDouble("b_right_hip_yaw", registry);
+   private final YoDouble b_right_hip_roll = new YoDouble("b_right_hip_roll", registry);
+   private final YoDouble b_right_ankle_roll = new YoDouble("b_right_ankle_roll", registry);
+   private final YoDouble b_left_ankle_roll = new YoDouble("b_left_ankle_roll", registry);
+   private final YoDouble act_right_ankle = new YoDouble("act_right_ankle", registry);
+   private final YoDouble right_heel = new YoDouble("right_heel", registry);
+   private final YoDouble ramp_right = new YoDouble("ramp_right", registry);
+   private final YoDouble ramp_left = new YoDouble("ramp_left", registry);
+   private final YoDouble left_heel = new YoDouble("left_heel", registry);
+   private final YoDouble ff_hip_roll = new YoDouble("ff_hip_roll", registry);
 
-   private final DoubleYoVariable ff_right_ankle_roll_speed = new DoubleYoVariable("ff_right_ankle_roll_speed", "Feedforward ankle speed, [rad/s]", registry);
-   private final DoubleYoVariable ff_left_ankle_roll_speed = new DoubleYoVariable("ff_left_ankle_roll_speed", "Feedforward ankle speed, [rad/s]", registry);
-   private final DoubleYoVariable k_left_hip_yaw = new DoubleYoVariable("k_left_hip_yaw", registry);
-   private final DoubleYoVariable k_left_hip_roll = new DoubleYoVariable("k_left_hip_roll", registry);
-   private final DoubleYoVariable ff_right_hip_yaw = new DoubleYoVariable("ff_right_hip_yaw", registry);
-   private final DoubleYoVariable ff_right_hip_roll = new DoubleYoVariable("ff_right_hip_roll", registry);
-   private final DoubleYoVariable ff_right_ankle_roll = new DoubleYoVariable("ff_right_ankle_roll", registry);
-   private final DoubleYoVariable ff_left_ankle_pitch = new DoubleYoVariable("ff_left_ankle_pitch", registry);
-   private final DoubleYoVariable b_left_hip_yaw = new DoubleYoVariable("b_left_hip_yaw", registry);
-   private final DoubleYoVariable b_left_hip_roll = new DoubleYoVariable("b_left_hip_roll", registry);
-   private final DoubleYoVariable act_left_ankle = new DoubleYoVariable("act_left_ankle", registry);
-   private final DoubleYoVariable pas_right_ankle = new DoubleYoVariable("pas_right_ankle", registry);
-   private final DoubleYoVariable pas_left_ankle = new DoubleYoVariable("pas_left_ankle", registry);
+   private final YoDouble ff_right_ankle_roll_speed = new YoDouble("ff_right_ankle_roll_speed", "Feedforward ankle speed, [rad/s]", registry);
+   private final YoDouble ff_left_ankle_roll_speed = new YoDouble("ff_left_ankle_roll_speed", "Feedforward ankle speed, [rad/s]", registry);
+   private final YoDouble k_left_hip_yaw = new YoDouble("k_left_hip_yaw", registry);
+   private final YoDouble k_left_hip_roll = new YoDouble("k_left_hip_roll", registry);
+   private final YoDouble ff_right_hip_yaw = new YoDouble("ff_right_hip_yaw", registry);
+   private final YoDouble ff_right_hip_roll = new YoDouble("ff_right_hip_roll", registry);
+   private final YoDouble ff_right_ankle_roll = new YoDouble("ff_right_ankle_roll", registry);
+   private final YoDouble ff_left_ankle_pitch = new YoDouble("ff_left_ankle_pitch", registry);
+   private final YoDouble b_left_hip_yaw = new YoDouble("b_left_hip_yaw", registry);
+   private final YoDouble b_left_hip_roll = new YoDouble("b_left_hip_roll", registry);
+   private final YoDouble act_left_ankle = new YoDouble("act_left_ankle", registry);
+   private final YoDouble pas_right_ankle = new YoDouble("pas_right_ankle", registry);
+   private final YoDouble pas_left_ankle = new YoDouble("pas_left_ankle", registry);
 
-   private final DoubleYoVariable leftCopPercentFromHeel = new DoubleYoVariable("leftCopPercentFromHeel",
+   private final YoDouble leftCopPercentFromHeel = new YoDouble("leftCopPercentFromHeel",
                                                         "The location of the left foot COP from the heel. 0.0=all on heel, " + "1,0= all on  toes", registry);
-   private final DoubleYoVariable rightCopPercentFromHeel = new DoubleYoVariable("rightCopPercentFromHeel",
+   private final YoDouble rightCopPercentFromHeel = new YoDouble("rightCopPercentFromHeel",
                                                          "The location of the right foot COP from the heel. 0.0=all on heel, " + "1,0= all on  toes", registry);
 
    // Desired for feedback control
-   private final DoubleYoVariable q_d_right_hip_roll = new DoubleYoVariable("q_d_right_hip_roll", "Desired right hip roll angle [rad]", registry);
-   private final DoubleYoVariable q_d_left_hip_roll = new DoubleYoVariable("q_d_left_hip_roll", "Desired left hip roll angle [rad]", registry);
-   private final DoubleYoVariable left_ankle_roll_error = new DoubleYoVariable("left_ankle_roll_error", "Intermeidate error term", registry);
-   private final DoubleYoVariable right_ankle_roll_error = new DoubleYoVariable("right_ankle_roll_error", "Intermeidate error term [rad]", registry);
+   private final YoDouble q_d_right_hip_roll = new YoDouble("q_d_right_hip_roll", "Desired right hip roll angle [rad]", registry);
+   private final YoDouble q_d_left_hip_roll = new YoDouble("q_d_left_hip_roll", "Desired left hip roll angle [rad]", registry);
+   private final YoDouble left_ankle_roll_error = new YoDouble("left_ankle_roll_error", "Intermeidate error term", registry);
+   private final YoDouble right_ankle_roll_error = new YoDouble("right_ankle_roll_error", "Intermeidate error term [rad]", registry);
 
    // These are calculate variables related to state of the robot
-   private final DoubleYoVariable rightHeelToBodyCenterInWorldY = new DoubleYoVariable("rightHeelToBodyCenterInWorldY",
+   private final YoDouble rightHeelToBodyCenterInWorldY = new YoDouble("rightHeelToBodyCenterInWorldY",
                                                                "Distance from Right Heel To Body Center In Point" + " In World Y [m]", registry);
    private final AlphaFilteredYoVariable rightFootForceFiltered = new AlphaFilteredYoVariable("rightFootForceFiltered", registry, footForceAlpha);
    private final AlphaFilteredYoVariable leftFootForceFiltered = new AlphaFilteredYoVariable("leftFootForceFiltered", registry, footForceAlpha);
-   private final DoubleYoVariable q_d_yaw = new DoubleYoVariable("q_d_yaw", registry);
-   private final DoubleYoVariable q_d_right_hip_yaw = new DoubleYoVariable("q_d_right_hip_yaw", registry);
-   private final DoubleYoVariable q_d_left_hip_yaw = new DoubleYoVariable("q_d_left_hip_yaw", registry);
-   private final DoubleYoVariable bodyVelocityInWorldX = new DoubleYoVariable("bodyVelocityInWorldX", registry);
-   private final DoubleYoVariable bodyVelocityInBodyFrameY = new DoubleYoVariable("bodyVelocityInBodyFrameY", registry);
-   private final DoubleYoVariable bodyVelocityInBodyFrameX = new DoubleYoVariable("xd", registry);
-   private final DoubleYoVariable bodyCenterToLeftHeelInWorldY = new DoubleYoVariable("bodyCenterToLeftHeelInWorldY",
+   private final YoDouble q_d_yaw = new YoDouble("q_d_yaw", registry);
+   private final YoDouble q_d_right_hip_yaw = new YoDouble("q_d_right_hip_yaw", registry);
+   private final YoDouble q_d_left_hip_yaw = new YoDouble("q_d_left_hip_yaw", registry);
+   private final YoDouble bodyVelocityInWorldX = new YoDouble("bodyVelocityInWorldX", registry);
+   private final YoDouble bodyVelocityInBodyFrameY = new YoDouble("bodyVelocityInBodyFrameY", registry);
+   private final YoDouble bodyVelocityInBodyFrameX = new YoDouble("xd", registry);
+   private final YoDouble bodyCenterToLeftHeelInWorldY = new YoDouble("bodyCenterToLeftHeelInWorldY",
                                                               "Distance from Body Center to Left Heel In Point" + " In World Y [m]", registry);
-   private final DoubleYoVariable velocityHeadingInBodyFrame = new DoubleYoVariable("velocityHeadingInBodyFrame",
+   private final YoDouble velocityHeadingInBodyFrame = new YoDouble("velocityHeadingInBodyFrame",
                                                             "This is the heading angle of the body velocity relative to body frame x", registry);
 
-   private final BooleanYoVariable doneWithStateRight = new BooleanYoVariable("doneWithStateRight", registry);
-   private final BooleanYoVariable doneWithStateLeft = new BooleanYoVariable("doneWithStateLeft", registry);
+   private final YoBoolean doneWithStateRight = new YoBoolean("doneWithStateRight", registry);
+   private final YoBoolean doneWithStateLeft = new YoBoolean("doneWithStateLeft", registry);
 
-   private final SideDependentList<DoubleYoVariable> ffHipYaw = new SideDependentList<DoubleYoVariable>(ff_left_hip_yaw, ff_right_hip_yaw);
-   private final SideDependentList<DoubleYoVariable> ffHipRoll = new SideDependentList<DoubleYoVariable>(ff_left_hip_roll, ff_right_hip_roll);
-   private final SideDependentList<DoubleYoVariable> ffHipPitch = new SideDependentList<DoubleYoVariable>(ff_left_hip_pitch, ff_right_hip_pitch);
-   private final SideDependentList<DoubleYoVariable> ffKnee = new SideDependentList<DoubleYoVariable>(ff_left_knee, ff_right_knee);
+   private final SideDependentList<YoDouble> ffHipYaw = new SideDependentList<YoDouble>(ff_left_hip_yaw, ff_right_hip_yaw);
+   private final SideDependentList<YoDouble> ffHipRoll = new SideDependentList<YoDouble>(ff_left_hip_roll, ff_right_hip_roll);
+   private final SideDependentList<YoDouble> ffHipPitch = new SideDependentList<YoDouble>(ff_left_hip_pitch, ff_right_hip_pitch);
+   private final SideDependentList<YoDouble> ffKnee = new SideDependentList<YoDouble>(ff_left_knee, ff_right_knee);
 //   private final SideDependentList<YoVariable> ffAnklePitch = new SideDependentList<YoVariable>(ff_left_ankle_pitch, ff_right_ankle_pitch);
-   private final SideDependentList<DoubleYoVariable> ffAnkleRoll = new SideDependentList<DoubleYoVariable>(ff_left_ankle_roll, ff_right_ankle_roll);
+   private final SideDependentList<YoDouble> ffAnkleRoll = new SideDependentList<YoDouble>(ff_left_ankle_roll, ff_right_ankle_roll);
 
-   private final SideDependentList<DoubleYoVariable> ankleRollError = new SideDependentList<DoubleYoVariable>(left_ankle_roll_error, right_ankle_roll_error);
-   private final SideDependentList<DoubleYoVariable> ffAnkleRollSpeed = new SideDependentList<DoubleYoVariable>(ff_left_ankle_roll_speed, ff_right_ankle_roll_speed);
-   private final SideDependentList<DoubleYoVariable> footForceFiltered = new SideDependentList<DoubleYoVariable>(leftFootForceFiltered, rightFootForceFiltered);
-   private final SideDependentList<BooleanYoVariable> doneWithState = new SideDependentList<BooleanYoVariable>(doneWithStateLeft, doneWithStateRight);
-   private final SideDependentList<DoubleYoVariable> activeAnkle = new SideDependentList<DoubleYoVariable>(act_left_ankle, act_right_ankle);
-   private final SideDependentList<DoubleYoVariable> passiveAnkle = new SideDependentList<DoubleYoVariable>(pas_left_ankle, pas_right_ankle);
+   private final SideDependentList<YoDouble> ankleRollError = new SideDependentList<YoDouble>(left_ankle_roll_error, right_ankle_roll_error);
+   private final SideDependentList<YoDouble> ffAnkleRollSpeed = new SideDependentList<YoDouble>(ff_left_ankle_roll_speed, ff_right_ankle_roll_speed);
+   private final SideDependentList<YoDouble> footForceFiltered = new SideDependentList<YoDouble>(leftFootForceFiltered, rightFootForceFiltered);
+   private final SideDependentList<YoBoolean> doneWithState = new SideDependentList<YoBoolean>(doneWithStateLeft, doneWithStateRight);
+   private final SideDependentList<YoDouble> activeAnkle = new SideDependentList<YoDouble>(act_left_ankle, act_right_ankle);
+   private final SideDependentList<YoDouble> passiveAnkle = new SideDependentList<YoDouble>(pas_left_ankle, pas_right_ankle);
 
-   private final SideDependentList<DoubleYoVariable> ramp = new SideDependentList<DoubleYoVariable>(ramp_left, ramp_right);
-   private final SideDependentList<DoubleYoVariable> q_d_hipYaw = new SideDependentList<DoubleYoVariable>(q_d_left_hip_yaw, q_d_right_hip_yaw);
-   private final SideDependentList<DoubleYoVariable> q_d_hipRoll = new SideDependentList<DoubleYoVariable>(q_d_left_hip_roll, q_d_right_hip_roll);
-   private final SideDependentList<DoubleYoVariable> k_hipYaw = new SideDependentList<DoubleYoVariable>(k_left_hip_yaw, k_right_hip_yaw);
-   private final SideDependentList<DoubleYoVariable> b_hipYaw = new SideDependentList<DoubleYoVariable>(b_left_hip_yaw, b_right_hip_yaw);
-   private final SideDependentList<DoubleYoVariable> kAnkleRoll = new SideDependentList<DoubleYoVariable>(k_left_ankle_roll, k_right_ankle_roll);
-   private final SideDependentList<DoubleYoVariable> bAnkleRoll = new SideDependentList<DoubleYoVariable>(b_left_ankle_roll, b_right_ankle_roll);
-   private final SideDependentList<DoubleYoVariable> kHipRoll = new SideDependentList<DoubleYoVariable>(k_left_hip_roll, k_right_hip_roll);
-   private final SideDependentList<DoubleYoVariable> bHipRoll = new SideDependentList<DoubleYoVariable>(b_left_hip_roll, b_right_hip_roll);
-   private final SideDependentList<DoubleYoVariable> q_d_hipPitch = new SideDependentList<DoubleYoVariable>(q_d_left_hip_pitch, q_d_right_hip_pitch);
-   private final SideDependentList<DoubleYoVariable> heel = new SideDependentList<DoubleYoVariable>(left_heel, right_heel);
-   private final SideDependentList<DoubleYoVariable> bodyCenterToHeelInWorldY = new SideDependentList<DoubleYoVariable>(bodyCenterToLeftHeelInWorldY,
+   private final SideDependentList<YoDouble> ramp = new SideDependentList<YoDouble>(ramp_left, ramp_right);
+   private final SideDependentList<YoDouble> q_d_hipYaw = new SideDependentList<YoDouble>(q_d_left_hip_yaw, q_d_right_hip_yaw);
+   private final SideDependentList<YoDouble> q_d_hipRoll = new SideDependentList<YoDouble>(q_d_left_hip_roll, q_d_right_hip_roll);
+   private final SideDependentList<YoDouble> k_hipYaw = new SideDependentList<YoDouble>(k_left_hip_yaw, k_right_hip_yaw);
+   private final SideDependentList<YoDouble> b_hipYaw = new SideDependentList<YoDouble>(b_left_hip_yaw, b_right_hip_yaw);
+   private final SideDependentList<YoDouble> kAnkleRoll = new SideDependentList<YoDouble>(k_left_ankle_roll, k_right_ankle_roll);
+   private final SideDependentList<YoDouble> bAnkleRoll = new SideDependentList<YoDouble>(b_left_ankle_roll, b_right_ankle_roll);
+   private final SideDependentList<YoDouble> kHipRoll = new SideDependentList<YoDouble>(k_left_hip_roll, k_right_hip_roll);
+   private final SideDependentList<YoDouble> bHipRoll = new SideDependentList<YoDouble>(b_left_hip_roll, b_right_hip_roll);
+   private final SideDependentList<YoDouble> q_d_hipPitch = new SideDependentList<YoDouble>(q_d_left_hip_pitch, q_d_right_hip_pitch);
+   private final SideDependentList<YoDouble> heel = new SideDependentList<YoDouble>(left_heel, right_heel);
+   private final SideDependentList<YoDouble> bodyCenterToHeelInWorldY = new SideDependentList<YoDouble>(bodyCenterToLeftHeelInWorldY,
                                                                              rightHeelToBodyCenterInWorldY);
 
 

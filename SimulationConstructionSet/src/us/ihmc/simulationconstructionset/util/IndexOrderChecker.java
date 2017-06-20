@@ -1,22 +1,21 @@
 package us.ihmc.simulationconstructionset.util;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class IndexOrderChecker
 {
-   private final IntegerYoVariable previousIndex;
-   private final IntegerYoVariable missedIndices;
-   private final BooleanYoVariable hasBeenUpdated;
+   private final YoInteger previousIndex;
+   private final YoInteger missedIndices;
+   private final YoBoolean hasBeenUpdated;
    private int increment;
    
    public IndexOrderChecker(String name, YoVariableRegistry registry, int increment)
    {
-      previousIndex = new IntegerYoVariable(name + "PrevIndex", registry);
-      missedIndices = new IntegerYoVariable(name + "MissedIndices", registry);
-      hasBeenUpdated = new BooleanYoVariable(name + "HasBeenUpdated", registry);
+      previousIndex = new YoInteger(name + "PrevIndex", registry);
+      missedIndices = new YoInteger(name + "MissedIndices", registry);
+      hasBeenUpdated = new YoBoolean(name + "HasBeenUpdated", registry);
       this.increment = increment;
    }
    

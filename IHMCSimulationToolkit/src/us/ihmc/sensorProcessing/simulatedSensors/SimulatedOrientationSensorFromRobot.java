@@ -4,8 +4,8 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -22,7 +22,7 @@ public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Rotatio
    private final RotationMatrix rotationMatrix = new RotationMatrix();
 
    private final YoFrameQuaternion yoFrameQuaternionPerfect, yoFrameQuaternionNoisy;
-   private final DoubleYoVariable rotationAngleNoise;
+   private final YoDouble rotationAngleNoise;
 
    private final ControlFlowOutputPort<RotationMatrix> orientationOutputPort = createOutputPort("orientationOutputPort");
 
@@ -32,7 +32,7 @@ public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Rotatio
       this.yoFrameQuaternionPerfect = new YoFrameQuaternion(name + "Perfect", ReferenceFrame.getWorldFrame(), registry);
       this.yoFrameQuaternionNoisy = new YoFrameQuaternion(name + "Noisy", ReferenceFrame.getWorldFrame(), registry);
 
-      rotationAngleNoise = new DoubleYoVariable(name + "Noise", registry);
+      rotationAngleNoise = new YoDouble(name + "Noise", registry);
    }
 
    public void startComputation()

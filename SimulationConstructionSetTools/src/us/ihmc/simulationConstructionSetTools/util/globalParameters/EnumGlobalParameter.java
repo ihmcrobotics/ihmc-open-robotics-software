@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class EnumGlobalParameter extends GlobalParameter
 {
@@ -8,9 +8,9 @@ public class EnumGlobalParameter extends GlobalParameter
    {
       super(null, listener);
 
-      EnumYoVariable<T> enumYoVariable = new EnumYoVariable<T>(name, description, registry, value.getDeclaringClass(), false);
-      enumYoVariable.set(value);
-      this.yoVariable = enumYoVariable;
+      YoEnum<T> yoEnum = new YoEnum<T>(name, description, registry, value.getDeclaringClass(), false);
+      yoEnum.set(value);
+      this.yoVariable = yoEnum;
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -20,7 +20,7 @@ public class EnumGlobalParameter extends GlobalParameter
    {
       super(parents, listener);
 
-      yoVariable = EnumYoVariable.create(name, description, enumType, registry, false);
+      yoVariable = YoEnum.create(name, description, enumType, registry, false);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -28,12 +28,12 @@ public class EnumGlobalParameter extends GlobalParameter
 
    public Enum<?> getValue()
    {
-      return ((EnumYoVariable<?>)yoVariable).getEnumValue();
+      return ((YoEnum<?>)yoVariable).getEnumValue();
    }
 
    protected int getNumberOfCharactersForDisplay()
    {
-      Enum<?>[] enumValues = ((Enum<?>) ((EnumYoVariable<?>)yoVariable).getEnumValue()).getDeclaringClass().getEnumConstants();
+      Enum<?>[] enumValues = ((Enum<?>) ((YoEnum<?>)yoVariable).getEnumValue()).getDeclaringClass().getEnumConstants();
       int maxNumberOfCharacters = Integer.MIN_VALUE;
 
       for (Enum<?> enumValue : enumValues)
@@ -66,7 +66,7 @@ public class EnumGlobalParameter extends GlobalParameter
       verifyNoParents();
 
       // check if the value is the same as the current value
-      if (value == ((EnumYoVariable<?>)yoVariable).getEnumValue())
+      if (value == ((YoEnum<?>)yoVariable).getEnumValue())
          return;
       else
          setEnumValue(value, comment);
@@ -75,7 +75,7 @@ public class EnumGlobalParameter extends GlobalParameter
    @Override
    public String getValueInStringFormat()
    {
-      String ret = ((EnumYoVariable<?>)yoVariable).getEnumValue().toString();
+      String ret = ((YoEnum<?>)yoVariable).getEnumValue().toString();
 
       return padWithSpaces(ret, numberOfCharactersForDisplay);
    }
@@ -84,8 +84,8 @@ public class EnumGlobalParameter extends GlobalParameter
    @SuppressWarnings("unchecked")
    private <T extends Enum<T>> void setEnumValue(T newValue, String comment)
    {
-      Enum<?> previousValue = ((EnumYoVariable<?>)yoVariable).getEnumValue();
-      ((EnumYoVariable<T>)yoVariable).set(newValue);
+      Enum<?> previousValue = ((YoEnum<?>)yoVariable).getEnumValue();
+      ((YoEnum<T>)yoVariable).set(newValue);
 
       if (changedListener != null)
       {

@@ -3,8 +3,8 @@ package us.ihmc.kalman.imu.testCases;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -20,21 +20,21 @@ public class TestIMUKalmanFilterRobot extends Robot
    // Primary joints of the robot...
    public FloatingJoint rootJoint;
 
-   public final DoubleYoVariable q_x, q_y, q_z;    // Position in world coordinates
-   public final DoubleYoVariable qd_x, qd_y, qd_z;    // Velocity in world coordinates.
-   public final DoubleYoVariable qdd_x, qdd_y, qdd_z;    // Acceleration in world coordinates.
+   public final YoDouble q_x, q_y, q_z;    // Position in world coordinates
+   public final YoDouble qd_x, qd_y, qd_z;    // Velocity in world coordinates.
+   public final YoDouble qdd_x, qdd_y, qdd_z;    // Acceleration in world coordinates.
 
-   public final DoubleYoVariable q_qs, q_qx, q_qy, q_qz;    // Rotation as a quaternion.
-   public final DoubleYoVariable qd_wx, qd_wy, qd_wz;    // Angular velocities in world coordinates
-   public final DoubleYoVariable qdd_wx, qdd_wy, qdd_wz;    // Angular acceleration in world coordinates
+   public final YoDouble q_qs, q_qx, q_qy, q_qz;    // Rotation as a quaternion.
+   public final YoDouble qd_wx, qd_wy, qd_wz;    // Angular velocities in world coordinates
+   public final YoDouble qdd_wx, qdd_wy, qdd_wz;    // Angular acceleration in world coordinates
 
    // Rotation of the body
    private final YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
-   public final DoubleYoVariable yaw = new DoubleYoVariable("yaw", registry);
-   public final DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
-   public final DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+   public final YoDouble yaw = new YoDouble("yaw", registry);
+   public final YoDouble pitch = new YoDouble("pitch", registry);
+   public final YoDouble roll = new YoDouble("roll", registry);
 
-   public final DoubleYoVariable ef_body_fx, ef_body_fy, ef_body_fz;    // External Forces in world coordinates
+   public final YoDouble ef_body_fx, ef_body_fy, ef_body_fz;    // External Forces in world coordinates
 
    public TestIMUKalmanFilterRobot()
    {
@@ -58,34 +58,34 @@ public class TestIMUKalmanFilterRobot extends Robot
       rootJoint.setLink(link);
       addRootJoint(rootJoint);
 
-      q_x = (DoubleYoVariable)this.getVariable("q_x");
-      q_y = (DoubleYoVariable)this.getVariable("q_y");
-      q_z = (DoubleYoVariable)this.getVariable("q_z");
+      q_x = (YoDouble)this.getVariable("q_x");
+      q_y = (YoDouble)this.getVariable("q_y");
+      q_z = (YoDouble)this.getVariable("q_z");
 
-      qd_x = (DoubleYoVariable)this.getVariable("qd_x");
-      qd_y = (DoubleYoVariable)this.getVariable("qd_y");
-      qd_z = (DoubleYoVariable)this.getVariable("qd_z");
+      qd_x = (YoDouble)this.getVariable("qd_x");
+      qd_y = (YoDouble)this.getVariable("qd_y");
+      qd_z = (YoDouble)this.getVariable("qd_z");
 
-      qdd_x = (DoubleYoVariable)this.getVariable("qdd_x");
-      qdd_y = (DoubleYoVariable)this.getVariable("qdd_y");
-      qdd_z = (DoubleYoVariable)this.getVariable("qdd_z");
+      qdd_x = (YoDouble)this.getVariable("qdd_x");
+      qdd_y = (YoDouble)this.getVariable("qdd_y");
+      qdd_z = (YoDouble)this.getVariable("qdd_z");
 
-      q_qs = (DoubleYoVariable)this.getVariable("q_qs");
-      q_qx = (DoubleYoVariable)this.getVariable("q_qx");
-      q_qy = (DoubleYoVariable)this.getVariable("q_qy");
-      q_qz = (DoubleYoVariable)this.getVariable("q_qz");
+      q_qs = (YoDouble)this.getVariable("q_qs");
+      q_qx = (YoDouble)this.getVariable("q_qx");
+      q_qy = (YoDouble)this.getVariable("q_qy");
+      q_qz = (YoDouble)this.getVariable("q_qz");
 
-      qd_wx = (DoubleYoVariable)this.getVariable("qd_wx");
-      qd_wy = (DoubleYoVariable)this.getVariable("qd_wy");
-      qd_wz = (DoubleYoVariable)this.getVariable("qd_wz");
+      qd_wx = (YoDouble)this.getVariable("qd_wx");
+      qd_wy = (YoDouble)this.getVariable("qd_wy");
+      qd_wz = (YoDouble)this.getVariable("qd_wz");
 
-      qdd_wx = (DoubleYoVariable)this.getVariable("qdd_wx");
-      qdd_wy = (DoubleYoVariable)this.getVariable("qdd_wy");
-      qdd_wz = (DoubleYoVariable)this.getVariable("qdd_wz");
+      qdd_wx = (YoDouble)this.getVariable("qdd_wx");
+      qdd_wy = (YoDouble)this.getVariable("qdd_wy");
+      qdd_wz = (YoDouble)this.getVariable("qdd_wz");
 
-      ef_body_fx = (DoubleYoVariable)this.getVariable("ef_body_fx");
-      ef_body_fy = (DoubleYoVariable)this.getVariable("ef_body_fy");
-      ef_body_fz = (DoubleYoVariable)this.getVariable("ef_body_fz");
+      ef_body_fx = (YoDouble)this.getVariable("ef_body_fx");
+      ef_body_fy = (YoDouble)this.getVariable("ef_body_fy");
+      ef_body_fz = (YoDouble)this.getVariable("ef_body_fz");
 
 //      this.addYoVariableRegistry(registry);
    }

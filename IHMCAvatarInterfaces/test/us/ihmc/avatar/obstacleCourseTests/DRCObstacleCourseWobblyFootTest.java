@@ -16,7 +16,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
@@ -154,7 +154,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
-      final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
+      final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
@@ -355,5 +355,5 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
+   protected abstract YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
 }

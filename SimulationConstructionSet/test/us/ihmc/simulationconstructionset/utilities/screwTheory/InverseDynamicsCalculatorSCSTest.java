@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -366,11 +366,11 @@ public class InverseDynamicsCalculatorSCSTest
       {
          OneDegreeOfFreedomJoint revoluteJoint = jointMap.get(idJoint);
 
-         DoubleYoVariable qddVariable = revoluteJoint.getQDDYoVariable();
+         YoDouble qddVariable = revoluteJoint.getQDDYoVariable();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQddDesired();
 
-//         DoubleYoVariable tauVariable = revoluteJoint.getTau();
+//         YoDouble tauVariable = revoluteJoint.getTau();
 //         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
 //         System.out.println("tau: "  + ", tauVariable: " + tauVariable.getDoubleValue());
          
@@ -678,14 +678,14 @@ public class InverseDynamicsCalculatorSCSTest
       private void printPinJointInformation(OneDegreeOfFreedomJoint pinJoint, StringBuffer buffer)
       {
          buffer.append("Joint is a Pin Joint.\n");
-         DoubleYoVariable q = pinJoint.getQYoVariable();
+         YoDouble q = pinJoint.getQYoVariable();
          buffer.append("Its q variable is named " + q.getName() + "\n");
       }
 
       private void printSliderJointInformation(SliderJoint sliderJoint, StringBuffer buffer)
       {
          buffer.append("Joint is a Slider Joint.\n");
-         DoubleYoVariable q = sliderJoint.getQYoVariable();
+         YoDouble q = sliderJoint.getQYoVariable();
          buffer.append("Its q variable is named " + q.getName() + "\n");
       }
 

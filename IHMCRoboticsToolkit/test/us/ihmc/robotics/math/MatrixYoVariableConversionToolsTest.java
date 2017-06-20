@@ -10,8 +10,8 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @author twan
@@ -24,7 +24,7 @@ public class MatrixYoVariableConversionToolsTest
 	@Test(timeout=300000)
    public void testBackAndForthVector()
    {
-      List<DoubleYoVariable> yoArray = new ArrayList<DoubleYoVariable>();
+      List<YoDouble> yoArray = new ArrayList<YoDouble>();
       int size = 50;
       String prefix = "test";
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -45,7 +45,7 @@ public class MatrixYoVariableConversionToolsTest
 	@Test(timeout=300000)
    public void testBackAndForthMatrix()
    {
-      List<List<DoubleYoVariable>> yoArray = new ArrayList<List<DoubleYoVariable>>();
+      List<List<YoDouble>> yoArray = new ArrayList<List<YoDouble>>();
       int nRows = 50;
       int nColumns = 60;
       String prefix = "test";
@@ -67,7 +67,7 @@ public class MatrixYoVariableConversionToolsTest
 	@Test(timeout=300000)
    public void testBackAndForthSymmetricMatrix()
    {
-      List<List<DoubleYoVariable>> yoArray = new ArrayList<List<DoubleYoVariable>>();
+      List<List<YoDouble>> yoArray = new ArrayList<List<YoDouble>>();
       int size = 50;
       String prefix = "test";
       YoVariableRegistry registry = new YoVariableRegistry("test");

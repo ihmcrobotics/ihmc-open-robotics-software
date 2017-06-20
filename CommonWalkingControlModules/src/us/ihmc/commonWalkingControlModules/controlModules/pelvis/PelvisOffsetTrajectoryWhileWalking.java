@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
@@ -26,32 +26,32 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isStanding = new BooleanYoVariable("pelvisIsStanding", registry);
-   private final BooleanYoVariable isInTransfer = new BooleanYoVariable("pelvisInInTransfer", registry);
+   private final YoBoolean isStanding = new YoBoolean("pelvisIsStanding", registry);
+   private final YoBoolean isInTransfer = new YoBoolean("pelvisInInTransfer", registry);
 
-   private final BooleanYoVariable addPelvisOffsetsBasedOnStep = new BooleanYoVariable("addPelvisOffsetsBasedOnStep", registry);
+   private final YoBoolean addPelvisOffsetsBasedOnStep = new YoBoolean("addPelvisOffsetsBasedOnStep", registry);
 
-   private final DoubleYoVariable previousSwingDuration = new DoubleYoVariable("pelvisPreviousSwingDuration", registry);
-   private final DoubleYoVariable transferDuration = new DoubleYoVariable("pelvisTransferDuration", registry);
-   private final DoubleYoVariable swingDuration = new DoubleYoVariable("pelvisSwingDuration", registry);
-   private final DoubleYoVariable nextTransferDuration = new DoubleYoVariable("pelvisNextTransferDuration", registry);
-   private final DoubleYoVariable nextSwingDuration = new DoubleYoVariable("pelvisNextSwingDuration", registry);
+   private final YoDouble previousSwingDuration = new YoDouble("pelvisPreviousSwingDuration", registry);
+   private final YoDouble transferDuration = new YoDouble("pelvisTransferDuration", registry);
+   private final YoDouble swingDuration = new YoDouble("pelvisSwingDuration", registry);
+   private final YoDouble nextTransferDuration = new YoDouble("pelvisNextTransferDuration", registry);
+   private final YoDouble nextSwingDuration = new YoDouble("pelvisNextSwingDuration", registry);
 
-   private final DoubleYoVariable pelvisYawSineFrequency = new DoubleYoVariable("pelvisYawSineFrequency", registry);
-   private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
-   private final DoubleYoVariable pelvisYawAngleRatio = new DoubleYoVariable("pelvisYawAngleRatio", registry);
-   private final DoubleYoVariable pelvisYawStepLengthThreshold = new DoubleYoVariable("pelvisYawStepLengthThreshold", registry);
+   private final YoDouble pelvisYawSineFrequency = new YoDouble("pelvisYawSineFrequency", registry);
+   private final YoDouble pelvisYawSineMagnitude = new YoDouble("pelvisYawSineMagnitude", registry);
+   private final YoDouble pelvisYawAngleRatio = new YoDouble("pelvisYawAngleRatio", registry);
+   private final YoDouble pelvisYawStepLengthThreshold = new YoDouble("pelvisYawStepLengthThreshold", registry);
 
-   private final DoubleYoVariable pelvisPitchAngleRatio = new DoubleYoVariable("pelvisPitchAngleRatio", registry);
-   private final DoubleYoVariable fractionOfSwingPitchingFromUpcomingLeg = new DoubleYoVariable("pelvisFractionOfSwingPitchingFromUpcomingLeg", registry);
-   private final DoubleYoVariable fractionOfSwingPitchingFromSwingLeg = new DoubleYoVariable("pelvisFractionOfSwingPitchingFromSwingLeg", registry);
+   private final YoDouble pelvisPitchAngleRatio = new YoDouble("pelvisPitchAngleRatio", registry);
+   private final YoDouble fractionOfSwingPitchingFromUpcomingLeg = new YoDouble("pelvisFractionOfSwingPitchingFromUpcomingLeg", registry);
+   private final YoDouble fractionOfSwingPitchingFromSwingLeg = new YoDouble("pelvisFractionOfSwingPitchingFromSwingLeg", registry);
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable timeInState = new DoubleYoVariable("pelvisOrientationTimeInState", registry);
+   private final YoDouble yoTime;
+   private final YoDouble timeInState = new YoDouble("pelvisOrientationTimeInState", registry);
 
-   private final DoubleYoVariable leadingLegAngle = new DoubleYoVariable("pelvisPitchLeadingLegAngle", registry);
-   private final DoubleYoVariable trailingLegAngle = new DoubleYoVariable("pelvisPitchTrailingLegAngle", registry);
-   private final DoubleYoVariable interpolatedLegAngle = new DoubleYoVariable("pelvisPitchInterpolatedLegAngle", registry);
+   private final YoDouble leadingLegAngle = new YoDouble("pelvisPitchLeadingLegAngle", registry);
+   private final YoDouble trailingLegAngle = new YoDouble("pelvisPitchTrailingLegAngle", registry);
+   private final YoDouble interpolatedLegAngle = new YoDouble("pelvisPitchInterpolatedLegAngle", registry);
 
    private final YoFrameOrientation desiredWalkingPelvisOffsetOrientation = new YoFrameOrientation("desiredWalkingPelvisOffset", worldFrame, registry);
    private final RateLimitedYoFrameOrientation limitedDesiredWalkingPelvisOffsetOrientation;
@@ -74,13 +74,13 @@ public class PelvisOffsetTrajectoryWhileWalking
       this(controllerToolbox.getYoTime(), controllerToolbox.getReferenceFrames(), pelvisOffsetWhileWalkingParameters, controllerToolbox.getControlDT(), parentRegistry);
    }
 
-   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, CommonHumanoidReferenceFrames referenceFrames,
+   public PelvisOffsetTrajectoryWhileWalking(YoDouble yoTime, CommonHumanoidReferenceFrames referenceFrames,
          PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
    {
       this(yoTime, referenceFrames.getSoleZUpFrames(), referenceFrames.getPelvisFrame(), pelvisOffsetWhileWalkingParameters, controlDT, parentRegistry);
    }
 
-   public PelvisOffsetTrajectoryWhileWalking(DoubleYoVariable yoTime, SideDependentList<? extends ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
+   public PelvisOffsetTrajectoryWhileWalking(YoDouble yoTime, SideDependentList<? extends ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
          PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;
@@ -107,7 +107,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       fractionOfSwingPitchingFromSwingLeg.set(pelvisOffsetWhileWalkingParameters.getFractionOfSwingPitchingFromSwingLeg());
       fractionOfSwingPitchingFromUpcomingLeg.set(pelvisOffsetWhileWalkingParameters.getFractionOfSwingPitchingFromUpcomingLeg());
 
-      DoubleYoVariable maxPelvisOrientationRate = new DoubleYoVariable("pelvisMaxOrientationRate", registry);
+      YoDouble maxPelvisOrientationRate = new YoDouble("pelvisMaxOrientationRate", registry);
       maxPelvisOrientationRate.set(maxOrientationRate);
       limitedDesiredWalkingPelvisOffsetOrientation = new RateLimitedYoFrameOrientation("desiredWalkingPelvisOffset", "Limited", registry,
             maxPelvisOrientationRate, controlDT, desiredWalkingPelvisOffsetOrientation);

@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
@@ -142,7 +142,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
+      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -292,7 +292,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -393,7 +393,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -504,7 +504,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
@@ -948,7 +948,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.send(footstepDataList);
 
       FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);
+      final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
@@ -1221,11 +1221,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
 
-   private DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullRobotModel fullRobotModel)
+   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullRobotModel fullRobotModel)
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
       String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();
       String varName = YoFrameVariableNameTools.createZName(namePrefix, "");
-      return (DoubleYoVariable) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
+      return (YoDouble) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
    }
 }

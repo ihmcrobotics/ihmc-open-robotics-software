@@ -1,24 +1,24 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DelayedDoubleYoVariable extends DoubleYoVariable
+public class DelayedYoDouble extends YoDouble
 {
-   private final DoubleYoVariable variableToDelay;
+   private final YoDouble variableToDelay;
 
-   private final DoubleYoVariable[] previousYoVariables;
+   private final YoDouble[] previousYoVariables;
 
-   public DelayedDoubleYoVariable(String name, String description, DoubleYoVariable variableToDelay, int ticksToDelay, YoVariableRegistry registry)
+   public DelayedYoDouble(String name, String description, YoDouble variableToDelay, int ticksToDelay, YoVariableRegistry registry)
    {
       super(name, description, registry);
 
       this.variableToDelay = variableToDelay;
-      previousYoVariables = new DoubleYoVariable[ticksToDelay];
+      previousYoVariables = new YoDouble[ticksToDelay];
 
       for (int i = 0; i < ticksToDelay; i++)
       {
-         previousYoVariables[i] = new DoubleYoVariable(name + "_previous" + i, registry);
+         previousYoVariables[i] = new YoDouble(name + "_previous" + i, registry);
          previousYoVariables[i].set(variableToDelay.getDoubleValue());
       }
 
@@ -45,7 +45,7 @@ public class DelayedDoubleYoVariable extends DoubleYoVariable
 
    public void reset()
    {
-      for (DoubleYoVariable var : previousYoVariables)
+      for (YoDouble var : previousYoVariables)
       {
          var.set(variableToDelay.getDoubleValue());
       }

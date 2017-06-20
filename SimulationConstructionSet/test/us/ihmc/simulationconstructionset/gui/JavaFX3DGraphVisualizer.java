@@ -4,13 +4,13 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JavaFX3DGraphVisualizer extends Application
 {

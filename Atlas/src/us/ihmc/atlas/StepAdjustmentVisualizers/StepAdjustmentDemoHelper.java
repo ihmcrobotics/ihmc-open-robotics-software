@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -186,10 +186,10 @@ public class StepAdjustmentDemoHelper
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<FootControlModule.ConstraintType> footConstraintType = (EnumYoVariable<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
                footPrefix + "State");
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
                "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -240,9 +240,9 @@ public class StepAdjustmentDemoHelper
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<FootControlModule.ConstraintType> footConstraintType;
+      private final YoEnum<FootControlModule.ConstraintType> footConstraintType;
 
-      public SingleSupportStartCondition(EnumYoVariable<FootControlModule.ConstraintType> footConstraintType)
+      public SingleSupportStartCondition(YoEnum<FootControlModule.ConstraintType> footConstraintType)
       {
          this.footConstraintType = footConstraintType;
       }
@@ -256,11 +256,11 @@ public class StepAdjustmentDemoHelper
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingStateEnum> walkingState;
+      private final YoEnum<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;

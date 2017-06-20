@@ -7,14 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
-
-public class DelayedBooleanYoVariableTest
+public class DelayedYoBooleanTest
 {
    private static YoVariableRegistry registry;
-   private static BooleanYoVariable variableToDelay;
+   private static YoBoolean variableToDelay;
    private static Boolean DEBUG = false;
    private int ticksToDelay;
    
@@ -22,7 +21,7 @@ public class DelayedBooleanYoVariableTest
    public void setUp()
    {
       registry = new YoVariableRegistry("registry");
-      variableToDelay = new BooleanYoVariable("variableToDelay", registry);
+      variableToDelay = new YoBoolean("variableToDelay", registry);
    }
    
    @After
@@ -40,7 +39,7 @@ public class DelayedBooleanYoVariableTest
       {
          variableToDelay.set(true);
 
-         DelayedBooleanYoVariable delayedYoVariable = new DelayedBooleanYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay,
+         DelayedYoBoolean delayedYoVariable = new DelayedYoBoolean("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay,
                registry);
 
          int ticksToTest = 100;
@@ -80,7 +79,7 @@ public class DelayedBooleanYoVariableTest
       ticksToDelay = 1;
 
       variableToDelay.set(false);
-      DelayedBooleanYoVariable delayedYoVariable = new DelayedBooleanYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoBoolean delayedYoVariable = new DelayedYoBoolean("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       assertEquals(delayedYoVariable.getBooleanValue(), false);
 
       variableToDelay.set(true);
@@ -112,7 +111,7 @@ public class DelayedBooleanYoVariableTest
       ticksToDelay = 0;
 
       variableToDelay.set(false);
-      DelayedBooleanYoVariable delayedYoVariable = new DelayedBooleanYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoBoolean delayedYoVariable = new DelayedYoBoolean("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       assertEquals(delayedYoVariable.getBooleanValue(), false);
 
       variableToDelay.set(true);
@@ -143,7 +142,7 @@ public class DelayedBooleanYoVariableTest
    {
       ticksToDelay = 0;
       variableToDelay.set(false);
-      DelayedBooleanYoVariable delayedYoVariable = new DelayedBooleanYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoBoolean delayedYoVariable = new DelayedYoBoolean("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       delayedYoVariable.getInternalState("Should be all false", DEBUG);      
       
       variableToDelay.set(true);
@@ -161,7 +160,7 @@ public class DelayedBooleanYoVariableTest
    {  
       ticksToDelay = 10;
       variableToDelay.set(false);
-      DelayedBooleanYoVariable delayedYoVariable = new DelayedBooleanYoVariable("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
+      DelayedYoBoolean delayedYoVariable = new DelayedYoBoolean("delayedVariable" + ticksToDelay, "", variableToDelay, ticksToDelay, registry);
       
       for(int i = 0; i < ticksToDelay; i++)
       {

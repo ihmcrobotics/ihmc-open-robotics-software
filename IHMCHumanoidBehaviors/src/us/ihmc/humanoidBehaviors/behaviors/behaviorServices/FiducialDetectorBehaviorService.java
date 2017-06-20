@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -23,7 +23,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    private final FiducialDetectorFromCameraImages fiducialDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;
    
-   private final BooleanYoVariable locationEnabled;
+   private final YoBoolean locationEnabled;
 
    public FiducialDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -39,7 +39,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
       fiducialDetectorFromCameraImages.setExpectedFiducialSize(DEFAULT_FIDUCIAL_SIZE);
       
       String prefix = "fiducial";
-      locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", getYoVariableRegistry());
+      locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());
       
       locationEnabled.set(false);
    }

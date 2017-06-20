@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +12,15 @@ public class ExitCMPRecursionMultipliers
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
+   private final ArrayList<YoDouble> exitMultipliers = new ArrayList<>();
 
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public ExitCMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<DoubleYoVariable> swingSplitFractions,
-         List<DoubleYoVariable> transferSplitFractions, YoVariableRegistry parentRegistry)
+   public ExitCMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<YoDouble> swingSplitFractions,
+         List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.swingSplitFractions = swingSplitFractions;
@@ -28,7 +28,7 @@ public class ExitCMPRecursionMultipliers
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         DoubleYoVariable exitMultiplier = new DoubleYoVariable(namePrefix + name + i, registry);
+         YoDouble exitMultiplier = new YoDouble(namePrefix + name + i, registry);
          exitMultiplier.setToNaN();
          exitMultipliers.add(exitMultiplier);
       }
@@ -43,7 +43,7 @@ public class ExitCMPRecursionMultipliers
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, boolean useTwoCMPs, double omega0)
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations, boolean useTwoCMPs, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
          throw new RuntimeException("Double Support Durations list is not long enough");
@@ -68,7 +68,7 @@ public class ExitCMPRecursionMultipliers
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations, double omega0)
    {
       double recursionTime = 0.0;
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)

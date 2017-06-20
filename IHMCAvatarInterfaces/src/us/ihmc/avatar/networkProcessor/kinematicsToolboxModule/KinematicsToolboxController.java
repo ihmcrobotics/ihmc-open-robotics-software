@@ -42,10 +42,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -148,13 +148,13 @@ public class KinematicsToolboxController extends ToolboxController
     * This is the current estimate of the solution quality that is calculated based on the tracking
     * error for the end-effectors (center of mass included) being actively controlled.
     */
-   private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
+   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    /**
-    * Updated during the initialization phase, this set of two {@link BooleanYoVariable}s is used to
+    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to
     * know which foot is currently used for support in the walking controller.
     */
-   private final SideDependentList<BooleanYoVariable> isFootInSupport = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>();
    /**
     * Updated during the initialization phase, this is where the poses of the feet are stored so
     * they can be held in place during the optimization process such that the solution will be
@@ -173,33 +173,33 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code true} by default but can be disabled using the message
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final BooleanYoVariable holdSupportFootPose = new BooleanYoVariable("holdSupportFootPose", registry);
+   private final YoBoolean holdSupportFootPose = new YoBoolean("holdSupportFootPose", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run.
     * It is {@code true} by default but can be disabled using the message
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final BooleanYoVariable holdCenterOfMassXYPosition = new BooleanYoVariable("holdCenterOfMassXYPosition", registry);
+   private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
 
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
     * current privileged configuration can be changed at any time by sending a
     * {@link KinematicsToolboxConfigurationMessage}.
     */
-   private final DoubleYoVariable privilegedWeight = new DoubleYoVariable("privilegedWeight", registry);
+   private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
     * compute for each joint a privileged velocity based on the difference between the privileged
     * angle and the current angle. These privileged joint velocities are then used to complete the
     * optimization problem in such way that they don't interfere with the user commands.
     */
-   private final DoubleYoVariable privilegedConfigurationGain = new DoubleYoVariable("privilegedConfigurationGain", registry);
+   private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
    /**
     * Cap used to limit the magnitude of the privileged joint velocities computed in the controller
     * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution
     * converges quicker.
     */
-   private final DoubleYoVariable privilegedMaxVelocity = new DoubleYoVariable("privilegedMaxVelocity", registry);
+   private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out
     * if the current privileged configuration used in the controller core is to be updated or not.
@@ -211,12 +211,12 @@ public class KinematicsToolboxController extends ToolboxController
     * Default weight used when holding the support foot/feet in place. It is rather high such that
     * they do not deviate much from their initial poses.
     */
-   private final DoubleYoVariable footWeight = new DoubleYoVariable("footWeight", registry);
+   private final YoDouble footWeight = new YoDouble("footWeight", registry);
    /**
     * Default weight used when holding the center of mass in place. It is rather high such that it
     * does not deviate much from its initial position.
     */
-   private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
+   private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
 
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user
@@ -236,7 +236,7 @@ public class KinematicsToolboxController extends ToolboxController
     * joint such that a factor of 0.05 for the hip yaw will effectively reduce the allowed range of
     * motion by 2.5% on the upper and lower end of the joint.
     */
-   private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
+   private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
 
    /**
     * This is the list of all the rigid-bodies that can ever be controlled and it is initialized in
@@ -282,7 +282,7 @@ public class KinematicsToolboxController extends ToolboxController
     * This is mostly for visualization to be able to keep track of the number of commands that the
     * user submitted.
     */
-   private final IntegerYoVariable numberOfActiveCommands = new IntegerYoVariable("numberOfActiveCommands", registry);
+   private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                       FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -321,7 +321,7 @@ public class KinematicsToolboxController extends ToolboxController
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new BooleanYoVariable("is" + side + "FootInSupport", registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
@@ -399,9 +399,9 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void populateJointLimitReductionFactors()
    {
-      DoubleYoVariable hipReductionFactor = new DoubleYoVariable("hipLimitReductionFactor", registry);
-      DoubleYoVariable kneeReductionFactor = new DoubleYoVariable("kneeLimitReductionFactor", registry);
-      DoubleYoVariable ankleReductionFactor = new DoubleYoVariable("ankleLimitReductionFactor", registry);
+      YoDouble hipReductionFactor = new YoDouble("hipLimitReductionFactor", registry);
+      YoDouble kneeReductionFactor = new YoDouble("kneeLimitReductionFactor", registry);
+      YoDouble ankleReductionFactor = new YoDouble("ankleLimitReductionFactor", registry);
       hipReductionFactor.set(0.05);
 
       legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);

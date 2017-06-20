@@ -15,9 +15,9 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -41,7 +41,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final DoubleParameter feedForwardRampTimeParameter = parameterFactory.createDouble("feedForwardRampTime", 2.0);
 
    // Yo variables
-   private final BooleanYoVariable yoUseForceFeedbackControl;
+   private final YoBoolean yoUseForceFeedbackControl;
 
    private final QuadrantDependentList<Double[]> initialSoleForces;
    // Reference frames
@@ -57,7 +57,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private double initialTime;
 
    private FullQuadrupedRobotModel fullRobotModel;
@@ -68,7 +68,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Reference frames
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       // Yo variables
-      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
       initialSoleForces = new QuadrantDependentList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {

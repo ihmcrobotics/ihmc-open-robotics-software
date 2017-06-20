@@ -22,9 +22,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -41,10 +41,10 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private Color[] costColorGradient;
    private ConvexPolygon2D defaultFootPolygon;
    private Map<Integer, YoGraphicPolygon> candidateFootstepPolygons;
-   private DoubleYoVariable colorIndexYoVariable;
-   private DoubleYoVariable stanceFootPitch;
-   private DoubleYoVariable yoTime;
-   private IntegerYoVariable candidateIndex;
+   private YoDouble colorIndexYoVariable;
+   private YoDouble stanceFootPitch;
+   private YoDouble yoTime;
+   private YoInteger candidateIndex;
 
    private double incrementX = 0.1;
    private double incrementY = 0.05;
@@ -128,14 +128,14 @@ public class BipedalStepAdjustmentCostCalculatorTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();
-      yoTime = (DoubleYoVariable) registry.getVariable("t");
+      yoTime = (YoDouble) registry.getVariable("t");
 
-      DoubleYoVariable costYoVariable = new DoubleYoVariable("cost", registry);
-      DoubleYoVariable xYoVariable = new DoubleYoVariable("x", registry);
-      DoubleYoVariable yYoVariable = new DoubleYoVariable("y", registry);
-      colorIndexYoVariable = new DoubleYoVariable("colorIndex", registry);
-      stanceFootPitch = new DoubleYoVariable("stanceFootPitch", registry);
-      candidateIndex = new IntegerYoVariable("candidateIndex", registry);
+      YoDouble costYoVariable = new YoDouble("cost", registry);
+      YoDouble xYoVariable = new YoDouble("x", registry);
+      YoDouble yYoVariable = new YoDouble("y", registry);
+      colorIndexYoVariable = new YoDouble("colorIndex", registry);
+      stanceFootPitch = new YoDouble("stanceFootPitch", registry);
+      candidateIndex = new YoInteger("candidateIndex", registry);
 
       BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(registry, yoGraphicsListRegistry);
 
@@ -205,7 +205,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       }
    }
 
-   private void applySlopeCandidateSet(FramePose candidateFramePose, DoubleYoVariable xYoVariable, DoubleYoVariable yYoVariable)
+   private void applySlopeCandidateSet(FramePose candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
    {
       candidateIndex.set((int) yoTime.getDoubleValue() % (numInX * numInY));
 
@@ -217,7 +217,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       candidateFramePose.setPosition(x, y, 0.3 + (y - 0.2) * 0.2);
    }
 
-   private void applyVerticalCandidateSet(FramePose candidateFramePose, DoubleYoVariable xYoVariable, DoubleYoVariable yYoVariable)
+   private void applyVerticalCandidateSet(FramePose candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
    {
       double height = 1.0;
       double verticalIncrement = 0.005;

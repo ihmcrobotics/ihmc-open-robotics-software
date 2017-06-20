@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.inputdevices;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -33,7 +33,7 @@ public class JSliderControl extends JSlider implements CloseableAndDisposable
       }
       else if (midiControl.sliderType == MidiControl.SliderType.ENUM)
       {
-         sliderMax = ((EnumYoVariable<?>) midiControl.var).getEnumValues().length - 1;
+         sliderMax = ((YoEnum<?>) midiControl.var).getEnumValues().length - 1;
       }
       else
          sliderMax = 127;

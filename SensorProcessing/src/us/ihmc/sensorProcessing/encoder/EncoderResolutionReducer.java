@@ -1,20 +1,20 @@
 package us.ihmc.sensorProcessing.encoder;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.SensorProcessor;
 
 public class EncoderResolutionReducer implements SensorProcessor
 {
-   private final IntegerYoVariable rawTicksIn;
-   private final IntegerYoVariable rawTicksOut;
+   private final YoInteger rawTicksIn;
+   private final YoInteger rawTicksOut;
    private final int reductionFactor;
    
-   public EncoderResolutionReducer(String name, IntegerYoVariable rawTicksIn, int reductionFactor, YoVariableRegistry registry)
+   public EncoderResolutionReducer(String name, YoInteger rawTicksIn, int reductionFactor, YoVariableRegistry registry)
    {
       this.rawTicksIn = rawTicksIn;
-      this.rawTicksOut = new IntegerYoVariable(name + "rawTicksOut", registry);
+      this.rawTicksOut = new YoInteger(name + "rawTicksOut", registry);
       this.reductionFactor = reductionFactor;
    }
 
@@ -28,7 +28,7 @@ public class EncoderResolutionReducer implements SensorProcessor
       rawTicksOut.set(rawTicksIn.getIntegerValue() / reductionFactor);
    }
    
-   public IntegerYoVariable getRawTicksOut()
+   public YoInteger getRawTicksOut()
    {
       return rawTicksOut;
    }

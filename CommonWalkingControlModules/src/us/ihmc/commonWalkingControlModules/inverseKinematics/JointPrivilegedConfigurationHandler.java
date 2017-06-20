@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -26,16 +26,16 @@ public class JointPrivilegedConfigurationHandler
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isJointPrivilegedConfigurationEnabled = new BooleanYoVariable("isJointPrivilegedConfigurationEnabled", registry);
-   private final DoubleYoVariable defaultConfigurationWeight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
-   private final DoubleYoVariable defaultConfigurationGain = new DoubleYoVariable("jointPrivilegedConfigurationDefaultGain", registry);
-   private final DoubleYoVariable defaultVelocityGain = new DoubleYoVariable("jointPrivilegedVelocityDefaultGain", registry);
-   private final DoubleYoVariable defaultMaxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationDefaultMaxVelocity", registry);
-   private final DoubleYoVariable defaultMaxAcceleration = new DoubleYoVariable("jointPrivilegedConfigurationDefaultMaxAcceleration", registry);
+   private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
+   private final YoDouble defaultConfigurationWeight = new YoDouble("jointPrivilegedConfigurationDefaultWeight", registry);
+   private final YoDouble defaultConfigurationGain = new YoDouble("jointPrivilegedConfigurationDefaultGain", registry);
+   private final YoDouble defaultVelocityGain = new YoDouble("jointPrivilegedVelocityDefaultGain", registry);
+   private final YoDouble defaultMaxVelocity = new YoDouble("jointPrivilegedConfigurationDefaultMaxVelocity", registry);
+   private final YoDouble defaultMaxAcceleration = new YoDouble("jointPrivilegedConfigurationDefaultMaxAcceleration", registry);
 
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedConfigurations = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedAccelerations = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedConfigurations = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedVelocities = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedAccelerations = new HashMap<>();
 
    private final DenseMatrix64F privilegedConfigurations;
    private final DenseMatrix64F privilegedVelocities;
@@ -107,9 +107,9 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
 
          String jointName = joint.getName();
-         yoJointPrivilegedConfigurations.put(joint, new DoubleYoVariable("q_priv_" + jointName, registry));
-         yoJointPrivilegedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
-         yoJointPrivilegedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
+         yoJointPrivilegedConfigurations.put(joint, new YoDouble("q_priv_" + jointName, registry));
+         yoJointPrivilegedVelocities.put(joint, new YoDouble("qd_priv_" + jointName, registry));
+         yoJointPrivilegedAccelerations.put(joint, new YoDouble("qdd_priv_" + jointName, registry));
       }
 
       for (int i = 0; i < numberOfDoFs; i++)

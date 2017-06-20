@@ -9,12 +9,12 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPac
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -74,32 +74,32 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final Vector3D distanceToTravelVector = new Vector3D();
    private final AxisAngle angleToTravelAxis4d = new AxisAngle();
 
-   private final LongYoVariable seNonProcessedPelvisTimeStamp;
+   private final YoLong seNonProcessedPelvisTimeStamp;
 
    private final AlphaFilteredYoVariable interpolationTranslationAlphaFilter;
    private final AlphaFilteredYoVariable interpolationRotationAlphaFilter;
-   private final DoubleYoVariable confidenceFactor; // target for alpha filter
-   private final DoubleYoVariable interpolationTranslationAlphaFilterBreakFrequency;
-   private final DoubleYoVariable interpolationRotationAlphaFilterBreakFrequency;
-   private final DoubleYoVariable distanceToTravel;
-   private final DoubleYoVariable distanceTraveled;
-   private final DoubleYoVariable angleToTravel;
-   private final DoubleYoVariable angleTraveled;
-   private final DoubleYoVariable previousTranslationClippedAlphaValue;
-   private final DoubleYoVariable previousRotationClippedAlphaValue;
-   private final DoubleYoVariable translationClippedAlphaValue;
-   private final DoubleYoVariable rotationClippedAlphaValue;
-   private final DoubleYoVariable maxTranslationVelocityClip;
-   private final DoubleYoVariable maxRotationVelocityClip;
-   private final DoubleYoVariable maxTranslationAlpha;
-   private final DoubleYoVariable maxRotationAlpha;
+   private final YoDouble confidenceFactor; // target for alpha filter
+   private final YoDouble interpolationTranslationAlphaFilterBreakFrequency;
+   private final YoDouble interpolationRotationAlphaFilterBreakFrequency;
+   private final YoDouble distanceToTravel;
+   private final YoDouble distanceTraveled;
+   private final YoDouble angleToTravel;
+   private final YoDouble angleTraveled;
+   private final YoDouble previousTranslationClippedAlphaValue;
+   private final YoDouble previousRotationClippedAlphaValue;
+   private final YoDouble translationClippedAlphaValue;
+   private final YoDouble rotationClippedAlphaValue;
+   private final YoDouble maxTranslationVelocityClip;
+   private final YoDouble maxRotationVelocityClip;
+   private final YoDouble maxTranslationAlpha;
+   private final YoDouble maxRotationAlpha;
 
-   private final DoubleYoVariable interpolationTranslationAlphaFilterAlphaValue;
-   private final DoubleYoVariable interpolationRotationAlphaFilterAlphaValue;
+   private final YoDouble interpolationTranslationAlphaFilterAlphaValue;
+   private final YoDouble interpolationRotationAlphaFilterAlphaValue;
 
-   private final BooleanYoVariable manuallyTriggerLocalizationUpdate;
-   private final DoubleYoVariable manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
-   private final DoubleYoVariable manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
+   private final YoBoolean manuallyTriggerLocalizationUpdate;
+   private final YoDouble manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
+   private final YoDouble manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
 
    private final double estimatorDT;
    private boolean sendCorrectionUpdate = false;
@@ -156,13 +156,13 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       orientationCorrection = new YoReferencePose("orientationCorrection", nonCorrectedPelvis, registry);
       correctedPelvis = new YoReferencePose("correctedPelvis", worldFrame, registry);
 
-      interpolationTranslationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationTranslationAlphaFilterAlphaValue", registry);
-      interpolationTranslationAlphaFilterBreakFrequency = new DoubleYoVariable("interpolationTranslationAlphaFilterBreakFrequency", registry);
+      interpolationTranslationAlphaFilterAlphaValue = new YoDouble("interpolationTranslationAlphaFilterAlphaValue", registry);
+      interpolationTranslationAlphaFilterBreakFrequency = new YoDouble("interpolationTranslationAlphaFilterBreakFrequency", registry);
       interpolationTranslationAlphaFilter = new AlphaFilteredYoVariable("PelvisTranslationErrorCorrectionAlphaFilter", registry,
             interpolationTranslationAlphaFilterAlphaValue);
 
-      interpolationRotationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationRotationAlphaFilterAlphaValue", registry);
-      interpolationRotationAlphaFilterBreakFrequency = new DoubleYoVariable("interpolationRotationAlphaFilterBreakFrequency", registry);
+      interpolationRotationAlphaFilterAlphaValue = new YoDouble("interpolationRotationAlphaFilterAlphaValue", registry);
+      interpolationRotationAlphaFilterBreakFrequency = new YoDouble("interpolationRotationAlphaFilterBreakFrequency", registry);
       interpolationRotationAlphaFilter = new AlphaFilteredYoVariable("PelvisRotationErrorCorrectionAlphaFilter", registry,
             interpolationRotationAlphaFilterAlphaValue);
 
@@ -191,35 +191,35 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       });
       interpolationRotationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
 
-      confidenceFactor = new DoubleYoVariable("PelvisErrorCorrectionConfidenceFactor", registry);
+      confidenceFactor = new YoDouble("PelvisErrorCorrectionConfidenceFactor", registry);
 
-      seNonProcessedPelvisTimeStamp = new LongYoVariable("seNonProcessedPelvis_timestamp", registry);
+      seNonProcessedPelvisTimeStamp = new YoLong("seNonProcessedPelvis_timestamp", registry);
 
-      translationClippedAlphaValue = new DoubleYoVariable("translationClippedAlphaValue", registry);
-      rotationClippedAlphaValue = new DoubleYoVariable("rotationClippedAlphaValue", registry);
-      distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
-      angleTraveled = new DoubleYoVariable("angleTraveled", registry);
-      maxTranslationVelocityClip = new DoubleYoVariable("maxTranslationVelocityClip", registry);
+      translationClippedAlphaValue = new YoDouble("translationClippedAlphaValue", registry);
+      rotationClippedAlphaValue = new YoDouble("rotationClippedAlphaValue", registry);
+      distanceTraveled = new YoDouble("distanceTraveled", registry);
+      angleTraveled = new YoDouble("angleTraveled", registry);
+      maxTranslationVelocityClip = new YoDouble("maxTranslationVelocityClip", registry);
       maxTranslationVelocityClip.set(0.01);
-      maxRotationVelocityClip = new DoubleYoVariable("maxRotationVelocityClip", registry);
+      maxRotationVelocityClip = new YoDouble("maxRotationVelocityClip", registry);
       maxRotationVelocityClip.set(0.005); // TODO Determine a good default Value
-      previousTranslationClippedAlphaValue = new DoubleYoVariable("previousTranslationClippedAlphaValue", registry);
-      previousRotationClippedAlphaValue = new DoubleYoVariable("previousRotationClippedAlphaValue", registry);
-      maxTranslationAlpha = new DoubleYoVariable("maxTranslationAlpha", registry);
-      maxRotationAlpha = new DoubleYoVariable("maxRotationAlpha", registry);
-      distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
-      angleToTravel = new DoubleYoVariable("angleToTravel", registry);
+      previousTranslationClippedAlphaValue = new YoDouble("previousTranslationClippedAlphaValue", registry);
+      previousRotationClippedAlphaValue = new YoDouble("previousRotationClippedAlphaValue", registry);
+      maxTranslationAlpha = new YoDouble("maxTranslationAlpha", registry);
+      maxRotationAlpha = new YoDouble("maxRotationAlpha", registry);
+      distanceToTravel = new YoDouble("distanceToTravel", registry);
+      angleToTravel = new YoDouble("angleToTravel", registry);
 
-      //      distanceError = new DoubleYoVariable("distanceError", registry);
+      //      distanceError = new YoDouble("distanceError", registry);
 
-      manuallyTriggerLocalizationUpdate = new BooleanYoVariable("manuallyTriggerLocalizationUpdate", registry);
+      manuallyTriggerLocalizationUpdate = new YoBoolean("manuallyTriggerLocalizationUpdate", registry);
 
-      manualTranslationOffsetX = new DoubleYoVariable("manualTranslationOffset_X", registry);
-      manualTranslationOffsetY = new DoubleYoVariable("manualTranslationOffset_Y", registry);
-      manualTranslationOffsetZ = new DoubleYoVariable("manualTranslationOffset_Z", registry);
-      manualRotationOffsetInRadX = new DoubleYoVariable("manualRotationOffsetInRad_X", registry);
-      manualRotationOffsetInRadY = new DoubleYoVariable("manualRotationOffsetInRad_Y", registry);
-      manualRotationOffsetInRadZ = new DoubleYoVariable("manualRotationOffsetInRad_Z", registry);
+      manualTranslationOffsetX = new YoDouble("manualTranslationOffset_X", registry);
+      manualTranslationOffsetY = new YoDouble("manualTranslationOffset_Y", registry);
+      manualTranslationOffsetZ = new YoDouble("manualTranslationOffset_Z", registry);
+      manualRotationOffsetInRadX = new YoDouble("manualRotationOffsetInRad_X", registry);
+      manualRotationOffsetInRadY = new YoDouble("manualRotationOffsetInRad_Y", registry);
+      manualRotationOffsetInRadZ = new YoDouble("manualRotationOffsetInRad_Z", registry);
       //defaultValues for testing with Atlas.
 //      manualTranslationOffsetX.set(-0.11404);
 //      manualTranslationOffsetY.set(0.00022);

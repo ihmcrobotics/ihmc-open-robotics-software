@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -24,7 +24,7 @@ public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
    private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> tauOutput = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> tauOutput = new LinkedHashMap<>();
    private final FullHumanoidRobotModel fullRobotModel;
    private final LogDataProcessorHelper logDataProcessorHelper;
 
@@ -67,7 +67,7 @@ public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
       
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         DoubleYoVariable tau = new DoubleYoVariable("tau_diag_" + oneDoFJoint.getName(), registry);
+         YoDouble tau = new YoDouble("tau_diag_" + oneDoFJoint.getName(), registry);
          tauOutput.put(oneDoFJoint, tau);
       }
    }

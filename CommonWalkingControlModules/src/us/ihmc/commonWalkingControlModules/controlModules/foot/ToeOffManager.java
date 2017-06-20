@@ -13,11 +13,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,49 +41,49 @@ public class ToeOffManager
    private static final int largeGlitchWindowSize = 10;
    private static final int smallGlitchWindowSize = 2;
 
-   private final BooleanYoVariable doToeOffIfPossibleInDoubleSupport = new BooleanYoVariable("doToeOffIfPossibleInDoubleSupport", registry);
-   private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
-   private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
-   private final BooleanYoVariable doPointToeOff = new BooleanYoVariable("doPointToeOff", registry);
-   private final BooleanYoVariable doLineToeOff = new BooleanYoVariable("doLineToeOff", registry);
+   private final YoBoolean doToeOffIfPossibleInDoubleSupport = new YoBoolean("doToeOffIfPossibleInDoubleSupport", registry);
+   private final YoBoolean doToeOffIfPossibleInSingleSupport = new YoBoolean("doToeOffIfPossibleInSingleSupport", registry);
+   private final YoBoolean doToeOffWhenHittingAnkleLimit = new YoBoolean("doToeOffWhenHittingAnkleLimit", registry);
+   private final YoBoolean doPointToeOff = new YoBoolean("doPointToeOff", registry);
+   private final YoBoolean doLineToeOff = new YoBoolean("doLineToeOff", registry);
 
-   private final BooleanYoVariable useToeLineContactInSwing = new BooleanYoVariable("useToeLineContactInSwing", registry);
-   private final BooleanYoVariable useToeLineContactInTransfer = new BooleanYoVariable("useToeLineContactInTransfer", registry);
-   private final BooleanYoVariable computeToeLineContact = new BooleanYoVariable("computeToeLineContact", registry);
-   private final BooleanYoVariable computeToePointContact = new BooleanYoVariable("computeToePointContact", registry);
-   private final BooleanYoVariable updateLineContactDuringToeOff = new BooleanYoVariable("updateLineContactDuringToeOff", registry);
-   private final BooleanYoVariable updatePointContactDuringToeOff = new BooleanYoVariable("updatePointContactDuringToeOff", registry);
+   private final YoBoolean useToeLineContactInSwing = new YoBoolean("useToeLineContactInSwing", registry);
+   private final YoBoolean useToeLineContactInTransfer = new YoBoolean("useToeLineContactInTransfer", registry);
+   private final YoBoolean computeToeLineContact = new YoBoolean("computeToeLineContact", registry);
+   private final YoBoolean computeToePointContact = new YoBoolean("computeToePointContact", registry);
+   private final YoBoolean updateLineContactDuringToeOff = new YoBoolean("updateLineContactDuringToeOff", registry);
+   private final YoBoolean updatePointContactDuringToeOff = new YoBoolean("updatePointContactDuringToeOff", registry);
 
-   private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
-   private final DoubleYoVariable icpPercentOfStanceForDSToeOff = new DoubleYoVariable("icpPercentOfStanceForDSToeOff", registry);
-   private final DoubleYoVariable icpPercentOfStanceForSSToeOff = new DoubleYoVariable("icpPercentOfStanceForSSToeOff", registry);
-   private final DoubleYoVariable icpProximityForDSToeOff = new DoubleYoVariable("icpProximityForDSToeOff", registry);
-   private final DoubleYoVariable icpProximityForSSToeOff = new DoubleYoVariable("icpProximityForSSToeOff", registry);
-   private final DoubleYoVariable ecmpProximityForToeOff = new DoubleYoVariable("ecmpProximityForToeOff", registry);
-   private final DoubleYoVariable copProximityForToeOff = new DoubleYoVariable("copProximityForToeOff", registry);
+   private final YoDouble ankleLowerLimitToTriggerToeOff = new YoDouble("ankleLowerLimitToTriggerToeOff", registry);
+   private final YoDouble icpPercentOfStanceForDSToeOff = new YoDouble("icpPercentOfStanceForDSToeOff", registry);
+   private final YoDouble icpPercentOfStanceForSSToeOff = new YoDouble("icpPercentOfStanceForSSToeOff", registry);
+   private final YoDouble icpProximityForDSToeOff = new YoDouble("icpProximityForDSToeOff", registry);
+   private final YoDouble icpProximityForSSToeOff = new YoDouble("icpProximityForSSToeOff", registry);
+   private final YoDouble ecmpProximityForToeOff = new YoDouble("ecmpProximityForToeOff", registry);
+   private final YoDouble copProximityForToeOff = new YoDouble("copProximityForToeOff", registry);
 
-   private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
-   private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
-   private final BooleanYoVariable isDesiredECMPOKForToeOff = new BooleanYoVariable("isDesiredECMPOKForToeOff", registry);
-   private final BooleanYoVariable isDesiredCoPOKForToeOff = new BooleanYoVariable("isDesiredCoPOKForToeOff", registry);
-   private final BooleanYoVariable needToSwitchToToeOffForAnkleLimit = new BooleanYoVariable("needToSwitchToToeOffForAnkleLimit", registry);
-   private final BooleanYoVariable isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
+   private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
+   private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
+   private final YoBoolean isDesiredECMPOKForToeOff = new YoBoolean("isDesiredECMPOKForToeOff", registry);
+   private final YoBoolean isDesiredCoPOKForToeOff = new YoBoolean("isDesiredCoPOKForToeOff", registry);
+   private final YoBoolean needToSwitchToToeOffForAnkleLimit = new YoBoolean("needToSwitchToToeOffForAnkleLimit", registry);
+   private final YoBoolean isRearAnklePitchHittingLimit = new YoBoolean("isRearAnklePitchHittingLimit", registry);
 
-   private final GlitchFilteredBooleanYoVariable isDesiredICPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredICPOKForToeOffFilt",
+   private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt",
          registry, isDesiredICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredBooleanYoVariable isCurrentICPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isCurrentICPOKForToeOffFilt",
+   private final GlitchFilteredYoBoolean isCurrentICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isCurrentICPOKForToeOffFilt",
          registry, isCurrentICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredBooleanYoVariable isDesiredECMPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredECMPOKForToeOffFilt",
+   private final GlitchFilteredYoBoolean isDesiredECMPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredECMPOKForToeOffFilt",
          registry, isDesiredECMPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredBooleanYoVariable isDesiredCoPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredCoPOKForToeOffFilt",
+   private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt",
          registry, isDesiredCoPOKForToeOff, smallGlitchWindowSize);
 
-   private final GlitchFilteredBooleanYoVariable isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt",
+   private final GlitchFilteredYoBoolean isRearAnklePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearAnklePitchHittingLimitFilt",
          registry, isRearAnklePitchHittingLimit, largeGlitchWindowSize);
 
-   private final DoubleYoVariable minStepLengthForToeOff = new DoubleYoVariable("minStepLengthForToeOff", registry);
-   private final DoubleYoVariable minStepHeightForToeOff = new DoubleYoVariable("minStepHeightForToeOff", registry);
-   private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
+   private final YoDouble minStepLengthForToeOff = new YoDouble("minStepLengthForToeOff", registry);
+   private final YoDouble minStepHeightForToeOff = new YoDouble("minStepHeightForToeOff", registry);
+   private final YoDouble extraCoMMaxHeightWithToes = new YoDouble("extraCoMMaxHeightWithToes", registry);
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint> contactStatePoints = new ArrayList<>();

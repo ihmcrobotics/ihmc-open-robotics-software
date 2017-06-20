@@ -2,15 +2,15 @@ package us.ihmc.simulationconstructionset.gui;
 
 import javax.swing.JFrame;
 
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class YoGraphTester
 {
@@ -48,7 +48,7 @@ public class YoGraphTester
 
       int nPoints = 200;
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoVariable = new DoubleYoVariable("variableOne", registry);
+      YoDouble yoVariable = new YoDouble("variableOne", registry);
       
       DataBufferEntry dataEntry = new DataBufferEntry(yoVariable, nPoints);
       

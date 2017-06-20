@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -111,11 +111,11 @@ public class SkippyRobot extends Robot
    private final PinJoint shoulderJoint;
    private final PinJoint hipJoint;
 
-   public final DoubleYoVariable t;  //used for JUMP controller
+   public final YoDouble t;  //used for JUMP controller
 
    private final KinematicPoint bodyPoint;
 
-   private final DoubleYoVariable yaw = new DoubleYoVariable("yaw", this.getRobotsYoVariableRegistry());
+   private final YoDouble yaw = new YoDouble("yaw", this.getRobotsYoVariableRegistry());
 
    public static final double LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0 / 4.0) * LEG_MASS * Math.pow(LEG_LENGTH, 2), // Leg
          TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0 / 4.0) * TORSO_MASS * Math.pow(TORSO_LENGTH, 2), // Torso
@@ -134,7 +134,7 @@ public class SkippyRobot extends Robot
       super("Skippy");
       robotType = typeOfRobot;
 
-      t = (DoubleYoVariable)getVariable("t");
+      t = (YoDouble)getVariable("t");
 
       this.setGravity(0.0, 0.0, -9.81); // m/s^2
 
@@ -517,24 +517,24 @@ public class SkippyRobot extends Robot
       return SHOULDER_MASS+LEG_MASS+TORSO_MASS;
    }
 
-   public DoubleYoVariable getQdd_z()
+   public YoDouble getQdd_z()
    {
       // TODO Auto-generated method stub
       return rootJointIfSkippy.qdd_z;
    }
 
-   public DoubleYoVariable getQ_hip()
+   public YoDouble getQ_hip()
    {
       // TODO Auto-generated method stub
       return hipJoint.getQYoVariable();
    }
 
-   public DoubleYoVariable getQd_hip()
+   public YoDouble getQd_hip()
    {
       // TODO Auto-generated method stub
       return hipJoint.getQDYoVariable();
    }
-   public DoubleYoVariable getQdd_hip()
+   public YoDouble getQdd_hip()
    {
       // TODO Auto-generated method stub
       return hipJoint.getQDDYoVariable();

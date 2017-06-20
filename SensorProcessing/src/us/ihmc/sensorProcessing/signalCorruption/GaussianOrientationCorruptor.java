@@ -7,8 +7,8 @@ import org.apache.commons.math3.util.FastMath;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class GaussianOrientationCorruptor implements SignalCorruptor<RotationMatrix>
@@ -17,13 +17,13 @@ public class GaussianOrientationCorruptor implements SignalCorruptor<RotationMat
    private final AxisAngle noiseAxisAngle = new AxisAngle();
    private final RotationMatrix noiseRotationMatrix = new RotationMatrix();
    private final Random random;
-   private final DoubleYoVariable standardDeviation;
+   private final YoDouble standardDeviation;
 
    public GaussianOrientationCorruptor(String namePrefix, long seed, YoVariableRegistry parentRegistry)
    {
       random = new Random(seed);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", registry);
+      standardDeviation = new YoDouble(namePrefix + "StdDev", registry);
       parentRegistry.addChild(registry);
    }
 

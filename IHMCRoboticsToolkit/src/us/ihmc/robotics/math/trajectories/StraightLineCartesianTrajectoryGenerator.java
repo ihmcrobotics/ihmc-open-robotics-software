@@ -1,30 +1,29 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    private final ReferenceFrame referenceFrame;
-   private final DoubleYoVariable time;
-   private final DoubleYoVariable maxVel;
-   private final DoubleYoVariable maxAccel;
+   private final YoDouble time;
+   private final YoDouble maxVel;
+   private final YoDouble maxAccel;
 
    private FramePointTrapezoidalVelocityTrajectory trajectory;
 
 
-   public StraightLineCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double maxVel, double maxAccel, DoubleYoVariable time,
+   public StraightLineCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double maxVel, double maxAccel, YoDouble time,
            YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + "StraightLineCartesianTrajectoryGenerator");
-      this.maxVel =  new DoubleYoVariable("straightLineTrajMaxVel", registry);
-      this.maxAccel = new DoubleYoVariable("straightLineTrajMaxAccel", registry);
+      this.maxVel =  new YoDouble("straightLineTrajMaxVel", registry);
+      this.maxAccel = new YoDouble("straightLineTrajMaxAccel", registry);
       
       this.referenceFrame = referenceFrame;
       this.time = time;

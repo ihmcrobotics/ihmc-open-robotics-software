@@ -6,10 +6,10 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -26,25 +26,25 @@ public class StepprStandPrep implements StepprController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprStandPrep");
 
-   private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
+   private final YoDouble initialTime = new YoDouble("initialTime", registry);
    private final YoPolynomial trajectory = new YoPolynomial("trajectory", 4, registry);
 
    private final EnumMap<StepprJoint, OneDoFJoint> joints = new EnumMap<>(StepprJoint.class);
    private final EnumMap<StepprJoint, PDController> controllers = new EnumMap<>(StepprJoint.class);
 
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> desiredPositions = new EnumMap<>(StepprStandPrepSetpoints.class);
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> kps = new EnumMap<>(StepprStandPrepSetpoints.class);
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> kds = new EnumMap<>(StepprStandPrepSetpoints.class);
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> dampingValues = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> desiredPositions = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> kps = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> kds = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> dampingValues = new EnumMap<>(StepprStandPrepSetpoints.class);
 
    private final EnumDoubleMap<StepprJoint> initialPositions = new EnumDoubleMap<>(StepprJoint.class);
 
-   private final BooleanYoVariable startStandprep = new BooleanYoVariable("startStandprep", registry);
-   private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
+   private final YoBoolean startStandprep = new YoBoolean("startStandprep", registry);
+   private final YoEnum<StandPrepState> standPrepState = new YoEnum<>("standPrepState", registry, StandPrepState.class);
 
-   private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
+   private final YoDouble crouch = new YoDouble("crouch", registry);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableStandPrepOutput", registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
@@ -57,10 +57,10 @@ public class StepprStandPrep implements StepprController
 
       for (StepprStandPrepSetpoints setpoint : StepprStandPrepSetpoints.values)
       {
-         DoubleYoVariable desiredPosition = new DoubleYoVariable(setpoint.getName() + "_q_d", registry);
-         DoubleYoVariable kp = new DoubleYoVariable(setpoint.getName() + "_kp", registry);
-         DoubleYoVariable kd = new DoubleYoVariable(setpoint.getName() + "_kd", registry);
-         DoubleYoVariable damping = new DoubleYoVariable(setpoint.getName() + "_damping", registry);
+         YoDouble desiredPosition = new YoDouble(setpoint.getName() + "_q_d", registry);
+         YoDouble kp = new YoDouble(setpoint.getName() + "_kp", registry);
+         YoDouble kd = new YoDouble(setpoint.getName() + "_kd", registry);
+         YoDouble damping = new YoDouble(setpoint.getName() + "_damping", registry);
 
          desiredPosition.set(setpoint.getQ());
          kp.set(setpoint.getKp());

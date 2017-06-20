@@ -24,14 +24,14 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -60,20 +60,20 @@ public class FiducialDetectorFromCameraImages
 
    private final String prefix = "fiducial";
 
-   private final DoubleYoVariable expectedFiducialSize = new DoubleYoVariable("expectedFiducialSize", registry);
-   private final DoubleYoVariable fieldOfViewXinRadians = new DoubleYoVariable("fovXRadians", registry);
-   private final DoubleYoVariable fieldOfViewYinRadians = new DoubleYoVariable("fovYRadians", registry);
+   private final YoDouble expectedFiducialSize = new YoDouble("expectedFiducialSize", registry);
+   private final YoDouble fieldOfViewXinRadians = new YoDouble("fovXRadians", registry);
+   private final YoDouble fieldOfViewYinRadians = new YoDouble("fovYRadians", registry);
 
-   private final DoubleYoVariable detectorPositionX = new DoubleYoVariable(prefix + "DetectorPositionX", registry);
-   private final DoubleYoVariable detectorPositionY = new DoubleYoVariable(prefix + "DetectorPositionY", registry);
-   private final DoubleYoVariable detectorPositionZ = new DoubleYoVariable(prefix + "DetectorPositionZ", registry);
-   private final DoubleYoVariable detectorEulerRotX = new DoubleYoVariable(prefix + "DetectorEulerRotX", registry);
-   private final DoubleYoVariable detectorEulerRotY = new DoubleYoVariable(prefix + "DetectorEulerRotY", registry);
-   private final DoubleYoVariable detectorEulerRotZ = new DoubleYoVariable(prefix + "DetectorEulerRotZ", registry);
+   private final YoDouble detectorPositionX = new YoDouble(prefix + "DetectorPositionX", registry);
+   private final YoDouble detectorPositionY = new YoDouble(prefix + "DetectorPositionY", registry);
+   private final YoDouble detectorPositionZ = new YoDouble(prefix + "DetectorPositionZ", registry);
+   private final YoDouble detectorEulerRotX = new YoDouble(prefix + "DetectorEulerRotX", registry);
+   private final YoDouble detectorEulerRotY = new YoDouble(prefix + "DetectorEulerRotY", registry);
+   private final YoDouble detectorEulerRotZ = new YoDouble(prefix + "DetectorEulerRotZ", registry);
 
-   private final BooleanYoVariable targetIDHasBeenLocated = new BooleanYoVariable(prefix + "TargetIDHasBeenLocated", registry);
-   private final GlitchFilteredBooleanYoVariable targetIDHasBeenLocatedFiltered = new GlitchFilteredBooleanYoVariable(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
-   private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
+   private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
+   private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
+   private final YoLong targetIDToLocate = new YoLong(prefix + "TargetIDToLocate", registry);
 
    private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);

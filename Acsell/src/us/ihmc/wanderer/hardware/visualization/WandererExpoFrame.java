@@ -13,13 +13,10 @@ import javax.swing.JPanel;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class WandererExpoFrame extends JFrame implements PlaybackListener
@@ -50,22 +47,22 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private double lastStartWalkTime;
    private double internalPriorWalkingDuration;
    private int stepCount = 0;
-   private final LongYoVariable nanosecondstime;
-   private final DoubleYoVariable total_time;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable walking_time;
-   private final BooleanYoVariable expo_isWalking;
-   private final DoubleYoVariable priorWalkingDuration;
-   private final LongYoVariable startingStepCount;
-   //private final EnumYoVariable<WalkingState> walkingState;
-   private final DoubleYoVariable distanceTraveled;
-   private final DoubleYoVariable startDistance;
-   private final DoubleYoVariable batteryLevel;
+   private final YoLong nanosecondstime;
+   private final YoDouble total_time;
+   private final YoDouble startTime;
+   private final YoDouble walking_time;
+   private final YoBoolean expo_isWalking;
+   private final YoDouble priorWalkingDuration;
+   private final YoLong startingStepCount;
+   //private final YoEnum<WalkingState> walkingState;
+   private final YoDouble distanceTraveled;
+   private final YoDouble startDistance;
+   private final YoDouble batteryLevel;
    //private final AlphaFilteredYoVariable batteryLevel_filt;
    
-   private final DoubleYoVariable avgpower;
-   private final DoubleYoVariable averageVelocity;
-   private final DoubleYoVariable COT;
+   private final YoDouble avgpower;
+   private final YoDouble averageVelocity;
+   private final YoDouble COT;
    
    private final Font titleFont = new Font("Calibri",Font.ITALIC, 75);
    private final Font mainLabelFont = new Font("Calibri",Font.PLAIN, 100);
@@ -101,20 +98,20 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       if(isStandalone)
       {
          YoVariableRegistry registry = new YoVariableRegistry("base");
-         nanosecondstime = new LongYoVariable("longtime", registry);
-         total_time = new DoubleYoVariable("time", registry);
-         startTime = new DoubleYoVariable("startTime", registry);
-         walking_time = new DoubleYoVariable("walkingtime", registry);
-         expo_isWalking = new BooleanYoVariable("walk", registry);
-         startingStepCount = new LongYoVariable("expoStartingStepCount", registry);
-         //walkingState = new EnumYoVariable<WalkingState>("walkingState", registry, WalkingState.class);
-         priorWalkingDuration = new DoubleYoVariable("startWalkingTime", registry);
-         distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
-         startDistance = new DoubleYoVariable("startDistance", registry);
-         batteryLevel = new DoubleYoVariable("batteryLevel", registry);
-         avgpower = new DoubleYoVariable("averagePower", registry);
-         averageVelocity = new DoubleYoVariable("averageVelocity", registry);
-         COT = new DoubleYoVariable("COT", registry);
+         nanosecondstime = new YoLong("longtime", registry);
+         total_time = new YoDouble("time", registry);
+         startTime = new YoDouble("startTime", registry);
+         walking_time = new YoDouble("walkingtime", registry);
+         expo_isWalking = new YoBoolean("walk", registry);
+         startingStepCount = new YoLong("expoStartingStepCount", registry);
+         //walkingState = new YoEnum<WalkingState>("walkingState", registry, WalkingState.class);
+         priorWalkingDuration = new YoDouble("startWalkingTime", registry);
+         distanceTraveled = new YoDouble("distanceTraveled", registry);
+         startDistance = new YoDouble("startDistance", registry);
+         batteryLevel = new YoDouble("batteryLevel", registry);
+         avgpower = new YoDouble("averagePower", registry);
+         averageVelocity = new YoDouble("averageVelocity", registry);
+         COT = new YoDouble("COT", registry);
          
          nanosecondstime.set(1234567890);
          startTime.set(0.0);
@@ -130,22 +127,22 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          indexChanged(1, 1.0);
       } else
       {
-         nanosecondstime = (LongYoVariable) parentRegistry.getVariable("SensorProcessing","timestamp");
-         total_time = new DoubleYoVariable("expoTime", parentRegistry);
-         startTime = new DoubleYoVariable("expoStartTime", parentRegistry);
-         walking_time = new DoubleYoVariable("expoWalkingTime", parentRegistry);
-         expo_isWalking = (BooleanYoVariable) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
-         startingStepCount = new LongYoVariable("expoStartingStepCount", parentRegistry);
-         //walkingState = (EnumYoVariable<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
-         priorWalkingDuration = new DoubleYoVariable("expoStartWalkingTime", parentRegistry);
-         distanceTraveled = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");         
-         startDistance = new DoubleYoVariable("expoStartDistance", parentRegistry);
-         batteryLevel = (DoubleYoVariable) parentRegistry.getVariable("WandererBatteryMonitor","totalBatteryVoltage");
+         nanosecondstime = (YoLong) parentRegistry.getVariable("SensorProcessing","timestamp");
+         total_time = new YoDouble("expoTime", parentRegistry);
+         startTime = new YoDouble("expoStartTime", parentRegistry);
+         walking_time = new YoDouble("expoWalkingTime", parentRegistry);
+         expo_isWalking = (YoBoolean) parentRegistry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
+         startingStepCount = new YoLong("expoStartingStepCount", parentRegistry);
+         //walkingState = (YoEnum<WalkingState>) parentRegistry.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         priorWalkingDuration = new YoDouble("expoStartWalkingTime", parentRegistry);
+         distanceTraveled = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","distanceTraveled");
+         startDistance = new YoDouble("expoStartDistance", parentRegistry);
+         batteryLevel = (YoDouble) parentRegistry.getVariable("WandererBatteryMonitor","totalBatteryVoltage");
          
-         avgpower = (DoubleYoVariable) parentRegistry.getVariable("powerDistribution","averageRobotPower");
-         averageVelocity = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","averageVelocity");
-         COT = (DoubleYoVariable) parentRegistry.getVariable("CostOfTransportCalculator","costOfTransport");
-         //power = (DoubleYoVariable) parentRegistry.getVariable("Wanderer","totalMotorPower");
+         avgpower = (YoDouble) parentRegistry.getVariable("powerDistribution","averageRobotPower");
+         averageVelocity = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","averageVelocity");
+         COT = (YoDouble) parentRegistry.getVariable("CostOfTransportCalculator","costOfTransport");
+         //power = (YoDouble) parentRegistry.getVariable("Wanderer","totalMotorPower");
       }
       
       if(isStandalone) setupExitOnClose();
@@ -163,7 +160,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            manageWalkingStateChanged((EnumYoVariable<WalkingState>) v);
+            manageWalkingStateChanged((YoEnum<WalkingState>) v);
          }
       }); */
    }   
@@ -296,7 +293,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          internalPriorWalkingDuration = walking_time.getDoubleValue();      
    }
    
-   private void manageWalkingStateChanged(EnumYoVariable<WalkingStateEnum> walkingState)
+   private void manageWalkingStateChanged(YoEnum<WalkingStateEnum> walkingState)
    {
       switch(walkingState.getEnumValue())
       {

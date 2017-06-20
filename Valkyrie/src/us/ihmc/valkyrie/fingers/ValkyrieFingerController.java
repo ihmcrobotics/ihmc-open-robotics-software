@@ -13,10 +13,10 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredCo
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -35,13 +35,13 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final boolean isRunningOnRealRobot;
    private final FullRobotModel fullRobotModel;
 
-   private final DoubleYoVariable fingerControllerTime = new DoubleYoVariable("fingerControllerTime", registry);
-   private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("lastEstimatorStartTime", registry);
-   private final BooleanYoVariable sendFingerJointGains = new BooleanYoVariable("sendFingerJointGains", registry);
-   private final DoubleYoVariable fingerTrajectoryTime = new DoubleYoVariable("FingerTrajectoryTime", registry);
+   private final YoDouble fingerControllerTime = new YoDouble("fingerControllerTime", registry);
+   private final YoLong lastEstimatorStartTime = new YoLong("lastEstimatorStartTime", registry);
+   private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
+   private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, DoubleYoVariable>> kpMap = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, DoubleYoVariable>> kdMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kpMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kdMap = new SideDependentList<>();
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -76,13 +76,13 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            kpMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, DoubleYoVariable>());
-            kdMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, DoubleYoVariable>());
+            kpMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
+            kdMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
 
             for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
             {
-               DoubleYoVariable kp = new DoubleYoVariable("kp" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
-               DoubleYoVariable kd = new DoubleYoVariable("kd" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
+               YoDouble kp = new YoDouble("kp" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
+               YoDouble kd = new YoDouble("kd" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
 
                double kpkp = 2.0;
                double kdkd = 0.1;

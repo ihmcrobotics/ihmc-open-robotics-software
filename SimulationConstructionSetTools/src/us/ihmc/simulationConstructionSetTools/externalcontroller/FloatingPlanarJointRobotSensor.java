@@ -1,12 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 
 class FloatingPlanarJointRobotSensor implements SensorInterface
 {
-   private DoubleYoVariable q_t1, q_t2, qd_t1, qd_t2, q_rot, qd_rot;
-   private DoubleYoVariable qdd_t1, qdd_t2, qdd_rot;
+   private YoDouble q_t1, q_t2, qd_t1, qd_t2, q_rot, qd_rot;
+   private YoDouble qdd_t1, qdd_t2, qdd_rot;
 
    public FloatingPlanarJointRobotSensor(FloatingPlanarJoint joint)
    {

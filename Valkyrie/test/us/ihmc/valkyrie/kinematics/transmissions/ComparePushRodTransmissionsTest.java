@@ -13,8 +13,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -169,25 +169,25 @@ public class ComparePushRodTransmissionsTest
       Robot robot = new Robot("comparePushrodTransmission");
       robot.getRobotsYoVariableRegistry().addChild(registry);
 
-      DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
-      DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
+      YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
+      YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);
       
-      DoubleYoVariable actuatorForceA0 = new DoubleYoVariable("actuatorForceA0", registry);
-      DoubleYoVariable actuatorForceA1 = new DoubleYoVariable("actuatorForceA1", registry);
+      YoDouble actuatorForceA0 = new YoDouble("actuatorForceA0", registry);
+      YoDouble actuatorForceA1 = new YoDouble("actuatorForceA1", registry);
       
-      DoubleYoVariable actuatorForceB0 = new DoubleYoVariable("actuatorForceB0", registry);
-      DoubleYoVariable actuatorForceB1 = new DoubleYoVariable("actuatorForceB1", registry);
+      YoDouble actuatorForceB0 = new YoDouble("actuatorForceB0", registry);
+      YoDouble actuatorForceB1 = new YoDouble("actuatorForceB1", registry);
       
-      DoubleYoVariable force0 = new DoubleYoVariable("force0", registry);
-      DoubleYoVariable force1 = new DoubleYoVariable("force1", registry);
+      YoDouble force0 = new YoDouble("force0", registry);
+      YoDouble force1 = new YoDouble("force1", registry);
       
-      DoubleYoVariable topJointTorqueA = new DoubleYoVariable("topJointTorqueA", registry);
-      DoubleYoVariable bottomJointTorqueA = new DoubleYoVariable("bottomJointTorqueA", registry);
-      DoubleYoVariable topJointTorqueB = new DoubleYoVariable("topJointTorqueB", registry);
-      DoubleYoVariable bottomJointTorqueB = new DoubleYoVariable("bottomJointTorqueB", registry);
+      YoDouble topJointTorqueA = new YoDouble("topJointTorqueA", registry);
+      YoDouble bottomJointTorqueA = new YoDouble("bottomJointTorqueA", registry);
+      YoDouble topJointTorqueB = new YoDouble("topJointTorqueB", registry);
+      YoDouble bottomJointTorqueB = new YoDouble("bottomJointTorqueB", registry);
       
-      DoubleYoVariable topJointTorque = new DoubleYoVariable("topJointTorque", registry);
-      DoubleYoVariable bottomJointTorque = new DoubleYoVariable("bottomJointTorque", registry);
+      YoDouble topJointTorque = new YoDouble("topJointTorque", registry);
+      YoDouble bottomJointTorque = new YoDouble("bottomJointTorque", registry);
 
       SimulationConstructionSet scs;
       if (VISUALIZE)
@@ -232,9 +232,9 @@ public class ComparePushRodTransmissionsTest
    }
 
    private void compareJointToActuatorEffort(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-         PushRodTransmissionInterface pushrodTransmissionB, DoubleYoVariable topJointAngle, DoubleYoVariable bottomJointAngle, DoubleYoVariable actuatorForceA0,
-         DoubleYoVariable actuatorForceA1, DoubleYoVariable actuatorForceB0, DoubleYoVariable actuatorForceB1, DoubleYoVariable topJointTorque,
-         DoubleYoVariable bottomJointTorque, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData, double increment)
+         PushRodTransmissionInterface pushrodTransmissionB, YoDouble topJointAngle, YoDouble bottomJointAngle, YoDouble actuatorForceA0,
+         YoDouble actuatorForceA1, YoDouble actuatorForceB0, YoDouble actuatorForceB1, YoDouble topJointTorque,
+         YoDouble bottomJointTorque, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData, double increment)
    {
       for (double topJoint = -1.0; topJoint < 1.0; topJoint = topJoint + increment)
       {
@@ -291,9 +291,9 @@ public class ComparePushRodTransmissionsTest
    }
 
    private void compareActuatorToJointEffort(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-         PushRodTransmissionInterface pushrodTransmissionB, DoubleYoVariable topJointAngle, DoubleYoVariable bottomJointAngle, DoubleYoVariable force0,
-         DoubleYoVariable force1, DoubleYoVariable topJointTorqueA, DoubleYoVariable bottomJointTorqueA, DoubleYoVariable topJointTorqueB,
-         DoubleYoVariable bottomJointTorqueB, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData,
+         PushRodTransmissionInterface pushrodTransmissionB, YoDouble topJointAngle, YoDouble bottomJointAngle, YoDouble force0,
+         YoDouble force1, YoDouble topJointTorqueA, YoDouble bottomJointTorqueA, YoDouble topJointTorqueB,
+         YoDouble bottomJointTorqueB, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData,
          double increment)
    {
       for (double topJoint = -1.0; topJoint < 1.0; topJoint = topJoint + increment)
@@ -357,16 +357,16 @@ public class ComparePushRodTransmissionsTest
       Robot robot = new Robot("comparePushrodTransmission");
       robot.getRobotsYoVariableRegistry().addChild(registry);
 
-      DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
-      DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
+      YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
+      YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);
       
-      DoubleYoVariable velocity0 = new DoubleYoVariable("velocity0", registry);
-      DoubleYoVariable velocity1 = new DoubleYoVariable("velocity1", registry);
+      YoDouble velocity0 = new YoDouble("velocity0", registry);
+      YoDouble velocity1 = new YoDouble("velocity1", registry);
       
-      DoubleYoVariable topJointVelocityA = new DoubleYoVariable("topJointVelocityA", registry);
-      DoubleYoVariable bottomJointVelocityA = new DoubleYoVariable("bottomJointVelocityA", registry);
-      DoubleYoVariable topJointVelocityB = new DoubleYoVariable("topJointVelocityB", registry);
-      DoubleYoVariable bottomJointVelocityB = new DoubleYoVariable("bottomJointVelocityB", registry);
+      YoDouble topJointVelocityA = new YoDouble("topJointVelocityA", registry);
+      YoDouble bottomJointVelocityA = new YoDouble("bottomJointVelocityA", registry);
+      YoDouble topJointVelocityB = new YoDouble("topJointVelocityB", registry);
+      YoDouble bottomJointVelocityB = new YoDouble("bottomJointVelocityB", registry);
       
       SimulationConstructionSet scs;
       if (VISUALIZE)
@@ -408,9 +408,9 @@ public class ComparePushRodTransmissionsTest
    }
 
    private void compareActuatorToJointVelocity(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-         PushRodTransmissionInterface pushrodTransmissionB, DoubleYoVariable topJointAngle, DoubleYoVariable bottomJointAngle, DoubleYoVariable actuatorVelocity0,
-         DoubleYoVariable actuatorVelocity1, DoubleYoVariable topJointVelocityA, DoubleYoVariable bottomJointVelocityA, DoubleYoVariable topJointVelocityB,
-         DoubleYoVariable bottomJointVelocityB, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData,
+         PushRodTransmissionInterface pushrodTransmissionB, YoDouble topJointAngle, YoDouble bottomJointAngle, YoDouble actuatorVelocity0,
+         YoDouble actuatorVelocity1, YoDouble topJointVelocityA, YoDouble bottomJointVelocityA, YoDouble topJointVelocityB,
+         YoDouble bottomJointVelocityB, SimulationConstructionSet scs, LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData,
          double increment)
    {
       for (double topJoint = -1.0; topJoint < 1.0; topJoint = topJoint + increment)
@@ -473,25 +473,25 @@ public class ComparePushRodTransmissionsTest
       Robot robot = new Robot("testTimingPushrodTransmission");
       robot.getRobotsYoVariableRegistry().addChild(registry);
 
-      DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
-      DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
+      YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
+      YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);
 
-      DoubleYoVariable actuatorForceA0 = new DoubleYoVariable("actuatorForceA0", registry);
-      DoubleYoVariable actuatorForceA1 = new DoubleYoVariable("actuatorForceA1", registry);
+      YoDouble actuatorForceA0 = new YoDouble("actuatorForceA0", registry);
+      YoDouble actuatorForceA1 = new YoDouble("actuatorForceA1", registry);
 
-      DoubleYoVariable actuatorForceB0 = new DoubleYoVariable("actuatorForceB0", registry);
-      DoubleYoVariable actuatorForceB1 = new DoubleYoVariable("actuatorForceB1", registry);
+      YoDouble actuatorForceB0 = new YoDouble("actuatorForceB0", registry);
+      YoDouble actuatorForceB1 = new YoDouble("actuatorForceB1", registry);
 
-      DoubleYoVariable force0 = new DoubleYoVariable("force0", registry);
-      DoubleYoVariable force1 = new DoubleYoVariable("force1", registry);
+      YoDouble force0 = new YoDouble("force0", registry);
+      YoDouble force1 = new YoDouble("force1", registry);
 
-      DoubleYoVariable topJointTorqueA = new DoubleYoVariable("topJointTorqueA", registry);
-      DoubleYoVariable bottomJointTorqueA = new DoubleYoVariable("bottomJointTorqueA", registry);
-      DoubleYoVariable topJointTorqueB = new DoubleYoVariable("topJointTorqueB", registry);
-      DoubleYoVariable bottomJointTorqueB = new DoubleYoVariable("bottomJointTorqueB", registry);
+      YoDouble topJointTorqueA = new YoDouble("topJointTorqueA", registry);
+      YoDouble bottomJointTorqueA = new YoDouble("bottomJointTorqueA", registry);
+      YoDouble topJointTorqueB = new YoDouble("topJointTorqueB", registry);
+      YoDouble bottomJointTorqueB = new YoDouble("bottomJointTorqueB", registry);
 
-      DoubleYoVariable topJointTorque = new DoubleYoVariable("topJointTorque", registry);
-      DoubleYoVariable bottomJointTorque = new DoubleYoVariable("bottomJointTorque", registry);
+      YoDouble topJointTorque = new YoDouble("topJointTorque", registry);
+      YoDouble bottomJointTorque = new YoDouble("bottomJointTorque", registry);
 
 
       LinearActuator[] actuatorData = new LinearActuator[2];

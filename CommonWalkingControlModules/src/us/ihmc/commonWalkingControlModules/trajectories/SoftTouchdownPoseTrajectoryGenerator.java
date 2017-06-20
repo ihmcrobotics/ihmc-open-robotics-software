@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -19,9 +19,9 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final YoSpline3D positionTouchdownTrajectory;
    private final FramePoint desiredPosition = new FramePoint();
    
-   private final DoubleYoVariable timeInitial;
-   private final DoubleYoVariable timeFinal;
-   private final DoubleYoVariable timeIntoTouchdown;
+   private final YoDouble timeInitial;
+   private final YoDouble timeFinal;
+   private final YoDouble timeIntoTouchdown;
    
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialVelocity = new FrameVector();
@@ -37,9 +37,9 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       parentRegistry.addChild(registry);
       
       positionTouchdownTrajectory = new YoSpline3D(3, 3, worldFrame, registry, namePrefix + "Trajectory");
-      timeInitial = new DoubleYoVariable(namePrefix + "TimeInitial", registry);
-      timeFinal = new DoubleYoVariable(namePrefix + "TimeFinal", registry);
-      timeIntoTouchdown = new DoubleYoVariable(namePrefix + "TimeIntoTouchdown", registry);
+      timeInitial = new YoDouble(namePrefix + "TimeInitial", registry);
+      timeFinal = new YoDouble(namePrefix + "TimeFinal", registry);
+      timeIntoTouchdown = new YoDouble(namePrefix + "TimeIntoTouchdown", registry);
       
       timeFinal.set(Double.POSITIVE_INFINITY);
    }

@@ -8,8 +8,8 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandTrajectoryBehavior extends AbstractBehavior
@@ -20,38 +20,38 @@ public class HandTrajectoryBehavior extends AbstractBehavior
 
    protected HandTrajectoryMessage outgoingMessage;
 
-   protected final BooleanYoVariable hasPacketBeenSent;
-   protected final DoubleYoVariable yoTime;
-   protected final DoubleYoVariable startTime;
-   protected final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable trajectoryTimeElapsed;
+   protected final YoBoolean hasPacketBeenSent;
+   protected final YoDouble yoTime;
+   protected final YoDouble startTime;
+   protected final YoDouble trajectoryTime;
+   private final YoDouble trajectoryTimeElapsed;
 
-   protected final BooleanYoVariable hasInputBeenSet;
-   protected final BooleanYoVariable hasStatusBeenReceived;
-   private final BooleanYoVariable isDone;
+   protected final YoBoolean hasInputBeenSet;
+   protected final YoBoolean hasStatusBeenReceived;
+   private final YoBoolean isDone;
 
-   public HandTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HandTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
 
-   public HandTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HandTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
-      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new YoDouble(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
       trajectoryTimeElapsed.set(Double.NaN);
 
-      hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
-      hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
-      isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
+      hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
+      hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
+      isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
    }
 
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)

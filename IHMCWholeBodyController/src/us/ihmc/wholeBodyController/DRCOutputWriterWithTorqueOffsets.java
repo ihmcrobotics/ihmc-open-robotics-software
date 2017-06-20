@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -16,13 +16,13 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DRCOutputWriter drcOutputWriter;
 
-   private final DoubleYoVariable alphaTorqueOffset = new DoubleYoVariable("alphaTorqueOffset",
+   private final YoDouble alphaTorqueOffset = new YoDouble("alphaTorqueOffset",
          "Filter for integrating acceleration to get a torque offset at each joint", registry);
 
-   private final BooleanYoVariable resetTorqueOffsets = new BooleanYoVariable("resetTorqueOffsets", registry);
+   private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
    private ArrayList<OneDoFJoint> oneDoFJoints;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> torqueOffsetMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
 
@@ -47,7 +47,7 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
          OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
          double desiredAcceleration = oneDoFJoint.getQddDesired();
 
-         DoubleYoVariable torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
+         YoDouble torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
          if (resetTorqueOffsets.getBooleanValue())
             torqueOffsetVariable.set(0.0);
 
@@ -71,12 +71,12 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
       oneDoFJoints = new ArrayList<OneDoFJoint>();
       controllerModel.getOneDoFJoints(oneDoFJoints);
 
-      torqueOffsetMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      torqueOffsetMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         final DoubleYoVariable torqueOffset = new DoubleYoVariable("tauOffset_" + oneDoFJoint.getName(), registry);
+         final YoDouble torqueOffset = new YoDouble("tauOffset_" + oneDoFJoint.getName(), registry);
 
          torqueOffsetMap.put(oneDoFJoint, torqueOffset);
       }
@@ -98,7 +98,7 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
    @Override
    public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
    {
-      DoubleYoVariable torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
+      YoDouble torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
       torqueOffsetVariable.sub(torqueOffset);
    }
 }

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -13,7 +13,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-
 
 public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -32,8 +31,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    
    private final DoubleProvider startTimeProvider;
    
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable timeIntoTouchdown;
+   private final YoDouble startTime;
+   private final YoDouble timeIntoTouchdown;
    
    private final FramePoint p0;
    private final FrameVector pd0;
@@ -42,7 +41,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final double tf = Double.POSITIVE_INFINITY;
    private double t0;
    
-   private final BooleanYoVariable replanningTrajectory;
+   private final YoBoolean replanningTrajectory;
 
    private final YoSpline3D trajectory;
 
@@ -61,7 +60,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       pdd0 = new FrameVector();
       t0 = 0.0;
       
-      this.replanningTrajectory = new BooleanYoVariable(namePrefix + "ReplanningTrajectory", parentRegistry);
+      this.replanningTrajectory = new YoBoolean(namePrefix + "ReplanningTrajectory", parentRegistry);
       this.replanningTrajectory.set(false);
       
       this.referenceFrame = referenceFrame;
@@ -72,10 +71,10 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       
       this.startTimeProvider = startTimeProvider;
       
-      startTime = new DoubleYoVariable(namePrefix + "startTime", registry);
+      startTime = new YoDouble(namePrefix + "startTime", registry);
       startTime.set(startTimeProvider.getValue());
 
-      timeIntoTouchdown = new DoubleYoVariable(namePrefix + "timeIntoTouchdown", registry);
+      timeIntoTouchdown = new YoDouble(namePrefix + "timeIntoTouchdown", registry);
 
       trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
    }

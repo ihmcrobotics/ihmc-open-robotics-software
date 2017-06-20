@@ -25,9 +25,9 @@ import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -247,15 +247,15 @@ public class YoVariableHandShakeBuilder
             break;
          case ENUM:
             yoVariableDefinition.setType(YoType.EnumYoVariable);
-            if(((EnumYoVariable<?>) variable).isBackedByEnum())
+            if(((YoEnum<?>) variable).isBackedByEnum())
             {
-               yoVariableDefinition.setEnumType(getOrAddEnumType(((EnumYoVariable<?>) variable).getEnumType().getCanonicalName(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
+               yoVariableDefinition.setEnumType(getOrAddEnumType(((YoEnum<?>) variable).getEnumType().getCanonicalName(), ((YoEnum<?>) variable).getEnumValuesAsString()));
             }
             else
             {
-               yoVariableDefinition.setEnumType(getOrAddEnumType(variable.getFullNameWithNameSpace() + ".EnumType", ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
+               yoVariableDefinition.setEnumType(getOrAddEnumType(variable.getFullNameWithNameSpace() + ".EnumType", ((YoEnum<?>) variable).getEnumValuesAsString()));
             }
-            yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
+            yoVariableDefinition.setAllowNullValues(((YoEnum<?>) variable).getAllowNullValue());
             break;
          default:
             throw new RuntimeException("Unknown variable type: " + variable.getYoVariableType());

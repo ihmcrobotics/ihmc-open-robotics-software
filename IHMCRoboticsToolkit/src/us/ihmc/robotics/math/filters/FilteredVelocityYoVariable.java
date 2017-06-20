@@ -1,10 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-
 
 /**
  * @author jrebula
@@ -21,22 +20,22 @@ import us.ihmc.robotics.geometry.AngleTools;
  * </pre>
  *
  */
-public class FilteredVelocityYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private double alphaDouble;
    private final double dt;
 
-   private final DoubleYoVariable alphaVariable;
-   private final DoubleYoVariable position;
+   private final YoDouble alphaVariable;
+   private final YoDouble position;
 
 // private double lastPosition;
-   private final DoubleYoVariable lastPosition;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoDouble lastPosition;
+   private final YoBoolean hasBeenCalled;
 
    public FilteredVelocityYoVariable(String name, String description, double alpha, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alphaDouble = alpha;
       this.dt = dt;
@@ -44,15 +43,15 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
       this.alphaVariable = null;
       this.position = null;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, double alpha, DoubleYoVariable positionVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, double alpha, YoDouble positionVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.alphaDouble = alpha;
       this.position = positionVariable;
@@ -60,16 +59,16 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
 
       this.alphaVariable = null;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
 
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       position = positionVariable;
       this.alphaVariable = alphaVariable;
@@ -77,15 +76,15 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, YoDouble alphaVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.position = null;
       this.alphaVariable = alphaVariable;
@@ -93,7 +92,7 @@ public class FilteredVelocityYoVariable extends DoubleYoVariable implements Proc
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }

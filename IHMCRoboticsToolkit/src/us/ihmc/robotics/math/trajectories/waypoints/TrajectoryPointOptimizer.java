@@ -9,9 +9,9 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
@@ -53,14 +53,14 @@ public class TrajectoryPointOptimizer
 
    private final PolynomialOrder order;
 
-   private final IntegerYoVariable dimensions;
-   private final IntegerYoVariable nWaypoints;
-   private final IntegerYoVariable intervals;
-   private final IntegerYoVariable coefficients;
-   private final IntegerYoVariable problemSize;
-   private final IntegerYoVariable inversionSize;
-   private final IntegerYoVariable constraints;
-   private final IntegerYoVariable iteration;
+   private final YoInteger dimensions;
+   private final YoInteger nWaypoints;
+   private final YoInteger intervals;
+   private final YoInteger coefficients;
+   private final YoInteger problemSize;
+   private final YoInteger inversionSize;
+   private final YoInteger constraints;
+   private final YoInteger iteration;
 
    private final TDoubleArrayList x0, x1, xd0, xd1;
    private final ArrayList<DenseMatrix64F> waypoints = new ArrayList<>();
@@ -86,7 +86,7 @@ public class TrajectoryPointOptimizer
 
    private final DenseMatrix64F timeGradient = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
-   private final DoubleYoVariable timeGain;
+   private final YoDouble timeGain;
 
    private final ExecutionTimer computeTimer;
    private final ExecutionTimer timeUpdateTimer;
@@ -115,17 +115,17 @@ public class TrajectoryPointOptimizer
    public TrajectoryPointOptimizer(String namePrefix, int dimensions, PolynomialOrder order)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.dimensions = new IntegerYoVariable(namePrefix + "Dimensions", registry);
-      this.nWaypoints = new IntegerYoVariable(namePrefix + "NumberOfWaypoints", registry);
-      this.intervals = new IntegerYoVariable(namePrefix + "NumberOfIntervals", registry);
-      this.coefficients = new IntegerYoVariable(namePrefix + "Coefficients", registry);
-      this.problemSize = new IntegerYoVariable(namePrefix + "ProblemSize", registry);
-      this.inversionSize = new IntegerYoVariable(namePrefix + "InversionSize", registry);
-      this.constraints = new IntegerYoVariable(namePrefix + "Conditions", registry);
-      this.iteration = new IntegerYoVariable(namePrefix + "Iteration", registry);
+      this.dimensions = new YoInteger(namePrefix + "Dimensions", registry);
+      this.nWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
+      this.intervals = new YoInteger(namePrefix + "NumberOfIntervals", registry);
+      this.coefficients = new YoInteger(namePrefix + "Coefficients", registry);
+      this.problemSize = new YoInteger(namePrefix + "ProblemSize", registry);
+      this.inversionSize = new YoInteger(namePrefix + "InversionSize", registry);
+      this.constraints = new YoInteger(namePrefix + "Conditions", registry);
+      this.iteration = new YoInteger(namePrefix + "Iteration", registry);
       this.computeTimer = new ExecutionTimer(namePrefix + "ComputeTimer", 0.0, registry);
       this.timeUpdateTimer = new ExecutionTimer(namePrefix + "TimeUpdateTimer", 0.0, registry);
-      this.timeGain = new DoubleYoVariable(namePrefix + "TimeGain", registry);
+      this.timeGain = new YoDouble(namePrefix + "TimeGain", registry);
 
       dimensions = Math.max(dimensions, 0);
       this.dimensions.set(dimensions);

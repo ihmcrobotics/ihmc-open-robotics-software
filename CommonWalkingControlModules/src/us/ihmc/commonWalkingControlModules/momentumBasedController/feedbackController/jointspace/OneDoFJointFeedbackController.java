@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -18,35 +18,35 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final OneDoFJoint joint;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
-   private final DoubleYoVariable qCurrent;
-   private final DoubleYoVariable qDCurrent;
+   private final YoDouble qCurrent;
+   private final YoDouble qDCurrent;
 
-   private final DoubleYoVariable qDesired;
-   private final DoubleYoVariable qDDesired;
+   private final YoDouble qDesired;
+   private final YoDouble qDDesired;
 
-   private final DoubleYoVariable qDFeedforward;
-   private final DoubleYoVariable qDDFeedforward;
+   private final YoDouble qDFeedforward;
+   private final YoDouble qDDFeedforward;
 
-   private final DoubleYoVariable qError;
-   private final DoubleYoVariable qDError;
+   private final YoDouble qError;
+   private final YoDouble qDError;
 
-   private final DoubleYoVariable maxFeedback;
-   private final DoubleYoVariable maxFeedbackRate;
+   private final YoDouble maxFeedback;
+   private final YoDouble maxFeedbackRate;
 
-   private final DoubleYoVariable qDDFeedback;
+   private final YoDouble qDDFeedback;
    private final RateLimitedYoVariable qDDFeedbackRateLimited;
-   private final DoubleYoVariable qDDDesired;
-   private final DoubleYoVariable qDDAchieved;
+   private final YoDouble qDDDesired;
+   private final YoDouble qDDAchieved;
 
-   private final DoubleYoVariable qDFeedback;
+   private final YoDouble qDFeedback;
    private final RateLimitedYoVariable qDFeedbackRateLimited;
 
-   private final DoubleYoVariable kp;
-   private final DoubleYoVariable kd;
+   private final YoDouble kp;
+   private final YoDouble kd;
 
-   private final DoubleYoVariable weightForSolver;
+   private final YoDouble weightForSolver;
 
    public OneDoFJointFeedbackController(OneDoFJoint joint, double dt, boolean inverseDynamicsEnabled, boolean inverseKinematicsEnabled,
                                         boolean virtualModelControlEnabled, YoVariableRegistry parentRegistry)
@@ -58,32 +58,32 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
 
       this.joint = joint;
-      isEnabled = new BooleanYoVariable("control_enabled_" + jointName, registry);
+      isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
       isEnabled.set(false);
 
-      qCurrent = new DoubleYoVariable("q_" + jointName, registry);
-      qDesired = new DoubleYoVariable("q_d_" + jointName, registry);
-      qError = new DoubleYoVariable("q_err_" + jointName, registry);
+      qCurrent = new YoDouble("q_" + jointName, registry);
+      qDesired = new YoDouble("q_d_" + jointName, registry);
+      qError = new YoDouble("q_err_" + jointName, registry);
 
-      qDDesired = new DoubleYoVariable("qd_d_" + jointName, registry);
+      qDDesired = new YoDouble("qd_d_" + jointName, registry);
 
-      maxFeedback = new DoubleYoVariable("max_fb_" + jointName, registry);
-      maxFeedbackRate = new DoubleYoVariable("max_fb_rate_" + jointName, registry);
+      maxFeedback = new YoDouble("max_fb_" + jointName, registry);
+      maxFeedbackRate = new YoDouble("max_fb_rate_" + jointName, registry);
 
-      kp = new DoubleYoVariable("kp_" + jointName, registry);
+      kp = new YoDouble("kp_" + jointName, registry);
 
       if (inverseDynamicsEnabled || virtualModelControlEnabled)
       {
-         qDCurrent = new DoubleYoVariable("qd_" + jointName, registry);
-         qDError = new DoubleYoVariable("qd_err_" + jointName, registry);
+         qDCurrent = new YoDouble("qd_" + jointName, registry);
+         qDError = new YoDouble("qd_err_" + jointName, registry);
 
-         kd = new DoubleYoVariable("kd_" + jointName, registry);
+         kd = new YoDouble("kd_" + jointName, registry);
 
-         qDDFeedforward = new DoubleYoVariable("qdd_ff_" + jointName, registry);
-         qDDFeedback = new DoubleYoVariable("qdd_fb_" + jointName, registry);
+         qDDFeedforward = new YoDouble("qdd_ff_" + jointName, registry);
+         qDDFeedback = new YoDouble("qdd_fb_" + jointName, registry);
          qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
-         qDDDesired = new DoubleYoVariable("qdd_d_" + jointName, registry);
-         qDDAchieved = new DoubleYoVariable("qdd_achieved_" + jointName, registry);
+         qDDDesired = new YoDouble("qdd_d_" + jointName, registry);
+         qDDAchieved = new YoDouble("qdd_achieved_" + jointName, registry);
       }
       else
       {
@@ -101,9 +101,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       if (inverseKinematicsEnabled)
       {
-         qDFeedforward = new DoubleYoVariable("qd_ff_" + jointName, registry);
+         qDFeedforward = new YoDouble("qd_ff_" + jointName, registry);
 
-         qDFeedback = new DoubleYoVariable("qd_fb_" + jointName, registry);
+         qDFeedback = new YoDouble("qd_fb_" + jointName, registry);
          qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
       }
       else
@@ -114,7 +114,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFeedbackRateLimited = null;
       }
 
-      weightForSolver = new DoubleYoVariable("weight_" + jointName, registry);
+      weightForSolver = new YoDouble("weight_" + jointName, registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
       inverseDynamicsOutput.addJoint(joint, Double.NaN);

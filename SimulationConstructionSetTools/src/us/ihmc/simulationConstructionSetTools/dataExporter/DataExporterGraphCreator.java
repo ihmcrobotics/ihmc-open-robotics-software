@@ -3,10 +3,10 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.Color;
 import java.io.File;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
 
 public class DataExporterGraphCreator
@@ -14,7 +14,7 @@ public class DataExporterGraphCreator
    protected final DataBuffer dataBuffer;
    private final DataBufferEntry timeEntry;
 
-   public DataExporterGraphCreator(DoubleYoVariable timeYoVariable, DataBuffer dataBuffer)
+   public DataExporterGraphCreator(YoDouble timeYoVariable, DataBuffer dataBuffer)
    {
       this.dataBuffer = dataBuffer;
       this.timeEntry = dataBuffer.getEntry(timeYoVariable);

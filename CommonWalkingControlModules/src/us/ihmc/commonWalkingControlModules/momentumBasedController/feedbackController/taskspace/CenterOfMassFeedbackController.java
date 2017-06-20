@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -31,7 +31,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final String shortName = "CenterOfMassFBController";
    private final YoVariableRegistry registry = new YoVariableRegistry(shortName);
 
-   private final BooleanYoVariable isEnabled = new BooleanYoVariable("is" + shortName + "Enabled", registry);
+   private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -87,7 +87,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);
 
