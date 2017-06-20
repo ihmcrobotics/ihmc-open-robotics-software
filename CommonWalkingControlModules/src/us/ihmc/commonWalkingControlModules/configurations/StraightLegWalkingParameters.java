@@ -22,6 +22,30 @@ public class StraightLegWalkingParameters
    }
 
    /**
+    * If set to true, the privileged acceleration for the leg pitch joints will be determined by blending feedback
+    * based on both the joint space error and a virtual actuator length error. If the leg is desired to be fully extended,
+    * it will use entirely virtual actuator feedback. If the knee setpoint is at the midpoint, it will use entirely joint
+    * space feedback.
+    * @return whether or not to blend jointspace with virtual actuator feedback
+    */
+   public boolean blendPrivilegedConfigurationPositionError()
+   {
+      return false;
+   }
+
+   /**
+    * If set to true, the privileged acceleration for the leg pitch joints will be determined by blending feedback
+    * based on both the joint space velocity error and a virtual actuator velocity error. If the leg is desired to be fully extended,
+    * it will use entirely virtual actuator feedback. If the knee setpoint is at the midpoint, it will use entirely joint
+    * space feedback.
+    * @return whether or not to blend jointspace with virtual actuator feedback
+    */
+   public boolean blendPrivilegedConfigurationVelocityError()
+   {
+      return false;
+   }
+
+   /**
     * Angle used to what it means to set the knee privileged configuration to straight.
     * This is used in the straight leg state by the support legs when the robot is attempting to walk with
     * straight legs, and also to help extend the leg at the end of the swing state.
