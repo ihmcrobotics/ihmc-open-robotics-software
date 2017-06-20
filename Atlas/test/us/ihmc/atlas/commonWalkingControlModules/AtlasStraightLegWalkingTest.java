@@ -63,13 +63,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public boolean checkCoPLocationToTriggerToeOff()
                {
-                  return false;
+                  return true;
                }
 
                @Override
                public double getCoPProximityForToeOff()
                {
-                  return 0.04;
+                  return 0.05;
                }
 
                @Override
@@ -111,7 +111,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.10;
+                  return 0.08;
                }
 
                @Override
@@ -159,6 +159,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public double getSpeedForSupportKneeStraightening()
                      {
                         return 1.0;
+                     }
+
+                     public boolean blendPrivilegedConfigurationPositionError()
+                     {
+                        return true;
+                     }
+
+                     public boolean blendPrivilegedConfigurationVelocityError()
+                     {
+                        return false;
+                     }
+
+
+                     @Override
+                     public double getPrivilegedMaxVelocity()
+                     {
+                        return super.getPrivilegedMaxVelocity();
                      }
 
                      @Override

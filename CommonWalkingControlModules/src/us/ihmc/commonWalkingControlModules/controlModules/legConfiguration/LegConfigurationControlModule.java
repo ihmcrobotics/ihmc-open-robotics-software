@@ -31,10 +31,11 @@ public class LegConfigurationControlModule
 
    private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = false;
 
-   private static final boolean BLEND_POSITION_ERROR_WITH_VIRTUAL_ACTUATOR = true;
-   private static final boolean BLEND_VELOCITY_ERROR_WITH_VIRTUAL_ACTUATOR = false;
-
    private final YoVariableRegistry registry;
+
+   private final PrivilegedAccelerationCommand privilegedAccelerationCommand = new PrivilegedAccelerationCommand();
+
+   private final StraightLegWalkingParameters straightLegWalkingParameters;
 
    private final EnumYoVariable<LegConfigurationType> requestedState;
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
@@ -74,7 +75,6 @@ public class LegConfigurationControlModule
    private static final int hipPitchJointIndex = 0;
    private static final int kneePitchJointIndex = 1;
    private static final int anklePitchJointIndex = 2;
-   private final PrivilegedAccelerationCommand privilegedAccelerationCommand = new PrivilegedAccelerationCommand();
 
    private final double kneeRangeOfMotion;
    private final double kneeMidRangeOfMotion;
@@ -92,6 +92,8 @@ public class LegConfigurationControlModule
    public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
                                         YoVariableRegistry parentRegistry)
    {
+      this.straightLegWalkingParameters = straightLegWalkingParameters;
+
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Leg";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
@@ -277,12 +279,12 @@ public class LegConfigurationControlModule
 
       double pAction, dAction;
 
-      if (BLEND_POSITION_ERROR_WITH_VIRTUAL_ACTUATOR)
+      if (straightLegWalkingParameters.blendPrivilegedConfigurationPositionError())
          pAction = InterpolationTools.linearInterpolate(jointSpacePAction, actuatorSpacePAction, percentDistanceToMidRange);
       else
          pAction = jointSpacePAction;
 
-      if (BLEND_VELOCITY_ERROR_WITH_VIRTUAL_ACTUATOR)
+      if (straightLegWalkingParameters.blendPrivilegedConfigurationVelocityError())
          dAction = InterpolationTools.linearInterpolate(jointSpaceDAction, actuatorSpaceDAction, percentDistanceToMidRange);
       else
          dAction = jointSpaceDAction;
