@@ -28,4 +28,6 @@ public interface CMPComponentPolynomialTrajectoryPlannerInterface
    public void setInitialCoPVelocity(FrameVector intialCoPVelocity);
    public void setInitialCoPAcceleration(FrameVector2d initialCoPAcceleration);
    public void setInitialCoPAcceleration(FrameVector initialCoPAcceleration);
+   public void setFinalCoPVelocity(FrameVector finalCoPVelocity);
+   public void setFinalCoPVelocity(FrameVector2d finalCoPVelocity);
 }

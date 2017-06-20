@@ -3,6 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
@@ -64,6 +68,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    private FramePoint currentCoPPosition;
    private FrameVector currentCoPVelocity;
    private FrameVector currentCoPAcceleration;
+   private FrameVector finalCoPVelocity;
 
    private BipedSupportPolygons bipedSupportPolygons;
    private SideDependentList<ReferenceFrame> currentSoleZUpFrames = new SideDependentList<>();
@@ -478,26 +483,46 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
       coPTrajectoryPolynomials.clear();
       if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CUBIC)
          generateCubicCoefficients();
-      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.NATURAL_CUBIC)
+      /*else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.NATURAL_CUBIC)
          generateNaturalCubicCoefficients();
       else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CLAMPED_CUBIC)
-         generateClampedCubicCoefficients();
+         generateClampedCubicCoefficients(); */
       else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.LINEAR)
          generateLinearCoefficients();
    }
 
-   private void generateClampedCubicCoefficients()
+   // TODO Implement clamped and natural cubic interpolation
+   /*private void generateClampedCubicCoefficients()
    {
+      Vector3D initialVelocity, finalVelocity;
+      if (currentCoPVelocity != null)
+      {
+         currentCoPVelocity.changeFrame(worldFrame);
+         initialVelocity = currentCoPVelocity.getVector();
+      }
+      else
+         initialVelocity = new Vector3D();
+
+      if (finalCoPVelocity != null)
+      {
+         currentCoPVelocity.changeFrame(worldFrame);
+         finalVelocity = currentCoPVelocity.getVector();
+      }
+      else
+         finalVelocity = new Vector3D();
+      
+      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(4*(coPWayPoints.getNumberOfTrajectoryPoints() - 1));
       for (int i = 0; i < coPWayPoints.getNumberOfTrajectoryPoints() - 1; i++)
       {
-
+         
       }
    }
 
    private void generateNaturalCubicCoefficients()
    {
-
-   }
+      PrintTools.warn(this, "Spline interpolation with natural cubic splines has not been implemented");
+      return;
+   }*/
 
    private void generateCubicCoefficients()
    {
@@ -564,8 +589,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    @Override
    public void setInitialCoPAcceleration(FrameVector2d initialCoPAccel)
    {
-      this.currentCoPAcceleration = new FrameVector(initialCoPAccel.getReferenceFrame(), initialCoPAccel.getX(), initialCoPAccel.getY(),
-                                                    0.0);
+      this.currentCoPAcceleration = new FrameVector(initialCoPAccel.getReferenceFrame(), initialCoPAccel.getX(), initialCoPAccel.getY(), 0.0);
    }
 
    @Override
@@ -575,9 +599,21 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    }
 
    @Override
-   public void setInitialCoPVelocity(FrameVector2d initiaCoPVelocity)
+   public void setInitialCoPVelocity(FrameVector2d initialCoPVelocity)
    {
-      this.currentCoPVelocity = new FrameVector(initiaCoPVelocity.getReferenceFrame(), initiaCoPVelocity.getX(), initiaCoPVelocity.getY(), 0.0);
+      this.currentCoPVelocity = new FrameVector(initialCoPVelocity.getReferenceFrame(), initialCoPVelocity.getX(), initialCoPVelocity.getY(), 0.0);
+   }
+   
+   @Override
+   public void setFinalCoPVelocity(FrameVector finalCoPVelocity)
+   {
+      this.currentCoPVelocity = new FrameVector(finalCoPVelocity);
+   }
+
+   @Override
+   public void setFinalCoPVelocity(FrameVector2d finalCoPVelocity)
+   {
+      this.currentCoPVelocity = new FrameVector(finalCoPVelocity.getReferenceFrame(), finalCoPVelocity.getX(), finalCoPVelocity.getY(), 0.0);
    }
 
    @Override
