@@ -141,7 +141,7 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    }
    
    /**
-    * Setting the terminal DCMequal to corresponding CMP to initialize the DCM backward iteration
+    * Setting the terminal DCM equal to corresponding CMP to initialize the DCM backward iteration
     * <P>
     * &xi;<sub>ref,T,n<sub>&phi;</sub></sub> = &nu;<sub>ref,T,n<sub>&phi;</sub></sub>
     * 
@@ -185,7 +185,7 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
     * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
     * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
     *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
-    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
     * 
     * @param generalizedAlphaBetaPrimeMatrix
     * @param generalizedGammaPrimeMatrix
