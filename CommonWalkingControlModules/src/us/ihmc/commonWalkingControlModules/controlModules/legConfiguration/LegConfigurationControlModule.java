@@ -32,7 +32,7 @@ public class LegConfigurationControlModule
    private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = false;
 
    private static final boolean BLEND_POSITION_ERROR_WITH_VIRTUAL_ACTUATOR = true;
-   private static final boolean BLEND_VELOCITY_ERROR_WITH_VIRTUAL_ACTUATOR = true;
+   private static final boolean BLEND_VELOCITY_ERROR_WITH_VIRTUAL_ACTUATOR = false;
 
    private final YoVariableRegistry registry;
 
@@ -285,7 +285,7 @@ public class LegConfigurationControlModule
       if (BLEND_VELOCITY_ERROR_WITH_VIRTUAL_ACTUATOR)
          dAction = InterpolationTools.linearInterpolate(jointSpaceDAction, actuatorSpaceDAction, percentDistanceToMidRange);
       else
-         dAction = jointSpacePAction;
+         dAction = jointSpaceDAction;
 
 
       kneePrivilegedPAction.set(pAction);

@@ -63,7 +63,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public boolean checkCoPLocationToTriggerToeOff()
                {
-                  return true;
+                  return false;
                }
 
                @Override
@@ -111,7 +111,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.08;
+                  return 0.10;
                }
 
                @Override
@@ -224,7 +224,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightLegActuatorSpacePrivilegedVelocityGain()
                      {
-                        return 6.0; // 6.0;
+                        return 6.0;
                      }
 
                      @Override
@@ -280,7 +280,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public double getJointAccelerationWeight()
                      {
                         //return 0.005;
-                        return 0.05;
+                        return 0.01;
                      }
                   };
                }
@@ -298,7 +298,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                      public double getPelvisPitchRatioOfLegAngle()
                      {
-                        return 0.7;
+                        return 0.3;
                      }
 
                      public double getPelvisYawRatioOfStepAngle()
