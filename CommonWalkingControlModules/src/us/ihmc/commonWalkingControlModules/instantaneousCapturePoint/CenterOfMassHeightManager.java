@@ -163,7 +163,7 @@ public class CenterOfMassHeightManager
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
       enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-      stateMachine.getCurrentState().getCurrentDesiredHeight(tempPosition);
+      stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
       
       tempPose.setToZero(tempPosition.getReferenceFrame());
       tempPose.setPosition(tempPosition);
@@ -186,7 +186,7 @@ public class CenterOfMassHeightManager
       if(command.isEnableUserPelvisControl())
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         stateMachine.getCurrentState().getCurrentDesiredHeight(tempPosition);
+         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
          
          tempPose.setToZero(tempPosition.getReferenceFrame());
          tempPose.setPosition(tempPosition);
