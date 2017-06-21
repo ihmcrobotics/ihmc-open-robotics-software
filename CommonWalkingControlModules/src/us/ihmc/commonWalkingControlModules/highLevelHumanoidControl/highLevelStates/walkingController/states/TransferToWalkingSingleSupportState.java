@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -15,7 +15,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 {
    private final YoDouble minimumTransferTime = new YoDouble("minimumTransferTime", registry);
 
-   private final KneeAngleManager kneeAngleManager;
+   private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
@@ -28,7 +28,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       this.minimumTransferTime.set(minimumTransferTime);
 
-      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
 
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfTransferToCollapseLeg());
    }
@@ -70,7 +70,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       pelvisOrientationManager.setUpcomingFootstep(walkingMessageHandler.peek(0));
       pelvisOrientationManager.initializeTransfer(transferToSide, footstepTiming.getTransferTime(), footstepTiming.getSwingTime());
 
-      kneeAngleManager.beginStraightening(transferToSide);
+      legConfigurationManager.beginStraightening(transferToSide);
    }
 
    @Override
@@ -81,9 +81,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       double transferDuration = walkingMessageHandler.peekTiming(0).getTransferTime();
 
       if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration &&
-            !kneeAngleManager.isLegCollapsed(transferToSide.getOppositeSide()))
+            !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
       {
-         kneeAngleManager.collapseLegDuringTransfer(transferToSide);
+         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
       }
    }
 
