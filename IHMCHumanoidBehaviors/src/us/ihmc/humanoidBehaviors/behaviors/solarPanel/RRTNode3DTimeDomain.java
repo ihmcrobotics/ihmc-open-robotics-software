@@ -55,11 +55,7 @@ public class RRTNode3DTimeDomain extends RRTNode
       
       nodeValidityTester.putTrajectoryMessages();
       
-      for(int i=0;i<30;i++)
-      {
-         nodeValidityTester.updateInternal();
-         ThreadTools.sleep(10);
-      }
+      
       
       PrintTools.info("isvalid END");
       return true;
