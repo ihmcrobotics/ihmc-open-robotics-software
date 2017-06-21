@@ -35,6 +35,7 @@ public class SimulationOverheadPlotterFactory
    private final OptionalFactoryField<Boolean> createInSeperateWindow = new OptionalFactoryField<>("createInSeperateWindow");
    private final OptionalFactoryField<Boolean> showOnStart = new OptionalFactoryField<>("showOnStart");
    private final OptionalFactoryField<String> variableNameToTrack = new OptionalFactoryField<>("variableNameToTrack");
+   private final OptionalFactoryField<String> plotterName = new OptionalFactoryField<>("plotterName");
 
    public SimulationOverheadPlotter createOverheadPlotter()
    {
@@ -42,6 +43,7 @@ public class SimulationOverheadPlotterFactory
 
       createInSeperateWindow.setDefaultValue(false);
       showOnStart.setDefaultValue(true);
+      plotterName.setDefaultValue("Plotter");
 
       SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
       simulationOverheadPlotter.setDrawHistory(false);
@@ -52,11 +54,10 @@ public class SimulationOverheadPlotterFactory
       JPanel plotterPanel = simulationOverheadPlotter.getJPanel();
       JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
-      String plotterName = "Plotter";
       
       if (createInSeperateWindow.get())
       {
-         JFrame overheadWindow = new JFrame(plotterName);
+         JFrame overheadWindow = new JFrame(plotterName.get());
          overheadWindow.setSize(new Dimension(1000, 1000));
          JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
          overheadWindow.add(splitPane);
@@ -93,7 +94,7 @@ public class SimulationOverheadPlotterFactory
       }
       else
       {
-         simulationConstructionSet.get().addExtraJpanel(plotterPanel, plotterName, showOnStart.get());
+         simulationConstructionSet.get().addExtraJpanel(plotterPanel, plotterName.get(), showOnStart.get());
 
          simulationConstructionSet.get().addExtraJpanel(scrollPane, "Plotter Legend", false);
 
@@ -151,6 +152,11 @@ public class SimulationOverheadPlotterFactory
    public void setCreateInSeperateWindow(boolean createInSeperateWindow)
    {
       this.createInSeperateWindow.set(createInSeperateWindow);
+   }
+   
+   public void setPlotterName(String plotterName)
+   {
+      this.plotterName.set(plotterName);
    }
    
    public void setShowOnStart(boolean showOnStart)
