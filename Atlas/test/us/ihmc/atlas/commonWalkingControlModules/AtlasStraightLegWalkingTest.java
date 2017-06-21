@@ -149,7 +149,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double[] getSwingWaypointProportions()
                {
-                  return new double[] {0.15, 0.80};
+                  return new double[] {0.15, 0.95};
                }
 
 
@@ -169,7 +169,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public boolean usePelvisRotation()
                      {
-                        return true;
+                        return false;
                      }
 
                      @Override
@@ -191,17 +191,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                         return 1.0;
                      }
 
-                     public boolean blendPrivilegedConfigurationPositionError()
-                     {
-                        return true;
-                     }
-
-                     public boolean blendPrivilegedConfigurationVelocityError()
-                     {
-                        return false;
-                     }
-
-
                      @Override
                      public double getPrivilegedMaxVelocity()
                      {
@@ -211,7 +200,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 0.7;
+                        return 0.4;
                      }
 
                      @Override
@@ -229,7 +218,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getSupportKneeCollapsingDuration()
                      {
-                        return 0.075;
+                        return 0.15;
                      }
 
                      @Override
@@ -259,6 +248,11 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                         gains.setActuatorSpaceKp(60.0);
                         gains.setActuatorSpaceKd(6.0);
 
+                        gains.setMaxBlendingFactor(0.6);
+
+                        gains.setBlendPositionError(false);
+                        gains.setBlendVelocityError(false);
+
                         return gains;
                      }
 
@@ -276,6 +270,11 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                         gains.setJointSpaceKd(4.0);
                         gains.setActuatorSpaceKp(200.0);
                         gains.setActuatorSpaceKd(6.0);
+
+                        gains.setMaxBlendingFactor(0.5);
+
+                        gains.setBlendPositionError(false);
+                        gains.setBlendVelocityError(false);
 
                         return gains;
                      }
@@ -306,7 +305,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public double getJointAccelerationWeight()
                      {
                         //return 0.005;
-                        return 0.01;
+                        return 0.05;
                      }
                   };
                }
@@ -346,6 +345,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          {
             return new AtlasCapturePointPlannerParameters(getPhysicalProperties())
             {
+               @Override
+               public double getMinEntryCMPForwardOffset()
+               {
+                  return -0.06;
+               }
+
                @Override
                public double getMinTimeToSpendOnExitCMPInSingleSupport()
                {
