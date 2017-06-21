@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -29,8 +31,13 @@ public class PelvisLeapOfFaithModule
    private double swingDuration;
 
    private final YoBoolean usePelvisRotation = new YoBoolean("leapOfFaithUsePelvisRotation", registry);
+   private final YoBoolean relaxPelvis = new YoBoolean("leapOfFaithRelaxPelvis", registry);
+
    private final YoDouble yawGain = new YoDouble("leapOfFaithPelvisYawGain", registry);
    private final YoDouble rollGain = new YoDouble("leapOfFaithPelvisRollGain", registry);
+
+   private final YoDouble relaxationRate = new YoDouble("leapOfFaithRelaxationRate", registry);
+   private final YoDouble relaxationFraction = new YoDouble("leapOfFaithRelaxationFraction", registry);
 
    public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
                                   YoVariableRegistry parentRegistry)
@@ -38,8 +45,12 @@ public class PelvisLeapOfFaithModule
       this.soleZUpFrames = soleZUpFrames;
 
       usePelvisRotation.set(parameters.usePelvisRotation());
+      relaxPelvis.set(parameters.relaxPelvisControl());
+
       yawGain.set(parameters.getPelvisYawGain());
       rollGain.set(parameters.getPelvisRollGain());
+
+      relaxationRate.set(parameters.getRelaxationRate());
 
       parentRegistry.addChild(registry);
    }
@@ -88,6 +99,22 @@ public class PelvisLeapOfFaithModule
 
          orientationOffset.setRoll(rollAngleOffset);
          orientationOffset.setYaw(yawAngleOffset);
+      }
+   }
+
+   public void relaxAngularWeight(double currentTimeInState, Vector3D angularWeightToPack)
+   {
+      if (isInSwing && relaxPelvis.getBooleanValue())
+      {
+         double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
+         double relaxationFraction;
+         if (exceededTime > 0.0)
+            relaxationFraction = MathTools.clamp(relaxationRate.getDoubleValue() * exceededTime + 0.2, 0.0, 1.0);
+         else
+            relaxationFraction = 0.0;
+         this.relaxationFraction.set(relaxationFraction);
+
+         angularWeightToPack.scale(1.0 - relaxationFraction);
       }
    }
 

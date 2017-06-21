@@ -62,6 +62,16 @@ public class LeapOfFaithParameters
     */
    public double getPelvisRollGain()
    {
+      return 20.0;
+   }
+
+   public boolean relaxPelvisControl()
+   {
+      return false;
+   }
+
+   public double getRelaxationRate()
+   {
       return 10.0;
    }
 }
