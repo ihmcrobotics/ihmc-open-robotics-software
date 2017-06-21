@@ -526,11 +526,17 @@ public class SwingState extends AbstractUnconstrainedState
       desiredAngularAcceleration.changeFrame(worldFrame);
    }
 
-   private double computeScaleFactor(double time)
+   private double computeScaleFactor(double timeInState)
    {
-      double phaseInSwingState = time / swingDuration.getDoubleValue();
+      double phaseInSwingState = timeInState / swingDuration.getDoubleValue();
 
-      return  (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
+      double scaleFactor;
+      if (timeInState < swingDuration.getDoubleValue())
+         scaleFactor = (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
+      else
+         scaleFactor = (1.0 + 0.1 * (timeInState - swingDuration.getDoubleValue())) * maxScalingFactor;
+
+      return scaleFactor;
    }
 
    public void setFootstep(Footstep footstep, double swingTime)
