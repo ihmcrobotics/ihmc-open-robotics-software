@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class JVMStatisticsGenerator
@@ -29,22 +29,22 @@ public class JVMStatisticsGenerator
    private final YoVariableRegistry registry = new YoVariableRegistry("JVMStatistics");
    private final RobotVisualizer visualizer;
 
-   private final LongYoVariable freeMemory = new LongYoVariable("freeMemory", registry);
-   private final LongYoVariable maxMemory = new LongYoVariable("maxMemory", registry);
-   private final LongYoVariable usedMemory = new LongYoVariable("usedMemory", registry);
-   private final LongYoVariable totalMemory = new LongYoVariable("totalMemory", registry);
+   private final YoLong freeMemory = new YoLong("freeMemory", registry);
+   private final YoLong maxMemory = new YoLong("maxMemory", registry);
+   private final YoLong usedMemory = new YoLong("usedMemory", registry);
+   private final YoLong totalMemory = new YoLong("totalMemory", registry);
 
-   private final LongYoVariable totalGCInvocations = new LongYoVariable("totalGCInvocations", registry);
-   private final LongYoVariable totalGCTotalCollectionTimeMs = new LongYoVariable("gcTotalCollectionTimeMs", registry);
+   private final YoLong totalGCInvocations = new YoLong("totalGCInvocations", registry);
+   private final YoLong totalGCTotalCollectionTimeMs = new YoLong("gcTotalCollectionTimeMs", registry);
 
-   private final IntegerYoVariable loadedClassCount = new IntegerYoVariable("loadedClassCount", registry);
-   private final LongYoVariable totalLoadedClassCount = new LongYoVariable("totalLoadedClassCount", registry);
-   private final LongYoVariable unloadedClassCount = new LongYoVariable("unloadedClassCount", registry);
+   private final YoInteger loadedClassCount = new YoInteger("loadedClassCount", registry);
+   private final YoLong totalLoadedClassCount = new YoLong("totalLoadedClassCount", registry);
+   private final YoLong unloadedClassCount = new YoLong("unloadedClassCount", registry);
 
-   private final LongYoVariable totalCompilationTime = new LongYoVariable("totalCompilationTimeMs", registry);
+   private final YoLong totalCompilationTime = new YoLong("totalCompilationTimeMs", registry);
 
-   private final IntegerYoVariable availableProcessors = new IntegerYoVariable("availableProcessors", registry);
-   private final DoubleYoVariable systemLoadAverage = new DoubleYoVariable("systemLoadAverage", registry);
+   private final YoInteger availableProcessors = new YoInteger("availableProcessors", registry);
+   private final YoDouble systemLoadAverage = new YoDouble("systemLoadAverage", registry);
 
    private final ArrayList<GCBeanHolder> gcBeanHolders = new ArrayList<>();
    private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
@@ -82,14 +82,14 @@ public class JVMStatisticsGenerator
    private class GCBeanHolder
    {
       final GarbageCollectorMXBean gcBean;
-      final LongYoVariable gcInvocations;
-      final LongYoVariable gcTotalCollectionTimeMs;
+      final YoLong gcInvocations;
+      final YoLong gcTotalCollectionTimeMs;
 
       GCBeanHolder(String name, GarbageCollectorMXBean gcBean)
       {
          this.gcBean = gcBean;
-         this.gcInvocations = new LongYoVariable(name + "GCInvocations", registry);
-         this.gcTotalCollectionTimeMs = new LongYoVariable(name + "GCTotalTimeMs", registry);
+         this.gcInvocations = new YoLong(name + "GCInvocations", registry);
+         this.gcTotalCollectionTimeMs = new YoLong(name + "GCTotalTimeMs", registry);
       }
 
       void update()

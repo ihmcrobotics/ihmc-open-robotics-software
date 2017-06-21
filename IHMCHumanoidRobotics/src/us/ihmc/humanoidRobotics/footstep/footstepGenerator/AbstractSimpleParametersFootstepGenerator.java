@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.CompositeOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -15,14 +15,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-
 public abstract class AbstractSimpleParametersFootstepGenerator extends AbstractFootstepGenerator
 {
-   protected final DoubleYoVariable straightWalkingStepLength = new DoubleYoVariable("straightWalkingStepLength", registry);
-   protected final DoubleYoVariable straightWalkingStepWidth = new DoubleYoVariable("straightWalkingStepWidth", registry);
-   protected final DoubleYoVariable turningWalkingClosingAngleIncrement = new DoubleYoVariable("turningWalkingInswardsAngleIncrement", registry);
-   protected final DoubleYoVariable turningWalkingOpeningAngleIncrement = new DoubleYoVariable("turningWalkingAngleIncrement", registry);
-   protected final DoubleYoVariable turningWalkingStepWidth = new DoubleYoVariable("turningWalkingStepWidth", registry);
+   protected final YoDouble straightWalkingStepLength = new YoDouble("straightWalkingStepLength", registry);
+   protected final YoDouble straightWalkingStepWidth = new YoDouble("straightWalkingStepWidth", registry);
+   protected final YoDouble turningWalkingClosingAngleIncrement = new YoDouble("turningWalkingInswardsAngleIncrement", registry);
+   protected final YoDouble turningWalkingOpeningAngleIncrement = new YoDouble("turningWalkingAngleIncrement", registry);
+   protected final YoDouble turningWalkingStepWidth = new YoDouble("turningWalkingStepWidth", registry);
    protected boolean isLeftRightPath;
    protected boolean isRightwardPath;
    protected FootstepCounter footstepCounter;
@@ -209,7 +208,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
       else
          planningPose = path.getPoseAtS(pathSParameter);
       FramePoint2d footstepPosition2d = new FramePoint2d();
-      planningPose.getPosition(footstepPosition2d);
+      planningPose.getPositionIncludingFrame(footstepPosition2d);
       double footHeading = planningPose.getYaw();
       footstepPosition2d = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
       FramePose2d footstepPose2d = new FramePose2d(planningPose);

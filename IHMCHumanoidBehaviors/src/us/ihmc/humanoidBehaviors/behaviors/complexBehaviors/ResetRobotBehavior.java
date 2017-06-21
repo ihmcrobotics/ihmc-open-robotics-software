@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
@@ -25,15 +25,15 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
-   public ResetRobotBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public ResetRobotBehavior(CommunicationBridge outgoingCommunicationBridge, YoDouble yoTime)
    {
       this(true, true, true, true, outgoingCommunicationBridge, yoTime);
    }
 
    public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, CommunicationBridge outgoingCommunicationBridge,
-         DoubleYoVariable yoTime)
+         YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
       this.leftArm = leftArm;

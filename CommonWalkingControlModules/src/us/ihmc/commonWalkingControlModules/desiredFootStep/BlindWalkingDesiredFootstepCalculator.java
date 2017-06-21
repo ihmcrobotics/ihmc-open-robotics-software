@@ -7,10 +7,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -29,22 +29,22 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
    private final YoFramePoint2d desiredDestination = new YoFramePoint2d("desiredDestination", "", worldFrame, registry);
 
-   private final EnumYoVariable<BlindWalkingDirection> blindWalkingDirection = new EnumYoVariable<BlindWalkingDirection>("blindWalkingDirection", "", registry,
+   private final YoEnum<BlindWalkingDirection> blindWalkingDirection = new YoEnum<BlindWalkingDirection>("blindWalkingDirection", "", registry,
          BlindWalkingDirection.class, false);
 
-   private final DoubleYoVariable distanceToDestination = new DoubleYoVariable("distanceToDestination", registry);
-   private final DoubleYoVariable angleToDestination = new DoubleYoVariable("angleToDestination", registry);
+   private final YoDouble distanceToDestination = new YoDouble("distanceToDestination", registry);
+   private final YoDouble angleToDestination = new YoDouble("angleToDestination", registry);
 
-   private final DoubleYoVariable desiredStepWidth = new DoubleYoVariable("desiredStepWidth", registry);
-   private final DoubleYoVariable desiredStepForward = new DoubleYoVariable("desiredStepForward", registry);
-   private final DoubleYoVariable desiredStepSideward = new DoubleYoVariable("desiredStepSideward", registry);
-   private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
+   private final YoDouble desiredStepWidth = new YoDouble("desiredStepWidth", registry);
+   private final YoDouble desiredStepForward = new YoDouble("desiredStepForward", registry);
+   private final YoDouble desiredStepSideward = new YoDouble("desiredStepSideward", registry);
+   private final YoDouble maxStepLength = new YoDouble("maxStepLength", registry);
 
-   private final DoubleYoVariable minStepWidth = new DoubleYoVariable("minStepWidth", registry);
-   private final DoubleYoVariable maxStepWidth = new DoubleYoVariable("maxStepWidth", registry);
+   private final YoDouble minStepWidth = new YoDouble("minStepWidth", registry);
+   private final YoDouble maxStepWidth = new YoDouble("maxStepWidth", registry);
 
-   private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
-   private final IntegerYoVariable numberBlindStepsInPlace = new IntegerYoVariable("numberBlindStepsInPlace", registry);
+   private final YoDouble stepPitch = new YoDouble("stepPitch", registry);
+   private final YoInteger numberBlindStepsInPlace = new YoInteger("numberBlindStepsInPlace", registry);
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ZUpFrame> soleZUpFrames = new SideDependentList<>();

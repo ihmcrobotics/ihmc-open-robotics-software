@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.simulationTesting;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
@@ -94,7 +94,7 @@ public class SimulationRunsSameWayTwiceVerifier
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
 
    {
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
       if(walk != null)
       {
          walk.set(false);

@@ -1,21 +1,20 @@
 package us.ihmc.avatar.posePlayback;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-
 
 public class PlaybackPoseInterpolator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable poseStartTime = new DoubleYoVariable("poseStartTime", registry);
-   private final DoubleYoVariable poseMorphPercentage = new DoubleYoVariable("poseMorphPercentage", registry);
-   private final DoubleYoVariable poseMorphDuration = new DoubleYoVariable("poseMorphDuration", registry);
-   private final DoubleYoVariable timeDelayAfterPose = new DoubleYoVariable("timeDelayAfterPose", registry);
-   private final IntegerYoVariable poseSequenceIndex = new IntegerYoVariable("poseSequenceIndex", registry);
+   private final YoDouble poseStartTime = new YoDouble("poseStartTime", registry);
+   private final YoDouble poseMorphPercentage = new YoDouble("poseMorphPercentage", registry);
+   private final YoDouble poseMorphDuration = new YoDouble("poseMorphDuration", registry);
+   private final YoDouble timeDelayAfterPose = new YoDouble("timeDelayAfterPose", registry);
+   private final YoInteger poseSequenceIndex = new YoInteger("poseSequenceIndex", registry);
    
    private boolean lastPoseIncrementedSequence = false;
 //   private final double defaultPoseMorphDuration = 1.0;

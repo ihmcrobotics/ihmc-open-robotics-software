@@ -1,13 +1,13 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
+public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 {
    public enum HysteresisState
    {
@@ -15,35 +15,35 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    };
 
    private final OneDoFJoint joint;
-   private final DoubleYoVariable torqueHysteresisAmplitude;
-   private final DoubleYoVariable jointAccelerationMin;
-   private final DoubleYoVariable jointVelocityMax;
+   private final YoDouble torqueHysteresisAmplitude;
+   private final YoDouble jointAccelerationMin;
+   private final YoDouble jointVelocityMax;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable ramp;
-   private final DoubleYoVariable rampUpTime;
-   private final DoubleYoVariable rampDownTime;
-   private final DoubleYoVariable rampStartTime;
+   private final YoDouble yoTime;
+   private final YoDouble ramp;
+   private final YoDouble rampUpTime;
+   private final YoDouble rampDownTime;
+   private final YoDouble rampStartTime;
 
-   private final EnumYoVariable<HysteresisState> hysteresisState;
+   private final YoEnum<HysteresisState> hysteresisState;
 
-   private final BooleanYoVariable isAccelerationHigh;
-   private final BooleanYoVariable isVelocityLow;
+   private final YoBoolean isAccelerationHigh;
+   private final YoBoolean isVelocityLow;
 
-   private final DoubleYoVariable hysteresisSign;
+   private final YoDouble hysteresisSign;
 
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, DoubleYoVariable torqueHysteresisAmplitude,
-         DoubleYoVariable jointAccelerationMin, DoubleYoVariable jointVelocityMax, DoubleYoVariable rampTime, DoubleYoVariable yoTime,
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, YoDouble torqueHysteresisAmplitude,
+         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
          YoVariableRegistry registry)
    {
       this(prefix, joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, DoubleYoVariable torqueHysteresisAmplitude,
-         DoubleYoVariable jointAccelerationMin, DoubleYoVariable jointVelocityMax, DoubleYoVariable rampUpTime, DoubleYoVariable rampDownTime,
-         DoubleYoVariable yoTime, YoVariableRegistry registry)
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, YoDouble torqueHysteresisAmplitude,
+         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
+         YoDouble yoTime, YoVariableRegistry registry)
    {
       super(prefix + joint.getName(), registry);
       this.joint = joint;
@@ -54,16 +54,16 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
       this.rampDownTime = rampDownTime;
       this.yoTime = yoTime;
 
-      ramp = new DoubleYoVariable(getName() + "Ramp", registry);
-      rampStartTime = new DoubleYoVariable(getName() + "RampStartTime", registry);
-      hysteresisState = new EnumYoVariable<>(getName() + "State", registry, HysteresisState.class, false);
+      ramp = new YoDouble(getName() + "Ramp", registry);
+      rampStartTime = new YoDouble(getName() + "RampStartTime", registry);
+      hysteresisState = new YoEnum<>(getName() + "State", registry, HysteresisState.class, false);
 
-      isAccelerationHigh = new BooleanYoVariable(getName() + "IsQddHigh", registry);
-      isVelocityLow = new BooleanYoVariable(getName() + "IsQdLow", registry);
+      isAccelerationHigh = new YoBoolean(getName() + "IsQddHigh", registry);
+      isVelocityLow = new YoBoolean(getName() + "IsQdLow", registry);
 
-      hysteresisSign = new DoubleYoVariable(getName() + "HysteresisSign", registry);
+      hysteresisSign = new YoDouble(getName() + "HysteresisSign", registry);
 
-      enabled = new BooleanYoVariable(getName() + "Enabled", registry);
+      enabled = new YoBoolean(getName() + "Enabled", registry);
    }
 
    public void reset()

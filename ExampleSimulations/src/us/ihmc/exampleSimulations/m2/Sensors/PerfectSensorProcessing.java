@@ -8,9 +8,9 @@ import us.ihmc.exampleSimulations.m2.M2Robot;
 import us.ihmc.exampleSimulations.m2.M2Simulation;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -36,75 +36,75 @@ public class PerfectSensorProcessing
 
    // These are the variables that are automatically created when the robot is
    // created:
-   private BooleanYoVariable gc_right_toe_in_slip, gc_right_toe_out_slip, gc_right_heel_in_slip, gc_right_heel_out_slip, gc_left_toe_in_slip, gc_left_toe_out_slip;
-   private BooleanYoVariable gc_left_heel_in_slip, gc_left_heel_out_slip;
-   private DoubleYoVariable t;
+   private YoBoolean gc_right_toe_in_slip, gc_right_toe_out_slip, gc_right_heel_in_slip, gc_right_heel_out_slip, gc_left_toe_in_slip, gc_left_toe_out_slip;
+   private YoBoolean gc_left_heel_in_slip, gc_left_heel_out_slip;
+   private YoDouble t;
 
-   private DoubleYoVariable q_yaw;
-   private DoubleYoVariable q_pitch;
-   private DoubleYoVariable q_roll;
+   private YoDouble q_yaw;
+   private YoDouble q_pitch;
+   private YoDouble q_roll;
 
-   private DoubleYoVariable q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z, q_qs;
-   private DoubleYoVariable q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
-   private DoubleYoVariable q_right_hip_yaw, qd_right_hip_yaw, qdd_right_hip_yaw, tau_right_hip_yaw;
-   private DoubleYoVariable q_right_hip_roll, qd_right_hip_roll, qdd_right_hip_roll, tau_right_hip_roll;
-   private DoubleYoVariable q_right_hip_pitch, qd_right_hip_pitch, qdd_right_hip_pitch, tau_right_hip_pitch;
-   private DoubleYoVariable q_right_knee, qd_right_knee, qdd_right_knee, tau_right_knee, tau_lim_right_knee;
-   private DoubleYoVariable q_right_ankle_roll, qd_right_ankle_roll, qdd_right_ankle_roll, tau_right_ankle_roll;
-   private DoubleYoVariable q_right_ankle_pitch, qd_right_ankle_pitch, qdd_right_ankle_pitch, tau_right_ankle_pitch;
-   private DoubleYoVariable gc_right_toe_in_x, gc_right_toe_in_y, gc_right_toe_in_z, gc_right_toe_in_dx, gc_right_toe_in_dy, gc_right_toe_in_dz, gc_right_toe_in_fx,
+   private YoDouble q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z, q_qs;
+   private YoDouble q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
+   private YoDouble q_right_hip_yaw, qd_right_hip_yaw, qdd_right_hip_yaw, tau_right_hip_yaw;
+   private YoDouble q_right_hip_roll, qd_right_hip_roll, qdd_right_hip_roll, tau_right_hip_roll;
+   private YoDouble q_right_hip_pitch, qd_right_hip_pitch, qdd_right_hip_pitch, tau_right_hip_pitch;
+   private YoDouble q_right_knee, qd_right_knee, qdd_right_knee, tau_right_knee, tau_lim_right_knee;
+   private YoDouble q_right_ankle_roll, qd_right_ankle_roll, qdd_right_ankle_roll, tau_right_ankle_roll;
+   private YoDouble q_right_ankle_pitch, qd_right_ankle_pitch, qdd_right_ankle_pitch, tau_right_ankle_pitch;
+   private YoDouble gc_right_toe_in_x, gc_right_toe_in_y, gc_right_toe_in_z, gc_right_toe_in_dx, gc_right_toe_in_dy, gc_right_toe_in_dz, gc_right_toe_in_fx,
                       gc_right_toe_in_fy, gc_right_toe_in_fz, gc_right_toe_in_px;
-   private DoubleYoVariable gc_right_toe_in_py, gc_right_toe_in_pz, gc_right_toe_in_tdx, gc_right_toe_in_tdy, gc_right_toe_in_tdz, gc_right_toe_in_fs;
-   private IntegerYoVariable gc_right_toe_in_coll;
-   private DoubleYoVariable gc_right_toe_out_x, gc_right_toe_out_y, gc_right_toe_out_z, gc_right_toe_out_dx, gc_right_toe_out_dy, gc_right_toe_out_dz,
+   private YoDouble gc_right_toe_in_py, gc_right_toe_in_pz, gc_right_toe_in_tdx, gc_right_toe_in_tdy, gc_right_toe_in_tdz, gc_right_toe_in_fs;
+   private YoInteger gc_right_toe_in_coll;
+   private YoDouble gc_right_toe_out_x, gc_right_toe_out_y, gc_right_toe_out_z, gc_right_toe_out_dx, gc_right_toe_out_dy, gc_right_toe_out_dz,
                       gc_right_toe_out_fx, gc_right_toe_out_fy, gc_right_toe_out_fz, gc_right_toe_out_px;
-   private DoubleYoVariable gc_right_toe_out_py, gc_right_toe_out_pz, gc_right_toe_out_tdx, gc_right_toe_out_tdy, gc_right_toe_out_tdz, gc_right_toe_out_fs;
-   private IntegerYoVariable gc_right_toe_out_coll;
-   private DoubleYoVariable gc_right_heel_in_x, gc_right_heel_in_y, gc_right_heel_in_z, gc_right_heel_in_dx, gc_right_heel_in_dy, gc_right_heel_in_dz,
+   private YoDouble gc_right_toe_out_py, gc_right_toe_out_pz, gc_right_toe_out_tdx, gc_right_toe_out_tdy, gc_right_toe_out_tdz, gc_right_toe_out_fs;
+   private YoInteger gc_right_toe_out_coll;
+   private YoDouble gc_right_heel_in_x, gc_right_heel_in_y, gc_right_heel_in_z, gc_right_heel_in_dx, gc_right_heel_in_dy, gc_right_heel_in_dz,
                       gc_right_heel_in_fx, gc_right_heel_in_fy, gc_right_heel_in_fz, gc_right_heel_in_px;
-   private DoubleYoVariable gc_right_heel_in_py, gc_right_heel_in_pz, gc_right_heel_in_tdx, gc_right_heel_in_tdy, gc_right_heel_in_tdz, gc_right_heel_in_fs;
-   private IntegerYoVariable gc_right_heel_in_coll;
-   private DoubleYoVariable gc_right_heel_out_x, gc_right_heel_out_y, gc_right_heel_out_z, gc_right_heel_out_dx, gc_right_heel_out_dy, gc_right_heel_out_dz,
+   private YoDouble gc_right_heel_in_py, gc_right_heel_in_pz, gc_right_heel_in_tdx, gc_right_heel_in_tdy, gc_right_heel_in_tdz, gc_right_heel_in_fs;
+   private YoInteger gc_right_heel_in_coll;
+   private YoDouble gc_right_heel_out_x, gc_right_heel_out_y, gc_right_heel_out_z, gc_right_heel_out_dx, gc_right_heel_out_dy, gc_right_heel_out_dz,
                       gc_right_heel_out_fx, gc_right_heel_out_fy, gc_right_heel_out_fz, gc_right_heel_out_px;
-   private DoubleYoVariable gc_right_heel_out_py, gc_right_heel_out_pz, gc_right_heel_out_tdx, gc_right_heel_out_tdy, gc_right_heel_out_tdz, gc_right_heel_out_fs;
-   private IntegerYoVariable gc_right_heel_out_coll;
-   private DoubleYoVariable q_left_hip_yaw, qd_left_hip_yaw, qdd_left_hip_yaw, tau_left_hip_yaw;
-   private DoubleYoVariable q_left_hip_roll, qd_left_hip_roll, qdd_left_hip_roll, tau_left_hip_roll;
-   private DoubleYoVariable q_left_hip_pitch, qd_left_hip_pitch, qdd_left_hip_pitch, tau_left_hip_pitch;
-   private DoubleYoVariable q_left_knee, qd_left_knee, qdd_left_knee, tau_left_knee, tau_lim_left_knee;
-   private DoubleYoVariable q_left_ankle_roll, qd_left_ankle_roll, qdd_left_ankle_roll, tau_left_ankle_roll;
-   private DoubleYoVariable q_left_ankle_pitch, qd_left_ankle_pitch, qdd_left_ankle_pitch, tau_left_ankle_pitch;
-   private DoubleYoVariable gc_left_toe_in_x, gc_left_toe_in_y, gc_left_toe_in_z, gc_left_toe_in_dx, gc_left_toe_in_dy, gc_left_toe_in_dz, gc_left_toe_in_fx,
+   private YoDouble gc_right_heel_out_py, gc_right_heel_out_pz, gc_right_heel_out_tdx, gc_right_heel_out_tdy, gc_right_heel_out_tdz, gc_right_heel_out_fs;
+   private YoInteger gc_right_heel_out_coll;
+   private YoDouble q_left_hip_yaw, qd_left_hip_yaw, qdd_left_hip_yaw, tau_left_hip_yaw;
+   private YoDouble q_left_hip_roll, qd_left_hip_roll, qdd_left_hip_roll, tau_left_hip_roll;
+   private YoDouble q_left_hip_pitch, qd_left_hip_pitch, qdd_left_hip_pitch, tau_left_hip_pitch;
+   private YoDouble q_left_knee, qd_left_knee, qdd_left_knee, tau_left_knee, tau_lim_left_knee;
+   private YoDouble q_left_ankle_roll, qd_left_ankle_roll, qdd_left_ankle_roll, tau_left_ankle_roll;
+   private YoDouble q_left_ankle_pitch, qd_left_ankle_pitch, qdd_left_ankle_pitch, tau_left_ankle_pitch;
+   private YoDouble gc_left_toe_in_x, gc_left_toe_in_y, gc_left_toe_in_z, gc_left_toe_in_dx, gc_left_toe_in_dy, gc_left_toe_in_dz, gc_left_toe_in_fx,
                       gc_left_toe_in_fy, gc_left_toe_in_fz, gc_left_toe_in_px;
-   private DoubleYoVariable gc_left_toe_in_py, gc_left_toe_in_pz, gc_left_toe_in_tdx, gc_left_toe_in_tdy, gc_left_toe_in_tdz, gc_left_toe_in_fs;
-   private IntegerYoVariable gc_left_toe_in_coll;
-   private DoubleYoVariable gc_left_toe_out_x, gc_left_toe_out_y, gc_left_toe_out_z, gc_left_toe_out_dx, gc_left_toe_out_dy, gc_left_toe_out_dz, gc_left_toe_out_fx,
+   private YoDouble gc_left_toe_in_py, gc_left_toe_in_pz, gc_left_toe_in_tdx, gc_left_toe_in_tdy, gc_left_toe_in_tdz, gc_left_toe_in_fs;
+   private YoInteger gc_left_toe_in_coll;
+   private YoDouble gc_left_toe_out_x, gc_left_toe_out_y, gc_left_toe_out_z, gc_left_toe_out_dx, gc_left_toe_out_dy, gc_left_toe_out_dz, gc_left_toe_out_fx,
                       gc_left_toe_out_fy, gc_left_toe_out_fz, gc_left_toe_out_px;
-   private DoubleYoVariable gc_left_toe_out_py, gc_left_toe_out_pz, gc_left_toe_out_tdx, gc_left_toe_out_tdy, gc_left_toe_out_tdz, gc_left_toe_out_fs;
-   private IntegerYoVariable gc_left_toe_out_coll;
-   private DoubleYoVariable gc_left_heel_in_x, gc_left_heel_in_y, gc_left_heel_in_z, gc_left_heel_in_dx, gc_left_heel_in_dy, gc_left_heel_in_dz, gc_left_heel_in_fx,
+   private YoDouble gc_left_toe_out_py, gc_left_toe_out_pz, gc_left_toe_out_tdx, gc_left_toe_out_tdy, gc_left_toe_out_tdz, gc_left_toe_out_fs;
+   private YoInteger gc_left_toe_out_coll;
+   private YoDouble gc_left_heel_in_x, gc_left_heel_in_y, gc_left_heel_in_z, gc_left_heel_in_dx, gc_left_heel_in_dy, gc_left_heel_in_dz, gc_left_heel_in_fx,
                       gc_left_heel_in_fy, gc_left_heel_in_fz, gc_left_heel_in_px;
-   private DoubleYoVariable gc_left_heel_in_py, gc_left_heel_in_pz, gc_left_heel_in_tdx, gc_left_heel_in_tdy, gc_left_heel_in_tdz, gc_left_heel_in_fs;
-   private IntegerYoVariable gc_left_heel_in_coll;
-   private DoubleYoVariable gc_left_heel_out_x, gc_left_heel_out_y, gc_left_heel_out_z, gc_left_heel_out_dx, gc_left_heel_out_dy, gc_left_heel_out_dz,
+   private YoDouble gc_left_heel_in_py, gc_left_heel_in_pz, gc_left_heel_in_tdx, gc_left_heel_in_tdy, gc_left_heel_in_tdz, gc_left_heel_in_fs;
+   private YoInteger gc_left_heel_in_coll;
+   private YoDouble gc_left_heel_out_x, gc_left_heel_out_y, gc_left_heel_out_z, gc_left_heel_out_dx, gc_left_heel_out_dy, gc_left_heel_out_dz,
                       gc_left_heel_out_fx, gc_left_heel_out_fy, gc_left_heel_out_fz, gc_left_heel_out_px;
-   private DoubleYoVariable gc_left_heel_out_py, gc_left_heel_out_pz, gc_left_heel_out_tdx, gc_left_heel_out_tdy, gc_left_heel_out_tdz, gc_left_heel_out_fs;
-   private IntegerYoVariable gc_left_heel_out_coll;
+   private YoDouble gc_left_heel_out_py, gc_left_heel_out_pz, gc_left_heel_out_tdx, gc_left_heel_out_tdy, gc_left_heel_out_tdz, gc_left_heel_out_fs;
+   private YoInteger gc_left_heel_out_coll;
 
-   private DoubleYoVariable[] robotBodyPosition;
-   private DoubleYoVariable[] robotBodyVelocity;
-   private DoubleYoVariable[] robotBodyAcceleration;
+   private YoDouble[] robotBodyPosition;
+   private YoDouble[] robotBodyVelocity;
+   private YoDouble[] robotBodyAcceleration;
 
-   private DoubleYoVariable[][] limbJointPositions;
-   private DoubleYoVariable[][] limbJointVelocities;
-   private DoubleYoVariable[][] limbJointAccelerations;
-   private DoubleYoVariable[] robotYawPitchAndRoll;
-   private DoubleYoVariable[] robotYawPitchAndRollVelocity;
-   private DoubleYoVariable[] robotYawPitchAndRollAcceleration;
+   private YoDouble[][] limbJointPositions;
+   private YoDouble[][] limbJointVelocities;
+   private YoDouble[][] limbJointAccelerations;
+   private YoDouble[] robotYawPitchAndRoll;
+   private YoDouble[] robotYawPitchAndRollVelocity;
+   private YoDouble[] robotYawPitchAndRollAcceleration;
 
-   private DoubleYoVariable[][] groundContactFramePointsPositions;
-   private DoubleYoVariable[][] groundContactFramePointsForces;
-   private DoubleYoVariable[][] groundContactFramePointsFootSwitch;
+   private YoDouble[][] groundContactFramePointsPositions;
+   private YoDouble[][] groundContactFramePointsForces;
+   private YoDouble[][] groundContactFramePointsFootSwitch;
 
    ProcessedSensors processedSensors;
 
@@ -125,227 +125,227 @@ public class PerfectSensorProcessing
    // Get the variables that are stored with the robot:
    public void initialize()
    {
-      t = (DoubleYoVariable)robot.getVariable("t");
+      t = (YoDouble)robot.getVariable("t");
 
-      q_yaw = (DoubleYoVariable)robot.getVariable("q_yaw");
-      q_pitch = (DoubleYoVariable)robot.getVariable("q_pitch");
-      q_roll = (DoubleYoVariable)robot.getVariable("q_roll");
+      q_yaw = (YoDouble)robot.getVariable("q_yaw");
+      q_pitch = (YoDouble)robot.getVariable("q_pitch");
+      q_roll = (YoDouble)robot.getVariable("q_roll");
 
-      q_x = (DoubleYoVariable)robot.getVariable("q_x");
-      q_y = (DoubleYoVariable)robot.getVariable("q_y");
-      q_z = (DoubleYoVariable)robot.getVariable("q_z");
-      qd_x = (DoubleYoVariable)robot.getVariable("qd_x");
-      qd_y = (DoubleYoVariable)robot.getVariable("qd_y");
-      qd_z = (DoubleYoVariable)robot.getVariable("qd_z");
-      qdd_x = (DoubleYoVariable)robot.getVariable("qdd_x");
-      qdd_y = (DoubleYoVariable)robot.getVariable("qdd_y");
-      qdd_z = (DoubleYoVariable)robot.getVariable("qdd_z");
-      q_qs = (DoubleYoVariable)robot.getVariable("q_qs");
-      q_qx = (DoubleYoVariable)robot.getVariable("q_qx");
-      q_qy = (DoubleYoVariable)robot.getVariable("q_qy");
-      q_qz = (DoubleYoVariable)robot.getVariable("q_qz");
-      qd_wx = (DoubleYoVariable)robot.getVariable("qd_wx");
-      qd_wy = (DoubleYoVariable)robot.getVariable("qd_wy");
-      qd_wz = (DoubleYoVariable)robot.getVariable("qd_wz");
-      qdd_wx = (DoubleYoVariable)robot.getVariable("qdd_wx");
-      qdd_wy = (DoubleYoVariable)robot.getVariable("qdd_wy");
-      qdd_wz = (DoubleYoVariable)robot.getVariable("qdd_wz");
-      q_right_hip_yaw = (DoubleYoVariable)robot.getVariable("q_right_hip_yaw");
-      qd_right_hip_yaw = (DoubleYoVariable)robot.getVariable("qd_right_hip_yaw");
-      qdd_right_hip_yaw = (DoubleYoVariable)robot.getVariable("qdd_right_hip_yaw");
-      tau_right_hip_yaw = (DoubleYoVariable)robot.getVariable("tau_right_hip_yaw");
-      q_right_hip_roll = (DoubleYoVariable)robot.getVariable("q_right_hip_roll");
-      qd_right_hip_roll = (DoubleYoVariable)robot.getVariable("qd_right_hip_roll");
-      qdd_right_hip_roll = (DoubleYoVariable)robot.getVariable("qdd_right_hip_roll");
-      tau_right_hip_roll = (DoubleYoVariable)robot.getVariable("tau_right_hip_roll");
-      q_right_hip_pitch = (DoubleYoVariable)robot.getVariable("q_right_hip_pitch");
-      qd_right_hip_pitch = (DoubleYoVariable)robot.getVariable("qd_right_hip_pitch");
-      qdd_right_hip_pitch = (DoubleYoVariable)robot.getVariable("qdd_right_hip_pitch");
-      tau_right_hip_pitch = (DoubleYoVariable)robot.getVariable("tau_right_hip_pitch");
-      q_right_knee = (DoubleYoVariable)robot.getVariable("q_right_knee");
-      qd_right_knee = (DoubleYoVariable)robot.getVariable("qd_right_knee");
-      qdd_right_knee = (DoubleYoVariable)robot.getVariable("qdd_right_knee");
-      tau_right_knee = (DoubleYoVariable)robot.getVariable("tau_right_knee");
-      tau_lim_right_knee = (DoubleYoVariable)robot.getVariable("tau_lim_right_knee");
-      q_right_ankle_roll = (DoubleYoVariable)robot.getVariable("q_right_ankle_roll");
-      qd_right_ankle_roll = (DoubleYoVariable)robot.getVariable("qd_right_ankle_roll");
-      qdd_right_ankle_roll = (DoubleYoVariable)robot.getVariable("qdd_right_ankle_roll");
-      tau_right_ankle_roll = (DoubleYoVariable)robot.getVariable("tau_right_ankle_roll");
-      q_right_ankle_pitch = (DoubleYoVariable)robot.getVariable("q_right_ankle_pitch");
-      qd_right_ankle_pitch = (DoubleYoVariable)robot.getVariable("qd_right_ankle_pitch");
-      qdd_right_ankle_pitch = (DoubleYoVariable)robot.getVariable("qdd_right_ankle_pitch");
-      tau_right_ankle_pitch = (DoubleYoVariable)robot.getVariable("tau_right_ankle_pitch");
-      gc_right_toe_in_x = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_x");
-      gc_right_toe_in_y = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_y");
-      gc_right_toe_in_z = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_z");
-      gc_right_toe_in_dx = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_dx");
-      gc_right_toe_in_dy = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_dy");
-      gc_right_toe_in_dz = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_dz");
-      gc_right_toe_in_fx = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_fx");
-      gc_right_toe_in_fy = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_fy");
-      gc_right_toe_in_fz = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_fz");
-      gc_right_toe_in_px = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_px");
-      gc_right_toe_in_py = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_py");
-      gc_right_toe_in_pz = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_pz");
-      gc_right_toe_in_tdx = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_tdx");
-      gc_right_toe_in_tdy = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_tdy");
-      gc_right_toe_in_tdz = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_tdz");
-      gc_right_toe_in_fs = (DoubleYoVariable)robot.getVariable("gc_right_toe_in_fs");
-      gc_right_toe_in_slip = (BooleanYoVariable)robot.getVariable("gc_right_toe_in_slip");
-      gc_right_toe_in_coll = (IntegerYoVariable)robot.getVariable("gc_right_toe_in_coll");
-      gc_right_toe_out_x = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_x");
-      gc_right_toe_out_y = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_y");
-      gc_right_toe_out_z = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_z");
-      gc_right_toe_out_dx = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_dx");
-      gc_right_toe_out_dy = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_dy");
-      gc_right_toe_out_dz = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_dz");
-      gc_right_toe_out_fx = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_fx");
-      gc_right_toe_out_fy = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_fy");
-      gc_right_toe_out_fz = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_fz");
-      gc_right_toe_out_px = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_px");
-      gc_right_toe_out_py = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_py");
-      gc_right_toe_out_pz = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_pz");
-      gc_right_toe_out_tdx = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_tdx");
-      gc_right_toe_out_tdy = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_tdy");
-      gc_right_toe_out_tdz = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_tdz");
-      gc_right_toe_out_fs = (DoubleYoVariable)robot.getVariable("gc_right_toe_out_fs");
-      gc_right_toe_out_slip = (BooleanYoVariable)robot.getVariable("gc_right_toe_out_slip");
-      gc_right_toe_out_coll = (IntegerYoVariable)robot.getVariable("gc_right_toe_out_coll");
-      gc_right_heel_in_x = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_x");
-      gc_right_heel_in_y = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_y");
-      gc_right_heel_in_z = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_z");
-      gc_right_heel_in_dx = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_dx");
-      gc_right_heel_in_dy = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_dy");
-      gc_right_heel_in_dz = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_dz");
-      gc_right_heel_in_fx = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_fx");
-      gc_right_heel_in_fy = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_fy");
-      gc_right_heel_in_fz = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_fz");
-      gc_right_heel_in_px = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_px");
-      gc_right_heel_in_py = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_py");
-      gc_right_heel_in_pz = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_pz");
-      gc_right_heel_in_tdx = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_tdx");
-      gc_right_heel_in_tdy = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_tdy");
-      gc_right_heel_in_tdz = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_tdz");
-      gc_right_heel_in_fs = (DoubleYoVariable)robot.getVariable("gc_right_heel_in_fs");
-      gc_right_heel_in_slip = (BooleanYoVariable)robot.getVariable("gc_right_heel_in_slip");
-      gc_right_heel_in_coll = (IntegerYoVariable)robot.getVariable("gc_right_heel_in_coll");
-      gc_right_heel_out_x = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_x");
-      gc_right_heel_out_y = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_y");
-      gc_right_heel_out_z = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_z");
-      gc_right_heel_out_dx = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_dx");
-      gc_right_heel_out_dy = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_dy");
-      gc_right_heel_out_dz = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_dz");
-      gc_right_heel_out_fx = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_fx");
-      gc_right_heel_out_fy = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_fy");
-      gc_right_heel_out_fz = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_fz");
-      gc_right_heel_out_px = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_px");
-      gc_right_heel_out_py = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_py");
-      gc_right_heel_out_pz = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_pz");
-      gc_right_heel_out_tdx = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_tdx");
-      gc_right_heel_out_tdy = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_tdy");
-      gc_right_heel_out_tdz = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_tdz");
-      gc_right_heel_out_fs = (DoubleYoVariable)robot.getVariable("gc_right_heel_out_fs");
-      gc_right_heel_out_slip = (BooleanYoVariable)robot.getVariable("gc_right_heel_out_slip");
-      gc_right_heel_out_coll = (IntegerYoVariable)robot.getVariable("gc_right_heel_out_coll");
-      q_left_hip_yaw = (DoubleYoVariable)robot.getVariable("q_left_hip_yaw");
-      qd_left_hip_yaw = (DoubleYoVariable)robot.getVariable("qd_left_hip_yaw");
-      qdd_left_hip_yaw = (DoubleYoVariable)robot.getVariable("qdd_left_hip_yaw");
-      tau_left_hip_yaw = (DoubleYoVariable)robot.getVariable("tau_left_hip_yaw");
-      q_left_hip_roll = (DoubleYoVariable)robot.getVariable("q_left_hip_roll");
-      qd_left_hip_roll = (DoubleYoVariable)robot.getVariable("qd_left_hip_roll");
-      qdd_left_hip_roll = (DoubleYoVariable)robot.getVariable("qdd_left_hip_roll");
-      tau_left_hip_roll = (DoubleYoVariable)robot.getVariable("tau_left_hip_roll");
-      q_left_hip_pitch = (DoubleYoVariable)robot.getVariable("q_left_hip_pitch");
-      qd_left_hip_pitch = (DoubleYoVariable)robot.getVariable("qd_left_hip_pitch");
-      qdd_left_hip_pitch = (DoubleYoVariable)robot.getVariable("qdd_left_hip_pitch");
-      tau_left_hip_pitch = (DoubleYoVariable)robot.getVariable("tau_left_hip_pitch");
-      q_left_knee = (DoubleYoVariable)robot.getVariable("q_left_knee");
-      qd_left_knee = (DoubleYoVariable)robot.getVariable("qd_left_knee");
-      qdd_left_knee = (DoubleYoVariable)robot.getVariable("qdd_left_knee");
-      tau_left_knee = (DoubleYoVariable)robot.getVariable("tau_left_knee");
-      tau_lim_left_knee = (DoubleYoVariable)robot.getVariable("tau_lim_left_knee");
-      q_left_ankle_roll = (DoubleYoVariable)robot.getVariable("q_left_ankle_roll");
-      qd_left_ankle_roll = (DoubleYoVariable)robot.getVariable("qd_left_ankle_roll");
-      qdd_left_ankle_roll = (DoubleYoVariable)robot.getVariable("qdd_left_ankle_roll");
-      tau_left_ankle_roll = (DoubleYoVariable)robot.getVariable("tau_left_ankle_roll");
-      q_left_ankle_pitch = (DoubleYoVariable)robot.getVariable("q_left_ankle_pitch");
-      qd_left_ankle_pitch = (DoubleYoVariable)robot.getVariable("qd_left_ankle_pitch");
-      qdd_left_ankle_pitch = (DoubleYoVariable)robot.getVariable("qdd_left_ankle_pitch");
-      tau_left_ankle_pitch = (DoubleYoVariable)robot.getVariable("tau_left_ankle_pitch");
-      gc_left_toe_in_x = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_x");
-      gc_left_toe_in_y = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_y");
-      gc_left_toe_in_z = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_z");
-      gc_left_toe_in_dx = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_dx");
-      gc_left_toe_in_dy = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_dy");
-      gc_left_toe_in_dz = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_dz");
-      gc_left_toe_in_fx = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_fx");
-      gc_left_toe_in_fy = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_fy");
-      gc_left_toe_in_fz = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_fz");
-      gc_left_toe_in_px = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_px");
-      gc_left_toe_in_py = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_py");
-      gc_left_toe_in_pz = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_pz");
-      gc_left_toe_in_tdx = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_tdx");
-      gc_left_toe_in_tdy = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_tdy");
-      gc_left_toe_in_tdz = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_tdz");
-      gc_left_toe_in_fs = (DoubleYoVariable)robot.getVariable("gc_left_toe_in_fs");
-      gc_left_toe_in_slip = (BooleanYoVariable)robot.getVariable("gc_left_toe_in_slip");
-      gc_left_toe_in_coll = (IntegerYoVariable)robot.getVariable("gc_left_toe_in_coll");
-      gc_left_toe_out_x = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_x");
-      gc_left_toe_out_y = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_y");
-      gc_left_toe_out_z = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_z");
-      gc_left_toe_out_dx = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_dx");
-      gc_left_toe_out_dy = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_dy");
-      gc_left_toe_out_dz = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_dz");
-      gc_left_toe_out_fx = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_fx");
-      gc_left_toe_out_fy = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_fy");
-      gc_left_toe_out_fz = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_fz");
-      gc_left_toe_out_px = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_px");
-      gc_left_toe_out_py = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_py");
-      gc_left_toe_out_pz = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_pz");
-      gc_left_toe_out_tdx = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_tdx");
-      gc_left_toe_out_tdy = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_tdy");
-      gc_left_toe_out_tdz = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_tdz");
-      gc_left_toe_out_fs = (DoubleYoVariable)robot.getVariable("gc_left_toe_out_fs");
-      gc_left_toe_out_slip = (BooleanYoVariable)robot.getVariable("gc_left_toe_out_slip");
-      gc_left_toe_out_coll = (IntegerYoVariable)robot.getVariable("gc_left_toe_out_coll");
-      gc_left_heel_in_x = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_x");
-      gc_left_heel_in_y = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_y");
-      gc_left_heel_in_z = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_z");
-      gc_left_heel_in_dx = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_dx");
-      gc_left_heel_in_dy = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_dy");
-      gc_left_heel_in_dz = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_dz");
-      gc_left_heel_in_fx = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_fx");
-      gc_left_heel_in_fy = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_fy");
-      gc_left_heel_in_fz = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_fz");
-      gc_left_heel_in_px = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_px");
-      gc_left_heel_in_py = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_py");
-      gc_left_heel_in_pz = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_pz");
-      gc_left_heel_in_tdx = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_tdx");
-      gc_left_heel_in_tdy = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_tdy");
-      gc_left_heel_in_tdz = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_tdz");
-      gc_left_heel_in_fs = (DoubleYoVariable)robot.getVariable("gc_left_heel_in_fs");
-      gc_left_heel_in_slip = (BooleanYoVariable)robot.getVariable("gc_left_heel_in_slip");
-      gc_left_heel_in_coll = (IntegerYoVariable)robot.getVariable("gc_left_heel_in_coll");
-      gc_left_heel_out_x = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_x");
-      gc_left_heel_out_y = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_y");
-      gc_left_heel_out_z = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_z");
-      gc_left_heel_out_dx = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_dx");
-      gc_left_heel_out_dy = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_dy");
-      gc_left_heel_out_dz = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_dz");
-      gc_left_heel_out_fx = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_fx");
-      gc_left_heel_out_fy = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_fy");
-      gc_left_heel_out_fz = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_fz");
-      gc_left_heel_out_px = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_px");
-      gc_left_heel_out_py = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_py");
-      gc_left_heel_out_pz = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_pz");
-      gc_left_heel_out_tdx = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_tdx");
-      gc_left_heel_out_tdy = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_tdy");
-      gc_left_heel_out_tdz = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_tdz");
-      gc_left_heel_out_fs = (DoubleYoVariable)robot.getVariable("gc_left_heel_out_fs");
-      gc_left_heel_out_slip = (BooleanYoVariable)robot.getVariable("gc_left_heel_out_slip");
-      gc_left_heel_out_coll = (IntegerYoVariable)robot.getVariable("gc_left_heel_out_coll");
+      q_x = (YoDouble)robot.getVariable("q_x");
+      q_y = (YoDouble)robot.getVariable("q_y");
+      q_z = (YoDouble)robot.getVariable("q_z");
+      qd_x = (YoDouble)robot.getVariable("qd_x");
+      qd_y = (YoDouble)robot.getVariable("qd_y");
+      qd_z = (YoDouble)robot.getVariable("qd_z");
+      qdd_x = (YoDouble)robot.getVariable("qdd_x");
+      qdd_y = (YoDouble)robot.getVariable("qdd_y");
+      qdd_z = (YoDouble)robot.getVariable("qdd_z");
+      q_qs = (YoDouble)robot.getVariable("q_qs");
+      q_qx = (YoDouble)robot.getVariable("q_qx");
+      q_qy = (YoDouble)robot.getVariable("q_qy");
+      q_qz = (YoDouble)robot.getVariable("q_qz");
+      qd_wx = (YoDouble)robot.getVariable("qd_wx");
+      qd_wy = (YoDouble)robot.getVariable("qd_wy");
+      qd_wz = (YoDouble)robot.getVariable("qd_wz");
+      qdd_wx = (YoDouble)robot.getVariable("qdd_wx");
+      qdd_wy = (YoDouble)robot.getVariable("qdd_wy");
+      qdd_wz = (YoDouble)robot.getVariable("qdd_wz");
+      q_right_hip_yaw = (YoDouble)robot.getVariable("q_right_hip_yaw");
+      qd_right_hip_yaw = (YoDouble)robot.getVariable("qd_right_hip_yaw");
+      qdd_right_hip_yaw = (YoDouble)robot.getVariable("qdd_right_hip_yaw");
+      tau_right_hip_yaw = (YoDouble)robot.getVariable("tau_right_hip_yaw");
+      q_right_hip_roll = (YoDouble)robot.getVariable("q_right_hip_roll");
+      qd_right_hip_roll = (YoDouble)robot.getVariable("qd_right_hip_roll");
+      qdd_right_hip_roll = (YoDouble)robot.getVariable("qdd_right_hip_roll");
+      tau_right_hip_roll = (YoDouble)robot.getVariable("tau_right_hip_roll");
+      q_right_hip_pitch = (YoDouble)robot.getVariable("q_right_hip_pitch");
+      qd_right_hip_pitch = (YoDouble)robot.getVariable("qd_right_hip_pitch");
+      qdd_right_hip_pitch = (YoDouble)robot.getVariable("qdd_right_hip_pitch");
+      tau_right_hip_pitch = (YoDouble)robot.getVariable("tau_right_hip_pitch");
+      q_right_knee = (YoDouble)robot.getVariable("q_right_knee");
+      qd_right_knee = (YoDouble)robot.getVariable("qd_right_knee");
+      qdd_right_knee = (YoDouble)robot.getVariable("qdd_right_knee");
+      tau_right_knee = (YoDouble)robot.getVariable("tau_right_knee");
+      tau_lim_right_knee = (YoDouble)robot.getVariable("tau_lim_right_knee");
+      q_right_ankle_roll = (YoDouble)robot.getVariable("q_right_ankle_roll");
+      qd_right_ankle_roll = (YoDouble)robot.getVariable("qd_right_ankle_roll");
+      qdd_right_ankle_roll = (YoDouble)robot.getVariable("qdd_right_ankle_roll");
+      tau_right_ankle_roll = (YoDouble)robot.getVariable("tau_right_ankle_roll");
+      q_right_ankle_pitch = (YoDouble)robot.getVariable("q_right_ankle_pitch");
+      qd_right_ankle_pitch = (YoDouble)robot.getVariable("qd_right_ankle_pitch");
+      qdd_right_ankle_pitch = (YoDouble)robot.getVariable("qdd_right_ankle_pitch");
+      tau_right_ankle_pitch = (YoDouble)robot.getVariable("tau_right_ankle_pitch");
+      gc_right_toe_in_x = (YoDouble)robot.getVariable("gc_right_toe_in_x");
+      gc_right_toe_in_y = (YoDouble)robot.getVariable("gc_right_toe_in_y");
+      gc_right_toe_in_z = (YoDouble)robot.getVariable("gc_right_toe_in_z");
+      gc_right_toe_in_dx = (YoDouble)robot.getVariable("gc_right_toe_in_dx");
+      gc_right_toe_in_dy = (YoDouble)robot.getVariable("gc_right_toe_in_dy");
+      gc_right_toe_in_dz = (YoDouble)robot.getVariable("gc_right_toe_in_dz");
+      gc_right_toe_in_fx = (YoDouble)robot.getVariable("gc_right_toe_in_fx");
+      gc_right_toe_in_fy = (YoDouble)robot.getVariable("gc_right_toe_in_fy");
+      gc_right_toe_in_fz = (YoDouble)robot.getVariable("gc_right_toe_in_fz");
+      gc_right_toe_in_px = (YoDouble)robot.getVariable("gc_right_toe_in_px");
+      gc_right_toe_in_py = (YoDouble)robot.getVariable("gc_right_toe_in_py");
+      gc_right_toe_in_pz = (YoDouble)robot.getVariable("gc_right_toe_in_pz");
+      gc_right_toe_in_tdx = (YoDouble)robot.getVariable("gc_right_toe_in_tdx");
+      gc_right_toe_in_tdy = (YoDouble)robot.getVariable("gc_right_toe_in_tdy");
+      gc_right_toe_in_tdz = (YoDouble)robot.getVariable("gc_right_toe_in_tdz");
+      gc_right_toe_in_fs = (YoDouble)robot.getVariable("gc_right_toe_in_fs");
+      gc_right_toe_in_slip = (YoBoolean)robot.getVariable("gc_right_toe_in_slip");
+      gc_right_toe_in_coll = (YoInteger)robot.getVariable("gc_right_toe_in_coll");
+      gc_right_toe_out_x = (YoDouble)robot.getVariable("gc_right_toe_out_x");
+      gc_right_toe_out_y = (YoDouble)robot.getVariable("gc_right_toe_out_y");
+      gc_right_toe_out_z = (YoDouble)robot.getVariable("gc_right_toe_out_z");
+      gc_right_toe_out_dx = (YoDouble)robot.getVariable("gc_right_toe_out_dx");
+      gc_right_toe_out_dy = (YoDouble)robot.getVariable("gc_right_toe_out_dy");
+      gc_right_toe_out_dz = (YoDouble)robot.getVariable("gc_right_toe_out_dz");
+      gc_right_toe_out_fx = (YoDouble)robot.getVariable("gc_right_toe_out_fx");
+      gc_right_toe_out_fy = (YoDouble)robot.getVariable("gc_right_toe_out_fy");
+      gc_right_toe_out_fz = (YoDouble)robot.getVariable("gc_right_toe_out_fz");
+      gc_right_toe_out_px = (YoDouble)robot.getVariable("gc_right_toe_out_px");
+      gc_right_toe_out_py = (YoDouble)robot.getVariable("gc_right_toe_out_py");
+      gc_right_toe_out_pz = (YoDouble)robot.getVariable("gc_right_toe_out_pz");
+      gc_right_toe_out_tdx = (YoDouble)robot.getVariable("gc_right_toe_out_tdx");
+      gc_right_toe_out_tdy = (YoDouble)robot.getVariable("gc_right_toe_out_tdy");
+      gc_right_toe_out_tdz = (YoDouble)robot.getVariable("gc_right_toe_out_tdz");
+      gc_right_toe_out_fs = (YoDouble)robot.getVariable("gc_right_toe_out_fs");
+      gc_right_toe_out_slip = (YoBoolean)robot.getVariable("gc_right_toe_out_slip");
+      gc_right_toe_out_coll = (YoInteger)robot.getVariable("gc_right_toe_out_coll");
+      gc_right_heel_in_x = (YoDouble)robot.getVariable("gc_right_heel_in_x");
+      gc_right_heel_in_y = (YoDouble)robot.getVariable("gc_right_heel_in_y");
+      gc_right_heel_in_z = (YoDouble)robot.getVariable("gc_right_heel_in_z");
+      gc_right_heel_in_dx = (YoDouble)robot.getVariable("gc_right_heel_in_dx");
+      gc_right_heel_in_dy = (YoDouble)robot.getVariable("gc_right_heel_in_dy");
+      gc_right_heel_in_dz = (YoDouble)robot.getVariable("gc_right_heel_in_dz");
+      gc_right_heel_in_fx = (YoDouble)robot.getVariable("gc_right_heel_in_fx");
+      gc_right_heel_in_fy = (YoDouble)robot.getVariable("gc_right_heel_in_fy");
+      gc_right_heel_in_fz = (YoDouble)robot.getVariable("gc_right_heel_in_fz");
+      gc_right_heel_in_px = (YoDouble)robot.getVariable("gc_right_heel_in_px");
+      gc_right_heel_in_py = (YoDouble)robot.getVariable("gc_right_heel_in_py");
+      gc_right_heel_in_pz = (YoDouble)robot.getVariable("gc_right_heel_in_pz");
+      gc_right_heel_in_tdx = (YoDouble)robot.getVariable("gc_right_heel_in_tdx");
+      gc_right_heel_in_tdy = (YoDouble)robot.getVariable("gc_right_heel_in_tdy");
+      gc_right_heel_in_tdz = (YoDouble)robot.getVariable("gc_right_heel_in_tdz");
+      gc_right_heel_in_fs = (YoDouble)robot.getVariable("gc_right_heel_in_fs");
+      gc_right_heel_in_slip = (YoBoolean)robot.getVariable("gc_right_heel_in_slip");
+      gc_right_heel_in_coll = (YoInteger)robot.getVariable("gc_right_heel_in_coll");
+      gc_right_heel_out_x = (YoDouble)robot.getVariable("gc_right_heel_out_x");
+      gc_right_heel_out_y = (YoDouble)robot.getVariable("gc_right_heel_out_y");
+      gc_right_heel_out_z = (YoDouble)robot.getVariable("gc_right_heel_out_z");
+      gc_right_heel_out_dx = (YoDouble)robot.getVariable("gc_right_heel_out_dx");
+      gc_right_heel_out_dy = (YoDouble)robot.getVariable("gc_right_heel_out_dy");
+      gc_right_heel_out_dz = (YoDouble)robot.getVariable("gc_right_heel_out_dz");
+      gc_right_heel_out_fx = (YoDouble)robot.getVariable("gc_right_heel_out_fx");
+      gc_right_heel_out_fy = (YoDouble)robot.getVariable("gc_right_heel_out_fy");
+      gc_right_heel_out_fz = (YoDouble)robot.getVariable("gc_right_heel_out_fz");
+      gc_right_heel_out_px = (YoDouble)robot.getVariable("gc_right_heel_out_px");
+      gc_right_heel_out_py = (YoDouble)robot.getVariable("gc_right_heel_out_py");
+      gc_right_heel_out_pz = (YoDouble)robot.getVariable("gc_right_heel_out_pz");
+      gc_right_heel_out_tdx = (YoDouble)robot.getVariable("gc_right_heel_out_tdx");
+      gc_right_heel_out_tdy = (YoDouble)robot.getVariable("gc_right_heel_out_tdy");
+      gc_right_heel_out_tdz = (YoDouble)robot.getVariable("gc_right_heel_out_tdz");
+      gc_right_heel_out_fs = (YoDouble)robot.getVariable("gc_right_heel_out_fs");
+      gc_right_heel_out_slip = (YoBoolean)robot.getVariable("gc_right_heel_out_slip");
+      gc_right_heel_out_coll = (YoInteger)robot.getVariable("gc_right_heel_out_coll");
+      q_left_hip_yaw = (YoDouble)robot.getVariable("q_left_hip_yaw");
+      qd_left_hip_yaw = (YoDouble)robot.getVariable("qd_left_hip_yaw");
+      qdd_left_hip_yaw = (YoDouble)robot.getVariable("qdd_left_hip_yaw");
+      tau_left_hip_yaw = (YoDouble)robot.getVariable("tau_left_hip_yaw");
+      q_left_hip_roll = (YoDouble)robot.getVariable("q_left_hip_roll");
+      qd_left_hip_roll = (YoDouble)robot.getVariable("qd_left_hip_roll");
+      qdd_left_hip_roll = (YoDouble)robot.getVariable("qdd_left_hip_roll");
+      tau_left_hip_roll = (YoDouble)robot.getVariable("tau_left_hip_roll");
+      q_left_hip_pitch = (YoDouble)robot.getVariable("q_left_hip_pitch");
+      qd_left_hip_pitch = (YoDouble)robot.getVariable("qd_left_hip_pitch");
+      qdd_left_hip_pitch = (YoDouble)robot.getVariable("qdd_left_hip_pitch");
+      tau_left_hip_pitch = (YoDouble)robot.getVariable("tau_left_hip_pitch");
+      q_left_knee = (YoDouble)robot.getVariable("q_left_knee");
+      qd_left_knee = (YoDouble)robot.getVariable("qd_left_knee");
+      qdd_left_knee = (YoDouble)robot.getVariable("qdd_left_knee");
+      tau_left_knee = (YoDouble)robot.getVariable("tau_left_knee");
+      tau_lim_left_knee = (YoDouble)robot.getVariable("tau_lim_left_knee");
+      q_left_ankle_roll = (YoDouble)robot.getVariable("q_left_ankle_roll");
+      qd_left_ankle_roll = (YoDouble)robot.getVariable("qd_left_ankle_roll");
+      qdd_left_ankle_roll = (YoDouble)robot.getVariable("qdd_left_ankle_roll");
+      tau_left_ankle_roll = (YoDouble)robot.getVariable("tau_left_ankle_roll");
+      q_left_ankle_pitch = (YoDouble)robot.getVariable("q_left_ankle_pitch");
+      qd_left_ankle_pitch = (YoDouble)robot.getVariable("qd_left_ankle_pitch");
+      qdd_left_ankle_pitch = (YoDouble)robot.getVariable("qdd_left_ankle_pitch");
+      tau_left_ankle_pitch = (YoDouble)robot.getVariable("tau_left_ankle_pitch");
+      gc_left_toe_in_x = (YoDouble)robot.getVariable("gc_left_toe_in_x");
+      gc_left_toe_in_y = (YoDouble)robot.getVariable("gc_left_toe_in_y");
+      gc_left_toe_in_z = (YoDouble)robot.getVariable("gc_left_toe_in_z");
+      gc_left_toe_in_dx = (YoDouble)robot.getVariable("gc_left_toe_in_dx");
+      gc_left_toe_in_dy = (YoDouble)robot.getVariable("gc_left_toe_in_dy");
+      gc_left_toe_in_dz = (YoDouble)robot.getVariable("gc_left_toe_in_dz");
+      gc_left_toe_in_fx = (YoDouble)robot.getVariable("gc_left_toe_in_fx");
+      gc_left_toe_in_fy = (YoDouble)robot.getVariable("gc_left_toe_in_fy");
+      gc_left_toe_in_fz = (YoDouble)robot.getVariable("gc_left_toe_in_fz");
+      gc_left_toe_in_px = (YoDouble)robot.getVariable("gc_left_toe_in_px");
+      gc_left_toe_in_py = (YoDouble)robot.getVariable("gc_left_toe_in_py");
+      gc_left_toe_in_pz = (YoDouble)robot.getVariable("gc_left_toe_in_pz");
+      gc_left_toe_in_tdx = (YoDouble)robot.getVariable("gc_left_toe_in_tdx");
+      gc_left_toe_in_tdy = (YoDouble)robot.getVariable("gc_left_toe_in_tdy");
+      gc_left_toe_in_tdz = (YoDouble)robot.getVariable("gc_left_toe_in_tdz");
+      gc_left_toe_in_fs = (YoDouble)robot.getVariable("gc_left_toe_in_fs");
+      gc_left_toe_in_slip = (YoBoolean)robot.getVariable("gc_left_toe_in_slip");
+      gc_left_toe_in_coll = (YoInteger)robot.getVariable("gc_left_toe_in_coll");
+      gc_left_toe_out_x = (YoDouble)robot.getVariable("gc_left_toe_out_x");
+      gc_left_toe_out_y = (YoDouble)robot.getVariable("gc_left_toe_out_y");
+      gc_left_toe_out_z = (YoDouble)robot.getVariable("gc_left_toe_out_z");
+      gc_left_toe_out_dx = (YoDouble)robot.getVariable("gc_left_toe_out_dx");
+      gc_left_toe_out_dy = (YoDouble)robot.getVariable("gc_left_toe_out_dy");
+      gc_left_toe_out_dz = (YoDouble)robot.getVariable("gc_left_toe_out_dz");
+      gc_left_toe_out_fx = (YoDouble)robot.getVariable("gc_left_toe_out_fx");
+      gc_left_toe_out_fy = (YoDouble)robot.getVariable("gc_left_toe_out_fy");
+      gc_left_toe_out_fz = (YoDouble)robot.getVariable("gc_left_toe_out_fz");
+      gc_left_toe_out_px = (YoDouble)robot.getVariable("gc_left_toe_out_px");
+      gc_left_toe_out_py = (YoDouble)robot.getVariable("gc_left_toe_out_py");
+      gc_left_toe_out_pz = (YoDouble)robot.getVariable("gc_left_toe_out_pz");
+      gc_left_toe_out_tdx = (YoDouble)robot.getVariable("gc_left_toe_out_tdx");
+      gc_left_toe_out_tdy = (YoDouble)robot.getVariable("gc_left_toe_out_tdy");
+      gc_left_toe_out_tdz = (YoDouble)robot.getVariable("gc_left_toe_out_tdz");
+      gc_left_toe_out_fs = (YoDouble)robot.getVariable("gc_left_toe_out_fs");
+      gc_left_toe_out_slip = (YoBoolean)robot.getVariable("gc_left_toe_out_slip");
+      gc_left_toe_out_coll = (YoInteger)robot.getVariable("gc_left_toe_out_coll");
+      gc_left_heel_in_x = (YoDouble)robot.getVariable("gc_left_heel_in_x");
+      gc_left_heel_in_y = (YoDouble)robot.getVariable("gc_left_heel_in_y");
+      gc_left_heel_in_z = (YoDouble)robot.getVariable("gc_left_heel_in_z");
+      gc_left_heel_in_dx = (YoDouble)robot.getVariable("gc_left_heel_in_dx");
+      gc_left_heel_in_dy = (YoDouble)robot.getVariable("gc_left_heel_in_dy");
+      gc_left_heel_in_dz = (YoDouble)robot.getVariable("gc_left_heel_in_dz");
+      gc_left_heel_in_fx = (YoDouble)robot.getVariable("gc_left_heel_in_fx");
+      gc_left_heel_in_fy = (YoDouble)robot.getVariable("gc_left_heel_in_fy");
+      gc_left_heel_in_fz = (YoDouble)robot.getVariable("gc_left_heel_in_fz");
+      gc_left_heel_in_px = (YoDouble)robot.getVariable("gc_left_heel_in_px");
+      gc_left_heel_in_py = (YoDouble)robot.getVariable("gc_left_heel_in_py");
+      gc_left_heel_in_pz = (YoDouble)robot.getVariable("gc_left_heel_in_pz");
+      gc_left_heel_in_tdx = (YoDouble)robot.getVariable("gc_left_heel_in_tdx");
+      gc_left_heel_in_tdy = (YoDouble)robot.getVariable("gc_left_heel_in_tdy");
+      gc_left_heel_in_tdz = (YoDouble)robot.getVariable("gc_left_heel_in_tdz");
+      gc_left_heel_in_fs = (YoDouble)robot.getVariable("gc_left_heel_in_fs");
+      gc_left_heel_in_slip = (YoBoolean)robot.getVariable("gc_left_heel_in_slip");
+      gc_left_heel_in_coll = (YoInteger)robot.getVariable("gc_left_heel_in_coll");
+      gc_left_heel_out_x = (YoDouble)robot.getVariable("gc_left_heel_out_x");
+      gc_left_heel_out_y = (YoDouble)robot.getVariable("gc_left_heel_out_y");
+      gc_left_heel_out_z = (YoDouble)robot.getVariable("gc_left_heel_out_z");
+      gc_left_heel_out_dx = (YoDouble)robot.getVariable("gc_left_heel_out_dx");
+      gc_left_heel_out_dy = (YoDouble)robot.getVariable("gc_left_heel_out_dy");
+      gc_left_heel_out_dz = (YoDouble)robot.getVariable("gc_left_heel_out_dz");
+      gc_left_heel_out_fx = (YoDouble)robot.getVariable("gc_left_heel_out_fx");
+      gc_left_heel_out_fy = (YoDouble)robot.getVariable("gc_left_heel_out_fy");
+      gc_left_heel_out_fz = (YoDouble)robot.getVariable("gc_left_heel_out_fz");
+      gc_left_heel_out_px = (YoDouble)robot.getVariable("gc_left_heel_out_px");
+      gc_left_heel_out_py = (YoDouble)robot.getVariable("gc_left_heel_out_py");
+      gc_left_heel_out_pz = (YoDouble)robot.getVariable("gc_left_heel_out_pz");
+      gc_left_heel_out_tdx = (YoDouble)robot.getVariable("gc_left_heel_out_tdx");
+      gc_left_heel_out_tdy = (YoDouble)robot.getVariable("gc_left_heel_out_tdy");
+      gc_left_heel_out_tdz = (YoDouble)robot.getVariable("gc_left_heel_out_tdz");
+      gc_left_heel_out_fs = (YoDouble)robot.getVariable("gc_left_heel_out_fs");
+      gc_left_heel_out_slip = (YoBoolean)robot.getVariable("gc_left_heel_out_slip");
+      gc_left_heel_out_coll = (YoInteger)robot.getVariable("gc_left_heel_out_coll");
 
-      limbJointPositions = new DoubleYoVariable[][]
+      limbJointPositions = new YoDouble[][]
       {
          {
             q_left_hip_yaw, q_left_hip_roll, q_left_hip_pitch, q_left_knee, q_left_ankle_pitch, q_left_ankle_roll
@@ -354,7 +354,7 @@ public class PerfectSensorProcessing
             q_right_hip_yaw, q_right_hip_roll, q_right_hip_pitch, q_right_knee, q_right_ankle_pitch, q_right_ankle_roll
          }
       };
-      limbJointVelocities = new DoubleYoVariable[][]
+      limbJointVelocities = new YoDouble[][]
       {
          {
             qd_left_hip_yaw, qd_left_hip_roll, qd_left_hip_pitch, qd_left_knee, qd_left_ankle_pitch, qd_left_ankle_roll
@@ -363,7 +363,7 @@ public class PerfectSensorProcessing
             qd_right_hip_yaw, qd_right_hip_roll, qd_right_hip_pitch, qd_right_knee, qd_right_ankle_pitch, qd_right_ankle_roll
          }
       };
-      limbJointAccelerations = new DoubleYoVariable[][]
+      limbJointAccelerations = new YoDouble[][]
       {
          {
             qdd_left_hip_yaw, qdd_left_hip_roll, qdd_left_hip_pitch, qdd_left_knee, qdd_left_ankle_pitch, qdd_left_ankle_roll
@@ -373,16 +373,16 @@ public class PerfectSensorProcessing
          }
       };
 
-      robotBodyPosition = new DoubleYoVariable[] {q_x, q_y, q_z};
-      robotBodyVelocity = new DoubleYoVariable[] {qd_x, qd_y, qd_z};
-      robotBodyAcceleration = new DoubleYoVariable[] {qdd_x, qdd_y, qdd_z};
+      robotBodyPosition = new YoDouble[] {q_x, q_y, q_z};
+      robotBodyVelocity = new YoDouble[] {qd_x, qd_y, qd_z};
+      robotBodyAcceleration = new YoDouble[] {qdd_x, qdd_y, qdd_z};
 
-      robotYawPitchAndRoll = new DoubleYoVariable[] {q_yaw, q_pitch, q_roll};
+      robotYawPitchAndRoll = new YoDouble[] {q_yaw, q_pitch, q_roll};
 
-      robotYawPitchAndRollVelocity = new DoubleYoVariable[] {qd_wz, qd_wy, qd_wx};
-      robotYawPitchAndRollAcceleration = new DoubleYoVariable[] {qdd_wz, qdd_wy, qdd_wx};
+      robotYawPitchAndRollVelocity = new YoDouble[] {qd_wz, qd_wy, qd_wx};
+      robotYawPitchAndRollAcceleration = new YoDouble[] {qdd_wz, qdd_wy, qdd_wx};
 
-      groundContactFramePointsPositions = new DoubleYoVariable[][]
+      groundContactFramePointsPositions = new YoDouble[][]
       {
          {
             gc_left_toe_in_x, gc_left_toe_in_y, gc_left_toe_in_z, gc_left_toe_out_x, gc_left_toe_out_y, gc_left_toe_out_z, gc_left_heel_in_x, gc_left_heel_in_y,
@@ -394,7 +394,7 @@ public class PerfectSensorProcessing
          }
       };
 
-      groundContactFramePointsForces = new DoubleYoVariable[][]
+      groundContactFramePointsForces = new YoDouble[][]
       {
          {
             gc_left_toe_in_fx, gc_left_toe_in_fy, gc_left_toe_in_fz, gc_left_toe_out_fx, gc_left_toe_out_fy, gc_left_toe_out_fz, gc_left_heel_in_fx,
@@ -406,7 +406,7 @@ public class PerfectSensorProcessing
          }
       };
 
-      groundContactFramePointsFootSwitch = new DoubleYoVariable[][]
+      groundContactFramePointsFootSwitch = new YoDouble[][]
       {
          {gc_left_toe_in_fs, gc_left_toe_out_fs, gc_left_heel_in_fs, gc_left_heel_out_fs},
          {gc_right_toe_in_fs, gc_right_toe_out_fs, gc_right_heel_in_fs, gc_right_heel_out_fs}

@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class FreeJoint extends Joint
 {
@@ -15,7 +15,7 @@ public class FreeJoint extends Joint
    private static final long serialVersionUID = 5257393793242028735L;
    @SuppressWarnings("unused")
    private String xName, yName, zName, yawName, rollName, pitchName;
-   private DoubleYoVariable xVar, yVar, zVar, yawVar, rollVar, pitchVar;
+   private YoDouble xVar, yVar, zVar, yawVar, rollVar, pitchVar;
 
    private Vector3D vTranslate = new Vector3D();
    private RigidBodyTransform tYaw = new RigidBodyTransform();
@@ -39,12 +39,12 @@ public class FreeJoint extends Joint
       this.rollName = rollName;
       this.pitchName = pitchName;
 
-      xVar = new DoubleYoVariable(xName, "FreeJoint x position", registry);
-      yVar = new DoubleYoVariable(yName, "FreeJoint y position", registry);
-      zVar = new DoubleYoVariable(zName, "FreeJoint z position", registry);
-      yawVar = new DoubleYoVariable(yawName, "FreeJoint yaw rotation", registry);
-      rollVar = new DoubleYoVariable(rollName, "FreeJoint roll rotation", registry);
-      pitchVar = new DoubleYoVariable(pitchName, "FreeJoint pitch rotation", registry);
+      xVar = new YoDouble(xName, "FreeJoint x position", registry);
+      yVar = new YoDouble(yName, "FreeJoint y position", registry);
+      zVar = new YoDouble(zName, "FreeJoint z position", registry);
+      yawVar = new YoDouble(yawName, "FreeJoint yaw rotation", registry);
+      rollVar = new YoDouble(rollName, "FreeJoint roll rotation", registry);
+      pitchVar = new YoDouble(pitchName, "FreeJoint pitch rotation", registry);
 
 //    rob.getVars().addVariables(freeJointVars);
 

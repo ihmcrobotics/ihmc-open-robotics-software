@@ -1,11 +1,10 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
-
 
 public class InefficientPushRodTransmission implements PushRodTransmissionInterface
 {
@@ -50,7 +49,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    private final double reflectTop;
    private final boolean topJointFirst;
    
-   private DoubleYoVariable topJointAngleOffset;
+   private YoDouble topJointAngleOffset;
    private final PushRodTransmissionJoint pushRodTransmissionJoint;
    
    /*
@@ -76,7 +75,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    
    public void allowTopJointAngleOffset(String namePrefix, double offset, YoVariableRegistry registry)
    {
-      topJointAngleOffset = new DoubleYoVariable(namePrefix + "TopJointAngleOffset", registry);
+      topJointAngleOffset = new YoDouble(namePrefix + "TopJointAngleOffset", registry);
       topJointAngleOffset.set(offset);
    }
   

@@ -3,8 +3,8 @@ package us.ihmc.avatar.sensors.microphone;
 import java.util.ArrayList;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
@@ -21,7 +21,7 @@ public class DrillDetectionCalibrationHelper extends DrillDetectionAlgorithm
    private static final double frequencyBandRange = 1000;
 
    private YoVariableRegistry registry = new YoVariableRegistry("DrillRegistry");
-   private ArrayList<DoubleYoVariable> rawBandMagnitudes = new ArrayList<>();
+   private ArrayList<YoDouble> rawBandMagnitudes = new ArrayList<>();
    private ArrayList<AlphaFilteredYoVariable> filteredBandMagnitudes = new ArrayList<>();
 
    public DrillDetectionCalibrationHelper(){
@@ -32,7 +32,7 @@ public class DrillDetectionCalibrationHelper extends DrillDetectionAlgorithm
       for (int i = 0; i < numberOfBands; i++){
          upperFrequency = upperFrequencyBound - i*frequencyBandRange;
          lowerFrequency = upperFrequency - frequencyBandRange;
-         rawBandMagnitudes.add(new DoubleYoVariable("raw"+(int)lowerFrequency+""+(int)upperFrequency+"BandMagnitude", registry));
+         rawBandMagnitudes.add(new YoDouble("raw"+(int)lowerFrequency+""+(int)upperFrequency+"BandMagnitude", registry));
          filteredBandMagnitudes.add(new AlphaFilteredYoVariable("filtered"+(int)lowerFrequency+""+(int)upperFrequency+"BandMagnitude", registry, 0.9));
       }
    }

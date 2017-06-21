@@ -1,7 +1,7 @@
 package us.ihmc.acsell.springs;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 public class HystereticSpringCalculator implements SpringCalculator {
@@ -14,7 +14,7 @@ public class HystereticSpringCalculator implements SpringCalculator {
 	private double x0_L;
 	private double k_U;
 	private double x0_U;
-	private final DoubleYoVariable s;
+	private final YoDouble s;
 	private final AlphaFilteredYoVariable s_filt;
 	
 	public HystereticSpringCalculator(HystereticSpringProperties springProperties, String name, YoVariableRegistry registry)
@@ -25,7 +25,7 @@ public class HystereticSpringCalculator implements SpringCalculator {
 		this.k_U = springProperties.getUnloadingSpringConstant();
 		this.x0_U = springProperties.getUnloadingRestLength();
 		
-		s = new DoubleYoVariable(name + "SpringLoadingState", registry);
+		s = new YoDouble(name + "SpringLoadingState", registry);
 		s_filt = new AlphaFilteredYoVariable(name + "FilteredSpringLoadingState", registry, 0.95, s);
 		
 	}

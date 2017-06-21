@@ -2,9 +2,9 @@ package us.ihmc.kalman.comparisons;
 
 import java.util.Random;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -14,9 +14,9 @@ public class NoisifierAndDelayer implements RobotController, ExampleFunctionCont
    private final String name;
    private final ExampleFunctionController function;
 
-   private final DoubleYoVariable xWithNoise;
-   private final DoubleYoVariable xDotWithNoise;
-   private final DoubleYoVariable xDoubleDotWithNoise;
+   private final YoDouble xWithNoise;
+   private final YoDouble xDotWithNoise;
+   private final YoDouble xDoubleDotWithNoise;
 
    private final Random random;
 
@@ -25,7 +25,7 @@ public class NoisifierAndDelayer implements RobotController, ExampleFunctionCont
    private final double xDoubleDotStandardDeviation;
    
    private double lastMeasurement;
-   private final IntegerYoVariable ticksPerMeasurement;
+   private final YoInteger ticksPerMeasurement;
    private int tickFromLastMeasurement;
 
    private boolean isPositionMeasurementUpdated = false;
@@ -35,13 +35,13 @@ public class NoisifierAndDelayer implements RobotController, ExampleFunctionCont
       name = getClass().getSimpleName();
       this.function = function;
       
-      ticksPerMeasurement = new IntegerYoVariable("ticksPerMeasurement", registry);
+      ticksPerMeasurement = new YoInteger("ticksPerMeasurement", registry);
       ticksPerMeasurement.set(7);
       tickFromLastMeasurement = 0;
 
-      xWithNoise = new DoubleYoVariable("xWithNoise", registry);
-      xDotWithNoise = new DoubleYoVariable("xDotWithNoise", registry);
-      xDoubleDotWithNoise = new DoubleYoVariable("xDoubleDotWithNoise", registry);
+      xWithNoise = new YoDouble("xWithNoise", registry);
+      xDotWithNoise = new YoDouble("xDotWithNoise", registry);
+      xDoubleDotWithNoise = new YoDouble("xDoubleDotWithNoise", registry);
 
       random = new Random(234L);
 

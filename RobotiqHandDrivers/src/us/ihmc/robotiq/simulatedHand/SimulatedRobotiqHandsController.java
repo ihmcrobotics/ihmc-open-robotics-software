@@ -15,10 +15,10 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,14 +36,14 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final DoubleYoVariable handControllerTime = new DoubleYoVariable("handControllerTime", registry);
-   private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
-   private final BooleanYoVariable sendFingerJointGains = new BooleanYoVariable("sendFingerJointGains", registry);
+   private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
+   private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
+   private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
 
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kpMap = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kdMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kdMap = new LinkedHashMap<>();
    
-   private final DoubleYoVariable fingerTrajectoryTime = new DoubleYoVariable("FingerTrajectoryTime", registry);
+   private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -81,8 +81,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       fingerTrajectoryTime.set(0.5);
       
 
-      EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
-      EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
+      EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
+      EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
 
       setupGains(kpEnumMap, kdEnumMap);
 
@@ -114,14 +114,14 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       }
    }
 
-   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kdEnumMap)
+   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap)
    {
-      DoubleYoVariable kpFingerJoint1 = new DoubleYoVariable("kpFingerJoint1", registry);
-      DoubleYoVariable kpFingerJoint2 = new DoubleYoVariable("kpFingerJoint2", registry);
-      DoubleYoVariable kpFingerJoint3 = new DoubleYoVariable("kpFingerJoint3", registry);
-      DoubleYoVariable kpThumbJoint1 = new DoubleYoVariable("kpThumbJoint1", registry);
-      DoubleYoVariable kpThumbJoint2 = new DoubleYoVariable("kpThumbJoint2", registry);
-      DoubleYoVariable kpThumbJoint3 = new DoubleYoVariable("kpThumbJoint3", registry);
+      YoDouble kpFingerJoint1 = new YoDouble("kpFingerJoint1", registry);
+      YoDouble kpFingerJoint2 = new YoDouble("kpFingerJoint2", registry);
+      YoDouble kpFingerJoint3 = new YoDouble("kpFingerJoint3", registry);
+      YoDouble kpThumbJoint1 = new YoDouble("kpThumbJoint1", registry);
+      YoDouble kpThumbJoint2 = new YoDouble("kpThumbJoint2", registry);
+      YoDouble kpThumbJoint3 = new YoDouble("kpThumbJoint3", registry);
 
       kpFingerJoint1.set(10.0);
       kpFingerJoint2.set(5.0);
@@ -145,12 +145,12 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, kpThumbJoint2);
       kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kpThumbJoint3);
 
-      DoubleYoVariable kdFingerJoint1 = new DoubleYoVariable("kdFingerJoint1", registry);
-      DoubleYoVariable kdFingerJoint2 = new DoubleYoVariable("kdFingerJoint2", registry);
-      DoubleYoVariable kdFingerJoint3 = new DoubleYoVariable("kdFingerJoint3", registry);
-      DoubleYoVariable kdThumbJoint1 = new DoubleYoVariable("kdThumbJoint1", registry);
-      DoubleYoVariable kdThumbJoint2 = new DoubleYoVariable("kdThumbJoint2", registry);
-      DoubleYoVariable kdThumbJoint3 = new DoubleYoVariable("kdThumbJoint3", registry);
+      YoDouble kdFingerJoint1 = new YoDouble("kdFingerJoint1", registry);
+      YoDouble kdFingerJoint2 = new YoDouble("kdFingerJoint2", registry);
+      YoDouble kdFingerJoint3 = new YoDouble("kdFingerJoint3", registry);
+      YoDouble kdThumbJoint1 = new YoDouble("kdThumbJoint1", registry);
+      YoDouble kdThumbJoint2 = new YoDouble("kdThumbJoint2", registry);
+      YoDouble kdThumbJoint3 = new YoDouble("kdThumbJoint3", registry);
 
       kdFingerJoint1.set(0.5);
       kdFingerJoint2.set(0.25);

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -11,15 +13,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -44,9 +43,11 @@ public class SupportState extends AbstractFootControlState
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable footBarelyLoaded;
-   private final BooleanYoVariable copOnEdge;
-   private final DoubleYoVariable footLoadThreshold;
+   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+
+   private final YoBoolean footBarelyLoaded;
+   private final YoBoolean copOnEdge;
+   private final YoDouble footLoadThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FootSwitchInterface footSwitch;
@@ -55,7 +56,7 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
-   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
+   private final InverseDynamicsCommandList inverseDynamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
@@ -75,22 +76,29 @@ public class SupportState extends AbstractFootControlState
    private final FrameOrientation footOrientation = new FrameOrientation();
 
    // For testing:
-   private final BooleanYoVariable assumeCopOnEdge;
-   private final BooleanYoVariable assumeFootBarelyLoaded;
-   private final BooleanYoVariable neverHoldRotation;
+   private final YoBoolean assumeCopOnEdge;
+   private final YoBoolean assumeFootBarelyLoaded;
+   private final YoBoolean neverHoldRotation;
 
    // For line contact walking and balancing:
-   private final BooleanYoVariable holdFootOrientationFlat;
+   private final YoBoolean holdFootOrientationFlat;
 
    // For foothold exploration:
    private final ExplorationHelper explorationHelper;
    private final PartialFootholdControlModule partialFootholdControlModule;
-   private final BooleanYoVariable requestFootholdExploration;
-   private final DoubleYoVariable recoverTime;
-   private final DoubleYoVariable timeBeforeExploring;
+   private final YoBoolean requestFootholdExploration;
+   private final YoDouble recoverTime;
+   private final YoDouble timeBeforeExploring;
 
    // For straight legs with privileged configuration
    private final RigidBody pelvis;
+
+   // Toe contact point loading time
+   private final boolean rampUpAllowableToeLoadAfterContact;
+   private final YoDouble toeLoadingDuration;
+   private final YoDouble fullyLoadedMagnitude;
+
+   private final FramePoint tempPoint = new FramePoint();
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -103,10 +111,17 @@ public class SupportState extends AbstractFootControlState
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
-      footBarelyLoaded = new BooleanYoVariable(prefix + "BarelyLoaded", registry);
-      copOnEdge = new BooleanYoVariable(prefix + "CopOnEdge", registry);
-      footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
+      footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
+      copOnEdge = new YoBoolean(prefix + "CopOnEdge", registry);
+      footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
+
+      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
+      rampUpAllowableToeLoadAfterContact = walkingControllerParameters.rampUpAllowableToeLoadAfterContact();
+      toeLoadingDuration = new YoDouble(prefix + "ToeContactPointLoadingTime", registry);
+      fullyLoadedMagnitude = new YoDouble(prefix + "FullyLoadedMagnitude", registry);
+      toeLoadingDuration.set(walkingControllerParameters.getToeLoadingDuration());
+      fullyLoadedMagnitude.set(walkingControllerParameters.getFullyLoadedToeForce());
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
@@ -125,15 +140,15 @@ public class SupportState extends AbstractFootControlState
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      assumeCopOnEdge = new BooleanYoVariable(prefix + "AssumeCopOnEdge", registry);
-      assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
-      neverHoldRotation = new BooleanYoVariable(prefix + "NeverHoldRotation", registry);
-      holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
+      assumeCopOnEdge = new YoBoolean(prefix + "AssumeCopOnEdge", registry);
+      assumeFootBarelyLoaded = new YoBoolean(prefix + "AssumeFootBarelyLoaded", registry);
+      neverHoldRotation = new YoBoolean(prefix + "NeverHoldRotation", registry);
+      holdFootOrientationFlat = new YoBoolean(prefix + "HoldFlatOrientation", registry);
 
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
-      ExplorationParameters explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
+      requestFootholdExploration = new YoBoolean(prefix + "RequestFootholdExploration", registry);
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {
          recoverTime = explorationParameters.getRecoverTime();
@@ -141,8 +156,8 @@ public class SupportState extends AbstractFootControlState
       }
       else
       {
-         recoverTime = new DoubleYoVariable(prefix + "RecoverTime", registry);
-         timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
+         recoverTime = new YoDouble(prefix + "RecoverTime", registry);
+         timeBeforeExploring = new YoDouble(prefix + "TimeBeforeExploring", registry);
       }
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
@@ -203,6 +218,39 @@ public class SupportState extends AbstractFootControlState
       if (partialFootholdControlModule != null && !timeBeforeExploringHasPassed)
          partialFootholdControlModule.clearCoPGrid();
       explorationHelper.compute(getTimeInCurrentState(), contactStateHasChanged);
+
+      // toe contact point loading //// TODO: 6/5/17
+      double currentTime = getTimeInCurrentState();
+      if (rampUpAllowableToeLoadAfterContact && currentTime < toeLoadingDuration.getDoubleValue())
+      {
+         computeFootPolygon();
+
+         double maxContactPointX = footPolygon.getMaxX();
+         double minContactPointX = footPolygon.getMinX();
+
+         double phaseInLoading = currentTime / toeLoadingDuration.getDoubleValue();
+         double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, fullyLoadedMagnitude.getDoubleValue(), phaseInLoading);
+         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
+
+         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
+            contactPoint.getPosition(tempPoint);
+            double percentAlongFoot = (tempPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
+            double contactPointMagnitude = InterpolationTools.linearInterpolate(fullyLoadedMagnitude.getDoubleValue(), leadingToeMagnitude, percentAlongFoot);
+
+            planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
+         }
+      }
+      else
+      {
+         YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
+         for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
+            planeContactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
+         }
+      }
 
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge());
@@ -275,6 +323,16 @@ public class SupportState extends AbstractFootControlState
       frameViz.setToReferenceFrame(controlFrame);
    }
 
+
+   private void computeFootPolygon()
+   {
+      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+      footPolygon.clear(soleFrame);
+      for (int i = 0; i < contactableFoot.getTotalNumberOfContactPoints(); i++)
+         footPolygon.addVertex(contactableFoot.getContactPoints2d().get(i));
+      footPolygon.update();
+   }
+
    private void updateHoldPositionSetpoints()
    {
       footPosition.setToZero(contactableFoot.getSoleFrame());
@@ -322,11 +380,11 @@ public class SupportState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      inverseDymamicsCommandsList.clear();
-      inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
-      inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+      inverseDynamicsCommandsList.clear();
+      inverseDynamicsCommandsList.addCommand(spatialAccelerationCommand);
+      inverseDynamicsCommandsList.addCommand(explorationHelper.getCommand());
 
-      return inverseDymamicsCommandsList;
+      return inverseDynamicsCommandsList;
    }
 
 

@@ -26,10 +26,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -46,8 +46,8 @@ public class RigidBodyControlManager
    private final String bodyName;
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
-   private final EnumYoVariable<RigidBodyControlMode> requestedState;
-   private final EnumYoVariable<RigidBodyControlMode> defaultControlMode;
+   private final YoEnum<RigidBodyControlMode> requestedState;
+   private final YoEnum<RigidBodyControlMode> defaultControlMode;
 
    private final RigidBodyPositionControlHelper positionControlHelper;
 
@@ -63,25 +63,25 @@ public class RigidBodyControlManager
 
    private final OneDoFJoint[] jointsToControl;
 
-   private final BooleanYoVariable allJointsEnabled;
+   private final YoBoolean allJointsEnabled;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final BooleanYoVariable stateSwitched;
+   private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          Pose homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
-         DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+         YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
-      stateSwitched = new BooleanYoVariable(namePrefix + "StateSwitched", registry);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
+      stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
-      defaultControlMode = new EnumYoVariable<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
+      defaultControlMode = new YoEnum<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
       defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
 
       jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
@@ -107,7 +107,7 @@ public class RigidBodyControlManager
       else
          this.homePose = null;
 
-      allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
+      allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
 
       setupStateMachine();

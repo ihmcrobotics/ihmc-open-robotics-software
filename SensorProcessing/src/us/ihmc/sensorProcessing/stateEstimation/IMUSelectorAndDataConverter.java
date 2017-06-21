@@ -9,8 +9,8 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -22,7 +22,6 @@ import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputP
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
-
 
 public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 {
@@ -42,9 +41,9 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final ReferenceFrame angularVelocityMeasurementFrame;
    
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable imuSimulatedDriftYawAcceleration;
-   private final DoubleYoVariable imuSimulatedDriftYawVelocity;
-   private final DoubleYoVariable imuSimulatedDriftYawAngle;
+   private final YoDouble imuSimulatedDriftYawAcceleration;
+   private final YoDouble imuSimulatedDriftYawVelocity;
+   private final YoDouble imuSimulatedDriftYawAngle;
    
    private final double estimatorDT;
 
@@ -56,9 +55,9 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       if ((orientationSensorConfigurations.size() != 1) || (angularVelocitySensorConfigurations.size() != 1))
          throw new RuntimeException("We are assuming there is only 1 IMU for right now.. Got " + orientationSensorConfigurations.size());
 
-      imuSimulatedDriftYawAcceleration = new DoubleYoVariable("imuSimulatedDriftYawAcceleration", registry);
-      imuSimulatedDriftYawVelocity = new DoubleYoVariable("imuSimulatedDriftYawVelocity", registry);
-      imuSimulatedDriftYawAngle = new DoubleYoVariable("imuSimulatedDriftYawAngle", registry);
+      imuSimulatedDriftYawAcceleration = new YoDouble("imuSimulatedDriftYawAcceleration", registry);
+      imuSimulatedDriftYawVelocity = new YoDouble("imuSimulatedDriftYawVelocity", registry);
+      imuSimulatedDriftYawAngle = new YoDouble("imuSimulatedDriftYawAngle", registry);
       this.estimatorDT = estimatorDT;
       
       for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)

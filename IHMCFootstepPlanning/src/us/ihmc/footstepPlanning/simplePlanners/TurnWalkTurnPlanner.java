@@ -72,7 +72,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
       FramePoint2d goalPoint = new FramePoint2d();
-      goalPose.getPosition(goalPoint);
+      goalPose.getPositionIncludingFrame(goalPoint);
 
       ArrayList<FramePose2d> footstepList = new ArrayList<>();
 
@@ -85,7 +85,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
       // walk
       FramePoint2d robotPosition = new FramePoint2d();
-      robotPoseInWorld.getPosition(robotPosition);
+      robotPoseInWorld.getPositionIncludingFrame(robotPosition);
       double distanceToTravel = robotPosition.distance(goalPoint);
       addStraightWalk(footstepList, robotPosition, distanceToTravel);
 
@@ -172,7 +172,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
       double turningAngle = AngleTools.calculateHeading(robotPose, goalPoint, -robotPose.getYaw(), 0.0);
       FramePoint2d pointToTurnAbout = new FramePoint2d();
-      robotPose.getPosition(pointToTurnAbout);
+      robotPose.getPositionIncludingFrame(pointToTurnAbout);
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
    }
 

@@ -3,26 +3,26 @@ package us.ihmc.acsell.hardware.command;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.steppr.hardware.StepprActuator;
 
 public abstract class AcsellActuatorCommand
 {
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable enabled;
-   private final DoubleYoVariable tauDesired;
-   private final DoubleYoVariable tauInertia;
-   //private final DoubleYoVariable currentDesired;
-   private final DoubleYoVariable damping;
-   private final DoubleYoVariable qddDesired;
+   private final YoBoolean enabled;
+   private final YoDouble tauDesired;
+   private final YoDouble tauInertia;
+   //private final YoDouble currentDesired;
+   private final YoDouble damping;
+   private final YoDouble qddDesired;
    private final double currentLimit;
    
-   private final DoubleYoVariable rawCurrentDesired;
+   private final YoDouble rawCurrentDesired;
    private final AlphaFilteredYoVariable filteredCurrentDesired;
    
    private final AcsellActuator actuator;
@@ -33,13 +33,13 @@ public abstract class AcsellActuatorCommand
       this.currentLimit = actuator.getCurrentLimit();
       this.registry = new YoVariableRegistry(name);
 
-      this.enabled = new BooleanYoVariable(name + "Enabled", registry);
-      this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
-      this.tauInertia = new DoubleYoVariable(name + "TauInertia", registry);
-      this.qddDesired = new DoubleYoVariable(name + "qdd_d", registry);
-      this.damping = new DoubleYoVariable(name + "Damping", registry);
-      //this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
-      this.rawCurrentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
+      this.enabled = new YoBoolean(name + "Enabled", registry);
+      this.tauDesired = new YoDouble(name + "TauDesired", registry);
+      this.tauInertia = new YoDouble(name + "TauInertia", registry);
+      this.qddDesired = new YoDouble(name + "qdd_d", registry);
+      this.damping = new YoDouble(name + "Damping", registry);
+      //this.currentDesired = new YoDouble(name+"CurrentDesired", registry);
+      this.rawCurrentDesired = new YoDouble(name+"CurrentDesired", registry);
       
       if(actuator==StepprActuator.LEFT_HIP_Z || actuator==StepprActuator.RIGHT_HIP_Z)
          this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 0.90, rawCurrentDesired);

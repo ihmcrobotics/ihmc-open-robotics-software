@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -36,7 +36,7 @@ public class ActualCMPComputer extends SimpleRobotController
    private final Vector2D comAcceleration = new Vector2D();
    private final Point2D cmp = new Point2D();
 
-   private final DoubleYoVariable alpha = new DoubleYoVariable("momentumRateAlpha", registry);
+   private final YoDouble alpha = new YoDouble("momentumRateAlpha", registry);
    private final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", worldFrame, registry);
    private final FilteredVelocityYoFrameVector momentumChange;
 

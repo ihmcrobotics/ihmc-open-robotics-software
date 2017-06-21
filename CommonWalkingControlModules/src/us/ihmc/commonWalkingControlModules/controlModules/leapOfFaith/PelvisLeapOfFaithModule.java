@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisLeapOfFaithModule
 {
@@ -28,9 +28,9 @@ public class PelvisLeapOfFaithModule
 
    private double swingDuration;
 
-   private final BooleanYoVariable usePelvisRotation = new BooleanYoVariable("leapOfFaithUsePelvisRotation", registry);
-   private final DoubleYoVariable yawGain = new DoubleYoVariable("leapOfFaithPelvisYawGain", registry);
-   private final DoubleYoVariable rollGain = new DoubleYoVariable("leapOfFaithPelvisRollGain", registry);
+   private final YoBoolean usePelvisRotation = new YoBoolean("leapOfFaithUsePelvisRotation", registry);
+   private final YoDouble yawGain = new YoDouble("leapOfFaithPelvisYawGain", registry);
+   private final YoDouble rollGain = new YoDouble("leapOfFaithPelvisRollGain", registry);
 
    public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
                                   YoVariableRegistry parentRegistry)

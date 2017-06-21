@@ -2,13 +2,12 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
-
 
 public abstract class AbstractThreadedRobotController implements RobotController
 {
@@ -16,16 +15,16 @@ public abstract class AbstractThreadedRobotController implements RobotController
    protected final YoVariableRegistry registry;
 
    protected final ArrayList<RobotControllerExecutor> controllers = new ArrayList<RobotControllerExecutor>();
-   protected final DoubleYoVariable yoTime;
+   protected final YoDouble yoTime;
    protected final Robot simulatedRobot;
 
-   protected final LongYoVariable currentControlTick;
+   protected final YoLong currentControlTick;
 
    public AbstractThreadedRobotController(String name, Robot simulatedRobot)
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
-      this.currentControlTick = new LongYoVariable("currentControlTick", registry);
+      this.currentControlTick = new YoLong("currentControlTick", registry);
       this.yoTime = simulatedRobot.getYoTime();
       this.simulatedRobot = simulatedRobot;
    }
@@ -34,8 +33,8 @@ public abstract class AbstractThreadedRobotController implements RobotController
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
-      this.currentControlTick = new LongYoVariable("currentControlTick", registry);
-      this.yoTime = new DoubleYoVariable("time", registry);
+      this.currentControlTick = new YoLong("currentControlTick", registry);
+      this.yoTime = new YoDouble("time", registry);
       this.simulatedRobot = null;
    }
 

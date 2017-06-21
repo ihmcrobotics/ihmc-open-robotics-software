@@ -11,8 +11,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.ContactingExternalForcePointsVisualizer;
 import us.ihmc.simulationconstructionset.Link;
@@ -31,14 +31,14 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final BagOfBalls newCollisionBalls;
    private final ContactingExternalForcePointsVisualizer contactingExternalForcePointsVisualizer;
 
-   private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
-   private final DoubleYoVariable rotationalCoefficientOfFrictionBeta = new DoubleYoVariable("rotationalCoefficientOfFrictionBeta", registry);
-   private final DoubleYoVariable coefficientOfRestitution = new DoubleYoVariable("coefficientOfRestitution", registry);
+   private final YoDouble coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
+   private final YoDouble rotationalCoefficientOfFrictionBeta = new YoDouble("rotationalCoefficientOfFrictionBeta", registry);
+   private final YoDouble coefficientOfRestitution = new YoDouble("coefficientOfRestitution", registry);
 
-   private final DoubleYoVariable kpCollision = new DoubleYoVariable("kpCollision", registry);
-   private final DoubleYoVariable kdCollision = new DoubleYoVariable("kdCollision", registry);
-   private final DoubleYoVariable kdRotationalDamping = new DoubleYoVariable("kdRotationalDamping", registry);
-   private final DoubleYoVariable pullingOutSpringHysteresisReduction = new DoubleYoVariable("pullingOutSpringHysteresisReduction", registry);
+   private final YoDouble kpCollision = new YoDouble("kpCollision", registry);
+   private final YoDouble kdCollision = new YoDouble("kdCollision", registry);
+   private final YoDouble kdRotationalDamping = new YoDouble("kdRotationalDamping", registry);
+   private final YoDouble pullingOutSpringHysteresisReduction = new YoDouble("pullingOutSpringHysteresisReduction", registry);
 
    private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4

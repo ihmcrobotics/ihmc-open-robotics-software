@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -36,13 +36,13 @@ public class CapturePointUpdatable implements Updatable
    private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("capturePoint", worldFrame, registry);
    private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
    private final SideDependentList<YoFrameConvexPolygon2d> yoFootSupportPolygons = new SideDependentList<>();
-   private final EnumYoVariable<RobotSide> yoSupportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
-   private final BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
+   private final YoEnum<RobotSide> yoSupportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class, true);
+   private final YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
    // Computed Stuff
-   private final DoubleYoVariable icpError = new DoubleYoVariable("icpError", registry);
-   private final DoubleYoVariable minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
-   private final BooleanYoVariable tippingDetected = new BooleanYoVariable("tippingDetected", registry);
+   private final YoDouble icpError = new YoDouble("icpError", registry);
+   private final YoDouble minIcpDistanceToSupportPolygon = new YoDouble("minIcpDistanceToSupportPolygon", registry);
+   private final YoBoolean tippingDetected = new YoBoolean("tippingDetected", registry);
    private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
 
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
@@ -150,7 +150,7 @@ public class CapturePointUpdatable implements Updatable
       }
    }
 
-   public BooleanYoVariable getTippingDetectedBoolean()
+   public YoBoolean getTippingDetectedBoolean()
    {
       return tippingDetected;
    }
@@ -175,22 +175,22 @@ public class CapturePointUpdatable implements Updatable
       return yoFootSupportPolygons.get(robotSide);
    }
 
-   public EnumYoVariable<RobotSide> getYoSupportLeg()
+   public YoEnum<RobotSide> getYoSupportLeg()
    {
       return yoSupportLeg;
    }
 
-   public BooleanYoVariable getYoDoubleSupport()
+   public YoBoolean getYoDoubleSupport()
    {
       return yoDoubleSupport;
    }
 
-   public DoubleYoVariable getMinIcpDistanceToSupportPolygon()
+   public YoDouble getMinIcpDistanceToSupportPolygon()
    {
       return minIcpDistanceToSupportPolygon;
    }
 
-   public DoubleYoVariable getIcpError()
+   public YoDouble getIcpError()
    {
       return icpError;
    }

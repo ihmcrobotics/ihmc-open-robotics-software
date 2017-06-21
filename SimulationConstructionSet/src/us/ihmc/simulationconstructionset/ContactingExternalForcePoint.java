@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 
@@ -14,8 +14,8 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
    private static final long serialVersionUID = -5919153372698232766L;
 
    private final YoFrameVector surfaceNormalInJointFrame;
-   private final IntegerYoVariable indexOfContactingPair;
-   private final BooleanYoVariable isSlipping;
+   private final YoInteger indexOfContactingPair;
+   private final YoBoolean isSlipping;
 
    private int index = -1;
 
@@ -29,8 +29,8 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       
       this.setParentJoint(parentJoint);
       this.surfaceNormalInJointFrame = new YoFrameVector(name + "SurfaceNormal", null, registry);
-      indexOfContactingPair = new IntegerYoVariable(name + "PairIndex", registry);
-      isSlipping = new BooleanYoVariable(name + "IsSlipping", registry);
+      indexOfContactingPair = new YoInteger(name + "PairIndex", registry);
+      isSlipping = new YoBoolean(name + "IsSlipping", registry);
       
       indexOfContactingPair.set(-1);
    }

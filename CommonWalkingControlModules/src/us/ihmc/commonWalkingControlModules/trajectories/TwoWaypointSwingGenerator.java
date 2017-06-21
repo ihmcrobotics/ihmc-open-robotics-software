@@ -8,9 +8,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -29,14 +29,14 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable stepTime;
-   private final DoubleYoVariable timeIntoStep;
-   private final BooleanYoVariable isDone;
-   private final DoubleYoVariable swingHeight;
-   private final DoubleYoVariable maxSwingHeight;
-   private final DoubleYoVariable minSwingHeight;
+   private final YoDouble stepTime;
+   private final YoDouble timeIntoStep;
+   private final YoBoolean isDone;
+   private final YoDouble swingHeight;
+   private final YoDouble maxSwingHeight;
+   private final YoDouble minSwingHeight;
 
-   private final List<DoubleYoVariable> waypointProportions = new ArrayList<>();
+   private final List<YoDouble> waypointProportions = new ArrayList<>();
 
    private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
@@ -66,16 +66,16 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
-      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
-      isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
-      swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
+      stepTime = new YoDouble(namePrefix + "StepTime", registry);
+      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
+      isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
       swingHeight.set(minSwingHeight);
 
-      this.maxSwingHeight = new DoubleYoVariable(namePrefix + "MaxSwingHeight", registry);
+      this.maxSwingHeight = new YoDouble(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
 
-      this.minSwingHeight = new DoubleYoVariable(namePrefix + "MinSwingHeight", registry);
+      this.minSwingHeight = new YoDouble(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
 
       if (waypointProportions == null)
@@ -83,7 +83,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       for (int i = 0; i < numberWaypoints; i++)
       {
-         DoubleYoVariable waypointProportion = new DoubleYoVariable(namePrefix + "WaypointProportion" + i, registry);
+         YoDouble waypointProportion = new YoDouble(namePrefix + "WaypointProportion" + i, registry);
          waypointProportion.set(waypointProportions[i]);
          this.waypointProportions.add(waypointProportion);
       }

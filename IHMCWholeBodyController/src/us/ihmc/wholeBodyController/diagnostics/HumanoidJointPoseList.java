@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -18,13 +18,13 @@ public class HumanoidJointPoseList
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final IntegerYoVariable humanoidJointPoseIndex = new IntegerYoVariable("humanoidJointPoseIndex", registry);
+   private final YoInteger humanoidJointPoseIndex = new YoInteger("humanoidJointPoseIndex", registry);
    
    private final ArrayList<HumanoidJointPose> humanoidJointPoses = new ArrayList<HumanoidJointPose>();
    
-   private final EnumYoVariable<HumanoidArmPose> desiredArmPose = new EnumYoVariable<HumanoidArmPose>("desiredArmPose", registry, HumanoidArmPose.class);
-   private final EnumYoVariable<HumanoidSpinePose> desiredSpinePose = new EnumYoVariable<HumanoidSpinePose>("desiredSpinePose", registry, HumanoidSpinePose.class);
-   private final EnumYoVariable<HumanoidLegPose> desiredLegPose = new EnumYoVariable<HumanoidLegPose>("desiredLegPose", registry, HumanoidLegPose.class);
+   private final YoEnum<HumanoidArmPose> desiredArmPose = new YoEnum<HumanoidArmPose>("desiredArmPose", registry, HumanoidArmPose.class);
+   private final YoEnum<HumanoidSpinePose> desiredSpinePose = new YoEnum<HumanoidSpinePose>("desiredSpinePose", registry, HumanoidSpinePose.class);
+   private final YoEnum<HumanoidLegPose> desiredLegPose = new YoEnum<HumanoidLegPose>("desiredLegPose", registry, HumanoidLegPose.class);
       
    public HumanoidJointPoseList()
    {

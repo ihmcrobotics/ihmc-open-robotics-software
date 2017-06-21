@@ -11,10 +11,10 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
@@ -29,33 +29,33 @@ public class StateMachineExampleTwoTest
    public void testComplexStateMachineExample()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      final IntegerYoVariable ticksInStateOne = new IntegerYoVariable("ticksInStateOne", registry);
-      final IntegerYoVariable ticksInStateTwo = new IntegerYoVariable("ticksInStateTwo", registry);
-      final IntegerYoVariable ticksInStateThree = new IntegerYoVariable("ticksInStateThree", registry);
-      final IntegerYoVariable ticksInStateFour = new IntegerYoVariable("ticksInStateFour", registry);
+      final YoInteger ticksInStateOne = new YoInteger("ticksInStateOne", registry);
+      final YoInteger ticksInStateTwo = new YoInteger("ticksInStateTwo", registry);
+      final YoInteger ticksInStateThree = new YoInteger("ticksInStateThree", registry);
+      final YoInteger ticksInStateFour = new YoInteger("ticksInStateFour", registry);
 
-      final BooleanYoVariable inStateOne = new BooleanYoVariable("inStateOne", registry);
-      final BooleanYoVariable inStateTwo = new BooleanYoVariable("inStateTwo", registry);
-      final BooleanYoVariable inStateThree = new BooleanYoVariable("inStateThree", registry);
-      final BooleanYoVariable inStateFour = new BooleanYoVariable("inStateFour", registry);
+      final YoBoolean inStateOne = new YoBoolean("inStateOne", registry);
+      final YoBoolean inStateTwo = new YoBoolean("inStateTwo", registry);
+      final YoBoolean inStateThree = new YoBoolean("inStateThree", registry);
+      final YoBoolean inStateFour = new YoBoolean("inStateFour", registry);
 
-      final BooleanYoVariable didTransitionIntoStateOne = new BooleanYoVariable("didTransitionIntoStateOne", registry);
-      final BooleanYoVariable didTransitionIntoStateTwo = new BooleanYoVariable("didTransitionIntoStateTwo", registry);
-      final BooleanYoVariable didTransitionIntoStateThree = new BooleanYoVariable("didTransitionIntoStateThree", registry);
-      final BooleanYoVariable didTransitionIntoStateFour = new BooleanYoVariable("didTransitionIntoStateFour", registry);
+      final YoBoolean didTransitionIntoStateOne = new YoBoolean("didTransitionIntoStateOne", registry);
+      final YoBoolean didTransitionIntoStateTwo = new YoBoolean("didTransitionIntoStateTwo", registry);
+      final YoBoolean didTransitionIntoStateThree = new YoBoolean("didTransitionIntoStateThree", registry);
+      final YoBoolean didTransitionIntoStateFour = new YoBoolean("didTransitionIntoStateFour", registry);
 
-      final BooleanYoVariable didTransitionOutOfStateOne = new BooleanYoVariable("didTransitionOutOfStateOne", registry);
-      final BooleanYoVariable didTransitionOutOfStateTwo = new BooleanYoVariable("didTransitionOutOfStateTwo", registry);
-      final BooleanYoVariable didTransitionOutOfStateThree = new BooleanYoVariable("didTransitionOutOfStateThree", registry);
-      final BooleanYoVariable didTransitionOutOfStateFour = new BooleanYoVariable("didTransitionOutOfStateFour", registry);
+      final YoBoolean didTransitionOutOfStateOne = new YoBoolean("didTransitionOutOfStateOne", registry);
+      final YoBoolean didTransitionOutOfStateTwo = new YoBoolean("didTransitionOutOfStateTwo", registry);
+      final YoBoolean didTransitionOutOfStateThree = new YoBoolean("didTransitionOutOfStateThree", registry);
+      final YoBoolean didTransitionOutOfStateFour = new YoBoolean("didTransitionOutOfStateFour", registry);
 
-      final BooleanYoVariable transitionFromOneToFour = new BooleanYoVariable("transitionFromOneToFour", registry);
-      final BooleanYoVariable transitionFromThreeToFour = new BooleanYoVariable("transitionFromThreeToFour", registry);
-      final BooleanYoVariable transitionFromThreeToOne = new BooleanYoVariable("transitionFromThreeToOne", registry);
+      final YoBoolean transitionFromOneToFour = new YoBoolean("transitionFromOneToFour", registry);
+      final YoBoolean transitionFromThreeToFour = new YoBoolean("transitionFromThreeToFour", registry);
+      final YoBoolean transitionFromThreeToOne = new YoBoolean("transitionFromThreeToOne", registry);
 
-      final BooleanYoVariable threeToOneTransitionAction = new BooleanYoVariable("threeToOneTransitionAction", registry);
+      final YoBoolean threeToOneTransitionAction = new YoBoolean("threeToOneTransitionAction", registry);
 
-      DoubleYoVariable timeProvider = new DoubleYoVariable("time", registry);
+      YoDouble timeProvider = new YoDouble("time", registry);
       timeProvider.set(13.3);
 
       StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("complexStateMachine", "switchTime", StateEnum.class, StateEnum.FOUR, timeProvider, registry);
@@ -277,9 +277,9 @@ public class StateMachineExampleTwoTest
 
    private class ExampleStateTransitionCondition implements StateTransitionCondition
    {
-      private final BooleanYoVariable transitionVariable;
+      private final YoBoolean transitionVariable;
 
-      public ExampleStateTransitionCondition(BooleanYoVariable transitionVariable)
+      public ExampleStateTransitionCondition(YoBoolean transitionVariable)
       {
          this.transitionVariable = transitionVariable;
       }
@@ -294,9 +294,9 @@ public class StateMachineExampleTwoTest
 
    private class ExampleStateTransitionAction implements StateTransitionAction
    {
-      private final BooleanYoVariable transitionVariable;
+      private final YoBoolean transitionVariable;
 
-      public ExampleStateTransitionAction(BooleanYoVariable transitionVariable)
+      public ExampleStateTransitionAction(YoBoolean transitionVariable)
       {
          this.transitionVariable = transitionVariable;
       }
@@ -310,10 +310,10 @@ public class StateMachineExampleTwoTest
 
    private class ExampleState extends State<StateEnum>
    {
-      private final BooleanYoVariable inState, didTransitionIntoState, didTransitionOutOfState;
-      private final IntegerYoVariable ticksInState;
+      private final YoBoolean inState, didTransitionIntoState, didTransitionOutOfState;
+      private final YoInteger ticksInState;
 
-      public ExampleState(StateEnum stateEnum, BooleanYoVariable inState, BooleanYoVariable didTransitionIntoState, BooleanYoVariable didTransitionOutOfState, IntegerYoVariable ticksInState)
+      public ExampleState(StateEnum stateEnum, YoBoolean inState, YoBoolean didTransitionIntoState, YoBoolean didTransitionOutOfState, YoInteger ticksInState)
       {
          super(stateEnum);
 

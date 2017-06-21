@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public interface YoVariableEntryContainer {
 

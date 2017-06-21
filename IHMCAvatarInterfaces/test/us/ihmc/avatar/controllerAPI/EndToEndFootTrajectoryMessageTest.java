@@ -39,8 +39,8 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -196,7 +196,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       // Since the control frame is moved down below the foot this assert makes sure the singularity escape uses the desired ankle position, not the desired control point position.
       String namePrefix = fullRobotModel.getFoot(robotSide).getName();
       String className = LegSingularityAndKneeCollapseAvoidanceControlModule.class.getSimpleName();
-      BooleanYoVariable singularityEscape = (BooleanYoVariable) scs.getVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
+      YoBoolean singularityEscape = (YoBoolean) scs.getVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
       assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
    }
 
@@ -873,7 +873,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
       String numberOfWaypointsVarName = footPrefix + "NumberOfWaypoints";
       String orientationTrajectoryName = footPrefix + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-      return ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static int findNumberOfWaypointsForPosition(RobotSide robotSide, SimulationConstructionSet scs)
@@ -882,7 +882,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
       String numberOfWaypointsVarName = footPrefix + "NumberOfWaypoints";
       String positionTrajectoryName = footPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
-      return ((IntegerYoVariable) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static SimpleSE3TrajectoryPoint findTrajectoryPoint(RobotSide robotSide, int trajectoryPointIndex, SimulationConstructionSet scs)

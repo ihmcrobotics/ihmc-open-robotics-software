@@ -96,7 +96,7 @@ public abstract class StopThreadUpdatable implements Updatable
    public FramePose2d getTestFramePose2dAtTransition(BehaviorControlModeEnum controlMode)
    {
       FramePose2d ret = new FramePose2d();
-      ret.setPose(getTestFrameTransformToWorldAtTransition(controlMode));
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode), false);
       return ret;
    }
 
@@ -108,7 +108,7 @@ public abstract class StopThreadUpdatable implements Updatable
    public FramePose2d getTestFramePose2dCopy(RigidBodyTransform testFrameTransformToWorld)
    {
       FramePose2d ret = new FramePose2d(ReferenceFrame.getWorldFrame());
-      ret.setPose(testFrameTransformToWorld);
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), testFrameTransformToWorld, false);
       return ret;
    }
 

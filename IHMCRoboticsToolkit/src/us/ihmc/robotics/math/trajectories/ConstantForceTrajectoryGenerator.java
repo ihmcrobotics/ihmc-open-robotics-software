@@ -1,25 +1,24 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ConstantForceTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable force;
-   private final DoubleYoVariable finalTime;
-   private final DoubleYoVariable time;
+   private final YoDouble force;
+   private final YoDouble finalTime;
+   private final YoDouble time;
 
    public ConstantForceTrajectoryGenerator(String namePrefix, double force, double finalTime, YoVariableRegistry parentRegistry)
    {
       MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.force = new DoubleYoVariable("force", registry);
-      this.finalTime = new DoubleYoVariable("finalTime", registry);
-      this.time = new DoubleYoVariable("time", registry);
+      this.force = new YoDouble("force", registry);
+      this.finalTime = new YoDouble("finalTime", registry);
+      this.time = new YoDouble("time", registry);
       this.force.set(force);
       this.finalTime.set(finalTime);
 

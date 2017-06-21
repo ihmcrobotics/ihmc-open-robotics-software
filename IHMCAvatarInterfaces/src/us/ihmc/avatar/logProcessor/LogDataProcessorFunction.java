@@ -1,7 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface LogDataProcessorFunction
 {

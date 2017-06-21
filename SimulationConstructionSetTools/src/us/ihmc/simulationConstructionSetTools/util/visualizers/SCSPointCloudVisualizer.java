@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
+import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SCSPointCloudVisualizer implements RewoundListener

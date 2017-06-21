@@ -14,8 +14,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.InertiaTools;
@@ -39,8 +39,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private final ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
-   private final DoubleYoVariable minimumMassOfRigidBodies = new DoubleYoVariable("minimumMassOfRigidBodies", registry);
-   private final DoubleYoVariable maximumMassOfRigidBodies = new DoubleYoVariable("maximumMassOfRigidBodies", registry);
+   private final YoDouble minimumMassOfRigidBodies = new YoDouble("minimumMassOfRigidBodies", registry);
+   private final YoDouble maximumMassOfRigidBodies = new YoDouble("maximumMassOfRigidBodies", registry);
 
    private class RigidBodyVisualizationData
    {

@@ -12,8 +12,8 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public class QuadrupedDcmBasedStandController implements QuadrupedController
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
    private final double mass;

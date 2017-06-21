@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -203,7 +203,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       FrameOrientation2d rightOrientation = new FrameOrientation2d();
       leftPose.getOrientation2dIncludingFrame(leftOrientation);
       rightPose.getOrientation2dIncludingFrame(rightOrientation);
-      initialDeltaFeetYaw = leftOrientation.sub(rightOrientation);
+      initialDeltaFeetYaw = leftOrientation.difference(rightOrientation);
       initialDeltaFeetY = leftPose.getY() - rightPose.getY();
       initialDeltaFeetX = leftPose.getX() - rightPose.getX();
    }

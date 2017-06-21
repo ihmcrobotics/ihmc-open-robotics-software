@@ -11,10 +11,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -39,13 +39,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
-   private final IntegerYoVariable numberOfCheckpoints;
+   private final YoInteger numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
-   private final DoubleYoVariable minimumClearance;
-   private final DoubleYoVariable incrementalAdjustmentDistance;
-   private final DoubleYoVariable maximumAdjustmentDistance;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
+   private final YoDouble minimumClearance;
+   private final YoDouble incrementalAdjustmentDistance;
+   private final YoDouble maximumAdjustmentDistance;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
    private final YoFramePoint trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
@@ -104,14 +104,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;
       System.out.println("soltotoelength: " + soleToToeLength);
 
-      numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
+      numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
-      minimumClearance = new DoubleYoVariable(namePrefix + "MinimumClearance", parentRegistry);
-      incrementalAdjustmentDistance = new DoubleYoVariable(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
-      maximumAdjustmentDistance = new DoubleYoVariable(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
-      status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
+      minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
+      incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
+      maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
+      status = new YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
                                                                                    SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
-      mostSevereCollisionType = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
+      mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
       trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);

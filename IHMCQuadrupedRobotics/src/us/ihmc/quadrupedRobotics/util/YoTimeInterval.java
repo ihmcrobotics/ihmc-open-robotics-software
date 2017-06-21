@@ -1,17 +1,17 @@
 package us.ihmc.quadrupedRobotics.util;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoTimeInterval extends TimeInterval
 {
-   private DoubleYoVariable startTime;
-   private DoubleYoVariable endTime;
+   private YoDouble startTime;
+   private YoDouble endTime;
 
    public YoTimeInterval(String prefix, YoVariableRegistry registry)
    {
-      this.startTime = new DoubleYoVariable(prefix + "StartTime", registry);
-      this.endTime = new DoubleYoVariable(prefix + "EndTime", registry);
+      this.startTime = new YoDouble(prefix + "StartTime", registry);
+      this.endTime = new YoDouble(prefix + "EndTime", registry);
    }
 
    @Override

@@ -1,19 +1,19 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoVariableLimitChecker
 {
-   private final EnumYoVariable<Status> status;
+   private final YoEnum<Status> status;
    private final double lowerLimit;
    private final double upperLimit;
-   private final DoubleYoVariable variableToCheck;
+   private final YoDouble variableToCheck;
 
-   public YoVariableLimitChecker(DoubleYoVariable variableToCheck, String prefix, double lowerLimit, double upperLimit, YoVariableRegistry registry)
+   public YoVariableLimitChecker(YoDouble variableToCheck, String prefix, double lowerLimit, double upperLimit, YoVariableRegistry registry)
    {
-      status = new EnumYoVariable<Status>(prefix + variableToCheck.getName() + "_Status", registry, Status.class);
+      status = new YoEnum<Status>(prefix + variableToCheck.getName() + "_Status", registry, Status.class);
 
       if (upperLimit < lowerLimit)
       {

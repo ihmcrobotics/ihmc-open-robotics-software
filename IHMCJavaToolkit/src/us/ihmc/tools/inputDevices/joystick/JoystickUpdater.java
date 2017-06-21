@@ -62,7 +62,16 @@ public class JoystickUpdater implements Runnable
       threadRunning = true;
       while (threadRunning)
       {
-         joystickController.poll();
+         if (!joystickController.poll())
+         {
+            connected = false;
+            for (JoystickStatusListener listener : generalListenersList)
+            {
+               listener.updateConnectivity(connected);
+            }
+            this.stopThread();
+         }
+         
          EventQueue queue = joystickController.getEventQueue();
          Event event = new Event();
 

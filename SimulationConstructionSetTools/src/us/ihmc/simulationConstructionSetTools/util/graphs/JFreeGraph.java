@@ -47,9 +47,9 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class JFreeGraph extends JPanel
 {
@@ -482,8 +482,8 @@ public class JFreeGraph extends JPanel
       int numberOfPoints = 1000;
 
       YoVariableRegistry registry = new YoVariableRegistry("Registry");
-      DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
-      DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", registry);
+      YoDouble variableOne = new YoDouble("variableOne", registry);
+      YoDouble variableTwo = new YoDouble("variableTwo", registry);
       
       DataBufferEntry dataOneEntry = new DataBufferEntry(variableOne, numberOfPoints);
       DataBufferEntry dataTwoEntry = new DataBufferEntry(variableTwo, numberOfPoints);
