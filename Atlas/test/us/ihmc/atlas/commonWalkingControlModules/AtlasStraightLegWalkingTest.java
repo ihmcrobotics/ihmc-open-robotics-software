@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -222,13 +223,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 0.87;
+                        return 0.92;
                      }
 
                      @Override
                      public double getSupportKneeCollapsingDuration()
                      {
-                        return 0.15;
+                        return 0.075;
                      }
 
                      @Override
@@ -250,27 +251,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getStraightLegJointSpacePrivilegedConfigurationGain()
+                     public LegConfigurationGains getStraightLegGains()
                      {
-                        return 40.0;
-                     }
+                        LegConfigurationGains gains = new LegConfigurationGains();
+                        gains.setJointSpaceKp(40.0);
+                        gains.setJointSpaceKd(4.0);
+                        gains.setActuatorSpaceKp(60.0);
+                        gains.setActuatorSpaceKd(6.0);
 
-                     @Override
-                     public double getStraightLegActuatorSpacePrivilegedConfigurationGain()
-                     {
-                        return 60.0;
-                     }
-
-                     @Override
-                     public double getStraightLegJointSpacePrivilegedVelocityGain()
-                     {
-                        return 4.0; // 6.0;
-                     }
-
-                     @Override
-                     public double getStraightLegActuatorSpacePrivilegedVelocityGain()
-                     {
-                        return 6.0;
+                        return gains;
                      }
 
                      @Override
@@ -280,27 +269,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getBentLegJointSpacePrivilegedConfigurationGain()
+                     public LegConfigurationGains getBentLegGains()
                      {
-                        return 150.0;
-                     }
+                        LegConfigurationGains gains = new LegConfigurationGains();
+                        gains.setJointSpaceKp(150.0);
+                        gains.setJointSpaceKd(4.0);
+                        gains.setActuatorSpaceKp(200.0);
+                        gains.setActuatorSpaceKd(6.0);
 
-                     @Override
-                     public double getBentLegActuatorSpacePrivilegedConfigurationGain()
-                     {
-                        return 200.0;
-                     }
-
-                     @Override
-                     public double getBentLegJointSpacePrivilegedVelocityGain()
-                     {
-                        return 4.0;
-                     }
-
-                     @Override
-                     public double getBentLegActuatorSpacePrivilegedVelocityGain()
-                     {
-                        return 6.0;
+                        return gains;
                      }
 
                      @Override
