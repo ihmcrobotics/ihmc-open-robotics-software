@@ -6,6 +6,7 @@ import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -150,6 +151,34 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   return new double[] {0.15, 0.80};
                }
 
+
+
+
+               @Override
+               public LeapOfFaithParameters getLeapOfFaithParameters()
+               {
+                  return new LeapOfFaithParameters()
+                  {
+                     @Override
+                     public boolean useFootForce()
+                     {
+                        return false;
+                     }
+
+                     @Override
+                     public boolean usePelvisRotation()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public boolean relaxPelvisControl()
+                     {
+                        return false;
+                     }
+                  };
+               }
+
                @Override
                public AtlasStraightLegWalkingParameters getStraightLegWalkingParameters()
                {
@@ -176,7 +205,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToCollapseStanceLeg()
                      {
-                        return 0.92;
+                        return 0.87;
                      }
 
                      @Override
@@ -247,6 +276,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   };
                }
 
+
+
+
                @Override
                public MomentumOptimizationSettings getMomentumOptimizationSettings()
                {
@@ -260,6 +292,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
                   };
                }
+
+
+
 
                @Override
                public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
