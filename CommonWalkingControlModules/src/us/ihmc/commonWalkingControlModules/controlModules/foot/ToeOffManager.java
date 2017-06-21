@@ -789,7 +789,8 @@ public class ToeOffManager
             return false;
          }
 
-         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue() && !isDesiredCoPOKForToeOffFilt.getBooleanValue())
+         // I don't care about the CoP location during transfer
+         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
          {
             doPointToeOff.set(false);
             computeToePointContact.set(true);
