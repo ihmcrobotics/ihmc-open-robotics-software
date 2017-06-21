@@ -31,6 +31,9 @@ public class LegConfigurationControlModule
       STRAIGHTEN_TO_STRAIGHT, STRAIGHT, STRAIGHTEN_TO_CONTROLLABLE, COLLAPSE, BENT
    }
 
+   private static final double minimumDampingScale = 0.2;
+   private static final boolean scaleDamping = true;
+
    private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = false;
 
    private final YoVariableRegistry registry;
@@ -77,6 +80,7 @@ public class LegConfigurationControlModule
    private final OneDoFJoint kneePitchJoint;
 
    private final YoDouble blendingFactor;
+   private final YoDouble dampingActionScaleFactor;
 
    private static final int hipPitchJointIndex = 0;
    private static final int kneePitchJointIndex = 1;
@@ -173,6 +177,7 @@ public class LegConfigurationControlModule
       privilegedMaxAcceleration.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
 
       blendingFactor = new YoDouble(namePrefix + "BlendingFactor", registry);
+      dampingActionScaleFactor = new YoDouble(namePrefix + "DampingActionScaleFactor", registry);
 
       desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
@@ -299,8 +304,17 @@ public class LegConfigurationControlModule
       double jointSpacePAction = jointSpaceKp * error;
       double actuatorSpacePAction = -actuatorSpaceConfigurationGain * virtualError;
 
-      double jointSpaceDAction = jointSpaceVelocityGain * -kneePitchJoint.getQd();
-      double actuatorSpaceDAction = actuatorSpaceVelocityGain * currentVirtualVelocity;
+      // modify gains based on error. If there's a big error, don't damp velocities
+      double percentError = Math.abs(error) / (0.5 * kneeRangeOfMotion);
+      double dampingActionScaleFactor;
+      if (scaleDamping)
+         dampingActionScaleFactor = MathTools.clamp(1.0 - (1.0 - minimumDampingScale) * percentError, 0.0, 1.0);
+      else
+         dampingActionScaleFactor = 1.0;
+      this.dampingActionScaleFactor.set(dampingActionScaleFactor);
+
+      double jointSpaceDAction = dampingActionScaleFactor * jointSpaceVelocityGain * -kneePitchJoint.getQd();
+      double actuatorSpaceDAction = dampingActionScaleFactor * actuatorSpaceVelocityGain * currentVirtualVelocity;
 
       double pAction, dAction;
 
