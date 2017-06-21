@@ -73,11 +73,11 @@ public class CommandConsumerWithDelayBuffers
       {
          Class<? extends Command<?, ?>> commandClass = listOfSupportedCommands.get(i);
          RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands((Class<C>) commandClass);
-         
+
          for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
          {
             C command = newCommands.get(commandIndex);
-            
+
             if(commandClass == ClearDelayQueueCommand.class)
             {
                ClearDelayQueueCommand clearDelayQueueCommand = (ClearDelayQueueCommand) command;
@@ -90,7 +90,7 @@ public class CommandConsumerWithDelayBuffers
    }
 
    /**
-    * Clears either all of the delay queues or a single delay queue depending on the 
+    * Clears either all of the delay queues or a single delay queue depending on the
     * ClearDelayQueueCommand
     * @param clearDelayQueueCommand a command that dictates which queues to clear
     */
@@ -110,7 +110,7 @@ public class CommandConsumerWithDelayBuffers
          Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);
          clearDelayQueueCommand.setCommandClassToClear(commandClassToClear);
       }
-      
+
       Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getCommandClassToClear();
       if(classToClear != null)
       {
@@ -129,7 +129,7 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToFlush);
       recyclingArrayList.clear();
    }
-   
+
    /**
     * Check if a new command is available.
     * @param clazz class of the command to check availability.
@@ -166,7 +166,7 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
       Command commandCopy = recyclingArrayList.add();
       commandCopy.set(command);
-      
+
       //not all commands implement setExecution time, if they don't the execution time will be 0 and should move to the front of the queue
       if(commandCopy.isDelayedExecutionSupported())
       {

@@ -218,7 +218,7 @@ public class PlaneContactStateToWrenchMatrixHelper
                clear(rhoIndex);
             }
 
-            //// TODO: 6/5/17 scale this by the vertical magnitude 
+            //// TODO: 6/5/17 scale this by the vertical magnitude
             rhoMaxMatrix.set(rhoIndex, 0, maxContactForces.get(yoPlaneContactState.getContactPoints().get(contactPointIndex)).getDoubleValue() / numberOfBasisVectorsPerContactPoint);
 
             rhoIndex++;

@@ -7,10 +7,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,38 +39,38 @@ public class LegConfigurationControlModule
 
    private final StraightLegWalkingParameters straightLegWalkingParameters;
 
-   private final EnumYoVariable<LegConfigurationType> requestedState;
+   private final YoEnum<LegConfigurationType> requestedState;
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
-   private final DoubleYoVariable legPitchPrivilegedWeight;
+   private final YoDouble legPitchPrivilegedWeight;
 
-   private final DoubleYoVariable kneeStraightPrivilegedWeight;
-   private final DoubleYoVariable straightJointSpacePositionGain;
-   private final DoubleYoVariable straightJointSpaceVelocityGain;
-   private final DoubleYoVariable straightActuatorSpacePositionGain;
-   private final DoubleYoVariable straightActuatorSpaceVelocityGain;
+   private final YoDouble kneeStraightPrivilegedWeight;
+   private final YoDouble straightJointSpacePositionGain;
+   private final YoDouble straightJointSpaceVelocityGain;
+   private final YoDouble straightActuatorSpacePositionGain;
+   private final YoDouble straightActuatorSpaceVelocityGain;
 
-   private final DoubleYoVariable kneeBentPrivilegedWeight;
-   private final DoubleYoVariable bentJointSpacePositionGain;
-   private final DoubleYoVariable bentJointSpaceVelocityGain;
-   private final DoubleYoVariable bentActuatorSpaceVelocityGain;
-   private final DoubleYoVariable bentActuatorSpacePositionGain;
+   private final YoDouble kneeBentPrivilegedWeight;
+   private final YoDouble bentJointSpacePositionGain;
+   private final YoDouble bentJointSpaceVelocityGain;
+   private final YoDouble bentActuatorSpaceVelocityGain;
+   private final YoDouble bentActuatorSpacePositionGain;
 
-   private final DoubleYoVariable kneePitchPrivilegedConfiguration;
-   private final DoubleYoVariable kneePitchPrivilegedError;
+   private final YoDouble kneePitchPrivilegedConfiguration;
+   private final YoDouble kneePitchPrivilegedError;
 
-   private final DoubleYoVariable kneePrivilegedPAction;
-   private final DoubleYoVariable kneePrivilegedDAction;
-   private final DoubleYoVariable privilegedMaxAcceleration;
+   private final YoDouble kneePrivilegedPAction;
+   private final YoDouble kneePrivilegedDAction;
+   private final YoDouble privilegedMaxAcceleration;
 
-   private final DoubleYoVariable desiredAngleWhenStraight;
+   private final YoDouble desiredAngleWhenStraight;
 
-   private final DoubleYoVariable straighteningSpeed;
-   private final DoubleYoVariable collapsingDuration;
+   private final YoDouble straighteningSpeed;
+   private final YoDouble collapsingDuration;
 
-   private final DoubleYoVariable desiredVirtualActuatorLength;
-   private final DoubleYoVariable currentVirtualActuatorLength;
-   private final DoubleYoVariable currentVirtualActuatorVelocity;
+   private final YoDouble desiredVirtualActuatorLength;
+   private final YoDouble currentVirtualActuatorLength;
+   private final YoDouble currentVirtualActuatorVelocity;
 
    private final OneDoFJoint kneePitchJoint;
 
@@ -114,26 +116,26 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.addJoint(kneePitchJoint, Double.NaN);
       privilegedAccelerationCommand.addJoint(anklePitchJoint, Double.NaN);
 
-      legPitchPrivilegedWeight = new DoubleYoVariable(sidePrefix + "LegPitchPrivilegedWeight", registry);
+      legPitchPrivilegedWeight = new YoDouble(sidePrefix + "LegPitchPrivilegedWeight", registry);
 
-      kneeStraightPrivilegedWeight = new DoubleYoVariable(sidePrefix + "KneeStraightPrivilegedWeight", registry);
-      straightJointSpacePositionGain = new DoubleYoVariable(sidePrefix + "StraightLegJointSpaceKp", registry);
-      straightJointSpaceVelocityGain = new DoubleYoVariable(sidePrefix + "StraightLegJointSpaceKv", registry);
-      straightActuatorSpacePositionGain = new DoubleYoVariable(sidePrefix + "StraightLegActuatorSpaceKp", registry);
-      straightActuatorSpaceVelocityGain = new DoubleYoVariable(sidePrefix + "StraightLegActuatorSpaceKv", registry);
+      kneeStraightPrivilegedWeight = new YoDouble(sidePrefix + "KneeStraightPrivilegedWeight", registry);
+      straightJointSpacePositionGain = new YoDouble(sidePrefix + "StraightLegJointSpaceKp", registry);
+      straightJointSpaceVelocityGain = new YoDouble(sidePrefix + "StraightLegJointSpaceKv", registry);
+      straightActuatorSpacePositionGain = new YoDouble(sidePrefix + "StraightLegActuatorSpaceKp", registry);
+      straightActuatorSpaceVelocityGain = new YoDouble(sidePrefix + "StraightLegActuatorSpaceKv", registry);
 
-      kneeBentPrivilegedWeight = new DoubleYoVariable(sidePrefix + "KneeBentPrivilegedWeight", registry);
-      bentJointSpacePositionGain = new DoubleYoVariable(sidePrefix + "BentLegJointSpaceKp", registry);
-      bentJointSpaceVelocityGain = new DoubleYoVariable(sidePrefix + "BentLegJointSpaceKv", registry);
-      bentActuatorSpacePositionGain = new DoubleYoVariable(sidePrefix + "BentLegActuatorSpaceKp", registry);
-      bentActuatorSpaceVelocityGain = new DoubleYoVariable(sidePrefix + "BentLegActuatorSpaceKv", registry);
+      kneeBentPrivilegedWeight = new YoDouble(sidePrefix + "KneeBentPrivilegedWeight", registry);
+      bentJointSpacePositionGain = new YoDouble(sidePrefix + "BentLegJointSpaceKp", registry);
+      bentJointSpaceVelocityGain = new YoDouble(sidePrefix + "BentLegJointSpaceKv", registry);
+      bentActuatorSpacePositionGain = new YoDouble(sidePrefix + "BentLegActuatorSpaceKp", registry);
+      bentActuatorSpaceVelocityGain = new YoDouble(sidePrefix + "BentLegActuatorSpaceKv", registry);
 
-      kneePitchPrivilegedConfiguration = new DoubleYoVariable(sidePrefix + "KneePitchPrivilegedConfiguration", registry);
-      privilegedMaxAcceleration = new DoubleYoVariable(sidePrefix + "LegPrivilegedMaxAcceleration", registry);
+      kneePitchPrivilegedConfiguration = new YoDouble(sidePrefix + "KneePitchPrivilegedConfiguration", registry);
+      privilegedMaxAcceleration = new YoDouble(sidePrefix + "LegPrivilegedMaxAcceleration", registry);
 
-      kneePitchPrivilegedError = new DoubleYoVariable(sidePrefix + "KneePitchPrivilegedError", registry);
-      kneePrivilegedPAction = new DoubleYoVariable(sidePrefix + "KneePrivilegedPAction", registry);
-      kneePrivilegedDAction = new DoubleYoVariable(sidePrefix + "KneePrivilegedDAction", registry);
+      kneePitchPrivilegedError = new YoDouble(sidePrefix + "KneePitchPrivilegedError", registry);
+      kneePrivilegedPAction = new YoDouble(sidePrefix + "KneePrivilegedPAction", registry);
+      kneePrivilegedDAction = new YoDouble(sidePrefix + "KneePrivilegedDAction", registry);
 
       legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
 
@@ -151,23 +153,23 @@ public class LegConfigurationControlModule
 
       privilegedMaxAcceleration.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
 
-      desiredAngleWhenStraight = new DoubleYoVariable(namePrefix + "DesiredAngleWhenStraight", registry);
+      desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
 
-      straighteningSpeed = new DoubleYoVariable(namePrefix + "SupportKneeStraighteningSpeed", registry);
+      straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
 
-      collapsingDuration = new DoubleYoVariable(namePrefix + "SupportKneeCollapsingDuration", registry);
+      collapsingDuration = new YoDouble(namePrefix + "SupportKneeCollapsingDuration", registry);
       collapsingDuration.set(straightLegWalkingParameters.getSupportKneeCollapsingDuration());
 
-      desiredVirtualActuatorLength = new DoubleYoVariable(namePrefix + "DesiredVirtualActuatorLength", registry);
-      currentVirtualActuatorLength = new DoubleYoVariable(namePrefix + "CurrentVirtualActuatorLength", registry);
-      currentVirtualActuatorVelocity = new DoubleYoVariable(namePrefix + "CurrentVirtualActuatorVelocity", registry);
+      desiredVirtualActuatorLength = new YoDouble(namePrefix + "DesiredVirtualActuatorLength", registry);
+      currentVirtualActuatorLength = new YoDouble(namePrefix + "CurrentVirtualActuatorLength", registry);
+      currentVirtualActuatorVelocity = new YoDouble(namePrefix + "CurrentVirtualActuatorVelocity", registry);
 
       // set up states and state machine
-      DoubleYoVariable time = controllerToolbox.getYoTime();
+      YoDouble time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", LegConfigurationType.class, time, registry);
-      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
+      requestedState = YoEnum.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
       requestedState.set(null);
 
       // compute leg segment lengths
@@ -326,7 +328,7 @@ public class LegConfigurationControlModule
 
    private class StraightenToStraightControlState extends StraighteningKneeControlState
    {
-      public StraightenToStraightControlState(DoubleYoVariable straighteningSpeed)
+      public StraightenToStraightControlState(YoDouble straighteningSpeed)
       {
          super(LegConfigurationType.STRAIGHTEN_TO_STRAIGHT, straighteningSpeed);
       }
@@ -334,7 +336,7 @@ public class LegConfigurationControlModule
 
    private class StraightenToControllableControlState extends StraighteningKneeControlState
    {
-      public StraightenToControllableControlState(DoubleYoVariable straighteningSpeed)
+      public StraightenToControllableControlState(YoDouble straighteningSpeed)
       {
          super(LegConfigurationType.STRAIGHTEN_TO_CONTROLLABLE, straighteningSpeed);
       }
@@ -342,7 +344,7 @@ public class LegConfigurationControlModule
 
    private class StraighteningKneeControlState extends FinishableState<LegConfigurationType>
    {
-      private final DoubleYoVariable yoStraighteningSpeed;
+      private final YoDouble yoStraighteningSpeed;
 
       private double startingPosition;
       private double previousKneePitchAngle;
@@ -355,7 +357,7 @@ public class LegConfigurationControlModule
 
       private double previousTime;
 
-      public StraighteningKneeControlState(LegConfigurationType stateEnum, DoubleYoVariable straighteningSpeed)
+      public StraighteningKneeControlState(LegConfigurationType stateEnum, YoDouble straighteningSpeed)
       {
          super(stateEnum);
 
