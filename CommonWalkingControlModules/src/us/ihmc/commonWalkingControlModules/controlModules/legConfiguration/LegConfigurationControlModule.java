@@ -140,16 +140,18 @@ public class LegConfigurationControlModule
       legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
 
       kneeStraightPrivilegedWeight.set(straightLegWalkingParameters.getKneeStraightLegPrivilegedWeight());
-      straightJointSpacePositionGain.set(straightLegWalkingParameters.getStraightLegJointSpacePrivilegedConfigurationGain());
-      straightJointSpaceVelocityGain.set(straightLegWalkingParameters.getStraightLegJointSpacePrivilegedVelocityGain());
-      straightActuatorSpacePositionGain.set(straightLegWalkingParameters.getStraightLegActuatorSpacePrivilegedConfigurationGain());
-      straightActuatorSpaceVelocityGain.set(straightLegWalkingParameters.getStraightLegActuatorSpacePrivilegedVelocityGain());
+      LegConfigurationGains straightLegGains = straightLegWalkingParameters.getStraightLegGains();
+      straightJointSpacePositionGain.set(straightLegGains.getJointSpaceKp());
+      straightJointSpaceVelocityGain.set(straightLegGains.getJointSpaceKd());
+      straightActuatorSpacePositionGain.set(straightLegGains.getActuatorSpaceKp());
+      straightActuatorSpaceVelocityGain.set(straightLegGains.getActuatorSpaceKd());
 
+      LegConfigurationGains bentLegGains = straightLegWalkingParameters.getBentLegGains();
       kneeBentPrivilegedWeight.set(straightLegWalkingParameters.getKneeBentLegPrivilegedWeight());
-      bentJointSpacePositionGain.set(straightLegWalkingParameters.getBentLegJointSpacePrivilegedConfigurationGain());
-      bentJointSpaceVelocityGain.set(straightLegWalkingParameters.getBentLegJointSpacePrivilegedVelocityGain());
-      bentActuatorSpacePositionGain.set(straightLegWalkingParameters.getBentLegActuatorSpacePrivilegedConfigurationGain());
-      bentActuatorSpaceVelocityGain.set(straightLegWalkingParameters.getBentLegActuatorSpacePrivilegedVelocityGain());
+      bentJointSpacePositionGain.set(bentLegGains.getJointSpaceKp());
+      bentJointSpaceVelocityGain.set(bentLegGains.getJointSpaceKd());
+      bentActuatorSpacePositionGain.set(bentLegGains.getActuatorSpaceKp());
+      bentActuatorSpaceVelocityGain.set(bentLegGains.getActuatorSpaceKd());
 
       privilegedMaxAcceleration.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
 
@@ -247,9 +249,9 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
       privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
 
-      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
-      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
    }
 
    private double computeKneeAcceleration()
