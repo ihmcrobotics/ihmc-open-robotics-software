@@ -20,21 +20,18 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode3DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.WheneverWholeBodyValidityTester;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
@@ -42,18 +39,12 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotModels.FullRobotModelFromDescription;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.SolarPanelEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -147,60 +138,43 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    
    @Test
    public void wheneverWholeBodyValidityTesterTest() throws SimulationExceededMaximumTimeException, IOException
-   {
-      if(false)
-         ThreadTools.sleep(13000);
-      
+   {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      drcBehaviorTestHelper.updateRobotModel();
-            
+      drcBehaviorTestHelper.updateRobotModel();            
       drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
-            
-      setUpSolarPanel();
-                 
+                             
       // construct
-      WheneverWholeBodyValidityTester nodeValidityTester = new WheneverWholeBodyValidityTester(getRobotModel());
+      WheneverWholeBodyValidityTester wbikTester = new WheneverWholeBodyValidityTester(getRobotModel());
             
       // create initial robot configuration
-      nodeValidityTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
-
+      wbikTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
       
-      nodeValidityTester.initialize();      
-      nodeValidityTester.holdCurrentTrajectoryMessages();
+      wbikTester.initialize();      
+      wbikTester.holdCurrentTrajectoryMessages();
       
-      // Hand
+      // Desired
       Quaternion desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      nodeValidityTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
-      nodeValidityTester.setDesiredChestOrientation(desiredChestOrientation);
+      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
             
-      nodeValidityTester.setDesiredPelvisHeight(0.75);
+      wbikTester.setDesiredPelvisHeight(0.75);
       
-      nodeValidityTester.putTrajectoryMessages();
+      wbikTester.putTrajectoryMessages();
+
+      PrintTools.info(""+wbikTester.isValidPose());      
       
-      for(int i=0;i<30;i++)
-      {
-         nodeValidityTester.updateInternal();
-         ThreadTools.sleep(10);
-      }
-      
-            
-      
-      FullHumanoidRobotModel createdFullRobotModel = nodeValidityTester.getDesiredFullRobotModel();
-            
+      FullHumanoidRobotModel createdFullRobotModel = wbikTester.getDesiredFullRobotModel();            
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
-      
-      
       
       PrintTools.info("END");     
    } 
@@ -208,9 +182,6 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    //@Test
    public void isValidTest() throws SimulationExceededMaximumTimeException, IOException
    {
-      if(false)
-         ThreadTools.sleep(13000);
-      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 

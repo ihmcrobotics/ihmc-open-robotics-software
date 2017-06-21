@@ -105,6 +105,7 @@ public class WheneverWholeBodyValidityTester
    private final FeedbackControllerDataReadOnly feedbackControllerDataHolder;
 
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
+   private final DoubleYoVariable solutionQualityOld = new DoubleYoVariable("solutionQualityOld", registry);
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
    private final SideDependentList<BooleanYoVariable> isFootInSupport = new SideDependentList<>();
    private final SideDependentList<YoFramePoseUsingQuaternions> initialFootPoses = new SideDependentList<>();
@@ -142,6 +143,11 @@ public class WheneverWholeBodyValidityTester
    private WeightMatrix6D chestWeightMatrix = new WeightMatrix6D();
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
+   
+   private static int updateCnt = 0;
+   private static int numberOfTest = 0;
+   private boolean isValidPose = false;
+   private static int maximumCntForUpdateInternal = 200;
    
    public WheneverWholeBodyValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
@@ -259,6 +265,8 @@ public class WheneverWholeBodyValidityTester
    public boolean initialize()
    {
       userFeedbackCommands.clear();
+      isValidPose = false;
+      updateCnt = 0;
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
@@ -294,7 +302,8 @@ public class WheneverWholeBodyValidityTester
 
    
    
-   public void updateInternal()
+   
+   private void updateInternal()
    {
       // Updating the reference frames and twist calculator.
       updateTools();
@@ -304,7 +313,6 @@ public class WheneverWholeBodyValidityTester
       controllerCoreCommand.addFeedbackControlCommand(createHoldCenterOfMassXYCommand());
       controllerCoreCommand.addFeedbackControlCommand(createHoldSupportFootCommands());
       
-//      FeedbackControlCommandList userCommands = consumeCommands();
       FeedbackControlCommandList userCommands = new FeedbackControlCommandList();      
       userFeedbackCommands.values().forEach(userCommands::addCommand);
       
@@ -328,10 +336,38 @@ public class WheneverWholeBodyValidityTester
       
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
-//      reportMessage(inverseKinematicsSolution);
       
+      double solutionStableThreshold = 0.01;
+      double solutionQualityThreshold = 0.005;
       
+      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+      boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold);
+      boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
+      boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
       
+      if(DEBUG)
+         PrintTools.info(""+updateCnt+" cur SQ "+solutionQuality.getDoubleValue() + " old "+solutionQualityOld.getDoubleValue() +" "+isSolutionStable +" "+isSolutionGoodEnough +" "+isGoodSolutionCur);
+      
+      if(isGoodSolutionCur)
+      {
+         isValidPose = true;
+         
+      }
+      
+      solutionQualityOld.set(solutionQuality.getDoubleValue());
+      updateCnt++;
+   }
+   
+   public boolean isValidPose()
+   {
+      numberOfTest++;
+      for(int i=0;i<maximumCntForUpdateInternal;i++)
+      {
+         updateInternal();
+         if(isValidPose)
+            return isValidPose;
+      }
+      return false;
    }
 
    public void updateTools()
@@ -444,6 +480,7 @@ public class WheneverWholeBodyValidityTester
 
       currentRobotConfigurationData.setRootOrientation(new Quaternion(rootJoint.getRotationForReading()));
       currentRobotConfigurationData.setRootTranslation(new Vector3D(rootJoint.getTranslationForReading()));
+      
       currentRobotConfigurationData.setJointState(joints);
       
       updateRobotConfigurationData(currentRobotConfigurationData);
@@ -596,6 +633,28 @@ public class WheneverWholeBodyValidityTester
       chestFrameOrientation.set(desiredOrientationToWorld);
    }
    
+   public void setHandSelectionMatrix(RobotSide robotSide, SelectionMatrix6D selectionMatrix)
+   {
+      handSelectionMatrices.get(robotSide).set(selectionMatrix);
+   }
+   
+   public void setPelvisSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
+      pelvisSelectionMatrix.set(selectionMatrix);
+   }
+   
+   public void setChestSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
+      chestSelectionMatrix.set(selectionMatrix);
+   }
+   
+   public void setHandSelectionMatrixFree(RobotSide robotSide)
+   {
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.clearSelection();
+      setHandSelectionMatrix(robotSide, selectionMatrix);
+   }
+   
    public void putTrajectoryMessages()
    {
       putHandTrajectoryMessages();
@@ -618,7 +677,7 @@ public class WheneverWholeBodyValidityTester
             feedbackControlCommand.set(rootBody, desiredFullRobotModel.getHand(robotSide));
             feedbackControlCommand.setGains((SE3PIDGainsInterface) gains);
             
-            feedbackControlCommand.setWeightMatrixForSolver(handWeightMatrices.get(robotSide));
+            feedbackControlCommand.setWeightMatrixForSolver(handWeightMatrices.get(robotSide));            
             feedbackControlCommand.setSelectionMatrix(handSelectionMatrices.get(robotSide));
             feedbackControlCommand.set(handFramePoses.get(robotSide));
             userFeedbackCommands.put(desiredFullRobotModel.getHand(robotSide).getName(), feedbackControlCommand);   
@@ -654,7 +713,7 @@ public class WheneverWholeBodyValidityTester
    }
    
    
-   private void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
+   public void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
    {
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(printFullRobotModel);
       currentReferenceFrames.updateFrames();
@@ -669,6 +728,7 @@ public class WheneverWholeBodyValidityTester
           ReferenceFrame desiredHandReferenceFrame = printFullRobotModel.getHand(robotSide).getBodyFixedFrame();
           FramePose desiredHandFramePose = new FramePose(desiredHandReferenceFrame);
             
+          System.out.println(desiredHandFramePose);
           desiredHandFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Hand");
           System.out.println(desiredHandFramePose);
@@ -678,7 +738,8 @@ public class WheneverWholeBodyValidityTester
       {                
           ReferenceFrame desiredFootReferenceFrame = printFullRobotModel.getFoot(robotSide).getBodyFixedFrame();
           FramePose desiredFootFramePose = new FramePose(desiredFootReferenceFrame);
-            
+          
+          System.out.println(desiredFootFramePose);
           desiredFootFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Foot");
           System.out.println(desiredFootFramePose);
