@@ -69,7 +69,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getCoPProximityForToeOff()
                {
-                  return 0.04;
+                  return 0.05;
                }
 
                @Override
@@ -161,6 +161,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                         return 1.0;
                      }
 
+                     public boolean blendPrivilegedConfigurationPositionError()
+                     {
+                        return true;
+                     }
+
+                     public boolean blendPrivilegedConfigurationVelocityError()
+                     {
+                        return false;
+                     }
+
+
+                     @Override
+                     public double getPrivilegedMaxVelocity()
+                     {
+                        return super.getPrivilegedMaxVelocity();
+                     }
+
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
@@ -204,15 +221,27 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getKneeStraightLegPrivilegedConfigurationGain()
+                     public double getStraightLegJointSpacePrivilegedConfigurationGain()
                      {
-                        return 50.0;
+                        return 40.0;
                      }
 
                      @Override
-                     public double getKneeStraightLegPrivilegedVelocityGain()
+                     public double getStraightLegActuatorSpacePrivilegedConfigurationGain()
+                     {
+                        return 60.0;
+                     }
+
+                     @Override
+                     public double getStraightLegJointSpacePrivilegedVelocityGain()
                      {
                         return 4.0; // 6.0;
+                     }
+
+                     @Override
+                     public double getStraightLegActuatorSpacePrivilegedVelocityGain()
+                     {
+                        return 6.0;
                      }
 
                      @Override
@@ -222,15 +251,27 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      }
 
                      @Override
-                     public double getKneeBentLegPrivilegedConfigurationGain()
+                     public double getBentLegJointSpacePrivilegedConfigurationGain()
                      {
                         return 150.0;
                      }
 
                      @Override
-                     public double getKneeBentLegPrivilegedVelocityGain()
+                     public double getBentLegActuatorSpacePrivilegedConfigurationGain()
+                     {
+                        return 200.0;
+                     }
+
+                     @Override
+                     public double getBentLegJointSpacePrivilegedVelocityGain()
                      {
                         return 4.0;
+                     }
+
+                     @Override
+                     public double getBentLegActuatorSpacePrivilegedVelocityGain()
+                     {
+                        return 6.0;
                      }
 
                      @Override
@@ -256,7 +297,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public double getJointAccelerationWeight()
                      {
                         //return 0.005;
-                        return 0.05;
+                        return 0.01;
                      }
                   };
                }
@@ -274,7 +315,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
                      public double getPelvisPitchRatioOfLegAngle()
                      {
-                        return 0.7;
+                        return 0.3;
                      }
 
                      public double getPelvisYawRatioOfStepAngle()
