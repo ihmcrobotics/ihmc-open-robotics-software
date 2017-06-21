@@ -23,7 +23,7 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    private final DoubleYoVariable omega0;
    private ReferenceFrame trajectoryFrame;
    
-   private final static int firstSegment = 0;
+   private final static int FIRST_SEGMENT = 0;
    private final static int POSITION = 0;
    private final static int VELOCITY = 1;
    private final static int ACCELERATION = 2;
@@ -32,9 +32,6 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    private final List<YoPolynomial3D> cmpPolynomialTrajectories = new ArrayList<>();
    
    private final List<FramePoint> desiredICPBoundaryPositions = new ArrayList<>();
-   
-   private final FramePoint desiredICPPositionOutput = new FramePoint();
-   private final FrameVector desiredICPVelocityOutput = new FrameVector();
    
    private final DenseMatrix64F coefficientsCombinedVector = new DenseMatrix64F();
    private final DenseMatrix64F coefficientsCurrentVector = new DenseMatrix64F();
@@ -106,8 +103,10 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    {
       for(Direction dir : Direction.values())
       {
-         YoPolynomial cmpPolynomial = cmpPolynomialTrajectories.get(firstSegment).getYoPolynomial(dir.ordinal());
-         icpQuantityDesiredCurrent[dir.ordinal()] = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(icpDerivativeOrder, cmpPolynomial, icpPositionDesiredFinalMatrix.get(firstSegment, dir.ordinal()), time);
+         YoPolynomial cmpPolynomial = cmpPolynomialTrajectories.get(FIRST_SEGMENT).getYoPolynomial(dir.ordinal());
+         double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, dir.ordinal());
+         
+         icpQuantityDesiredCurrent[dir.ordinal()] = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(icpDerivativeOrder, cmpPolynomial, icpPositionDesiredFinal, time);
       }
       icpQuantityDesiredOutput.setIncludingFrame(trajectoryFrame, icpQuantityDesiredCurrent);
    }
@@ -124,8 +123,10 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
          for(Direction dir : Direction.values())
          {
             YoPolynomial cmpPolynomial = cmpPolynomialTrajectories.get(i).getYoPolynomial(dir.ordinal());
-            double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinalMatrix.get(i, dir.ordinal()), 0.0);
+            double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
+            double time = 0.0;
             
+            double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinal, time);
             icpPositionDesiredInitialMatrix.set(i, dir.ordinal(), icpPositionDesiredInitial);
             
             if(i > 0)
@@ -135,9 +136,9 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
             }
          }
       }
-      icpPositionDesiredFinal.set(icpPositionDesiredFinalMatrix.get(firstSegment, Direction.X.ordinal()), 
-                                  icpPositionDesiredFinalMatrix.get(firstSegment, Direction.Y.ordinal()), 
-                                  icpPositionDesiredFinalMatrix.get(firstSegment, Direction.Z.ordinal()));
+      icpPositionDesiredFinal.set(icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.X.ordinal()), 
+                                  icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Y.ordinal()), 
+                                  icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Z.ordinal()));
    }
    
    /**
@@ -343,17 +344,17 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    
    public void getPosition(FramePoint positionToPack)
    {
-      positionToPack.set(desiredICPPositionOutput);
+      positionToPack.set(icpPositionDesiredCurrent);
    }
    
    public void getVelocity(FrameVector velocityToPack)
    {
-      
+      velocityToPack.set(icpVelocityDesiredCurrent);
    }
 
    public void getAcceleration(FrameVector accelerationToPack)
    {
-      
+      accelerationToPack.set(icpAccelerationDesiredCurrent);
    }
 
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
