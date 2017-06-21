@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 {
@@ -35,13 +35,13 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 
    public abstract void setMaxProportionalError(double maxProportionalError);
 
-   public abstract DoubleYoVariable getYoMaximumFeedback();
+   public abstract YoDouble getYoMaximumFeedback();
 
-   public abstract DoubleYoVariable getYoMaximumFeedbackRate();
+   public abstract YoDouble getYoMaximumFeedbackRate();
 
-   public abstract DoubleYoVariable getYoMaximumDerivativeError();
+   public abstract YoDouble getYoMaximumDerivativeError();
 
-   public abstract DoubleYoVariable getYoMaximumProportionalError();
+   public abstract YoDouble getYoMaximumProportionalError();
 
    public abstract YoTangentialDampingGains getYoTangentialDampingGains();
 }

@@ -1,18 +1,17 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class TimestampedVelocityYoFrameVector extends YoFrameVector
 {
    private final TimestampedVelocityYoVariable xDot, yDot, zDot;
 
-   public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleYoVariable timestamp,
+   public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
            double dt, YoVariableRegistry registry, YoFrameVector yoFrameVectorToDifferentiate, double epsilonChange)
    {
       TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoX(),
@@ -27,7 +26,7 @@ public class TimestampedVelocityYoFrameVector extends YoFrameVector
       return ret;
    }
 
-   public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleYoVariable timestamp,
+   public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
            double dt, YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate, double epsilonChange)
    {
       TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoX(),

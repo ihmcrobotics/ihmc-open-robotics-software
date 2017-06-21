@@ -4,8 +4,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.CylinderJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -182,22 +182,22 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       return ret;
    }
 
-   private DoubleYoVariable tau_rotation, q_cylinder_z, qd_cylinder_z;
+   private YoDouble tau_rotation, q_cylinder_z, qd_cylinder_z;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FlyballGovernorController");
    
-   private final DoubleYoVariable k_feedback, q_d_cylinder_z;
+   private final YoDouble k_feedback, q_d_cylinder_z;
 
-   public DoubleYoVariable[] getControlVars()
+   public YoDouble[] getControlVars()
    {
-      return new DoubleYoVariable[] {k_feedback, q_d_cylinder_z};
+      return new YoDouble[] {k_feedback, q_d_cylinder_z};
    }
 
    public void initControl()
    {
-      tau_rotation = (DoubleYoVariable)this.getVariable("tau_rotation");
-      q_cylinder_z = (DoubleYoVariable)this.getVariable("q_cylinder_z");
-      qd_cylinder_z = (DoubleYoVariable)this.getVariable("qd_cylinder_z");
+      tau_rotation = (YoDouble)this.getVariable("tau_rotation");
+      q_cylinder_z = (YoDouble)this.getVariable("q_cylinder_z");
+      qd_cylinder_z = (YoDouble)this.getVariable("qd_cylinder_z");
    }
 
    public void doControl()

@@ -2,14 +2,13 @@ package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 
 public class GroundContactPoint extends ExternalForcePoint
 {
@@ -17,11 +16,11 @@ public class GroundContactPoint extends ExternalForcePoint
  
    private final YoFramePoint touchdownLocation;
    
-   private final DoubleYoVariable fs;    // Foot Switch TODO: BooleanYoVariable or EnumYoVariable
+   private final YoDouble fs;    // Foot Switch TODO: YoBoolean or YoEnum
    private final YoFrameVector surfaceNormal;
 
-   private final BooleanYoVariable slip;    // Whether or not it is slipping.
-   private final IntegerYoVariable collisionCount;   
+   private final YoBoolean slip;    // Whether or not it is slipping.
+   private final YoInteger collisionCount;
 
    public GroundContactPoint(String name, Robot robot)
    {
@@ -44,10 +43,10 @@ public class GroundContactPoint extends ExternalForcePoint
 
       touchdownLocation = new YoFramePoint(name + "_td", "", ReferenceFrame.getWorldFrame(), registry);
 
-      fs = new DoubleYoVariable(name + "_fs", "GroundContactPoint foot switch", registry);
+      fs = new YoDouble(name + "_fs", "GroundContactPoint foot switch", registry);
 
-      slip = new BooleanYoVariable(name + "_slip", "GroundContactPoint slipping", registry);
-      collisionCount = new IntegerYoVariable(name + "_coll", "GroundContactPoint colliding", registry);
+      slip = new YoBoolean(name + "_slip", "GroundContactPoint slipping", registry);
+      collisionCount = new YoInteger(name + "_coll", "GroundContactPoint colliding", registry);
       
       surfaceNormal = new YoFrameVector(name + "_n", "", ReferenceFrame.getWorldFrame(), registry);
    }
@@ -113,7 +112,7 @@ public class GroundContactPoint extends ExternalForcePoint
       return touchdownLocation;
    }
    
-   public DoubleYoVariable getYoFootSwitch()
+   public YoDouble getYoFootSwitch()
    {
       return fs;
    }

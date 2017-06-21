@@ -1,38 +1,38 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableValueDataChecker implements DataProcessingFunction
 {
-   private BooleanYoVariable maximumValueExceeded;
-   private BooleanYoVariable minimumValueExceeded;
-   private BooleanYoVariable maximumDerivativeExceeded;
-   private BooleanYoVariable maximumSecondDerivativeExceeded;
-   private BooleanYoVariable derivativeCompError;
+   private YoBoolean maximumValueExceeded;
+   private YoBoolean minimumValueExceeded;
+   private YoBoolean maximumDerivativeExceeded;
+   private YoBoolean maximumSecondDerivativeExceeded;
+   private YoBoolean derivativeCompError;
 
-   private DoubleYoVariable maximumValue;
-   private DoubleYoVariable minimumValue;
-   private DoubleYoVariable maximumDerivative;
-   private DoubleYoVariable maximumSecondDerivative;
+   private YoDouble maximumValue;
+   private YoDouble minimumValue;
+   private YoDouble maximumDerivative;
+   private YoDouble maximumSecondDerivative;
    
-   private DoubleYoVariable maximumValueSimTime;
-   private DoubleYoVariable minimumValueSimTime;
-   private DoubleYoVariable maximumDerivativeSimTime;
-   private DoubleYoVariable maximumSecondDerivativeSimTime;
-   private DoubleYoVariable derivativeCompErrorSimTime;
+   private YoDouble maximumValueSimTime;
+   private YoDouble minimumValueSimTime;
+   private YoDouble maximumDerivativeSimTime;
+   private YoDouble maximumSecondDerivativeSimTime;
+   private YoDouble derivativeCompErrorSimTime;
 
-   private DoubleYoVariable calculatedDerivative;
+   private YoDouble calculatedDerivative;
    private double previousValue;
    private double previousTime;
    private double previousDerivative = Double.NaN;
 
-   private DoubleYoVariable time;
-   private DoubleYoVariable variableToCheck;
-   private DoubleYoVariable actualDerivativeofVariableToCheck;
+   private YoDouble time;
+   private YoDouble variableToCheck;
+   private YoDouble actualDerivativeofVariableToCheck;
 
    private boolean maxDerivativeExeeded = false;
 
@@ -41,7 +41,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    private boolean minValueExeeded = false;
    private boolean derivativeCompErrorOccurred = false;
 
-   private DoubleYoVariable calculatedSecondDerivative;
+   private YoDouble calculatedSecondDerivative;
 
    private int counter;
    
@@ -50,15 +50,15 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    private ValueDataCheckerParameters valueDataCheckerParameters;
 
 
-   public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time,
+   public YoVariableValueDataChecker(SimulationConstructionSet scs, YoDouble variableToCheck, YoDouble time,
                                      ValueDataCheckerParameters valueDataCheckerParameters)
    {
       this(scs, variableToCheck, time, valueDataCheckerParameters, null);
    }
 
 
-   public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time,
-                                     ValueDataCheckerParameters valueDataCheckerParameters, DoubleYoVariable actualDerivativeOfVariableToCheck)
+   public YoVariableValueDataChecker(SimulationConstructionSet scs, YoDouble variableToCheck, YoDouble time,
+                                     ValueDataCheckerParameters valueDataCheckerParameters, YoDouble actualDerivativeOfVariableToCheck)
    {
       this.scs = scs;
       
@@ -71,27 +71,27 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
 
       this.actualDerivativeofVariableToCheck = actualDerivativeOfVariableToCheck;
 
-      maximumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxValueExceeded", registry);
-      minimumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MinValueExceeded", registry);
-      maximumDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxDervExceeded", registry);
-      maximumSecondDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxSecDervExceeded", registry);
+      maximumValueExceeded = new YoBoolean(variableToCheck.getName() + "_MaxValueExceeded", registry);
+      minimumValueExceeded = new YoBoolean(variableToCheck.getName() + "_MinValueExceeded", registry);
+      maximumDerivativeExceeded = new YoBoolean(variableToCheck.getName() + "_MaxDervExceeded", registry);
+      maximumSecondDerivativeExceeded = new YoBoolean(variableToCheck.getName() + "_MaxSecDervExceeded", registry);
 
       if (actualDerivativeofVariableToCheck != null)
-         derivativeCompError = new BooleanYoVariable(variableToCheck.getName() + "_DerivativeCompError", registry);
+         derivativeCompError = new YoBoolean(variableToCheck.getName() + "_DerivativeCompError", registry);
 
-      calculatedDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcDerv", registry);
-      calculatedSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcSecDerv", registry);
+      calculatedDerivative = new YoDouble(variableToCheck.getName() + "_CalcDerv", registry);
+      calculatedSecondDerivative = new YoDouble(variableToCheck.getName() + "_CalcSecDerv", registry);
 
-      maximumValue = new DoubleYoVariable(variableToCheck.getName() + "_MaxValue", registry);
-      minimumValue = new DoubleYoVariable(variableToCheck.getName() + "_MinValue", registry);
-      maximumDerivative = new DoubleYoVariable(variableToCheck.getName() + "_MaxDerv", registry);
-      maximumSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_MaxSecDerv", registry);
+      maximumValue = new YoDouble(variableToCheck.getName() + "_MaxValue", registry);
+      minimumValue = new YoDouble(variableToCheck.getName() + "_MinValue", registry);
+      maximumDerivative = new YoDouble(variableToCheck.getName() + "_MaxDerv", registry);
+      maximumSecondDerivative = new YoDouble(variableToCheck.getName() + "_MaxSecDerv", registry);
       
-      maximumValueSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxValueSimTime", registry);
-      minimumValueSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MinValueSimTime", registry);
-      maximumDerivativeSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxDervSimTime", registry);
-      maximumSecondDerivativeSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxSecDervSimTime", registry);
-      derivativeCompErrorSimTime = new DoubleYoVariable(variableToCheck.getName() + "_DerivativeCompErrorSimTime", registry);
+      maximumValueSimTime = new YoDouble(variableToCheck.getName() + "_MaxValueSimTime", registry);
+      minimumValueSimTime = new YoDouble(variableToCheck.getName() + "_MinValueSimTime", registry);
+      maximumDerivativeSimTime = new YoDouble(variableToCheck.getName() + "_MaxDervSimTime", registry);
+      maximumSecondDerivativeSimTime = new YoDouble(variableToCheck.getName() + "_MaxSecDervSimTime", registry);
+      derivativeCompErrorSimTime = new YoDouble(variableToCheck.getName() + "_DerivativeCompErrorSimTime", registry);
       
       counter = 0;
    }

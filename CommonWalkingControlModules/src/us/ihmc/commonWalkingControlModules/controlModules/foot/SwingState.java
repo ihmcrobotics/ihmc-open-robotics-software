@@ -12,11 +12,11 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -38,14 +38,14 @@ import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private final BooleanYoVariable replanTrajectory;
-   private final BooleanYoVariable doContinuousReplanning;
+   private final YoBoolean replanTrajectory;
+   private final YoBoolean doContinuousReplanning;
 
    private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
-   private final EnumYoVariable<TrajectoryType> activeTrajectoryType;
+   private final YoEnum<TrajectoryType> activeTrajectoryType;
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
@@ -78,31 +78,31 @@ public class SwingState extends AbstractUnconstrainedState
    private final RecyclingArrayList<FramePoint> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
 
-   private final DoubleYoVariable swingDuration;
-   private final DoubleYoVariable swingHeight;
+   private final YoDouble swingDuration;
+   private final YoDouble swingHeight;
 
-   private final DoubleYoVariable swingTimeSpeedUpFactor;
-   private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
-   private final DoubleYoVariable minSwingTimeForDisturbanceRecovery;
-   private final BooleanYoVariable isSwingSpeedUpEnabled;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable currentTimeWithSwingSpeedUp;
+   private final YoDouble swingTimeSpeedUpFactor;
+   private final YoDouble maxSwingTimeSpeedUpFactor;
+   private final YoDouble minSwingTimeForDisturbanceRecovery;
+   private final YoBoolean isSwingSpeedUpEnabled;
+   private final YoDouble currentTime;
+   private final YoDouble currentTimeWithSwingSpeedUp;
 
-   private final BooleanYoVariable doHeelTouchdownIfPossible;
-   private final DoubleYoVariable heelTouchdownAngle;
-   private final DoubleYoVariable maximumHeightForHeelTouchdown;
-   private final DoubleYoVariable heelTouchdownLengthRatio;
+   private final YoBoolean doHeelTouchdownIfPossible;
+   private final YoDouble heelTouchdownAngle;
+   private final YoDouble maximumHeightForHeelTouchdown;
+   private final YoDouble heelTouchdownLengthRatio;
 
-   private final BooleanYoVariable doToeTouchdownIfPossible;
-   private final DoubleYoVariable toeTouchdownAngle;
-   private final DoubleYoVariable stepDownHeightForToeTouchdown;
-   private final DoubleYoVariable toeTouchdownDepthRatio;
+   private final YoBoolean doToeTouchdownIfPossible;
+   private final YoDouble toeTouchdownAngle;
+   private final YoDouble stepDownHeightForToeTouchdown;
+   private final YoDouble toeTouchdownDepthRatio;
 
 
-   private final DoubleYoVariable finalSwingHeightOffset;
+   private final YoDouble finalSwingHeightOffset;
    private final double controlDT;
 
-   private final DoubleYoVariable minHeightDifferenceForObstacleClearance;
+   private final YoDouble minHeightDifferenceForObstacleClearance;
 
    private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame controlFrame;
@@ -116,7 +116,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
-   private final DoubleYoVariable velocityAdjustmentDamping;
+   private final YoDouble velocityAdjustmentDamping;
    private final YoFrameVector adjustmentVelocityCorrection;
    private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
 
@@ -126,7 +126,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
 
    // for unit testing and debugging:
-   private final IntegerYoVariable currentTrajectoryWaypoint;
+   private final YoInteger currentTrajectoryWaypoint;
    private final YoFramePoint yoDesiredSolePosition;
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
@@ -148,37 +148,37 @@ public class SwingState extends AbstractUnconstrainedState
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
 
-      finalSwingHeightOffset = new DoubleYoVariable(namePrefix + "SwingFinalHeightOffset", registry);
+      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
-      replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
+      replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
 
-      minHeightDifferenceForObstacleClearance = new DoubleYoVariable(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
+      minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
       minHeightDifferenceForObstacleClearance.set(walkingControllerParameters.getMinHeightDifferenceForStepUpOrDown());
 
-      velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
+      velocityAdjustmentDamping = new YoDouble(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
 
-      doHeelTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoHeelTouchdownIfPossible", registry);
-      heelTouchdownAngle = new DoubleYoVariable(namePrefix + "HeelTouchdownAngle", registry);
-      maximumHeightForHeelTouchdown = new DoubleYoVariable(namePrefix + "MaximumHeightForHeelTouchdown", registry);
-      heelTouchdownLengthRatio = new DoubleYoVariable(namePrefix + "HeelTouchdownLengthRatio", registry);
+      doHeelTouchdownIfPossible = new YoBoolean(namePrefix + "DoHeelTouchdownIfPossible", registry);
+      heelTouchdownAngle = new YoDouble(namePrefix + "HeelTouchdownAngle", registry);
+      maximumHeightForHeelTouchdown = new YoDouble(namePrefix + "MaximumHeightForHeelTouchdown", registry);
+      heelTouchdownLengthRatio = new YoDouble(namePrefix + "HeelTouchdownLengthRatio", registry);
       doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
       heelTouchdownAngle.set(walkingControllerParameters.getHeelTouchdownAngle());
       maximumHeightForHeelTouchdown.set(walkingControllerParameters.getMaximumHeightForHeelTouchdown());
       heelTouchdownLengthRatio.set(walkingControllerParameters.getHeelTouchdownLengthRatio());
 
-      doToeTouchdownIfPossible = new BooleanYoVariable(namePrefix + "DoToeTouchdownIfPossible", registry);
-      toeTouchdownAngle = new DoubleYoVariable(namePrefix + "ToeTouchdownAngle", registry);
-      stepDownHeightForToeTouchdown = new DoubleYoVariable(namePrefix + "StepDownHeightForToeTouchdown", registry);
-      toeTouchdownDepthRatio = new DoubleYoVariable(namePrefix + "ToeTouchdownDepthRatio", registry);
+      doToeTouchdownIfPossible = new YoBoolean(namePrefix + "DoToeTouchdownIfPossible", registry);
+      toeTouchdownAngle = new YoDouble(namePrefix + "ToeTouchdownAngle", registry);
+      stepDownHeightForToeTouchdown = new YoDouble(namePrefix + "StepDownHeightForToeTouchdown", registry);
+      toeTouchdownDepthRatio = new YoDouble(namePrefix + "ToeTouchdownDepthRatio", registry);
       doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       toeTouchdownAngle.set(walkingControllerParameters.getToeTouchdownAngle());
       stepDownHeightForToeTouchdown.set(walkingControllerParameters.getStepDownHeightForToeTouchdown());
       toeTouchdownDepthRatio.set(walkingControllerParameters.getToeTouchdownDepthRatio());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
-      doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
+      doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
 
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
@@ -208,17 +208,17 @@ public class SwingState extends AbstractUnconstrainedState
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
-      activeTrajectoryType = new EnumYoVariable<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
-      swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration", registry);
-      swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
+      activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
+      swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
+      swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
 
-      swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
-      minSwingTimeForDisturbanceRecovery = new DoubleYoVariable(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
+      swingTimeSpeedUpFactor = new YoDouble(namePrefix + "SwingTimeSpeedUpFactor", registry);
+      minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
       minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
-      maxSwingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
-      currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
-      isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
+      maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
+      currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
+      currentTimeWithSwingSpeedUp = new YoDouble(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
+      isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
@@ -230,7 +230,7 @@ public class SwingState extends AbstractUnconstrainedState
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
 
-      currentTrajectoryWaypoint = new IntegerYoVariable(namePrefix + "CurrentTrajectoryWaypoint", registry);
+      currentTrajectoryWaypoint = new YoInteger(namePrefix + "CurrentTrajectoryWaypoint", registry);
       yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);

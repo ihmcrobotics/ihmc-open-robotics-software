@@ -4,8 +4,8 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -26,17 +26,17 @@ public class ICPProportionalController
    private final YoFramePoint2d cmpOutput = new YoFramePoint2d("icpControlCMPOutput", "", worldFrame, registry);
    private final YoFramePoint2d rateLimitedCMPOutput;
    private final boolean rateLimitFeedbackPart;
-   private final DoubleYoVariable feedbackPartMaxRate;
+   private final YoDouble feedbackPartMaxRate;
 
    private final YoFramePoint icpPosition;
    private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
 
    private final double controlDT;
-   private final DoubleYoVariable captureKpParallelToMotion;
-   private final DoubleYoVariable captureKpOrthogonalToMotion;
+   private final YoDouble captureKpParallelToMotion;
+   private final YoDouble captureKpOrthogonalToMotion;
 
-   private final DoubleYoVariable captureKi;
-   private final DoubleYoVariable captureKiBleedoff;
+   private final YoDouble captureKi;
+   private final YoDouble captureKiBleedoff;
 
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 

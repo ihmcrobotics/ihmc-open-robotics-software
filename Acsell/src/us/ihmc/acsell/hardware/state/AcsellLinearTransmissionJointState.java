@@ -1,8 +1,8 @@
 package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class AcsellLinearTransmissionJointState implements AcsellJointState
@@ -17,11 +17,11 @@ public class AcsellLinearTransmissionJointState implements AcsellJointState
 
    private double motorAngle;
    
-   private final DoubleYoVariable q;
-   private final DoubleYoVariable qd;
-   private final DoubleYoVariable tau_strain;
-   private final DoubleYoVariable tau_current;
-   private final DoubleYoVariable tau_error;
+   private final YoDouble q;
+   private final YoDouble qd;
+   private final YoDouble tau_strain;
+   private final YoDouble tau_current;
+   private final YoDouble tau_error;
 
    public AcsellLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, AcsellActuatorState actuator, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
    {
@@ -31,11 +31,11 @@ public class AcsellLinearTransmissionJointState implements AcsellJointState
       this.hasOutputEncoder = hasOutputEncoder;
       this.strainSensor = strainSensor;
 
-      this.q = new DoubleYoVariable(name + "_q", registry);
-      this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.tau_current = new DoubleYoVariable(name + "_tauPredictedCurrent", registry);
-      this.tau_strain = new DoubleYoVariable(name + "_tauMeasuredStrain", registry);
-      this.tau_error = new DoubleYoVariable(name + "_tauCurrentStrainError", registry);
+      this.q = new YoDouble(name + "_q", registry);
+      this.qd = new YoDouble(name + "_qd", registry);
+      this.tau_current = new YoDouble(name + "_tauPredictedCurrent", registry);
+      this.tau_strain = new YoDouble(name + "_tauMeasuredStrain", registry);
+      this.tau_error = new YoDouble(name + "_tauCurrentStrainError", registry);
       
       parentRegistry.addChild(registry);
    }

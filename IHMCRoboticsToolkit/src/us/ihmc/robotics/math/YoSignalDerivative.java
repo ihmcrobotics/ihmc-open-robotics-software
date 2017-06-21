@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * This class computes the derivative of the input signal in two different ways.
@@ -23,25 +23,25 @@ public class YoSignalDerivative
    private static final double DEFAULT_TOLERANCE = Double.MIN_VALUE;
    private final String name;
 
-   private EnumYoVariable<DifferentiationMode> differentiationMode;
-   private DoubleYoVariable previousSignal;
-   private DoubleYoVariable previousDerivative;
-   private DoubleYoVariable previousTime;
-   private DoubleYoVariable timeAtLastSignalChange;
-   private DoubleYoVariable tolerance;
-   private DoubleYoVariable lastSignalChange;
+   private YoEnum<DifferentiationMode> differentiationMode;
+   private YoDouble previousSignal;
+   private YoDouble previousDerivative;
+   private YoDouble previousTime;
+   private YoDouble timeAtLastSignalChange;
+   private YoDouble tolerance;
+   private YoDouble lastSignalChange;
 
    public YoSignalDerivative(String name, YoVariableRegistry registry)
    {
       this.name = name;
 
-      differentiationMode = new EnumYoVariable<DifferentiationMode>(name + "_differentiationMode", registry, DifferentiationMode.class);
-      previousDerivative = new DoubleYoVariable(name + "_previousDerivative", registry);
-      previousSignal = new DoubleYoVariable(name + "_previousSignal", registry);
-      timeAtLastSignalChange = new DoubleYoVariable(name + "_timeAtLastSignalChange", registry);
-      previousTime = new DoubleYoVariable(name + "_previousTime", registry);
-      tolerance = new DoubleYoVariable(name + "_tolerance", registry);
-      lastSignalChange = new DoubleYoVariable(name + "_lastSignalChange", registry);
+      differentiationMode = new YoEnum<DifferentiationMode>(name + "_differentiationMode", registry, DifferentiationMode.class);
+      previousDerivative = new YoDouble(name + "_previousDerivative", registry);
+      previousSignal = new YoDouble(name + "_previousSignal", registry);
+      timeAtLastSignalChange = new YoDouble(name + "_timeAtLastSignalChange", registry);
+      previousTime = new YoDouble(name + "_previousTime", registry);
+      tolerance = new YoDouble(name + "_tolerance", registry);
+      lastSignalChange = new YoDouble(name + "_lastSignalChange", registry);
 
       tolerance.set(DEFAULT_TOLERANCE);
 

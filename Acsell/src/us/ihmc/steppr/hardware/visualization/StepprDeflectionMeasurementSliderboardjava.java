@@ -4,13 +4,13 @@ import java.util.EnumMap;
 
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.IndexChangedListener;
+import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
@@ -21,11 +21,11 @@ import us.ihmc.steppr.hardware.controllers.StepprStandPrepSetpoints;
 public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer implements IndexChangedListener
 {
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprStandPrepSliderBoard");
-   private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
+   private final YoEnum<StepprStandPrepSetpoints> selectedJointPair = new YoEnum<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
 
-   private final DoubleYoVariable selectedJoint_tau_d = new DoubleYoVariable("selectedJoint_tau_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
+   private final YoDouble selectedJoint_tau_d = new YoDouble("selectedJoint_tau_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_damping = new YoDouble("selectedJoint_damping", sliderBoardRegistry);
 
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
 
@@ -75,14 +75,14 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
 
    private class StandPrepVariables
    {
-      private final DoubleYoVariable tau_d;
-      private final DoubleYoVariable damping;
+      private final YoDouble tau_d;
+      private final YoDouble damping;
 
       public StandPrepVariables(StepprStandPrepSetpoints setpoint, YoVariableHolder variableHolder)
       {
          String prefix = setpoint.getName();
-         tau_d = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_tau_d");
-         damping = (DoubleYoVariable) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
+         tau_d = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_tau_d");
+         damping = (YoDouble) variableHolder.getVariable("StepprStandPrep", prefix + "_damping");
       }
 
       public void update()

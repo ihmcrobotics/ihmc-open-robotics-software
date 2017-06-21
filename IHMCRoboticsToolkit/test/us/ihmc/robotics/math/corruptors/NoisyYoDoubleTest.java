@@ -7,10 +7,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NoisyDoubleYoVariableTest
+public class NoisyYoDoubleTest
 {
    YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("testRegistry");
 
@@ -18,7 +18,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testSimpleConstructor()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
       noisyDoubleYoVariable.update();
    }
 
@@ -26,8 +26,8 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testSimpleConstructorDouble()
    {
-      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("testD", yoVariableRegistry);
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry, doubleYoVariable);
+      YoDouble yoDouble = new YoDouble("testD", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry, yoDouble);
       noisyDoubleYoVariable.update();
    }
 
@@ -35,7 +35,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testFullConstructor()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry, false, 2.0, true, 1.0, 2.0, 0.0, 0.01,
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry, false, 2.0, true, 1.0, 2.0, 0.0, 0.01,
                                                        NoiseType.UNIFORM, 1.0);
       noisyDoubleYoVariable.update();
    }
@@ -44,8 +44,8 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testFullConstructorDouble()
    {
-      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("testD", yoVariableRegistry);
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry, doubleYoVariable, false, 2.0, true, 1.0, 2.0, 0.0,
+      YoDouble yoDouble = new YoDouble("testD", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry, yoDouble, false, 2.0, true, 1.0, 2.0, 0.0,
                                                        0.01, NoiseType.UNIFORM, 1.0);
       noisyDoubleYoVariable.update();
    }
@@ -53,7 +53,7 @@ public class NoisyDoubleYoVariableTest
 // @Test(timeout=300000)
 // public void testUpdateException()
 // {
-//  NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("test", yoVariableRegistry);
+//  NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("test", yoVariableRegistry);
 //
 //  try
 //  {
@@ -70,7 +70,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testGetPerfectDoubleValue()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       noisyDoubleYoVariable.update();
       assertTrue(noisyDoubleYoVariable.getPerfectDoubleValue() == 0.0);
@@ -83,10 +83,10 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testGetPerfectDoubleValueDouble()
    {
-      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("testD", yoVariableRegistry);
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry, doubleYoVariable);
+      YoDouble yoDouble = new YoDouble("testD", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry, yoDouble);
 
-      doubleYoVariable.set(2.0);
+      yoDouble.set(2.0);
       assertTrue(noisyDoubleYoVariable.getPerfectDoubleValue() == 2.0);
 
       noisyDoubleYoVariable.update(3.0);
@@ -97,7 +97,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testDiscrete()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
       noisyDoubleYoVariable.setIsNoisy(true);
       noisyDoubleYoVariable.setGaussianNoise(1.0);
       noisyDoubleYoVariable.update(10.0);
@@ -114,7 +114,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testRandomBound()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double randomBound = 10.0 * Math.random();
@@ -139,7 +139,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testZeroRandomBound()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double randomBound = 0.0;
@@ -161,7 +161,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testZeroRandomBoundWithPerfect()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double randomBound = 0.0;
@@ -183,7 +183,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testStaticBias()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       double bias = 10.0 * Math.random();
       double value = 1000.0 * Math.random();
@@ -201,7 +201,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testWalkingBias()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double bias = 10.0 * Math.random();
@@ -232,7 +232,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testRandomBoundAndStaticBias()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double bias = 10.0 * Math.random();
@@ -258,7 +258,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testRandomBoundAndWalkingBias()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double bias = 10.0 * Math.random();
@@ -287,7 +287,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testGaussianNoise()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double standardDeviation = 10.0 * Math.random();
@@ -313,7 +313,7 @@ public class NoisyDoubleYoVariableTest
 	@Test(timeout=300000)
    public void testGaussianNoiseAndStaticBias()
    {
-      NoisyDoubleYoVariable noisyDoubleYoVariable = new NoisyDoubleYoVariable("testN", yoVariableRegistry);
+      NoisyYoDouble noisyDoubleYoVariable = new NoisyYoDouble("testN", yoVariableRegistry);
 
       int count = 10000;
       double bias = 10.0 * Math.random();

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class Step0Controller implements RobotController
@@ -14,8 +14,8 @@ public class Step0Controller implements RobotController
    
    private double deltaT;
    private PIDController zController;
-   private DoubleYoVariable desiredZ;
-   private DoubleYoVariable controlOutput;
+   private YoDouble desiredZ;
+   private YoDouble controlOutput;
    
    //Constructor
    public Step0Controller(Step0Robot rob, String name, double deltaT)
@@ -30,10 +30,10 @@ public class Step0Controller implements RobotController
       zController.setDerivativeGain(30000);
       //zController.setDerivativeGain(0.0);
       
-      desiredZ = new DoubleYoVariable("desiredZ", controllerRegistry);
+      desiredZ = new YoDouble("desiredZ", controllerRegistry);
       desiredZ.set(1.4); //Height I want to maintain
       
-      controlOutput = new DoubleYoVariable("controlOutput",controllerRegistry);
+      controlOutput = new YoDouble("controlOutput",controllerRegistry);
    }
    
    //Methods

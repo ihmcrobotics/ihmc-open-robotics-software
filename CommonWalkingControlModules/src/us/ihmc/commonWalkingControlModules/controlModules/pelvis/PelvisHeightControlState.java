@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -19,8 +20,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -49,9 +50,12 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    /** handles the trajectory and the queuing**/
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    
+   private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
-   private final DoubleYoVariable defaultHeightAboveAnkleForHome;
+   private final YoDouble defaultHeightAboveAnkleForHome;
    private final FramePose tempPose = new FramePose();
+   private final Point3D tempPoint = new Point3D();
+   private final RigidBodyTransform controlFrame = new RigidBodyTransform();
    
    public PelvisHeightControlState(YoPositionPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -60,11 +64,11 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
+      pelvisFrame = referenceFrames.getPelvisFrame();
       RigidBody elevator = fullRobotModel.getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       baseFrame = referenceFrames.getMidFootZUpGroundFrame();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       
 
@@ -73,7 +77,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
       double soleToAnkleZHeight = computeSoleToAnkleMeanZHeight(controllerToolbox, fullRobotModel);
-      defaultHeightAboveAnkleForHome = new DoubleYoVariable(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
+      defaultHeightAboveAnkleForHome = new YoDouble(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
       defaultHeightAboveAnkleForHome.set(walkingControllerParameters.nominalHeightAboveAnkle() + soleToAnkleZHeight);
       
       parentRegistry.addChild(registry);
@@ -120,9 +124,22 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       if (command.useCustomControlFrame())
       {
-         PrintTools.warn("Can not use custom control frame with pelvis height.");
-         return false;
+         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         taskspaceControlState.setControlFramePose(controlFrame);
       }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+      
+      //convert the initial point to be consistent with the control frame
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(pelvisFrame);
+      tempPose.changeFrame(controlFrame);
+      tempPose.getPosition(tempPoint);
+      
+      initialPose.translate(tempPoint);
+      
       return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
    }
    
@@ -134,12 +151,6 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     */
    public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command, FramePose initialPose)
    {
-      if (command.useCustomControlFrame())
-      {
-         PrintTools.warn("Can not use custom control frame with pelvis height.");
-         return false;
-      }
-      
       // We have to remove the orientation and xy components of the command, and adjust the selection matrix;
       // We do this to break up the pelvis control, it reduces the complexity of each manager at the expense of these little hacks.
       tempPelvisTrajectoryCommand.set(command);
@@ -188,7 +199,30 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       linearZWeightMatrix.setWeightFrame(ReferenceFrame.getWorldFrame());
       tempPelvisTrajectoryCommand.setWeightMatrix(linearZWeightMatrix);
       
-      return taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose);
+      if (command.useCustomControlFrame())
+      {
+         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         taskspaceControlState.setControlFramePose(controlFrame);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+      
+      //convert the initial point to be consistent with the control frame
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(pelvisFrame);
+      tempPose.changeFrame(controlFrame);
+      tempPose.getPosition(tempPoint);
+      
+      initialPose.translate(tempPoint);
+      
+      if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose))
+      {
+         taskspaceControlState.clear();
+         return false;
+      }
+      return true;
    }
    
    /**
@@ -204,10 +238,17 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
     */
    @Override
-   public void getCurrentDesiredHeight(FramePoint positionToPack)
+   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getPositionIncludingFrame(positionToPack);
+      
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(controlFrame);
+      tempPose.changeFrame(pelvisFrame);
+      tempPose.getPosition(tempPoint);
+      
+      positionToPack.add(tempPoint);
    }
 
    @Override
@@ -224,6 +265,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       tempPose.setToZero(baseFrame);
       tempPose.setZ(defaultHeightAboveAnkleForHome.getDoubleValue());
+      taskspaceControlState.setDefaultControlFrame();
       taskspaceControlState.goToPoseFromCurrent(tempPose, trajectoryTime);
    }
 
@@ -249,7 +291,6 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       //Consider using the previous desired linear momentum z to be more consistent with the CenterOfMassheightManager
       return 0.0;
    }
-   
    
    private final FramePoint controlPosition = new FramePoint();
    private final FrameOrientation controlOrientation = new FrameOrientation();

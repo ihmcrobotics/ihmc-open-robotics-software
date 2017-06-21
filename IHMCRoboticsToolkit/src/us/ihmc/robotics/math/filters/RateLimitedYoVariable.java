@@ -1,27 +1,27 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RateLimitedYoVariable extends DoubleYoVariable
+public class RateLimitedYoVariable extends YoDouble
 {
-   private final DoubleYoVariable maxRateVariable;
+   private final YoDouble maxRateVariable;
 
-   private final DoubleYoVariable position;
-   private final BooleanYoVariable limited;
+   private final YoDouble position;
+   private final YoBoolean limited;
 
    private final double dt;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
-      this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
+      this.maxRateVariable = new YoDouble(name + "MaxRate", registry);
       this.maxRateVariable.set(maxRate);
 
       this.position = null;
@@ -31,11 +31,11 @@ public class RateLimitedYoVariable extends DoubleYoVariable
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRateVariable, double dt)
+   public RateLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRateVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       this.maxRateVariable = maxRateVariable;
       this.position = null;
@@ -44,15 +44,15 @@ public class RateLimitedYoVariable extends DoubleYoVariable
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, DoubleYoVariable positionVariable, double dt)
+   public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, YoDouble positionVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       position = positionVariable;
 
-      this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
+      this.maxRateVariable = new YoDouble(name + "MaxRate", registry);
       this.maxRateVariable.set(maxRate);
 
       this.dt = dt;
@@ -60,11 +60,11 @@ public class RateLimitedYoVariable extends DoubleYoVariable
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRateVariable, DoubleYoVariable positionVariable, double dt)
+   public RateLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRateVariable, YoDouble positionVariable, double dt)
    {
       super(name, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.limited = new BooleanYoVariable(name + "Limited", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.limited = new YoBoolean(name + "Limited", registry);
 
       position = positionVariable;
       this.maxRateVariable = maxRateVariable;

@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -13,7 +13,7 @@ public class SimpleArmSimulation
    {
       SimpleArmRobot simpleArmRobot = new SimpleArmRobot(0.0);
       SimpleRobotInputOutputMap robotInputOutputMap = new SimpleRobotInputOutputMap(simpleArmRobot);
-      DoubleYoVariable time = simpleArmRobot.getYoTime();
+      YoDouble time = simpleArmRobot.getYoTime();
       RigidBody endEffectorBody = simpleArmRobot.getEndEffectorBody();
       SimpleArmController controller = new SimpleArmController(robotInputOutputMap, endEffectorBody, time);
       simpleArmRobot.setController(controller);

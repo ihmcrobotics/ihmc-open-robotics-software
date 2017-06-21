@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -33,7 +33,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
    
    private final FrameVector tempVector;
    
-   private final DoubleYoVariable positionGain, velocityGain, accelerationGain;
+   private final YoDouble positionGain, velocityGain, accelerationGain;
    
    private final PositionTrajectoryGenerator positionTrajectoryInput;
    
@@ -59,9 +59,9 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       yoSmoothedVelocity = new YoFrameVector(namePrefix + "SmoothedVelocity", trajectoryReferenceFrame, registry);
       yoSmoothedAcceleration = new YoFrameVector(namePrefix + "SmoothedAcceleration", trajectoryReferenceFrame, registry);
 
-      positionGain = new DoubleYoVariable(namePrefix + "PositionGain", registry);
-      velocityGain = new DoubleYoVariable(namePrefix + "VelocityGain", registry);
-      accelerationGain = new DoubleYoVariable(namePrefix + "AccelerationGain", registry);
+      positionGain = new YoDouble(namePrefix + "PositionGain", registry);
+      velocityGain = new YoDouble(namePrefix + "VelocityGain", registry);
+      accelerationGain = new YoDouble(namePrefix + "AccelerationGain", registry);
       
       positionInput = new FramePoint(trajectoryReferenceFrame);
       velocityInput = new FrameVector(trajectoryReferenceFrame);

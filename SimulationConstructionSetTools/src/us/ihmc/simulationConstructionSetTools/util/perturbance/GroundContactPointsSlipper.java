@@ -6,9 +6,9 @@ import java.util.List;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -27,8 +27,8 @@ public class GroundContactPointsSlipper implements RobotController
    private final YoFrameVector slipAmount;
    private final YoFrameOrientation slipRotation;
 
-   private final DoubleYoVariable percentToSlipPerTick;
-   private final BooleanYoVariable doSlip;
+   private final YoDouble percentToSlipPerTick;
+   private final YoBoolean doSlip;
 
    
    public GroundContactPointsSlipper(String registryPrefix)
@@ -39,8 +39,8 @@ public class GroundContactPointsSlipper implements RobotController
       slipAmount = new YoFrameVector("slipAmount", ReferenceFrame.getWorldFrame(), registry);
       slipRotation = new YoFrameOrientation("slipRotation", ReferenceFrame.getWorldFrame(), registry);
 
-      percentToSlipPerTick = new DoubleYoVariable("percentToSlipPerTick", registry);
-      doSlip = new BooleanYoVariable("doSlip", registry);
+      percentToSlipPerTick = new YoDouble("percentToSlipPerTick", registry);
+      doSlip = new YoBoolean("doSlip", registry);
    }
 
    public void addGroundContactPoints(List<GroundContactPoint> footGroundContactPoints)

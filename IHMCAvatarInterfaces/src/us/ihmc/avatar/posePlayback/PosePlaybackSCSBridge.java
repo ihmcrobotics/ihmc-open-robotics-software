@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -47,7 +47,7 @@ public class PosePlaybackSCSBridge
    private final PlaybackPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
-   // private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
+   // private final YoBoolean plotBalls = new YoBoolean("plotBalls", registry);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassPosition2d = new YoFramePoint("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
@@ -280,7 +280,7 @@ public class PosePlaybackSCSBridge
       
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
 
          System.out.println("Load Sequence");
@@ -299,7 +299,7 @@ public class PosePlaybackSCSBridge
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
 
          System.out.println("Load Last Sequence");
@@ -316,7 +316,7 @@ public class PosePlaybackSCSBridge
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
 
          System.out.println("Load Sequence for Frame by Frame Play Back");
@@ -336,7 +336,7 @@ public class PosePlaybackSCSBridge
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         //         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
+         //         if(!((YoBoolean) yoVariable).getBooleanValue())
          //            return;
 
          playLoadedSequence();
@@ -347,7 +347,7 @@ public class PosePlaybackSCSBridge
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         if (((BooleanYoVariable) yoVariable).getBooleanValue())
+         if (((YoBoolean) yoVariable).getBooleanValue())
          {
             System.out.println("saving file");
             PlaybackPoseSequenceWriter.promptWriteToFile(posePlaybackRobotPoseSequence);

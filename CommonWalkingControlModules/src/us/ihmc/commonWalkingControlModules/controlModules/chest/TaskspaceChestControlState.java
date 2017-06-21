@@ -16,10 +16,10 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -50,20 +50,20 @@ public class TaskspaceChestControlState extends ChestControlState
    private final ReferenceFrame pelvisZUpFrame;
 
    private final RecyclingArrayDeque<ChestTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(ChestTrajectoryCommand.class);
-   private final BooleanYoVariable isReadyToHandleQueuedCommands = new BooleanYoVariable("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
-   private final LongYoVariable numberOfQueuedCommands = new LongYoVariable("chestNumberOfQueuedCommands", registry);
+   private final YoBoolean isReadyToHandleQueuedCommands = new YoBoolean("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
+   private final YoLong numberOfQueuedCommands = new YoLong("chestNumberOfQueuedCommands", registry);
 
-   private final LongYoVariable lastCommandId;
+   private final YoLong lastCommandId;
 
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
-   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+   private final YoBoolean isTrajectoryStopped = new YoBoolean("isChestOrientationTrajectoryStopped", registry);
+   private final YoBoolean isTrackingOrientation = new YoBoolean("isTrackingOrientation", registry);
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
+   private final YoDouble yoTime;
+   private final YoDouble receivedNewChestOrientationTime = new YoDouble("receivedNewChestOrientationTime", registry);
 
-   private final BooleanYoVariable followChestRollSineWave = new BooleanYoVariable("followChestRollSineWave", registry);
-   private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
-   private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
+   private final YoBoolean followChestRollSineWave = new YoBoolean("followChestRollSineWave", registry);
+   private final YoDouble chestRollSineFrequency = new YoDouble("chestRollSineFrequency", registry);
+   private final YoDouble chestRollSineMagnitude = new YoDouble("chestRollSineMagnitude", registry);
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
@@ -85,7 +85,7 @@ public class TaskspaceChestControlState extends ChestControlState
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", true, pelvisZUpFrame, registry);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
-      lastCommandId = new LongYoVariable("chestLastCommandId", registry);
+      lastCommandId = new YoLong("chestLastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       parentRegistry.addChild(registry);

@@ -21,10 +21,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -83,10 +83,10 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
-   private final DoubleYoVariable diagnosticControllerTime = new DoubleYoVariable("diagnosticControllerTime", registry);
+   private final YoDouble diagnosticControllerTime = new YoDouble("diagnosticControllerTime", registry);
    private final ExecutionTimer diagnosticControllerTimer = new ExecutionTimer("diagnosticControllerTimer", 10.0, registry);
-   private final LongYoVariable startTime = new LongYoVariable("startTime", registry);
-   private final BooleanYoVariable startController = new BooleanYoVariable("startController", registry);
+   private final YoLong startTime = new YoLong("startTime", registry);
+   private final YoBoolean startController = new YoBoolean("startController", registry);
 
    private final String diagnosticGainsFilePath = "diagnostic/realRobotPDGains.yaml";
    private final String diagnosticSetPointsFilePath = "diagnostic/diagnosticSetPoints.yaml";

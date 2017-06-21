@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -23,7 +23,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
    private final OneDoFJoint[] sensorOneDoFJoints;
 
-   private final BooleanYoVariable enableDrives;
+   private final YoBoolean enableDrives;
 
    public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, FullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
@@ -48,7 +48,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
          }
       }
 
-      enableDrives = new BooleanYoVariable("enableDrives", getYoVariableRegistry());
+      enableDrives = new YoBoolean("enableDrives", getYoVariableRegistry());
       enableDrives.set(true);
    }
 

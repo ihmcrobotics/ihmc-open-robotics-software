@@ -7,9 +7,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Plane;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
@@ -18,48 +18,48 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 {
    private static final long serialVersionUID = -1627814016079577790L;
 
-   public DoubleYoVariable q_t1;
-   public DoubleYoVariable q_t2;
-   public DoubleYoVariable qd_t1;
-   public DoubleYoVariable qd_t2;
-   public DoubleYoVariable q_rot;
-   public DoubleYoVariable qd_rot;
-   public DoubleYoVariable qdd_t1, qdd_t2, qdd_rot;
+   public YoDouble q_t1;
+   public YoDouble q_t2;
+   public YoDouble qd_t1;
+   public YoDouble qd_t2;
+   public YoDouble q_rot;
+   public YoDouble qd_rot;
+   public YoDouble qdd_t1, qdd_t2, qdd_rot;
    public Plane type = Plane.XZ;
 
-   public DoubleYoVariable getQ_t1()
+   public YoDouble getQ_t1()
    {
 	return q_t1;
    }
-   public DoubleYoVariable getQ_t2()
+   public YoDouble getQ_t2()
    {
 	return q_t2;
    }
-   public DoubleYoVariable getQd_t1()
+   public YoDouble getQd_t1()
    {
 	return qd_t1;
    }
-   public DoubleYoVariable getQd_t2()
+   public YoDouble getQd_t2()
    {
 	return qd_t2;
    }
-   public DoubleYoVariable getQ_rot()
+   public YoDouble getQ_rot()
    {
 	return q_rot;
    }
-   public DoubleYoVariable getQd_rot()
+   public YoDouble getQd_rot()
    {
 	return qd_rot;
    }
-   public DoubleYoVariable getQdd_t1()
+   public YoDouble getQdd_t1()
    {
 	return qdd_t1;
    }
-   public DoubleYoVariable getQdd_t2()
+   public YoDouble getQdd_t2()
    {
 	return qdd_t2;
    }
-   public DoubleYoVariable getQdd_rot()
+   public YoDouble getQdd_rot()
    {
 	return qdd_rot;
    }
@@ -115,17 +115,17 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
 
-      q_t1 = new DoubleYoVariable("q_" + t1_name, "PlanarFloatingJoint " + t1_name + " position", registry);
-      q_t2 = new DoubleYoVariable("q_" + t2_name, "PlanarFloatingJoint " + t2_name + " position", registry);
-      q_rot = new DoubleYoVariable("q_" + rot_name, "PlanarFloatingJoint " + rot_name + " angle", registry);
+      q_t1 = new YoDouble("q_" + t1_name, "PlanarFloatingJoint " + t1_name + " position", registry);
+      q_t2 = new YoDouble("q_" + t2_name, "PlanarFloatingJoint " + t2_name + " position", registry);
+      q_rot = new YoDouble("q_" + rot_name, "PlanarFloatingJoint " + rot_name + " angle", registry);
 
-      qd_t1 = new DoubleYoVariable("qd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear velocity", registry);
-      qd_t2 = new DoubleYoVariable("qd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear velocity", registry);
-      qd_rot = new DoubleYoVariable("qd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular velocity", registry);
+      qd_t1 = new YoDouble("qd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear velocity", registry);
+      qd_t2 = new YoDouble("qd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear velocity", registry);
+      qd_rot = new YoDouble("qd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular velocity", registry);
 
-      qdd_t1 = new DoubleYoVariable("qdd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear acceleration", registry);
-      qdd_t2 = new DoubleYoVariable("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
-      qdd_rot = new DoubleYoVariable("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
+      qdd_t1 = new YoDouble("qdd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear acceleration", registry);
+      qdd_t2 = new YoDouble("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
+      qdd_rot = new YoDouble("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
 
 //    rob.getVars().addVariables(floatingJointVars);
 
@@ -172,17 +172,17 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
 
-      q_t1 = new DoubleYoVariable("q_" + t1_name, "PlanarFloatingJoint " + t1_name + " position", registry);
-      q_t2 = new DoubleYoVariable("q_" + t2_name, "PlanarFloatingJoint " + t2_name + " position", registry);
-      q_rot = new DoubleYoVariable("q_" + rot_name, "PlanarFloatingJoint " + rot_name + " angle", registry);
+      q_t1 = new YoDouble("q_" + t1_name, "PlanarFloatingJoint " + t1_name + " position", registry);
+      q_t2 = new YoDouble("q_" + t2_name, "PlanarFloatingJoint " + t2_name + " position", registry);
+      q_rot = new YoDouble("q_" + rot_name, "PlanarFloatingJoint " + rot_name + " angle", registry);
 
-      qd_t1 = new DoubleYoVariable("qd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear velocity", registry);
-      qd_t2 = new DoubleYoVariable("qd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear velocity", registry);
-      qd_rot = new DoubleYoVariable("qd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular velocity", registry);
+      qd_t1 = new YoDouble("qd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear velocity", registry);
+      qd_t2 = new YoDouble("qd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear velocity", registry);
+      qd_rot = new YoDouble("qd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular velocity", registry);
 
-      qdd_t1 = new DoubleYoVariable("qdd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear acceleration", registry);
-      qdd_t2 = new DoubleYoVariable("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
-      qdd_rot = new DoubleYoVariable("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
+      qdd_t1 = new YoDouble("qdd_" + t1_name, "PlanarFloatingJoint " + t1_name + " linear acceleration", registry);
+      qdd_t2 = new YoDouble("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
+      qdd_rot = new YoDouble("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
 
 //    rob.getVars().addVariables(floatingJointVars);
 

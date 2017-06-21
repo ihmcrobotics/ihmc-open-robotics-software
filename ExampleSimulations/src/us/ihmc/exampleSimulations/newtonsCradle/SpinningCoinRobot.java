@@ -7,8 +7,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -29,10 +29,10 @@ public class SpinningCoinRobot
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);
-   private final DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
-   private final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", registry);
-   private final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", registry);
+   private final YoDouble translationalKineticEnergy = new YoDouble("translationalKineticEnergy", registry);
+   private final YoDouble rotationalKineticEnergy = new YoDouble("rotationalKineticEnergy", registry);
+   private final YoDouble potentialEnergy = new YoDouble("potentialEnergy", registry);
+   private final YoDouble totalEnergy = new YoDouble("totalEnergy", registry);
 
    public SpinningCoinRobot()
    {
@@ -73,7 +73,7 @@ public class SpinningCoinRobot
          }
 
          @Override
-         public DoubleYoVariable[] getOutputVariables()
+         public YoDouble[] getOutputVariables()
          {
             return null;
          }

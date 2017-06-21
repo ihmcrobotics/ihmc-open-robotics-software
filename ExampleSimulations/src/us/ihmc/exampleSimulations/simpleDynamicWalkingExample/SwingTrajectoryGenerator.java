@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import java.util.EnumMap;
 
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
@@ -20,7 +20,7 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
    private final ParabolicCartesianTrajectoryGenerator cartesianTrajectoryGenerator;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable swingHeightParabolaVertix;
+   private final YoDouble swingHeightParabolaVertix;
    
    private final ReferenceFrame footFrame;
    private final FramePoint currentFootPosition = new FramePoint();
@@ -36,7 +36,7 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
       footFrame = allLegJoints.get(robotSide).get(JointNames.ANKLE).getFrameAfterJoint(); //TODO make sure this is the one we want
       registry = new YoVariableRegistry("trajectoryRegistry");
       swingTimeDoubleProvider = new YoVariableDoubleProvider("swingTime", registry);
-      swingHeightParabolaVertix = new DoubleYoVariable("swingHeightParabolaVertix", registry);
+      swingHeightParabolaVertix = new YoDouble("swingHeightParabolaVertix", registry);
       swingHeightParabolaVertix.set(0.3);    
       cartesianTrajectoryGenerator = new ParabolicCartesianTrajectoryGenerator("swingTrajectory", ReferenceFrame.getWorldFrame(), swingTimeDoubleProvider, swingHeightParabolaVertix.getDoubleValue(), registry);
       parentRegistry.addChild(registry);

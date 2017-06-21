@@ -5,8 +5,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,16 +22,16 @@ public class Step5IDController implements RobotController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Step5IDandSCSRobot robot;
    
-   private final DoubleYoVariable qDesiredHip = new DoubleYoVariable("qDesiredHip", registry);
-   private final DoubleYoVariable qdDesiredHip = new DoubleYoVariable("qdDesiredHip", registry);
-   private final DoubleYoVariable qddDesiredHip = new DoubleYoVariable("qddDesiredHip", registry);
+   private final YoDouble qDesiredHip = new YoDouble("qDesiredHip", registry);
+   private final YoDouble qdDesiredHip = new YoDouble("qdDesiredHip", registry);
+   private final YoDouble qddDesiredHip = new YoDouble("qddDesiredHip", registry);
    
-   private final DoubleYoVariable gain = new DoubleYoVariable("gain", registry), damp = new DoubleYoVariable("damp", registry);
+   private final YoDouble gain = new YoDouble("gain", registry), damp = new YoDouble("damp", registry);
    
    private final OneDoFJoint hipJoint;
    
-   private final DoubleYoVariable hipAmplitude = new DoubleYoVariable("hipAmplitude", registry);
-   private final DoubleYoVariable hipPeriod = new DoubleYoVariable("hipPeriod", registry);
+   private final YoDouble hipAmplitude = new YoDouble("hipAmplitude", registry);
+   private final YoDouble hipPeriod = new YoDouble("hipPeriod", registry);
    
    
     // Joint-space bias force: gathers centrifugal, Coriolis, and gravity generalized forces

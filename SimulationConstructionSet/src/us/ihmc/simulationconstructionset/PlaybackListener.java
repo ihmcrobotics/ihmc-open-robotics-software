@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
 
 public interface PlaybackListener extends IndexChangedListener
 {

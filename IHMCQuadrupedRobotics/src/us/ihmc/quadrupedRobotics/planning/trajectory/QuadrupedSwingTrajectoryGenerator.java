@@ -6,8 +6,8 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.Finishable;
@@ -38,8 +38,8 @@ public class QuadrupedSwingTrajectoryGenerator
    private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector zeroVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
 
-   private final DoubleYoVariable timeInStep, alphaTimeInStep, alphaIn, alphaOut;
-   private final DoubleYoVariable alphaSlopeAtStart;
+   private final YoDouble timeInStep, alphaTimeInStep, alphaIn, alphaOut;
+   private final YoDouble alphaSlopeAtStart;
    private final AlphaToAlphaFunction alphaToAlphaFunction;
    private BagOfBalls bagOfBalls;
    private int ballCounter = 0;
@@ -55,11 +55,11 @@ public class QuadrupedSwingTrajectoryGenerator
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
       cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(prefix + "swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
-      timeInStep = new DoubleYoVariable(prefix + "TimeInStep", registry);
-      alphaTimeInStep = new DoubleYoVariable(prefix + "AlphaTimeInStep", registry);
-      alphaIn = new DoubleYoVariable(prefix + "AlphaIn", registry);
-      alphaOut = new DoubleYoVariable(prefix + "AlphaOut", registry);
-      alphaSlopeAtStart = new DoubleYoVariable(prefix + "AlphaSlopeAtStart", registry);
+      timeInStep = new YoDouble(prefix + "TimeInStep", registry);
+      alphaTimeInStep = new YoDouble(prefix + "AlphaTimeInStep", registry);
+      alphaIn = new YoDouble(prefix + "AlphaIn", registry);
+      alphaOut = new YoDouble(prefix + "AlphaOut", registry);
+      alphaSlopeAtStart = new YoDouble(prefix + "AlphaSlopeAtStart", registry);
       alphaSlopeAtStart.set(1.5);
 
       //stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(alphaSlopeAtStart.getDoubleValue());

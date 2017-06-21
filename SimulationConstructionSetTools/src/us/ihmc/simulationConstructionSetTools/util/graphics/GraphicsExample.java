@@ -6,8 +6,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -33,9 +33,9 @@ public class GraphicsExample
       YoFramePoint testPoint2 = new YoFramePoint("testPoint2", "", ReferenceFrame.getWorldFrame(), registry);
 
       YoFramePoint worldOrigin = new YoFramePoint("worldOrigin", "", ReferenceFrame.getWorldFrame(), registry);
-      DoubleYoVariable yaw = new DoubleYoVariable("yaw", registry);
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
-      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+      YoDouble yaw = new YoDouble("yaw", registry);
+      YoDouble pitch = new YoDouble("pitch", registry);
+      YoDouble roll = new YoDouble("roll", registry);
 
       YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin.getYoX(), worldOrigin.getYoY(),
                                                                 worldOrigin.getYoZ(), yaw, pitch, roll, 2.0);
@@ -43,7 +43,7 @@ public class GraphicsExample
       // setup slider board
       setupEvolution(scs, testPoint);
 
-      DoubleYoVariable zero = new DoubleYoVariable("zero", registry);
+      YoDouble zero = new YoDouble("zero", registry);
       zero.set(0.0);
 
       // create graphics vector

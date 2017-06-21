@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.scoring;
 
 import us.ihmc.footstepPlanning.graphSearch.BipedalStepCostCalculator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -22,17 +22,17 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private final YoFrameVector upwardCostVector;
    private final YoFrameVector downwardVector;
 
-   private final DoubleYoVariable forwardCostScalar;
-   private final DoubleYoVariable backwardCostScalar;
-   private final DoubleYoVariable inwardCostScalar;
-   private final DoubleYoVariable outwardCostScalar;
-   private final DoubleYoVariable upwardCostScalar;
-   private final DoubleYoVariable downwardCostScalar;
-   private final DoubleYoVariable stancePitchDownwardCostScalar;
-   private final DoubleYoVariable angularCostScalar;
-   private final DoubleYoVariable negativeFootholdLinearCostScalar;
+   private final YoDouble forwardCostScalar;
+   private final YoDouble backwardCostScalar;
+   private final YoDouble inwardCostScalar;
+   private final YoDouble outwardCostScalar;
+   private final YoDouble upwardCostScalar;
+   private final YoDouble downwardCostScalar;
+   private final YoDouble stancePitchDownwardCostScalar;
+   private final YoDouble angularCostScalar;
+   private final YoDouble negativeFootholdLinearCostScalar;
 
-   private final DoubleYoVariable footstepBaseCost;
+   private final YoDouble footstepBaseCost;
 
    private final YoFrameVector idealToCandidateVector;
    private final YoFrameOrientation idealToCandidateOrientation;
@@ -49,17 +49,17 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       upwardCostVector = new YoFrameVector(prefix + "UpwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       downwardVector = new YoFrameVector(prefix + "DownwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
 
-      forwardCostScalar = new DoubleYoVariable(prefix + "ForwardCostScalar", parentRegistry);
-      backwardCostScalar = new DoubleYoVariable(prefix + "BackwardCostScalar", parentRegistry);
-      inwardCostScalar = new DoubleYoVariable(prefix + "InwardCostScalar", parentRegistry);
-      outwardCostScalar = new DoubleYoVariable(prefix + "OutwardCostScalar", parentRegistry);
-      upwardCostScalar = new DoubleYoVariable(prefix + "UpwardCostScalar", parentRegistry);
-      downwardCostScalar = new DoubleYoVariable(prefix + "DownwardCostScalar", parentRegistry);
-      stancePitchDownwardCostScalar = new DoubleYoVariable(prefix + "StancePitchDownwardCostScalar", parentRegistry);
-      angularCostScalar = new DoubleYoVariable(prefix + "AngularCostScalar", parentRegistry);
-      negativeFootholdLinearCostScalar = new DoubleYoVariable(prefix + "NegativeFootholdLinearCostScalar", parentRegistry);
+      forwardCostScalar = new YoDouble(prefix + "ForwardCostScalar", parentRegistry);
+      backwardCostScalar = new YoDouble(prefix + "BackwardCostScalar", parentRegistry);
+      inwardCostScalar = new YoDouble(prefix + "InwardCostScalar", parentRegistry);
+      outwardCostScalar = new YoDouble(prefix + "OutwardCostScalar", parentRegistry);
+      upwardCostScalar = new YoDouble(prefix + "UpwardCostScalar", parentRegistry);
+      downwardCostScalar = new YoDouble(prefix + "DownwardCostScalar", parentRegistry);
+      stancePitchDownwardCostScalar = new YoDouble(prefix + "StancePitchDownwardCostScalar", parentRegistry);
+      angularCostScalar = new YoDouble(prefix + "AngularCostScalar", parentRegistry);
+      negativeFootholdLinearCostScalar = new YoDouble(prefix + "NegativeFootholdLinearCostScalar", parentRegistry);
 
-      footstepBaseCost = new DoubleYoVariable(prefix + "FootstepBaseCost", parentRegistry);
+      footstepBaseCost = new YoDouble(prefix + "FootstepBaseCost", parentRegistry);
 
       idealToCandidateVector = new YoFrameVector(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       idealToCandidateOrientation = new YoFrameOrientation(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);

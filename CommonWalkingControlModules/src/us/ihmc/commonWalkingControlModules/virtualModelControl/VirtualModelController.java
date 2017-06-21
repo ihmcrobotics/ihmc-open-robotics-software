@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -35,7 +35,7 @@ public class VirtualModelController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final Map<RigidBody, YoWrench> yoWrenches = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> vmcTorques = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> vmcTorques = new HashMap<>();
 
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final RigidBody defaultRootBody;
@@ -63,7 +63,7 @@ public class VirtualModelController
       if (DEBUG)
       {
          for (OneDoFJoint joint : controlledJoints)
-            vmcTorques.put(joint, new DoubleYoVariable("tau_vmc_" + joint.getName(), registry));
+            vmcTorques.put(joint, new YoDouble("tau_vmc_" + joint.getName(), registry));
       }
 
       if (DISPLAY_GRAVITY_WRENCHES)

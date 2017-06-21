@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FirstOrderBandPassFilteredYoVariable extends FirstOrderFilteredYoVariable
 {
@@ -10,7 +10,7 @@ public class FirstOrderBandPassFilteredYoVariable extends FirstOrderFilteredYoVa
    private final FirstOrderFilteredYoVariable highPassFilteredInput;
 
    public FirstOrderBandPassFilteredYoVariable(String name, String description, double minPassThroughFrequency_Hz, double maxPassThroughFrequency_Hz,
-         DoubleYoVariable yoTime, YoVariableRegistry registry)
+         YoDouble yoTime, YoVariableRegistry registry)
    {
       super(name, description, maxPassThroughFrequency_Hz, yoTime, FirstOrderFilterType.LOW_PASS, registry);
 

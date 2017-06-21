@@ -20,11 +20,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -60,25 +60,25 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
-   private final LongYoVariable yoWeightMatrixAngularFrameID;
-   private final LongYoVariable yoWeightMatrixLinearFrameID;
+   private final YoLong yoWeightMatrixAngularFrameID;
+   private final YoLong yoWeightMatrixLinearFrameID;
    private final YoFrameVector yoDefaultAngularWeight;
    private final YoFrameVector yoDefaultLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
 
-   private final BooleanYoVariable trackingOrientation;
-   private final BooleanYoVariable trackingPosition;
+   private final YoBoolean trackingOrientation;
+   private final YoBoolean trackingPosition;
 
-   private final BooleanYoVariable hasOrientaionGains;
-   private final BooleanYoVariable hasAngularWeight;
-   private final BooleanYoVariable hasPositionGains;
-   private final BooleanYoVariable hasLinearWeight;
+   private final YoBoolean hasOrientaionGains;
+   private final YoBoolean hasAngularWeight;
+   private final YoBoolean hasPositionGains;
+   private final YoBoolean hasLinearWeight;
 
-   private final IntegerYoVariable numberOfPointsInQueue;
-   private final IntegerYoVariable numberOfPointsInGenerator;
-   private final IntegerYoVariable numberOfPoints;
+   private final YoInteger numberOfPointsInQueue;
+   private final YoInteger numberOfPointsInGenerator;
+   private final YoInteger numberOfPoints;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
@@ -110,11 +110,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FramePoint desiredPoint = new FramePoint();
    private final YoFramePoint yoDesiredPoint;
 
-   private final BooleanYoVariable hybridModeActive;
+   private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
-         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, RigidBodyJointControlHelper jointControlHelper,
+         ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName() + postfix, yoTime, parentRegistry);
@@ -126,12 +126,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.controlFrame = new PoseReferenceFrame(prefix + "ControlFrame", bodyFrame);
 
-      trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
-      trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
+      trackingOrientation = new YoBoolean(prefix + "TrackingOrientation", registry);
+      trackingPosition = new YoBoolean(prefix + "TrackingPosition", registry);
 
-      numberOfPointsInQueue = new IntegerYoVariable(prefix + "NumberOfPointsInQueue", registry);
-      numberOfPointsInGenerator = new IntegerYoVariable(prefix + "NumberOfPointsInGenerator", registry);
-      numberOfPoints = new IntegerYoVariable(prefix + "NumberOfPoints", registry);
+      numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
+      numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
+      numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
 
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);
@@ -143,8 +143,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", "_RO", null, registry);
       yoDefaultAngularWeight = new YoFrameVector(prefix + "DefaultAngularWeight", null, registry);
       yoDefaultLinearWeight = new YoFrameVector(prefix + "DefaultLinearWeight", null, registry);
-      yoWeightMatrixAngularFrameID = new LongYoVariable(prefix + "WeightMatrixAngularFrameID_RO", null, registry);
-      yoWeightMatrixLinearFrameID = new LongYoVariable(prefix + "WeightMatrixLinearFrameID_RO", null, registry);
+      yoWeightMatrixAngularFrameID = new YoLong(prefix + "WeightMatrixAngularFrameID_RO", null, registry);
+      yoWeightMatrixLinearFrameID = new YoLong(prefix + "WeightMatrixLinearFrameID_RO", null, registry);
 
       yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
       yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);
@@ -165,15 +165,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
 
-      hasOrientaionGains = new BooleanYoVariable(prefix + "HasOrientaionGains", registry);
-      hasAngularWeight = new BooleanYoVariable(prefix + "HasAngularWeights", registry);
-      hasPositionGains = new BooleanYoVariable(prefix + "HasPositionGains", registry);
-      hasLinearWeight = new BooleanYoVariable(prefix + "HasLinearWeights", registry);
+      hasOrientaionGains = new YoBoolean(prefix + "HasOrientaionGains", registry);
+      hasAngularWeight = new YoBoolean(prefix + "HasAngularWeights", registry);
+      hasPositionGains = new YoBoolean(prefix + "HasPositionGains", registry);
+      hasLinearWeight = new YoBoolean(prefix + "HasLinearWeights", registry);
 
       pointQueue.clear();
 
       this.jointControlHelper = jointControlHelper;
-      hybridModeActive = new BooleanYoVariable(prefix + "HybridModeActive", registry);
+      hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
 
       setupViz(graphicsListRegistry, bodyName);
    }

@@ -18,10 +18,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -53,43 +53,43 @@ public class DynamicReachabilityCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable requiredAdjustmentSafetyFactor = new DoubleYoVariable("requiredAdjustmentSafetyFactor", registry);
-   private final DoubleYoVariable requiredAdjustmentFeedbackGain = new DoubleYoVariable("requiredAdjustmentFeedbackGain", registry);
-   private final DoubleYoVariable widthOfReachableRegion = new DoubleYoVariable("widthOfReachableRegion", registry);
+   private final YoDouble requiredAdjustmentSafetyFactor = new YoDouble("requiredAdjustmentSafetyFactor", registry);
+   private final YoDouble requiredAdjustmentFeedbackGain = new YoDouble("requiredAdjustmentFeedbackGain", registry);
+   private final YoDouble widthOfReachableRegion = new YoDouble("widthOfReachableRegion", registry);
 
-   private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
-   private final DoubleYoVariable maximumLegLength = new DoubleYoVariable("maximumLegLength", registry);
+   private final YoDouble minimumLegLength = new YoDouble("minimumLegLength", registry);
+   private final YoDouble maximumLegLength = new YoDouble("maximumLegLength", registry);
 
-   private final DoubleYoVariable maximumDesiredKneeBend = new DoubleYoVariable("maximumDesiredKneeBendForReachability", registry);
+   private final YoDouble maximumDesiredKneeBend = new YoDouble("maximumDesiredKneeBendForReachability", registry);
 
-   private final DoubleYoVariable stanceLegMinimumHeight = new DoubleYoVariable("stanceLegMinimumHeight", registry);
-   private final DoubleYoVariable stanceLegMaximumHeight = new DoubleYoVariable("stanceLegMaximumHeight", registry);
-   private final DoubleYoVariable swingLegMinimumHeight = new DoubleYoVariable("swingLegMinimumHeight", registry);
-   private final DoubleYoVariable swingLegMaximumHeight = new DoubleYoVariable("swingLegMaximumHeight", registry);
+   private final YoDouble stanceLegMinimumHeight = new YoDouble("stanceLegMinimumHeight", registry);
+   private final YoDouble stanceLegMaximumHeight = new YoDouble("stanceLegMaximumHeight", registry);
+   private final YoDouble swingLegMinimumHeight = new YoDouble("swingLegMinimumHeight", registry);
+   private final YoDouble swingLegMaximumHeight = new YoDouble("swingLegMaximumHeight", registry);
 
-   private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
-   private final BooleanYoVariable isModifiedStepReachable = new BooleanYoVariable("isModifiedStepReachable", registry);
+   private final YoBoolean isStepReachable = new YoBoolean("isStepReachable", registry);
+   private final YoBoolean isModifiedStepReachable = new YoBoolean("isModifiedStepReachable", registry);
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfTimingAdjustmentIterations", registry);
-   private final IntegerYoVariable numberOfAdjustments = new IntegerYoVariable("numberOfCoMAdjustments", registry);
-   private final IntegerYoVariable maximumNumberOfAdjustments = new IntegerYoVariable("maxNumberOfCoMAdjustments", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfTimingAdjustmentIterations", registry);
+   private final YoInteger numberOfAdjustments = new YoInteger("numberOfCoMAdjustments", registry);
+   private final YoInteger maximumNumberOfAdjustments = new YoInteger("maxNumberOfCoMAdjustments", registry);
 
-   private final DoubleYoVariable currentTransferAdjustment = new DoubleYoVariable("currentTransferAdjustment", registry);
-   private final DoubleYoVariable currentSwingAdjustment = new DoubleYoVariable("currentSwingAdjustment", registry);
-   private final DoubleYoVariable nextTransferAdjustment = new DoubleYoVariable("nextTransferAdjustment", registry);
+   private final YoDouble currentTransferAdjustment = new YoDouble("currentTransferAdjustment", registry);
+   private final YoDouble currentSwingAdjustment = new YoDouble("currentSwingAdjustment", registry);
+   private final YoDouble nextTransferAdjustment = new YoDouble("nextTransferAdjustment", registry);
 
-   private final ArrayList<DoubleYoVariable> higherSwingAdjustments = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> higherTransferAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> higherSwingAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> higherTransferAdjustments = new ArrayList<>();
 
    private final SideDependentList<YoFramePoint> hipMinimumLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
 
-   private final ArrayList<DoubleYoVariable> requiredParallelCoMAdjustments = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> achievedParallelCoMAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> requiredParallelCoMAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> achievedParallelCoMAdjustments = new ArrayList<>();
 
-   private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
-   private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
-   private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
+   private final YoDouble currentTransferAlpha = new YoDouble("currentTransferAlpha", registry);
+   private final YoDouble currentSwingAlpha = new YoDouble("currentSwingAlpha", registry);
+   private final YoDouble nextTransferAlpha = new YoDouble("nextTransferAlpha", registry);
 
    private final ExecutionTimer reachabilityTimer = new ExecutionTimer("reachabilityTimer", registry);
 
@@ -210,16 +210,16 @@ public class DynamicReachabilityCalculator
          higherSwingGradients.add(higherSwingGradient);
          higherTransferGradients.add(higherTransferGradient);
 
-         DoubleYoVariable higherSwingAdjustment = new DoubleYoVariable("higherSwingAdjustment" + i, registry);
-         DoubleYoVariable higherTransferAdjustment = new DoubleYoVariable("higherTransferAdjustment" + i, registry);
+         YoDouble higherSwingAdjustment = new YoDouble("higherSwingAdjustment" + i, registry);
+         YoDouble higherTransferAdjustment = new YoDouble("higherTransferAdjustment" + i, registry);
          higherSwingAdjustments.add(higherSwingAdjustment);
          higherTransferAdjustments.add(higherTransferAdjustment);
       }
 
       for (int i = 0; i < dynamicReachabilityParameters.getMaximumNumberOfCoMAdjustments(); i++)
       {
-         requiredParallelCoMAdjustments.add(new DoubleYoVariable("requiredParallelCoMAdjustment" + i, registry));
-         achievedParallelCoMAdjustments.add(new DoubleYoVariable("achievedParallelCoMAdjustment" + i, registry));
+         requiredParallelCoMAdjustments.add(new YoDouble("requiredParallelCoMAdjustment" + i, registry));
+         achievedParallelCoMAdjustments.add(new YoDouble("achievedParallelCoMAdjustment" + i, registry));
       }
 
 

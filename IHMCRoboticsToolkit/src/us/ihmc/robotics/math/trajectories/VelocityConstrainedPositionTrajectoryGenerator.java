@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -21,8 +21,8 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    private final YoVariableRegistry registry;
    private final YoPolynomial xPolynomial, yPolynomial, zPolynomial;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
 
    private final YoFramePoint initialPosition;
    private final YoFrameVector initialVelocity;
@@ -87,8 +87,8 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
          currentAcceleration = new YoFrameVector(currentAccelerationName, referenceFrame, registry);
       }
 
-      currentTime = new DoubleYoVariable(name + "CurrentTime", registry);
-      trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", registry);
+      currentTime = new YoDouble(name + "CurrentTime", registry);
+      trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
 
       xPolynomial = new YoPolynomial(name + "PolynomialX", 4, registry);
       yPolynomial = new YoPolynomial(name + "PolynomialY", 4, registry);

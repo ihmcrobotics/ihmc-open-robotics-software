@@ -5,9 +5,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 @SuppressWarnings("serial")
@@ -18,7 +18,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
    private boolean stateChanged = false;
 
-   public YoVariableToggleButton(String outletName, BooleanYoVariable currentStateVariable, YoVariableRegistry parent)
+   public YoVariableToggleButton(String outletName, YoBoolean currentStateVariable, YoVariableRegistry parent)
    {
       buttonToggleState = new YoVariableToggler(outletName, parent, this, currentStateVariable);
       this.setText(buttonToggleState.getCurrentStateString());

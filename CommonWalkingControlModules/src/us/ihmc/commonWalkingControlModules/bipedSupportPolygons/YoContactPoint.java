@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -12,7 +12,7 @@ public class YoContactPoint implements ContactPointInterface
 {
    private final YoVariableRegistry registry;
    private final YoFramePoint yoPosition;
-   private final BooleanYoVariable isInContact;
+   private final YoBoolean isInContact;
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
@@ -38,7 +38,7 @@ public class YoContactPoint implements ContactPointInterface
       registry = parentRegistry;
 
       yoPosition = new YoFramePoint(namePrefix + "Contact" + index, pointFrame, registry);
-      isInContact = new BooleanYoVariable(namePrefix + "InContact" + index, registry);
+      isInContact = new YoBoolean(namePrefix + "InContact" + index, registry);
    }
 
    @Override

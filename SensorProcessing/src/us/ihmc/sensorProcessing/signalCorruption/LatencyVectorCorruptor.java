@@ -2,9 +2,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class LatencyVectorCorruptor implements SignalCorruptor<Tuple3DBasics>
 {
@@ -12,12 +11,12 @@ public class LatencyVectorCorruptor implements SignalCorruptor<Tuple3DBasics>
    private final int latencyTicks;
 
    private final Tuple3DBasics[] vectors;
-   private final IntegerYoVariable index;
+   private final YoInteger index;
    
    public LatencyVectorCorruptor(String namePrefix, int latencyTicks, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      index = new IntegerYoVariable(namePrefix + "Index", registry);
+      index = new YoInteger(namePrefix + "Index", registry);
       this.latencyTicks = latencyTicks;
       parentRegistry.addChild(registry);
       

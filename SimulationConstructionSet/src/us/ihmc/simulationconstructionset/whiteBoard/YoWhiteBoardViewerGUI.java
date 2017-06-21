@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 import java.io.IOException;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

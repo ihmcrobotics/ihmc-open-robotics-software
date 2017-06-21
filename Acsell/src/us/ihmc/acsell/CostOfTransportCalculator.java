@@ -6,8 +6,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Hacked to be outside the main DRC code, move after code freeze
@@ -21,14 +21,14 @@ public class CostOfTransportCalculator implements RobotVisualizer
    private final RobotVisualizer superVisualizer;
  
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable deltaWork;
-   private final DoubleYoVariable distanceTraveled; 
-   private final DoubleYoVariable deltaTime;
-   private final DoubleYoVariable averageVelocity; 
-   private final DoubleYoVariable costOfTransport;
+   private final YoDouble deltaWork;
+   private final YoDouble distanceTraveled;
+   private final YoDouble deltaTime;
+   private final YoDouble averageVelocity;
+   private final YoDouble costOfTransport;
    
    private FullRobotModel fullRobotModel;
-   private DoubleYoVariable totalWorkVariable;
+   private YoDouble totalWorkVariable;
    
    private final int samples;
    
@@ -61,11 +61,11 @@ public class CostOfTransportCalculator implements RobotVisualizer
       this.zPosition = new double[samples];
       
       this.registry = new YoVariableRegistry("CostOfTransportCalculator");
-      this.costOfTransport = new DoubleYoVariable("costOfTransport", registry);
-      this.deltaTime = new DoubleYoVariable("deltaTime", registry);
-      this.deltaWork = new DoubleYoVariable("deltaWork", registry);
-      this.distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
-      this.averageVelocity = new DoubleYoVariable("averageVelocity", registry);
+      this.costOfTransport = new YoDouble("costOfTransport", registry);
+      this.deltaTime = new YoDouble("deltaTime", registry);
+      this.deltaWork = new YoDouble("deltaWork", registry);
+      this.distanceTraveled = new YoDouble("distanceTraveled", registry);
+      this.averageVelocity = new YoDouble("averageVelocity", registry);
       
       this.superVisualizer = superVisualizer;
    }
@@ -144,7 +144,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
       superVisualizer.close();
    }
 
-   public void setTotalWorkVariable(DoubleYoVariable totalWorkVariable)
+   public void setTotalWorkVariable(YoDouble totalWorkVariable)
    {
       this.totalWorkVariable = totalWorkVariable;
    }

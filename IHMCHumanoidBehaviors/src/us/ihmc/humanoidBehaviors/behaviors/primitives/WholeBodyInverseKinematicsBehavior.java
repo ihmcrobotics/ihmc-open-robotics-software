@@ -14,8 +14,8 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -31,13 +31,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final DoubleYoVariable solutionQualityThreshold;
-   private final DoubleYoVariable currentSolutionQuality;
-   private final BooleanYoVariable isPaused;
-   private final BooleanYoVariable isStopped;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable hasSolverFailed;
-   private final BooleanYoVariable hasSentMessageToController;
+   private final YoDouble solutionQualityThreshold;
+   private final YoDouble currentSolutionQuality;
+   private final YoBoolean isPaused;
+   private final YoBoolean isStopped;
+   private final YoBoolean isDone;
+   private final YoBoolean hasSolverFailed;
+   private final YoBoolean hasSentMessageToController;
 
    private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
    private final SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
@@ -47,7 +47,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final YoFrameQuaternion yoDesiredChestOrientation;
    private final YoFrameQuaternion yoDesiredPelvisOrientation;
    private final YoFramePoint yoDesiredPelvisPosition;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -58,33 +58,33 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable timeSolutionSentToController;
+   private final YoDouble yoTime;
+   private final YoDouble timeSolutionSentToController;
 
-   public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
+   public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
                                              CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       this(null, fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
    }
 
-   public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
+   public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
                                              CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       super(namePrefix, outgoingCommunicationBridge);
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
 
-      solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
+      solutionQualityThreshold = new YoDouble(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.005);
-      isPaused = new BooleanYoVariable(behaviorName + "IsPaused", registry);
-      isStopped = new BooleanYoVariable(behaviorName + "IsStopped", registry);
-      isDone = new BooleanYoVariable(behaviorName + "IsDone", registry);
-      hasSolverFailed = new BooleanYoVariable(behaviorName + "HasSolverFailed", registry);
-      hasSentMessageToController = new BooleanYoVariable(behaviorName + "HasSentMessageToController", registry);
+      isPaused = new YoBoolean(behaviorName + "IsPaused", registry);
+      isStopped = new YoBoolean(behaviorName + "IsStopped", registry);
+      isDone = new YoBoolean(behaviorName + "IsDone", registry);
+      hasSolverFailed = new YoBoolean(behaviorName + "HasSolverFailed", registry);
+      hasSentMessageToController = new YoBoolean(behaviorName + "HasSentMessageToController", registry);
 
-      currentSolutionQuality = new DoubleYoVariable(behaviorName + "CurrentSolutionQuality", registry);
-      trajectoryTime = new DoubleYoVariable(behaviorName + "TrajectoryTime", registry);
-      timeSolutionSentToController = new DoubleYoVariable(behaviorName + "TimeSolutionSentToController", registry);
+      currentSolutionQuality = new YoDouble(behaviorName + "CurrentSolutionQuality", registry);
+      trajectoryTime = new YoDouble(behaviorName + "TrajectoryTime", registry);
+      timeSolutionSentToController = new YoDouble(behaviorName + "TimeSolutionSentToController", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {

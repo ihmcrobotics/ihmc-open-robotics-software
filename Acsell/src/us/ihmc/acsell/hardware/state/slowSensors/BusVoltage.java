@@ -1,16 +1,16 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BusVoltage implements AcsellSlowSensor
 {
-   private final DoubleYoVariable voltage;
+   private final YoDouble voltage;
    private final double conversionFactor;
 
    public BusVoltage(String name, double conversionFactor, YoVariableRegistry slowSensorRegistry)
    {
-      voltage = new DoubleYoVariable(name + "BusVoltage", slowSensorRegistry);
+      voltage = new YoDouble(name + "BusVoltage", slowSensorRegistry);
       this.conversionFactor = conversionFactor;
    }
 

@@ -18,7 +18,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -82,7 +82,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
    {
       String namespace = "utorsoManager";
       String state = namespace + "State";
-      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(namespace, state)).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(namespace, state)).getEnumValue();
    }
 
    public double[] findQPOutputJointAccelerations(OneDoFJoint[] joints, SimulationConstructionSet scs)

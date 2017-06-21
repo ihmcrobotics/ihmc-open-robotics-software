@@ -36,8 +36,8 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -60,7 +60,7 @@ public class RigidBodyControlManagerTest
    private static final double epsilon = 1.0E-10;
 
    private YoVariableRegistry testRegistry;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
    private RigidBody bodyToControl;
 
    private OneDoFJoint joint1;
@@ -475,7 +475,7 @@ public class RigidBodyControlManagerTest
       testRegistry = new YoVariableRegistry(getClass().getSimpleName());
 
       // create time variable
-      yoTime = new DoubleYoVariable("yoTime", testRegistry);
+      yoTime = new YoDouble("yoTime", testRegistry);
 
       // create a dummy robot with elevator, two joints, and two rigid bodies
       RigidBody elevator = new RigidBody("elevator", worldFrame);

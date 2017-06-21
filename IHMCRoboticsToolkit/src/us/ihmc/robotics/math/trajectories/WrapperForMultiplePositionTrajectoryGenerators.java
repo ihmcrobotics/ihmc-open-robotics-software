@@ -2,23 +2,22 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-
 
 public class WrapperForMultiplePositionTrajectoryGenerators implements PositionTrajectoryGenerator
 {
    private final String namePostfix = getClass().getSimpleName();
 
-   private final BooleanYoVariable replanPositionTrajectory;
+   private final YoBoolean replanPositionTrajectory;
 
-   private final IntegerYoVariable positionTrajectoryGeneratorIndex;
+   private final YoInteger positionTrajectoryGeneratorIndex;
    private final ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators;
-   private final DoubleYoVariable timeIntoStep;
+   private final YoDouble timeIntoStep;
 
    public WrapperForMultiplePositionTrajectoryGenerators(ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators, String namePrefix,
          YoVariableRegistry parentRegistry)
@@ -27,10 +26,10 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
       parentRegistry.addChild(registry);
 
       this.positionTrajectoryGenerators = positionTrajectoryGenerators;
-      positionTrajectoryGeneratorIndex = new IntegerYoVariable(namePrefix + "PositionTrajectoryGeneratorIndex", registry);
-      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+      positionTrajectoryGeneratorIndex = new YoInteger(namePrefix + "PositionTrajectoryGeneratorIndex", registry);
+      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
-      this.replanPositionTrajectory = new BooleanYoVariable(namePrefix + "ReplanPositionTrajectory", registry);
+      this.replanPositionTrajectory = new YoBoolean(namePrefix + "ReplanPositionTrajectory", registry);
       this.replanPositionTrajectory.set(false);
    }
 

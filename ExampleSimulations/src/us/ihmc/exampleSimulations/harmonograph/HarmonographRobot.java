@@ -9,9 +9,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.GimbalJoint;
@@ -88,12 +88,12 @@ public class HarmonographRobot extends Robot
    private static final double B_ANGLE_LIMIT = 100.0;
 
    
-   private final DoubleYoVariable kpArmWeld, kdArmWeld, kpPenOnDesk;
-   private final BooleanYoVariable penIsAboveDesk;
-   private final DoubleYoVariable penToDeskDistance;
-   private final BooleanYoVariable clearPoints;
+   private final YoDouble kpArmWeld, kdArmWeld, kpPenOnDesk;
+   private final YoBoolean penIsAboveDesk;
+   private final YoDouble penToDeskDistance;
+   private final YoBoolean clearPoints;
 
-   private final DoubleYoVariable rotationalKineticEnergy, translationalKineticEnergy, gravitationalPotentialEnergy, totalEnergy;
+   private final YoDouble rotationalKineticEnergy, translationalKineticEnergy, gravitationalPotentialEnergy, totalEnergy;
    
    private final PinJoint deskPendulumYJoint;
    private final HarmonographPaperJPanel harmonographPaperJPanel;
@@ -105,20 +105,20 @@ public class HarmonographRobot extends Robot
       harmonographPaperJPanel = new HarmonographPaperJPanel();
       YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
       
-      kpArmWeld = new DoubleYoVariable("kpArmWeld", registry);
-      kdArmWeld = new DoubleYoVariable("kdArmWeld", registry);
-      kpPenOnDesk = new DoubleYoVariable("kpPenOnDesk", registry);
+      kpArmWeld = new YoDouble("kpArmWeld", registry);
+      kdArmWeld = new YoDouble("kdArmWeld", registry);
+      kpPenOnDesk = new YoDouble("kpPenOnDesk", registry);
       
-      penIsAboveDesk = new BooleanYoVariable("penIsAboveDesk", registry);
-      penToDeskDistance = new DoubleYoVariable("penToDeskDistance", registry);
+      penIsAboveDesk = new YoBoolean("penIsAboveDesk", registry);
+      penToDeskDistance = new YoDouble("penToDeskDistance", registry);
       
-      clearPoints = new BooleanYoVariable("clearPoints", registry);
+      clearPoints = new YoBoolean("clearPoints", registry);
 
-      rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
-      translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);
-      gravitationalPotentialEnergy = new DoubleYoVariable("gravitationalPotentialEnergy", registry);
+      rotationalKineticEnergy = new YoDouble("rotationalKineticEnergy", registry);
+      translationalKineticEnergy = new YoDouble("translationalKineticEnergy", registry);
+      gravitationalPotentialEnergy = new YoDouble("gravitationalPotentialEnergy", registry);
       
-      totalEnergy = new DoubleYoVariable("totalEnergy", registry);
+      totalEnergy = new YoDouble("totalEnergy", registry);
       
       kpArmWeld.set(1000.0);
       kdArmWeld.set(100.0);
@@ -241,9 +241,9 @@ public class HarmonographRobot extends Robot
             return 0;
          }
          
-         public DoubleYoVariable[] getOutputVariables()
+         public YoDouble[] getOutputVariables()
          {
-            return new DoubleYoVariable[]{};
+            return new YoDouble[]{};
          }
          
          public double[] computeDerivativeVector()
