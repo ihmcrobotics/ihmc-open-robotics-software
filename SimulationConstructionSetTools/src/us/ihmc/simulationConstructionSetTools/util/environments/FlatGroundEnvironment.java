@@ -1,5 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -10,12 +11,18 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D flatGround;
+   private final ArrayList<Robot> environmentRobots = new ArrayList<>();
 
    public FlatGroundEnvironment()
    {
       flatGround = DefaultCommonAvatarEnvironment.setUpGround("Ground");
    }
-   
+
+   public void addEnvironmentRobot(Robot robot)
+   {
+      environmentRobots.add(robot);
+   }
+
    @Override
    public TerrainObject3D getTerrainObject3D()
    {
@@ -25,7 +32,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
    @Override
    public List<Robot> getEnvironmentRobots()
    {
-      return null;
+      return environmentRobots;
    }
 
    @Override
