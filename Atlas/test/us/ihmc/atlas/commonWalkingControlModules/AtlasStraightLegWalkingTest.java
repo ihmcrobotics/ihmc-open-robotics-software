@@ -188,7 +188,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getSpeedForSupportKneeStraightening()
                      {
-                        return 1.0;
+                        return 2.0;
                      }
 
                      @Override
@@ -243,14 +243,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public LegConfigurationGains getStraightLegGains()
                      {
                         LegConfigurationGains gains = new LegConfigurationGains();
-                        gains.setJointSpaceKp(40.0);
+                        gains.setJointSpaceKp(20.0);
                         gains.setJointSpaceKd(4.0);
-                        gains.setActuatorSpaceKp(60.0);
+                        gains.setActuatorSpaceKp(75.0);
                         gains.setActuatorSpaceKd(6.0);
 
-                        gains.setMaxBlendingFactor(0.6);
+                        gains.setMaxBlendingFactor(0.75);
 
-                        gains.setBlendPositionError(false);
+                        gains.setBlendPositionError(true);
                         gains.setBlendVelocityError(false);
 
                         return gains;
