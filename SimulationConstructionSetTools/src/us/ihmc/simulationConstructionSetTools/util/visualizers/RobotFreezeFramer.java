@@ -2,9 +2,9 @@ package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -14,9 +14,9 @@ import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 public class RobotFreezeFramer implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("RobotFreezeFramer");
-   private final BooleanYoVariable doFreezeFrame = new BooleanYoVariable("doFreezeFrame", registry);
-   private final DoubleYoVariable freezeInterval = new DoubleYoVariable("freezeInterval", registry);
-   private final DoubleYoVariable nextFreezeTime = new DoubleYoVariable("nextFreezeTime", registry);
+   private final YoBoolean doFreezeFrame = new YoBoolean("doFreezeFrame", registry);
+   private final YoDouble freezeInterval = new YoDouble("freezeInterval", registry);
+   private final YoDouble nextFreezeTime = new YoDouble("nextFreezeTime", registry);
 
    private final Robot robot;
    private final GraphicsRobot graphicsRobot;

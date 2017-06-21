@@ -15,17 +15,13 @@ import com.jmatio.types.MLInt64;
 import com.jmatio.types.MLNumericArray;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -158,7 +154,7 @@ public class YoVariableExporter extends YoVariableLogReader
    {
       int[] dims = { elements, 1 };
       String name =  variable.getName();
-      if (variable instanceof EnumYoVariable<?>)
+      if (variable instanceof YoEnum<?>)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
@@ -171,7 +167,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof LongYoVariable)
+      else if (variable instanceof YoLong)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
@@ -184,7 +180,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof IntegerYoVariable)
+      else if (variable instanceof YoInteger)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
@@ -197,7 +193,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof DoubleYoVariable)
+      else if (variable instanceof YoDouble)
       {
          return new DataHolder<Double>(offset, new MLDouble(name, dims))
          {
@@ -210,7 +206,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
          };
       }
-      else if (variable instanceof BooleanYoVariable)
+      else if (variable instanceof YoBoolean)
       {
          return new DataHolder<Integer>(offset, new MLInt32(name, dims))
          {

@@ -12,8 +12,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.simulationconstructionset.*;
@@ -177,7 +177,7 @@ public class JointPhysicsConservedQuantitiesTest
    {
       private final Random random = new Random(3289023L);
       private final YoVariableRegistry registry;
-      private final DoubleYoVariable t;
+      private final YoDouble t;
       private final ArrayList<Joint> joints = new ArrayList<>();
       private final ArrayList<Double> amplitudes = new ArrayList<>();
       private final ArrayList<Double> omegas = new ArrayList<>();

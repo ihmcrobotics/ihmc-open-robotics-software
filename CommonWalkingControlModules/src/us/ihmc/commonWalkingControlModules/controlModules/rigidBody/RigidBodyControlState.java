@@ -16,10 +16,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
 public abstract class RigidBodyControlState extends FinishableState<RigidBodyControlMode>
@@ -27,15 +27,15 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected final YoVariableRegistry registry;
    protected final String warningPrefix;
 
-   protected final BooleanYoVariable trajectoryDone;
+   protected final YoBoolean trajectoryDone;
 
-   private final LongYoVariable lastCommandId;
-   private final DoubleYoVariable trajectoryStartTime;
-   private final DoubleYoVariable yoTime;
+   private final YoLong lastCommandId;
+   private final YoDouble trajectoryStartTime;
+   private final YoDouble yoTime;
 
    protected final ArrayList<YoGraphic> graphics = new ArrayList<>();
 
-   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.yoTime = yoTime;
@@ -44,11 +44,11 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       registry = new YoVariableRegistry(createRegistryName(bodyName, stateEnum));
 
       String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
-      lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
+      lastCommandId = new YoLong(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
-      trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
+      trajectoryDone = new YoBoolean(prefix + "TrajectoryDone", registry);
+      trajectoryStartTime = new YoDouble(prefix + "TrajectoryStartTime", registry);
 
       parentRegistry.addChild(registry);
    }

@@ -7,8 +7,8 @@ import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedPlanarVelocityInputProvider
 {
@@ -18,16 +18,16 @@ public class QuadrupedPlanarVelocityInputProvider
    private final DoubleArrayParameter planarVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("planarVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
    private final DoubleArrayParameter planarVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("planarVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
-   private final DoubleYoVariable yoPlanarVelocityInputX;
-   private final DoubleYoVariable yoPlanarVelocityInputY;
-   private final DoubleYoVariable yoPlanarVelocityInputZ;
+   private final YoDouble yoPlanarVelocityInputX;
+   private final YoDouble yoPlanarVelocityInputY;
+   private final YoDouble yoPlanarVelocityInputZ;
    private final Vector3D planarVelocityInput;
 
    public QuadrupedPlanarVelocityInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
-      yoPlanarVelocityInputX = new DoubleYoVariable("planarVelocityInputX", registry);
-      yoPlanarVelocityInputY = new DoubleYoVariable("planarVelocityInputY", registry);
-      yoPlanarVelocityInputZ = new DoubleYoVariable("planarVelocityInputZ", registry);
+      yoPlanarVelocityInputX = new YoDouble("planarVelocityInputX", registry);
+      yoPlanarVelocityInputY = new YoDouble("planarVelocityInputY", registry);
+      yoPlanarVelocityInputZ = new YoDouble("planarVelocityInputZ", registry);
       yoPlanarVelocityInputX.set(0);
       yoPlanarVelocityInputY.set(0);
       yoPlanarVelocityInputZ.set(0);

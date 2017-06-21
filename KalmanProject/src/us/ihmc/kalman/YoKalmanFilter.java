@@ -24,13 +24,11 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
-
 
 /**
  * Adapted from http://code.google.com/p/efficient-java-matrix-library/wiki/KalmanFilterExamples
@@ -71,28 +69,28 @@ public class YoKalmanFilter implements KalmanFilter
    private final LinearSolver<DenseMatrix64F> solver;
 
    // YoVariables
-   private final List<List<DoubleYoVariable>> yoF = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoG = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoH = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoQ = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoR = new ArrayList<List<DoubleYoVariable>>();
-   private final List<List<DoubleYoVariable>> yoP = new ArrayList<List<DoubleYoVariable>>();
-   private final List<DoubleYoVariable> yoX = new ArrayList<DoubleYoVariable>();
+   private final List<List<YoDouble>> yoF = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoG = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoH = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoQ = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoR = new ArrayList<List<YoDouble>>();
+   private final List<List<YoDouble>> yoP = new ArrayList<List<YoDouble>>();
+   private final List<YoDouble> yoX = new ArrayList<YoDouble>();
 
-   private final IntegerYoVariable nStates;
-   private final IntegerYoVariable nInputs;
-   private final IntegerYoVariable nMeasurements;
+   private final YoInteger nStates;
+   private final YoInteger nInputs;
+   private final YoInteger nMeasurements;
 
-   private final BooleanYoVariable updateCovarianceAndGain;
+   private final YoBoolean updateCovarianceAndGain;
 
    private boolean doChecks = false;
 
    public YoKalmanFilter(String name, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
-      nStates = new IntegerYoVariable("nStates", registry);
-      nInputs = new IntegerYoVariable("nInputs", registry);
-      nMeasurements = new IntegerYoVariable("nMeasurements", registry);
+      nStates = new YoInteger("nStates", registry);
+      nInputs = new YoInteger("nInputs", registry);
+      nMeasurements = new YoInteger("nMeasurements", registry);
 
 
       // covariance matrices are symmetric positive semi-definite
@@ -105,7 +103,7 @@ public class YoKalmanFilter implements KalmanFilter
       // applications S should not be modified.
 
 
-      updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain",
+      updateCovarianceAndGain = new YoBoolean(name + "UpdateCovarianceAndGain",
               "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
       updateCovarianceAndGain.set(true);
 

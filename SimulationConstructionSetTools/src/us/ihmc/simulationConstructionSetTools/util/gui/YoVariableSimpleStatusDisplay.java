@@ -6,7 +6,7 @@ import java.awt.Color;
 
 import javax.swing.JLabel;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 @SuppressWarnings("serial")
@@ -17,9 +17,9 @@ public class YoVariableSimpleStatusDisplay extends JLabel implements NewDataList
    private final Color trueColor = Color.GREEN;
    private final Color falseColor = Color.RED;
 
-   private BooleanYoVariable currentStateVariable;
+   private YoBoolean currentStateVariable;
 
-   public YoVariableSimpleStatusDisplay(BooleanYoVariable currentStateVariable)
+   public YoVariableSimpleStatusDisplay(YoBoolean currentStateVariable)
    {
       this.currentStateVariable = currentStateVariable;
 

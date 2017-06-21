@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
@@ -380,7 +380,7 @@ public class StateMachineExampleOneTest
          assertEquals("DefaultNextState was not set for currentState=StateTwo: ()", e.getMessage());
       }
 
-      EnumYoVariable<ExampleStateName> stateYoVariable = stateMachine.getStateYoVariable();
+      YoEnum<ExampleStateName> stateYoVariable = stateMachine.getStateYoVariable();
 
       try
       {
@@ -389,7 +389,7 @@ public class StateMachineExampleOneTest
       }
       catch(Exception e)
       {
-         assertEquals("Setting EnumYoVariable stateMachine to null. Must set allowNullValue to true in the constructor if you ever want to set it to null.", e.getMessage());
+         assertEquals("Setting YoEnum stateMachine to null. Must set allowNullValue to true in the constructor if you ever want to set it to null.", e.getMessage());
       }
    }
 

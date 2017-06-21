@@ -12,10 +12,10 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.sliderboardVisualizer.MidiSliderBoardConfigurationVisualizer;
@@ -485,7 +485,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setButtonEnum(int channel, String name, YoVariableHolder holder, Enum<?> enumValue)
    {
-      setButtonEnum(channel, (EnumYoVariable<?>) holder.getVariable(name), enumValue);
+      setButtonEnum(channel, (YoEnum<?>) holder.getVariable(name), enumValue);
    }
 
    public void setButton(int channel, String varName, String buttonName, YoVariableHolder holder)
@@ -503,7 +503,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       setControl(channel + offset, var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
-   public void setButtonEnum(int channel, EnumYoVariable<?> enumYoVariable, Enum<?> enumValue)
+   public void setButtonEnum(int channel, YoEnum<?> yoEnum, Enum<?> enumValue)
    {
       int offset;
       if ((channel >= 17) && (channel <= 20))
@@ -511,7 +511,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       else
          offset = -16;
 
-      setControl(channel + offset, enumYoVariable, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
+      setControl(channel + offset, yoEnum, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
    }
 
    public void setButton(int channel, YoVariable<?> var, String name)
@@ -687,27 +687,27 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       setKnob(channel, var, name, min, max, 1.0);
    }
 
-   public void setKnobEnum(int channel, EnumYoVariable<?> var)
+   public void setKnobEnum(int channel, YoEnum<?> var)
    {
       setControl(channel - 80, var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.KNOB);
    }
 
    public void setSliderEnum(int channel, String name, YoVariableHolder holder)
    {
-      setSliderEnum(channel, (EnumYoVariable<?>) holder.getVariable(name));
+      setSliderEnum(channel, (YoEnum<?>) holder.getVariable(name));
    }
 
    public void setSliderEnum(int channel, String varName, String sliderName, YoVariableHolder holder)
    {
-      setSliderEnum(channel, (EnumYoVariable<?>) holder.getVariable(varName), sliderName);
+      setSliderEnum(channel, (YoEnum<?>) holder.getVariable(varName), sliderName);
    }
 
-   public void setSliderEnum(int channel, EnumYoVariable<?> var)
+   public void setSliderEnum(int channel, YoEnum<?> var)
    {
       setControl(channel, var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
    }
 
-   public void setSliderEnum(int channel, EnumYoVariable<?> var, String name)
+   public void setSliderEnum(int channel, YoEnum<?> var, String name)
    {
       setControl(channel, var, name, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
    }

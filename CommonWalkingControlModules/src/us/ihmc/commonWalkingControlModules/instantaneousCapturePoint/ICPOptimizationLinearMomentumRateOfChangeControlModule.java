@@ -13,8 +13,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,14 +27,14 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private static final boolean USE_TIMING_OPTIMIZATION = false;
 
    private final ICPOptimizationController icpOptimizationController;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime, double totalMass,
+         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
          double gravityZ, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime,
@@ -44,7 +44,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
-         DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
+         YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);

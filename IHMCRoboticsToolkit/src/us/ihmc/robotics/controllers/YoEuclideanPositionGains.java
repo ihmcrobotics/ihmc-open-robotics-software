@@ -2,26 +2,26 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 {
    private static final String[] directionNames = new String[] {"x", "y", "z"};
 
-   private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] integralGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] dampingRatios;
+   private final YoDouble[] proportionalGains = new YoDouble[3];
+   private final YoDouble[] derivativeGains = new YoDouble[3];
+   private final YoDouble[] integralGains = new YoDouble[3];
+   private final YoDouble[] dampingRatios;
 
-   private final DoubleYoVariable maxIntegralError;
-   private final DoubleYoVariable maxDerivativeError;
-   private final DoubleYoVariable maxProportionalError;
+   private final YoDouble maxIntegralError;
+   private final YoDouble maxDerivativeError;
+   private final YoDouble maxProportionalError;
 
-   private final DoubleYoVariable maxFeedback;
-   private final DoubleYoVariable maxFeedbackRate;
+   private final YoDouble maxFeedback;
+   private final YoDouble maxFeedbackRate;
 
    private final YoTangentialDampingGains tangentialDampingGains;
 
@@ -38,19 +38,19 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 
       for (int i = 0; i < 3; i++)
       {
-         proportionalGains[i] = new DoubleYoVariable(baseProportionalGainName + directionNames[i], registry);
-         derivativeGains[i] = new DoubleYoVariable(baseDerivativeGainName + directionNames[i], registry);
-         integralGains[i] = new DoubleYoVariable(baseIntegralGainName + directionNames[i], registry);
+         proportionalGains[i] = new YoDouble(baseProportionalGainName + directionNames[i], registry);
+         derivativeGains[i] = new YoDouble(baseDerivativeGainName + directionNames[i], registry);
+         integralGains[i] = new YoDouble(baseIntegralGainName + directionNames[i], registry);
       }
 
       if (createDampingRatio)
       {
          String baseDampingRatioName = prefix + "PositionZeta";
 
-         dampingRatios = new DoubleYoVariable[3];
+         dampingRatios = new YoDouble[3];
          for (int i = 0; i < 3; i++)
          {
-            dampingRatios[i] = new DoubleYoVariable(baseDampingRatioName + directionNames[i], registry);
+            dampingRatios[i] = new YoDouble(baseDampingRatioName + directionNames[i], registry);
          }
       }
       else
@@ -58,12 +58,12 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
          dampingRatios = null;
       }
 
-      maxIntegralError = new DoubleYoVariable(prefix + "PositionMaxIntegralError", registry);
-      maxDerivativeError = new DoubleYoVariable(prefix + "PositionMaxDerivativeError", registry);
-      maxProportionalError = new DoubleYoVariable(prefix + "PositionMaxProportionalError", registry);
+      maxIntegralError = new YoDouble(prefix + "PositionMaxIntegralError", registry);
+      maxDerivativeError = new YoDouble(prefix + "PositionMaxDerivativeError", registry);
+      maxProportionalError = new YoDouble(prefix + "PositionMaxProportionalError", registry);
 
-      maxFeedback = new DoubleYoVariable(prefix + "PositionMaxFeedback", registry);
-      maxFeedbackRate = new DoubleYoVariable(prefix + "PositionMaxFeedbackRate", registry);
+      maxFeedback = new YoDouble(prefix + "PositionMaxFeedback", registry);
+      maxFeedbackRate = new YoDouble(prefix + "PositionMaxFeedbackRate", registry);
 
       tangentialDampingGains = new YoTangentialDampingGains(prefix, registry);
 
@@ -252,25 +252,25 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maxFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maxFeedbackRate;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumDerivativeError()
+   public YoDouble getYoMaximumDerivativeError()
    {
       return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumProportionalError()
+   public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
    }

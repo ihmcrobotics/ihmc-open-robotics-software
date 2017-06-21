@@ -7,8 +7,8 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -26,9 +26,9 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    private final YoVariableRegistry registry;
 
    private final OneDoFJoint joint;
-   private final DoubleYoVariable desiredJointPositionOffset;
-   private final DoubleYoVariable desiredJointVelocityOffset;
-   private final DoubleYoVariable desiredJointTauOffset;
+   private final YoDouble desiredJointPositionOffset;
+   private final YoDouble desiredJointVelocityOffset;
+   private final YoDouble desiredJointTauOffset;
 
    private final OneDoFJointSensorValidityChecker validityChecker;
    private final PositionVelocity1DConsistencyChecker positionVelocityConsistency;
@@ -36,52 +36,52 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    private final OneDoFJointFourierAnalysis fourierAnalysis;
 
    private final YoFunctionGenerator functionGenerator;
-   private final DoubleYoVariable checkUpDuration;
+   private final YoDouble checkUpDuration;
 
-   private final DoubleYoVariable rampDuration;
-   private final DoubleYoVariable ramp;
+   private final YoDouble rampDuration;
+   private final YoDouble ramp;
 
    private final DiagnosticParameters diagnosticParameters;
 
    private final Mean processedPositionQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable processedPositionQualityMean;
+   private final YoDouble processedPositionQualityMean;
    private final StandardDeviation processedPositionQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable processedPositionQualityStandardDeviation;
+   private final YoDouble processedPositionQualityStandardDeviation;
 
    private final Mean processedPositionDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable processedPositionDelayMean;
+   private final YoDouble processedPositionDelayMean;
    private final StandardDeviation processedPositionDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable processedPositionDelayStandardDeviation;
+   private final YoDouble processedPositionDelayStandardDeviation;
 
    private final Mean rawVelocityQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable rawVelocityQualityMean;
+   private final YoDouble rawVelocityQualityMean;
    private final StandardDeviation rawVelocityQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable rawVelocityQualityStandardDeviation;
+   private final YoDouble rawVelocityQualityStandardDeviation;
 
    private final Mean rawVelocityDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable rawVelocityDelayMean;
+   private final YoDouble rawVelocityDelayMean;
    private final StandardDeviation rawVelocityDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable rawVelocityDelayStandardDeviation;
+   private final YoDouble rawVelocityDelayStandardDeviation;
 
    private final Mean processedVelocityQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable processedVelocityQualityMean;
+   private final YoDouble processedVelocityQualityMean;
    private final StandardDeviation processedVelocityQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable processedVelocityQualityStandardDeviation;
+   private final YoDouble processedVelocityQualityStandardDeviation;
 
    private final Mean processedVelocityDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable processedVelocityDelayMean;
+   private final YoDouble processedVelocityDelayMean;
    private final StandardDeviation processedVelocityDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable processedVelocityDelayStandardDeviation;
+   private final YoDouble processedVelocityDelayStandardDeviation;
 
    private final Mean forceTrackingQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable forceTrackingQualityMean;
+   private final YoDouble forceTrackingQualityMean;
    private final StandardDeviation forceTrackingQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable forceTrackingQualityStandardDeviation;
+   private final YoDouble forceTrackingQualityStandardDeviation;
 
    private final Mean forceTrackingDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable forceTrackingDelayMean;
+   private final YoDouble forceTrackingDelayMean;
    private final StandardDeviation forceTrackingDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable forceTrackingDelayStandardDeviation;
+   private final YoDouble forceTrackingDelayStandardDeviation;
 
    private OneDoFJointCheckUpDiagnosticDataReporter dataReporter;
 
@@ -93,46 +93,46 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       registry = new YoVariableRegistry(jointName + nameSuffix);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
-      desiredJointPositionOffset = new DoubleYoVariable("q_off_d_" + jointName + nameSuffix, registry);
-      desiredJointVelocityOffset = new DoubleYoVariable("qd_off_d_" + jointName + nameSuffix, registry);
-      desiredJointTauOffset = new DoubleYoVariable("tau_off_d_" + jointName + nameSuffix, registry);
-      checkUpDuration = new DoubleYoVariable(jointName + nameSuffix + "Duration", registry);
+      desiredJointPositionOffset = new YoDouble("q_off_d_" + jointName + nameSuffix, registry);
+      desiredJointVelocityOffset = new YoDouble("qd_off_d_" + jointName + nameSuffix, registry);
+      desiredJointTauOffset = new YoDouble("tau_off_d_" + jointName + nameSuffix, registry);
+      checkUpDuration = new YoDouble(jointName + nameSuffix + "Duration", registry);
       checkUpDuration.set(diagnosticParameters.getJointCheckUpDuration());
 
-      rampDuration = new DoubleYoVariable(jointName + nameSuffix + "SignalRampDuration", registry);
+      rampDuration = new YoDouble(jointName + nameSuffix + "SignalRampDuration", registry);
       rampDuration.set(0.2 * checkUpDuration.getDoubleValue());
-      ramp = new DoubleYoVariable(jointName + nameSuffix + "SignalRamp", registry);
+      ramp = new YoDouble(jointName + nameSuffix + "SignalRamp", registry);
 
       validityChecker = toolbox.getJointSensorValidityChecker(joint);
       positionVelocityConsistency = toolbox.getJointPositionVelocityConsistencyChecker(joint);
       forceTrackingDelay = toolbox.getJointForceTrackingDelayEstimator(joint);
       fourierAnalysis = toolbox.getJointFourierAnalysis(joint);
 
-      processedPositionQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionQualityMean", registry);
-      processedPositionQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionQualityStandardDeviation", registry);
+      processedPositionQualityMean = new YoDouble(jointName + nameSuffix + "ProcessedPositionQualityMean", registry);
+      processedPositionQualityStandardDeviation = new YoDouble(jointName + nameSuffix + "ProcessedPositionQualityStandardDeviation", registry);
 
-      processedPositionDelayMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionDelayMean", registry);
-      processedPositionDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedPositionDelayStandardDeviation", registry);
+      processedPositionDelayMean = new YoDouble(jointName + nameSuffix + "ProcessedPositionDelayMean", registry);
+      processedPositionDelayStandardDeviation = new YoDouble(jointName + nameSuffix + "ProcessedPositionDelayStandardDeviation", registry);
 
-      rawVelocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityQualityMean", registry);
-      rawVelocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityQualityStandardDeviation", registry);
+      rawVelocityQualityMean = new YoDouble(jointName + nameSuffix + "RawVelocityQualityMean", registry);
+      rawVelocityQualityStandardDeviation = new YoDouble(jointName + nameSuffix + "RawVelocityQualityStandardDeviation", registry);
 
-      rawVelocityDelayMean = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityDelayMean", registry);
-      rawVelocityDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "RawVelocityDelayStandardDeviation", registry);
+      rawVelocityDelayMean = new YoDouble(jointName + nameSuffix + "RawVelocityDelayMean", registry);
+      rawVelocityDelayStandardDeviation = new YoDouble(jointName + nameSuffix + "RawVelocityDelayStandardDeviation", registry);
 
-      processedVelocityQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityQualityMean", registry);
-      processedVelocityQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityQualityStandardDeviation", registry);
+      processedVelocityQualityMean = new YoDouble(jointName + nameSuffix + "ProcessedVelocityQualityMean", registry);
+      processedVelocityQualityStandardDeviation = new YoDouble(jointName + nameSuffix + "ProcessedVelocityQualityStandardDeviation", registry);
 
-      processedVelocityDelayMean = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityDelayMean", registry);
-      processedVelocityDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ProcessedVelocityDelayStandardDeviation", registry);
+      processedVelocityDelayMean = new YoDouble(jointName + nameSuffix + "ProcessedVelocityDelayMean", registry);
+      processedVelocityDelayStandardDeviation = new YoDouble(jointName + nameSuffix + "ProcessedVelocityDelayStandardDeviation", registry);
 
-      forceTrackingQualityMean = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingQualityMean", registry);
-      forceTrackingQualityStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingQualityStandardDeviation", registry);
+      forceTrackingQualityMean = new YoDouble(jointName + nameSuffix + "ForceTrackingQualityMean", registry);
+      forceTrackingQualityStandardDeviation = new YoDouble(jointName + nameSuffix + "ForceTrackingQualityStandardDeviation", registry);
 
-      forceTrackingDelayMean = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingDelayMean", registry);
-      forceTrackingDelayStandardDeviation = new DoubleYoVariable(jointName + nameSuffix + "ForceTrackingDelayStandardDeviation", registry);
+      forceTrackingDelayMean = new YoDouble(jointName + nameSuffix + "ForceTrackingDelayMean", registry);
+      forceTrackingDelayStandardDeviation = new YoDouble(jointName + nameSuffix + "ForceTrackingDelayStandardDeviation", registry);
 
-      DoubleYoVariable yoTime = toolbox.getYoTime();
+      YoDouble yoTime = toolbox.getYoTime();
       functionGenerator = new YoFunctionGenerator(jointName + nameSuffix, yoTime, registry);
       functionGenerator.setAmplitude(diagnosticParameters.getCheckUpOscillationPositionAmplitude());
       functionGenerator.setFrequency(diagnosticParameters.getCheckUpOscillationPositionFrequency());

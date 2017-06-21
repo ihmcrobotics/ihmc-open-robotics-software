@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.EnumMap;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -19,10 +19,10 @@ public class YoSpline3D
    private final int arcLengthCalculatorDivisions;
    private final int numberOfCoefficientsPerPolynomial;
    private final ReferenceFrame referenceFrame;
-   private final DoubleYoVariable[] arcLengths;
+   private final YoDouble[] arcLengths;
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable t0;
-   private final DoubleYoVariable tf;
+   private final YoDouble t0;
+   private final YoDouble tf;
    private final YoFramePoint position;
    private final YoFrameVector velocity;
    private final YoFrameVector acceleration;
@@ -41,9 +41,9 @@ public class YoSpline3D
       this.numberOfCoefficientsPerPolynomial = numberOfCoefficientsPerPolynomial;
       this.arcLengthCalculatorDivisions = arcLengthCalculatorDivisions;
       this.referenceFrame = referenceFrame;
-      arcLengths = new DoubleYoVariable[arcLengthCalculatorDivisions + 1];
-      t0 = new DoubleYoVariable(namePrefix + "T0", registry);
-      tf = new DoubleYoVariable(namePrefix + "Tf", registry);
+      arcLengths = new YoDouble[arcLengthCalculatorDivisions + 1];
+      t0 = new YoDouble(namePrefix + "T0", registry);
+      tf = new YoDouble(namePrefix + "Tf", registry);
       position = new YoFramePoint(namePrefix + "Position", referenceFrame, registry);
       velocity = new YoFrameVector(namePrefix + "Velocity", referenceFrame, registry);
       acceleration = new YoFrameVector(namePrefix + "Acceleration", referenceFrame, registry);
@@ -55,7 +55,7 @@ public class YoSpline3D
 
       for (int i = 0; i < arcLengthCalculatorDivisions + 1; i++)
       {
-         arcLengths[i] = new DoubleYoVariable(namePrefix + "ArcLength" + i, registry);
+         arcLengths[i] = new YoDouble(namePrefix + "ArcLength" + i, registry);
       }
    }
 

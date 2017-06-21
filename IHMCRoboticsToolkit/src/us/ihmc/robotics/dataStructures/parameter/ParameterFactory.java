@@ -1,11 +1,11 @@
 package us.ihmc.robotics.dataStructures.parameter;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * A factory for creating and registering parameters and their default values.
@@ -73,14 +73,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoBoolean variable = new YoBoolean("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((BooleanYoVariable) v).getBooleanValue());
+               parameter.set(((YoBoolean) v).getBooleanValue());
             }
          });
 
@@ -104,14 +104,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoDouble variable = new YoDouble("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((DoubleYoVariable) v).getDoubleValue());
+               parameter.set(((YoDouble) v).getDoubleValue());
             }
          });
 
@@ -138,14 +138,14 @@ public class ParameterFactory
          {
             final int count = i;
 
-            final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final YoDouble variable = new YoDouble("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
-                  parameter.set(count, ((DoubleYoVariable) v).getDoubleValue());
+                  parameter.set(count, ((YoDouble) v).getDoubleValue());
                }
             });
 
@@ -170,14 +170,14 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath(), registry);
+         final YoInteger variable = new YoInteger("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               parameter.set(((IntegerYoVariable) v).getIntegerValue());
+               parameter.set(((YoInteger) v).getIntegerValue());
             }
          });
 
@@ -204,14 +204,14 @@ public class ParameterFactory
          {
             final int count = i;
 
-            final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final YoInteger variable = new YoInteger("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
-                  parameter.set(count, ((IntegerYoVariable) v).getIntegerValue());
+                  parameter.set(count, ((YoInteger) v).getIntegerValue());
                }
             });
 

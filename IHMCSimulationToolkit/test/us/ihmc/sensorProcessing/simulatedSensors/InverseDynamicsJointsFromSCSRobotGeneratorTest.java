@@ -18,8 +18,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -262,11 +262,11 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       private final YoFrameQuaternion lastFrameOrientationID = new YoFrameQuaternion("lastFrameID", ReferenceFrame.getWorldFrame(), registry);
       private final YoFrameQuaternion lastFrameOrientation = new YoFrameQuaternion("lastFrame", ReferenceFrame.getWorldFrame(), registry);
 
-      private final ArrayList<DoubleYoVariable> tauErrors = new ArrayList<DoubleYoVariable>();
-      private final ArrayList<DoubleYoVariable> inverseDynamicsTaus = new ArrayList<DoubleYoVariable>();
+      private final ArrayList<YoDouble> tauErrors = new ArrayList<YoDouble>();
+      private final ArrayList<YoDouble> inverseDynamicsTaus = new ArrayList<YoDouble>();
 
-      private final ArrayList<DoubleYoVariable> wrenchLinearPartErrors = new ArrayList<DoubleYoVariable>();
-      private final ArrayList<DoubleYoVariable> wrenchAngularPartErrors = new ArrayList<DoubleYoVariable>();
+      private final ArrayList<YoDouble> wrenchLinearPartErrors = new ArrayList<YoDouble>();
+      private final ArrayList<YoDouble> wrenchAngularPartErrors = new ArrayList<YoDouble>();
       
       private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
@@ -287,19 +287,19 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            DoubleYoVariable wrenchLinearPartError = new DoubleYoVariable(floatingJoint.getName() + "LinearPartError", registry);
+            YoDouble wrenchLinearPartError = new YoDouble(floatingJoint.getName() + "LinearPartError", registry);
             wrenchLinearPartErrors.add(wrenchLinearPartError);
             
-            DoubleYoVariable wrenchAngularPartError = new DoubleYoVariable(floatingJoint.getName() + "AngularPartError", registry);
+            YoDouble wrenchAngularPartError = new YoDouble(floatingJoint.getName() + "AngularPartError", registry);
             wrenchAngularPartErrors.add(wrenchAngularPartError);
          }
 
          for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
          {
-            DoubleYoVariable tauError = new DoubleYoVariable(pinJoint.getName() + "TauError", registry);
+            YoDouble tauError = new YoDouble(pinJoint.getName() + "TauError", registry);
             tauErrors.add(tauError);
 
-            DoubleYoVariable inverseDynamicsTau = new DoubleYoVariable(pinJoint.getName() + "InverseDynamicsTau", registry);
+            YoDouble inverseDynamicsTau = new YoDouble(pinJoint.getName() + "InverseDynamicsTau", registry);
             inverseDynamicsTaus.add(inverseDynamicsTau);
          }
 
@@ -382,10 +382,10 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
             double appliedTau = pinJoint.getTauYoVariable().getDoubleValue();
 
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
-            DoubleYoVariable inverseDynamicsTau = inverseDynamicsTaus.get(i);
+            YoDouble inverseDynamicsTau = inverseDynamicsTaus.get(i);
             inverseDynamicsTau.set(revoluteJoint.getTau());
 
-            DoubleYoVariable tauError = tauErrors.get(i);
+            YoDouble tauError = tauErrors.get(i);
             tauError.set(Math.abs(appliedTau - inverseDynamicsTau.getDoubleValue()));
 
             if (DO_ASSERTS)
@@ -434,8 +434,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
             Vector3D angularPartCopy = wrench.getAngularPartCopy();
             Vector3D linearPartCopy = wrench.getLinearPartCopy();
             
-            DoubleYoVariable wrenchAngularPartError = wrenchAngularPartErrors.get(i);
-            DoubleYoVariable wrenchLinearPartError = wrenchLinearPartErrors.get(i);
+            YoDouble wrenchAngularPartError = wrenchAngularPartErrors.get(i);
+            YoDouble wrenchLinearPartError = wrenchLinearPartErrors.get(i);
             
             wrenchAngularPartError.set(angularPartCopy.length());
             wrenchLinearPartError.set(linearPartCopy.length());  

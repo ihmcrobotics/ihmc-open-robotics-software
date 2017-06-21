@@ -18,10 +18,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -34,9 +34,9 @@ public class ChestOrientationManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GenericStateMachine<ChestControlMode, ChestControlState> stateMachine;
-   private final EnumYoVariable<ChestControlMode> requestedState = new EnumYoVariable<>("chestRequestedControlMode", registry, ChestControlMode.class, true);
+   private final YoEnum<ChestControlMode> requestedState = new YoEnum<>("chestRequestedControlMode", registry, ChestControlMode.class, true);
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable(getClass().getSimpleName() + "Initialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean(getClass().getSimpleName() + "Initialized", registry);
 
    private final TaskspaceChestControlState taskspaceChestControlState;
    private final JointspaceChestControlState jointspaceChestControlState;
@@ -53,7 +53,7 @@ public class ChestOrientationManager
    public ChestOrientationManager(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       String className = getClass().getSimpleName();
-      DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
+      YoDouble yoTime = humanoidControllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(className, className + "SwitchTime", ChestControlMode.class, yoTime, registry);
 
       RigidBody chest = humanoidControllerToolbox.getFullRobotModel().getChest();

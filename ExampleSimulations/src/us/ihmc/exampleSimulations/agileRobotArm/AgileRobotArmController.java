@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.agileRobotArm;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class AgileRobotArmController implements RobotController
@@ -14,99 +14,99 @@ public class AgileRobotArmController implements RobotController
    protected AgileRobotArmRobot rob;
 
    // These are the variables that are automatically created when the robot is created:
-   private final DoubleYoVariable t, q_shoulder_yaw, qd_shoulder_yaw, tau_shoulder_yaw, q_shoulder_pitch, qd_shoulder_pitch, tau_shoulder_pitch, q_elbow_pitch;
-   private final DoubleYoVariable qd_elbow_pitch, tau_elbow_pitch, q_wrist_pitch, qd_wrist_pitch, tau_wrist_pitch, q_wrist_yaw, qd_wrist_yaw;
-   private final DoubleYoVariable tau_wrist_yaw, q_wrist_roll, qd_wrist_roll, tau_wrist_roll;
+   private final YoDouble t, q_shoulder_yaw, qd_shoulder_yaw, tau_shoulder_yaw, q_shoulder_pitch, qd_shoulder_pitch, tau_shoulder_pitch, q_elbow_pitch;
+   private final YoDouble qd_elbow_pitch, tau_elbow_pitch, q_wrist_pitch, qd_wrist_pitch, tau_wrist_pitch, q_wrist_yaw, qd_wrist_yaw;
+   private final YoDouble tau_wrist_yaw, q_wrist_roll, qd_wrist_roll, tau_wrist_roll;
 
    private static final int
       NULL_TORQUES = 0, POSITION_CONTROL = 1, ANTI_GRAVITY = 2, DAMPING_PLUS_ANTI_GRAVITY = 3, POSITION_PLUS_ANTI_GRAVITY = 4, SINE_TRAJECTORY = 5;
 
-   private final DoubleYoVariable mode = new DoubleYoVariable("mode", registry);
+   private final YoDouble mode = new YoDouble("mode", registry);
 
-   private final DoubleYoVariable
-      v1 = new DoubleYoVariable("v1", registry), v2 = new DoubleYoVariable("v2", registry), v3 = new DoubleYoVariable("v3", registry);
-   private final DoubleYoVariable
-      v4 = new DoubleYoVariable("v4", registry), v5 = new DoubleYoVariable("v5", registry), v6 = new DoubleYoVariable("v6", registry);
+   private final YoDouble
+      v1 = new YoDouble("v1", registry), v2 = new YoDouble("v2", registry), v3 = new YoDouble("v3", registry);
+   private final YoDouble
+      v4 = new YoDouble("v4", registry), v5 = new YoDouble("v5", registry), v6 = new YoDouble("v6", registry);
 
 
-   private final DoubleYoVariable shoulder_yaw_amp = new DoubleYoVariable("shoulder_yaw_amp", registry);
-   private final DoubleYoVariable shoulder_yaw_freq = new DoubleYoVariable("shoulder_yaw_freq", registry);
-   private final DoubleYoVariable shoulder_yaw_phase = new DoubleYoVariable("shoulder_yaw_phase", registry);
-   private final DoubleYoVariable q_d_shoulder_yaw = new DoubleYoVariable("q_d_shoulder_yaw", registry);
+   private final YoDouble shoulder_yaw_amp = new YoDouble("shoulder_yaw_amp", registry);
+   private final YoDouble shoulder_yaw_freq = new YoDouble("shoulder_yaw_freq", registry);
+   private final YoDouble shoulder_yaw_phase = new YoDouble("shoulder_yaw_phase", registry);
+   private final YoDouble q_d_shoulder_yaw = new YoDouble("q_d_shoulder_yaw", registry);
 
-   private final DoubleYoVariable k_shoulder_yaw = new DoubleYoVariable("k_shoulder_yaw", registry);
-   private final DoubleYoVariable b_shoulder_yaw = new DoubleYoVariable("b_shoulder_yaw", registry);
+   private final YoDouble k_shoulder_yaw = new YoDouble("k_shoulder_yaw", registry);
+   private final YoDouble b_shoulder_yaw = new YoDouble("b_shoulder_yaw", registry);
 
-   private final DoubleYoVariable shoulder_pitch_amp = new DoubleYoVariable("shoulder_pitch_amp", registry);
-   private final DoubleYoVariable shoulder_pitch_freq = new DoubleYoVariable("shoulder_pitch_freq", registry);
-   private final DoubleYoVariable shoulder_pitch_phase = new DoubleYoVariable("shoulder_pitch_phase", registry);
-   private final DoubleYoVariable q_d_shoulder_pitch = new DoubleYoVariable("q_d_shoulder_pitch", registry);
+   private final YoDouble shoulder_pitch_amp = new YoDouble("shoulder_pitch_amp", registry);
+   private final YoDouble shoulder_pitch_freq = new YoDouble("shoulder_pitch_freq", registry);
+   private final YoDouble shoulder_pitch_phase = new YoDouble("shoulder_pitch_phase", registry);
+   private final YoDouble q_d_shoulder_pitch = new YoDouble("q_d_shoulder_pitch", registry);
 
-   private final DoubleYoVariable k_shoulder_pitch = new DoubleYoVariable("k_shoulder_pitch", registry);
-   private final DoubleYoVariable b_shoulder_pitch = new DoubleYoVariable("b_shoulder_pitch", registry);
+   private final YoDouble k_shoulder_pitch = new YoDouble("k_shoulder_pitch", registry);
+   private final YoDouble b_shoulder_pitch = new YoDouble("b_shoulder_pitch", registry);
 
-   private final DoubleYoVariable elbow_pitch_amp = new DoubleYoVariable("elbow_pitch_amp", registry);
-   private final DoubleYoVariable elbow_pitch_freq = new DoubleYoVariable("elbow_pitch_freq", registry);
-   private final DoubleYoVariable elbow_pitch_phase = new DoubleYoVariable("elbow_pitch_phase", registry);
-   private final DoubleYoVariable q_d_elbow_pitch = new DoubleYoVariable("q_d_elbow_pitch", registry);
+   private final YoDouble elbow_pitch_amp = new YoDouble("elbow_pitch_amp", registry);
+   private final YoDouble elbow_pitch_freq = new YoDouble("elbow_pitch_freq", registry);
+   private final YoDouble elbow_pitch_phase = new YoDouble("elbow_pitch_phase", registry);
+   private final YoDouble q_d_elbow_pitch = new YoDouble("q_d_elbow_pitch", registry);
 
-   private final DoubleYoVariable k_elbow_pitch = new DoubleYoVariable("k_elbow_pitch", registry);
-   private final DoubleYoVariable b_elbow_pitch = new DoubleYoVariable("b_elbow_pitch", registry);
+   private final YoDouble k_elbow_pitch = new YoDouble("k_elbow_pitch", registry);
+   private final YoDouble b_elbow_pitch = new YoDouble("b_elbow_pitch", registry);
 
-   private final DoubleYoVariable wrist_pitch_amp = new DoubleYoVariable("wrist_pitch_amp", registry);
-   private final DoubleYoVariable wrist_pitch_freq = new DoubleYoVariable("wrist_pitch_freq", registry);
-   private final DoubleYoVariable wrist_pitch_phase = new DoubleYoVariable("wrist_pitch_phase", registry);
-   private final DoubleYoVariable q_d_wrist_pitch = new DoubleYoVariable("q_d_wrist_pitch", registry);
+   private final YoDouble wrist_pitch_amp = new YoDouble("wrist_pitch_amp", registry);
+   private final YoDouble wrist_pitch_freq = new YoDouble("wrist_pitch_freq", registry);
+   private final YoDouble wrist_pitch_phase = new YoDouble("wrist_pitch_phase", registry);
+   private final YoDouble q_d_wrist_pitch = new YoDouble("q_d_wrist_pitch", registry);
 
-   private final DoubleYoVariable k_wrist_pitch = new DoubleYoVariable("k_wrist_pitch", registry);
-   private final DoubleYoVariable b_wrist_pitch = new DoubleYoVariable("b_wrist_pitch", registry);
+   private final YoDouble k_wrist_pitch = new YoDouble("k_wrist_pitch", registry);
+   private final YoDouble b_wrist_pitch = new YoDouble("b_wrist_pitch", registry);
 
-   private final DoubleYoVariable wrist_yaw_amp = new DoubleYoVariable("wrist_yaw_amp", registry);
-   private final DoubleYoVariable wrist_yaw_freq = new DoubleYoVariable("wrist_yaw_freq", registry);
-   private final DoubleYoVariable wrist_yaw_phase = new DoubleYoVariable("wrist_yaw_phase", registry);
-   private final DoubleYoVariable q_d_wrist_yaw = new DoubleYoVariable("q_d_wrist_yaw", registry);
+   private final YoDouble wrist_yaw_amp = new YoDouble("wrist_yaw_amp", registry);
+   private final YoDouble wrist_yaw_freq = new YoDouble("wrist_yaw_freq", registry);
+   private final YoDouble wrist_yaw_phase = new YoDouble("wrist_yaw_phase", registry);
+   private final YoDouble q_d_wrist_yaw = new YoDouble("q_d_wrist_yaw", registry);
 
-   private final DoubleYoVariable k_wrist_yaw = new DoubleYoVariable("k_wrist_yaw", registry);
-   private final DoubleYoVariable b_wrist_yaw = new DoubleYoVariable("b_wrist_yaw", registry);
+   private final YoDouble k_wrist_yaw = new YoDouble("k_wrist_yaw", registry);
+   private final YoDouble b_wrist_yaw = new YoDouble("b_wrist_yaw", registry);
 
-   private final DoubleYoVariable wrist_roll_amp = new DoubleYoVariable("wrist_roll_amp", registry);
-   private final DoubleYoVariable wrist_roll_offset = new DoubleYoVariable("wrist_roll_offset", registry);
-   private final DoubleYoVariable wrist_roll_freq = new DoubleYoVariable("wrist_roll_freq", registry);
-   private final DoubleYoVariable wrist_roll_phase = new DoubleYoVariable("wrist_roll_phase", registry);
-   private final DoubleYoVariable q_d_wrist_roll = new DoubleYoVariable("q_d_wrist_roll", registry);
+   private final YoDouble wrist_roll_amp = new YoDouble("wrist_roll_amp", registry);
+   private final YoDouble wrist_roll_offset = new YoDouble("wrist_roll_offset", registry);
+   private final YoDouble wrist_roll_freq = new YoDouble("wrist_roll_freq", registry);
+   private final YoDouble wrist_roll_phase = new YoDouble("wrist_roll_phase", registry);
+   private final YoDouble q_d_wrist_roll = new YoDouble("q_d_wrist_roll", registry);
 
-   private final DoubleYoVariable k_wrist_roll = new DoubleYoVariable("k_wrist_roll", registry);
-   private final DoubleYoVariable b_wrist_roll = new DoubleYoVariable("b_wrist_roll", registry);
+   private final YoDouble k_wrist_roll = new YoDouble("k_wrist_roll", registry);
+   private final YoDouble b_wrist_roll = new YoDouble("b_wrist_roll", registry);
 
-   private final DoubleYoVariable a1 = new DoubleYoVariable("a1", registry);
-   private final DoubleYoVariable a2 = new DoubleYoVariable("a2", registry);
-   private final DoubleYoVariable a3 = new DoubleYoVariable("a3", registry);
-   private final DoubleYoVariable a4 = new DoubleYoVariable("a4", registry);
-   private final DoubleYoVariable a5 = new DoubleYoVariable("a5", registry);
+   private final YoDouble a1 = new YoDouble("a1", registry);
+   private final YoDouble a2 = new YoDouble("a2", registry);
+   private final YoDouble a3 = new YoDouble("a3", registry);
+   private final YoDouble a4 = new YoDouble("a4", registry);
+   private final YoDouble a5 = new YoDouble("a5", registry);
 
    public AgileRobotArmController(AgileRobotArmRobot rob)
    {
       this.rob = rob;
 
-      t = (DoubleYoVariable) rob.getVariable("t");
-      q_shoulder_yaw = (DoubleYoVariable) rob.getVariable("q_shoulder_yaw");
-      qd_shoulder_yaw = (DoubleYoVariable) rob.getVariable("qd_shoulder_yaw");
-      tau_shoulder_yaw = (DoubleYoVariable) rob.getVariable("tau_shoulder_yaw");
-      q_shoulder_pitch = (DoubleYoVariable) rob.getVariable("q_shoulder_pitch");
-      qd_shoulder_pitch = (DoubleYoVariable) rob.getVariable("qd_shoulder_pitch");
-      tau_shoulder_pitch = (DoubleYoVariable) rob.getVariable("tau_shoulder_pitch");
-      q_elbow_pitch = (DoubleYoVariable) rob.getVariable("q_elbow_pitch");
-      qd_elbow_pitch = (DoubleYoVariable) rob.getVariable("qd_elbow_pitch");
-      tau_elbow_pitch = (DoubleYoVariable) rob.getVariable("tau_elbow_pitch");
-      q_wrist_pitch = (DoubleYoVariable) rob.getVariable("q_wrist_pitch");
-      qd_wrist_pitch = (DoubleYoVariable) rob.getVariable("qd_wrist_pitch");
-      tau_wrist_pitch = (DoubleYoVariable) rob.getVariable("tau_wrist_pitch");
-      q_wrist_yaw = (DoubleYoVariable) rob.getVariable("q_wrist_yaw");
-      qd_wrist_yaw = (DoubleYoVariable) rob.getVariable("qd_wrist_yaw");
-      tau_wrist_yaw = (DoubleYoVariable) rob.getVariable("tau_wrist_yaw");
-      q_wrist_roll = (DoubleYoVariable) rob.getVariable("q_wrist_roll");
-      qd_wrist_roll = (DoubleYoVariable) rob.getVariable("qd_wrist_roll");
-      tau_wrist_roll = (DoubleYoVariable) rob.getVariable("tau_wrist_roll");
+      t = (YoDouble) rob.getVariable("t");
+      q_shoulder_yaw = (YoDouble) rob.getVariable("q_shoulder_yaw");
+      qd_shoulder_yaw = (YoDouble) rob.getVariable("qd_shoulder_yaw");
+      tau_shoulder_yaw = (YoDouble) rob.getVariable("tau_shoulder_yaw");
+      q_shoulder_pitch = (YoDouble) rob.getVariable("q_shoulder_pitch");
+      qd_shoulder_pitch = (YoDouble) rob.getVariable("qd_shoulder_pitch");
+      tau_shoulder_pitch = (YoDouble) rob.getVariable("tau_shoulder_pitch");
+      q_elbow_pitch = (YoDouble) rob.getVariable("q_elbow_pitch");
+      qd_elbow_pitch = (YoDouble) rob.getVariable("qd_elbow_pitch");
+      tau_elbow_pitch = (YoDouble) rob.getVariable("tau_elbow_pitch");
+      q_wrist_pitch = (YoDouble) rob.getVariable("q_wrist_pitch");
+      qd_wrist_pitch = (YoDouble) rob.getVariable("qd_wrist_pitch");
+      tau_wrist_pitch = (YoDouble) rob.getVariable("tau_wrist_pitch");
+      q_wrist_yaw = (YoDouble) rob.getVariable("q_wrist_yaw");
+      qd_wrist_yaw = (YoDouble) rob.getVariable("qd_wrist_yaw");
+      tau_wrist_yaw = (YoDouble) rob.getVariable("tau_wrist_yaw");
+      q_wrist_roll = (YoDouble) rob.getVariable("q_wrist_roll");
+      qd_wrist_roll = (YoDouble) rob.getVariable("qd_wrist_roll");
+      tau_wrist_roll = (YoDouble) rob.getVariable("tau_wrist_roll");
 
 
       initControl();

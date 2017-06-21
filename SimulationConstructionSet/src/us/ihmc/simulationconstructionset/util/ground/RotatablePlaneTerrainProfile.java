@@ -10,10 +10,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -41,11 +41,11 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    private final FramePlane3d previousPlane = new FramePlane3d(WORLD_FRAME);
    private final YoGraphicPolygon floorGraphic;
    
-   private final DoubleYoVariable ground_kp = new DoubleYoVariable("ground_kp", registry);
-   private final DoubleYoVariable ground_kd =  new DoubleYoVariable("ground_kd", registry);
-   private final DoubleYoVariable filteredDesiredGroundYawAlpha = new DoubleYoVariable("filteredDesiredGroundYawAlpha", registry);
-   private final DoubleYoVariable filteredDesiredGroundPitchAlpha = new DoubleYoVariable("filteredDesiredGroundOrientationAlpha", registry);
-   private final DoubleYoVariable filteredDesiredGroundRollAlpha = new DoubleYoVariable("filteredDesiredGroundRollAlpha", registry);
+   private final YoDouble ground_kp = new YoDouble("ground_kp", registry);
+   private final YoDouble ground_kd =  new YoDouble("ground_kd", registry);
+   private final YoDouble filteredDesiredGroundYawAlpha = new YoDouble("filteredDesiredGroundYawAlpha", registry);
+   private final YoDouble filteredDesiredGroundPitchAlpha = new YoDouble("filteredDesiredGroundOrientationAlpha", registry);
+   private final YoDouble filteredDesiredGroundRollAlpha = new YoDouble("filteredDesiredGroundRollAlpha", registry);
    
    private final YoFrameOrientation desiredGroundOrientation = new YoFrameOrientation("desiredGroundOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final AlphaFilteredWrappingYoVariable filteredDesiredGroundYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundYaw", "", registry, desiredGroundOrientation.getYaw(), filteredDesiredGroundYawAlpha, -Math.PI, Math.PI);

@@ -3,9 +3,9 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import java.util.List;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -21,15 +21,15 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable cancelGravityFromAccelerationMeasurement = new BooleanYoVariable("cancelGravityFromAccelerationMeasurement", registry);
+   private final YoBoolean cancelGravityFromAccelerationMeasurement = new YoBoolean("cancelGravityFromAccelerationMeasurement", registry);
 
    private final FrameVector accelerationBias = new FrameVector(worldFrame);
    private final FrameVector gravityVector = new FrameVector();
 
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
-   private final BooleanYoVariable setRootJointPositionImuOnlyToCurrent = new BooleanYoVariable("setRootJointPositionImuOnlyToCurrent", registry);
-   private final DoubleYoVariable alphaLeakIMUOnly = new DoubleYoVariable("imuOnlyAlphaLeak", registry);
+   private final YoBoolean setRootJointPositionImuOnlyToCurrent = new YoBoolean("setRootJointPositionImuOnlyToCurrent", registry);
+   private final YoDouble alphaLeakIMUOnly = new YoDouble("imuOnlyAlphaLeak", registry);
    private final YoFrameVector rootJointPositionImuOnly = new YoFrameVector("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
    private final YoFrameVector imuLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedIMULinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedRootJointLinearVelocity", worldFrame, registry);
@@ -39,7 +39,7 @@ public class PelvisIMUBasedLinearStateCalculator
    private final YoFrameVector yoLinearAccelerationMeasurementInWorld;
    private final YoFrameVector yoLinearAccelerationMeasurement;
 
-   private final BooleanYoVariable imuBasedStateEstimationEnabled = new BooleanYoVariable("imuBasedStateEstimationEnabled", registry);
+   private final YoBoolean imuBasedStateEstimationEnabled = new YoBoolean("imuBasedStateEstimationEnabled", registry);
 
    private final ReferenceFrame measurementFrame;
 

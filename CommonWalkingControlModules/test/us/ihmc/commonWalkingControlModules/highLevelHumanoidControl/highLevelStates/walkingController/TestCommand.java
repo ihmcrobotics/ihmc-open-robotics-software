@@ -89,6 +89,17 @@ public class TestCommand implements Command<TestCommand,AbortWalkingMessage>
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
    }
+   
+   /**
+    * tells the controller if this command supports delayed execution
+    * (Spoiler alert: It does)
+    * @return
+    */
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
 
    @Override
    public boolean equals(Object obj)

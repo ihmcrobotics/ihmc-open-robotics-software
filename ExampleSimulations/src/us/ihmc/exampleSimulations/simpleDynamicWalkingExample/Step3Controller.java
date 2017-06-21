@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,18 +23,18 @@ public class Step3Controller implements RobotController
    private PIDController controllerLegPitch;
    private PIDController controllerKneeZ;
 
-   private DoubleYoVariable desiredBodyZ;
-   private DoubleYoVariable desiredBodyPitch;
-   private DoubleYoVariable desiredLegPitch;
-   private DoubleYoVariable desiredKneeZ;
+   private YoDouble desiredBodyZ;
+   private YoDouble desiredBodyPitch;
+   private YoDouble desiredLegPitch;
+   private YoDouble desiredKneeZ;
 
-   private DoubleYoVariable controlKneeTau;
-   private DoubleYoVariable controlBodyTau;
-   private DoubleYoVariable controlHipTau;
-   private DoubleYoVariable controlKneeForce;
+   private YoDouble controlKneeTau;
+   private YoDouble controlBodyTau;
+   private YoDouble controlHipTau;
+   private YoDouble controlKneeForce;
 
-   private BooleanYoVariable onTheFloor;
-   private DoubleYoVariable gcHeightRight;
+   private YoBoolean onTheFloor;
+   private YoDouble gcHeightRight;
 
    private double ffComponent = -38.0 * 9.81;
 
@@ -50,35 +50,35 @@ public class Step3Controller implements RobotController
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(2000.0);
       controllerBodyZ.setDerivativeGain(500.0);
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", controllerRegistry);
       desiredBodyZ.set(1.4); //larger than initial
-      controlKneeTau = new DoubleYoVariable("controlKneeTau", controllerRegistry);
+      controlKneeTau = new YoDouble("controlKneeTau", controllerRegistry);
 
       controllerBodyPitch = new PIDController("bodyPitch", controllerRegistry);
       controllerBodyPitch.setProportionalGain(1e3);
       controllerBodyPitch.setDerivativeGain(1e2);
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(-0.2);
-      controlBodyTau = new DoubleYoVariable("controlBodyTau", controllerRegistry);
+      controlBodyTau = new YoDouble("controlBodyTau", controllerRegistry);
 
       controllerLegPitch = new PIDController("legPitch", controllerRegistry);
       controllerLegPitch.setProportionalGain(50000.0);
       controllerLegPitch.setDerivativeGain(5000.0);
-      desiredLegPitch = new DoubleYoVariable("desiredLegPitch", controllerRegistry);
+      desiredLegPitch = new YoDouble("desiredLegPitch", controllerRegistry);
       desiredLegPitch.set(0.4);
-      controlHipTau = new DoubleYoVariable("controlLegTau", controllerRegistry);
+      controlHipTau = new YoDouble("controlLegTau", controllerRegistry);
 
       controllerKneeZ = new PIDController("kneeZ", controllerRegistry);
       controllerKneeZ.setProportionalGain(15000.0);
       controllerKneeZ.setDerivativeGain(2000.0);
-      desiredKneeZ = new DoubleYoVariable("desiredKneeZ", controllerRegistry);
+      desiredKneeZ = new YoDouble("desiredKneeZ", controllerRegistry);
       desiredKneeZ.set(0.2);
-      controlKneeForce = new DoubleYoVariable("controlKneeForce", controllerRegistry);
+      controlKneeForce = new YoDouble("controlKneeForce", controllerRegistry);
 
-      onTheFloor = new BooleanYoVariable("onTheFloor", controllerRegistry);
+      onTheFloor = new YoBoolean("onTheFloor", controllerRegistry);
       onTheFloor.set(true);
 
-      gcHeightRight = new DoubleYoVariable("gcHeightRight", controllerRegistry);
+      gcHeightRight = new YoDouble("gcHeightRight", controllerRegistry);
    }
 
    /**

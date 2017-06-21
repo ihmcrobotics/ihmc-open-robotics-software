@@ -1,12 +1,12 @@
 package us.ihmc.robotics.time;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CallFrequencyCalculator
 {
-   private DoubleYoVariable yoCallFrequency;
-   private DoubleYoVariable yoRequestDeltaTInMilliseconds;
+   private YoDouble yoCallFrequency;
+   private YoDouble yoRequestDeltaTInMilliseconds;
    private int counter;
    private double lastTimeCalled = 0.0;
    private double currentTime = 0.0;
@@ -15,8 +15,8 @@ public class CallFrequencyCalculator
 
    public CallFrequencyCalculator(YoVariableRegistry registry, String prefix)
    {
-      yoCallFrequency = new DoubleYoVariable((prefix + "_Freq"), registry);
-      yoRequestDeltaTInMilliseconds = new DoubleYoVariable((prefix + "_DeltaT"), registry);
+      yoCallFrequency = new YoDouble((prefix + "_Freq"), registry);
+      yoRequestDeltaTInMilliseconds = new YoDouble((prefix + "_DeltaT"), registry);
    }
 
    public void setNumberOfSamples(int numberOfSamples)

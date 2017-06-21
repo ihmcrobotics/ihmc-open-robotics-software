@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoStopwatchTest
 {
@@ -16,13 +16,13 @@ public class YoStopwatchTest
    public void testStopwatch()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DoubleYoVariable yoTime = new DoubleYoVariable("t", registry);
+      YoDouble yoTime = new YoDouble("t", registry);
       
       testStopwatch(yoTime, new YoStopwatch(yoTime));
       testStopwatch(yoTime, new YoStopwatch("timerTest", yoTime, registry));
    }
 
-   private void testStopwatch(DoubleYoVariable yoTime, YoStopwatch stopwatch)
+   private void testStopwatch(YoDouble yoTime, YoStopwatch stopwatch)
    {
       yoTime.set(0.0);
       

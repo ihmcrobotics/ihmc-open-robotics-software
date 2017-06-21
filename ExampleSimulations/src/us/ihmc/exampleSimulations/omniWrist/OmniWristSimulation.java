@@ -2,11 +2,10 @@ package us.ihmc.exampleSimulations.omniWrist;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -26,11 +25,11 @@ public class OmniWristSimulation
       OmniWristController controller = new OmniWristController(robot);
       robot.setController(controller);
 
-      DoubleYoVariable q_jointOneA = (DoubleYoVariable) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneA");
-      DoubleYoVariable q_jointOneB = (DoubleYoVariable) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneB");
-      DoubleYoVariable q_jointOneC = (DoubleYoVariable) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneC");
-      DoubleYoVariable q_jointOneD = (DoubleYoVariable) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneD");
-      DoubleYoVariable q_jointFourA = (DoubleYoVariable) robot.getRobotsYoVariableRegistry().getVariable("q_jointFourA");
+      YoDouble q_jointOneA = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneA");
+      YoDouble q_jointOneB = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneB");
+      YoDouble q_jointOneC = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneC");
+      YoDouble q_jointOneD = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneD");
+      YoDouble q_jointFourA = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointFourA");
 
       double initialAngle = -0.38;
       q_jointOneA.set(initialAngle);

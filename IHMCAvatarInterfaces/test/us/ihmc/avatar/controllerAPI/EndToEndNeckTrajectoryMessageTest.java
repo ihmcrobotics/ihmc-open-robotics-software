@@ -15,7 +15,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -124,7 +124,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          String subTrajectory = "SubTrajectory";
          String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentValue";
-         DoubleYoVariable q_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         YoDouble q_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
          controllerDesiredJointPositions[i] = q_d.getDoubleValue();
       }
       return controllerDesiredJointPositions;
@@ -139,7 +139,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          String subTrajectory = "SubTrajectory";
          String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentVelocity";
-         DoubleYoVariable qd_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         YoDouble qd_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
          controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();
       }
       return controllerDesiredJointVelocities;

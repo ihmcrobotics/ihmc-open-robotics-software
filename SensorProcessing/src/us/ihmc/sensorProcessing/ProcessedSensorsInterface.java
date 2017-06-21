@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing;
 import java.util.HashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -18,11 +18,10 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.sensors.FingerForceSensors;
 
-
 public interface ProcessedSensorsInterface extends FingerForceSensors
 {
    public abstract double getTime();
-   public abstract DoubleYoVariable getYoTime();
+   public abstract YoDouble getYoTime();
    
    public abstract double getKneeAngle(RobotSide robotSide);
 

@@ -4,8 +4,8 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -24,8 +24,8 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable stiffnessX, stiffnessY, stiffnessZ;
-   private final DoubleYoVariable dampingX, dampingY, dampingZ;
+   private final YoDouble stiffnessX, stiffnessY, stiffnessZ;
+   private final YoDouble dampingX, dampingY, dampingZ;
 
    private final ExternalForcePoint connectionPointA;
    private final ExternalForcePoint connectionPointB;
@@ -62,13 +62,13 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
    {
       registry = new YoVariableRegistry(name);
 
-      stiffnessX = new DoubleYoVariable(name + "_StiffnessX", registry);
-      stiffnessY = new DoubleYoVariable(name + "_StiffnessY", registry);
-      stiffnessZ = new DoubleYoVariable(name + "_StiffnessZ", registry);
+      stiffnessX = new YoDouble(name + "_StiffnessX", registry);
+      stiffnessY = new YoDouble(name + "_StiffnessY", registry);
+      stiffnessZ = new YoDouble(name + "_StiffnessZ", registry);
 
-      dampingX = new DoubleYoVariable(name + "_DampingX", registry);
-      dampingY = new DoubleYoVariable(name + "_DampingY", registry);
-      dampingZ = new DoubleYoVariable(name + "_DampingZ", registry);
+      dampingX = new YoDouble(name + "_DampingX", registry);
+      dampingY = new YoDouble(name + "_DampingY", registry);
+      dampingZ = new YoDouble(name + "_DampingZ", registry);
 
       this.connectionPointA = connectionPointA;
       this.connectionPointB = connectionPointB;
@@ -197,7 +197,7 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
    }
 
    @Override
-   public DoubleYoVariable[] getOutputVariables()
+   public YoDouble[] getOutputVariables()
    {
       return null;
    }

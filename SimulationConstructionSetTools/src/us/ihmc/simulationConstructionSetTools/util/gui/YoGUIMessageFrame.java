@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.BooleanGlobalParameter;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.DoubleGlobalParameter;
 import us.ihmc.simulationConstructionSetTools.util.globalParameters.EnumGlobalParameter;
@@ -53,7 +53,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
 
    private static YoGUIMessageFrame elvis;
 
-   private DoubleYoVariable time;
+   private YoDouble time;
 
    private YoGUIMessageFrame()
    {
@@ -66,7 +66,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
       return elvis;
    }
 
-   public static void setTimeVariable(DoubleYoVariable time)
+   public static void setTimeVariable(YoDouble time)
    {
       initialize();
 

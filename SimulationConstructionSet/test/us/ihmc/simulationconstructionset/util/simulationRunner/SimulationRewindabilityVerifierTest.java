@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -169,10 +169,10 @@ public class SimulationRewindabilityVerifierTest
    {
       protected final YoVariableRegistry registry = new YoVariableRegistry("controller");
       
-      protected final DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
-      protected final DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", registry);
-      protected final DoubleYoVariable variableThree = new DoubleYoVariable("variableThree", registry);
-      protected final DoubleYoVariable variableFour = new DoubleYoVariable("variableFour", registry);
+      protected final YoDouble variableOne = new YoDouble("variableOne", registry);
+      protected final YoDouble variableTwo = new YoDouble("variableTwo", registry);
+      protected final YoDouble variableThree = new YoDouble("variableThree", registry);
+      protected final YoDouble variableFour = new YoDouble("variableFour", registry);
 
       protected final Robot robot;
       
@@ -246,7 +246,7 @@ public class SimulationRewindabilityVerifierTest
       private double lastTimeChanged;
       private double timeBetweenChanges = 3.0;
       
-      private DoubleYoVariable lastTimeUpdated = new DoubleYoVariable("lastTimeUpdated", registry);
+      private YoDouble lastTimeUpdated = new YoDouble("lastTimeUpdated", registry);
       private double timeBetweenUpdates = 5.0;
       
       public DifficultToDetectNonRewindableController(Robot robot)

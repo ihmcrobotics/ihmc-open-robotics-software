@@ -1,8 +1,8 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
+import us.ihmc.robotics.math.filters.DelayedYoDouble;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class VelocityControlEvaluationController implements RobotController
@@ -11,32 +11,32 @@ public class VelocityControlEvaluationController implements RobotController
    private final double controlDT;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable q_d_x = new DoubleYoVariable("q_d_x", registry);
-   private final DoubleYoVariable qd_d_x = new DoubleYoVariable("qd_d_x", registry);
-   private final DoubleYoVariable qdd_d_x = new DoubleYoVariable("qdd_d_x", registry);
+   private final YoDouble q_d_x = new YoDouble("q_d_x", registry);
+   private final YoDouble qd_d_x = new YoDouble("qd_d_x", registry);
+   private final YoDouble qdd_d_x = new YoDouble("qdd_d_x", registry);
    
-   private final DoubleYoVariable offset = new DoubleYoVariable("offset", registry);
-   private final DoubleYoVariable amplitude = new DoubleYoVariable("amplitude", registry);
-   private final DoubleYoVariable frequency = new DoubleYoVariable("frequency", registry);
+   private final YoDouble offset = new YoDouble("offset", registry);
+   private final YoDouble amplitude = new YoDouble("amplitude", registry);
+   private final YoDouble frequency = new YoDouble("frequency", registry);
    
-   private final DoubleYoVariable xTrajectory = new DoubleYoVariable("xTrajectory", registry);
-   private final DoubleYoVariable xDotTrajectory = new DoubleYoVariable("xDotTrajectory", registry);
-   private final DoubleYoVariable xDDotTrajectory = new DoubleYoVariable("xDDotTrajectory", registry);
+   private final YoDouble xTrajectory = new YoDouble("xTrajectory", registry);
+   private final YoDouble xDotTrajectory = new YoDouble("xDotTrajectory", registry);
+   private final YoDouble xDDotTrajectory = new YoDouble("xDDotTrajectory", registry);
 
-   private final DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-   private final DoubleYoVariable zeta = new DoubleYoVariable("zeta", registry);
+   private final YoDouble omega = new YoDouble("omega", registry);
+   private final YoDouble zeta = new YoDouble("zeta", registry);
    
-   private final DoubleYoVariable kp = new DoubleYoVariable("kp", registry);
-   private final DoubleYoVariable kd = new DoubleYoVariable("kd", registry);
+   private final YoDouble kp = new YoDouble("kp", registry);
+   private final YoDouble kd = new YoDouble("kd", registry);
 
-   private final DoubleYoVariable alphaDesiredVelocity = new DoubleYoVariable("alphaDesiredVelocity", "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking", registry);
-   private final DoubleYoVariable kForceVel = new DoubleYoVariable("kForceVel", "Gain for velocity control in order to achieve acceleration control", registry);
+   private final YoDouble alphaDesiredVelocity = new YoDouble("alphaDesiredVelocity", "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking", registry);
+   private final YoDouble kForceVel = new YoDouble("kForceVel", "Gain for velocity control in order to achieve acceleration control", registry);
 
-   private final DoubleYoVariable qdd_tau = new DoubleYoVariable("qdd_tau", "Torque from inverse dynamics desired acceleration", registry);
-   private final DoubleYoVariable qd_tau = new DoubleYoVariable("qd_tau", "Torque from integrating acceleration to get velocity", registry);
-   private final DoubleYoVariable undelayedTorque = new DoubleYoVariable("undelayedTorque", "", registry);
+   private final YoDouble qdd_tau = new YoDouble("qdd_tau", "Torque from inverse dynamics desired acceleration", registry);
+   private final YoDouble qd_tau = new YoDouble("qd_tau", "Torque from integrating acceleration to get velocity", registry);
+   private final YoDouble undelayedTorque = new YoDouble("undelayedTorque", "", registry);
 
-   private final DelayedDoubleYoVariable delayedTorque = new DelayedDoubleYoVariable("delayedTorque", "", undelayedTorque, 2, registry);
+   private final DelayedYoDouble delayedTorque = new DelayedYoDouble("delayedTorque", "", undelayedTorque, 2, registry);
    
    public VelocityControlEvaluationController(VelocityControlEvaluationRobot robot, double controlDT)
    {

@@ -5,7 +5,7 @@ import java.awt.Color;
 
 import org.jfree.data.xy.XYSeries;
 
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class JFreePlot extends XYSeries
 {

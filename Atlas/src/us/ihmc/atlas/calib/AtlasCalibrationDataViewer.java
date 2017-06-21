@@ -16,7 +16,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -25,14 +25,13 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
 {
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
    private final YoFramePose yposeLeftEE, yposeRightEE;
-   Map<String, DoubleYoVariable> yoQout = new HashMap<>();
-   Map<String, DoubleYoVariable> yoQdiff = new HashMap<>();
+   Map<String, YoDouble> yoQout = new HashMap<>();
+   Map<String, YoDouble> yoQdiff = new HashMap<>();
 
    public AtlasCalibrationDataViewer(DRCRobotModel robotModel)
    {
@@ -81,8 +80,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       Map<String, Double> qout0 = (Map) qout.get(0);
       for (String jointName : qout0.keySet())
       {
-         yoQout.put(jointName, new DoubleYoVariable("qout_" + jointName, registry));
-         yoQdiff.put(jointName, new DoubleYoVariable("qdiff_" + jointName, registry));
+         yoQout.put(jointName, new YoDouble("qout_" + jointName, registry));
+         yoQdiff.put(jointName, new YoDouble("qdiff_" + jointName, registry));
       }
 
    }

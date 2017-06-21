@@ -28,13 +28,9 @@ import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * Class to decode variable data from handshakes
@@ -139,22 +135,22 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          switch (type)
          {
          case DoubleYoVariable:
-            DoubleYoVariable doubleVar = new DoubleYoVariable(name, parent);
+            YoDouble doubleVar = new YoDouble(name, parent);
             variableList.add(doubleVar);
             break;
 
          case IntegerYoVariable:
-            IntegerYoVariable intVar = new IntegerYoVariable(name, parent);
+            YoInteger intVar = new YoInteger(name, parent);
             variableList.add(intVar);
             break;
 
          case BooleanYoVariable:
-            BooleanYoVariable boolVar = new BooleanYoVariable(name, parent);
+            YoBoolean boolVar = new YoBoolean(name, parent);
             variableList.add(boolVar);
             break;
 
          case LongYoVariable:
-            LongYoVariable longVar = new LongYoVariable(name, parent);
+            YoLong longVar = new YoLong(name, parent);
             variableList.add(longVar);
             break;
 
@@ -162,7 +158,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
             String[] names = enumType.getEnumValues().toStringArray();
             boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
-            EnumYoVariable enumVar = new EnumYoVariable(name, "", parent, allowNullValues, names);
+            YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
             variableList.add(enumVar);
             break;
 

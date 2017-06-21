@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @author thutcheson
@@ -20,18 +20,18 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  *            filtered_{n} = (raw_{0} + ... + raw_{n-1} + raw_{n}) / n
  *         </pre>
  */
-public class BetaFilteredYoVariable extends DoubleYoVariable
+public class BetaFilteredYoVariable extends YoDouble
 {
    private int beta;
    private int index = 0;
    @SuppressWarnings("unused")
-   private final DoubleYoVariable betaVariable;
+   private final YoDouble betaVariable;
 
-   private final DoubleYoVariable position;
+   private final YoDouble position;
 
    private static double raw[];
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta)
    {
@@ -43,15 +43,15 @@ public class BetaFilteredYoVariable extends DoubleYoVariable
       this(name, description, registry, beta, null);
    }
 
-   public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta, DoubleYoVariable positionVariable)
+   public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta, YoDouble positionVariable)
    {
       this(name, "", registry, beta, positionVariable);
    }
 
-   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta, DoubleYoVariable positionVariable)
+   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta, YoDouble positionVariable)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
       this.beta = beta;
       this.position = positionVariable;

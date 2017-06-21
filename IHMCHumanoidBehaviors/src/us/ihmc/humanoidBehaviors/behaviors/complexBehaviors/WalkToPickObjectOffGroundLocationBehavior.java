@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -36,7 +36,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final double standingDistance = 0.4;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public WalkToPickObjectOffGroundLocationBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
+   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames,
          CommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {

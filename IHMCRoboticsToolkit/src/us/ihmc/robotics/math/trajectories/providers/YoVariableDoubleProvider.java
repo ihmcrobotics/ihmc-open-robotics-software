@@ -1,20 +1,20 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 
 public class YoVariableDoubleProvider implements DoubleProvider
 {
-   private final DoubleYoVariable value;
+   private final YoDouble value;
 
    public YoVariableDoubleProvider(String name, YoVariableRegistry registry)
    {
-      value = new DoubleYoVariable(name, registry);
+      value = new YoDouble(name, registry);
    }
    
-   public YoVariableDoubleProvider(DoubleYoVariable value)
+   public YoVariableDoubleProvider(YoDouble value)
    {
       this.value = value;
    }

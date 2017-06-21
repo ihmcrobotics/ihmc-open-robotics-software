@@ -2,7 +2,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem

@@ -2,65 +2,65 @@ package us.ihmc.sensorProcessing;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class RawSensors implements RawIMUSensorsInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("RawSensors");
 
-   private final DoubleYoVariable r_imu_m00;
-   private final DoubleYoVariable r_imu_m01;
-   private final DoubleYoVariable r_imu_m02;
+   private final YoDouble r_imu_m00;
+   private final YoDouble r_imu_m01;
+   private final YoDouble r_imu_m02;
 
-   private final DoubleYoVariable r_imu_m10;
-   private final DoubleYoVariable r_imu_m11;
-   private final DoubleYoVariable r_imu_m12;
+   private final YoDouble r_imu_m10;
+   private final YoDouble r_imu_m11;
+   private final YoDouble r_imu_m12;
 
-   private final DoubleYoVariable r_imu_m20;
-   private final DoubleYoVariable r_imu_m21;
-   private final DoubleYoVariable r_imu_m22;
+   private final YoDouble r_imu_m20;
+   private final YoDouble r_imu_m21;
+   private final YoDouble r_imu_m22;
 
-   private final DoubleYoVariable r_imu_accel_x;
-   private final DoubleYoVariable r_imu_accel_y;
-   private final DoubleYoVariable r_imu_accel_z;
+   private final YoDouble r_imu_accel_x;
+   private final YoDouble r_imu_accel_y;
+   private final YoDouble r_imu_accel_z;
 
-   private final DoubleYoVariable r_imu_gyro_x;
-   private final DoubleYoVariable r_imu_gyro_y;
-   private final DoubleYoVariable r_imu_gyro_z;
+   private final YoDouble r_imu_gyro_x;
+   private final YoDouble r_imu_gyro_y;
+   private final YoDouble r_imu_gyro_z;
 
-   private final DoubleYoVariable r_imu_compass_x;
-   private final DoubleYoVariable r_imu_compass_y;
-   private final DoubleYoVariable r_imu_compass_z;
+   private final YoDouble r_imu_compass_x;
+   private final YoDouble r_imu_compass_y;
+   private final YoDouble r_imu_compass_z;
 
-   public final DoubleYoVariable r_time = new DoubleYoVariable("r_time", registry);
+   public final YoDouble r_time = new YoDouble("r_time", registry);
 
    public RawSensors(YoVariableRegistry yoVariableRegistry)
    {
-      r_imu_m00 = new DoubleYoVariable("r_imu_m00", registry);
-      r_imu_m01 = new DoubleYoVariable("r_imu_m01", registry);
-      r_imu_m02 = new DoubleYoVariable("r_imu_m02", registry);
+      r_imu_m00 = new YoDouble("r_imu_m00", registry);
+      r_imu_m01 = new YoDouble("r_imu_m01", registry);
+      r_imu_m02 = new YoDouble("r_imu_m02", registry);
 
-      r_imu_m10 = new DoubleYoVariable("r_imu_m10", registry);
-      r_imu_m11 = new DoubleYoVariable("r_imu_m11", registry);
-      r_imu_m12 = new DoubleYoVariable("r_imu_m12", registry);
+      r_imu_m10 = new YoDouble("r_imu_m10", registry);
+      r_imu_m11 = new YoDouble("r_imu_m11", registry);
+      r_imu_m12 = new YoDouble("r_imu_m12", registry);
 
-      r_imu_m20 = new DoubleYoVariable("r_imu_m20", registry);
-      r_imu_m21 = new DoubleYoVariable("r_imu_m21", registry);
-      r_imu_m22 = new DoubleYoVariable("r_imu_m22", registry);
+      r_imu_m20 = new YoDouble("r_imu_m20", registry);
+      r_imu_m21 = new YoDouble("r_imu_m21", registry);
+      r_imu_m22 = new YoDouble("r_imu_m22", registry);
 
-      r_imu_accel_x = new DoubleYoVariable("r_imu_accel_x", registry);
-      r_imu_accel_y = new DoubleYoVariable("r_imu_accel_y", registry);
-      r_imu_accel_z = new DoubleYoVariable("r_imu_accel_z", registry);
+      r_imu_accel_x = new YoDouble("r_imu_accel_x", registry);
+      r_imu_accel_y = new YoDouble("r_imu_accel_y", registry);
+      r_imu_accel_z = new YoDouble("r_imu_accel_z", registry);
 
-      r_imu_gyro_x = new DoubleYoVariable("r_imu_gyro_x", registry);
-      r_imu_gyro_y = new DoubleYoVariable("r_imu_gyro_y", registry);
-      r_imu_gyro_z = new DoubleYoVariable("r_imu_gyro_z", registry);
+      r_imu_gyro_x = new YoDouble("r_imu_gyro_x", registry);
+      r_imu_gyro_y = new YoDouble("r_imu_gyro_y", registry);
+      r_imu_gyro_z = new YoDouble("r_imu_gyro_z", registry);
 
-      r_imu_compass_x = new DoubleYoVariable("r_imu_compass_x", registry);
-      r_imu_compass_y = new DoubleYoVariable("r_imu_compass_y", registry);
-      r_imu_compass_z = new DoubleYoVariable("r_imu_compass_z", registry);
+      r_imu_compass_x = new YoDouble("r_imu_compass_x", registry);
+      r_imu_compass_y = new YoDouble("r_imu_compass_y", registry);
+      r_imu_compass_z = new YoDouble("r_imu_compass_z", registry);
 
       yoVariableRegistry.addChild(registry);
    }

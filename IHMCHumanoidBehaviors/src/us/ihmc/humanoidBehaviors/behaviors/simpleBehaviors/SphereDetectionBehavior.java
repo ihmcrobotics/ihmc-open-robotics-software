@@ -23,8 +23,8 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
@@ -35,13 +35,13 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 public class SphereDetectionBehavior extends AbstractBehavior
 {
 
-   private BooleanYoVariable ballFound = new BooleanYoVariable("ballFound", registry);
-   private DoubleYoVariable ballRadius = new DoubleYoVariable("ballRadius", registry);
-   private DoubleYoVariable ballX = new DoubleYoVariable("ballX", registry);
-   private DoubleYoVariable ballY = new DoubleYoVariable("ballY", registry);
-   private DoubleYoVariable ballZ = new DoubleYoVariable("ballZ", registry);
-   private DoubleYoVariable totalBallsFound = new DoubleYoVariable("totalBallsFound", registry);
-   private DoubleYoVariable smallestBallFound = new DoubleYoVariable("smallestBallFound", registry);
+   private YoBoolean ballFound = new YoBoolean("ballFound", registry);
+   private YoDouble ballRadius = new YoDouble("ballRadius", registry);
+   private YoDouble ballX = new YoDouble("ballX", registry);
+   private YoDouble ballY = new YoDouble("ballY", registry);
+   private YoDouble ballZ = new YoDouble("ballZ", registry);
+   private YoDouble totalBallsFound = new YoDouble("totalBallsFound", registry);
+   private YoDouble smallestBallFound = new YoDouble("smallestBallFound", registry);
 
    ExecutorService executorService = Executors.newFixedThreadPool(2);
    //   final int pointDropFactor = 4;

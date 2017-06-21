@@ -5,10 +5,10 @@ import java.util.ArrayList;
 
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
@@ -69,7 +69,7 @@ public class SaitekX52Joystick
    
    public void mapDoubleVariableToComponent(YoVariableHolder holder, SaitekX52Mapping mapping, String variableName, double minValue, double maxValue, double deadZone, boolean invert)
    {
-      DoubleYoVariable yoVariable = (DoubleYoVariable) holder.getVariable(variableName);
+      YoDouble yoVariable = (YoDouble) holder.getVariable(variableName);
       if (yoVariable != null)
       {
          mapDoubleVariableToComponent(mapping, yoVariable, minValue, maxValue, deadZone, invert);
@@ -80,7 +80,7 @@ public class SaitekX52Joystick
       }
    }
 
-   public void mapDoubleVariableToComponent(SaitekX52Mapping mapping, DoubleYoVariable yoVariable, double minValue, double maxValue, double deadZone, boolean invert)
+   public void mapDoubleVariableToComponent(SaitekX52Mapping mapping, YoDouble yoVariable, double minValue, double maxValue, double deadZone, boolean invert)
    {
       Component component = joystick.findComponent(mapping.getIdentifier());
       DoubleYoVariableJoystickEventListener doubleYoVariableJoystickEventListener = new DoubleYoVariableJoystickEventListener(yoVariable, component, minValue, maxValue, deadZone, invert);
@@ -90,7 +90,7 @@ public class SaitekX52Joystick
    
    public void mapBooleanVariableToComponent(YoVariableHolder holder, SaitekX52Mapping mapping, String variableName, boolean toggle, boolean invert)
    {
-      BooleanYoVariable yoVariable = (BooleanYoVariable) holder.getVariable(variableName);
+      YoBoolean yoVariable = (YoBoolean) holder.getVariable(variableName);
       if (yoVariable != null)
       {
          mapBooleanVariableToComponent(mapping, yoVariable, toggle, invert);
@@ -101,7 +101,7 @@ public class SaitekX52Joystick
       }
    }
 
-   public void mapBooleanVariableToComponent(SaitekX52Mapping mapping, BooleanYoVariable yoVariable, boolean toggle, boolean invert)
+   public void mapBooleanVariableToComponent(SaitekX52Mapping mapping, YoBoolean yoVariable, boolean toggle, boolean invert)
    {
       Component component = joystick.findComponent(mapping.getIdentifier());
       BooleanYoVariableJoystickEventListener booleanYoVariableJoystickEventListener = new BooleanYoVariableJoystickEventListener(yoVariable, component, toggle, invert);
@@ -148,7 +148,7 @@ public class SaitekX52Joystick
       mapDoubleVariableToComponent(holder, SaitekX52Mapping.STICK_ROLL, name, min, max, 0.0, false);
    }
 
-   public void setXAxis(String name, DoubleYoVariable variable, double min, double max)
+   public void setXAxis(String name, YoDouble variable, double min, double max)
    {
       mapDoubleVariableToComponent(SaitekX52Mapping.STICK_ROLL, variable, min, max, 0.0, false);
    }
@@ -158,7 +158,7 @@ public class SaitekX52Joystick
       mapDoubleVariableToComponent(holder, SaitekX52Mapping.STICK_PITCH, name, min, max, 0.0, false);
    }
 
-   public void setYAxis(String name, DoubleYoVariable variable, double min, double max)
+   public void setYAxis(String name, YoDouble variable, double min, double max)
    {
       mapDoubleVariableToComponent(SaitekX52Mapping.STICK_PITCH, variable, min, max, 0.0, false);
    }
@@ -168,7 +168,7 @@ public class SaitekX52Joystick
       mapDoubleVariableToComponent(holder, SaitekX52Mapping.THROTTLE, name, min, max, 0.0, false);
    }
 
-   public void setZAxis(String name, DoubleYoVariable variable, double min, double max)
+   public void setZAxis(String name, YoDouble variable, double min, double max)
    {
       mapDoubleVariableToComponent(SaitekX52Mapping.THROTTLE, variable, min, max, 0.0, false);
    }
@@ -178,7 +178,7 @@ public class SaitekX52Joystick
       mapDoubleVariableToComponent(holder, SaitekX52Mapping.STICK_YAW, name, min, max, 0.0, false);
    }
 
-   public void setRAxis(String name, DoubleYoVariable variable, double min, double max)
+   public void setRAxis(String name, YoDouble variable, double min, double max)
    {
       mapDoubleVariableToComponent(SaitekX52Mapping.STICK_YAW, variable, min, max, 0.0, false);
    }

@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
@@ -11,7 +11,7 @@ import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.Re
 public class DispatchedSimulationDescription implements RemoteSimulationDescription, SimulationDoneListener
 {
    private static final long serialVersionUID = 5987329050837257865L;
-   private DoubleYoVariable time;
+   private YoDouble time;
    private Simulation simulation;
 
    private String[] inputStateVariableNames, outputStateVariableNames;
@@ -47,7 +47,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       simulation = constructor.constructSimulation(structuralParameterNames, structuralParameterValues);
       simulation.addSimulateDoneListener(this);
 
-      time = (DoubleYoVariable) simulation.getVariable("t");
+      time = (YoDouble) simulation.getVariable("t");
 
       if (inputStateVariableNames != null)
       {

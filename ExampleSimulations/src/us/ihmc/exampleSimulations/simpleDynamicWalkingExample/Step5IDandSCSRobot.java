@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -90,7 +90,7 @@ public class Step5IDandSCSRobot extends Robot
    Vector3D comOffsetBody = new Vector3D((3.0 * cubeX) / 4.0, 0.0, cubeZ / 2.0);
    Vector3D comOffsetFoot = new Vector3D(footOffsetX, 0.0, -footZ / 2.0); //TODO is it correct to include the footOffsetX (since the foot isn't centered)?
 
-   public DoubleYoVariable qd_x;
+   public YoDouble qd_x;
    
    /**
     * Joints
@@ -203,7 +203,7 @@ public class Step5IDandSCSRobot extends Robot
     */
    public void initializeForBallisticWalking()
    {
-      qd_x = (DoubleYoVariable)getVariable("qd_x");
+      qd_x = (YoDouble)getVariable("qd_x");
       qd_x.set(7.458267603119068);   //initial velocity 
    }
    

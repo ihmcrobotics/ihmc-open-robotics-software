@@ -2,14 +2,13 @@ package us.ihmc.systemIdentification;
 
 import java.util.EnumMap;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
-
 
 public abstract class JointFrictionModelsHolder
 {
@@ -17,45 +16,45 @@ public abstract class JointFrictionModelsHolder
    private static final double ACCELERATION_THRESHOLD = 0.1;
    private static final double ALPHA_EQUIVALENT_VELOCITY = 0.5;
    
-   private final DoubleYoVariable stictionTransitionVelocity;
+   private final YoDouble stictionTransitionVelocity;
    private final AlphaFilteredYoVariable filteredVelocity;
    private final AlphaFilteredYoVariable velocityForFrictionCalculation;
-   private final DoubleYoVariable alphaForFilteredVelocity;
-   private final DoubleYoVariable forceThreshold;
-   private final DoubleYoVariable frictionCompensationEffectiveness;
-   private final DoubleYoVariable maxJointVelocityToCompensate;
-   private final DoubleYoVariable smallVelocityAbs;
-   private final DoubleYoVariable accelerationThreshold;
+   private final YoDouble alphaForFilteredVelocity;
+   private final YoDouble forceThreshold;
+   private final YoDouble frictionCompensationEffectiveness;
+   private final YoDouble maxJointVelocityToCompensate;
+   private final YoDouble smallVelocityAbs;
+   private final YoDouble accelerationThreshold;
 
-   protected final DoubleYoVariable frictionForce;
-   protected final EnumYoVariable<FrictionState> frictionCompensationState;
-   protected final EnumYoVariable<FrictionModel> activeFrictionModel;
+   protected final YoDouble frictionForce;
+   protected final YoEnum<FrictionState> frictionCompensationState;
+   protected final YoEnum<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
    public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity,
          double maxJointVelocityToCompensate)
    {
-      alphaForFilteredVelocity = new DoubleYoVariable(name + "_alphaForFilteredVelocity", registry);
+      alphaForFilteredVelocity = new YoDouble(name + "_alphaForFilteredVelocity", registry);
       alphaForFilteredVelocity.set(alpha);
       frictionModels = new EnumMap<FrictionModel, JointFrictionModel>(FrictionModel.class);
-      frictionCompensationState = new EnumYoVariable<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
-      activeFrictionModel = new EnumYoVariable<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
-      frictionForce = new DoubleYoVariable(name + "_frictionForce", registry);
-      this.stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
+      frictionCompensationState = new YoEnum<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
+      activeFrictionModel = new YoEnum<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
+      frictionForce = new YoDouble(name + "_frictionForce", registry);
+      this.stictionTransitionVelocity = new YoDouble(name + "_stictionTransitionVelocity", registry);
       this.stictionTransitionVelocity.set(Math.abs(stictionTransitionVelocity));
-      this.forceThreshold = new DoubleYoVariable(name + "_forceThreshold", registry);
+      this.forceThreshold = new YoDouble(name + "_forceThreshold", registry);
       this.forceThreshold.set(Math.abs(forceThreshold));
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
       filteredVelocity.update(0.0);
       velocityForFrictionCalculation = new AlphaFilteredYoVariable(name + "_velocityForFrictionCalculation", registry, ALPHA_EQUIVALENT_VELOCITY);
       velocityForFrictionCalculation.update(0.0);
-      frictionCompensationEffectiveness = new DoubleYoVariable(name + "_frictionCompensationEffectiveness", registry);
+      frictionCompensationEffectiveness = new YoDouble(name + "_frictionCompensationEffectiveness", registry);
       frictionCompensationEffectiveness.set(0.0);
-      this.maxJointVelocityToCompensate = new DoubleYoVariable(name + "_maxJointVelocityToCompensate", registry);
+      this.maxJointVelocityToCompensate = new YoDouble(name + "_maxJointVelocityToCompensate", registry);
       this.maxJointVelocityToCompensate.set(Math.abs(maxJointVelocityToCompensate));
-      smallVelocityAbs = new DoubleYoVariable(name + "_stictionEquivalentVelocity", registry);
+      smallVelocityAbs = new YoDouble(name + "_stictionEquivalentVelocity", registry);
       smallVelocityAbs.set(Math.abs(SMALL_VELOCITY_ABS));
-      accelerationThreshold = new DoubleYoVariable(name + "_accelerationThreshold", registry);
+      accelerationThreshold = new YoDouble(name + "_accelerationThreshold", registry);
       this.accelerationThreshold.set(Math.abs(ACCELERATION_THRESHOLD)); // maybe take as parameter in the constructor and set in the friction parameters
    }
 

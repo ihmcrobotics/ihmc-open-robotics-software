@@ -1,32 +1,32 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class YoLowLevelJointData implements LowLevelJointDataReadOnly
 {
-   private final EnumYoVariable<LowLevelJointControlMode> controlMode;
-   private final DoubleYoVariable desiredTorque;
-   private final DoubleYoVariable desiredPosition;
-   private final DoubleYoVariable desiredVelocity;
-   private final DoubleYoVariable desiredAcceleration;
-   private final DoubleYoVariable desiredCurrent;
-   private final BooleanYoVariable resetIntegrators;
+   private final YoEnum<LowLevelJointControlMode> controlMode;
+   private final YoDouble desiredTorque;
+   private final YoDouble desiredPosition;
+   private final YoDouble desiredVelocity;
+   private final YoDouble desiredAcceleration;
+   private final YoDouble desiredCurrent;
+   private final YoBoolean resetIntegrators;
 
    public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
       namePrefix += "LowLevel";
 
-      controlMode = new EnumYoVariable<>(namePrefix + "ControlMode" + suffixString, registry, LowLevelJointControlMode.class, true);
-      desiredTorque = new DoubleYoVariable(namePrefix + "DesiredTorque" + suffixString, registry);
-      desiredPosition = new DoubleYoVariable(namePrefix + "DesiredPosition" + suffixString, registry);
-      desiredVelocity = new DoubleYoVariable(namePrefix + "DesiredVelocity" + suffixString, registry);
-      desiredAcceleration = new DoubleYoVariable(namePrefix + "DesiredAcceleration" + suffixString, registry);
-      desiredCurrent = new DoubleYoVariable(namePrefix + "DesiredCurrent" + suffixString, registry);
-      resetIntegrators = new BooleanYoVariable(namePrefix + "ResetIntegrators" + suffixString, registry);
+      controlMode = new YoEnum<>(namePrefix + "ControlMode" + suffixString, registry, LowLevelJointControlMode.class, true);
+      desiredTorque = new YoDouble(namePrefix + "DesiredTorque" + suffixString, registry);
+      desiredPosition = new YoDouble(namePrefix + "DesiredPosition" + suffixString, registry);
+      desiredVelocity = new YoDouble(namePrefix + "DesiredVelocity" + suffixString, registry);
+      desiredAcceleration = new YoDouble(namePrefix + "DesiredAcceleration" + suffixString, registry);
+      desiredCurrent = new YoDouble(namePrefix + "DesiredCurrent" + suffixString, registry);
+      resetIntegrators = new YoBoolean(namePrefix + "ResetIntegrators" + suffixString, registry);
 
       clear();
    }

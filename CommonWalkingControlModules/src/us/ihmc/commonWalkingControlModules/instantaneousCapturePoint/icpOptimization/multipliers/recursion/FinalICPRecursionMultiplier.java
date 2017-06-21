@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
-public class FinalICPRecursionMultiplier extends DoubleYoVariable
+public class FinalICPRecursionMultiplier extends YoDouble
 {
    private static final String name = "FinalICPRecursionMultiplier";
 
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   public FinalICPRecursionMultiplier(String namePrefix, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
+   public FinalICPRecursionMultiplier(String namePrefix, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
          YoVariableRegistry registry)
    {
       super(namePrefix + name, registry);
@@ -27,7 +27,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations,
          boolean useTwoCMPs, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -48,7 +48,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations,
          double omega0)
    {
       double recursionTime = 0.0;
@@ -81,7 +81,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations, double omega0)
    {
       double recursionTime = 0.0;
 
