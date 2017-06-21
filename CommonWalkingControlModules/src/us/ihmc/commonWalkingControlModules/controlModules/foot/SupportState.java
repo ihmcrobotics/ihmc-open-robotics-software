@@ -326,7 +326,7 @@ public class SupportState extends AbstractFootControlState
       frameViz.setToReferenceFrame(controlFrame);
    }
 
-   
+
    private void computeFootPolygon()
    {
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
