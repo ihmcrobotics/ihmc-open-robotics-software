@@ -40,8 +40,6 @@ public class LegConfigurationControlModule
 
    private final PrivilegedAccelerationCommand privilegedAccelerationCommand = new PrivilegedAccelerationCommand();
 
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
-
    private final YoEnum<LegConfigurationType> requestedState;
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
@@ -109,8 +107,6 @@ public class LegConfigurationControlModule
    public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
                                         YoVariableRegistry parentRegistry)
    {
-      this.straightLegWalkingParameters = straightLegWalkingParameters;
-
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Leg";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
