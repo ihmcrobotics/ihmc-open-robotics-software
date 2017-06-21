@@ -16,8 +16,8 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -110,7 +110,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
+      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
 
       initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
 
@@ -144,7 +144,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
            throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);
 //      walk.set(true);

@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.filters;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  *  Filter the given yoVariable using a moving average filter.
@@ -14,10 +14,10 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
  *  This class is NOT REWINDABLE!
  *
  */
-public class SimpleMovingAverageFilteredYoVariable extends DoubleYoVariable
+public class SimpleMovingAverageFilteredYoVariable extends YoDouble
 {
-   private final IntegerYoVariable windowSize;
-   private final DoubleYoVariable yoVariableToFilter;
+   private final YoInteger windowSize;
+   private final YoDouble yoVariableToFilter;
 
    private final DenseMatrix64F previousUpdateValues = new DenseMatrix64F(0, 0);
    private int bufferPosition = 0;
@@ -29,12 +29,12 @@ public class SimpleMovingAverageFilteredYoVariable extends DoubleYoVariable
       this(name, windowSize, null, registry);
    }
 
-   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, DoubleYoVariable yoVariableToFilter, YoVariableRegistry registry)
+   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoDouble yoVariableToFilter, YoVariableRegistry registry)
    {
       super(name, registry);
 
       this.yoVariableToFilter = yoVariableToFilter;
-      this.windowSize = new IntegerYoVariable(name + "WindowSize", registry);
+      this.windowSize = new YoInteger(name + "WindowSize", registry);
       this.windowSize.set(windowSize);
 
       previousUpdateValues.reshape(windowSize, 1);

@@ -1,8 +1,8 @@
 package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.kinematics.fourbar.FourbarCalculator;
 import us.ihmc.robotics.kinematics.fourbar.FourbarProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,10 +11,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public class AcsellFourbarCalculator extends FourbarCalculator {
 
 	private final YoVariableRegistry registry;
-	private final DoubleYoVariable beta0;
-	private final DoubleYoVariable q_out;
-	private final DoubleYoVariable q_in;
-	private final DoubleYoVariable N;
+	private final YoDouble beta0;
+	private final YoDouble q_out;
+	private final YoDouble q_in;
+	private final YoDouble N;
 	
 	
 	public AcsellFourbarCalculator(FourbarProperties fourbarProperties, String name, RobotSide side, YoVariableRegistry parentRegistry)
@@ -22,10 +22,10 @@ public class AcsellFourbarCalculator extends FourbarCalculator {
 		super(fourbarProperties);
 				
 		this.registry = new YoVariableRegistry(name + "Fourbar");
-		this.beta0 = new DoubleYoVariable(name + "Fourbar_OutputOffsetAngle", registry);
-		this.q_out = new DoubleYoVariable(name + "Fourbar_OutputAngle", registry);
-		this.q_in = new DoubleYoVariable(name + "Fourbar_InputAngle", registry);
-		this.N = new DoubleYoVariable(name + "Fourbar_TransmissionRatio", registry);
+		this.beta0 = new YoDouble(name + "Fourbar_OutputOffsetAngle", registry);
+		this.q_out = new YoDouble(name + "Fourbar_OutputAngle", registry);
+		this.q_in = new YoDouble(name + "Fourbar_InputAngle", registry);
+		this.N = new YoDouble(name + "Fourbar_TransmissionRatio", registry);
 		
 		if(side==RobotSide.LEFT)
 			beta0.set(fourbarProperties.getLeftLinkageBeta0());

@@ -49,6 +49,7 @@ dependencies {
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
 }
 jar {
     manifest {

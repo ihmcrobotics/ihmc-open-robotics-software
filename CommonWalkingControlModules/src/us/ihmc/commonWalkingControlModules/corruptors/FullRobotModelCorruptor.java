@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.corruptors;
 import java.util.ArrayList;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -129,7 +129,7 @@ public class FullRobotModelCorruptor
 //
 //      final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
 //
-//      final DoubleYoVariable offset = new DoubleYoVariable(name + "Offset", registry);
+//      final YoDouble offset = new YoDouble(name + "Offset", registry);
 //
 //      VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
 //      {
@@ -148,7 +148,7 @@ public class FullRobotModelCorruptor
    private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBody rigidBody)
    {
       name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
-      final DoubleYoVariable massVariable = new DoubleYoVariable(name + "Mass", registry);
+      final YoDouble massVariable = new YoDouble(name + "Mass", registry);
       massVariable.set(rigidBody.getInertia().getMass());
 
       VariableChangedListener massVariableChangedListener = new VariableChangedListener()

@@ -22,11 +22,11 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -77,9 +77,9 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    private final int meshBufferSize;
 
    /** When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns on this flag to let the WRITER know that it has to synchronize.*/
-   private final BooleanYoVariable waitForReader;
+   private final YoBoolean waitForReader;
    /** When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns on this flag to let the WRITER know that it has processed the current mesh. */
-   private final BooleanYoVariable hasReaderProcessedMesh;
+   private final YoBoolean hasReaderProcessedMesh;
 
    /**
     * Buffer of vertices used to store one or more polygons to render.
@@ -93,22 +93,22 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * Corresponds the current mesh index in the {@link #meshBuffer} to be updated.
     * When there is no mesh to render, {@link #currentMeshIndex} equals to {@code -1}.
     */
-   private final IntegerYoVariable currentMeshIndex;
+   private final YoInteger currentMeshIndex;
    /**
     * Indicates the id of the region that the new mesh belongs to.
     * It is used to find the corresponding {@link AppearanceDefinition}.
     * When there is no mesh to render, {@link #currentRegionId} equals to {@code -1}.
     */
-   private final IntegerYoVariable currentRegionId;
+   private final YoInteger currentRegionId;
    /**
     * Indicates that the current mesh to render is the last one of the current {@link PlanarRegionsList}.
     * It is used to clear the unused part of the {@link #meshBuffer}.
     */
-   private final BooleanYoVariable isPlanarRegionsListComplete;
+   private final YoBoolean isPlanarRegionsListComplete;
    /**
     * Indicates that this {@link YoGraphic} is clearing the graphics and resetting its current state.
     */
-   private final BooleanYoVariable clear;
+   private final YoBoolean clear;
    /**
     * Indicates the pose with respect to world of the region that the new mesh belongs to.
     * It is used to transform the vertices so they're expressed in world.
@@ -120,7 +120,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * When constructed without using custom colors, {@link #planarRegionsColorBuffer} is {@code null}
     * and random colors are used.
     */   
-   private final IntegerYoVariable[] planarRegionsColorBuffer;
+   private final YoInteger[] planarRegionsColorBuffer;
 
    private final Graphics3DObject graphics3dObject;
    private final List<Graphics3DAddMeshDataInstruction> meshBuffer;
@@ -155,8 +155,8 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       this.vertexBufferSize = vertexBufferSize;
       this.meshBufferSize = meshBufferSize;
 
-      waitForReader = new BooleanYoVariable(name + "WaitForReader", registry);
-      hasReaderProcessedMesh = new BooleanYoVariable(name + "HasReaderProcessedMesh", registry);
+      waitForReader = new YoBoolean(name + "WaitForReader", registry);
+      hasReaderProcessedMesh = new YoBoolean(name + "HasReaderProcessedMesh", registry);
 
       vertexBuffer = new ArrayList<>(vertexBufferSize);
 
@@ -167,10 +167,10 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
          vertexBuffer.add(vertex);
       }
 
-      currentMeshIndex = new IntegerYoVariable(name + "CurrentMeshIndex", registry);
-      currentRegionId = new IntegerYoVariable(name + "CurrentRegionId", registry);
-      isPlanarRegionsListComplete = new BooleanYoVariable(name + "IsComplete", registry);
-      clear = new BooleanYoVariable(name + "Clear", registry);
+      currentMeshIndex = new YoInteger(name + "CurrentMeshIndex", registry);
+      currentRegionId = new YoInteger(name + "CurrentRegionId", registry);
+      isPlanarRegionsListComplete = new YoBoolean(name + "IsComplete", registry);
+      clear = new YoBoolean(name + "Clear", registry);
       currentRegionPose = new YoFramePoseUsingQuaternions(name + "CurrentRegionPose", worldFrame, registry);
 
       clearYoVariables();
@@ -184,10 +184,10 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       
       if(useCustomColors)
       {
-         planarRegionsColorBuffer = new IntegerYoVariable[numberOfPlanarRegions];
+         planarRegionsColorBuffer = new YoInteger[numberOfPlanarRegions];
          for(int i = 0; i < numberOfPlanarRegions; i++)
          {
-            planarRegionsColorBuffer[i] = new IntegerYoVariable("customColor" + i, registry);
+            planarRegionsColorBuffer[i] = new YoInteger("customColor" + i, registry);
          }
       }
       else
@@ -226,29 +226,29 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       int variableIndex = 0;
 
-      waitForReader = (BooleanYoVariable) yoVariables[variableIndex++];
-      hasReaderProcessedMesh = (BooleanYoVariable) yoVariables[variableIndex++];
+      waitForReader = (YoBoolean) yoVariables[variableIndex++];
+      hasReaderProcessedMesh = (YoBoolean) yoVariables[variableIndex++];
 
       for (int vertexIndex = 0; vertexIndex < vertexBufferSize; vertexIndex++)
       {
-         DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
+         YoDouble x = (YoDouble) yoVariables[variableIndex++];
+         YoDouble y = (YoDouble) yoVariables[variableIndex++];
          YoFramePoint2d vertex = new YoFramePoint2d(x, y, worldFrame);
          vertexBuffer.add(vertex);
       }
 
-      currentMeshIndex = (IntegerYoVariable) yoVariables[variableIndex++];
-      currentRegionId = (IntegerYoVariable) yoVariables[variableIndex++];
-      isPlanarRegionsListComplete = (BooleanYoVariable) yoVariables[variableIndex++];
-      clear = (BooleanYoVariable) yoVariables[variableIndex++];
+      currentMeshIndex = (YoInteger) yoVariables[variableIndex++];
+      currentRegionId = (YoInteger) yoVariables[variableIndex++];
+      isPlanarRegionsListComplete = (YoBoolean) yoVariables[variableIndex++];
+      clear = (YoBoolean) yoVariables[variableIndex++];
 
-      DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable z = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qx = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qy = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qz = (DoubleYoVariable) yoVariables[variableIndex++];
-      DoubleYoVariable qs = (DoubleYoVariable) yoVariables[variableIndex++];
+      YoDouble x = (YoDouble) yoVariables[variableIndex++];
+      YoDouble y = (YoDouble) yoVariables[variableIndex++];
+      YoDouble z = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qx = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qy = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qz = (YoDouble) yoVariables[variableIndex++];
+      YoDouble qs = (YoDouble) yoVariables[variableIndex++];
       YoFramePoint position = new YoFramePoint(x, y, z, worldFrame);
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, worldFrame);
       currentRegionPose = new YoFramePoseUsingQuaternions(position, orientation);
@@ -263,10 +263,10 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       if(yoVariables.length > variableIndex)
       {
          int numberOfPlanarRegions = yoVariables.length - variableIndex;
-         planarRegionsColorBuffer = new IntegerYoVariable[numberOfPlanarRegions];
+         planarRegionsColorBuffer = new YoInteger[numberOfPlanarRegions];
          
          for(int i = 0; i < numberOfPlanarRegions; i++)
-            planarRegionsColorBuffer[i] = (IntegerYoVariable) yoVariables[variableIndex++];    
+            planarRegionsColorBuffer[i] = (YoInteger) yoVariables[variableIndex++];
       }
       else
       {

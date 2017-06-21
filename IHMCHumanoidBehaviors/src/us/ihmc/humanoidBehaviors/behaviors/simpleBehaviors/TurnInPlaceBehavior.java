@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,8 +30,8 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private double swingTime;
    private double transferTime;
 
-   private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
-   private final BooleanYoVariable haveFootstepsBeenGenerated = new BooleanYoVariable("haveFootstepsBeenGenerated", registry);
+   private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
+   private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
    

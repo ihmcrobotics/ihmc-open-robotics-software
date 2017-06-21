@@ -4,7 +4,7 @@ import java.nio.LongBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.util.RealtimeTools;
 
 public class FullStateBuffer extends RegistryBuffer

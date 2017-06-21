@@ -1,18 +1,16 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-
-
 
 public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector
 {
    private final BacklashCompensatingVelocityYoVariable xDot, yDot, zDot;
 
-   public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleYoVariable alpha, double dt, DoubleYoVariable slopTime,
+   public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
            YoVariableRegistry registry, YoFrameVector yoFrameVectorToDifferentiate)
    {
       BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoX(), dt, slopTime,
@@ -27,7 +25,7 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector
       return ret;
    }
 
-   public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleYoVariable alpha, double dt, DoubleYoVariable slopTime,
+   public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
            YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate)
    {
       BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoX(), dt, slopTime,

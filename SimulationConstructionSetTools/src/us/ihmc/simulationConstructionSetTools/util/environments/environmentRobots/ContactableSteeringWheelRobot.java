@@ -12,9 +12,9 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -44,7 +44,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    private double totalNumberOfPossibleTurns;
 
-   private final DoubleYoVariable steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion;
+   private final YoDouble steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion;
 
    private double mass;
    private Matrix3D inertiaMatrix;
@@ -55,7 +55,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    protected Link steeringWheelLink;
    private PinJoint steeringWheelPinJoint;
    protected Graphics3DObject steeringWheelLinkGraphics = new Graphics3DObject();
-   private final DoubleYoVariable steeringDamping;
+   private final YoDouble steeringDamping;
 
    protected PoseReferenceFrame steeringWheelFrame;
 
@@ -83,9 +83,9 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       setProperties(steeringWheelRadius, steerigColunmLength, steeringWheelThickness, spokesThickness, totalNumberOfPossibleTurns, mass);
       setPoseInWorld(steeringWheelPoseInWorld);
       setMass(mass);
-      steeringDamping = new DoubleYoVariable(getName() + "SteeringDamping", yoVariableRegistry);
+      steeringDamping = new YoDouble(getName() + "SteeringDamping", yoVariableRegistry);
       steeringDamping.set(DEFAULT_DAMPING);
-      steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion = new DoubleYoVariable("steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion", yoVariableRegistry);
+      steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion = new YoDouble("steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion", yoVariableRegistry);
       steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set(0.0);
    }
 

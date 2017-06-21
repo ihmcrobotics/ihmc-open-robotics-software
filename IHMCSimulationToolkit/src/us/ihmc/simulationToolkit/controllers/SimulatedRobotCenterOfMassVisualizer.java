@@ -2,8 +2,8 @@ package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -29,7 +29,7 @@ public class SimulatedRobotCenterOfMassVisualizer implements RobotController
    public SimulatedRobotCenterOfMassVisualizer(Robot robot, double dt)
    {
       this.robot = robot;
-      DoubleYoVariable alphaSimCoMAcceleration = new DoubleYoVariable("alphaSimCoMAcceleration", registry);
+      YoDouble alphaSimCoMAcceleration = new YoDouble("alphaSimCoMAcceleration", registry);
       exactCenterOfMassAcceleration = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("exactCenterOfMassAcceleration", "", alphaSimCoMAcceleration, dt, registry, exactCenterOfMassVelocity);
       alphaSimCoMAcceleration.set(0.99);
    }

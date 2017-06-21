@@ -20,10 +20,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -152,7 +152,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    {
       private static final long serialVersionUID = -2047087705497963648L;
       private final SimulationConstructionSet simulationConstructionSet;
-      private final EnumYoVariable<DiagnosticsWhenHangingState> diagnosticsState;
+      private final YoEnum<DiagnosticsWhenHangingState> diagnosticsState;
 
       public CutBufferToDiagnosticsStateButton(SimulationConstructionSet simulationConstructionSet)
       {
@@ -160,7 +160,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
          this.simulationConstructionSet = simulationConstructionSet;
 
-         diagnosticsState = (EnumYoVariable<DiagnosticsWhenHangingState>) simulationConstructionSet.getVariable("DiagnosticsState");
+         diagnosticsState = (YoEnum<DiagnosticsWhenHangingState>) simulationConstructionSet.getVariable("DiagnosticsState");
          this.addActionListener(this);
       }
 

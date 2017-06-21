@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 
 public class PoseSequenceEditorGUI extends JFrame

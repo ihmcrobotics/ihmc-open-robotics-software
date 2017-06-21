@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-   public class FirstOrderFilteredYoVariable extends DoubleYoVariable
+public class FirstOrderFilteredYoVariable extends YoDouble
    {
       
       public enum FirstOrderFilterType
@@ -16,14 +16,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
       private double filterInputOld;
       private double filterUpdateTimeOld;
       
-      private final DoubleYoVariable cutoffFrequency_Hz;
+      private final YoDouble cutoffFrequency_Hz;
 
-      private final DoubleYoVariable yoTime;
+      private final YoDouble yoTime;
       private double dt;
       
       private FirstOrderFilterType highOrLowPass;
             
-      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, DoubleYoVariable yoTime, FirstOrderFilterType highOrLowPass, YoVariableRegistry registry)
+      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, YoDouble yoTime, FirstOrderFilterType highOrLowPass, YoVariableRegistry registry)
       {
          super(name, description, registry);
          
@@ -40,7 +40,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
             throw new RuntimeException("Must Specify Filter Type as Low or High Pass.  Current Specification : " + highOrLowPass);
          }
 
-         this.cutoffFrequency_Hz = new DoubleYoVariable(cutoffFrequencyName, registry);
+         this.cutoffFrequency_Hz = new YoDouble(cutoffFrequencyName, registry);
          this.cutoffFrequency_Hz.set(cutoffFrequency_Hz);
 
          this.yoTime = yoTime;

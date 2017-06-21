@@ -2,18 +2,12 @@ package us.ihmc.avatar.circleWalkTest;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.lwjgl.Sys;
 
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -29,11 +23,9 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,15 +33,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.globalParameters.SystemOutGlobalParameterChangedListener;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.partNames.ArmJointName;
 
 public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 	
@@ -174,11 +162,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 		double simulationTime = 1 * footMessage.footstepDataList.size() + 2.0;
 		
 		assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-		ArrayList<BooleanYoVariable> footCheckPointFlags = controllerSpy.getFootCheckPointFlag();
+		ArrayList<YoBoolean> footCheckPointFlags = controllerSpy.getFootCheckPointFlag();
 	    for (int i = 0; i < footCheckPointFlags.size(); i++) {
 		    assertTrue(footCheckPointFlags.get(i).getBooleanValue());
 		}
-	    ArrayList<BooleanYoVariable> armCheckPointFlags = controllerSpy.getArmCheckPointFlag();
+	    ArrayList<YoBoolean> armCheckPointFlags = controllerSpy.getArmCheckPointFlag();
 	    for (int i = 0; i < armCheckPointFlags.size(); i++) {
 		    assertTrue(armCheckPointFlags.get(i).getBooleanValue());
 		}
@@ -258,12 +246,12 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 		private final HumanoidFloatingRootJointRobot humanoidRobotModel;
 		private final DRCSimulationTestHelper drcSimTestHelper;
 
-		private ArrayList<BooleanYoVariable> footCheckPointFlag;
+		private ArrayList<YoBoolean> footCheckPointFlag;
 		private ArrayList<BoundingBox3D> footCheckPoint;
 		private Point3D position;
 		private int footStepCheckPointIndex;
 
-		private ArrayList<BooleanYoVariable> armCheckPointFlag;
+		private ArrayList<YoBoolean> armCheckPointFlag;
 		private ArrayList<OneDoFJointTrajectoryMessage> leftArmMessages;
 		private ArrayList<OneDoFJointTrajectoryMessage> rightArmMessages;
 		private int armJointCheckPointIndex;
@@ -385,7 +373,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 				Point3D maxBound = new Point3D(locations.get(i));
 				maxBound.add(xRange/2.0, yRange/2.0, 10.0);
 				footCheckPoint.add(new BoundingBox3D(minBound, maxBound));
-				BooleanYoVariable newFlag = new BooleanYoVariable("FootstepCheckPointFlag" + Integer.toString(i), circleWalkRegistry);
+				YoBoolean newFlag = new YoBoolean("FootstepCheckPointFlag" + Integer.toString(i), circleWalkRegistry);
 				footCheckPointFlag.add(newFlag);
 			}
 		}
@@ -399,7 +387,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 			for(OneDoFJointTrajectoryMessage msg : leftArmList)
 			{
 				leftArmMessages.add(msg);
-				BooleanYoVariable newFlag = new BooleanYoVariable("ArmJointCheckPointFlag" + Integer.toString(counter++), circleWalkRegistry);
+				YoBoolean newFlag = new YoBoolean("ArmJointCheckPointFlag" + Integer.toString(counter++), circleWalkRegistry);
 				armCheckPointFlag.add(newFlag);
 			}
 			counter = 0;
@@ -410,16 +398,16 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 			}
 		}
 		
-		public DoubleYoVariable getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
+		public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
 		{
 			String variable = "q_d_" + joint.getName();
-			return (DoubleYoVariable)humanoidRobotModel.getVariable(variable);
+			return (YoDouble)humanoidRobotModel.getVariable(variable);
 		}
 		
-		public DoubleYoVariable getJointDesiredPosition(RobotSide side, ArmJointName jointName)
+		public YoDouble getJointDesiredPosition(RobotSide side, ArmJointName jointName)
 		{
 			String variable = "q_d_" + fullRobotModel.getArmJoint(side, jointName).getName();
-			return (DoubleYoVariable)humanoidRobotModel.getVariable(variable);
+			return (YoDouble)humanoidRobotModel.getVariable(variable);
 		}
 		
 		public boolean getFootCheckPointFlag(int index)
@@ -427,7 +415,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 			return footCheckPointFlag.get(index).getBooleanValue();
 		}
 		
-		public ArrayList<BooleanYoVariable> getFootCheckPointFlag()
+		public ArrayList<YoBoolean> getFootCheckPointFlag()
 		{
 			return footCheckPointFlag;
 		}
@@ -437,7 +425,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface{
 			return armCheckPointFlag.get(index).getBooleanValue();
 		}
 		
-		public ArrayList<BooleanYoVariable> getArmCheckPointFlag()
+		public ArrayList<YoBoolean> getArmCheckPointFlag()
 		{
 			return armCheckPointFlag;
 		}

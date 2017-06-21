@@ -4,8 +4,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.PinJointPhysics;
 import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
 
@@ -27,15 +27,15 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    private static final long serialVersionUID = -8016564065453170730L;
 
    private AxisAngle axisAngle = new AxisAngle();
-   protected DoubleYoVariable q, qd, qdd,  tau;
+   protected YoDouble q, qd, qdd,  tau;
 
-   public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
+   public YoDouble tauJointLimit, tauVelocityLimit, tauDamping;
    
-   public DoubleYoVariable qLowerLimit, qUpperLimit, kLimit, bLimit; //double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
+   public YoDouble qLowerLimit, qUpperLimit, kLimit, bLimit; //double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
 
-   private DoubleYoVariable b_damp, f_stiction;
-   public DoubleYoVariable qd_max, b_vel_limit;
-   public DoubleYoVariable tau_max;
+   private YoDouble b_damp, f_stiction;
+   public YoDouble qd_max, b_vel_limit;
+   public YoDouble tau_max;
 
    protected YoVariableRegistry registry;
 
@@ -180,7 +180,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the angle of this joint.
     */
    @Override
-   public DoubleYoVariable getQYoVariable()
+   public YoDouble getQYoVariable()
    {
       return q;
    }
@@ -202,7 +202,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the current angle of this joint.
     */
    @Override
-   public DoubleYoVariable getQDYoVariable()
+   public YoDouble getQDYoVariable()
    {
       return qd;
    }
@@ -224,7 +224,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the current acceleration
     */
    @Override
-   public DoubleYoVariable getQDDYoVariable()
+   public YoDouble getQDDYoVariable()
    {
       return qdd;
    }
@@ -246,7 +246,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the currently applied torque.
     */
    @Override
-   public DoubleYoVariable getTauYoVariable()
+   public YoDouble getTauYoVariable()
    {
       return tau;
    }
@@ -309,13 +309,13 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       if (tauJointLimit == null)
       {
-         tauJointLimit = new DoubleYoVariable("tau_joint_limit_" + this.name, "PinJoint limit stop torque", registry);
+         tauJointLimit = new YoDouble("tau_joint_limit_" + this.name, "PinJoint limit stop torque", registry);
          
-         qLowerLimit = new DoubleYoVariable("qLowerLimit" + this.name, "Pin Joint minimum limit", registry);
-         qUpperLimit = new DoubleYoVariable("qUpperLimit" + this.name, "Pin Joint maximum limit", registry);
+         qLowerLimit = new YoDouble("qLowerLimit" + this.name, "Pin Joint minimum limit", registry);
+         qUpperLimit = new YoDouble("qUpperLimit" + this.name, "Pin Joint maximum limit", registry);
          
-         kLimit = new DoubleYoVariable("kLimit_" + this.name, "Pin Joint limit spring constant", registry);
-         bLimit = new DoubleYoVariable("bLimit_" + this.name, "Pin Joint limit damping constant", registry);
+         kLimit = new YoDouble("kLimit_" + this.name, "Pin Joint limit spring constant", registry);
+         bLimit = new YoDouble("bLimit_" + this.name, "Pin Joint limit damping constant", registry);
       }
 
       qLowerLimit.set(q_min);
@@ -340,9 +340,9 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       if (tauVelocityLimit == null)
       {
-         tauVelocityLimit = new DoubleYoVariable("tau_vel_limit_" + this.name, "PinJoint velocity limit torque", registry);
-         this.b_vel_limit = new DoubleYoVariable("b_vel_limit_" + this.name, "PinJoint damping after maximum angular velocity is reached", registry);
-         this.qd_max = new DoubleYoVariable("qd_max_" + this.name, "PinJoint maximum angular velocity", registry);
+         tauVelocityLimit = new YoDouble("tau_vel_limit_" + this.name, "PinJoint velocity limit torque", registry);
+         this.b_vel_limit = new YoDouble("b_vel_limit_" + this.name, "PinJoint damping after maximum angular velocity is reached", registry);
+         this.qd_max = new YoDouble("qd_max_" + this.name, "PinJoint maximum angular velocity", registry);
 
 
       }
@@ -367,7 +367,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       if (tau_max == null)
       {
-         tau_max = new DoubleYoVariable("tau_max_" + this.name, "PinJoint maximum torque", registry);
+         tau_max = new YoDouble("tau_max_" + this.name, "PinJoint maximum torque", registry);
       }
 
       this.tau_max.set(Math.abs(maxTorque));
@@ -384,12 +384,12 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       if (tauDamping == null)
       {
-         tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "PinJoint damping torque", registry);
+         tauDamping = new YoDouble("tau_damp_" + this.name, "PinJoint damping torque", registry);
       }
 
       if (this.b_damp == null)
       {
-         this.b_damp = new DoubleYoVariable("b_damp_" + this.name, "PinJoint damping parameter", registry);
+         this.b_damp = new YoDouble("b_damp_" + this.name, "PinJoint damping parameter", registry);
       }
       this.b_damp.set(b_damp);
    }
@@ -398,11 +398,11 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       if (tauDamping == null)
       {
-         tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "PinJoint damping torque", registry);
+         tauDamping = new YoDouble("tau_damp_" + this.name, "PinJoint damping torque", registry);
       }
       if (this.f_stiction == null)
       {
-         this.f_stiction = new DoubleYoVariable("f_stiction_" + this.name, "PinJoint stiction force", registry);
+         this.f_stiction = new YoDouble("f_stiction_" + this.name, "PinJoint stiction force", registry);
       }
       this.f_stiction.set(f_stiction);
    }
@@ -439,10 +439,10 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     */
    protected void initializeYoVariables(String jname, YoVariableRegistry registry)
    {
-      q = new DoubleYoVariable("q_" + jname, "PinJoint angle", registry);
-      qd = new DoubleYoVariable("qd_" + jname, "PinJoint anglular velocity", registry);
-      qdd = new DoubleYoVariable("qdd_" + jname, "PinJoint angular acceleration", registry);
-      tau = new DoubleYoVariable("tau_" + jname, "PinJoint torque", registry);
+      q = new YoDouble("q_" + jname, "PinJoint angle", registry);
+      qd = new YoDouble("qd_" + jname, "PinJoint anglular velocity", registry);
+      qdd = new YoDouble("qdd_" + jname, "PinJoint angular acceleration", registry);
+      tau = new YoDouble("tau_" + jname, "PinJoint torque", registry);
    }
 
    public void setDampingParameterOnly(double b_damp) // Hack for Gazebo

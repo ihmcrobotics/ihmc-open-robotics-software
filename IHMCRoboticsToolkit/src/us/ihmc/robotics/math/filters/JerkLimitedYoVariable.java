@@ -1,50 +1,50 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JerkLimitedYoVariable extends DoubleYoVariable
+public class JerkLimitedYoVariable extends YoDouble
 {
    private final double dt;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final YoBoolean hasBeenInitialized;
 
-   private final DoubleYoVariable smoothedRate;
-   private final DoubleYoVariable smoothedAcceleration;
-   private final DoubleYoVariable smoothedJerk;
+   private final YoDouble smoothedRate;
+   private final YoDouble smoothedAcceleration;
+   private final YoDouble smoothedJerk;
 
-   private final DoubleYoVariable positionGain;
-   private final DoubleYoVariable velocityGain;
-   private final DoubleYoVariable accelerationGain;
+   private final YoDouble positionGain;
+   private final YoDouble velocityGain;
+   private final YoDouble accelerationGain;
 
-   private final DoubleYoVariable maximumJerk;
-   private final DoubleYoVariable maximumAcceleration;
+   private final YoDouble maximumJerk;
+   private final YoDouble maximumAcceleration;
 
-   private final DoubleYoVariable inputPosition;
-   private final DoubleYoVariable inputVelocity;
-   private final DoubleYoVariable inputAcceleration;
+   private final YoDouble inputPosition;
+   private final YoDouble inputVelocity;
+   private final YoDouble inputAcceleration;
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxAcceleration, DoubleYoVariable maxJerk, double dt)
+   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, null, null, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxAcceleration, DoubleYoVariable maxJerk,
-         DoubleYoVariable inputPosition, double dt)
+   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+         YoDouble inputPosition, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, inputPosition, null, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxAcceleration, DoubleYoVariable maxJerk,
-         DoubleYoVariable inputPosition, DoubleYoVariable inputVelocity, double dt)
+   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+         YoDouble inputPosition, YoDouble inputVelocity, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, inputPosition, inputVelocity, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxAcceleration, DoubleYoVariable maxJerk,
-         DoubleYoVariable inputPosition, DoubleYoVariable inputVelocity, DoubleYoVariable inputAcceleration, double dt)
+   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+         YoDouble inputPosition, YoDouble inputVelocity, YoDouble inputAcceleration, double dt)
    {
       super(name, registry);
 
@@ -57,15 +57,15 @@ public class JerkLimitedYoVariable extends DoubleYoVariable
 
       this.dt = dt;
 
-      hasBeenInitialized = new BooleanYoVariable(name + "HasBeenInitialized", registry);
+      hasBeenInitialized = new YoBoolean(name + "HasBeenInitialized", registry);
 
-      smoothedRate = new DoubleYoVariable(name + "SmoothedRate", registry);
-      smoothedAcceleration = new DoubleYoVariable(name + "SmoothedAcceleration", registry);
-      smoothedJerk = new DoubleYoVariable(name + "SmoothedJerk", registry);
+      smoothedRate = new YoDouble(name + "SmoothedRate", registry);
+      smoothedAcceleration = new YoDouble(name + "SmoothedAcceleration", registry);
+      smoothedJerk = new YoDouble(name + "SmoothedJerk", registry);
 
-      positionGain = new DoubleYoVariable(name + "PositionGain", registry);
-      velocityGain = new DoubleYoVariable(name + "VelocityGain", registry);
-      accelerationGain = new DoubleYoVariable(name + "AccelerationGain", registry);
+      positionGain = new YoDouble(name + "PositionGain", registry);
+      velocityGain = new YoDouble(name + "VelocityGain", registry);
+      accelerationGain = new YoDouble(name + "AccelerationGain", registry);
 
       double w0 = 2.0 * Math.PI * 16.0;
       double w1 = 2.0 * Math.PI * 16.0;

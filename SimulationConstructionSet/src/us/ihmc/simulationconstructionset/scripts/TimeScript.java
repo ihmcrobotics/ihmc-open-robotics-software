@@ -11,24 +11,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class TimeScript implements Script
 {
    // Rep invariant: timeScriptEntryList must be always sorted!
    private ArrayList<TimeScriptEntry> sortedTimeScriptEntryList = new ArrayList<TimeScriptEntry>();
-   private final IntegerYoVariable nextTimeScriptIndex;
+   private final YoInteger nextTimeScriptIndex;
 
    public TimeScript(YoVariableRegistry registry)
    {
-      nextTimeScriptIndex = new IntegerYoVariable("nextTimeScriptIndex", registry);
+      nextTimeScriptIndex = new YoInteger("nextTimeScriptIndex", registry);
       nextTimeScriptIndex.set(0);
    }
 
@@ -227,7 +223,7 @@ public class TimeScript implements Script
          case DOUBLE:
          {  
             double value = Double.parseDouble(t_part);
-            ret.addVarValue((DoubleYoVariable) variable, value);
+            ret.addVarValue((YoDouble) variable, value);
             break;
          }
          case BOOLEAN:
@@ -242,22 +238,22 @@ public class TimeScript implements Script
                value = Boolean.parseBoolean(t_part);
             }
             
-            ret.addVarValue((BooleanYoVariable) variable, value);
+            ret.addVarValue((YoBoolean) variable, value);
             break;
          }
          case ENUM:
          {
             @SuppressWarnings("rawtypes")
-            EnumYoVariable enumYoVariable = (EnumYoVariable) variable;
+            YoEnum yoEnum = (YoEnum) variable;
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            Enum value = Enum.valueOf(enumYoVariable.getEnumType(), t_part);            
-            ret.addVarValue(enumYoVariable, value);
+            Enum value = Enum.valueOf(yoEnum.getEnumType(), t_part);
+            ret.addVarValue(yoEnum, value);
             break;
          }
          case INTEGER:
          {
             int value = Integer.parseInt(t_part);
-            ret.addVarValue((IntegerYoVariable) variable, value);
+            ret.addVarValue((YoInteger) variable, value);
             break;
          }
          default:

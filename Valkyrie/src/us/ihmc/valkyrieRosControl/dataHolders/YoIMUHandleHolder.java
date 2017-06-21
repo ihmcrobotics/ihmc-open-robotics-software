@@ -2,22 +2,21 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
-
 
 public class YoIMUHandleHolder
 {
    private final IMUHandle handle;
    private final IMUDefinition imuDefinition;
    
-   private final DoubleYoVariable xdd, ydd, zdd;
-   private final DoubleYoVariable theta_x, theta_y, theta_z;
-   private final DoubleYoVariable q_w, q_x, q_y, q_z;
-   private final BooleanYoVariable isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
+   private final YoDouble xdd, ydd, zdd;
+   private final YoDouble theta_x, theta_y, theta_z;
+   private final YoDouble q_w, q_x, q_y, q_z;
+   private final YoBoolean isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
 
    public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -27,22 +26,22 @@ public class YoIMUHandleHolder
       this.handle = handle;
       this.imuDefinition = imuDefinition;
       
-      xdd = new DoubleYoVariable(name + "_xdd", registry);
-      ydd = new DoubleYoVariable(name + "_ydd", registry);
-      zdd = new DoubleYoVariable(name + "_zdd", registry);
+      xdd = new YoDouble(name + "_xdd", registry);
+      ydd = new YoDouble(name + "_ydd", registry);
+      zdd = new YoDouble(name + "_zdd", registry);
 
-      theta_x = new DoubleYoVariable(name + "_theta_x", registry);
-      theta_y = new DoubleYoVariable(name + "_theta_y", registry);
-      theta_z = new DoubleYoVariable(name + "_theta_z", registry);
+      theta_x = new YoDouble(name + "_theta_x", registry);
+      theta_y = new YoDouble(name + "_theta_y", registry);
+      theta_z = new YoDouble(name + "_theta_z", registry);
 
-      q_w = new DoubleYoVariable(name + "_q_w", registry);
-      q_x = new DoubleYoVariable(name + "_q_x", registry);
-      q_y = new DoubleYoVariable(name + "_q_y", registry);
-      q_z = new DoubleYoVariable(name + "_q_z", registry);
+      q_w = new YoDouble(name + "_q_w", registry);
+      q_x = new YoDouble(name + "_q_x", registry);
+      q_y = new YoDouble(name + "_q_y", registry);
+      q_z = new YoDouble(name + "_q_z", registry);
       
-      isLinearAccelerationValid = new BooleanYoVariable(name + "_isLinearAccelerationValid", registry);
-      isAngularRateValid = new BooleanYoVariable(name + "_isAngularRateValid", registry);
-      isOrientationMeasurementValid = new BooleanYoVariable(name + "_isOrientationMeasurementValid", registry);
+      isLinearAccelerationValid = new YoBoolean(name + "_isLinearAccelerationValid", registry);
+      isAngularRateValid = new YoBoolean(name + "_isAngularRateValid", registry);
+      isOrientationMeasurementValid = new YoBoolean(name + "_isOrientationMeasurementValid", registry);
       
       parentRegistry.addChild(registry);
       

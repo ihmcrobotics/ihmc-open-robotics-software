@@ -7,7 +7,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearDynamicSystems.SplitUpMatrixExponentialStateSpaceSystemDiscretizer;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -21,15 +21,15 @@ public class SimpleArmEstimator extends SimpleRobotController
    private final SimpleRobotInputOutputMap robot;
 
    // the state to display in SCS
-   private final DoubleYoVariable qYaw = new DoubleYoVariable("qYaw", registry);
-   private final DoubleYoVariable qPitch1 = new DoubleYoVariable("qPitch1", registry);
-   private final DoubleYoVariable qPitch2 = new DoubleYoVariable("qPitch2", registry);
-   private final DoubleYoVariable qdYaw = new DoubleYoVariable("qdYaw", registry);
-   private final DoubleYoVariable qdPitch1 = new DoubleYoVariable("qdPitch1", registry);
-   private final DoubleYoVariable qdPitch2 = new DoubleYoVariable("qdPitch2", registry);
-   private final DoubleYoVariable qddYaw = new DoubleYoVariable("qddYaw", registry);
-   private final DoubleYoVariable qddPitch1 = new DoubleYoVariable("qddPitch1", registry);
-   private final DoubleYoVariable qddPitch2 = new DoubleYoVariable("qddPitch2", registry);
+   private final YoDouble qYaw = new YoDouble("qYaw", registry);
+   private final YoDouble qPitch1 = new YoDouble("qPitch1", registry);
+   private final YoDouble qPitch2 = new YoDouble("qPitch2", registry);
+   private final YoDouble qdYaw = new YoDouble("qdYaw", registry);
+   private final YoDouble qdPitch1 = new YoDouble("qdPitch1", registry);
+   private final YoDouble qdPitch2 = new YoDouble("qdPitch2", registry);
+   private final YoDouble qddYaw = new YoDouble("qddYaw", registry);
+   private final YoDouble qddPitch1 = new YoDouble("qddPitch1", registry);
+   private final YoDouble qddPitch2 = new YoDouble("qddPitch2", registry);
 
    // the state vectors
    // the state is defines as [q1, q2, q3, qd1, qd2, qd3, qdd1, qdd2, qdd3]

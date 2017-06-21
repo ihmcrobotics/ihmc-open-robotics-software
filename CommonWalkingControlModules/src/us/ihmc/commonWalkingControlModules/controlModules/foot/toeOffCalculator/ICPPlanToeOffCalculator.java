@@ -2,13 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,8 +28,8 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 
-   private final BooleanYoVariable hasComputedToeOffContactPoint;
-   private final BooleanYoVariable hasComputedToeOffContactLine;
+   private final YoBoolean hasComputedToeOffContactPoint;
+   private final YoBoolean hasComputedToeOffContactLine;
 
    public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
          YoVariableRegistry parentRegistry)
@@ -45,8 +42,8 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
       }
 
-      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
-      hasComputedToeOffContactLine = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactLine", registry);
+      hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactLine = new YoBoolean(namePrefix + "HasComputedToeOffContactLine", registry);
 
       parentRegistry.addChild(registry);
    }

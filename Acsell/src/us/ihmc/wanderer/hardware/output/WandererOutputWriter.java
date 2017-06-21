@@ -13,10 +13,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -45,29 +45,29 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private final WandererCommand command = new WandererCommand(registry);
 
    private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlJoints;
-   private EnumMap<WandererJoint, DoubleYoVariable> tauControllerOutput;
+   private EnumMap<WandererJoint, YoDouble> tauControllerOutput;
    private final EnumMap<WandererJoint, OneDoFJoint> standPrepJoints;
    private final WandererStandPrep standPrep = new WandererStandPrep();
 
-   private final DoubleYoVariable controlRatio = new DoubleYoVariable("controlRatio", registry);
+   private final YoDouble controlRatio = new YoDouble("controlRatio", registry);
 
    private boolean outputEnabled;
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableOutput", registry);
 
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
    private final UDPAcsellOutputWriter outputWriter;
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoTauSpringCorrection = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoTauTotal = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoAngleSpring = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoReflectedMotorInertia = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoTauInertiaViz = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumMap<WandererJoint, DoubleYoVariable> desiredJointQ = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
-   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
+   private final EnumMap<WandererJoint, YoDouble> yoTauSpringCorrection = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> yoTauTotal = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> yoAngleSpring = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> yoReflectedMotorInertia = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> yoTauInertiaViz = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> yoMotorDamping = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> desiredQddFeedForwardGain = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final EnumMap<WandererJoint, YoDouble> desiredJointQ = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
+   private final YoEnum<WalkingStateEnum> yoWalkingState = new YoEnum<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
 
-   private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
+   private final YoDouble masterMotorDamping = new YoDouble("masterMotorDamping", registry);
 
    private final HystereticSpringProperties leftHipXSpringProperties = new WandererLeftHipXSpringProperties();
    private final HystereticSpringProperties rightHipXSpringProperties = new WandererRightHipXSpringProperties();
@@ -84,7 +84,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       TORQUE_CONTROL, POSITION_CONTROL;
    };
 
-   private final EnumMap<WandererJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<WandererJoint, EnumYoVariable<JointControlMode>>(
+   private final EnumMap<WandererJoint, YoEnum<JointControlMode>> jointControlMode = new EnumMap<WandererJoint, YoEnum<JointControlMode>>(
          WandererJoint.class);
 
    private WalkingStateEnum currentWalkingState;
@@ -95,33 +95,33 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       FullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = WandererUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
-      tauControllerOutput = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
+      tauControllerOutput = new EnumMap<WandererJoint, YoDouble>(WandererJoint.class);
       for (WandererJoint joint : WandererJoint.values)
       {
-         tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
-         yoMotorDamping.put(joint, new DoubleYoVariable(joint.getSdfName() + "motorDamping", registry));
+         tauControllerOutput.put(joint, new YoDouble(joint.getSdfName() + "tauControllerOutput", registry));
+         yoMotorDamping.put(joint, new YoDouble(joint.getSdfName() + "motorDamping", registry));
 
 
-         DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
+         YoDouble inertia = new YoDouble(joint.getSdfName()+"ReflectedMotorInertia", registry);
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
          yoReflectedMotorInertia.put(joint, inertia);
-         yoTauInertiaViz.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
-         desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));
-         desiredJointQ.put(joint, new DoubleYoVariable(joint.getSdfName()+"_Q_desired",registry));
+         yoTauInertiaViz.put(joint, new YoDouble(joint.getSdfName()+"TauInertia", registry));
+         desiredQddFeedForwardGain.put(joint, new YoDouble(joint.getSdfName()+"QddFeedForwardGain", registry));
+         desiredJointQ.put(joint, new YoDouble(joint.getSdfName()+"_Q_desired",registry));
       }
 
-      yoTauSpringCorrection.put(WandererJoint.LEFT_HIP_X, new DoubleYoVariable(WandererJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(WandererJoint.RIGHT_HIP_X, new DoubleYoVariable(WandererJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(WandererJoint.LEFT_ANKLE_Y, new DoubleYoVariable(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpringCorrection.put(WandererJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauTotal.put(WandererJoint.LEFT_HIP_X, new DoubleYoVariable(WandererJoint.LEFT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(WandererJoint.RIGHT_HIP_X, new DoubleYoVariable(WandererJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(WandererJoint.LEFT_ANKLE_Y, new DoubleYoVariable(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoTauTotal.put(WandererJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
-      yoAngleSpring.put(WandererJoint.LEFT_HIP_X, new DoubleYoVariable(WandererJoint.LEFT_HIP_X.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(WandererJoint.RIGHT_HIP_X, new DoubleYoVariable(WandererJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(WandererJoint.LEFT_ANKLE_Y, new DoubleYoVariable(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
-      yoAngleSpring.put(WandererJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
+      yoTauSpringCorrection.put(WandererJoint.LEFT_HIP_X, new YoDouble(WandererJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(WandererJoint.RIGHT_HIP_X, new YoDouble(WandererJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(WandererJoint.LEFT_ANKLE_Y, new YoDouble(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(WandererJoint.RIGHT_ANKLE_Y, new YoDouble(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauTotal.put(WandererJoint.LEFT_HIP_X, new YoDouble(WandererJoint.LEFT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(WandererJoint.RIGHT_HIP_X, new YoDouble(WandererJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(WandererJoint.LEFT_ANKLE_Y, new YoDouble(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauTotal.put(WandererJoint.RIGHT_ANKLE_Y, new YoDouble(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoAngleSpring.put(WandererJoint.LEFT_HIP_X, new YoDouble(WandererJoint.LEFT_HIP_X.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(WandererJoint.RIGHT_HIP_X, new YoDouble(WandererJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(WandererJoint.LEFT_ANKLE_Y, new YoDouble(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
+      yoAngleSpring.put(WandererJoint.RIGHT_ANKLE_Y, new YoDouble(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
 
       leftHipXSpringCalculator = new LinearSpringCalculator(leftHipXSpringProperties);
       rightHipXSpringCalculator = new LinearSpringCalculator(rightHipXSpringProperties);
@@ -262,7 +262,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    {
       for (WandererJoint joint : WandererJoint.values)
       {
-         EnumYoVariable<JointControlMode> controlMode = new EnumYoVariable<WandererOutputWriter.JointControlMode>(joint.getSdfName()
+         YoEnum<JointControlMode> controlMode = new YoEnum<JointControlMode>(joint.getSdfName()
                + JointControlMode.class.getSimpleName(), registry, JointControlMode.class, false);
 
          controlMode.set(JointControlMode.TORQUE_CONTROL);
@@ -375,8 +375,8 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
-      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
-      //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
+      //((YoEnum<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((YoBoolean)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
 
 }

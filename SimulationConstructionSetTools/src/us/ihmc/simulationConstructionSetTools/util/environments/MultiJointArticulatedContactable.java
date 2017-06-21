@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -18,7 +18,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
    private final Robot robot;
    
    private final ArrayList<ArrayList<GroundContactPoint>> allGroundContactPoints = new ArrayList<ArrayList<GroundContactPoint>>();
-   private final ArrayList<ArrayList<BooleanYoVariable>> contactsAvailable = new ArrayList<ArrayList<BooleanYoVariable>>();
+   private final ArrayList<ArrayList<YoBoolean>> contactsAvailable = new ArrayList<ArrayList<YoBoolean>>();
    
    public MultiJointArticulatedContactable(String name, Robot robot)
    {
@@ -42,14 +42,14 @@ public abstract class MultiJointArticulatedContactable implements Contactable
             if(j == 0) 
             {
                allGroundContactPoints.add(i, new ArrayList<GroundContactPoint>());
-               contactsAvailable.add(i, new ArrayList<BooleanYoVariable>());
+               contactsAvailable.add(i, new ArrayList<YoBoolean>());
             }
             
             GroundContactPoint contactPoint = new GroundContactPoint("contact_" + name + "_" + joint.getName() + "_" + j, robot.getRobotsYoVariableRegistry());
             joint.addGroundContactPoint(groundIdentifier, contactPoint);
             allGroundContactPoints.get(i).add(contactPoint);
             
-            BooleanYoVariable contactAvailable = new BooleanYoVariable("contact_" + name + "_" + joint.getName() + "_" + j + "_avail", robot.getRobotsYoVariableRegistry());
+            YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + joint.getName() + "_" + j + "_avail", robot.getRobotsYoVariableRegistry());
             contactAvailable.set(true);
             contactsAvailable.get(i).add(contactAvailable);
             
@@ -90,7 +90,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
    {
       for(int j = 0; j < allGroundContactPoints.get(jointIndex).size(); j++)
       {
-         BooleanYoVariable contactAvailable = contactsAvailable.get(jointIndex).get(j);
+         YoBoolean contactAvailable = contactsAvailable.get(jointIndex).get(j);
 
          if(contactAvailable.getBooleanValue())
          {
@@ -112,7 +112,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
          {
             if(groundContactPoint == allGroundContactPoints.get(i).get(j))
             {
-               BooleanYoVariable contactAvailable = contactsAvailable.get(i).get(j);
+               YoBoolean contactAvailable = contactsAvailable.get(i).get(j);
                if(!contactAvailable.getBooleanValue())
                {
                   contactAvailable.set(true);

@@ -1,27 +1,27 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
 {
    public static final double EPSILON = 1e-10;
 
    private double previousUnfilteredVariable;
-   private final DoubleYoVariable unfilteredVariable;
-   private final DoubleYoVariable unfilteredInRangeVariable;
-   private final DoubleYoVariable alphaVariable;
+   private final YoDouble unfilteredVariable;
+   private final YoDouble unfilteredInRangeVariable;
+   private final YoDouble alphaVariable;
    
-   private final DoubleYoVariable temporaryOutputVariable;
-   private final DoubleYoVariable error;
+   private final YoDouble temporaryOutputVariable;
+   private final YoDouble error;
    private final double upperLimit;
    private final double lowerLimit;
    private final double range;
    
    //wrap the values in [lowerLimit ; upperLimit[
    
-   public AlphaFilteredWrappingYoVariable(String name, String description, YoVariableRegistry registry, final DoubleYoVariable unfilteredVariable, DoubleYoVariable alphaVariable, double lowerLimit, double upperLimit)
+   public AlphaFilteredWrappingYoVariable(String name, String description, YoVariableRegistry registry, final YoDouble unfilteredVariable, YoDouble alphaVariable, double lowerLimit, double upperLimit)
    {
       super(name, description, registry, alphaVariable);
       this.alphaVariable = alphaVariable;
@@ -30,9 +30,9 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
       this.range = upperLimit - lowerLimit;
       this.unfilteredVariable = unfilteredVariable;
 
-      unfilteredInRangeVariable = new DoubleYoVariable(name + "UnfilteredInRangeVariable", registry);
-      temporaryOutputVariable = new DoubleYoVariable(name + "TemporaryOutputVariable", registry);
-      error = new DoubleYoVariable(name + "Error", registry);
+      unfilteredInRangeVariable = new YoDouble(name + "UnfilteredInRangeVariable", registry);
+      temporaryOutputVariable = new YoDouble(name + "TemporaryOutputVariable", registry);
+      error = new YoDouble(name + "Error", registry);
       
    }
    

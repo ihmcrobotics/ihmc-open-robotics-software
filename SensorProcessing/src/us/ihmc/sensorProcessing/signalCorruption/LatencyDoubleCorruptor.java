@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 
 public class LatencyDoubleCorruptor implements SignalCorruptor<MutableDouble>
@@ -12,12 +12,12 @@ public class LatencyDoubleCorruptor implements SignalCorruptor<MutableDouble>
    private final int latencyTicks;
 
    private final MutableDouble[] doubles;
-   private final IntegerYoVariable index;
+   private final YoInteger index;
    
    public LatencyDoubleCorruptor(String namePrefix, int latencyTicks, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      index = new IntegerYoVariable(namePrefix + "Index", registry);
+      index = new YoInteger(namePrefix + "Index", registry);
       this.latencyTicks = latencyTicks;
       parentRegistry.addChild(registry);
       

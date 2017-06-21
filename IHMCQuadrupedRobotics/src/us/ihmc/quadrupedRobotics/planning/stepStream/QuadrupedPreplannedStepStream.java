@@ -7,8 +7,8 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,11 +21,11 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    private final YoVariableRegistry registry;
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final DoubleYoVariable timestamp;
+   private final YoDouble timestamp;
    private final YoFrameOrientation bodyOrientation;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
-   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
+   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       this.preplannedStepProvider = preplannedStepProvider;

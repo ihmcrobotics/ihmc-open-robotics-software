@@ -6,8 +6,8 @@ import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,8 +22,8 @@ public class WandererOutputProcessor implements OutputProcessor
 {
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererOutputProcessor");
-   private final EnumMap<WandererActuator, DoubleYoVariable> predictedMotorPower = new EnumMap<WandererActuator, DoubleYoVariable>(WandererActuator.class);
-   private final DoubleYoVariable totalPredictedRobotPower = new DoubleYoVariable("totalPredictedMotorPower", registry);
+   private final EnumMap<WandererActuator, YoDouble> predictedMotorPower = new EnumMap<WandererActuator, YoDouble>(WandererActuator.class);
+   private final YoDouble totalPredictedRobotPower = new YoDouble("totalPredictedMotorPower", registry);
    private final SimpleMovingAverageFilteredYoVariable totalPredictedRobotPowerAverage = new SimpleMovingAverageFilteredYoVariable(
          totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
 
@@ -40,7 +40,7 @@ public class WandererOutputProcessor implements OutputProcessor
 
       for (WandererActuator actuator : WandererActuator.values)
       {
-         predictedMotorPower.put(actuator, new DoubleYoVariable(actuator.getName() + "PredictedMotorPower", registry));
+         predictedMotorPower.put(actuator, new YoDouble(actuator.getName() + "PredictedMotorPower", registry));
       }
       leftFourbar = new AcsellFourbarCalculator(new WandererFourbarProperties(), "leftOutputProcessor", RobotSide.LEFT, registry);
       rightFourbar = new AcsellFourbarCalculator(new WandererFourbarProperties(), "rightOutputProcessor", RobotSide.RIGHT, registry);

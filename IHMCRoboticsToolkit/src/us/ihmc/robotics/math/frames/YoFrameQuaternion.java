@@ -17,9 +17,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -33,7 +33,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
    private final String namePrefix;
    private final String nameSuffix;
 
-   private final DoubleYoVariable qx, qy, qz, qs;
+   private final YoDouble qx, qy, qz, qs;
    private final FrameOrientation frameOrientation = new FrameOrientation();
    /**
     * Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the
@@ -51,16 +51,16 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      this.qx = new DoubleYoVariable(createQxName(namePrefix, nameSuffix), registry);
-      this.qy = new DoubleYoVariable(createQyName(namePrefix, nameSuffix), registry);
-      this.qz = new DoubleYoVariable(createQzName(namePrefix, nameSuffix), registry);
-      this.qs = new DoubleYoVariable(createQsName(namePrefix, nameSuffix), registry);
+      this.qx = new YoDouble(createQxName(namePrefix, nameSuffix), registry);
+      this.qy = new YoDouble(createQyName(namePrefix, nameSuffix), registry);
+      this.qz = new YoDouble(createQzName(namePrefix, nameSuffix), registry);
+      this.qs = new YoDouble(createQsName(namePrefix, nameSuffix), registry);
       this.referenceFrame = referenceFrame;
 
       qs.set(1.0);
    }
 
-   public YoFrameQuaternion(DoubleYoVariable qx, DoubleYoVariable qy, DoubleYoVariable qz, DoubleYoVariable qs, ReferenceFrame referenceFrame)
+   public YoFrameQuaternion(YoDouble qx, YoDouble qy, YoDouble qz, YoDouble qs, ReferenceFrame referenceFrame)
    {
       this.namePrefix = StringUtils.getCommonPrefix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
       this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(qx.getName(), qy.getName(), qz.getName(), qs.getName());
@@ -333,22 +333,22 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
       yoFrameRotationVectorToPack.setAsRotationVector(getFrameOrientation());
    }
 
-   public DoubleYoVariable getYoQx()
+   public YoDouble getYoQx()
    {
       return qx;
    }
 
-   public DoubleYoVariable getYoQy()
+   public YoDouble getYoQy()
    {
       return qy;
    }
 
-   public DoubleYoVariable getYoQz()
+   public YoDouble getYoQz()
    {
       return qz;
    }
 
-   public DoubleYoVariable getYoQs()
+   public YoDouble getYoQs()
    {
       return qs;
    }

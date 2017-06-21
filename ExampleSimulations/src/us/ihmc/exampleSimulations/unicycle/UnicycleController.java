@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.unicycle;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class UnicycleController implements RobotController
@@ -13,15 +13,15 @@ public class UnicycleController implements RobotController
    private final String name;
 
    // used for control
-   private final DoubleYoVariable back_tau, wheel_tau;
+   private final YoDouble back_tau, wheel_tau;
 
    // robot state
-   private final DoubleYoVariable body_x;
-   private final DoubleYoVariable pitch, q_back, q_wheel;
-   private final DoubleYoVariable pitch_rate, qd_back, qd_wheel;
+   private final YoDouble body_x;
+   private final YoDouble pitch, q_back, q_wheel;
+   private final YoDouble pitch_rate, qd_back, qd_wheel;
 
    // control variables
-   private final DoubleYoVariable x_d = new DoubleYoVariable("x_desired", registry);
+   private final YoDouble x_d = new YoDouble("x_desired", registry);
    // F_lqr is a state feedback controller computed in Octave after modeling the system
    private static final DenseMatrix64F F_lqr = new DenseMatrix64F(new double[][] {
       {-11.50472, 3.80286, 0.11255, -2.32854, -0.23139, 0.17381},
@@ -36,19 +36,19 @@ public class UnicycleController implements RobotController
       this.name = name;
       this.radius = robot.getWheelRadius();
 
-      back_tau = (DoubleYoVariable) robot.getVariable("tau_backJoint");
-      wheel_tau = (DoubleYoVariable) robot.getVariable("tau_wheelJoint");
+      back_tau = (YoDouble) robot.getVariable("tau_backJoint");
+      wheel_tau = (YoDouble) robot.getVariable("tau_wheelJoint");
 
-      pitch = (DoubleYoVariable) robot.getVariable("q_pitch");
-      pitch_rate = (DoubleYoVariable) robot.getVariable("qd_pitch");
+      pitch = (YoDouble) robot.getVariable("q_pitch");
+      pitch_rate = (YoDouble) robot.getVariable("qd_pitch");
 
-      q_back = (DoubleYoVariable) robot.getVariable("q_backJoint");
-      qd_back = (DoubleYoVariable) robot.getVariable("qd_backJoint");
+      q_back = (YoDouble) robot.getVariable("q_backJoint");
+      qd_back = (YoDouble) robot.getVariable("qd_backJoint");
 
-      q_wheel = (DoubleYoVariable) robot.getVariable("q_wheelJoint");
-      qd_wheel = (DoubleYoVariable) robot.getVariable("qd_wheelJoint");
+      q_wheel = (YoDouble) robot.getVariable("q_wheelJoint");
+      qd_wheel = (YoDouble) robot.getVariable("qd_wheelJoint");
 
-      body_x = (DoubleYoVariable) robot.getVariable("q_x");
+      body_x = (YoDouble) robot.getVariable("q_x");
    }
 
    @Override

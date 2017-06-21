@@ -39,7 +39,7 @@ public abstract class PelvisAndCenterOfMassHeightControlState extends Finishable
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
-   public abstract void getCurrentDesiredHeight(FramePoint positionToPack);
+   public abstract void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack);
 
    public abstract void initializeDesiredHeightToCurrent();
 

@@ -2,19 +2,19 @@ package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBehavior
 {
 
    protected BehaviorStateMachine<E> statemachine;
 
-   public StateMachineBehavior(String stateMachineName, Class<E> enumType, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String stateMachineName, Class<E> enumType, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge)
    {
       this(null, stateMachineName, enumType, yoTime, outgoingCommunicationBridge);
    }
 
-   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> enumType, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> enumType, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge)
    {
       super(namePrefix, outgoingCommunicationBridge);
       statemachine = new BehaviorStateMachine<E>(stateMachineName, stateMachineName + "SwitchTime", enumType, yoTime, registry);

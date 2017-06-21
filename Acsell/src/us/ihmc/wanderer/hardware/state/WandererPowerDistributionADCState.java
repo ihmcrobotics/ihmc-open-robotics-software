@@ -3,27 +3,27 @@ package us.ihmc.wanderer.hardware.state;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.state.AcsellPowerDistributionADCState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
 
 public class WandererPowerDistributionADCState implements AcsellPowerDistributionADCState
 {
    private final YoVariableRegistry registry;
-   private final IntegerYoVariable ADC[] = new IntegerYoVariable[8];
+   private final YoInteger ADC[] = new YoInteger[8];
 
-   private final DoubleYoVariable robotPower;
-   private final DoubleYoVariable robotWork;
-   private final DoubleYoVariable busVoltage;
-   private final DoubleYoVariable leftLimbCurrent;
-   private final DoubleYoVariable rightLimbCurrent;
-   private final DoubleYoVariable torsoLimbCurrent;
-   private final DoubleYoVariable vicor48Current;
-   private final DoubleYoVariable vicor12Current;
-   private final DoubleYoVariable armCurrent;
-   private final DoubleYoVariable inputCurrent;
+   private final YoDouble robotPower;
+   private final YoDouble robotWork;
+   private final YoDouble busVoltage;
+   private final YoDouble leftLimbCurrent;
+   private final YoDouble rightLimbCurrent;
+   private final YoDouble torsoLimbCurrent;
+   private final YoDouble vicor48Current;
+   private final YoDouble vicor12Current;
+   private final YoDouble armCurrent;
+   private final YoDouble inputCurrent;
    private final AlphaFilteredYoVariable averageRobotPower;
    private final double dt;
 
@@ -32,20 +32,20 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
       this.registry = new YoVariableRegistry(name);
       for (int i = 0; i < ADC.length; i++)
       {
-         ADC[i] = new IntegerYoVariable("rawADC" + i, registry);
+         ADC[i] = new YoInteger("rawADC" + i, registry);
       }
 
-      robotPower = new DoubleYoVariable("robotPower", registry);
+      robotPower = new YoDouble("robotPower", registry);
       averageRobotPower = new AlphaFilteredYoVariable("averageRobotPower", registry, 0.99975, robotPower);
-      robotWork = new DoubleYoVariable("robotWork", registry);
-      busVoltage = new DoubleYoVariable("busVoltage", registry);
-      leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
-      rightLimbCurrent = new DoubleYoVariable("rightLimbCurrent", registry);
-      torsoLimbCurrent = new DoubleYoVariable("torsoLimbCurrent", registry);
-      vicor48Current = new DoubleYoVariable("vicor48Current", registry);
-      vicor12Current = new DoubleYoVariable("vicor12Current", registry);
-      armCurrent = new DoubleYoVariable("armCurrent", registry);
-      inputCurrent = new DoubleYoVariable("inputCurrent", registry);
+      robotWork = new YoDouble("robotWork", registry);
+      busVoltage = new YoDouble("busVoltage", registry);
+      leftLimbCurrent = new YoDouble("leftLimbCurrent", registry);
+      rightLimbCurrent = new YoDouble("rightLimbCurrent", registry);
+      torsoLimbCurrent = new YoDouble("torsoLimbCurrent", registry);
+      vicor48Current = new YoDouble("vicor48Current", registry);
+      vicor12Current = new YoDouble("vicor12Current", registry);
+      armCurrent = new YoDouble("armCurrent", registry);
+      inputCurrent = new YoDouble("inputCurrent", registry);
       
       dt = (new WandererRobotModel(true, false)).getEstimatorDT();
       parentRegistry.addChild(registry);
@@ -73,7 +73,7 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
    }
 
    @Override
-   public DoubleYoVariable getTotalWorkVariable()
+   public YoDouble getTotalWorkVariable()
    {
       return robotWork;
    }

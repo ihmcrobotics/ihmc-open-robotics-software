@@ -14,8 +14,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -29,9 +29,9 @@ import us.ihmc.tools.taskExecutor.PipeLine;
 public class KickBehavior extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final ReferenceFrame midZupFrame;
-   private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
+   private YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final FootTrajectoryBehavior footTrajectoryBehavior;
 
    private FramePoint2d objectToKickPose;
@@ -39,16 +39,16 @@ public class KickBehavior extends AbstractBehavior
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
-      trajectoryTime = new DoubleYoVariable("kickTrajectoryTime", registry);
+      trajectoryTime = new YoDouble("kickTrajectoryTime", registry);
       trajectoryTime.set(0.5);
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 

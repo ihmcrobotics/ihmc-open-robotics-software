@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
@@ -16,14 +16,14 @@ import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 
 public class YoFramePoint2dInPolygonCoordinate
 {
-   private DoubleYoVariable eccentricity, angle;
+   private YoDouble eccentricity, angle;
    private FramePoint2d framePoint2d;
    private Point2dInConvexPolygon2d point2dInConvexPolygon2d; //this will be using
 
    public YoFramePoint2dInPolygonCoordinate(String namePrefix, YoVariableRegistry registry)
    {
-      eccentricity = new DoubleYoVariable(namePrefix + "Eccentricity", registry);
-      angle = new DoubleYoVariable(namePrefix + "Angle", registry);
+      eccentricity = new YoDouble(namePrefix + "Eccentricity", registry);
+      angle = new YoDouble(namePrefix + "Angle", registry);
 
       //these will be initialized in update()
       framePoint2d = null;

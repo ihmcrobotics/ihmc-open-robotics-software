@@ -12,12 +12,14 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileReader
@@ -387,7 +389,7 @@ public class DataFileReader
 
          YoVariableRegistry registry = rootRegistryToAddNewVariablesTo.getOrCreateAndAddRegistry(nameSpace);
 
-         newVariable = new DoubleYoVariable(variableName, "Created Variable in DataFileReader", registry);
+         newVariable = new YoDouble(variableName, "Created Variable in DataFileReader", registry);
          newVars.addVariable(newVariable);
       }
 
@@ -737,11 +739,11 @@ public class DataFileReader
                   }
 
                   varName = NameSpace.stripOffNameSpaceToGetVariableName(varName);
-                  variable = new DoubleYoVariable(varName, registryToUse);
+                  variable = new YoDouble(varName, registryToUse);
                }
                else
                {
-                  variable = new DoubleYoVariable(varName, registry);
+                  variable = new YoDouble(varName, registry);
                }
 
                varList.addVariable(variable);

@@ -1,7 +1,7 @@
 package us.ihmc.kalman.comparisons;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -11,16 +11,16 @@ public class SinosoidalExampleFunction  implements RobotController, ExampleFunct
    private final String name;
    private final Robot robot;
    
-   private final DoubleYoVariable xReal;
-   private final DoubleYoVariable xDotReal;
-   private final DoubleYoVariable xDoubleDotReal;
+   private final YoDouble xReal;
+   private final YoDouble xDotReal;
+   private final YoDouble xDoubleDotReal;
    
    private final double amplitude;
    private final double frequency;
    private final double phase;
    
-   protected final DoubleYoVariable time = new DoubleYoVariable("time", registry);
-   protected final DoubleYoVariable dt = new DoubleYoVariable("dt", registry);
+   protected final YoDouble time = new YoDouble("time", registry);
+   protected final YoDouble dt = new YoDouble("dt", registry);
    private double tLastTick;
    
    public SinosoidalExampleFunction(Robot robot, double amplitude, double frequency, double phase)
@@ -33,9 +33,9 @@ public class SinosoidalExampleFunction  implements RobotController, ExampleFunct
       
       tLastTick = robot.getTime();
       
-      xReal = new DoubleYoVariable("xReal", registry);
-      xDotReal = new DoubleYoVariable("xDotReal", registry);
-      xDoubleDotReal = new DoubleYoVariable("xDoubleDotReal", registry);
+      xReal = new YoDouble("xReal", registry);
+      xDotReal = new YoDouble("xDotReal", registry);
+      xDoubleDotReal = new YoDouble("xDoubleDotReal", registry);
    }
 
 

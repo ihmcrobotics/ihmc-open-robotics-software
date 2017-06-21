@@ -1,20 +1,19 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
-
 public class ConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable finalTime;
-   private final DoubleYoVariable time;
+   private final YoDouble finalTime;
+   private final YoDouble time;
    private final OrientationProvider orientationProvider;
    private final YoFrameQuaternion orientation;
 
@@ -26,8 +25,8 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.orientationProvider = orientationProvider;
       this.orientation = new YoFrameQuaternion("orientation", referenceFrame, registry);
-      this.finalTime = new DoubleYoVariable("finalTime", registry);
-      this.time = new DoubleYoVariable("time", registry);
+      this.finalTime = new YoDouble("finalTime", registry);
+      this.time = new YoDouble("time", registry);
       this.finalTime.set(finalTime);
 
       parentRegistry.addChild(registry);

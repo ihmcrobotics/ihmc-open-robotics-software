@@ -1,6 +1,6 @@
 package us.ihmc.robotics.robotController;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Designed for convenience in tests if you don't want to implement everything.

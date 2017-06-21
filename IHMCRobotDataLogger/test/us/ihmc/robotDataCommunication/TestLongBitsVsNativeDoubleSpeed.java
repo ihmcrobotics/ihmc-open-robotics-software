@@ -6,10 +6,8 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestLongBitsVsNativeDoubleSpeed
 {
@@ -18,13 +16,13 @@ public class TestLongBitsVsNativeDoubleSpeed
       int numberOfVariables = 1000000;
       
       Random random = new Random();
-      ArrayList<DoubleYoVariable> variables = new ArrayList<DoubleYoVariable>(numberOfVariables);
+      ArrayList<YoDouble> variables = new ArrayList<YoDouble>(numberOfVariables);
       
       YoVariableRegistry registry = new YoVariableRegistry("test");
       
       for(int i = 0; i < numberOfVariables; i++)
       {
-         DoubleYoVariable v = new DoubleYoVariable("test_" + i, registry);
+         YoDouble v = new YoDouble("test_" + i, registry);
          v.set(random.nextDouble());
          variables.add(v);
       }
@@ -56,7 +54,7 @@ public class TestLongBitsVsNativeDoubleSpeed
       
    }
 
-   private static void testLongBuffer(int numberOfVariables, ArrayList<DoubleYoVariable> variables, LongBuffer longBuffer)
+   private static void testLongBuffer(int numberOfVariables, ArrayList<YoDouble> variables, LongBuffer longBuffer)
    {
       for(int i = 0; i < numberOfVariables; i++)
       {
@@ -64,7 +62,7 @@ public class TestLongBitsVsNativeDoubleSpeed
       }
    }
 
-   private static void testDoubleBuffer(int numberOfVariables, ArrayList<DoubleYoVariable> variables, DoubleBuffer doubleBuffer)
+   private static void testDoubleBuffer(int numberOfVariables, ArrayList<YoDouble> variables, DoubleBuffer doubleBuffer)
    {
       for(int i = 0; i < numberOfVariables; i++)
       {

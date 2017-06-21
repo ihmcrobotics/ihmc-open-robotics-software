@@ -5,8 +5,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class InitialICPVelocityCurrentMultiplier
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
    /** multiplier of the initial ICP to compute the current ICP location. */
-   private final DoubleYoVariable positionMultiplier;
+   private final YoDouble positionMultiplier;
    /** multiplier of the initial ICP to compute the current ICP velocity. */
-   private final DoubleYoVariable velocityMultiplier;
+   private final YoDouble velocityMultiplier;
 
    public InitialICPVelocityCurrentMultiplier(String yoNamePrefix, YoVariableRegistry registry)
    {
@@ -45,8 +45,8 @@ public class InitialICPVelocityCurrentMultiplier
    public InitialICPVelocityCurrentMultiplier(EfficientCubicMatrix cubicMatrix, EfficientCubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix,
          YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCVelocityCurrentVelocityMultiplier", registry);
+      positionMultiplier = new YoDouble(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
+      velocityMultiplier = new YoDouble(yoNamePrefix + "InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
       if (cubicMatrix == null)
       {
@@ -109,7 +109,7 @@ public class InitialICPVelocityCurrentMultiplier
     * @param timeInState time in the current state.
     * @param isInTransfer whether or not the robot is currently in the transfer phase.
     */
-   public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
+   public void compute(List<YoDouble> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
       if (isInTransfer)
          computeInTransfer(doubleSupportDurations, timeInState);
@@ -130,7 +130,7 @@ public class InitialICPVelocityCurrentMultiplier
     * @param doubleSupportDurations vector of double support durations
     * @param timeInState time in the transfer state
     */
-   public void computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   public void computeInTransfer(List<YoDouble> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 

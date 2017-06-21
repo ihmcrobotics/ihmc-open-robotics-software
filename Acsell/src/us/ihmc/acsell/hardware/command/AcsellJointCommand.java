@@ -1,15 +1,15 @@
 package us.ihmc.acsell.hardware.command;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 
 public class AcsellJointCommand
 {
    private final YoVariableRegistry registry;
    
-   private final DoubleYoVariable tauDesired;
-   private final DoubleYoVariable damping;
+   private final YoDouble tauDesired;
+   private final YoDouble damping;
    
    private final int numberOfActuators;
    private final double[] motorAngles;
@@ -20,8 +20,8 @@ public class AcsellJointCommand
    public AcsellJointCommand(String name, int numberOfActuators, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
-      this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
-      this.damping = new DoubleYoVariable(name + "Damping", registry);
+      this.tauDesired = new YoDouble(name + "TauDesired", registry);
+      this.damping = new YoDouble(name + "Damping", registry);
       this.numberOfActuators = numberOfActuators;
       this.motorAngles = new double[numberOfActuators];
       
