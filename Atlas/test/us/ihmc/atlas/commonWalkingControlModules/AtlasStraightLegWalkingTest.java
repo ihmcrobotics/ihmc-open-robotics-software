@@ -169,7 +169,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public boolean usePelvisRotation()
                      {
-                        return false;
+                        return true;
                      }
 
                      @Override
@@ -200,7 +200,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getFractionOfSwingToStraightenLeg()
                      {
-                        return 0.4;
+                        return 0.2;
                      }
 
                      @Override
@@ -230,7 +230,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightKneeAngle()
                      {
-                        return 0.1;
+                        return 0.2;
                      }
 
                      @Override
@@ -266,7 +266,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      public LegConfigurationGains getBentLegGains()
                      {
                         LegConfigurationGains gains = new LegConfigurationGains();
-                        gains.setJointSpaceKp(150.0);
+                        gains.setJointSpaceKp(50.0);
                         gains.setJointSpaceKd(4.0);
                         gains.setActuatorSpaceKp(200.0);
                         gains.setActuatorSpaceKd(6.0);
