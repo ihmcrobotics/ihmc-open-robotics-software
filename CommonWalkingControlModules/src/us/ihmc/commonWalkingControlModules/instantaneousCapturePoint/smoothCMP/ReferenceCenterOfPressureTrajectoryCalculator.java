@@ -447,7 +447,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       }
    }
 
-   public List<FramePoint> getCoPs()
+   public List<FramePoint> getWaypoints()
    {
       convertCoPWayPointsToWorldFrame();
       List<FramePoint> wayPointPositionList = new ArrayList<>(copWayPoints.getNumberOfTrajectoryPoints());
