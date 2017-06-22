@@ -269,6 +269,6 @@ public class CenterOfMassHeightManager
     */
    public boolean getControlHeightWithMomentum()
    {
-      return stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
+      return true;//stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 }
