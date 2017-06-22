@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,9 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CMPComponentPolynomialTrajectoryPlannerInterface;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CMPComponentType;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FootstepTrajectoryPoint;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;

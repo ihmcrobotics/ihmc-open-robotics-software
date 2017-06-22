@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
 import java.util.List;
