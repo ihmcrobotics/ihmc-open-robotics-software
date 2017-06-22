@@ -1,5 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -22,9 +23,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -38,18 +36,17 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   static
-   {
-      simulationTestingParameters.setRunMultiThreaded(false);
-   }
-
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final int TICK_EPSILON = 4;
+   private static final int TICK_EPSILON = 2;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -92,24 +89,77 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footsteps.add(footstepData);
       }
 
-      double controllerDt = getRobotModel().getControllerDT();
-      double timeEpsilon = TICK_EPSILON * controllerDt;
+      YoVariable<?> yoTime = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("t");
+      TimingChecker timingChecker = new TimingChecker(scs, footsteps);
+      yoTime.addVariableChangedListener(timingChecker);
 
       drcSimulationTestHelper.send(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingStartInterval - timeEpsilon));
-      String failMessage = "Swing did not start at the expected time.";
-
-      for (int stepIndex = 0; stepIndex < steps; stepIndex++)
+      while (!timingChecker.isDone())
       {
-         assertTrue(failMessage, getWalkingState(scs).isDoubleSupport());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * timeEpsilon));
-         assertTrue(failMessage, getWalkingState(scs).isSingleSupport());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingStartInterval - 2.0 * timeEpsilon));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2));
       }
-
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
+   private class TimingChecker implements VariableChangedListener
+   {
+      private static final String failMessage = "Swing did not start at expected time.";
+
+      private int stepCount = 0;
+      private double expectedStartTimeOfNextStep = 0.0;
+      private WalkingStateEnum previousWalkingState = WalkingStateEnum.STANDING;
+
+      private final SimulationConstructionSet scs;
+      private final FootstepDataListMessage footsteps;
+
+      private boolean isDone = false;
+
+      public TimingChecker(SimulationConstructionSet scs, FootstepDataListMessage footsteps)
+      {
+         this.scs = scs;
+         this.footsteps = footsteps;
+      }
+
+      @Override
+      public void variableChanged(YoVariable<?> v)
+      {
+         if (isDone)
+         {
+            return;
+         }
+
+         double time = v.getValueAsDouble();
+         WalkingStateEnum walkingState = getWalkingState(scs);
+
+         if (previousWalkingState.isDoubleSupport() && walkingState.isSingleSupport())
+         {
+            if (stepCount == 0)
+            {
+               expectedStartTimeOfNextStep = time;
+            }
+
+            assertEquals(failMessage, expectedStartTimeOfNextStep, time, TICK_EPSILON * getRobotModel().getControllerDT());
+
+            if (stepCount > footsteps.getDataList().size() - 2)
+            {
+               isDone = true;
+               return;
+            }
+
+            double swingTime = footsteps.get(stepCount).getSwingDuration();
+            double transferTime = footsteps.get(stepCount + 1).getTransferDuration();
+            expectedStartTimeOfNextStep += swingTime + transferTime;
+            stepCount++;
+         }
+
+         previousWalkingState = walkingState;
+      }
+
+      public boolean isDone()
+      {
+         return isDone;
+      }
+
+   }
 
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
@@ -155,7 +205,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
-   private WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
+   @SuppressWarnings("unchecked")
+   private static WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
    {
       return (WalkingStateEnum) getYoVariable(scs, "WalkingState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
    }
