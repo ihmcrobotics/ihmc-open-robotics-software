@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ICPPlannerWithTimeFreezer extends ICPPlanner
+public class ICPPlannerWithTimeFreezer extends ContinuousCMPBasedICPPlanner
 {
    private final String namePrefix = "icpPlanner";
 
@@ -63,7 +63,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    @Override
    public void compute(double time)
    {
-      throw new RuntimeException("Use the method ICPPlannerWithTimeFreezer.compute(FramePoint2d, double) instead. If the time freeze feature is not desired, use ICPPlanner instead.");
+      throw new RuntimeException("Use the method ICPPlannerWithTimeFreezer.compute(FramePoint2d, double) instead. If the time freeze feature is not desired, use ContinuousCMPBasedICPPlanner instead.");
    }
 
    public void compute(FramePoint2d currentCapturePointPosition, double time)

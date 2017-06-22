@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -121,7 +121,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final ICPTimingOptimizationController icpOptimizationController;
-   private final ICPPlanner icpPlanner;
+   private final ContinuousCMPBasedICPPlanner icpPlanner;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final SimulationConstructionSet scs;
@@ -161,7 +161,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
       setupFeetFrames(yoGraphicsListRegistry);
 
-      icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
       icpOptimizationController = new ICPTimingOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
