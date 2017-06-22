@@ -2,12 +2,14 @@ package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 
 import java.util.ArrayList;
 
-public abstract class TaskNode
+import us.ihmc.commons.PrintTools;
+
+public class TaskNode
 {
    private NodeData nodeData;
    private ArrayList<TaskNode> childNodes;
    private TaskNode parentNode;
-
+      
    public TaskNode()
    {
 
@@ -86,55 +88,20 @@ public abstract class TaskNode
    {
       return parentNode;
    }
-
-   public class NodeData
+   
+   public void printNodeData()
    {
-      private double[] q;
-      private int dimension;
-
-      private NodeData(int dimension)
-      {
-         this.q = new double[dimension];
-         this.dimension = dimension;
-      }
-
-      private NodeData(NodeData nodeData)
-      {
-         this.q = new double[nodeData.getDimension()];
-         for (int i = 0; i < nodeData.getDimension(); i++)
-         {
-            this.q[i] = nodeData.getQ(i);
-         }
-         this.dimension = nodeData.getDimension();
-      }
-
-      private final int getDimension()
-      {
-         return dimension;
-      }
-
-      private final double getQ(int index)
-      {
-         return q[index];
-      }
-
-      private final void setQ(int index, double value)
-      {
-         this.q[index] = value;
-      }
-
-      private final double distance(NodeData nodeData)
-      {
-         double ret = 0;
-         for (int i = 0; i < dimension; i++)
-         {
-            ret = ret + (nodeData.getQ(i) - this.getQ(i)) * (nodeData.getQ(i) - this.getQ(i));
-         }
-         ret = Math.sqrt(ret);
-
-         return ret;
-      }
+      for(int i=0;i<getDimensionOfNodeData();i++)
+         PrintTools.info("" + i +" "+getNodeData(i));
    }
    
-   public abstract void setRandomNodeData();
+   public double getTime()
+   {
+      return getNodeData(0);
+   }
+   
+   public boolean isValidNode()
+   {
+      return true;
+   }
 }

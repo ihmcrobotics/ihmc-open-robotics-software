@@ -70,12 +70,12 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 /*
  * Make sure this class is for testing whole-body inverse kinematics only.
  * Whenever we want to get whole-body solution without sending and receiving message on @code KinematicsToolboxModule, use this one.
- * Use 'setDesired<rigidBody>Message()', 'putTrajectoryMessages()' method and 'isValid()' method to verify the user put messages.
+ * Use 'setDesired<rigidBody>Message()', 'putTrajectoryMessages()' method and 'isSolved()' method to verify the user put messages.
  * This class has originality in @code KinematicsToolboxController and @author Sylvain Bertrand.
  * 2017.06.19. Inho Lee. 
  */
 
-public class WheneverWholeBodyValidityTester
+public class WheneverWholeBodyKinematicsSolver
 {
    private boolean DEBUG = false;
    protected final String name = getClass().getSimpleName();   
@@ -146,10 +146,10 @@ public class WheneverWholeBodyValidityTester
    
    private static int updateCnt = 0;
    private static int numberOfTest = 0;
-   private boolean isValidPose = false;
+   private boolean isSolved = false;
    private static int maximumCntForUpdateInternal = 200;
    
-   public WheneverWholeBodyValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory)
+   public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
 
@@ -265,7 +265,7 @@ public class WheneverWholeBodyValidityTester
    public boolean initialize()
    {
       userFeedbackCommands.clear();
-      isValidPose = false;
+      isSolved = false;
       updateCnt = 0;
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
@@ -350,7 +350,7 @@ public class WheneverWholeBodyValidityTester
       
       if(isGoodSolutionCur)
       {
-         isValidPose = true;
+         isSolved = true;
          
       }
       
@@ -358,14 +358,14 @@ public class WheneverWholeBodyValidityTester
       updateCnt++;
    }
    
-   public boolean isValidPose()
+   public boolean isSolved()
    {
       numberOfTest++;
       for(int i=0;i<maximumCntForUpdateInternal;i++)
       {
          updateInternal();
-         if(isValidPose)
-            return isValidPose;
+         if(isSolved)
+            return isSolved;
       }
       return false;
    }

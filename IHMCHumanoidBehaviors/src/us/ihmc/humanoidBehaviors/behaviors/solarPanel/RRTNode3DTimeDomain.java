@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyValidityTester;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class RRTNode3DTimeDomain extends RRTNode
 {
-   public static WheneverWholeBodyValidityTester nodeValidityTester;
+   public static WheneverWholeBodyKinematicsSolver nodeValidityTester;
    public static SolarPanelPath cleaningPath;
    
    public RRTNode3DTimeDomain()

@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import javax.swing.JSplitPane;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -42,7 +43,10 @@ public class WholeBodyPlanningVisualizer
    
    
    
-
+   public static void main(String[] args)
+   {
+      new WholeBodyPlanningVisualizer();
+   }
    
    public WholeBodyPlanningVisualizer()
    {        
@@ -105,24 +109,44 @@ public class WholeBodyPlanningVisualizer
       simulationOverheadPlotterFactory2.createOverheadPlotter();
       
       
-      for (double t = 0.0; t <= trajectoryTime; t += dt)
-      {
-         FramePoint currentPosition = new FramePoint(worldFrame, 0.2, -0.2 + 0.4/trajectoryTime*t, 0.5);
-         yoPointInho.set(currentPosition);
-         
-         
-
-         
-         
-         scs.tickAndUpdate();
-      }
-      scs.startOnAThread();
-      ThreadTools.sleepForever();
+//      for (double t = 0.0; t <= trajectoryTime; t += dt)
+//      {
+//         FramePoint currentPosition = new FramePoint(worldFrame, 0.2, -0.2 + 0.4/trajectoryTime*t, 0.5);
+//         yoPointInho.set(currentPosition);
+//         
+//         
+//
+//         
+//         
+//         scs.tickAndUpdate();
+//      }
+      
+//      scs.startOnAThread();
+//      ThreadTools.sleepForever();
+      
+      PrintTools.info("Finish Visualizing ");
+      
    }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
 
-   public static void main(String[] args)
-   {
-      new WholeBodyPlanningVisualizer();
-   }
 }

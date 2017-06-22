@@ -12,8 +12,6 @@ import java.util.ArrayList;
  * For the parent node of the 'A' node, 'A' node is a child node of the parent node.
  * This structure excludes extra computing time consuming when <RRTTree> gets a path from root node to goal node.
  *
- * All class that inherits this class <RRTNode> must override two methods, isValid() and createNode().
- * 
  * @param nodeData
  * @param childRRTNode and ParentRRTNode
  * 
