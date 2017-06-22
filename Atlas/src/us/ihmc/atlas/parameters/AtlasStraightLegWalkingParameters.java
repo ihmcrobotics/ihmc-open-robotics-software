@@ -11,14 +11,16 @@ public class AtlasStraightLegWalkingParameters extends StraightLegWalkingParamet
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
+   @Override
    /** {@inheritDoc} */
    public boolean attemptToStraightenLegs()
    {
       return false;
    }
 
+   @Override
    /** {@inheritDoc} */
-   public double getKneeBentLegPrivilegedConfigurationGain()
+   public double getBentLegJointSpacePrivilegedConfigurationGain()
    {
       return runningOnRealRobot ? 40.0 : 100.0;
    }
