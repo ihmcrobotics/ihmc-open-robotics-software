@@ -146,7 +146,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
 
    /**
     * Creates a visualizer for the planned CoP trajectory
-    * @param yoGraphicsList 
+    * @param yoGraphicsList
     * @param artifactList
     */
    public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
@@ -346,8 +346,15 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
          RobotSide swingSide = footstepTrajectory.get(0).getSwingSide();
          double percentageTime = time / footstepTrajectory.get(0).getSwingTime();
          int splineSegmentIndex = getSplineSegmentIndexFromTime(swingSide, percentageTime);
-         coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(time, currentCoPPosition));
-         FramePoint2d centroidOfSupportFoot = new FramePoint2d(currentSoleZUpFrames.get(swingSide.getOppositeSide()));
+         if(currentCoPPosition != null)
+            coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(time, currentCoPPosition));
+         else
+         {  
+            FramePoint2d nextCoPLocation = getFootSupportPolygonCentroid(swingSide.getOppositeSide());
+            nextCoPLocation.add(coPWayPointOffsets.get(swingSide.getOppositeSide()).get(splineSegmentIndex - 1));
+            coPWayPoints.addTrajectoryPoint(convertToWorldFrameAndPackIntoTrajectoryPoint(time, nextCoPLocation));
+         }
+         FramePoint2d centroidOfSupportFoot = new FramePoint2d(getFootSupportPolygonCentroid(swingSide.getOppositeSide()));
          computeReferenceCoPsForFootstep(coPWayPoints, coPWayPointOffsets.get(swingSide.getOppositeSide()), coPWayPointAlphas.get(swingSide.getOppositeSide()),
                                          centroidOfSupportFoot, footstepTrajectory.get(0).getSwingTime(), splineSegmentIndex);
          computeReferenceCoPsForUpcomingFootstep();
