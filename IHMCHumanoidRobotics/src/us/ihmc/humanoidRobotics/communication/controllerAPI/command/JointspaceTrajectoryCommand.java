@@ -21,7 +21,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    public JointspaceTrajectoryCommand(Random random)
    {
       clear();
-      int degreesOfFreedom = random.nextInt(10);
+      int degreesOfFreedom = random.nextInt(10) + 1;
       for(int i = 0; i < degreesOfFreedom; i++)
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = new OneDoFJointTrajectoryCommand(random);
@@ -116,7 +116,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       for (int i = 0; i < jointTrajectoryInputs.size(); i++)
          jointTrajectoryInputs.get(i).addTimeOffset(timeOffsetToAdd);
    }
-   
+
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
