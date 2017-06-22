@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
@@ -24,14 +25,18 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
+   private final YoInteger numberOfFootstepsToConsider;
+
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    CapturePointPlannerParameters icpPlannerParameters, CenterOfPressurePlannerParameters copPlannerParameters,
                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, icpPlannerParameters);
 
-      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator("icpPlanner");
-      referenceCoPsCalculator.initializeParameters(copPlannerParameters, bipedSupportPolygons, contactableFeet, parentRegistry);
+      numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
+
+      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, copPlannerParameters, bipedSupportPolygons, contactableFeet,
+                                                                                  numberOfFootstepsToConsider, parentRegistry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator();
 
@@ -64,6 +69,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void clearPlan()
    {
       referenceCoPsCalculator.clear();
+      //todo clear the others
+
+      for (int i = 0; i < swingDurations.size(); i++)
+      {
+         swingDurations.get(i).setToNaN();
+         transferDurations.get(i).setToNaN();
+         swingDurationAlphas.get(i).setToNaN();
+         transferDurationAlphas.get(i).setToNaN();
+      }
    }
 
    @Override

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static org.junit.Assert.assertTrue;
 
-import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +15,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.DummyCoPParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureTrajectoryCalculator;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -32,8 +28,8 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCenterOfPressureTrajectoryCalculatorTest
 {
@@ -59,6 +55,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    MidFootZUpGroundFrame midFeetZUpFrame;
    SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
    DummyCoPParameters icpPlannerParameters;
+   YoInteger numberOfFootstepsToConsider = new YoInteger("numberOfFootstepsToConsider", parentRegistry);
 
    @Before
    public void setUp()
@@ -99,10 +96,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, parentRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
-      testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass");
-      assertTrue("Object not initialized", testCoPGenerator != null);
       icpPlannerParameters = new DummyCoPParameters();
-      testCoPGenerator.initializeParameters(icpPlannerParameters, bipedSupportPolygons, contactableFeet, null);
+      numberOfFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+      testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass", icpPlannerParameters, bipedSupportPolygons,
+                                                                           contactableFeet, numberOfFootstepsToConsider, parentRegistry);
+      assertTrue("Object not initialized", testCoPGenerator != null);
    }
 
    @After

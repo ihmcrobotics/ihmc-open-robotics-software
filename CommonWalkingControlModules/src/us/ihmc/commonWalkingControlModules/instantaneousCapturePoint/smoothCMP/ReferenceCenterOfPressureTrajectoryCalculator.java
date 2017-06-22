@@ -46,54 +46,46 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
    private static final double CoPPointSize = 0.005;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private YoVariableRegistry parentRegistry;
-   private String namePrefix;
+   private final String namePrefix;
 
-   private YoBoolean isDoneWalking;
-   private YoInteger numberOfUpcomingFootsteps;
-   private YoInteger numberOfPointsPerFoot;
-   private YoInteger numberOfFootstepstoConsider;
-   private YoEnum<CoPSplineType> orderOfSplineInterpolation;
-   private YoDouble defaultFinalTransferDuration;
-   private YoDouble defaultStationaryTransferDuration;
-   private Vector2D finalTransferOffset;
-   private List<FootstepTrajectoryPoint> footstepTrajectory = new ArrayList<>();
-   private FrameEuclideanTrajectoryPointList copWayPoints = new FrameEuclideanTrajectoryPointList();
-   private ArrayList<YoPolynomial3D> copTrajectoryPolynomials = new ArrayList<>();
-   private SideDependentList<List<Vector2D>> copWayPointOffsets = new SideDependentList<>();
-   private SideDependentList<List<Double>> copWayPointAlphas = new SideDependentList<>();
-   private FramePoint currentCoPPosition;
-   private FrameVector currentCoPVelocity;
-   private FrameVector currentCoPAcceleration;
-   private FrameVector finalCoPVelocity;
+   private final YoBoolean isDoneWalking;
+   private final YoInteger numberOfUpcomingFootsteps;
+   private final YoInteger numberOfPointsPerFoot;
+   private final YoInteger numberOfFootstepsToConsider;
 
-   private BipedSupportPolygons bipedSupportPolygons;
-   private SideDependentList<ReferenceFrame> currentSoleZUpFrames = new SideDependentList<>();
-   private SideDependentList<FrameConvexPolygon2d> currentSupportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
-   private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
+   private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
+   private final YoDouble defaultFinalTransferDuration;
+   private final YoDouble defaultStationaryTransferDuration;
+   private final Vector2D finalTransferOffset;
+   private final List<FootstepTrajectoryPoint> footstepTrajectory = new ArrayList<>();
+   private final FrameEuclideanTrajectoryPointList copWayPoints = new FrameEuclideanTrajectoryPointList();
+   private final ArrayList<YoPolynomial3D> copTrajectoryPolynomials = new ArrayList<>();
+   private final SideDependentList<List<Vector2D>> copWayPointOffsets = new SideDependentList<>();
+   private final SideDependentList<List<Double>> copWayPointAlphas = new SideDependentList<>();
+
+   private final FramePoint currentCoPPosition = new FramePoint();
+   private final FrameVector currentCoPVelocity = new FrameVector();
+   private final FrameVector currentCoPAcceleration = new FrameVector();
+   private final FrameVector finalCoPVelocity = new FrameVector();
+
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private final SideDependentList<ReferenceFrame> currentSoleZUpFrames;
+   private final SideDependentList<FrameConvexPolygon2d> currentSupportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    private final SideDependentList<YoFrameVector2d> copUserOffsets = new SideDependentList<>();
 
    /**
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCenterOfPressureTrajectoryCalculator(String namePrefix)
+   public ReferenceCenterOfPressureTrajectoryCalculator(String namePrefix, CenterOfPressurePlannerParameters copPlannerParameters,
+                                                        BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                                        YoInteger numberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
-   }
+      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
-   /**
-    * @param copPlannerParameters
-=   * @param bipedSupportPolygons
-    * @param contactableFeet
-    * @param parentRegistry
-    */
-   public void initializeParameters(CenterOfPressurePlannerParameters copPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
-   {
-      this.parentRegistry = parentRegistry;
-      if (parentRegistry != null)
-         parentRegistry.addChild(registry);
       isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
 
       for (RobotSide side : RobotSide.values)
@@ -124,21 +116,23 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
          }
       }
       currentSoleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
-      this.bipedSupportPolygons = bipedSupportPolygons;
 
       this.defaultFinalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
-      this.defaultFinalTransferDuration.set(copPlannerParameters.getDefaultFinalTransferDuration());
       this.defaultStationaryTransferDuration = new YoDouble(namePrefix + "StationaryTransferDuration", registry);
+      this.defaultFinalTransferDuration.set(copPlannerParameters.getDefaultFinalTransferDuration());
       this.defaultStationaryTransferDuration.set(copPlannerParameters.getDefaultStationaryTransferTime());
       this.finalTransferOffset = copPlannerParameters.getFinalTransferCoPOffset();
+
       this.numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfUpcomingFootsteps.set(0);
+
       this.numberOfPointsPerFoot = new YoInteger(namePrefix + "NumberOfPointsPerFootstep", registry);
       this.numberOfPointsPerFoot.set(copPlannerParameters.getNumberOfWayPointsPerFoot());
-      this.numberOfFootstepstoConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
-      this.numberOfFootstepstoConsider.set(copPlannerParameters.getNumberOfFootstepsToConsider());
+
       this.orderOfSplineInterpolation = new YoEnum<>(namePrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
       this.orderOfSplineInterpolation.set(copPlannerParameters.getOrderOfCoPInterpolation());
+
+      parentRegistry.addChild(registry);
    }
 
    /**
@@ -148,18 +142,15 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
     */
    public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
-      if (parentRegistry != null)
+      for (int i = 0; i < copWayPoints.getNumberOfTrajectoryPoints(); i++)
       {
-         for (int i = 0; i < copWayPoints.getNumberOfTrajectoryPoints(); i++)
-         {
-            YoFramePoint graphicFramePoint = new YoFramePoint(namePrefix + "CoPWayPoint" + i, worldFrame, parentRegistry);
-            graphicFramePoint.set(copWayPoints.getTrajectoryPoint(i).getPositionX(), copWayPoints.getTrajectoryPoint(i).getPositionY(),
-                                  copWayPoints.getTrajectoryPoint(i).getPositionZ());
-            YoGraphicPosition CoPViz = new YoGraphicPosition(namePrefix + "GraphicCoPWaypoint" + i, graphicFramePoint, CoPPointSize, YoAppearance.Green(),
-                                                             GraphicType.SOLID_BALL);
-            yoGraphicsList.add(CoPViz);
-            artifactList.add(CoPViz.createArtifact());
-         }
+         YoFramePoint graphicFramePoint = new YoFramePoint(namePrefix + "CoPWayPoint" + i, worldFrame, registry);
+         graphicFramePoint.set(copWayPoints.getTrajectoryPoint(i).getPositionX(), copWayPoints.getTrajectoryPoint(i).getPositionY(),
+                               copWayPoints.getTrajectoryPoint(i).getPositionZ());
+         YoGraphicPosition CoPViz = new YoGraphicPosition(namePrefix + "GraphicCoPWaypoint" + i, graphicFramePoint, CoPPointSize, YoAppearance.Green(),
+                                                          GraphicType.SOLID_BALL);
+         yoGraphicsList.add(CoPViz);
+         artifactList.add(CoPViz.createArtifact());
       }
    }
 
@@ -182,7 +173,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
    /**
     * Remove first footstep in the upcoming footstep queue from planner
     */
-   public void removeFootStepQueueFront()
+   public void removeFootstepQueueFront()
    {
       removeFootstep(0);
       numberOfUpcomingFootsteps.set(footstepTrajectory.size());
@@ -193,7 +184,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
     * @param numberOfFootstepsToRemove number of steps to remove
     */
 
-   public void removeFootStepQueueFront(int numberOfFootstepsToRemove)
+   public void removeFootstepQueueFront(int numberOfFootstepsToRemove)
    {
       for (int i = 0; i < numberOfFootstepsToRemove; i++)
          removeFootstep(0);
@@ -219,8 +210,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       copWayPoints.clear();
       copTrajectoryPolynomials.clear();
       numberOfUpcomingFootsteps.set(0);
-      currentCoPPosition = null;
-      currentCoPVelocity = null;
+      currentCoPPosition.setToNaN();
+      currentCoPVelocity.setToNaN();
    }
 
    /**
@@ -230,8 +221,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
    {
       copWayPoints.clear();
       copTrajectoryPolynomials.clear();
-      currentCoPVelocity = null;
-      currentCoPPosition = null;
+      currentCoPVelocity.setToNaN();
+      currentCoPPosition.setToNaN();
    }
 
    public boolean isDoneWalking()
@@ -376,8 +367,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
 
    private void computeReferenceCoPsForUpcomingFootstep()
    {
-      int numberOfFootstepsToPlan = footstepTrajectory.size() - 1 > numberOfFootstepstoConsider.getIntegerValue() - 1
-            ? numberOfFootstepstoConsider.getIntegerValue() - 1 : footstepTrajectory.size() - 1;
+      int numberOfFootstepsToPlan = footstepTrajectory.size() - 1 > numberOfFootstepsToConsider.getIntegerValue() - 1 ?
+            numberOfFootstepsToConsider.getIntegerValue() - 1 : footstepTrajectory.size() - 1;
       computeReferenceCoPsForUpcomingFootstep(numberOfFootstepsToPlan);
    }
 
@@ -392,7 +383,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
                                          copWayPointAlphas.get(planningFootstep.getSupportSide()), footstepLocation, planningFootstep.getSwingTime(),
                                          planningFootstep.getTransferTime());
       }
-      if (footstepTrajectory.size() - 1 <= numberOfFootstepstoConsider.getIntegerValue())
+      if (footstepTrajectory.size() - 1 <= numberOfFootstepsToConsider.getIntegerValue())
          computeReferenceCoPsForFinalTransfer(index);
    }
 
@@ -579,56 +570,62 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
    }
 
    @Override
-   public void setInitialCoPAcceleration(FrameVector initialCoPAcceleration)
-   {
-      this.currentCoPAcceleration = new FrameVector(initialCoPAcceleration);
-   }
-
-   @Override
-   public void setInitialCoPAcceleration(FrameVector2d initialCoPAccel)
-   {
-      this.currentCoPAcceleration = new FrameVector(initialCoPAccel.getReferenceFrame(), initialCoPAccel.getX(), initialCoPAccel.getY(), 0.0);
-   }
-
-   @Override
-   public void setInitialCoPVelocity(FrameVector initialCoPVelocity)
-   {
-      this.currentCoPVelocity = new FrameVector(initialCoPVelocity);
-   }
-
-   @Override
-   public void setInitialCoPVelocity(FrameVector2d initialCoPVelocity)
-   {
-      this.currentCoPVelocity = new FrameVector(initialCoPVelocity.getReferenceFrame(), initialCoPVelocity.getX(), initialCoPVelocity.getY(), 0.0);
-   }
-   
-   @Override
-   public void setFinalCoPVelocity(FrameVector finalCoPVelocity)
-   {
-      this.currentCoPVelocity = new FrameVector(finalCoPVelocity);
-   }
-
-   @Override
-   public void setFinalCoPVelocity(FrameVector2d finalCoPVelocity)
-   {
-      this.currentCoPVelocity = new FrameVector(finalCoPVelocity.getReferenceFrame(), finalCoPVelocity.getX(), finalCoPVelocity.getY(), 0.0);
-   }
-
-   @Override
    public void setInitialCoPPosition(FramePoint initialCoPPosition)
    {
-      this.currentCoPPosition = new FramePoint(initialCoPPosition);
+      currentCoPPosition.setIncludingFrame(initialCoPPosition);
    }
 
    @Override
    public void setInitialCoPPosition(FramePoint2d initialCoPPosition)
    {
-      this.currentCoPPosition = new FramePoint(initialCoPPosition.getReferenceFrame(), initialCoPPosition.getX(), initialCoPPosition.getY(), 0.0);
+      currentCoPPosition.setToZero(initialCoPPosition.getReferenceFrame());
+      currentCoPPosition.setXY(initialCoPPosition);
+   }
+
+   @Override
+   public void setInitialCoPVelocity(FrameVector initialCoPVelocity)
+   {
+      currentCoPVelocity.setIncludingFrame(initialCoPVelocity);
+   }
+
+   @Override
+   public void setInitialCoPVelocity(FrameVector2d initialCoPVelocity)
+   {
+      currentCoPVelocity.setToZero(initialCoPVelocity.getReferenceFrame());
+      currentCoPVelocity.setXY(initialCoPVelocity);
+   }
+
+
+   @Override
+   public void setInitialCoPAcceleration(FrameVector initialCoPAcceleration)
+   {
+      currentCoPAcceleration.setIncludingFrame(initialCoPAcceleration);
+   }
+
+   @Override
+   public void setInitialCoPAcceleration(FrameVector2d initialCoPAccel)
+   {
+      currentCoPAcceleration.setToZero(initialCoPAccel.getReferenceFrame());
+      currentCoPAcceleration.setXY(initialCoPAccel);
+   }
+
+   @Override
+   public void setFinalCoPVelocity(FrameVector finalCoPVelocity)
+   {
+      this.finalCoPVelocity.setIncludingFrame(finalCoPVelocity);
+   }
+
+   @Override
+   public void setFinalCoPVelocity(FrameVector2d finalCoPVelocity)
+   {
+      this.finalCoPVelocity.setToZero(finalCoPVelocity.getReferenceFrame());
+      this.finalCoPVelocity.setXY(finalCoPVelocity);
    }
 
    private FrameEuclideanTrajectoryPoint convertToWorldFrameAndPackIntoTrajectoryPoint(double time, FramePoint2d position)
    {
       position.changeFrame(worldFrame);
+
       return new FrameEuclideanTrajectoryPoint(time, position.toFramePoint(), new FrameVector(position.getReferenceFrame()));
    }
 
