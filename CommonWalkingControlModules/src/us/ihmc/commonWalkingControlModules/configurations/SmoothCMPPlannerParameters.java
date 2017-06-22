@@ -46,8 +46,8 @@ public class SmoothCMPPlannerParameters
 
    public double[] getMinCoPForwardOffsetsFootFrame()
    {
-      double minHeelOffset = modelScale * 0.0;
-      double minBallOffset = modelScale * -0.04;
+      double minHeelOffset = modelScale * -0.04;
+      double minBallOffset = modelScale * 0.0;
 
       double[] minCoPOffsets = { minHeelOffset, minBallOffset };
 

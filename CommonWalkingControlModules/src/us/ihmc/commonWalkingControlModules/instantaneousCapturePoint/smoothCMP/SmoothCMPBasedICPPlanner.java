@@ -21,7 +21,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = true;
 
-   private final ReferenceCenterOfPressureTrajectoryCalculator referenceCoPsCalculator;
+   private final ReferenceCenterOfPressureWaypointCalculator referenceCoPsCalculator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
@@ -35,8 +35,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
 
-      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                  numberOfFootstepsToConsider, parentRegistry);
+      referenceCoPsCalculator = new ReferenceCenterOfPressureWaypointCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
+                                                                                numberOfFootstepsToConsider, parentRegistry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator();
 

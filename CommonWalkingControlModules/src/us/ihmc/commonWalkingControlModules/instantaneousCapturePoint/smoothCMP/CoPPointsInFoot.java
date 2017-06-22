@@ -94,4 +94,9 @@ public class CoPPointsInFoot
       for (int i = 0; i < maxNumberOfPointsPerFoot; i++)
          copLocations.get(i).switchCurrentReferenceFrame(desiredFrame);
    }
+
+   public void switchCurrentReferenceFrame(int waypointIndex, ReferenceFrame desiredFrame)
+   {
+      copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
+   }
 }
