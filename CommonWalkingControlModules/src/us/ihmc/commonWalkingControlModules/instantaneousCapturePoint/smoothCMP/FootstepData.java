@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -12,40 +12,45 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * @author Apoorv S
  */
 
-public class FootstepTrajectoryPoint
+public class FootstepData
 {
-   private Footstep footstep;   
-   private FootstepTiming timing;
-   private ReferenceFrame footFrame;
-      
+   public Footstep footstep;
+   public FootstepTiming timing;
+
    /**
     * Initialize the foot point storage object
-    * @param side Specify foot side
-    * @param refFrame Provide corresponding foot reference frame. This will be stored and accessed to get updated values
     */
-   
-   public FootstepTrajectoryPoint(Footstep footstep, FootstepTiming timing)
-   {
-      this(footstep, timing, 0);     
-   }
-   
-   /**
-    * Initialize the foot point storage object
-    * @param side Specify foot side
-    * @param refFrame Provide corresponding foot reference frame. This will be stored and accessed to get updated values
-    * @param estimatedSize Initial estimate of the number of points to be stored
-    */
-   
-   public FootstepTrajectoryPoint(Footstep footstep, FootstepTiming timing, int estimatedSize)
+   public FootstepData(Footstep footstep, FootstepTiming timing)
    {
       this.footstep = footstep;
       this.timing = timing;      
-      this.footFrame = footstep.getSoleReferenceFrame();
    }
    
    public void addFootstepPoint(FramePoint2d newPoint)
    {
       //TODO 
+   }
+
+   public void setFootstep(Footstep footstep)
+   {
+      this.footstep = footstep;
+   }
+
+   public void setTiming(FootstepTiming timing)
+   {
+      this.timing = timing;
+   }
+
+   public void set(FootstepData other)
+   {
+      this.footstep = other.footstep;
+      this.timing = other.timing;
+   }
+
+   public void set(Footstep footstep, FootstepTiming timing)
+   {
+      this.footstep = footstep;
+      this.timing = timing;
    }
    
    /**
@@ -61,9 +66,19 @@ public class FootstepTrajectoryPoint
       }
       else 
       {
-         if(newPoint.getReferenceFrame() != footFrame)
-            newPoint.changeFrame(footFrame);
+         if(newPoint.getReferenceFrame() != footstep.getSoleReferenceFrame())
+            newPoint.changeFrame(footstep.getSoleReferenceFrame());
       }
+   }
+
+   public Footstep getFootstep()
+   {
+      return footstep;
+   }
+
+   public ReferenceFrame getSoleReferenceFrame()
+   {
+      return footstep.getSoleReferenceFrame();
    }
 
    public FramePoint getCentroidOfExpectedFootPolygonLocation()
