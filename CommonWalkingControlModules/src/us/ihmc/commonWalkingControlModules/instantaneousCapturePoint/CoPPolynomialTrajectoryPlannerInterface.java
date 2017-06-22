@@ -15,13 +15,11 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface CoPPolynomialTrajectoryPlannerInterface
+public interface CoPPolynomialTrajectoryPlannerInterface extends CMPComponentTrajectoryPlannerInterface
 {
    public void initializeParameters(CenterOfPressurePlannerParameters coPPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
                                     SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry);
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
-   public List<YoPolynomial3D> getPolynomialTrajectory();
-   public List<FramePoint> getCoPs();
    public void setInitialCoPPosition(FramePoint2d initialCoPPosition);
    public void setInitialCoPPosition(FramePoint initialCoPPosition);
    public void setInitialCoPVelocity(FrameVector2d intialCoPVelocity);

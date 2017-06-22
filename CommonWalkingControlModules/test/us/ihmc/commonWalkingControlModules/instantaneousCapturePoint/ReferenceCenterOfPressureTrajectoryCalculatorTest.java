@@ -141,7 +141,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true);
-      List<FramePoint> coPList = testCoPGenerator.getCoPs();
+      List<FramePoint> coPList = testCoPGenerator.getWaypoints();
       assertTrue("Incorrect number of CoP way points generated", coPList.size() == numberOfFootsteps * 3 + 2);
       assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
       assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), -0.05, -0.2), EPSILON));
@@ -155,7 +155,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       assertTrue(coPList.get(9).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.2), EPSILON));
       assertTrue(coPList.get(10).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.85, 0.1), EPSILON));
       testCoPGenerator.clearPlan();
-      assertTrue("Plan not cleared", testCoPGenerator.getCoPs().isEmpty());
+      assertTrue("Plan not cleared", testCoPGenerator.getWaypoints().isEmpty());
       assertTrue("Footsteps cleared on clearing plan", testCoPGenerator.getNumberOfFootstepRegistered() == 3);
       testCoPGenerator.clear();
       assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepRegistered() == 0);
@@ -163,7 +163,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       sendFootStepMessages(10);
       testCoPGenerator.setInitialCoPPosition(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false);
-      coPList = testCoPGenerator.getCoPs();
+      coPList = testCoPGenerator.getWaypoints();
       assertTrue("Incorrect number of CoP way points generated", coPList.size() == 3 * 3 + 1);
       assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1), EPSILON));
       assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), -0.05, -0.2), EPSILON));
@@ -186,7 +186,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2);
       testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
       testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport();
-      List<FramePoint> coPList = testCoPGenerator.getCoPs();
+      List<FramePoint> coPList = testCoPGenerator.getWaypoints();
       assertTrue("Incorrect number of CoP way points generated", coPList.size() == 3 * 3);
       assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));
       assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.2), EPSILON));
@@ -199,11 +199,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       assertTrue(coPList.get(8).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.2), EPSILON));
 
       testCoPGenerator.clearPlan();
-      coPList = testCoPGenerator.getCoPs();
+      coPList = testCoPGenerator.getWaypoints();
       assertTrue("Unable to clear plan", coPList.isEmpty());
       testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
       testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(0.6);
-      coPList = testCoPGenerator.getCoPs();
+      coPList = testCoPGenerator.getWaypoints();
       assertTrue("Incorrect number of CoP way points generated", coPList.size() == 3 * 3 - 1);      
       assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));
       assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.2), EPSILON));
@@ -219,7 +219,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    public void testTransferFootstepPlan()
    {
       testCoPGenerator.computeReferenceCoPsForTransfer(RobotSide.LEFT);
-      List<FramePoint> coPList = testCoPGenerator.getCoPs();
+      List<FramePoint> coPList = testCoPGenerator.getWaypoints();
       assertTrue("Incorrect number of CoP way points generated", coPList.size() == 2);
       assertTrue(coPList.get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
       assertTrue(coPList.get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));      
