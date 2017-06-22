@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util;
 
 import org.junit.Assert;
 import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 
 public class CollisionGroundContactModelTest
 {
+   @ContinuousIntegrationTest(estimatedDuration = 0.13)
    @Test
    public void testDoGroundContact()
    {
