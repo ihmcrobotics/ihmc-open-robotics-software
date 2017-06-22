@@ -17,8 +17,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface CoPPolynomialTrajectoryPlannerInterface extends CMPComponentTrajectoryPlannerInterface
 {
-   public void initializeParameters(CenterOfPressurePlannerParameters coPPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry);
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
    public void setInitialCoPPosition(FramePoint2d initialCoPPosition);
    public void setInitialCoPPosition(FramePoint initialCoPPosition);

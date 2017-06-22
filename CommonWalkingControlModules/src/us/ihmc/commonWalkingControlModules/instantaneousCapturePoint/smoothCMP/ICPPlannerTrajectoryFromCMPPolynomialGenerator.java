@@ -6,21 +6,20 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionTrajectoryGenerator
 {
-   private final DoubleYoVariable omega0;
+   private final YoDouble omega0;
    private ReferenceFrame trajectoryFrame;
    
    private final static int FIRST_SEGMENT = 0;
@@ -57,15 +56,18 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
    
    private DenseMatrix64F icpDesiredInitialVector = new DenseMatrix64F(10000, 1);
    private DenseMatrix64F icpDesiredFinalVector = new DenseMatrix64F(10000, 1);
-   
+
    // Pre-allocated helper matrices
    private final DenseMatrix64F M1 = new DenseMatrix64F(10000, 10000);
    private final DenseMatrix64F M2 = new DenseMatrix64F(10000, 10000);
    private final DenseMatrix64F M3 = new DenseMatrix64F(10000, 10000);
    
    private final int numberOfSegments;
-      
-   public ICPPlannerTrajectoryFromCMPPolynomialGenerator(DoubleYoVariable omega0, List<YoPolynomial3D> cmpPolynomialTrajectories)
+
+   private YoInteger numberOfFootstepsToConsider;
+   private YoInteger numberOfFootstepsToConsiderForAngularMomentum;
+
+   public ICPPlannerTrajectoryFromCMPPolynomialGenerator(YoDouble omega0, ReferenceFrame trajectoryFrame, List<YoPolynomial3D> cmpPolynomialTrajectories)
    {
       this.omega0 = omega0;
       numberOfSegments = cmpPolynomialTrajectories.size();
@@ -78,10 +80,24 @@ public class ICPPlannerTrajectoryFromCMPPolynomialGenerator implements PositionT
          this.cmpPolynomialTrajectories.add(cmpPolynomialTrajectories.get(i));
       }
    }
-   
+
+   public void setNumberOfFootstepsToConsider(YoInteger numberOfFootstepsToConsider)
+   {
+      this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
+   }
+
+   public void setNumberOfFootstepsToConsiderForAngularMomentum(YoInteger numberOfFootstepsToConsiderForAngularMomentum)
+   {
+      this.numberOfFootstepsToConsiderForAngularMomentum = numberOfFootstepsToConsiderForAngularMomentum;
+   }
+
    public void initialize()
    {
       calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar();
+   }
+
+   public void computeFromCMPTrajectory(List<YoPolynomial3D> cmpPolynomialTrajectories)
+   {
    }
 
    public void compute(double time)
