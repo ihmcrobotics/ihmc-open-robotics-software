@@ -13,7 +13,7 @@ public class DummyCoPParameters extends CenterOfPressurePlannerParameters
    int numberOfCoPWayPointsPerFoot = 3;
    int numberOfFootstepsToConsider = 3;
    double finalTransferDuration = 0.1;
-   Vector2D finalTransferCoPOffset = new Vector2D(0.1, 0.1); 
+   Vector2D finalTransferCoPOffset = new Vector2D(0.0, 0.0); 
    List<Vector2D> leftCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
    List<Vector2D> rightCoPLocations = new ArrayList<>(numberOfCoPWayPointsPerFoot);
    List<Double> coPWayPointAlphas= new ArrayList<>(numberOfCoPWayPointsPerFoot-1);
