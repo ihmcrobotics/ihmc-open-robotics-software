@@ -46,7 +46,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final int TICK_EPSILON = 2;
+   private static final double swingStartTimeEpsilon = 0.04 * 4.0;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -137,7 +137,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                expectedStartTimeOfNextStep = time;
             }
 
-            assertEquals(failMessage, expectedStartTimeOfNextStep, time, TICK_EPSILON * getRobotModel().getControllerDT());
+            assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
 
             if (stepCount > footsteps.getDataList().size() - 2)
             {
