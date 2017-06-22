@@ -2,12 +2,7 @@ package us.ihmc.avatar.behaviorTests.SolarPanel;
 
 import static org.junit.Assert.assertTrue;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.swing.JPanel;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,21 +18,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode3DTimeDomain;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WholeBodyPlanningVisualizer;
-import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyValidityTester;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNode3D;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,7 +32,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -134,8 +119,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       setupKinematicsToolboxModule();
    }
    
-   @Test
-   public void wheneverWholeBodyValidityTesterTest() throws SimulationExceededMaximumTimeException, IOException
+   //@Test
+   public void wheneverWholeBodyKinematicsSolverTest() throws SimulationExceededMaximumTimeException, IOException
    {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -147,7 +132,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       sdfFullRobotModel.updateFrames();
                              
       // construct
-      WheneverWholeBodyValidityTester wbikTester = new WheneverWholeBodyValidityTester(getRobotModel());
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
             
       // create initial robot configuration
       wbikTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
@@ -169,278 +154,55 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info(""+wbikTester.isValidPose());      
+      PrintTools.info(""+wbikTester.isSolved());      
       
       FullHumanoidRobotModel createdFullRobotModel = wbikTester.getDesiredFullRobotModel();            
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
       
-      WholeBodyPlanningVisualizer visulaizer = new WholeBodyPlanningVisualizer();
+      
       
       PrintTools.info("END");     
    } 
       
-   //@Test
-   public void isValidTest() throws SimulationExceededMaximumTimeException, IOException
+   @Test
+   public void taskNodeTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
       drcBehaviorTestHelper.updateRobotModel();
             
-      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+      TaskNode3D rootNode = new TaskNode3D();
       
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-            
-      setUpSolarPanel();
-                 
-      // construct
-      RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyValidityTester(getRobotModel());
-                  
-      // create initial robot configuration
-      
-      RRTNode3DTimeDomain.nodeValidityTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
-
-      // temporary node define
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
-      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.05, -Math.PI*0.3), 4.0);  
-            
-      RRTNode3DTimeDomain.cleaningPath = cleaningPath;
-      
-      RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
-      
-      PrintTools.info(""+node1.isValidNode());
+      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode);
       
       
       
-      FullHumanoidRobotModel createdFullRobotModel = RRTNode3DTimeDomain.nodeValidityTester.getDesiredFullRobotModel();
-            
-      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, 10.0);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.92);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.1), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
+      
+      System.out.println(taskNodeTree.getTrajectoryTime());
+      
+      taskNodeTree.expandTree(10);
+      
+      for(int i=0;i<taskNodeTree.getWholeNodes().size();i++)
+      {
+         taskNodeTree.getWholeNodes().get(i).printNodeData();
+      }
+      
+//      WholeBodyPlanningVisualizer visulaizer = new WholeBodyPlanningVisualizer();
       
       PrintTools.info("END");     
    } 
     
-   //@Test
-   public void plannerTest() throws SimulationExceededMaximumTimeException, IOException
-   {
-//      if(isKinematicsToolboxVisualizerEnabled)
-//         ThreadTools.sleep(13000);
-//      
-//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      assertTrue(success);
-//
-//      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-//
-//      drcBehaviorTestHelper.updateRobotModel();
-//      
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      
-//      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
-//      
-//      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-//      sdfFullRobotModel.updateFrames();
-//            
-//      setUpSolarPanel();
-//            
-//      RRTNode3DTimeDomain.nodeValidityTester = new WheneverWholeBodyPoseTester(getRobotModel(), 
-//                                                                                drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-//                                                                                sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
-//            
-//      drcBehaviorTestHelper.dispatchBehavior(RRTNode3DTimeDomain.nodeValidityTester);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      
-//      // ********** Planning *** //      
-//      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.05, -Math.PI*0.2);    
-//      SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-//      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.05, -Math.PI*0.3), 4.0);  
-//            
-//      RRTNode3DTimeDomain.cleaningPath = cleaningPath;
-//      RRTNode3DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
-//      
-//      RRTNode3DTimeDomain node0 = new RRTNode3DTimeDomain();
-//      node0.isValidNode();
-//      
-//      RRTNode3DTimeDomain node1 = new RRTNode3DTimeDomain(1.0, 0.8, 0/180*Math.PI, 0/180*Math.PI);
-//      RRTNode3DTimeDomain node2 = new RRTNode3DTimeDomain(1.0, 0.9, 15/180*Math.PI, 0/180*Math.PI);
-//      RRTNode3DTimeDomain node3 = new RRTNode3DTimeDomain(1.0, 0.7, -15/180*Math.PI, 10/180*Math.PI);
-//      
-//      PrintTools.info(""+node1.isValidNode());
-//      ThreadTools.sleep(1000);
-//      PrintTools.info(""+node2.isValidNode());
-//      ThreadTools.sleep(1000);
-//      PrintTools.info(""+node3.isValidNode());
-//      ThreadTools.sleep(1000);
-//      
-//      
-//      scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode3DTimeDomain.cleaningPath));
-//
-//      if (visualize)
-//      {
-//         // ************************************* //
-//         // show
-//         // ************************************* //
-//         JFrame frame;
-//         DrawPanel drawPanel;
-//         Dimension dim;
-//
-//
-//         frame = new JFrame("RRTTest");
-//         drawPanel = new DrawPanel(solarPanelPlanner.rrtPlanner);
-//         dim = new Dimension(1600, 800);
-//         frame.setPreferredSize(dim);
-//         frame.setLocation(200, 100);
-//
-//         frame.add(drawPanel);
-//         frame.pack();
-//         frame.setVisible(true);
-//      }
       
-      // ************************************* //
-      // show
-      // ************************************* //
-      PrintTools.info("END");     
-   } 
    
    
    
    
    
-   
-// ************************************* //
-   class DrawPanel extends JPanel
-   {
-      int timeScale = 70;
-      int pelvisYawScale = 300;
-      RRTPlannerSolarPanelCleaning planner;
-      
-      DrawPanel(RRTPlannerSolarPanelCleaning plannerTimeDomain)
-      {
-         this.planner = plannerTimeDomain;
-      }
-
-      @Override
-      public void paint(Graphics g)
-      {
-         super.paint(g);       
-         
-         for(int j =0;j<planner.getNumberOfPlanners();j++)
-         {
-            RRTTreeTimeDomain tree = planner.getPlanner(j).getTree();
-            ArrayList<RRTNode> wholeNode = tree.getWholeNode();
-            g.setColor(Color.BLACK);
-            for(int i =1;i<wholeNode.size();i++)
-            {
-               RRTNode rrtNode1 = wholeNode.get(i);
-               RRTNode rrtNode2 = rrtNode1.getParentNode();
-               branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-            }
-            
-            
-            g.setColor(Color.BLUE);
-            ArrayList<RRTNode> nodePath = tree.getPathNode();
-            for(int i =1;i<nodePath.size();i++)
-            {
-               RRTNode rrtNode1 = nodePath.get(i);
-               RRTNode rrtNode2 = rrtNode1.getParentNode();
-               branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-            }
-            
-             g.setColor(Color.CYAN);
-             ArrayList<RRTNode> nodeShort = planner.getPlanner(j).getOptimalPath();
-             for(int i =1;i<nodeShort.size();i++)
-             {
-                RRTNode rrtNode1 = nodeShort.get(i);
-                RRTNode rrtNode2 = nodeShort.get(i-1);
-                branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-             }
-             
-             g.setColor(Color.RED);
-             ArrayList<RRTNode> nodeFail = tree.failNodes;
-             PrintTools.info("whole "+ j +" "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
-             for(int i =0;i<nodeFail.size();i++)
-             {
-                RRTNode rrtNode1 = nodeFail.get(i);
-                point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
-             }
-         }
-
-         
-
-         
-         g.setColor(Color.yellow);
-//         branch(g, RRTNode3DTimeDomain.cleaningPath.getArrivalTime().get(1), -Math.PI*0.4, RRTNode3DTimeDomain.cleaningPath.getArrivalTime().get(1), Math.PI*0.4, 4);
-//         branch(g, RRTNode3DTimeDomain.cleaningPath.getArrivalTime().get(2), -Math.PI*0.4, RRTNode3DTimeDomain.cleaningPath.getArrivalTime().get(2), Math.PI*0.4, 4);
-//         branch(g, RRTNode3DTimeDomain.cleaningPath.getArrivalTime().get(3), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), Math.PI*0.4, 4);
-      }
-      
-      public int t2u(double time)
-      {
-         return (int) Math.round((time * timeScale) + 50);
-      }
-
-      public int y2v(double yaw)
-      {
-         return (int) Math.round(((-yaw)) * pelvisYawScale + 400);
-      }
-      
-      public void point(Graphics g, double time, double yaw, int size)
-      {
-         int diameter = size;
-         g.drawOval(t2u(time) - diameter / 2, y2v(yaw) - diameter / 2, diameter, diameter);
-      }
-      
-      public void branch(Graphics g, double time1, double yaw1, double time2, double yaw2, int size)
-      {
-         point(g, time1, yaw1, size);
-         point(g, time2, yaw2, size);
-         
-         g.drawLine(t2u(time1), y2v(yaw1), t2u(time2), y2v(yaw2));
-      }
-   }
-   
-   private ArrayList<Graphics3DObject> getPrintCleaningPath(SolarPanelPath cleaningPath)
-   {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
-      for(int i=0;i<cleaningPath.getLinearPath().size();i++)
-      {
-         ret.addAll(getPrintLinearPath(cleaningPath.getLinearPath().get(i)));
-      }
-      
-      return ret;
-   }
-   
-   private ArrayList<Graphics3DObject> getPrintLinearPath(SolarPanelLinearPath linearPath)
-   {
-      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
-      Graphics3DObject nodeOneSphere = new Graphics3DObject();
-      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-      
-      Graphics3DObject lineCapsule = new Graphics3DObject();
-      
-      Point3D translationNodeOne = linearPath.getStartPose().getDesiredHandPosition();
-      nodeOneSphere.translate(translationNodeOne);
-      nodeOneSphere.addSphere(0.02, YoAppearance.DarkGray());
-      
-      Point3D translationNodeTwo = linearPath.getEndPose().getDesiredHandPosition();
-      nodeTwoSphere.translate(translationNodeTwo);
-      nodeTwoSphere.addSphere(0.02, YoAppearance.DarkGray());
-      
-      Point3D translationLine = new Point3D((translationNodeOne.getX()+translationNodeTwo.getX())/2, (translationNodeOne.getY()+translationNodeTwo.getY())/2, (translationNodeOne.getZ()+translationNodeTwo.getZ())/2);
-      AxisAngle rotationLine = new AxisAngle(-(translationNodeOne.getY()-translationNodeTwo.getY()), (translationNodeOne.getX()-translationNodeTwo.getX()), 0, Math.PI/2);
-      lineCapsule.translate(translationLine);      
-      lineCapsule.rotate(rotationLine);
-      lineCapsule.addCapsule(0.02, translationNodeOne.distance(translationNodeTwo), YoAppearance.Gray());
-            
-      ret.add(nodeOneSphere);
-      ret.add(nodeTwoSphere);
-
-      return ret;
-   }
    
    private void showUpFullRobotModelWithConfiguration(FullHumanoidRobotModel createdFullRobotModel) throws SimulationExceededMaximumTimeException
    {
