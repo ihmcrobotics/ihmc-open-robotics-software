@@ -3,10 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.RRTPiecewisePath;
-import us.ihmc.manipulation.planning.rrt.RRTTree;
-import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTPiecewisePath;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTTree;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTValidConnection;
 
 public class RRTPlannerTimeDomain
 {

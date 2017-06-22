@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import java.util.Random;
 
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 
 public class TimeDomain3DNode extends RRTNode
 {

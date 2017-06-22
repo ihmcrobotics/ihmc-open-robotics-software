@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt;
+package us.ihmc.manipulation.planning.rrt.generalrrt;
 /**
  * @method boolean isValidNode()
  * This method is for testing the node is valid.

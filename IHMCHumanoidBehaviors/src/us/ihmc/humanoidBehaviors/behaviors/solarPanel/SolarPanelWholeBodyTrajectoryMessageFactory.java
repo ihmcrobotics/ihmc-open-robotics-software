@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

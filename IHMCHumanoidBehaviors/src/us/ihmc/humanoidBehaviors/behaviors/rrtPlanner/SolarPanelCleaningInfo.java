@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;

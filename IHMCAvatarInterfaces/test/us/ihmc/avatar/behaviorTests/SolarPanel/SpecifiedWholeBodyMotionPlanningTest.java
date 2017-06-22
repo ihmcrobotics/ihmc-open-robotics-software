@@ -31,18 +31,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode3DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.WheneverWholeBodyValidityTester;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WholeBodyPlanningVisualizer;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyValidityTester;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelFromDescription;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -175,6 +173,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       FullHumanoidRobotModel createdFullRobotModel = wbikTester.getDesiredFullRobotModel();            
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
+      
+      WholeBodyPlanningVisualizer visulaizer = new WholeBodyPlanningVisualizer();
       
       PrintTools.info("END");     
    } 

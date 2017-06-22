@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.walkingpath.rrtplanner;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
