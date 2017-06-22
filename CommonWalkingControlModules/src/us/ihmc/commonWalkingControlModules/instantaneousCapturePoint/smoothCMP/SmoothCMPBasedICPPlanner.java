@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -16,6 +18,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
+   private static final boolean VISUALIZE = true;
+
    private final ReferenceCenterOfPressureTrajectoryCalculator referenceCoPsCalculator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
@@ -32,6 +36,27 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator();
 
       referenceICPGenerator = new ICPPlannerTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
+
+      parentRegistry.addChild(registry);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         setupVisualizers(yoGraphicsListRegistry);
+      }
+   }
+
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      referenceCoPsCalculator.createVisualizerForConstantCoPs(yoGraphicsList, artifactList);
+
+      artifactList.setVisible(VISUALIZE);
+      yoGraphicsList.setVisible(VISUALIZE);
+
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    @Override
