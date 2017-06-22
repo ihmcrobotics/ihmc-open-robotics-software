@@ -63,7 +63,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Does not need to match the dt at which the trajectory will be updated.
     */
-   private final double dtForFiniteDifference = 1.0e-4;
+   private final double dtForFiniteDifference = 1.0e-3;
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -319,6 +319,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       currentOrientation.set(initialOrientation);
       currentAngularVelocity.set(initialAngularVelocity);
       currentAngularAcceleration.setToZero();
+      compute(0.0);
    }
 
    private final Quaternion[] tempControlQuaternions = new Quaternion[] {new Quaternion(), new Quaternion(), new Quaternion(), new Quaternion()};
@@ -378,7 +379,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final Quaternion qInterpolatedNext = new Quaternion();
 
    private final Vector4D qDot = new Vector4D();
-   private final Vector4D qDDotOld = new Vector4D();
+//   private final Vector4D qDDotOld = new Vector4D();
    private final Vector4D qDDot = new Vector4D();
 
    @Override
@@ -393,14 +394,19 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          currentAngularAcceleration.setToZero();
          return;
       }
-      else if (currentTime.getDoubleValue() <= 0.0)
+      else if (currentTime.getDoubleValue() < 0.0)
       {
          currentOrientation.set(initialOrientation);
          currentAngularVelocity.set(initialAngularVelocity);
          currentAngularAcceleration.setToZero();
          return;
       }
-
+//      else if(time < 2.0 * dtForFiniteDifference)
+//      {
+//         time = 2.0 * dtForFiniteDifference;
+//         this.currentTime.set(time);
+//      }
+      
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       double timePrevious = time - dtForFiniteDifference;
       double timeNext = time + dtForFiniteDifference;
@@ -421,7 +427,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       currentAngularVelocity.set(tempAngularVelocity);
       currentAngularAcceleration.set(tempAngularAcceleration);
 
-      qDDotOld.set(qDDot);
+//      qDDotOld.set(qDDot);
    }
 
    private final Quaternion tempQuatForInterpolation = new Quaternion();
@@ -450,7 +456,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       double timeCube = timeSquare * time;
 
       cumulativeBeziers[1].set(1 - MathTools.pow(1 - time, 3));
-      cumulativeBeziers[2].set(3.0 * timeSquare - 2 * timeCube);
+      cumulativeBeziers[2].set(3.0 * timeSquare - 2.0 * timeCube);
       cumulativeBeziers[3].set(timeCube);
    }
 
