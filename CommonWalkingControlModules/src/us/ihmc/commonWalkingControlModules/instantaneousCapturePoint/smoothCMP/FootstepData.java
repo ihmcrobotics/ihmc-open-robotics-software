@@ -25,11 +25,9 @@ public class FootstepData
       this.footstep = footstep;
       this.timing = timing;      
    }
-   
-   public void addFootstepPoint(FramePoint2d newPoint)
-   {
-      //TODO 
-   }
+
+   public FootstepData()
+   {}
 
    public void setFootstep(Footstep footstep)
    {

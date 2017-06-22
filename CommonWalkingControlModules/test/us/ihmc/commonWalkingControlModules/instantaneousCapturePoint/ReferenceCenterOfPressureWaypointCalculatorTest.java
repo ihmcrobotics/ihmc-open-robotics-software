@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureTrajectoryCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureWaypointCalculator;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -32,7 +32,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceCenterOfPressureTrajectoryCalculatorTest
+public class ReferenceCenterOfPressureWaypointCalculatorTest
 {
    private final int numberOfContactPoints = 4;
    private final double soleFrameYDisplacement = 0.2;
@@ -47,7 +47,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    private final double stepWidth = soleFrameYDisplacement;
    private final double EPSILON = 10e-5;
 
-   ReferenceCenterOfPressureTrajectoryCalculator testCoPGenerator;
+   ReferenceCenterOfPressureWaypointCalculator testCoPGenerator;
    SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
@@ -99,8 +99,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       plannerParameters = new SmoothCMPPlannerParameters();
       numberOfFootstepsToConsider.set(plannerParameters.getNumberOfFootstepsToConsider());
-      testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
-                                                                           contactableFeet, numberOfFootstepsToConsider, parentRegistry);
+      testCoPGenerator = new ReferenceCenterOfPressureWaypointCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
+                                                                         contactableFeet, numberOfFootstepsToConsider, parentRegistry);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
 
@@ -134,37 +134,56 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    }
 
    @Test
-   public void testDoubleSupportFootstepPlan()
+   public void testDoubleSupportFootstepPlanFromRest()
    {
       int numberOfFootsteps = 3;
       sendFootStepMessages(numberOfFootsteps);
-      assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
-      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.LEFT);
+      assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
+      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
-      assertTrue("Incorrect number of CoP way points generated", copList.size() == numberOfFootsteps);
+      // initial waypoint between the feet
       assertTrue(copList.get(0).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
-      assertTrue(copList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), -0.05, -0.2), EPSILON));
-      assertTrue(copList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.2), EPSILON));
-      assertTrue(copList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.2), EPSILON));
-      assertTrue(copList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.25, 0.2), EPSILON));
-      assertTrue(copList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.3, 0.2), EPSILON));
-      testCoPGenerator.clearPlan();
-      assertTrue("Plan not cleared", testCoPGenerator.getWaypoints().isEmpty());
-      assertTrue("Footsteps cleared on clearing plan", testCoPGenerator.getNumberOfFootstepRegistered() == 3);
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(0).get(i).containsNaN());
+      assertTrue(copList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
+      assertTrue(copList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06,-0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(1).get(i).containsNaN());
+      assertTrue(copList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
+      assertTrue(copList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(2).get(i).containsNaN());
+      assertTrue(copList.get(3).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.6, -0.205), EPSILON));
+      assertTrue(copList.get(3).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(3).get(i).containsNaN());
       testCoPGenerator.clear();
-      assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepRegistered() == 0);
+      assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepsRegistered() == 0);
+   }
 
+   @Test
+   public void testDoubleSupportFootstepPlanMoving()
+   {
       sendFootStepMessages(10);
       testCoPGenerator.setInitialCoPPosition(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
-      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.LEFT);
-      copList = testCoPGenerator.getWaypoints();
-      assertTrue("Incorrect number of CoP way points generated", copList.size() == 3 * 3 + 1);
-      assertTrue(copList.get(0).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1), EPSILON));
-      assertTrue(copList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), -0.05, -0.2), EPSILON));
-      assertTrue(copList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.2), EPSILON));
-      assertTrue(copList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.2), EPSILON));
-      assertTrue(copList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.25, 0.2), EPSILON));
-      assertTrue(copList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.3, 0.2), EPSILON));
+      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT);
+      List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
+      assertTrue(copList.get(0).get(0).containsNaN());
+      assertTrue(copList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(0).get(i).containsNaN());
+      assertTrue(copList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
+      assertTrue(copList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(1).get(i).containsNaN());
+      assertTrue(copList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
+      assertTrue(copList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(2).get(i).containsNaN());
+      assertTrue(copList.get(3).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.6, -0.205), EPSILON));
+      assertTrue(copList.get(3).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(3).get(i).containsNaN());
    }
 
    @Test
@@ -172,31 +191,26 @@ public class ReferenceCenterOfPressureTrajectoryCalculatorTest
    {
       int numberOfFootsteps = 10;
       sendFootStepMessages(numberOfFootsteps);
-      assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepRegistered() == numberOfFootsteps);
+      assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
       FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2);
       testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
-      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
-      List<CoPPointsInFoot> coPList = testCoPGenerator.getWaypoints();
-      assertTrue("Incorrect number of CoP way points generated", coPList.size() == 3 * 3);
-      assertTrue(coPList.get(0).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));
-      assertTrue(coPList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.2), EPSILON));
-      assertTrue(coPList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.2), EPSILON));
-      assertTrue(coPList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.25, 0.2), EPSILON));
-      assertTrue(coPList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.3, 0.2), EPSILON));
-      assertTrue(coPList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.2), EPSILON));
-
-      testCoPGenerator.clearPlan();
-      coPList = testCoPGenerator.getWaypoints();
-      assertTrue("Unable to clear plan", coPList.isEmpty());
-      testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
-      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
-      coPList = testCoPGenerator.getWaypoints();
-      assertTrue("Incorrect number of CoP way points generated", coPList.size() == 3 * 3 - 1);      
-      assertTrue(coPList.get(0).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2), EPSILON));
-      assertTrue(coPList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.2), EPSILON));
-      assertTrue(coPList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.25, 0.2), EPSILON));
-      assertTrue(coPList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.3, 0.2), EPSILON));
-      assertTrue(coPList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.2), EPSILON));
-      assertTrue(coPList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.55, -0.2), EPSILON));
+      testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.RIGHT);
+      List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
+      assertTrue(copList.get(0).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
+      assertTrue(copList.get(0).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(0).get(i).containsNaN());
+      assertTrue(copList.get(1).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
+      assertTrue(copList.get(1).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(1).get(i).containsNaN());
+      assertTrue(copList.get(2).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.6, -0.205), EPSILON));
+      assertTrue(copList.get(2).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(2).get(i).containsNaN());
+      assertTrue(copList.get(3).get(0).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.9, 0.205), EPSILON));
+      assertTrue(copList.get(3).get(1).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.96, 0.180), EPSILON));
+      for (int i = 2; i < 4; i++)
+         assertTrue(copList.get(3).get(i).containsNaN());
    }
 }

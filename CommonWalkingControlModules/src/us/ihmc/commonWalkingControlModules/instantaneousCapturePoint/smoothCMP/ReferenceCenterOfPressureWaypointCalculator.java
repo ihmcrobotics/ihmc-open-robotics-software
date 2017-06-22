@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynomialTrajectoryPlannerInterface
+public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomialTrajectoryPlannerInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double COP_POINT_SIZE = 0.005;
@@ -61,7 +61,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
 
    private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
 
-   private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<FootstepData>(3, FootstepData.class);
+   private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<FootstepData>(10, FootstepData.class);
 
    private final FramePoint tmpCoP = new FramePoint();
    private final FramePoint firstCoP = new FramePoint();
@@ -101,9 +101,9 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCenterOfPressureTrajectoryCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
-                                                        BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                                        YoInteger numberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+   public ReferenceCenterOfPressureWaypointCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
+                                                      BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                                      YoInteger numberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -115,14 +115,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       stepLengthToCoPOffsetFactor = new YoDouble(namePrefix + "StepLengthToCMPOffsetFactor", registry);
 
-      for (RobotSide side : RobotSide.values)
-      {
-         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFeet.get(side).getContactPoints2d());
-         defaultFootPolygons.put(side, defaultFootPolygon.getConvexPolygon2d());
-
-         supportFootPolygonsInSoleZUpFrames.put(side, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(side));
-      }
-
       int numberOfPointsPerFoot = plannerParameters.getNumberOfWayPointsPerFoot();
       double[] maxCoPOffsets = plannerParameters.getMaxCoPForwardOffsetsFootFrame();
       double[] minCoPOffsets = plannerParameters.getMinCoPForwardOffsetsFootFrame();
@@ -130,15 +122,20 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       for (int waypointIndex = 0; waypointIndex < numberOfPointsPerFoot; waypointIndex++)
       {
          YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
-         YoDouble minCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
+         YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + waypointIndex, registry);
          maxCoPOffset.set(maxCoPOffsets[waypointIndex]);
          minCoPOffset.set(minCoPOffsets[waypointIndex]);
          this.maxCoPOffsets.add(maxCoPOffset);
-         this.minCoPOffsets.add(maxCoPOffset);
+         this.minCoPOffsets.add(minCoPOffset);
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFeet.get(robotSide).getContactPoints2d());
+         defaultFootPolygons.put(robotSide, defaultFootPolygon.getConvexPolygon2d());
+
+         supportFootPolygonsInSoleZUpFrames.put(robotSide, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(robotSide));
+
          String sidePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
          List<YoFrameVector2d> copUserOffsets = new ArrayList<>();
 
@@ -150,6 +147,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
 
          this.copUserOffsets.put(robotSide, copUserOffsets);
       }
+
 
       this.numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.numberOfUpcomingFootsteps.set(0);
@@ -172,6 +170,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       percentageChickenSupport.set(0.5);
 
       initializeParameters(plannerParameters);
+      clear();
 
       parentRegistry.addChild(registry);
    }
@@ -431,19 +430,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       numberOfUpcomingFootsteps.decrement();
    }
 
-   /**
-    * Clears the CoP plan. Footsteps used to generate the plan are retained
-    */
-   public void clearPlan()
-   {
-      copTrajectoryPolynomials.clear();
-      currentCoPVelocity.setToNaN();
-      currentCoPPosition.setToNaN();
-
-      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
-         copLocationWaypoints.get(i).reset();
-   }
-
    public boolean isDoneWalking()
    {
       return isDoneWalking.getBooleanValue();
@@ -502,11 +488,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       }
    }
 
-   public int getNumberOfFootstepRegistered()
-   {
-      return upcomingFootstepsData.size();
-   }
-
    private FrameConvexPolygon2d getFootSupportPolygon(RobotSide side)
    {
       return supportFootPolygonsInSoleZUpFrames.get(side);
@@ -516,7 +497,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
    {
       return getFootSupportPolygon(side).getCentroid();
    }
-
 
 
    public List<CoPPointsInFoot> getWaypoints()
@@ -729,12 +709,13 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       upcomingSupport.addVertices(tempFootPolygon);
       upcomingSupport.update();
 
-      copLocationWaypoints.get(footIndex).switchCurrentReferenceFrame(worldFrame);
+      copLocationWaypoints.get(footIndex).switchCurrentReferenceFrame(0, worldFrame);
 
       upcomingSupport.getCentroid(tempCentroid);
       tempCentroid3d.setXYIncludingFrame(tempCentroid);
 
       double chicken = MathTools.clamp(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
+      tmpCoP.setToZero(worldFrame);
       if (chicken <= 0.5)
          copLocationWaypoints.get(footIndex).get(0).interpolate(firstCoP, tempCentroid3d, chicken * 2.0);
       else
