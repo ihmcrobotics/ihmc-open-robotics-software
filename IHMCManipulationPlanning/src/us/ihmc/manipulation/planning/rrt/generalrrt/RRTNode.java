@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt;
+package us.ihmc.manipulation.planning.rrt.generalrrt;
 
 import java.util.ArrayList;
 

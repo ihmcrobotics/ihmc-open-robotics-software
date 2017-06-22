@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 

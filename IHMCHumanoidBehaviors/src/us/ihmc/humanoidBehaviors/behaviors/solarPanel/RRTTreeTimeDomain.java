@@ -3,9 +3,9 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.RRTTree;
-import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTTree;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTValidConnection;
 
 public class RRTTreeTimeDomain extends RRTTree
 {

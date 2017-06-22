@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.rrtPlanner;
 import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.RRTTree;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTTree;
 
 public class TimeDomainTree extends RRTTree
 {

@@ -26,7 +26,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
-import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;

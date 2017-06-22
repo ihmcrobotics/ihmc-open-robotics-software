@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt;
+package us.ihmc.manipulation.planning.rrt.generalrrt;
 
 import java.awt.Color;
 import java.awt.Dimension;
