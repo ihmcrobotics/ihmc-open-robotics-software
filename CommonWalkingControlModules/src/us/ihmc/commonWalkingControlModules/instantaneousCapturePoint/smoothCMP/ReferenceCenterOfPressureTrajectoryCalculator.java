@@ -6,8 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CMPComponentPolynomialTrajectoryPlannerInterface;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CMPComponentType;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CoPPolynomialTrajectoryPlannerInterface;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FootstepTrajectoryPoint;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -41,9 +40,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPComponentPolynomialTrajectoryPlannerInterface
+public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynomialTrajectoryPlannerInterface
 {
-   private static final CMPComponentType cmpComponentType = CMPComponentType.CoP;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double CoPPointSize = 0.005;
 
@@ -86,7 +84,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
 
    /**
     * @param copPlannerParameters
-    * @param bipedSupportPolygons
+=   * @param bipedSupportPolygons
     * @param contactableFeet
     * @param parentRegistry
     */
@@ -468,12 +466,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CMPCompone
    {
       FramePoint nextCoP = copWayPoints.getTrajectoryPoint(0).getPositionCopy();
       entryCMPToPack.setIncludingFrame(nextCoP);
-   }
-
-   @Override
-   public CMPComponentType getComponentType()
-   {
-      return cmpComponentType;
    }
 
    @Override
