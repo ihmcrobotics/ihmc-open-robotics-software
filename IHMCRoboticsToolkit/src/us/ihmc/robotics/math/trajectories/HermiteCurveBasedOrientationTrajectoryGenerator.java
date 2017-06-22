@@ -4,9 +4,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,6 +15,9 @@ import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
@@ -319,7 +319,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       currentOrientation.set(initialOrientation);
       currentAngularVelocity.set(initialAngularVelocity);
       currentAngularAcceleration.setToZero();
-      compute(0.0);
    }
 
    private final Quaternion[] tempControlQuaternions = new Quaternion[] {new Quaternion(), new Quaternion(), new Quaternion(), new Quaternion()};
@@ -379,7 +378,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final Quaternion qInterpolatedNext = new Quaternion();
 
    private final Vector4D qDot = new Vector4D();
-//   private final Vector4D qDDotOld = new Vector4D();
    private final Vector4D qDDot = new Vector4D();
 
    @Override
@@ -394,19 +392,14 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          currentAngularAcceleration.setToZero();
          return;
       }
-      else if (currentTime.getDoubleValue() < 0.0)
+      else if (currentTime.getDoubleValue() <= 0.0)
       {
          currentOrientation.set(initialOrientation);
          currentAngularVelocity.set(initialAngularVelocity);
          currentAngularAcceleration.setToZero();
          return;
       }
-//      else if(time < 2.0 * dtForFiniteDifference)
-//      {
-//         time = 2.0 * dtForFiniteDifference;
-//         this.currentTime.set(time);
-//      }
-      
+
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       double timePrevious = time - dtForFiniteDifference;
       double timeNext = time + dtForFiniteDifference;
@@ -426,8 +419,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       currentOrientation.set(qInterpolated);
       currentAngularVelocity.set(tempAngularVelocity);
       currentAngularAcceleration.set(tempAngularAcceleration);
-
-//      qDDotOld.set(qDDot);
    }
 
    private final Quaternion tempQuatForInterpolation = new Quaternion();
