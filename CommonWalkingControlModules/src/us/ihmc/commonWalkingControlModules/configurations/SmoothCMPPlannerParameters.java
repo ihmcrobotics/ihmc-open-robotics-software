@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public abstract class CenterOfPressurePlannerParameters
+public abstract class SmoothCMPPlannerParameters extends CapturePointPlannerParameters
 {  
    /**
     * Provides the CoP way point list for generating CoP trajectories
@@ -13,6 +13,15 @@ public abstract class CenterOfPressurePlannerParameters
     * @return
     */
    public abstract List<Vector2D> getCoPWayPointLocationsFootFrame(RobotSide side);
+
+   public List<Vector2D> getMaxCoPOffsetsFootFrame()
+   {
+   }
+
+   public List<Vector2D> getMinCoPOffsetsFootFrame()
+   {
+   }
+
    /**
     * Provides a list of the alphas that denote the percentage of time taken to transition from one CoP way point to another.
     * Summation of the list must be equal to 1. 
