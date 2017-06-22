@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.CenterOfPressurePlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,14 +28,14 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoInteger numberOfFootstepsToConsider;
 
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                   CapturePointPlannerParameters icpPlannerParameters, CenterOfPressurePlannerParameters copPlannerParameters,
+                                   CapturePointPlannerParameters icpPlannerParameters, SmoothCMPPlannerParameters plannerParameters,
                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, icpPlannerParameters);
 
       numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
 
-      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, copPlannerParameters, bipedSupportPolygons, contactableFeet,
+      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
                                                                                   numberOfFootstepsToConsider, parentRegistry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator();
