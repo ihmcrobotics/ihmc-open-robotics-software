@@ -275,6 +275,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
       spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
+      
+      spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
 
       //update the qp weight yovariables.
       ReferenceFrame angularSelectionFrame = weightMatrix.getAngularWeightFrame();
