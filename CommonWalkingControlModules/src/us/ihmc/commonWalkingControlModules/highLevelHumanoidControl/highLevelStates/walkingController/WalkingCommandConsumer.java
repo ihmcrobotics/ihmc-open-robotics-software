@@ -44,13 +44,13 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingCommandConsumer
 {
@@ -95,10 +95,18 @@ public class WalkingCommandConsumer
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
       this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
-      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+
+      if (head != null)
+      {
+         ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
+         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+      }
+      else
+      {
+         this.headManager = null;
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -127,7 +135,7 @@ public class WalkingCommandConsumer
    {
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
-   
+
    public void update()
    {
       commandConsumerWithDelayBuffers.update();
@@ -135,6 +143,11 @@ public class WalkingCommandConsumer
 
    public void consumeHeadCommands()
    {
+      if (headManager == null)
+      {
+         return;
+      }
+
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
          headManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class));
@@ -187,25 +200,25 @@ public class WalkingCommandConsumer
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(GoHomeCommand.class))
          return;
-      
+
       List<GoHomeCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(GoHomeCommand.class);
       for(int i = 0; i < commands.size(); i++)
       {
          GoHomeCommand command = commands.get(i);
-         
+
          for (RobotSide robotSide : RobotSide.values)
          {
             if (command.getRequest(robotSide, BodyPart.ARM))
                handManagers.get(robotSide).goHome(command.getTrajectoryTime());
          }
-         
+
          if (command.getRequest(BodyPart.PELVIS))
          {
             pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
             balanceManager.goHome();
             comHeightManager.goHome(command.getTrajectoryTime());
          }
-         
+
          if (command.getRequest(BodyPart.CHEST))
          {
             chestManager.goHome(command.getTrajectoryTime());
