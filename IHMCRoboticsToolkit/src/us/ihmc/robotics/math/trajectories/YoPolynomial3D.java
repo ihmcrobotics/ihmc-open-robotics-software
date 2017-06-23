@@ -273,6 +273,12 @@ public class YoPolynomial3D
       return zPolynomial;
    }
 
+   public void reset()
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).reset();
+   }
+
    public void setConstant(Point3DReadOnly z)
    {
       for (int index = 0; index < 3; index++)

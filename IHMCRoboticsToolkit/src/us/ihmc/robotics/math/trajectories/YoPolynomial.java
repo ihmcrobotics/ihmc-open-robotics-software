@@ -106,6 +106,13 @@ public class YoPolynomial
       return a;
    }
 
+   public void reset()
+   {
+      numberOfCoefficients.set(0);
+      for (int i = 0; i < maximumNumberOfCoefficients; i++)
+         a[i].setToNaN();
+   }
+
    public void setConstant(double z)
    {
       numberOfCoefficients.set(1);

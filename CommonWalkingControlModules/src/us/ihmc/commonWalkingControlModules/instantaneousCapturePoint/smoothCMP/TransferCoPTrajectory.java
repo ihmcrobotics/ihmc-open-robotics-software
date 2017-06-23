@@ -13,6 +13,7 @@ public class TransferCoPTrajectory
    private final YoDouble transferSplitFraction;
 
    private final YoFramePolynomial3D transferSegment;
+
    private final FramePoint intermediatePoint = new FramePoint();
 
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
@@ -25,7 +26,12 @@ public class TransferCoPTrajectory
       transferSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "TransferSegment", 5, referenceFrame, registry);
    }
 
-   public void compute(CoPSplineType splineType, FramePoint initialCoP, FramePoint finalCoP)
+   public void reset()
+   {
+      transferSegment.reset();
+   }
+
+   public void update(CoPSplineType splineType, FramePoint initialCoP, FramePoint finalCoP)
    {
       intermediatePoint.interpolate(initialCoP, finalCoP, transferSplitFraction.getDoubleValue());
       double intermediateDuration = 0.5 * transferDuration.getDoubleValue();
