@@ -115,12 +115,14 @@ public class YoPolynomial
 
    public void set(YoPolynomial other)
    {
+      reset();
+
       numberOfCoefficients.set(other.getNumberOfCoefficients());
 
       xInitial = other.getXInitial();
       xFinal = other.getXFinal();
 
-      for (int i = 0; i < maximumNumberOfCoefficients; i++)
+      for (int i = 0; i < other.getNumberOfCoefficients(); i++)
          a[i].set(other.getCoefficient(i));
    }
 
