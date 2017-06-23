@@ -132,6 +132,14 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       setConstant(z.getPoint());
    }
 
+   public void setCubic(double t0, double tFinal, FramePoint z0, FramePoint zFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+
+      setCubic(t0, tFinal, z0.getPoint(), zFinal.getPoint());
+   }
+
    public void setCubic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal, FrameVector zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);

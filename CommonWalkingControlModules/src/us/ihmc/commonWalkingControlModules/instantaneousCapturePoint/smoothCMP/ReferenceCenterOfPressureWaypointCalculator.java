@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -80,7 +79,6 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
    private final FramePoint2d previousCoP2d = new FramePoint2d();
    private final FramePoint2d firstHeelCoPForSingleSupport = new FramePoint2d();
 
-   private final ArrayList<YoPolynomial3D> copTrajectoryPolynomials = new ArrayList<>();
 
    private final List<CoPPointsInFoot> copLocationWaypoints = new ArrayList<>();
 
@@ -242,7 +240,6 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
    public void clear()
    {
       upcomingFootstepsData.clear();
-      copTrajectoryPolynomials.clear();
       numberOfUpcomingFootsteps.set(0);
       currentCoPPosition.setToNaN();
       currentCoPVelocity.setToNaN();
@@ -746,7 +743,6 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
    {
       convertCoPWayPointsToWorldFrame();
       generatePolynomialCoefficients();
-      return copTrajectoryPolynomials;
    }
    */
 
@@ -811,7 +807,6 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
          Point3D point1 = wayPoint1.getPositionCopy().getPoint();
          Point3D point2 = wayPoint2.getPositionCopy().getPoint();
          piecewiseSpline.setLinear(wayPoint1.getTime(), wayPoint2.getTime(), point1, point2);
-         copTrajectoryPolynomials.add(piecewiseSpline);
       }
    }
    */
