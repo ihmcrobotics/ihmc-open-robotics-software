@@ -28,7 +28,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final ReferenceCenterOfPressureTrajectoryCalculator referenceCoPsCalculator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
-   private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
+   private final ReferenceICPTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoBoolean useSegmentedSwing;
@@ -63,7 +63,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, swingDurations, transferDurations, swingDurationAlphas, transferDurationAlphas,
                                                                   useSegmentedSwing, registry);
 
-      referenceICPGenerator = new ICPPlannerTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
+      referenceICPGenerator = new ReferenceICPTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
 
       parentRegistry.addChild(registry);
 

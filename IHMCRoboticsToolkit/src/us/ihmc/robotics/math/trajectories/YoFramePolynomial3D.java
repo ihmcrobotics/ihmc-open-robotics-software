@@ -501,6 +501,12 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       return framePosition;
    }
 
+   public void getFramePosition(FramePoint positionToPack)
+   {
+      positionToPack.setToZero(referenceFrame);
+      positionToPack.set(getPosition());
+   }
+
    public FrameVector getFrameVelocity()
    {
       frameVelocity.setToZero(referenceFrame);
@@ -508,11 +514,23 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       return frameVelocity;
    }
 
+   public void getFrameVelocity(FrameVector velocityToPack)
+   {
+      velocityToPack.setToZero(referenceFrame);
+      velocityToPack.set(getVelocity());
+   }
+
    public FrameVector getFrameAcceleration()
    {
       frameAcceleration.setToZero(referenceFrame);
       frameAcceleration.set(getAcceleration());
       return frameAcceleration;
+   }
+
+   public void getFrameAcceleration(FrameVector accelerationToPack)
+   {
+      accelerationToPack.setToZero(referenceFrame);
+      accelerationToPack.set(getAcceleration());
    }
 
    public ReferenceFrame getReferenceFrame()
