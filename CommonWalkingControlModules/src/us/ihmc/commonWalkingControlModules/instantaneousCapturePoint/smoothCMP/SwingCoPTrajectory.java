@@ -15,7 +15,9 @@ public class SwingCoPTrajectory
 {
    private final YoDouble swingDuration;
    private final YoDouble swingSplitFraction;
-   private final YoDouble swingShiftDurationFraction;
+   private final YoDouble swingDurationShiftFraction;
+
+   private final YoInteger numberOfSegments;
 
    private final YoFramePolynomial3D swingShiftSegment;
    private final YoFramePolynomial3D swingToeShiftSegment;
@@ -28,29 +30,40 @@ public class SwingCoPTrajectory
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
    public SwingCoPTrajectory(String namePrefix, int stepNumber, YoDouble swingDuration, YoDouble swingSplitFraction,
-                             YoDouble swingShiftDurationFraction, YoVariableRegistry registry)
+                             YoDouble swingDurationShiftFraction, YoVariableRegistry registry)
    {
       this.swingDuration = swingDuration;
       this.swingSplitFraction = swingSplitFraction;
-      this.swingShiftDurationFraction = swingShiftDurationFraction;
+      this.swingDurationShiftFraction = swingDurationShiftFraction;
+
+      numberOfSegments = new YoInteger(namePrefix + stepNumber + "SwingNumberOfSegments", registry);
 
       swingShiftSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingShiftSegment", 5, referenceFrame, registry);
       swingToeShiftSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingToeShiftSegment", 5, referenceFrame, registry);
       swingConstantSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingConstantSegment", 1, referenceFrame, registry);
    }
 
-   public void computeOnePointPerFoot(FramePoint cop)
+   public void reset()
+   {
+      swingShiftSegment.reset();
+      swingToeShiftSegment.reset();
+      swingConstantSegment.reset();
+   }
+
+   public void updateOnePointPerFoot(FramePoint cop)
    {
       swingConstantSegment.setConstant(cop);
       swingSegments.add(swingConstantSegment);
+
+      numberOfSegments.set(1);
    }
 
    public void updateTwoPointsPerFoot(CoPSplineType splineType, FramePoint heelCoP, FramePoint ballCoP)
    {
       intermediatePoint.interpolate(heelCoP, ballCoP, swingSplitFraction.getDoubleValue());
 
-      double shiftDuration = swingShiftDurationFraction.getDoubleValue() * swingDuration.getDoubleValue();
-      double constantDuration = (1.0 - swingShiftDurationFraction.getDoubleValue()) * swingDuration.getDoubleValue();
+      double shiftDuration = swingDurationShiftFraction.getDoubleValue() * swingDuration.getDoubleValue();
+      double constantDuration = (1.0 - swingDurationShiftFraction.getDoubleValue()) * swingDuration.getDoubleValue();
       double intermediateDuration = 0.5 * shiftDuration;
 
       switch (splineType)
@@ -67,12 +80,14 @@ public class SwingCoPTrajectory
 
       swingSegments.add(swingShiftSegment);
       swingSegments.add(swingConstantSegment);
+
+      numberOfSegments.set(2);
    }
 
    public void updateThreePointsPerFoot(CoPSplineType splineType, FramePoint heelCoP, FramePoint ballCoP, FramePoint toeCoP)
    {
-      double shiftDuration = swingShiftDurationFraction.getDoubleValue() * swingDuration.getDoubleValue();
-      double constantDuration = (1.0 - swingShiftDurationFraction.getDoubleValue()) * swingDuration.getDoubleValue();
+      double shiftDuration = swingDurationShiftFraction.getDoubleValue() * swingDuration.getDoubleValue();
+      double constantDuration = (1.0 - swingDurationShiftFraction.getDoubleValue()) * swingDuration.getDoubleValue();
       double intermediateDuration = swingSplitFraction.getDoubleValue() * shiftDuration;
 
       switch (splineType)
@@ -92,6 +107,8 @@ public class SwingCoPTrajectory
       swingSegments.add(swingShiftSegment);
       swingSegments.add(swingToeShiftSegment);
       swingSegments.add(swingConstantSegment);
+
+      numberOfSegments.set(3);
    }
 
 }

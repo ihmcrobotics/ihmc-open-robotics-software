@@ -26,7 +26,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = true;
 
-   private final ReferenceCenterOfPressureWaypointCalculator referenceCoPsCalculator;
+   private final ReferenceCenterOfPressureTrajectoryCalculator referenceCoPsCalculator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
@@ -55,10 +55,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.add(swingDurationShiftFraction);
       }
 
-      referenceCoPsCalculator = new ReferenceCenterOfPressureWaypointCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                this.numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                                swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
-                                                                                useSegmentedSwing, registry);
+      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
+                                                                                  this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
+                                                                                  useSegmentedSwing, registry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, swingDurations, transferDurations, swingDurationAlphas, transferDurationAlphas,
                                                                   useSegmentedSwing, registry);

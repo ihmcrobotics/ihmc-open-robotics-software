@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureWaypointCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureTrajectoryCalculator;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -49,7 +49,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    private final double stepWidth = soleFrameYDisplacement;
    private final double EPSILON = 10e-5;
 
-   ReferenceCenterOfPressureWaypointCalculator testCoPGenerator;
+   ReferenceCenterOfPressureTrajectoryCalculator testCoPGenerator;
    SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
@@ -124,10 +124,10 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       }
       useSegmentedSwing.set(true);
 
-      testCoPGenerator = new ReferenceCenterOfPressureWaypointCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
-                                                                         contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                         swingSplitFractions, swingDurationShiftFractions, transferSplitFractions,
-                                                                         useSegmentedSwing, parentRegistry);
+      testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
+                                                                           contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions,
+                                                                           useSegmentedSwing, parentRegistry);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
 
