@@ -29,7 +29,7 @@ public class WholeBodyPlanningVisualizer
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoGraphicsListRegistry yoGraphicsListRegistry2 = new YoGraphicsListRegistry();
    private SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-   private SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("InhoRobot"), parameters);
+   private SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"), parameters);
    
    private final double trajectoryTime = 10.0;
    private final double dt = 0.001;
@@ -93,6 +93,27 @@ public class WholeBodyPlanningVisualizer
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
 
       
+      
+      
+      
+      TaskNode3D rootNode = new TaskNode3D();
+      
+      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode);
+      
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, 10.0);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.92);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.1), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
+            
+      taskNodeTree.expandTree(10);
+      
+      for(int i=0;i<taskNodeTree.getWholeNodes().size();i++)
+      {
+         taskNodeTree.getWholeNodes().get(i).printNodeData();
+      }
+      
+      
+      
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.setVariableNameToTrack("centroidGraphic");
       simulationOverheadPlotterFactory.setShowOnStart(true);
@@ -113,11 +134,7 @@ public class WholeBodyPlanningVisualizer
 //      {
 //         FramePoint currentPosition = new FramePoint(worldFrame, 0.2, -0.2 + 0.4/trajectoryTime*t, 0.5);
 //         yoPointInho.set(currentPosition);
-//         
-//         
-//
-//         
-//         
+//      
 //         scs.tickAndUpdate();
 //      }
       

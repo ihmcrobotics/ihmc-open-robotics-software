@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNode3D;
 import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNodeTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -32,6 +33,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -174,7 +176,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
             
       TaskNode3D rootNode = new TaskNode3D();
       
-      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode);
+      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
       
       
       
@@ -192,7 +194,9 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
          taskNodeTree.getWholeNodes().get(i).printNodeData();
       }
       
-//      WholeBodyPlanningVisualizer visulaizer = new WholeBodyPlanningVisualizer();
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
       
       PrintTools.info("END");     
    } 
