@@ -1,12 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import org.apache.commons.lang3.Conversion;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -20,20 +18,19 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PushAndWalkBehavior extends AbstractBehavior
 {
@@ -51,12 +48,12 @@ public class PushAndWalkBehavior extends AbstractBehavior
    private final YoDouble errorFilterAlpha = new YoDouble("ErrorFilterAlpha", registry);
    private final AlphaFilteredYoVariable filteredError = new AlphaFilteredYoVariable("FilteredError", registry, errorFilterAlpha);
    
-   private final DoubleYoVariable yawErrorThreshold = new DoubleYoVariable("YawErrorThreshold", registry);
-   private final DoubleYoVariable yawErrorFilterAlpha = new DoubleYoVariable("YawErrorFilterAlpha", registry);
+   private final YoDouble yawErrorThreshold = new YoDouble("YawErrorThreshold", registry);
+   private final YoDouble yawErrorFilterAlpha = new YoDouble("YawErrorFilterAlpha", registry);
    private final AlphaFilteredYoVariable yawFilteredError = new AlphaFilteredYoVariable("YawFilteredError", registry, yawErrorFilterAlpha);
-   private final DoubleYoVariable yawMaxAnglePerStep = new DoubleYoVariable("YawMaxAnglePerStep", registry);
+   private final YoDouble yawMaxAnglePerStep = new YoDouble("YawMaxAnglePerStep", registry);
    
-   private final DoubleYoVariable[] footWorkSpaceVertex = new DoubleYoVariable[8];
+   private final YoDouble[] footWorkSpaceVertex = new YoDouble[8];
    private final HumanoidReferenceFrames referenceFrames;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -75,14 +72,14 @@ public class PushAndWalkBehavior extends AbstractBehavior
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       
       
-      footWorkSpaceVertex[0] = new DoubleYoVariable("FootWorkSpaceVertex1X", registry);
-      footWorkSpaceVertex[1] = new DoubleYoVariable("FootWorkSpaceVertex1Y", registry);
-      footWorkSpaceVertex[2] = new DoubleYoVariable("FootWorkSpaceVertex2X", registry);
-      footWorkSpaceVertex[3] = new DoubleYoVariable("FootWorkSpaceVertex2Y", registry);
-      footWorkSpaceVertex[4] = new DoubleYoVariable("FootWorkSpaceVertex3X", registry);
-      footWorkSpaceVertex[5] = new DoubleYoVariable("FootWorkSpaceVertex3Y", registry);
-      footWorkSpaceVertex[6] = new DoubleYoVariable("FootWorkSpaceVertex4X", registry);
-      footWorkSpaceVertex[7] = new DoubleYoVariable("FootWorkSpaceVertex4Y", registry);
+      footWorkSpaceVertex[0] = new YoDouble("FootWorkSpaceVertex1X", registry);
+      footWorkSpaceVertex[1] = new YoDouble("FootWorkSpaceVertex1Y", registry);
+      footWorkSpaceVertex[2] = new YoDouble("FootWorkSpaceVertex2X", registry);
+      footWorkSpaceVertex[3] = new YoDouble("FootWorkSpaceVertex2Y", registry);
+      footWorkSpaceVertex[4] = new YoDouble("FootWorkSpaceVertex3X", registry);
+      footWorkSpaceVertex[5] = new YoDouble("FootWorkSpaceVertex3Y", registry);
+      footWorkSpaceVertex[6] = new YoDouble("FootWorkSpaceVertex4X", registry);
+      footWorkSpaceVertex[7] = new YoDouble("FootWorkSpaceVertex4Y", registry);
       
       footWorkSpaceVertex[0].set(0.25); footWorkSpaceVertex[1].set(0.18);
       footWorkSpaceVertex[2].set(0.15); footWorkSpaceVertex[3].set(0.35);
