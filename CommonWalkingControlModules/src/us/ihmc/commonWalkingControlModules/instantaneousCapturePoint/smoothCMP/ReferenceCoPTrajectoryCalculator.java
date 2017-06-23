@@ -34,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynomialTrajectoryPlannerInterface
+public class ReferenceCoPTrajectoryCalculator implements CoPPolynomialTrajectoryPlannerInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double COP_POINT_SIZE = 0.005;
@@ -55,8 +55,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
 
    private final List<YoDouble> transferDurations;
    private final List<YoDouble> transferSplitFractions;
-
-   private final YoBoolean useSegmentedSwing;
 
    private final List<TransferCoPTrajectory> transferCoPTrajectories = new ArrayList<>();
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
@@ -116,11 +114,11 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCenterOfPressureTrajectoryCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
-                                                        BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                                        YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
-                                                        List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
-                                                        List<YoDouble> transferSplitFractions, YoBoolean useSegmentedSwing, YoVariableRegistry parentRegistry)
+   public ReferenceCoPTrajectoryCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
+                                           BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                           YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
+                                           List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -129,7 +127,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
-      this.useSegmentedSwing = useSegmentedSwing;
 
       firstHeelCoPForSingleSupport.setToNaN();
 
@@ -518,7 +515,7 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
          boolean isUpcomingFootstepLast = (indexOfUpcomingFootstep >= Math.min(upcomingFootstepsData.size(), numberOfFootstepsToConsider.getIntegerValue()));
          if (isUpcomingFootstepLast)
          {
-            // fixme
+            // fixme this is predicting the final heel point as something incorrect
             predictedSupportPolygon.clear(currentFootstep.getSoleReferenceFrame());
             addPredictedContactPointsToPolygon(currentFootstep, predictedSupportPolygon);
             predictedSupportPolygon.update();

@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCenterOfPressureTrajectoryCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryCalculator;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -49,7 +49,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    private final double stepWidth = soleFrameYDisplacement;
    private final double EPSILON = 10e-5;
 
-   ReferenceCenterOfPressureTrajectoryCalculator testCoPGenerator;
+   ReferenceCoPTrajectoryCalculator testCoPGenerator;
    SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
@@ -64,7 +64,6 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
-   private final YoBoolean useSegmentedSwing = new YoBoolean("useSegmentedSwing", parentRegistry);
 
    @Before
    public void setUp()
@@ -122,12 +121,10 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          transferDurations.add(transferDuration);
          transferSplitFractions.add(transferSplitFraction);
       }
-      useSegmentedSwing.set(true);
 
-      testCoPGenerator = new ReferenceCenterOfPressureTrajectoryCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
-                                                                           contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions,
-                                                                           useSegmentedSwing, parentRegistry);
+      testCoPGenerator = new ReferenceCoPTrajectoryCalculator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
+                                                              contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                              swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, parentRegistry);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
 

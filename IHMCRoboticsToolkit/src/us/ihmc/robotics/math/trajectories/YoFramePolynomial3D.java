@@ -125,6 +125,15 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       this.referenceFrame = referenceFrame;
    }
 
+   public void set(YoFramePolynomial3D other)
+   {
+      setReferenceFrame(other.getReferenceFrame());
+
+      xPolynomial.set(other.getYoPolynomialX());
+      yPolynomial.set(other.getYoPolynomialY());
+      zPolynomial.set(other.getYoPolynomialZ());
+   }
+
    public void setConstant(FramePoint z)
    {
       z.checkReferenceFrameMatch(referenceFrame);

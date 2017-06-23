@@ -26,12 +26,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = true;
 
-   private final ReferenceCenterOfPressureTrajectoryCalculator referenceCoPsCalculator;
+   private final ReferenceCoPTrajectoryCalculator referenceCoPsCalculator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ReferenceICPTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
-   private final YoBoolean useSegmentedSwing;
 
    private final YoInteger numberOfFootstepsToConsider;
 
@@ -40,9 +39,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, icpPlannerParameters);
-
-      useSegmentedSwing = new YoBoolean(namePrefix + "UseSegmentedSwing", registry);
-      useSegmentedSwing.set(true);
 
       int numberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       this.numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
@@ -55,13 +51,13 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.add(swingDurationShiftFraction);
       }
 
-      referenceCoPsCalculator = new ReferenceCenterOfPressureTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                  this.numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
-                                                                                  useSegmentedSwing, registry);
+      referenceCoPsCalculator = new ReferenceCoPTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
+                                                                     this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                     swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
+                                                                     registry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, swingDurations, transferDurations, swingDurationAlphas, transferDurationAlphas,
-                                                                  useSegmentedSwing, registry);
+                                                                  registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
 
