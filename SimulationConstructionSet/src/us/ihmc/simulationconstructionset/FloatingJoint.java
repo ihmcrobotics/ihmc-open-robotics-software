@@ -6,8 +6,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingJointPhysics;
@@ -19,22 +19,22 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
    private Quaternion tempOrientation1 = new Quaternion();
    private Vector3D tempPosition1 = new Vector3D();
 
-   public DoubleYoVariable q_x, q_y, q_z;    // in world-fixed frame
-   public DoubleYoVariable qd_x;
-   public DoubleYoVariable qd_y;
-   public DoubleYoVariable qd_z;    // in world-fixed frame
-   public DoubleYoVariable q_qs;
-   public DoubleYoVariable q_qx;
-   public DoubleYoVariable q_qy;
-   public DoubleYoVariable q_qz;    // Unit quaternion (Euler parameters). q_qs is the 'scalar part', q_q{x,y,z} form the vector part
-   public DoubleYoVariable qd_wx;
-   public DoubleYoVariable qd_wy;
-   public DoubleYoVariable qd_wz;    // angular velocity, expressed in body-fixed frame.
-   public DoubleYoVariable qdd_x, qdd_y, qdd_z;    // in world-fixed frame
-   public DoubleYoVariable qdd_wx, qdd_wy, qdd_wz;    // angular acceleration, expressed in body-fixed frame.
+   public YoDouble q_x, q_y, q_z;    // in world-fixed frame
+   public YoDouble qd_x;
+   public YoDouble qd_y;
+   public YoDouble qd_z;    // in world-fixed frame
+   public YoDouble q_qs;
+   public YoDouble q_qx;
+   public YoDouble q_qy;
+   public YoDouble q_qz;    // Unit quaternion (Euler parameters). q_qs is the 'scalar part', q_q{x,y,z} form the vector part
+   public YoDouble qd_wx;
+   public YoDouble qd_wy;
+   public YoDouble qd_wz;    // angular velocity, expressed in body-fixed frame.
+   public YoDouble qdd_x, qdd_y, qdd_z;    // in world-fixed frame
+   public YoDouble qdd_wx, qdd_wy, qdd_wz;    // angular acceleration, expressed in body-fixed frame.
 
    private final boolean createYawPitchRollYoVariable;
-   public DoubleYoVariable q_yaw, q_pitch, q_roll;    // in world-fixed frame.
+   public YoDouble q_yaw, q_pitch, q_roll;    // in world-fixed frame.
    
    public FloatingJoint(String jname, Vector3D offset, Robot rob)
    {
@@ -70,32 +70,32 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
          varName += "_";
       }
       
-      q_x = new DoubleYoVariable("q_" + varName + "x", "FloatingJoint x position", registry);
-      q_y = new DoubleYoVariable("q_" + varName + "y", "FloatingJoint y position", registry);
-      q_z = new DoubleYoVariable("q_" + varName + "z", "FloatingJoint z position", registry);
-      qd_x = new DoubleYoVariable("qd_" + varName + "x", "FloatingJoint x velocity", registry);
-      qd_y = new DoubleYoVariable("qd_" + varName + "y", "FloatingJoint y velocity", registry);
-      qd_z = new DoubleYoVariable("qd_" + varName + "z", "FloatingJoint z velocity", registry);
-      qdd_x = new DoubleYoVariable("qdd_" + varName + "x", "FloatingJoint x acceleration", registry);
-      qdd_y = new DoubleYoVariable("qdd_" + varName + "y", "FloatingJoint yx acceleration", registry);
-      qdd_z = new DoubleYoVariable("qdd_" + varName + "z", "FloatingJoint z acceleration", registry);
-      q_qs = new DoubleYoVariable("q_" + varName + "qs", "FloatingJoint orientation quaternion qs", registry);
+      q_x = new YoDouble("q_" + varName + "x", "FloatingJoint x position", registry);
+      q_y = new YoDouble("q_" + varName + "y", "FloatingJoint y position", registry);
+      q_z = new YoDouble("q_" + varName + "z", "FloatingJoint z position", registry);
+      qd_x = new YoDouble("qd_" + varName + "x", "FloatingJoint x velocity", registry);
+      qd_y = new YoDouble("qd_" + varName + "y", "FloatingJoint y velocity", registry);
+      qd_z = new YoDouble("qd_" + varName + "z", "FloatingJoint z velocity", registry);
+      qdd_x = new YoDouble("qdd_" + varName + "x", "FloatingJoint x acceleration", registry);
+      qdd_y = new YoDouble("qdd_" + varName + "y", "FloatingJoint yx acceleration", registry);
+      qdd_z = new YoDouble("qdd_" + varName + "z", "FloatingJoint z acceleration", registry);
+      q_qs = new YoDouble("q_" + varName + "qs", "FloatingJoint orientation quaternion qs", registry);
       q_qs.set(1.0);
-      q_qx = new DoubleYoVariable("q_" + varName + "qx", "FloatingJoint orientation quaternion qx", registry);
-      q_qy = new DoubleYoVariable("q_" + varName + "qy", "FloatingJoint orientation quaternion qy", registry);
-      q_qz = new DoubleYoVariable("q_" + varName + "qz", "FloatingJoint orientation quaternion qz", registry);
-      qd_wx = new DoubleYoVariable("qd_" + varName + "wx", "FloatingJoint rotational velocity about x", registry);
-      qd_wy = new DoubleYoVariable("qd_" + varName + "wy", "FloatingJoint rotational velocity about y", registry);
-      qd_wz = new DoubleYoVariable("qd_" + varName + "wz", "FloatingJoint rotational velocity about z", registry);
-      qdd_wx = new DoubleYoVariable("qdd_" + varName + "wx", "FloatingJoint rotational acceleration about x", registry);
-      qdd_wy = new DoubleYoVariable("qdd_" + varName + "wy", "FloatingJoint rotational acceleration about y", registry);
-      qdd_wz = new DoubleYoVariable("qdd_" + varName + "wz", "FloatingJoint rotational acceleration about z", registry);
+      q_qx = new YoDouble("q_" + varName + "qx", "FloatingJoint orientation quaternion qx", registry);
+      q_qy = new YoDouble("q_" + varName + "qy", "FloatingJoint orientation quaternion qy", registry);
+      q_qz = new YoDouble("q_" + varName + "qz", "FloatingJoint orientation quaternion qz", registry);
+      qd_wx = new YoDouble("qd_" + varName + "wx", "FloatingJoint rotational velocity about x", registry);
+      qd_wy = new YoDouble("qd_" + varName + "wy", "FloatingJoint rotational velocity about y", registry);
+      qd_wz = new YoDouble("qd_" + varName + "wz", "FloatingJoint rotational velocity about z", registry);
+      qdd_wx = new YoDouble("qdd_" + varName + "wx", "FloatingJoint rotational acceleration about x", registry);
+      qdd_wy = new YoDouble("qdd_" + varName + "wy", "FloatingJoint rotational acceleration about y", registry);
+      qdd_wz = new YoDouble("qdd_" + varName + "wz", "FloatingJoint rotational acceleration about z", registry);
 
       if(createYawPitchRollYoVariable)
       {
-         q_yaw = new DoubleYoVariable("q_" + varName + "yaw", "FloatingJoint yaw orientation", registry);
-         q_pitch = new DoubleYoVariable("q_" + varName + "pitch", "FloatingJoint pitch orientation", registry);
-         q_roll = new DoubleYoVariable("q_" + varName + "roll", "FloatingJoint roll orientation", registry);
+         q_yaw = new YoDouble("q_" + varName + "yaw", "FloatingJoint yaw orientation", registry);
+         q_pitch = new YoDouble("q_" + varName + "pitch", "FloatingJoint pitch orientation", registry);
+         q_roll = new YoDouble("q_" + varName + "roll", "FloatingJoint roll orientation", registry);
       }
       else
       {
@@ -237,14 +237,14 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       qdd_wz.set(angularAccelerationInBody.getZ());
    }
 
-   public void getPosition(DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
+   public void getPosition(YoDouble x, YoDouble y, YoDouble z)
    {
       x.set(q_x.getDoubleValue());
       y.set(q_y.getDoubleValue());
       z.set(q_z.getDoubleValue());
    }
 
-   public void getVelocity(DoubleYoVariable xDot, DoubleYoVariable yDot, DoubleYoVariable zDot)
+   public void getVelocity(YoDouble xDot, YoDouble yDot, YoDouble zDot)
    {
       xDot.set(qd_x.getDoubleValue());
       yDot.set(qd_y.getDoubleValue());
@@ -264,7 +264,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       angularVelocityToPack.setIncludingFrame(bodyFrame, qd_wx.getDoubleValue(), qd_wy.getDoubleValue(), qd_wz.getDoubleValue());
    }
 
-   public void getPositionAndVelocity(DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, DoubleYoVariable xDot, DoubleYoVariable yDot, DoubleYoVariable zDot)
+   public void getPositionAndVelocity(YoDouble x, YoDouble y, YoDouble z, YoDouble xDot, YoDouble yDot, YoDouble zDot)
    {
       getPosition(x, y, z);
       getVelocity(xDot, yDot, zDot);
@@ -286,67 +286,67 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       getVelocity(velocity);
    }
 
-   public DoubleYoVariable getQx()
+   public YoDouble getQx()
    {
       return q_x;
    }
 
-   public DoubleYoVariable getQy()
+   public YoDouble getQy()
    {
       return q_y;
    }
 
-   public DoubleYoVariable getQz()
+   public YoDouble getQz()
    {
       return q_z;
    }
 
-   public DoubleYoVariable getQdx()
+   public YoDouble getQdx()
    {
       return qd_x;
    }
 
-   public DoubleYoVariable getQdy()
+   public YoDouble getQdy()
    {
       return qd_y;
    }
 
-   public DoubleYoVariable getQdz()
+   public YoDouble getQdz()
    {
       return qd_z;
    }
 
-   public DoubleYoVariable getQddx()
+   public YoDouble getQddx()
    {
       return qdd_x;
    }
 
-   public DoubleYoVariable getQddy()
+   public YoDouble getQddy()
    {
       return qdd_y;
    }
 
-   public DoubleYoVariable getQddz()
+   public YoDouble getQddz()
    {
       return qdd_z;
    }
 
-   public DoubleYoVariable getQuaternionQs()
+   public YoDouble getQuaternionQs()
    {
       return q_qs;
    }
 
-   public DoubleYoVariable getQuaternionQx()
+   public YoDouble getQuaternionQx()
    {
       return q_qx;
    }
 
-   public DoubleYoVariable getQuaternionQy()
+   public YoDouble getQuaternionQy()
    {
       return q_qy;
    }
 
-   public DoubleYoVariable getQuaternionQz()
+   public YoDouble getQuaternionQz()
    {
       return q_qz;
    }
@@ -361,17 +361,17 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       quaternionToPack.set(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue());
    }
 
-   public DoubleYoVariable getAngularVelocityX()
+   public YoDouble getAngularVelocityX()
    {
       return qd_wx;
    }
 
-   public DoubleYoVariable getAngularVelocityY()
+   public YoDouble getAngularVelocityY()
    {
       return qd_wy;
    }
 
-   public DoubleYoVariable getAngularVelocityZ()
+   public YoDouble getAngularVelocityZ()
    {
       return qd_wz;
    }
@@ -386,17 +386,17 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       vectorToPack.set(qd_wx.getDoubleValue(), qd_wy.getDoubleValue(), qd_wz.getDoubleValue());
    }
 
-   public DoubleYoVariable getAngularAccelerationX()
+   public YoDouble getAngularAccelerationX()
    {
       return qdd_wx;
    }
 
-   public DoubleYoVariable getAngularAccelerationY()
+   public YoDouble getAngularAccelerationY()
    {
       return qdd_wy;
    }
 
-   public DoubleYoVariable getAngularAccelerationZ()
+   public YoDouble getAngularAccelerationZ()
    {
       return qdd_wz;
    }
@@ -426,7 +426,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       linearAccelerationToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qdd_x.getDoubleValue(), qdd_y.getDoubleValue(), qdd_z.getDoubleValue()); 
    }
 
-   public void getYawPitchRoll(DoubleYoVariable yaw, DoubleYoVariable pitch, DoubleYoVariable roll)
+   public void getYawPitchRoll(YoDouble yaw, YoDouble pitch, YoDouble roll)
    {
 
       double pitchArgument = -2.0 * q_qx.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qs.getDoubleValue() * q_qy.getDoubleValue();

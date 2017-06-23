@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.pushRecovery;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -11,32 +11,32 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class PushRobotTestConductor
 {
    private final String jointName;
-   private final DoubleYoVariable pushDuration;
-   private final DoubleYoVariable pushMagnitude;
+   private final YoDouble pushDuration;
+   private final YoDouble pushMagnitude;
    private final YoFrameVector pushDirection;
    private final YoFrameVector pushForce;
-   private final DoubleYoVariable pushTimeSwitch;
-   private final IntegerYoVariable pushNumber;
-   private final DoubleYoVariable pushDelay;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble pushTimeSwitch;
+   private final YoInteger pushNumber;
+   private final YoDouble pushDelay;
+   private final YoDouble yoTime;
    
    public PushRobotTestConductor(SimulationConstructionSet scs, String jointName)
    {
       this.jointName = jointName;
       
-      pushDuration = (DoubleYoVariable) scs.getVariable(jointName + "_pushDuration");
-      pushMagnitude = (DoubleYoVariable) scs.getVariable(jointName + "_pushMagnitude");
-      pushTimeSwitch = (DoubleYoVariable) scs.getVariable(jointName + "_pushTimeSwitch");
-      pushNumber = (IntegerYoVariable) scs.getVariable(jointName + "_pushNumber");
-      pushDelay = (DoubleYoVariable) scs.getVariable(jointName + "_pushDelay");
-      yoTime = (DoubleYoVariable) scs.getVariable("t");
+      pushDuration = (YoDouble) scs.getVariable(jointName + "_pushDuration");
+      pushMagnitude = (YoDouble) scs.getVariable(jointName + "_pushMagnitude");
+      pushTimeSwitch = (YoDouble) scs.getVariable(jointName + "_pushTimeSwitch");
+      pushNumber = (YoInteger) scs.getVariable(jointName + "_pushNumber");
+      pushDelay = (YoDouble) scs.getVariable(jointName + "_pushDelay");
+      yoTime = (YoDouble) scs.getVariable("t");
       
-      pushDirection = new YoFrameVector((DoubleYoVariable) scs.getVariable(jointName + "_pushDirectionX"),
-                                        (DoubleYoVariable) scs.getVariable(jointName + "_pushDirectionY"),
-                                        (DoubleYoVariable) scs.getVariable(jointName + "_pushDirectionZ"), ReferenceFrame.getWorldFrame());
-      pushForce = new YoFrameVector((DoubleYoVariable) scs.getVariable(jointName + "_pushForceX"),
-                                    (DoubleYoVariable) scs.getVariable(jointName + "_pushForceY"),
-                                    (DoubleYoVariable) scs.getVariable(jointName + "_pushForceZ"), ReferenceFrame.getWorldFrame());
+      pushDirection = new YoFrameVector((YoDouble) scs.getVariable(jointName + "_pushDirectionX"),
+                                        (YoDouble) scs.getVariable(jointName + "_pushDirectionY"),
+                                        (YoDouble) scs.getVariable(jointName + "_pushDirectionZ"), ReferenceFrame.getWorldFrame());
+      pushForce = new YoFrameVector((YoDouble) scs.getVariable(jointName + "_pushForceX"),
+                                    (YoDouble) scs.getVariable(jointName + "_pushForceY"),
+                                    (YoDouble) scs.getVariable(jointName + "_pushForceZ"), ReferenceFrame.getWorldFrame());
    }
    
    public void applyForce(Vector3D direction, double magnitude, double duration)

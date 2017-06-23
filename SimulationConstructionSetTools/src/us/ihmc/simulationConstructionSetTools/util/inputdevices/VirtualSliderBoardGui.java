@@ -18,9 +18,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -174,9 +174,9 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
                        closeableAndDisposableRegistry);
             } else if (current.sliderType == MidiControl.SliderType.ENUM)
             {
-               slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((EnumYoVariable<?>) current.var).getEnumValues().length - 1,
+               slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((YoEnum<?>) current.var).getEnumValues().length - 1,
                        SliderBoardUtils.valueRatioConvertToIntWithExponents(current,
-                               ((EnumYoVariable<?>) current.var).getEnumValues().length - 1), current, closeableAndDisposableRegistry);
+                               ((YoEnum<?>) current.var).getEnumValues().length - 1), current, closeableAndDisposableRegistry);
             } else
                slider = new JSliderControl(SwingConstants.VERTICAL, 0, sliderBoardMax,
                        SliderBoardUtils.valueRatioConvertToIntWithExponents(current, sliderBoardMax), current, closeableAndDisposableRegistry);

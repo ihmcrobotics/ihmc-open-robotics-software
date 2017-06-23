@@ -8,8 +8,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -27,10 +27,10 @@ public class YoArtifactPosition extends YoArtifact
 
    public YoArtifactPosition(String namePrefix, String nameSuffix, GraphicType type, Color color, double radius, YoVariableRegistry registry)
    {
-      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, radius);
+      this(namePrefix+nameSuffix, new YoDouble(namePrefix + "X" + nameSuffix, registry), new YoDouble(namePrefix + "Y" + nameSuffix, registry), type, color, radius);
    }
    
-   public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, GraphicType type, Color color, double radius)
+   public YoArtifactPosition(String name, YoDouble x, YoDouble y, GraphicType type, Color color, double radius)
    {
       this(name, new YoFramePoint2d(x, y, ReferenceFrame.getWorldFrame()), type, color, radius);
    }
@@ -163,12 +163,12 @@ public class YoArtifactPosition extends YoArtifact
       return RemoteGraphicType.POSITION_ARTIFACT;
    }
    
-   public DoubleYoVariable getYoX()
+   public YoDouble getYoX()
    {
       return point.getYoX();
    }
    
-   public DoubleYoVariable getYoY()
+   public YoDouble getYoY()
    {
       return point.getYoY();
    }

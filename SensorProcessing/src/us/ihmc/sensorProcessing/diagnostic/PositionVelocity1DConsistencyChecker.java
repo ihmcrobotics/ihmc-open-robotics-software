@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
@@ -21,7 +21,7 @@ public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
 
    private final double dt;
 
-   public PositionVelocity1DConsistencyChecker(String namePrefix, DoubleYoVariable rawPosition, DoubleYoVariable rawVelocityToCheck, DoubleYoVariable processedPositionToCheck, DoubleYoVariable processedVelocityToCheck, double dt,
+   public PositionVelocity1DConsistencyChecker(String namePrefix, YoDouble rawPosition, YoDouble rawVelocityToCheck, YoDouble processedPositionToCheck, YoDouble processedVelocityToCheck, double dt,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;

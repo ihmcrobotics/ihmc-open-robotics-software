@@ -4,11 +4,11 @@ import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -36,16 +36,16 @@ public class QuadrupedFallDetector
    private final QuadrupedSupportPolygon supportPolygon;
 
    // Yo Variables
-   private final DoubleYoVariable yoDcmDistanceOutsideSupportPolygon = new DoubleYoVariable("dcmDistanceOutsideSupportPolygon", registry);
-   private final EnumYoVariable<FallDetectionType> fallDetectionType = EnumYoVariable.create("fallDetectionType", FallDetectionType.class, registry);
-   private final GlitchFilteredBooleanYoVariable isFallDetected;
+   private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
+   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
+   private final GlitchFilteredYoBoolean isFallDetected;
 
    public QuadrupedFallDetector(QuadrupedTaskSpaceEstimator taskSpaceEstimator,
          DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
    {
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
       this.taskSpaceEstimator = taskSpaceEstimator;
-      this.isFallDetected = new GlitchFilteredBooleanYoVariable("isFallDetected", registry, fallDetectorGlitchFilterWindow.get());
+      this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, fallDetectorGlitchFilterWindow.get());
       this.isFallDetected.set(false);
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       dcmPositionEstimate = new FramePoint();

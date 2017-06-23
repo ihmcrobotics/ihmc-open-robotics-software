@@ -22,6 +22,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
@@ -533,6 +534,38 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
       this.weightMatrix.set(weightMatrix);
+   }
+   
+   /**
+    * Sets the linear weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setLinearPartOfWeightMatrix(WeightMatrix3D linearWeightMatrix)
+   {
+      this.weightMatrix.setLinearPart(linearWeightMatrix);
+   }
+
+   /**
+    * Sets the angular weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setAngularPartOfWeightMatrix(WeightMatrix3D angularWeightMatrix)
+   {
+      this.weightMatrix.setAngularPart(angularWeightMatrix);
    }
 
    /**

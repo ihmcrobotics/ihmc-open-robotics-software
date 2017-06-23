@@ -1,259 +1,172 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
+import us.ihmc.yoVariables.dataBuffer.DataEntry;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+public class VarPropertiesPanel extends GridPane implements EventHandler<javafx.event.ActionEvent> {
 
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+    private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
 
+    private TextField minTextField, maxTextField;
+    private RadioButton autoButton, manualButton;
+    private CheckBox invertCheckBox;
 
-public class VarPropertiesPanel extends JPanel implements ActionListener
-{
-   private static final long serialVersionUID = -1729688086769099783L;
+    private final DataEntry entry;
 
-   private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
+    private double newMinVal, newMaxVal;
 
-   private JTextField minTextField, maxTextField;
-   private JRadioButton autoButton, manualButton;
-   private JCheckBox invertCheckBox;
-   
-   private final DataEntry entry;
-   
-   private double newMinVal, newMaxVal;
+    public VarPropertiesPanel(DataEntry entry) {
+        super();
 
-   public VarPropertiesPanel(DataEntry entry)
-   {
-      super();
+        this.entry = entry;
 
-      this.entry = entry;
+        // entry.reCalcMinMax(); TODO: can this be removed?
+        newMinVal = entry.getManualMinScaling();
+        newMaxVal = entry.getManualMaxScaling();
 
-//    entry.reCalcMinMax();
-      newMinVal = entry.getManualMinScaling();
-      newMaxVal = entry.getManualMaxScaling();
-      GridBagLayout gridbag = new GridBagLayout();
+        Label varLabel = new Label(entry.getVariableName());
+        varLabel.setFont(new Font(Font.getDefault().getName(), 14));
+        GridPane.setConstraints(varLabel, 0, 0);
 
-      this.setLayout(gridbag);
+        ToggleGroup group = new ToggleGroup();
 
-      Border blackLine = BorderFactory.createLineBorder(Color.black);
-      TitledBorder title = BorderFactory.createTitledBorder(blackLine, entry.getVariableName());
-      this.setBorder(title);
+        // Row 0:
 
-      GridBagConstraints constraints = new GridBagConstraints();
+        Label scalingLabel = new Label("Scaling:");
+        GridPane.setConstraints(scalingLabel, 0, 1);
 
-      // Row 0:
+        autoButton = new RadioButton("Auto");
+        autoButton.setSelected(entry.isAutoScaleEnabled());
+        autoButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        autoButton.setToggleGroup(group);
+        GridPane.setConstraints(autoButton, 1, 1);
 
-      JLabel scalingLabel = new JLabel("Scaling:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 0;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(scalingLabel, constraints);
-      this.add(scalingLabel);
+        manualButton = new RadioButton("Manual");
+        manualButton.setSelected(!entry.isAutoScaleEnabled());
+        manualButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        manualButton.setToggleGroup(group);
+        GridPane.setConstraints(manualButton, 3, 1);
 
-      autoButton = new JRadioButton("Auto", entry.isAutoScaleEnabled());
-      autoButton.addActionListener(this);
-      constraints.gridx = 1;
-      constraints.gridy = 0;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(autoButton, constraints);
-      this.add(autoButton);
+        // Row 1:
 
-      manualButton = new JRadioButton("Manual", !entry.isAutoScaleEnabled());
-      manualButton.addActionListener(this);
-      constraints.gridx = 3;
-      constraints.gridy = 0;
-      constraints.gridwidth = 3;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(manualButton, constraints);
-      this.add(manualButton);
+        Label settingsLabel = new Label("Manual Settings:");
+        GridPane.setConstraints(settingsLabel, 0, 2);
 
-      ButtonGroup group = new ButtonGroup();
-      group.add(autoButton);
-      group.add(manualButton);
+        Label minSettingsLabel = new Label("Min:");
+        GridPane.setConstraints(minSettingsLabel, 1, 2);
 
-      // Row 1:
+        String minValString = numFormat.format(newMinVal);
+        minTextField = new TextField(minValString);
+        minTextField.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        if (entry.isAutoScaleEnabled()) {
+            minTextField.setDisable(true);
+        }
+        GridPane.setConstraints(minTextField, 2, 2);
 
-      JLabel settingsLabel = new JLabel("Manual Settings:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(settingsLabel, constraints);
-      this.add(settingsLabel);
+        Label maxSettingsLabel = new Label("Max:");
+        GridPane.setConstraints(maxSettingsLabel, 4, 2);
 
-      JLabel minSettingsLabel = new JLabel("  Min:  ");
-      constraints.gridx = 1;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(minSettingsLabel, constraints);
-      this.add(minSettingsLabel);
+        String maxValString = numFormat.format(newMaxVal);
+        maxTextField = new TextField(maxValString);
+        maxTextField.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+        if (entry.isAutoScaleEnabled()) {
+            maxTextField.setDisable(true);
+        }
+        GridPane.setConstraints(maxTextField, 5, 2);
 
-      String minValString = numFormat.format(newMinVal);
-      minTextField = new JTextField(minValString);
-      minTextField.addActionListener(this);
-      if (entry.isAutoScaleEnabled())
-         minTextField.setEnabled(false);
-      constraints.gridx = 2;
-      constraints.gridy = 1;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(minTextField, constraints);
-      this.add(minTextField);
+        // Row 2:
 
-      JLabel maxSettingsLabel = new JLabel("  Max:  ");
-      constraints.gridx = 4;
-      constraints.gridy = 1;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(maxSettingsLabel, constraints);
-      this.add(maxSettingsLabel);
+        Label rangeLabel = new Label("Data Range:");
+        GridPane.setConstraints(rangeLabel, 0, 3);
 
+        Label minRangeLabel = new Label("Min:");
+        GridPane.setConstraints(minRangeLabel, 1, 3);
 
-      String maxValString = numFormat.format(newMaxVal);
-      maxTextField = new JTextField(maxValString);
-      maxTextField.addActionListener(this);
-      if (entry.isAutoScaleEnabled())
-         maxTextField.setEnabled(false);
-      constraints.gridx = 5;
-      constraints.gridy = 1;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(maxTextField, constraints);
-      this.add(maxTextField);
+        minValString = numFormat.format(entry.getMin());
+        Label minTextLabel = new Label(minValString);
+        GridPane.setConstraints(minTextLabel, 2, 3);
 
+        Label maxRangeLabel = new Label("Max:");
+        GridPane.setConstraints(maxRangeLabel, 4, 3);
 
-      // Row 2:
+        maxValString = numFormat.format(entry.getMax());
+        Label maxTextLabel = new Label(maxValString);
+        GridPane.setConstraints(maxTextLabel, 5, 3);
 
-      JLabel rangeLabel = new JLabel("Data Range:  ");
-      constraints.gridx = 0;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(rangeLabel, constraints);
-      this.add(rangeLabel);
+        invertCheckBox = new CheckBox("Invert");
+        invertCheckBox.setSelected(entry.getInverted());
+        GridPane.setConstraints(invertCheckBox, 0, 4);
 
-      JLabel minRangeLabel = new JLabel("  Min:  ");
-      constraints.gridx = 1;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(minRangeLabel, constraints);
-      this.add(minRangeLabel);
+        this.getChildren().addAll(
+                varLabel,
+                scalingLabel,
+                autoButton,
+                manualButton,
+                settingsLabel,
+                minSettingsLabel,
+                minTextField,
+                maxSettingsLabel,
+                maxTextField,
+                rangeLabel,
+                minRangeLabel,
+                minTextLabel,
+                maxRangeLabel,
+                maxTextLabel,
+                invertCheckBox
+        );
+    }
 
-      minValString = numFormat.format(entry.getMin());
-      JLabel minTextLabel = new JLabel(minValString);
-      constraints.gridx = 2;
-      constraints.gridy = 2;
-      constraints.gridwidth = 2;
-      constraints.anchor = GridBagConstraints.WEST;
-      gridbag.setConstraints(minTextLabel, constraints);
-      this.add(minTextLabel);
+    public void commitChanges() {
+        updateMinTextField();
+        updateMaxTextField();
 
-      JLabel maxRangeLabel = new JLabel("  Max:  ");
-      constraints.gridx = 4;
-      constraints.gridy = 2;
-      constraints.gridwidth = 1;
-      gridbag.setConstraints(maxRangeLabel, constraints);
-      this.add(maxRangeLabel);
+        entry.setManualScaling(newMinVal, newMaxVal);
+
+        if (this.autoButton.isSelected())
+            entry.enableAutoScale(true);
+        else
+            entry.enableAutoScale(false);
 
 
-      maxValString = numFormat.format(entry.getMax());
-      JLabel maxTextLabel = new JLabel(maxValString);
+        entry.setInverted(invertCheckBox.isSelected());
+    }
 
-      // jTextField.addActionListener(this);
-      constraints.gridx = 5;
-      constraints.gridy = 2;
-      constraints.gridwidth = 2;
-      gridbag.setConstraints(maxTextLabel, constraints);
-      this.add(maxTextLabel);
-      
-      
-      invertCheckBox = new JCheckBox("Invert");
-      invertCheckBox.setSelected(entry.getInverted());
-      
-      constraints.gridx = 0;
-      constraints.gridy = 3;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.EAST;
-      gridbag.setConstraints(invertCheckBox, constraints);
-      this.add(invertCheckBox);
+    public void updateMaxTextField() {
+        String text = maxTextField.getText();
 
-   }
+        try {
+            newMaxVal = Double.valueOf(text);
+        } catch (NumberFormatException e) {
+            maxTextField.setText(numFormat.format(newMaxVal));
+        }
 
-   public void commitChanges()
-   {
-      updateMinTextField();
-      updateMaxTextField();
+    }
 
-      entry.setManualScaling(newMinVal, newMaxVal);
+    public void updateMinTextField() {
+        String text = minTextField.getText();
 
-      if (this.autoButton.isSelected())
-         entry.enableAutoScale(true);
-      else
-         entry.enableAutoScale(false);
-      
-  
-      entry.setInverted(invertCheckBox.isSelected());      
-   }
+        try {
+            newMinVal = Double.valueOf(text);
+        } catch (NumberFormatException e) {
+            minTextField.setText(numFormat.format(newMinVal));
+        }
+    }
 
-   @Override
-   public void actionPerformed(ActionEvent event)
-   {
-      if (event.getSource() == maxTextField)
-         updateMaxTextField();
-      if (event.getSource() == minTextField)
-         updateMinTextField();
-
-      if (event.getSource() == autoButton)
-      {
-         maxTextField.setEnabled(false);
-         minTextField.setEnabled(false);
-      }
-
-      if (event.getSource() == manualButton)
-      {
-         maxTextField.setEnabled(true);
-         minTextField.setEnabled(true);
-      }
-   }
-
-   public void updateMaxTextField()
-   {
-      String text = maxTextField.getText();
-
-      try
-      {
-         double val = Double.valueOf(text).doubleValue();
-         newMaxVal = val;
-      }
-      catch (NumberFormatException e)
-      {
-         maxTextField.setText(numFormat.format(newMaxVal));
-      }
-
-   }
-
-   public void updateMinTextField()
-   {
-      String text = minTextField.getText();
-
-      try
-      {
-         double val = Double.valueOf(text).doubleValue();
-         newMinVal = val;
-      }
-      catch (NumberFormatException e)
-      {
-         minTextField.setText(numFormat.format(newMinVal));
-      }
-   }
-
+    @Override
+    public void handle(javafx.event.ActionEvent event) {
+        if (event.getSource() == maxTextField) {
+            updateMaxTextField();
+        } else if (event.getSource() == minTextField) {
+            updateMinTextField();
+        } else if (event.getSource() == autoButton) {
+            maxTextField.setDisable(true);
+            minTextField.setDisable(true);
+        } else if (event.getSource() == manualButton) {
+            maxTextField.setDisable(false);
+            minTextField.setDisable(false);
+        }
+    }
 }

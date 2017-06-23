@@ -5,9 +5,9 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -45,196 +45,196 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private StateMachine leftStateMachine, rightStateMachine;
 
    // Control Parameters:
-   private final DoubleYoVariable v_nom = new DoubleYoVariable("v_nom", "Desired walking velocity.", registry);
-   private final DoubleYoVariable x_d = new DoubleYoVariable("x_d", "Desired x location when standing and balancing.", registry);
-   private final DoubleYoVariable t_d = new DoubleYoVariable("t_d", "Desired body pitch.", registry);
+   private final YoDouble v_nom = new YoDouble("v_nom", "Desired walking velocity.", registry);
+   private final YoDouble x_d = new YoDouble("x_d", "Desired x location when standing and balancing.", registry);
+   private final YoDouble t_d = new YoDouble("t_d", "Desired body pitch.", registry);
 
-   private final DoubleYoVariable vtp_gain = new DoubleYoVariable("vtp_gain", "Gain from velocity error to change in virtual toe point.", registry);
-   private final DoubleYoVariable t_gain = new DoubleYoVariable("t_gain", "Proportional gain for body pitch controller.", registry);
-   private final DoubleYoVariable t_damp = new DoubleYoVariable("t_damp", "Damping for body pitch controller.", registry);
+   private final YoDouble vtp_gain = new YoDouble("vtp_gain", "Gain from velocity error to change in virtual toe point.", registry);
+   private final YoDouble t_gain = new YoDouble("t_gain", "Proportional gain for body pitch controller.", registry);
+   private final YoDouble t_damp = new YoDouble("t_damp", "Damping for body pitch controller.", registry);
 
 // private final YoVariable s_d2s = new YoVariable("s_d2s", "Distance to new front support foot before transition to it from double support", registry);
-   private final DoubleYoVariable s_d2s_trail = new DoubleYoVariable("s_d2s_trail",
+   private final YoDouble s_d2s_trail = new YoDouble("s_d2s_trail",
                                              "If distance from traling leg is this much, then transition to front leg from double support.", registry);
-   private final DoubleYoVariable supportTransitionGain = new DoubleYoVariable("supportTransitionGain",
+   private final YoDouble supportTransitionGain = new YoDouble("supportTransitionGain",
                                                        "Gain from velocity error to distance from new support leg before transition to single support.",
                                                        registry);
-   private final DoubleYoVariable captureRatio = new DoubleYoVariable("captureRatio", "Ratio from velocity to support transition for capture point.", registry);
+   private final YoDouble captureRatio = new YoDouble("captureRatio", "Ratio from velocity to support transition for capture point.", registry);
 
-   private final DoubleYoVariable toeOffTorque = new DoubleYoVariable("toeOffTorque", "Toe off torque", registry);
-   private final DoubleYoVariable toeOffGain = new DoubleYoVariable("toeOffGain", "Gain from velocity to toe off torque", registry);
-   private final DoubleYoVariable toeOffOffset = new DoubleYoVariable("toeOffOffset", "Toe off torque offset.", registry);
-   private final DoubleYoVariable maxToeOffTorque = new DoubleYoVariable("maxToeOffTorque", "Maximum toe off torque.", registry);
+   private final YoDouble toeOffTorque = new YoDouble("toeOffTorque", "Toe off torque", registry);
+   private final YoDouble toeOffGain = new YoDouble("toeOffGain", "Gain from velocity to toe off torque", registry);
+   private final YoDouble toeOffOffset = new YoDouble("toeOffOffset", "Toe off torque offset.", registry);
+   private final YoDouble maxToeOffTorque = new YoDouble("maxToeOffTorque", "Maximum toe off torque.", registry);
 
-   private final DoubleYoVariable couple_tau_percent = new DoubleYoVariable("couple_tau_percent", "", registry);
-   private final DoubleYoVariable foot_switch_force = new DoubleYoVariable("foot_switch_force", "", registry);
+   private final YoDouble couple_tau_percent = new YoDouble("couple_tau_percent", "", registry);
+   private final YoDouble foot_switch_force = new YoDouble("foot_switch_force", "", registry);
 
-   private final DoubleYoVariable swingTimeMultiplier = new DoubleYoVariable("swingTimeMultiplier", "Multiplier to slow down swing when robot is going slowly.", registry);
-   private final DoubleYoVariable tot_swing_time = new DoubleYoVariable("tot_swing_time", "Total swing time.", registry);
-   private final DoubleYoVariable hip_swing_time = new DoubleYoVariable("hip_swing_time", "Time to swing hip before straightening.", registry);
-   private final DoubleYoVariable straighten_delay = new DoubleYoVariable("straighten_delay", "Time to collapse knee.", registry);
-
-
-   private final DoubleYoVariable swing_damp_knee1 = new DoubleYoVariable("swing_damp_knee1", "", registry);
-   private final DoubleYoVariable sw_force_thresh = new DoubleYoVariable("sw_force_thresh", "", registry);
+   private final YoDouble swingTimeMultiplier = new YoDouble("swingTimeMultiplier", "Multiplier to slow down swing when robot is going slowly.", registry);
+   private final YoDouble tot_swing_time = new YoDouble("tot_swing_time", "Total swing time.", registry);
+   private final YoDouble hip_swing_time = new YoDouble("hip_swing_time", "Time to swing hip before straightening.", registry);
+   private final YoDouble straighten_delay = new YoDouble("straighten_delay", "Time to collapse knee.", registry);
 
 
-   private final DoubleYoVariable hip_d = new DoubleYoVariable("hip_d", "Desired hip angle for initial swing.", registry);
-   private final DoubleYoVariable hip_hold = new DoubleYoVariable("hip_hold", "Desired hip angle to hold for straightening.", registry);
-   private final DoubleYoVariable hip_down = new DoubleYoVariable("hip_down", "", registry);
+   private final YoDouble swing_damp_knee1 = new YoDouble("swing_damp_knee1", "", registry);
+   private final YoDouble sw_force_thresh = new YoDouble("sw_force_thresh", "", registry);
 
-   private final DoubleYoVariable hip_down_torque = new DoubleYoVariable("hip_down_torque", "", registry);
 
-   private final DoubleYoVariable sh_bash_pos = new DoubleYoVariable("sh_bash_pos", "", registry);
-   private final DoubleYoVariable sh_bash_vel = new DoubleYoVariable("sh_bash_vel", "", registry);
+   private final YoDouble hip_d = new YoDouble("hip_d", "Desired hip angle for initial swing.", registry);
+   private final YoDouble hip_hold = new YoDouble("hip_hold", "Desired hip angle to hold for straightening.", registry);
+   private final YoDouble hip_down = new YoDouble("hip_down", "", registry);
 
-   private final DoubleYoVariable knee_damp = new DoubleYoVariable("knee_damp", "", registry);
-   private final DoubleYoVariable knee_d = new DoubleYoVariable("knee_d", "", registry);
-   private final DoubleYoVariable knee_gain = new DoubleYoVariable("knee_gain", "", registry);
+   private final YoDouble hip_down_torque = new YoDouble("hip_down_torque", "", registry);
+
+   private final YoDouble sh_bash_pos = new YoDouble("sh_bash_pos", "", registry);
+   private final YoDouble sh_bash_vel = new YoDouble("sh_bash_vel", "", registry);
+
+   private final YoDouble knee_damp = new YoDouble("knee_damp", "", registry);
+   private final YoDouble knee_d = new YoDouble("knee_d", "", registry);
+   private final YoDouble knee_gain = new YoDouble("knee_gain", "", registry);
 //   private final YoVariable stand_gain = new YoVariable("stand_gain", "", registry);
 
-   private final DoubleYoVariable heel_thresh = new DoubleYoVariable("heel_thresh", "", registry);
+   private final YoDouble heel_thresh = new YoDouble("heel_thresh", "", registry);
 
-   private final DoubleYoVariable knee_straight_torque = new DoubleYoVariable("knee_straight_torque", "", registry);
-   private final DoubleYoVariable pitch_gain = new DoubleYoVariable("pitch_gain", "", registry);
-   private final DoubleYoVariable doub_time = new DoubleYoVariable("doub_time", "", registry);
+   private final YoDouble knee_straight_torque = new YoDouble("knee_straight_torque", "", registry);
+   private final YoDouble pitch_gain = new YoDouble("pitch_gain", "", registry);
+   private final YoDouble doub_time = new YoDouble("doub_time", "", registry);
 
-   private final DoubleYoVariable toff_knee_gain = new DoubleYoVariable("toff_knee_gain", "", registry);
-   private final DoubleYoVariable toff_knee_d = new DoubleYoVariable("toff_knee_d", "", registry);
+   private final YoDouble toff_knee_gain = new YoDouble("toff_knee_gain", "", registry);
+   private final YoDouble toff_knee_d = new YoDouble("toff_knee_d", "", registry);
 
-   private final DoubleYoVariable ff_z = new DoubleYoVariable("ff_z", "", registry);
+   private final YoDouble ff_z = new YoDouble("ff_z", "", registry);
 
-   private final DoubleYoVariable swing_damp_knee = new DoubleYoVariable("swing_damp_knee", "", registry);
-   private final DoubleYoVariable swing_gain_knee = new DoubleYoVariable("swing_gain_knee", "", registry);
+   private final YoDouble swing_damp_knee = new YoDouble("swing_damp_knee", "", registry);
+   private final YoDouble swing_gain_knee = new YoDouble("swing_gain_knee", "", registry);
 
-   private final DoubleYoVariable f_add = new DoubleYoVariable("f_add", "", registry);
-   private final DoubleYoVariable f_mul = new DoubleYoVariable("f_mul", "", registry);
-   private final DoubleYoVariable f_min = new DoubleYoVariable("f_min", "", registry);
-   private final DoubleYoVariable f_max = new DoubleYoVariable("f_max", "", registry);
+   private final YoDouble f_add = new YoDouble("f_add", "", registry);
+   private final YoDouble f_mul = new YoDouble("f_mul", "", registry);
+   private final YoDouble f_min = new YoDouble("f_min", "", registry);
+   private final YoDouble f_max = new YoDouble("f_max", "", registry);
 
-   private final DoubleYoVariable lambda1 = new DoubleYoVariable("lambda1", "", registry);
-   private final DoubleYoVariable lambda2 = new DoubleYoVariable("lambda2", "", registry);
+   private final YoDouble lambda1 = new YoDouble("lambda1", "", registry);
+   private final YoDouble lambda2 = new YoDouble("lambda2", "", registry);
 //   private final YoVariable lambda3 = new YoVariable("lambda3", "", registry);
 //   private final YoVariable lambda4 = new YoVariable("lambda4", "", registry);
 //   private final YoVariable lambda5 = new YoVariable("lambda5", "", registry);
 
-   private final DoubleYoVariable a1 = new DoubleYoVariable("a1", "", registry);
-   private final DoubleYoVariable a2 = new DoubleYoVariable("a2", "", registry);
-   private final DoubleYoVariable a3 = new DoubleYoVariable("a3", "", registry);
-   private final DoubleYoVariable a4 = new DoubleYoVariable("a4", "", registry);
-   private final DoubleYoVariable a5 = new DoubleYoVariable("a5", "", registry);
+   private final YoDouble a1 = new YoDouble("a1", "", registry);
+   private final YoDouble a2 = new YoDouble("a2", "", registry);
+   private final YoDouble a3 = new YoDouble("a3", "", registry);
+   private final YoDouble a4 = new YoDouble("a4", "", registry);
+   private final YoDouble a5 = new YoDouble("a5", "", registry);
 
-   private final DoubleYoVariable kd1 = new DoubleYoVariable("kd1", "", registry);
-   private final DoubleYoVariable kd2 = new DoubleYoVariable("kd2", "", registry);
+   private final YoDouble kd1 = new YoDouble("kd1", "", registry);
+   private final YoDouble kd2 = new YoDouble("kd2", "", registry);
 
-   private final DoubleYoVariable ankle_limit_set = new DoubleYoVariable("ankle_limit_set", "", registry);
-   private final DoubleYoVariable ankle_limit_gain = new DoubleYoVariable("ankle_limit_gain", "", registry);
-   private final DoubleYoVariable push_gain = new DoubleYoVariable("push_gain", "", registry);
-   private final DoubleYoVariable push_set = new DoubleYoVariable("push_set", "", registry);
-   private final DoubleYoVariable push_damp = new DoubleYoVariable("push_damp", "", registry);
+   private final YoDouble ankle_limit_set = new YoDouble("ankle_limit_set", "", registry);
+   private final YoDouble ankle_limit_gain = new YoDouble("ankle_limit_gain", "", registry);
+   private final YoDouble push_gain = new YoDouble("push_gain", "", registry);
+   private final YoDouble push_set = new YoDouble("push_set", "", registry);
+   private final YoDouble push_damp = new YoDouble("push_damp", "", registry);
 
    // Computed variables:
-   private final DoubleYoVariable supportTransitionDistance = new DoubleYoVariable("supportTransitionDistance",
+   private final YoDouble supportTransitionDistance = new YoDouble("supportTransitionDistance",
                                                            "Total distance from new support leg before transition to single support.", registry);
 
-   private final DoubleYoVariable swingExtraTime = new DoubleYoVariable("swingExtraTime", "Extra time to swing when going slowly.", registry);
+   private final YoDouble swingExtraTime = new YoDouble("swingExtraTime", "Extra time to swing when going slowly.", registry);
 
-   private final DoubleYoVariable thigh_d = new DoubleYoVariable("thigh_d", "", registry);
-   private final DoubleYoVariable thighd_d = new DoubleYoVariable("thighd_d", "", registry);
-   private final DoubleYoVariable thighdd_d = new DoubleYoVariable("thighdd_d", "", registry);
-   private final DoubleYoVariable shin_d = new DoubleYoVariable("shin_d", "", registry);
-   private final DoubleYoVariable shind_d = new DoubleYoVariable("shind_d", "", registry);
-   private final DoubleYoVariable shindd_d = new DoubleYoVariable("shindd_d", "", registry);
+   private final YoDouble thigh_d = new YoDouble("thigh_d", "", registry);
+   private final YoDouble thighd_d = new YoDouble("thighd_d", "", registry);
+   private final YoDouble thighdd_d = new YoDouble("thighdd_d", "", registry);
+   private final YoDouble shin_d = new YoDouble("shin_d", "", registry);
+   private final YoDouble shind_d = new YoDouble("shind_d", "", registry);
+   private final YoDouble shindd_d = new YoDouble("shindd_d", "", registry);
 
-   private final DoubleYoVariable lthigh_d = new DoubleYoVariable("lthigh_d", "", registry);
-   private final DoubleYoVariable lthighd_d = new DoubleYoVariable("lthighd_d", "", registry);
-   private final DoubleYoVariable lthighdd_d = new DoubleYoVariable("lthighdd_d", "", registry);
+   private final YoDouble lthigh_d = new YoDouble("lthigh_d", "", registry);
+   private final YoDouble lthighd_d = new YoDouble("lthighd_d", "", registry);
+   private final YoDouble lthighdd_d = new YoDouble("lthighdd_d", "", registry);
 
-   private final DoubleYoVariable lshin_d = new DoubleYoVariable("lshin_d", "", registry);
-   private final DoubleYoVariable lshind_d = new DoubleYoVariable("lshind_d", "", registry);
-   private final DoubleYoVariable lshindd_d = new DoubleYoVariable("lshindd_d", "", registry);
+   private final YoDouble lshin_d = new YoDouble("lshin_d", "", registry);
+   private final YoDouble lshind_d = new YoDouble("lshind_d", "", registry);
+   private final YoDouble lshindd_d = new YoDouble("lshindd_d", "", registry);
 
-   private final DoubleYoVariable rthigh_d = new DoubleYoVariable("rthigh_d", "", registry);
-   private final DoubleYoVariable rthighd_d = new DoubleYoVariable("rthighd_d", "", registry);
-   private final DoubleYoVariable rthighdd_d = new DoubleYoVariable("rthighdd_d", "", registry);
+   private final YoDouble rthigh_d = new YoDouble("rthigh_d", "", registry);
+   private final YoDouble rthighd_d = new YoDouble("rthighd_d", "", registry);
+   private final YoDouble rthighdd_d = new YoDouble("rthighdd_d", "", registry);
 
-   private final DoubleYoVariable rshin_d = new DoubleYoVariable("rshin_d", "", registry);
-   private final DoubleYoVariable rshind_d = new DoubleYoVariable("rshind_d", "", registry);
-   private final DoubleYoVariable rshindd_d = new DoubleYoVariable("rshindd_d", "", registry);
+   private final YoDouble rshin_d = new YoDouble("rshin_d", "", registry);
+   private final YoDouble rshind_d = new YoDouble("rshind_d", "", registry);
+   private final YoDouble rshindd_d = new YoDouble("rshindd_d", "", registry);
 
-   private final DoubleYoVariable qdd_1r = new DoubleYoVariable("qdd_1r", "", registry);
-   private final DoubleYoVariable qdd_2r = new DoubleYoVariable("qdd_2r", "", registry);
+   private final YoDouble qdd_1r = new YoDouble("qdd_1r", "", registry);
+   private final YoDouble qdd_2r = new YoDouble("qdd_2r", "", registry);
 
-   private final DoubleYoVariable qd_1r = new DoubleYoVariable("qd_1r", "", registry);
-   private final DoubleYoVariable qd_2r = new DoubleYoVariable("qd_2r", "", registry);
+   private final YoDouble qd_1r = new YoDouble("qd_1r", "", registry);
+   private final YoDouble qd_2r = new YoDouble("qd_2r", "", registry);
 
-   private final DoubleYoVariable s1 = new DoubleYoVariable("s1", "", registry);
-   private final DoubleYoVariable s2 = new DoubleYoVariable("s2", "", registry);
+   private final YoDouble s1 = new YoDouble("s1", "", registry);
+   private final YoDouble s2 = new YoDouble("s2", "", registry);
 
-   private final DoubleYoVariable Y11 = new DoubleYoVariable("Y11", "", registry);
-   private final DoubleYoVariable Y12 = new DoubleYoVariable("Y12", "", registry);
-   private final DoubleYoVariable Y13 = new DoubleYoVariable("Y13", "", registry);
-   private final DoubleYoVariable Y14 = new DoubleYoVariable("Y14", "", registry);
-   private final DoubleYoVariable Y15 = new DoubleYoVariable("Y15", "", registry);
+   private final YoDouble Y11 = new YoDouble("Y11", "", registry);
+   private final YoDouble Y12 = new YoDouble("Y12", "", registry);
+   private final YoDouble Y13 = new YoDouble("Y13", "", registry);
+   private final YoDouble Y14 = new YoDouble("Y14", "", registry);
+   private final YoDouble Y15 = new YoDouble("Y15", "", registry);
 
-   private final DoubleYoVariable Y21 = new DoubleYoVariable("Y21", "", registry);
-   private final DoubleYoVariable Y22 = new DoubleYoVariable("Y22", "", registry);
-   private final DoubleYoVariable Y23 = new DoubleYoVariable("Y23", "", registry);
-   private final DoubleYoVariable Y24 = new DoubleYoVariable("Y24", "", registry);
-   private final DoubleYoVariable Y25 = new DoubleYoVariable("Y25", "", registry);
+   private final YoDouble Y21 = new YoDouble("Y21", "", registry);
+   private final YoDouble Y22 = new YoDouble("Y22", "", registry);
+   private final YoDouble Y23 = new YoDouble("Y23", "", registry);
+   private final YoDouble Y24 = new YoDouble("Y24", "", registry);
+   private final YoDouble Y25 = new YoDouble("Y25", "", registry);
 
-   private final DoubleYoVariable transfer_ratio = new DoubleYoVariable("transfer_ratio", "", registry);
-   private final DoubleYoVariable leftVirtualToePoint = new DoubleYoVariable("leftVirtualToePoint",
+   private final YoDouble transfer_ratio = new YoDouble("transfer_ratio", "", registry);
+   private final YoDouble leftVirtualToePoint = new YoDouble("leftVirtualToePoint",
                                                      "The virtual toe point (i.e. desired Center of Pressure) for the left leg.", registry);
-   private final DoubleYoVariable rightVirtualToePoint = new DoubleYoVariable("rightVirtualToePoint",
+   private final YoDouble rightVirtualToePoint = new YoDouble("rightVirtualToePoint",
                                                       "The virtual toe point (i.e. desired Center of Pressure) for the right leg.", registry);
 
-   private final DoubleYoVariable fxl = new DoubleYoVariable("fxl", "", registry);
-   private final DoubleYoVariable fzl = new DoubleYoVariable("fzl", "", registry);
-   private final DoubleYoVariable ftl = new DoubleYoVariable("ftl", "", registry);
+   private final YoDouble fxl = new YoDouble("fxl", "", registry);
+   private final YoDouble fzl = new YoDouble("fzl", "", registry);
+   private final YoDouble ftl = new YoDouble("ftl", "", registry);
 
-   private final DoubleYoVariable fxr = new DoubleYoVariable("fxr", "", registry);
-   private final DoubleYoVariable fzr = new DoubleYoVariable("fzr", "", registry);
-   private final DoubleYoVariable ftr = new DoubleYoVariable("ftr", "", registry);
+   private final YoDouble fxr = new YoDouble("fxr", "", registry);
+   private final YoDouble fzr = new YoDouble("fzr", "", registry);
+   private final YoDouble ftr = new YoDouble("ftr", "", registry);
 
    // Kinematic Computed Variables:
-   private final DoubleYoVariable q_lthigh = new DoubleYoVariable("q_lthigh", "", registry);
-   private final DoubleYoVariable qd_lthigh = new DoubleYoVariable("qd_lthigh", "", registry);
+   private final YoDouble q_lthigh = new YoDouble("q_lthigh", "", registry);
+   private final YoDouble qd_lthigh = new YoDouble("qd_lthigh", "", registry);
 
-   private final DoubleYoVariable q_lshin = new DoubleYoVariable("q_lshin", "", registry);
-   private final DoubleYoVariable qd_lshin = new DoubleYoVariable("qd_lshin", "", registry);
-   private final DoubleYoVariable q_rthigh = new DoubleYoVariable("q_rthigh", "", registry);
+   private final YoDouble q_lshin = new YoDouble("q_lshin", "", registry);
+   private final YoDouble qd_lshin = new YoDouble("qd_lshin", "", registry);
+   private final YoDouble q_rthigh = new YoDouble("q_rthigh", "", registry);
 
-   private final DoubleYoVariable qd_rthigh = new DoubleYoVariable("qd_rthigh", "", registry);
+   private final YoDouble qd_rthigh = new YoDouble("qd_rthigh", "", registry);
 
-   private final DoubleYoVariable q_rshin = new DoubleYoVariable("q_rshin", "", registry);
-   private final DoubleYoVariable qd_rshin = new DoubleYoVariable("qd_rshin", "", registry);
+   private final YoDouble q_rshin = new YoDouble("q_rshin", "", registry);
+   private final YoDouble qd_rshin = new YoDouble("qd_rshin", "", registry);
 
-   private final DoubleYoVariable x_lf = new DoubleYoVariable("x_lf", "", registry);
-   private final DoubleYoVariable z_lf = new DoubleYoVariable("z_lf", "", registry);
-   private final DoubleYoVariable xd_lf = new DoubleYoVariable("xd_lf", "", registry);
-   private final DoubleYoVariable zd_lf = new DoubleYoVariable("zd_lf", "", registry);
+   private final YoDouble x_lf = new YoDouble("x_lf", "", registry);
+   private final YoDouble z_lf = new YoDouble("z_lf", "", registry);
+   private final YoDouble xd_lf = new YoDouble("xd_lf", "", registry);
+   private final YoDouble zd_lf = new YoDouble("zd_lf", "", registry);
 
-   private final DoubleYoVariable x_rf = new DoubleYoVariable("x_rf", "", registry);
-   private final DoubleYoVariable z_rf = new DoubleYoVariable("z_rf", "", registry);
-   private final DoubleYoVariable xd_rf = new DoubleYoVariable("xd_rf", "", registry);
-   private final DoubleYoVariable zd_rf = new DoubleYoVariable("zd_rf", "", registry);
+   private final YoDouble x_rf = new YoDouble("x_rf", "", registry);
+   private final YoDouble z_rf = new YoDouble("z_rf", "", registry);
+   private final YoDouble xd_rf = new YoDouble("xd_rf", "", registry);
+   private final YoDouble zd_rf = new YoDouble("zd_rf", "", registry);
 
-   private final DoubleYoVariable lshin_start = new DoubleYoVariable("lshin_start", "", registry);
-   private final DoubleYoVariable lshind_start = new DoubleYoVariable("lshind_start", "", registry);
+   private final YoDouble lshin_start = new YoDouble("lshin_start", "", registry);
+   private final YoDouble lshind_start = new YoDouble("lshind_start", "", registry);
 
    //
-   private final DoubleYoVariable down_lh = new DoubleYoVariable("down_lh", "", registry);
-   private final DoubleYoVariable down_rh = new DoubleYoVariable("down_rh", "", registry);
-   SideDependentList<DoubleYoVariable> hipDownTorques = new SideDependentList<DoubleYoVariable>(down_lh, down_rh);
+   private final YoDouble down_lh = new YoDouble("down_lh", "", registry);
+   private final YoDouble down_rh = new YoDouble("down_rh", "", registry);
+   SideDependentList<YoDouble> hipDownTorques = new SideDependentList<YoDouble>(down_lh, down_rh);
 
-   private final DoubleYoVariable knee_lock_torque = new DoubleYoVariable("knee_lock_torque", "", registry);
+   private final YoDouble knee_lock_torque = new YoDouble("knee_lock_torque", "", registry);
 
-   private final DoubleYoVariable left_heel = new DoubleYoVariable("left_heel", "", registry);
-   private final DoubleYoVariable right_heel = new DoubleYoVariable("right_heel", "", registry);
-   private final SideDependentList<DoubleYoVariable> heels = new SideDependentList<DoubleYoVariable>(left_heel, right_heel);
+   private final YoDouble left_heel = new YoDouble("left_heel", "", registry);
+   private final YoDouble right_heel = new YoDouble("right_heel", "", registry);
+   private final SideDependentList<YoDouble> heels = new SideDependentList<YoDouble>(left_heel, right_heel);
 
-   private final DoubleYoVariable max_hip_torque = new DoubleYoVariable("max_hip_torque", "", registry);
+   private final YoDouble max_hip_torque = new YoDouble("max_hip_torque", "", registry);
 
 //   private final YoVariable left_knee_set = new YoVariable("left_knee_set", "", registry);
 //   private final YoVariable lk_set_d = new YoVariable("lk_set_d", "", registry);
@@ -245,96 +245,96 @@ public class SpringFlamingoFastWalkingController implements RobotController
 //   private final SideDependentList<YoVariable> kneeSetPoints = new SideDependentList<YoVariable>(left_knee_set, right_knee_set);
 //   private final SideDependentList<YoVariable> kneeSetVelocities = new SideDependentList<YoVariable>(lk_set_d, rk_set_d);
 
-   private final DoubleYoVariable ankle_gain = new DoubleYoVariable("ankle_gain", "", registry);
-   private final DoubleYoVariable ankle_desired = new DoubleYoVariable("ankle_desired", "", registry);
-   private final DoubleYoVariable ankle_damp = new DoubleYoVariable("ankle_damp", "", registry);
+   private final YoDouble ankle_gain = new YoDouble("ankle_gain", "", registry);
+   private final YoDouble ankle_desired = new YoDouble("ankle_desired", "", registry);
+   private final YoDouble ankle_damp = new YoDouble("ankle_damp", "", registry);
 
-   private final DoubleYoVariable ft_right = new DoubleYoVariable("ft_right", "", registry);
+   private final YoDouble ft_right = new YoDouble("ft_right", "", registry);
 
-   private final DoubleYoVariable r_swing_flag = new DoubleYoVariable("r_swing_flag", "", registry);
-   private final DoubleYoVariable rshin_start = new DoubleYoVariable("rshin_start", "", registry);
-   private final DoubleYoVariable rshind_start = new DoubleYoVariable("rshind_start", "", registry);
+   private final YoDouble r_swing_flag = new YoDouble("r_swing_flag", "", registry);
+   private final YoDouble rshin_start = new YoDouble("rshin_start", "", registry);
+   private final YoDouble rshind_start = new YoDouble("rshind_start", "", registry);
 
-   private final DoubleYoVariable rthigh_start = new DoubleYoVariable("rthigh_start", "", registry);
+   private final YoDouble rthigh_start = new YoDouble("rthigh_start", "", registry);
 
 // private final YoVariable gc_lheel = new YoVariable("gc_lheel", "", registry);
-   private final DoubleYoVariable force_thresh = new DoubleYoVariable("force_thresh", "", registry);
-   private final DoubleYoVariable min_support_time = new DoubleYoVariable("min_support_time", "", registry);
+   private final YoDouble force_thresh = new YoDouble("force_thresh", "", registry);
+   private final YoDouble min_support_time = new YoDouble("min_support_time", "", registry);
 
-   private final DoubleYoVariable gc_ltoe = new DoubleYoVariable("gc_ltoe", "", registry);
+   private final YoDouble gc_ltoe = new YoDouble("gc_ltoe", "", registry);
 
-   private final DoubleYoVariable ff_hip = new DoubleYoVariable("ff_hip", "", registry);
-   private final DoubleYoVariable ff_knee = new DoubleYoVariable("ff_knee", "", registry);
-   private final DoubleYoVariable ff_ankle = new DoubleYoVariable("ff_ankle", "", registry);
+   private final YoDouble ff_hip = new YoDouble("ff_hip", "", registry);
+   private final YoDouble ff_knee = new YoDouble("ff_knee", "", registry);
+   private final YoDouble ff_ankle = new YoDouble("ff_ankle", "", registry);
 
 // private final YoVariable gc_rheel = new YoVariable("gc_rheel", "", registry);
-   private final DoubleYoVariable gc_rtoe = new DoubleYoVariable("gc_rtoe", "", registry);
+   private final YoDouble gc_rtoe = new YoDouble("gc_rtoe", "", registry);
 
 //   private final YoVariable offset = new YoVariable("offset", "", registry);
 //   private final YoVariable amp = new YoVariable("amp", "", registry);
 //   private final YoVariable freq = new YoVariable("freq", "", registry);
 
 // private final YoVariable left_state = new YoVariable("left_state", "", States.values(), registry);
-   private final DoubleYoVariable ft_left = new DoubleYoVariable("ft_left", "", registry);
+   private final YoDouble ft_left = new YoDouble("ft_left", "", registry);
 
-   private final DoubleYoVariable la_int = new DoubleYoVariable("la_int", "", registry);
-   private final DoubleYoVariable ra_int = new DoubleYoVariable("ra_int", "", registry);
+   private final YoDouble la_int = new YoDouble("la_int", "", registry);
+   private final YoDouble ra_int = new YoDouble("ra_int", "", registry);
 
-   private final DoubleYoVariable l_swing_flag = new DoubleYoVariable("l_swing_flag", "", registry);
+   private final YoDouble l_swing_flag = new YoDouble("l_swing_flag", "", registry);
 
-   private final DoubleYoVariable lthigh_start = new DoubleYoVariable("lthigh_start", "", registry);
+   private final YoDouble lthigh_start = new YoDouble("lthigh_start", "", registry);
 
-   private final DoubleYoVariable left_force = new DoubleYoVariable("left_force", "", registry);
+   private final YoDouble left_force = new YoDouble("left_force", "", registry);
 
    // Active Joint Torques:
-   private final DoubleYoVariable act_lh = new DoubleYoVariable("act_lh", "", registry);
-   private final DoubleYoVariable act_lk = new DoubleYoVariable("act_lk", "", registry);
-   private final DoubleYoVariable act_la = new DoubleYoVariable("act_la", "", registry);
+   private final YoDouble act_lh = new YoDouble("act_lh", "", registry);
+   private final YoDouble act_lk = new YoDouble("act_lk", "", registry);
+   private final YoDouble act_la = new YoDouble("act_la", "", registry);
 
-   private final DoubleYoVariable act_rh = new DoubleYoVariable("act_rh", "", registry);
-   private final DoubleYoVariable act_rk = new DoubleYoVariable("act_rk", "", registry);
-   private final DoubleYoVariable act_ra = new DoubleYoVariable("act_ra", "", registry);
+   private final YoDouble act_rh = new YoDouble("act_rh", "", registry);
+   private final YoDouble act_rk = new YoDouble("act_rk", "", registry);
+   private final YoDouble act_ra = new YoDouble("act_ra", "", registry);
 
    // Passive Joint Torques:
-   private final DoubleYoVariable pas_lh = new DoubleYoVariable("pas_lh", "", registry);
-   private final DoubleYoVariable pas_lk = new DoubleYoVariable("pas_lk", "", registry);
-   private final DoubleYoVariable pas_la = new DoubleYoVariable("pas_la", "", registry);
+   private final YoDouble pas_lh = new YoDouble("pas_lh", "", registry);
+   private final YoDouble pas_lk = new YoDouble("pas_lk", "", registry);
+   private final YoDouble pas_la = new YoDouble("pas_la", "", registry);
 
-   private final DoubleYoVariable pas_rh = new DoubleYoVariable("pas_rh", "", registry);
-   private final DoubleYoVariable pas_rk = new DoubleYoVariable("pas_rk", "", registry);
-   private final DoubleYoVariable pas_ra = new DoubleYoVariable("pas_ra", "", registry);
+   private final YoDouble pas_rh = new YoDouble("pas_rh", "", registry);
+   private final YoDouble pas_rk = new YoDouble("pas_rk", "", registry);
+   private final YoDouble pas_ra = new YoDouble("pas_ra", "", registry);
 
-   private final DoubleYoVariable vel = new DoubleYoVariable("vel", "", registry);
-   private final DoubleYoVariable left_cop = new DoubleYoVariable("left_cop", "", registry);
-   private final DoubleYoVariable right_force = new DoubleYoVariable("right_force", "", registry);
-   private final DoubleYoVariable right_cop = new DoubleYoVariable("right_cop", "", registry);
+   private final YoDouble vel = new YoDouble("vel", "", registry);
+   private final YoDouble left_cop = new YoDouble("left_cop", "", registry);
+   private final YoDouble right_force = new YoDouble("right_force", "", registry);
+   private final YoDouble right_cop = new YoDouble("right_cop", "", registry);
 
-   private final SideDependentList<DoubleYoVariable> desiredThighAngles = new SideDependentList<DoubleYoVariable>(lthigh_d, rthigh_d);
-   private final SideDependentList<DoubleYoVariable> desiredThighVelocities = new SideDependentList<DoubleYoVariable>(lthighd_d, rthighd_d);
-   private final SideDependentList<DoubleYoVariable> desiredThighAccelerations = new SideDependentList<DoubleYoVariable>(lthighdd_d, rthighdd_d);
+   private final SideDependentList<YoDouble> desiredThighAngles = new SideDependentList<YoDouble>(lthigh_d, rthigh_d);
+   private final SideDependentList<YoDouble> desiredThighVelocities = new SideDependentList<YoDouble>(lthighd_d, rthighd_d);
+   private final SideDependentList<YoDouble> desiredThighAccelerations = new SideDependentList<YoDouble>(lthighdd_d, rthighdd_d);
 
-   private final SideDependentList<DoubleYoVariable> desiredShinAngles = new SideDependentList<DoubleYoVariable>(lshin_d, rshin_d);
-   private final SideDependentList<DoubleYoVariable> desiredShinVelocities = new SideDependentList<DoubleYoVariable>(lshind_d, rshind_d);
-   private final SideDependentList<DoubleYoVariable> desiredShinAccelerations = new SideDependentList<DoubleYoVariable>(lshindd_d, rshindd_d);
+   private final SideDependentList<YoDouble> desiredShinAngles = new SideDependentList<YoDouble>(lshin_d, rshin_d);
+   private final SideDependentList<YoDouble> desiredShinVelocities = new SideDependentList<YoDouble>(lshind_d, rshind_d);
+   private final SideDependentList<YoDouble> desiredShinAccelerations = new SideDependentList<YoDouble>(lshindd_d, rshindd_d);
 
-   private final SideDependentList<DoubleYoVariable> thighAngles = new SideDependentList<DoubleYoVariable>(q_lthigh, q_rthigh);
-   private final SideDependentList<DoubleYoVariable> thighVelocities = new SideDependentList<DoubleYoVariable>(qd_lthigh, qd_rthigh);
-   private final SideDependentList<DoubleYoVariable> shinAngles = new SideDependentList<DoubleYoVariable>(q_lshin, q_rshin);
-   private final SideDependentList<DoubleYoVariable> shinVelocities = new SideDependentList<DoubleYoVariable>(qd_lshin, qd_rshin);
+   private final SideDependentList<YoDouble> thighAngles = new SideDependentList<YoDouble>(q_lthigh, q_rthigh);
+   private final SideDependentList<YoDouble> thighVelocities = new SideDependentList<YoDouble>(qd_lthigh, qd_rthigh);
+   private final SideDependentList<YoDouble> shinAngles = new SideDependentList<YoDouble>(q_lshin, q_rshin);
+   private final SideDependentList<YoDouble> shinVelocities = new SideDependentList<YoDouble>(qd_lshin, qd_rshin);
 
-   private final SideDependentList<DoubleYoVariable> thighStartAngles = new SideDependentList<DoubleYoVariable>(lthigh_start, rthigh_start);
+   private final SideDependentList<YoDouble> thighStartAngles = new SideDependentList<YoDouble>(lthigh_start, rthigh_start);
 
 // private final SideDependentList<YoVariable> thighStartVelocities = new SideDependentList<YoVariable>(lthighd_start, rthighd_start);
-   private final SideDependentList<DoubleYoVariable> shinStartAngles = new SideDependentList<DoubleYoVariable>(lshin_start, rshin_start);
-   private final SideDependentList<DoubleYoVariable> shinStartVelocities = new SideDependentList<DoubleYoVariable>(lshind_start, rshind_start);
+   private final SideDependentList<YoDouble> shinStartAngles = new SideDependentList<YoDouble>(lshin_start, rshin_start);
+   private final SideDependentList<YoDouble> shinStartVelocities = new SideDependentList<YoDouble>(lshind_start, rshind_start);
 
-   private final SideDependentList<DoubleYoVariable> activeTorqueAtHip = new SideDependentList<DoubleYoVariable>(act_lh, act_rh);
-   private final SideDependentList<DoubleYoVariable> activeTorqueAtKnee = new SideDependentList<DoubleYoVariable>(act_lk, act_rk);
-   private final SideDependentList<DoubleYoVariable> activeTorqueAtAnkle = new SideDependentList<DoubleYoVariable>(act_la, act_ra);
+   private final SideDependentList<YoDouble> activeTorqueAtHip = new SideDependentList<YoDouble>(act_lh, act_rh);
+   private final SideDependentList<YoDouble> activeTorqueAtKnee = new SideDependentList<YoDouble>(act_lk, act_rk);
+   private final SideDependentList<YoDouble> activeTorqueAtAnkle = new SideDependentList<YoDouble>(act_la, act_ra);
 
 //   private final SideDependentList<YoVariable> passiveTorqueAtHip = new SideDependentList<YoVariable>(pas_lh, pas_rh);
 //   private final SideDependentList<YoVariable> passiveTorqueAtKnee = new SideDependentList<YoVariable>(pas_lk, pas_rk);
-   private final SideDependentList<DoubleYoVariable> passiveTorqueAtAnkle = new SideDependentList<DoubleYoVariable>(pas_la, pas_ra);
+   private final SideDependentList<YoDouble> passiveTorqueAtAnkle = new SideDependentList<YoDouble>(pas_la, pas_ra);
 
    private final SpringFlamingoRobot robot;
 
@@ -546,7 +546,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          return (0.0);
    }
 
-   DoubleYoVariable z_d = new DoubleYoVariable("z_d", "", registry);
+   YoDouble z_d = new YoDouble("z_d", "", registry);
 
    private double toe_off_ankle_torques(double anklePosition, double ankleVelocity)
    {
@@ -673,8 +673,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
       robot.tau_ra.set(act_ra.getDoubleValue() + pas_ra.getDoubleValue());
    }
 
-   private void body_kinematics_ankles(double foot_x, double foot_z, double ankle, double knee, double hip, DoubleYoVariable body_x, DoubleYoVariable body_z,
-           double body_theta, double ankle_dtheta, double knee_dtheta, double hip_dtheta, DoubleYoVariable body_dx, DoubleYoVariable body_dz, double body_dtheta)
+   private void body_kinematics_ankles(double foot_x, double foot_z, double ankle, double knee, double hip, YoDouble body_x, YoDouble body_z,
+           double body_theta, double ankle_dtheta, double knee_dtheta, double hip_dtheta, YoDouble body_dx, YoDouble body_dz, double body_dtheta)
 
    {
       double toe = -body_theta - ankle - knee - hip;
@@ -728,8 +728,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
    }
 
-   void com_kinematics(double foot_x, double foot_z, double ankle, double knee, double hip, DoubleYoVariable body_x, DoubleYoVariable body_z, double body_theta,
-                       double ankle_dtheta, double knee_dtheta, double hip_dtheta, DoubleYoVariable body_dx, DoubleYoVariable body_dz, double body_dtheta)
+   void com_kinematics(double foot_x, double foot_z, double ankle, double knee, double hip, YoDouble body_x, YoDouble body_z, double body_theta,
+                       double ankle_dtheta, double knee_dtheta, double hip_dtheta, YoDouble body_dx, YoDouble body_dz, double body_dtheta)
    {
       double toe = -body_theta - ankle - knee - hip;
       double toe_dtheta = -body_dtheta - ankle_dtheta - knee_dtheta - hip_dtheta;
@@ -892,7 +892,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class BalanceState extends State
    {
       private final RobotSide robotSide;
-      private SideDependentList<DoubleYoVariable> bodyPitchTorque = new SideDependentList<DoubleYoVariable>(ft_left, ft_right);
+      private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
       public BalanceState(WalkingState stateEnum, RobotSide robotSide)
       {
@@ -951,7 +951,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SupportState extends State
    {
       private final RobotSide robotSide;
-      private SideDependentList<DoubleYoVariable> bodyPitchTorque = new SideDependentList<DoubleYoVariable>(ft_left, ft_right);
+      private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
       public SupportState(WalkingState stateEnum, RobotSide robotSide)
       {
@@ -1015,7 +1015,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class ToeOffState extends State
    {
       private final RobotSide robotSide;
-      private SideDependentList<DoubleYoVariable> bodyPitchTorque = new SideDependentList<DoubleYoVariable>(ft_left, ft_right);
+      private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
       public ToeOffState(WalkingState stateEnum, RobotSide robotSide)
       {
@@ -1099,7 +1099,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SwingState extends State
    {
       private final RobotSide robotSide;
-      private final SideDependentList<DoubleYoVariable> swingFlags = new SideDependentList<DoubleYoVariable>(l_swing_flag, r_swing_flag);
+      private final SideDependentList<YoDouble> swingFlags = new SideDependentList<YoDouble>(l_swing_flag, r_swing_flag);
 
       public SwingState(WalkingState stateEnum, RobotSide robotSide)
       {
@@ -1110,7 +1110,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
       public void doAction()
       {
          double timeInCurrentState = SpringFlamingoFastWalkingController.this.getTimeInCurrentState(robotSide);
-         DoubleYoVariable swingFlag = swingFlags.get(robotSide);
+         YoDouble swingFlag = swingFlags.get(robotSide);
 
          /* swing flag transitions */
          if (swingFlag.getDoubleValue() < 0.5)
@@ -1233,8 +1233,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
                  - ankle_damp.getDoubleValue() * robot.getAnkleVelocity(robotSide));
          passiveTorqueAtAnkle.get(robotSide).set(0.0);
 
-         DoubleYoVariable activeHipTorque = activeTorqueAtHip.get(robotSide);
-         DoubleYoVariable activeKneeTorque = activeTorqueAtKnee.get(robotSide);
+         YoDouble activeHipTorque = activeTorqueAtHip.get(robotSide);
+         YoDouble activeKneeTorque = activeTorqueAtKnee.get(robotSide);
 
          if (activeHipTorque.getDoubleValue() > max_hip_torque.getDoubleValue())
             activeHipTorque.set(max_hip_torque.getDoubleValue());
@@ -1313,15 +1313,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class ReadyToStartWalkingCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBack;
+      private final YoBoolean enoughTimePassed, supportLegIsBack;
 
       public ReadyToStartWalkingCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_RTS_" + supportSide, "Check if enough time passed to start walking",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_RTS_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         supportLegIsBack = new BooleanYoVariable("supportLegIsBack_RTS_" + supportSide, "Check if the support leg for this transition is the reward leg",
+         supportLegIsBack = new YoBoolean("supportLegIsBack_RTS_" + supportSide, "Check if the support leg for this transition is the reward leg",
                                            registry);
       }
 
@@ -1348,18 +1348,18 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SupportToToeOffCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBackAndUnloaded, otherSideInSupport;
+      private final YoBoolean enoughTimePassed, supportLegIsBackAndUnloaded, otherSideInSupport;
 
       public SupportToToeOffCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_STTO_" + supportSide, "Check if enough time passed to start walking",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_STTO_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         otherSideInSupport = new BooleanYoVariable("otherSideInSupport_TOTS_" + supportSide, "Check if other side is in support before going to toe off",
+         otherSideInSupport = new YoBoolean("otherSideInSupport_TOTS_" + supportSide, "Check if other side is in support before going to toe off",
                  registry);
 
-         supportLegIsBackAndUnloaded = new BooleanYoVariable("supportLegIsBackAndUnloaded_STTO_" + supportSide,
+         supportLegIsBackAndUnloaded = new YoBoolean("supportLegIsBackAndUnloaded_STTO_" + supportSide,
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
@@ -1394,15 +1394,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class ToeOffToSwingCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, supportLegIsBackAndUnloaded;
+      private final YoBoolean enoughTimePassed, supportLegIsBackAndUnloaded;
 
       public ToeOffToSwingCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_TOTS_" + supportSide, "Check if enough time passed to start walking", 
+         enoughTimePassed = new YoBoolean("enoughTimePassed_TOTS_" + supportSide, "Check if enough time passed to start walking",
                                            registry);
-         supportLegIsBackAndUnloaded = new BooleanYoVariable("supportLegIsBackAndUnloaded_TOTS_" + supportSide,
+         supportLegIsBackAndUnloaded = new YoBoolean("supportLegIsBackAndUnloaded_TOTS_" + supportSide,
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
@@ -1446,15 +1446,15 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private class SwingToSupportCondition implements StateTransitionCondition
    {
       private final RobotSide supportSide;
-      private final BooleanYoVariable enoughTimePassed, swingFootHitGround;
+      private final YoBoolean enoughTimePassed, swingFootHitGround;
 
       public SwingToSupportCondition(RobotSide supportSide)
       {
          this.supportSide = supportSide;
 
-         enoughTimePassed = new BooleanYoVariable("enoughTimePassed_STS_" + supportSide, "Check if enough time passed to ensure swing is done",
+         enoughTimePassed = new YoBoolean("enoughTimePassed_STS_" + supportSide, "Check if enough time passed to ensure swing is done",
                                             registry);
-         swingFootHitGround = new BooleanYoVariable("swingFootHitGround_STS_" + supportSide, "Check if the swing foot hit the ground", 
+         swingFootHitGround = new YoBoolean("swingFootHitGround_STS_" + supportSide, "Check if the swing foot hit the ground",
                  registry);
       }
 
@@ -1495,7 +1495,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
     *  Rather it is computed based on fz,ft,rf,lf.
     */
 
-   private void single_support_vtp(RobotSide support_leg, double fz, double ft, DoubleYoVariable ff_hip, DoubleYoVariable ff_knee, DoubleYoVariable ff_ankle)
+   private void single_support_vtp(RobotSide support_leg, double fz, double ft, YoDouble ff_hip, YoDouble ff_knee, YoDouble ff_ankle)
    {
       double J1, J2, J3;
       double J4, J5, J6;
@@ -1554,7 +1554,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
 
    /* For fitting a cubic equation: page 234 of Craig */
-   void cubic_equation(double b0, double bf, double dot_b0, double dot_bf, double tf, double t, DoubleYoVariable b, DoubleYoVariable b_dot, DoubleYoVariable b_ddot)
+   void cubic_equation(double b0, double bf, double dot_b0, double dot_bf, double tf, double t, YoDouble b, YoDouble b_dot, YoDouble b_ddot)
    {
       double a0, a1, a2, a3;
 
@@ -1586,7 +1586,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
    }
 
    /* For fitting a minimum jerk trajectory.  From Flash and Hogan 1985 */
-   void minjerk_equation(double b0, double bf, double tf, double t, DoubleYoVariable b, DoubleYoVariable b_dot, DoubleYoVariable b_ddot)
+   void minjerk_equation(double b0, double bf, double tf, double t, YoDouble b, YoDouble b_dot, YoDouble b_ddot)
 
    {
       double tau;
@@ -1807,7 +1807,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
       double shinAngle = shinAngles.get(robotSide).getDoubleValue();
       double thighVelocity = thighVelocities.get(robotSide).getDoubleValue();
 
-      DoubleYoVariable activeKneeTorque = activeTorqueAtKnee.get(robotSide);
+      YoDouble activeKneeTorque = activeTorqueAtKnee.get(robotSide);
 
       desiredShinAngles.get(robotSide).set(shinAngles.get(robotSide).getDoubleValue());
       desiredShinVelocities.get(robotSide).set(shinVelocities.get(robotSide).getDoubleValue());

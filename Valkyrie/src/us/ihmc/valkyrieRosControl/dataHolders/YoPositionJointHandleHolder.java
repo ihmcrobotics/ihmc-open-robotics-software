@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
@@ -13,11 +13,11 @@ public class YoPositionJointHandleHolder
    private final OneDoFJoint joint;
    private final DesiredJointData desiredJointData;
 
-   private final DoubleYoVariable q;
-   private final DoubleYoVariable qd;
+   private final YoDouble q;
+   private final YoDouble qd;
 
-   private final DoubleYoVariable controllerPositionDesired;
-   private final DoubleYoVariable positionDesired;
+   private final YoDouble controllerPositionDesired;
+   private final YoDouble positionDesired;
 
    public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
    {
@@ -28,10 +28,10 @@ public class YoPositionJointHandleHolder
       this.joint = joint;
       this.desiredJointData = desiredJointData;
 
-      this.q = new DoubleYoVariable(name + "_q", registry);
-      this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.controllerPositionDesired = new DoubleYoVariable(name + "ControllerPositionDesired", registry);
-      this.positionDesired = new DoubleYoVariable(name + "PositionDesired", registry);
+      this.q = new YoDouble(name + "_q", registry);
+      this.qd = new YoDouble(name + "_qd", registry);
+      this.controllerPositionDesired = new YoDouble(name + "ControllerPositionDesired", registry);
+      this.positionDesired = new YoDouble(name + "PositionDesired", registry);
 
       parentRegistry.addChild(registry);
    }

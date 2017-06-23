@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.List;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -151,7 +151,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
                                                               double doubleSupportSplitFraction, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
@@ -202,7 +202,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
@@ -255,7 +255,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
                                                               double doubleSupportSplitFraction, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
@@ -302,8 +302,8 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
-         List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes,
+         List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
@@ -403,8 +403,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
                                                               List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-                                                              List<DoubleYoVariable> transferTimes, double swingSplitFraction, double transferSplitFraction,
+                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
                                                               double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
@@ -470,8 +470,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
          List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions,
-         List<DoubleYoVariable> transferSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions,
+         List<YoDouble> transferSplitFractions, double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
@@ -537,8 +537,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
                                                               List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-                                                              List<DoubleYoVariable> transferTimes, double swingSplitFraction, double transferSplitFraction,
+                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
                                                               double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
@@ -597,8 +597,8 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-         List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, double omega0)
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+         List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions, double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 

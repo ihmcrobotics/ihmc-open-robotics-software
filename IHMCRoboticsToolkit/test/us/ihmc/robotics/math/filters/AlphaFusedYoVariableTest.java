@@ -7,8 +7,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFusedYoVariableTest
 {
@@ -22,8 +22,8 @@ public class AlphaFusedYoVariableTest
       double alpha = 0.3, slowSignalNoise = 0, fastSignalNoise = 0;
 
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      DoubleYoVariable slowSignal = new DoubleYoVariable("slowFrequency", registry);
-      DoubleYoVariable fastSignal = new DoubleYoVariable("fastFrequency", registry);
+      YoDouble slowSignal = new YoDouble("slowFrequency", registry);
+      YoDouble fastSignal = new YoDouble("fastFrequency", registry);
 
       slowSignal.set(10);
       fastSignal.set(10);

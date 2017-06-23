@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -10,16 +10,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
-
 public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
    private final YoPolynomial anglePolynomial;
 
-   private final DoubleYoVariable radius;
-   private final DoubleYoVariable z;
+   private final YoDouble radius;
+   private final YoDouble z;
 
    private final PositionProvider initialPositionProvider;
    private final DoubleProvider trajectoryTimeProvider;
@@ -39,8 +38,8 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
       // calculate the initial angle:
 
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      this.currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      this.currentTime = new YoDouble(namePrefix + "Time", registry);
       this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
 
       this.referenceFrame = referenceFrame;
@@ -49,8 +48,8 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
       this.trajectoryTimeProvider = trajectoryTimeProvider;
 
       this.initialPositionProvider = initialPositionProvider;
-      this.radius = new DoubleYoVariable(namePrefix + "Radius", registry);
-      this.z = new DoubleYoVariable(namePrefix + "ZPosition", registry);
+      this.radius = new YoDouble(namePrefix + "Radius", registry);
+      this.z = new YoDouble(namePrefix + "ZPosition", registry);
       position = new FramePoint(referenceFrame);
       velocity = new FrameVector(referenceFrame);
       acceleration = new FrameVector(referenceFrame);

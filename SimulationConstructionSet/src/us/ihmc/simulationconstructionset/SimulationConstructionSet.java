@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 import com.jme3.renderer.Camera;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -48,30 +49,28 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
-import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.*;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.GotoInPointCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.GotoOutPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.PreviousCameraKeyCommandExecutor;
@@ -82,8 +81,6 @@ import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.StepBackwardCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
@@ -1939,7 +1936,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame = new JFrame("Simulation Construction Set");
-      jFrame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-32x32-Sim.png")).getImage());
+      jFrame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-2-32x32-Sim.png")).getImage());
 
       try
       {
@@ -3459,7 +3456,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
       // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
 
       // dataWriter.writeSpreadsheetFormattedData(myDataBuffer, (mySimulation.getDT() * mySimulation.getRecordFreq()), vars);
       dataWriter.writeSpreadsheetFormattedData(myDataBuffer, vars);
@@ -3480,7 +3477,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public void writeData(String varGroupName, boolean binary, boolean compress, File chosenFile)
    {
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
       writeData(vars, binary, compress, chosenFile);
    }
 
@@ -3511,7 +3508,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroup, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroup, varGroupList);
       dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);
    }
 
@@ -3623,7 +3620,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       System.out.println("Writing State File " + chosenFile.getName()); // filename);
 
       // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
       dataWriter.writeState(robots[0].getName(), (mySimulation.getDT() * mySimulation.getRecordFreq()), vars, binary, compress);
    }
 
@@ -3640,7 +3637,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
+      ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroupName, varGroupList);
 
       dataWriter.writeSpreadsheetFormattedState(myDataBuffer, vars);
    }
@@ -4449,7 +4446,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return null;
    }
 
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, RenderedSceneHandler videoDataServer,
+   /**
+    * This is where SCS video comes from! 
+    * 
+    * Tags: publisher, communicator, video, viewport
+    */
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       if (myGUI != null)
@@ -4504,5 +4506,4 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
    }
-
 }

@@ -9,8 +9,8 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 {
@@ -26,7 +26,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    }
 
    @Override
-   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3D cameraPosition, Quaternion cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
       try
@@ -38,19 +38,13 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
          }
          byte[] data =  new byte[buffer.remaining()];
          buffer.get(data);
-         handler.newVideoPacketAvailable(videoSource, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
+         handler.onFrame(videoSource, data, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
       picture.delete();
-   }
-
-   @Override
-   public void close()
-   {
-      // TODO
    }
 
    @Override
@@ -63,5 +57,10 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    public void setVideoControlSettings(VideoControlSettings object)
    {
       // TODO
+   }
+
+   @Override
+   public void dispose()
+   {
    }
 }

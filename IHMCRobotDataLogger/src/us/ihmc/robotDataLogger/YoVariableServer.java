@@ -27,9 +27,9 @@ import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.TickAndUpdatable;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -56,8 +56,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    // Change data
    private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new LinkedHashMap<>();
       
-   private IntegerYoVariable skippedMainRegistryTicksDueFullBuffer;
-   private HashMap<YoVariableRegistry, IntegerYoVariable> skippedRegistryTicksDueFullBuffer = new HashMap<>();
+   private YoInteger skippedMainRegistryTicksDueFullBuffer;
+   private HashMap<YoVariableRegistry, YoInteger> skippedRegistryTicksDueFullBuffer = new HashMap<>();
    
    // State
    private boolean started = false;
@@ -158,10 +158,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          throw new RuntimeException("Server already started");
       }
       
-      skippedMainRegistryTicksDueFullBuffer = new IntegerYoVariable("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
+      skippedMainRegistryTicksDueFullBuffer = new YoInteger("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
       for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> registry : variableData)
       {
-         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new IntegerYoVariable("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
+         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new YoInteger("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
       }
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);

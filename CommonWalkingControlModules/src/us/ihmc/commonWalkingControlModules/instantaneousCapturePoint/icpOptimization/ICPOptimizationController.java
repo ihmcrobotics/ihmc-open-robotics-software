@@ -12,11 +12,11 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -43,36 +43,36 @@ public abstract class ICPOptimizationController
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   protected final IntegerYoVariable numberOfFootstepsToConsider = new IntegerYoVariable(yoNamePrefix + "NumberOfFootstepsToConsider", registry);
+   protected final YoInteger numberOfFootstepsToConsider = new YoInteger(yoNamePrefix + "NumberOfFootstepsToConsider", registry);
 
-   protected final BooleanYoVariable useStepAdjustment = new BooleanYoVariable(yoNamePrefix + "UseStepAdjustment", registry);
-   protected final BooleanYoVariable useAngularMomentum = new BooleanYoVariable(yoNamePrefix + "UseAngularMomentum", registry);
+   protected final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
+   protected final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
 
-   protected final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
-   protected final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
-   protected final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
+   protected final YoBoolean scaleStepRegularizationWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
+   protected final YoBoolean scaleFeedbackWeightWithGain = new YoBoolean(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
+   protected final YoBoolean scaleUpcomingStepWeights = new YoBoolean(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
 
-   protected final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
-   protected final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
+   protected final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
+   protected final YoBoolean isInTransfer = new YoBoolean(yoNamePrefix + "IsInTransfer", registry);
 
-   protected final List<DoubleYoVariable> swingDurations = new ArrayList<>();
-   protected final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   protected final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(yoNamePrefix + "FinalTransferDuration", registry);
+   protected final List<YoDouble> swingDurations = new ArrayList<>();
+   protected final List<YoDouble> transferDurations = new ArrayList<>();
+   protected final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
 
-   protected final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-   protected final List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-   protected final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
-   protected final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
+   protected final List<YoDouble> transferSplitFractions = new ArrayList<>();
+   protected final List<YoDouble> swingSplitFractions = new ArrayList<>();
+   protected final YoDouble defaultTransferSplitFraction = new YoDouble(yoNamePrefix + "DefaultTransferSplitFraction", registry);
+   protected final YoDouble defaultSwingSplitFraction = new YoDouble(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
-   protected final DoubleYoVariable finalTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "FinalTransferSplitFraction", registry);
+   protected final YoDouble finalTransferSplitFraction = new YoDouble(yoNamePrefix + "FinalTransferSplitFraction", registry);
 
-   protected final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
-   protected final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
 
-   protected final DoubleYoVariable initialTime = new DoubleYoVariable(yoNamePrefix + "InitialTime", registry);
-   protected final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(yoNamePrefix + "TimeInCurrentState", registry);
-   protected final DoubleYoVariable timeRemainingInState = new DoubleYoVariable(yoNamePrefix + "TimeRemainingInState", registry);
-   protected final DoubleYoVariable minimumTimeRemaining = new DoubleYoVariable(yoNamePrefix + "MinimumTimeRemaining", registry);
+   protected final YoDouble initialTime = new YoDouble(yoNamePrefix + "InitialTime", registry);
+   protected final YoDouble timeInCurrentState = new YoDouble(yoNamePrefix + "TimeInCurrentState", registry);
+   protected final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
+   protected final YoDouble minimumTimeRemaining = new YoDouble(yoNamePrefix + "MinimumTimeRemaining", registry);
 
    protected final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
    protected final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
@@ -88,31 +88,31 @@ public abstract class ICPOptimizationController
    protected final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
    protected final ArrayList<FramePoint2d> unclippedFootstepSolutions = new ArrayList<>();
 
-   protected final DoubleYoVariable forwardFootstepWeight = new DoubleYoVariable(yoNamePrefix + "ForwardFootstepWeight", registry);
-   protected final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
+   protected final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
+   protected final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
    protected final YoFramePoint2d scaledFootstepWeights = new YoFramePoint2d(yoNamePrefix + "ScaledFootstepWeights", worldFrame, registry);
 
-   protected final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
-   protected final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
+   protected final YoDouble feedbackForwardWeight = new YoDouble(yoNamePrefix + "FeedbackForwardWeight", registry);
+   protected final YoDouble feedbackLateralWeight = new YoDouble(yoNamePrefix + "FeedbackLateralWeight", registry);
    protected final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
 
-   protected final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
-   protected final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackRegularizationWeight", registry);
-   protected final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
-   protected final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationWeight", registry);
-   protected final DoubleYoVariable angularMomentumMinimizationWeight = new DoubleYoVariable(yoNamePrefix + "AngularMomentumMinimizationWeight", registry);
+   protected final YoDouble footstepRegularizationWeight = new YoDouble(yoNamePrefix + "FootstepRegularizationWeight", registry);
+   protected final YoDouble feedbackRegularizationWeight = new YoDouble(yoNamePrefix + "FeedbackRegularizationWeight", registry);
+   protected final YoDouble scaledFootstepRegularizationWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
+   protected final YoDouble dynamicRelaxationWeight = new YoDouble(yoNamePrefix + "DynamicRelaxationWeight", registry);
+   protected final YoDouble angularMomentumMinimizationWeight = new YoDouble(yoNamePrefix + "AngularMomentumMinimizationWeight", registry);
 
-   protected final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
-   protected final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable(yoNamePrefix + "FeedbackParallelGain", registry);
+   protected final YoDouble feedbackOrthogonalGain = new YoDouble(yoNamePrefix + "FeedbackOrthogonalGain", registry);
+   protected final YoDouble feedbackParallelGain = new YoDouble(yoNamePrefix + "FeedbackParallelGain", registry);
 
-   protected final IntegerYoVariable numberOfIterations = new IntegerYoVariable(yoNamePrefix + "NumberOfIterations", registry);
-   protected final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
-   protected final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable(yoNamePrefix + "HasNotConvergedCounts", registry);
+   protected final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
+   protected final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
+   protected final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
-   protected final BooleanYoVariable doingBigAdjustment = new BooleanYoVariable(yoNamePrefix + "DoingBigAdjustment", registry);
+   protected final YoBoolean doingBigAdjustment = new YoBoolean(yoNamePrefix + "DoingBigAdjustment", registry);
 
-   protected final DoubleYoVariable transferSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
-   protected final DoubleYoVariable magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
+   protected final YoDouble transferSplitFractionUnderDisturbance = new YoDouble(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
+   protected final YoDouble magnitudeForBigAdjustment = new YoDouble(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
    protected final boolean useTwoCMPs;
    protected final boolean useFootstepRegularization;
@@ -225,18 +225,18 @@ public abstract class ICPOptimizationController
          footstepSolutions.add(new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation" + i, worldFrame, registry));
          unclippedFootstepSolutions.add(new FramePoint2d(worldFrame));
 
-         DoubleYoVariable swingDuration = new DoubleYoVariable(yoNamePrefix + "SwingDuration" + i, registry);
+         YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
-         DoubleYoVariable transferDuration = new DoubleYoVariable(yoNamePrefix + "TransferDuration" + i, registry);
+         YoDouble transferDuration = new YoDouble(yoNamePrefix + "TransferDuration" + i, registry);
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable(yoNamePrefix + "TransferSplitFraction" + i,
+         YoDouble transferSplitFraction = new YoDouble(yoNamePrefix + "TransferSplitFraction" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable(yoNamePrefix + "SwingSplitFraction" + i,
+         YoDouble swingSplitFraction = new YoDouble(yoNamePrefix + "SwingSplitFraction" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          swingSplitFraction.setToNaN();
          swingSplitFractions.add(swingSplitFraction);
@@ -340,7 +340,7 @@ public abstract class ICPOptimizationController
     */
    public void setSwingSplitFraction(int stepNumber, double splitFraction)
    {
-      transferSplitFractions.get(stepNumber).set(splitFraction);
+      swingSplitFractions.get(stepNumber).set(splitFraction);
    }
 
    /**

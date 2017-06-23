@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -25,7 +25,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    private double minRadiusScaleFactor = 0.3;
    private double maxRadiusScaleFactor = 3.0;
 
-   private final DoubleYoVariable baseX, baseY, baseZ, x, y, z;
+   private final YoDouble baseX, baseY, baseZ, x, y, z;
    protected final double scaleFactor;
    private boolean drawArrowhead;
    private final AppearanceDefinition appearance;
@@ -64,14 +64,14 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       }
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-                          DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance)
+   public YoGraphicVector(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
+                          YoDouble z, double scaleFactor, AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-                          DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicVector(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
+                          YoDouble z, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name);
 
@@ -202,7 +202,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    //      }
    //   }
 
-   public void set(DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
+   public void set(YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y, YoDouble z)
    {
       this.baseX.set(baseX.getDoubleValue());
       this.baseY.set(baseY.getDoubleValue());
@@ -276,9 +276,9 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    }
 
    @Override
-   public DoubleYoVariable[] getVariables()
+   public YoDouble[] getVariables()
    {
-      return new DoubleYoVariable[] {baseX, baseY, baseZ, x, y, z};
+      return new YoDouble[] {baseX, baseY, baseZ, x, y, z};
    }
 
    @Override

@@ -1,9 +1,8 @@
 package us.ihmc.sensorProcessing.signalCorruption;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class OrientationLatencyCorruptor implements SignalCorruptor<RotationMatrix>
 {
@@ -11,12 +10,12 @@ public class OrientationLatencyCorruptor implements SignalCorruptor<RotationMatr
    private final int latencyTicks;
 
    private final RotationMatrix[] orientations;
-   private final IntegerYoVariable index;
+   private final YoInteger index;
    
    public OrientationLatencyCorruptor(String namePrefix, int latencyTicks, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      index = new IntegerYoVariable(namePrefix + "Index", registry);
+      index = new YoInteger(namePrefix + "Index", registry);
       this.latencyTicks = latencyTicks;
       parentRegistry.addChild(registry);
       

@@ -6,9 +6,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
@@ -17,11 +17,11 @@ public class HandUserControlModeState extends HandControlState
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
    private final OneDoFJoint[] userControlledJoints;
-   private final DoubleYoVariable[] userDesiredJointAccelerations;
-   private final DoubleYoVariable timeOfLastUserMesage;
-   private final DoubleYoVariable timeSinceLastUserMesage;
-   private final BooleanYoVariable abortUserControlMode;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble[] userDesiredJointAccelerations;
+   private final YoDouble timeOfLastUserMesage;
+   private final YoDouble timeSinceLastUserMesage;
+   private final YoBoolean abortUserControlMode;
+   private final YoDouble yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public HandUserControlModeState(String namePrefix, OneDoFJoint[] userControlledJoints, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
@@ -32,19 +32,19 @@ public class HandUserControlModeState extends HandControlState
       parentRegistry.addChild(registry);
 
       this.userControlledJoints = userControlledJoints;
-      userDesiredJointAccelerations = new DoubleYoVariable[userControlledJoints.length];
+      userDesiredJointAccelerations = new YoDouble[userControlledJoints.length];
       for (int i = 0; i < userControlledJoints.length; i++)
       {
          String jointName = userControlledJoints[i].getName();
-         userDesiredJointAccelerations[i] = new DoubleYoVariable("qdd_d_user_" + jointName, registry);
+         userDesiredJointAccelerations[i] = new YoDouble("qdd_d_user_" + jointName, registry);
          jointspaceAccelerationCommand.addJoint(userControlledJoints[i], Double.NaN);
       }
 
       jointspaceAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
 
-      timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfLastUserMesage", registry);
-      timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
-      abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
+      timeOfLastUserMesage = new YoDouble(namePrefix + "TimeOfLastUserMesage", registry);
+      timeSinceLastUserMesage = new YoDouble(namePrefix + "TimeSinceLastUserMesage", registry);
+      abortUserControlMode = new YoBoolean(namePrefix + "AbortUserControlMode", registry);
       yoTime = controllerToolbox.getYoTime();
    }
 

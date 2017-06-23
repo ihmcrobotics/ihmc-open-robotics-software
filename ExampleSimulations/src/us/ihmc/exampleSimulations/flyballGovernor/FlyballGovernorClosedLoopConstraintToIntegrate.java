@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.flyballGovernor;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -20,7 +20,7 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
    private final YoFrameVector forceA, forceB;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DoubleYoVariable positionErrorMagnitude;
+   private final YoDouble positionErrorMagnitude;
 
    private final double k = 10000.0;
    private final double b = 15.0;
@@ -49,7 +49,7 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
       robot.addFunctionToIntegrate(this);
 
       registry = new YoVariableRegistry(name);
-      positionErrorMagnitude = new DoubleYoVariable("positionErrorMagnitude", registry);
+      positionErrorMagnitude = new YoDouble("positionErrorMagnitude", registry);
       parentRegistry.addChild(registry);
    }
 
@@ -86,7 +86,7 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
       return 0;
    }
 
-   public DoubleYoVariable[] getOutputVariables()
+   public YoDouble[] getOutputVariables()
    {
       return null;
    }

@@ -1,36 +1,36 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class TimestampedVelocityYoVariable extends DoubleYoVariable
+public class TimestampedVelocityYoVariable extends YoDouble
 {
-   private final DoubleYoVariable positionToReferenceOnUpdate;
-   private final DoubleYoVariable updatedPosition;
-   private final DoubleYoVariable previousPosition;
+   private final YoDouble positionToReferenceOnUpdate;
+   private final YoDouble updatedPosition;
+   private final YoDouble previousPosition;
 
-   private final DoubleYoVariable timeToReferenceOnUpdate;
-   private final DoubleYoVariable updatedTimestamp;
-   private final DoubleYoVariable previousTimestamp;
+   private final YoDouble timeToReferenceOnUpdate;
+   private final YoDouble updatedTimestamp;
+   private final YoDouble previousTimestamp;
    
-   private final BooleanYoVariable hasBeenUpdated;
+   private final YoBoolean hasBeenUpdated;
    private final double epsilonChange;
 
-   public TimestampedVelocityYoVariable(String name, String description, DoubleYoVariable positionToReferenceOnUpdate, DoubleYoVariable timeToReferenceOnUpdate, YoVariableRegistry registry,
+   public TimestampedVelocityYoVariable(String name, String description, YoDouble positionToReferenceOnUpdate, YoDouble timeToReferenceOnUpdate, YoVariableRegistry registry,
          double epsilonChange)
    {
       super(name, description, registry);
 
       this.positionToReferenceOnUpdate = positionToReferenceOnUpdate;
-      this.updatedPosition = new DoubleYoVariable(name + "_position", registry);
-      this.previousPosition = new DoubleYoVariable(name + "_prevPosition", registry);
+      this.updatedPosition = new YoDouble(name + "_position", registry);
+      this.previousPosition = new YoDouble(name + "_prevPosition", registry);
 
       this.timeToReferenceOnUpdate = timeToReferenceOnUpdate;
-      this.updatedTimestamp = new DoubleYoVariable(name + "_timestamp", registry);
-      this.previousTimestamp = new DoubleYoVariable(name + "_prevTimestamp", registry);
+      this.updatedTimestamp = new YoDouble(name + "_timestamp", registry);
+      this.previousTimestamp = new YoDouble(name + "_prevTimestamp", registry);
       
-      this.hasBeenUpdated = new BooleanYoVariable(name + "_hasBeenUpdated", registry);
+      this.hasBeenUpdated = new YoBoolean(name + "_hasBeenUpdated", registry);
       this.epsilonChange = epsilonChange;
 
       reset();

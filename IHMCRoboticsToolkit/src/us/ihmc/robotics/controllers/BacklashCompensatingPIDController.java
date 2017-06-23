@@ -1,22 +1,22 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BacklashCompensatingPIDController extends PIDController
 {
-   private final DoubleYoVariable maxProportionalGain;
-   private final DoubleYoVariable maxDerivativeGain;
+   private final YoDouble maxProportionalGain;
+   private final YoDouble maxDerivativeGain;
    
-   private final DoubleYoVariable lowGainReduction, gainReduction;
-   private final DoubleYoVariable rampUpTime, rampDownTime, holdLowGainsTime;
+   private final YoDouble lowGainReduction, gainReduction;
+   private final YoDouble rampUpTime, rampDownTime, holdLowGainsTime;
 
-   private final EnumYoVariable<GainChangerState> gainChangerState;
-   private final DoubleYoVariable switchTime;
-   private final BooleanYoVariable previousTorqueWasPositive;
+   private final YoEnum<GainChangerState> gainChangerState;
+   private final YoDouble switchTime;
+   private final YoBoolean previousTorqueWasPositive;
    
    private boolean gainReductionUpToDate = false;
    
@@ -24,19 +24,19 @@ public class BacklashCompensatingPIDController extends PIDController
    {
       super(suffix, registry);
       
-      maxProportionalGain = new DoubleYoVariable("max_kp_" + suffix, registry);
-      maxDerivativeGain = new DoubleYoVariable("max_kd_" + suffix, registry);
-      gainReduction = new DoubleYoVariable("gainReduction_" + suffix, registry);
-      lowGainReduction = new DoubleYoVariable("lowGainReduction_" + suffix, registry);
+      maxProportionalGain = new YoDouble("max_kp_" + suffix, registry);
+      maxDerivativeGain = new YoDouble("max_kd_" + suffix, registry);
+      gainReduction = new YoDouble("gainReduction_" + suffix, registry);
+      lowGainReduction = new YoDouble("lowGainReduction_" + suffix, registry);
 
-      gainChangerState = new EnumYoVariable<GainChangerState>("gainChangerState_" + suffix, registry, GainChangerState.class);
+      gainChangerState = new YoEnum<GainChangerState>("gainChangerState_" + suffix, registry, GainChangerState.class);
       
-      rampDownTime = new DoubleYoVariable("rampDownTime_" + suffix, registry);
-      rampUpTime = new DoubleYoVariable("rampUpTime_" + suffix, registry);
-      holdLowGainsTime = new DoubleYoVariable("holdLowGainsTime_" + suffix, registry);
+      rampDownTime = new YoDouble("rampDownTime_" + suffix, registry);
+      rampUpTime = new YoDouble("rampUpTime_" + suffix, registry);
+      holdLowGainsTime = new YoDouble("holdLowGainsTime_" + suffix, registry);
       
-      previousTorqueWasPositive = new BooleanYoVariable("previousTorqueWasPositive_" + suffix, registry);
-      switchTime = new DoubleYoVariable("switchTime_" + suffix, registry);
+      previousTorqueWasPositive = new YoBoolean("previousTorqueWasPositive_" + suffix, registry);
+      switchTime = new YoDouble("switchTime_" + suffix, registry);
       
       gainChangerState.set(GainChangerState.LOW_GAINS);
       switchTime.set(0.0);

@@ -88,18 +88,18 @@ public class NetworkProcessorTest
    
    public void disconnectCommunicators() throws IOException
    {
-      packetCommunicatorAServer.close();
-      packetCommunicatorBServer.close();
-      packetCommunicatorCServer.close();
-      packetCommunicatorDServer.close();
-      packetCommunicatorEServer.close();
-      packetCommunicatorFServer.close();
-      packetCommunicatorAClient.close();
-      packetCommunicatorBClient.close();
-      packetCommunicatorCClient.close();
-      packetCommunicatorDClient.close();
-      packetCommunicatorEClient.close();
-      packetCommunicatorFClient.close();
+      packetCommunicatorAServer.disconnect();
+      packetCommunicatorBServer.disconnect();
+      packetCommunicatorCServer.disconnect();
+      packetCommunicatorDServer.disconnect();
+      packetCommunicatorEServer.disconnect();
+      packetCommunicatorFServer.disconnect();
+      packetCommunicatorAClient.disconnect();
+      packetCommunicatorBClient.disconnect();
+      packetCommunicatorCClient.disconnect();
+      packetCommunicatorDClient.disconnect();
+      packetCommunicatorEClient.disconnect();
+      packetCommunicatorFClient.disconnect();
       
       networkProcessor.detatchObjectCommunicator(TestPacketDestinations.A);
       networkProcessor.detatchObjectCommunicator(TestPacketDestinations.B);
@@ -274,8 +274,8 @@ public class NetworkProcessorTest
       assertTrue(checkIfPacketsGoThroughTheWire(packetsForB, consumersForB));
       assertTrue(checkIfPacketsGoThroughTheWire(packetsForE, consumersForE));
 
-      packetCommunicatorBClient.close();
-      packetCommunicatorEServer.close();
+      packetCommunicatorBClient.disconnect();
+      packetCommunicatorEServer.disconnect();
 
       sendPackets(packetCommunicatorAServer, packetsForB);
       sendPackets(packetCommunicatorBServer, packetsForA);

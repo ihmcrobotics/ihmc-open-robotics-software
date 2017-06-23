@@ -23,11 +23,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -51,7 +51,7 @@ public class WalkingMessageHandler
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final List<FootstepTiming> upcomingFootstepTimings = new ArrayList<>();
 
-   private final BooleanYoVariable hasNewFootstepAdjustment = new BooleanYoVariable("hasNewFootstepAdjustement", registry);
+   private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
@@ -62,24 +62,24 @@ public class WalkingMessageHandler
 
    private final StatusMessageOutputManager statusOutputManager;
 
-   private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
-   private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
-   private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
-   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
-   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
-   private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
+   private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
+   private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
+   private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
+   private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
+   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
+   private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
+   private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
-   private final BooleanYoVariable isWalking = new BooleanYoVariable("isWalking", registry);
+   private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
-   private final EnumYoVariable<RobotSide>[] upcomingFoostepSide = new EnumYoVariable[numberOfFootstepsToVisualize];
+   private final YoEnum<RobotSide>[] upcomingFoostepSide = new YoEnum[numberOfFootstepsToVisualize];
 
    private final FootstepListVisualizer footstepListVisualizer;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable footstepDataListRecievedTime = new DoubleYoVariable("footstepDataListRecievedTime", registry);
+   private final YoDouble yoTime;
+   private final YoDouble footstepDataListRecievedTime = new YoDouble("footstepDataListRecievedTime", registry);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -88,7 +88,7 @@ public class WalkingMessageHandler
    }
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         StatusMessageOutputManager statusOutputManager, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
@@ -113,7 +113,7 @@ public class WalkingMessageHandler
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
-         upcomingFoostepSide[i] = new EnumYoVariable<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
+         upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
 
       footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
@@ -585,6 +585,8 @@ public class WalkingMessageHandler
 
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
+      footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
+      footstep.setExpectedInitialPose(footstepData.getExpectedInitialPosition(), footstepData.getExpectedInitialOrientation());
       return footstep;
    }
 

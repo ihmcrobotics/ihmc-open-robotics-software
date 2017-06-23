@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryCommand, PelvisTrajectoryMessage>
@@ -40,6 +41,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
 
    public PelvisTrajectoryCommand()
    {
+      super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
 
    @Override

@@ -79,7 +79,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
+         toolboxCommunicator.disconnect();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
@@ -246,7 +246,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Quaternion desiredHandOrientationL = new Quaternion();
       desiredHandPoseL.getOrientation(desiredHandOrientationL);
 
-      double handAngleEpsilon = Math.toRadians(1);
+      double handAngleEpsilon = Math.toRadians(1.0);
 
       assertTrue(isOrientationEqual(desiredHandOrientationR, controllerDesiredHandOrientationR, handAngleEpsilon));
       assertTrue(isOrientationEqual(desiredHandOrientationL, controllerDesiredHandOrientationL, handAngleEpsilon));
@@ -452,10 +452,10 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
-      double positionEpsilon = 1.0e-4;
+      double positionEpsilon = 1.0e-3;
 
-      assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
-      assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
+      assertTrue("Position difference: " + rightDifference, rightDifference < positionEpsilon);
+      assertTrue("Position difference: " + leftDifference, leftDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }

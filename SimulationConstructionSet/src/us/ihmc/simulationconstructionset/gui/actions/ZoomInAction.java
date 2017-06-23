@@ -1,34 +1,28 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
-
-public class ZoomInAction extends AbstractAction
+@SuppressWarnings("serial")
+public class ZoomInAction extends SCSAction
 {
-   private static final long serialVersionUID = -7575893287036365108L;
-
    private ZoomGraphCommandExecutor executor;
 
    public ZoomInAction(ZoomGraphCommandExecutor executor)
    {
-      super("Zoom In");
-      this.executor = executor;
+      super("Zoom In",
+              "icons/ZoomIn.png",
+              KeyEvent.VK_I,
+              "Zoom In Data Buffer",
+              "Expand graphs to get finer detail of data buffer."
+      );
 
-      String iconFilename = "icons/ZoomIn24.gif";
-      int shortKey = KeyEvent.VK_I;
-      String longDescription = "Zoom In";
-      String shortDescription = "Zoom In";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = executor;
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       executor.zoomIn();
    }

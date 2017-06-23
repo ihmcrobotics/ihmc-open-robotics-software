@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -21,22 +22,26 @@ public class Footstep
 {
    public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP}
 
+   public static final int maxNumberOfSwingWaypoints = 10;
+
    private static int counter = 0;
    private final String id;
    private final RigidBody endEffector;
    private RobotSide robotSide;
    private FootstepType footstepType = FootstepType.FULL_FOOTSTEP;
-   
+
    private final FramePose footstepPose = new FramePose();
-   
+   private final FramePose expectedInitialPose = new FramePose();
+
    private final FramePose tempPose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
-   
+
    private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
-   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(10, FrameSE3TrajectoryPoint.class);
+   private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
+   private double swingTrajectoryBlendDuration = 0.0;
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -70,6 +75,8 @@ public class Footstep
       this(footstep.endEffector, footstep.robotSide, footstep.footstepPose, footstep.trustHeight);
       this.trajectoryType = footstep.trajectoryType;
       this.swingHeight = footstep.swingHeight;
+      this.swingTrajectoryBlendDuration = footstep.swingTrajectoryBlendDuration;
+      this.expectedInitialPose.setIncludingFrame(footstep.expectedInitialPose);
    }
 
    public Footstep(RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
@@ -91,6 +98,7 @@ public class Footstep
       this.trustHeight = trustHeight;
       this.footstepPose.setIncludingFrame(footstepPose);
       setPredictedContactPointsFromPoint2ds(predictedContactPoints);
+      this.expectedInitialPose.setToNaN();
       this.trajectoryType = trajectoryType;
       this.swingHeight = swingHeight;
       footstepSoleFrame = new PoseReferenceFrame(id + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
@@ -117,7 +125,7 @@ public class Footstep
       for (int i = 0; i < customPositionWaypoints.size(); i++)
          this.customPositionWaypoints.add().set(customPositionWaypoints.get(i));
    }
-   
+
    public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
       return swingTrajectory;
@@ -128,6 +136,16 @@ public class Footstep
       this.swingTrajectory.clear();
       for (int i = 0; i < swingTrajectory.size(); i++)
          this.swingTrajectory.add().set(swingTrajectory.get(i));
+   }
+
+   public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
+   {
+      this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
+   }
+
+   public double getSwingTrajectoryBlendDuration()
+   {
+      return swingTrajectoryBlendDuration;
    }
 
    public double getSwingHeight()
@@ -252,7 +270,7 @@ public class Footstep
    {
       footstepPose.setZ(z);
    }
-   
+
    public double getX()
    {
       return footstepPose.getX();
@@ -296,6 +314,16 @@ public class Footstep
       setY(position2d.getY());
    }
 
+   public void setExpectedInitialPose(FramePose expectedInitialPose)
+   {
+      this.expectedInitialPose.setIncludingFrame(expectedInitialPose);
+   }
+
+   public void setExpectedInitialPose(FramePoint expectedInitialPosition, FrameOrientation expectedInitialOrientation)
+   {
+      this.expectedInitialPose.setPoseIncludingFrame(expectedInitialPosition, expectedInitialOrientation);
+   }
+
    public String getId()
    {
       return id;
@@ -320,17 +348,17 @@ public class Footstep
    {
       this.robotSide = robotSide;
    }
-   
+
    public FramePose getFootstepPose()
    {
       return footstepPose;
    }
-   
+
    public void getPose(FramePose poseToPack)
    {
       poseToPack.setIncludingFrame(footstepPose);
    }
-   
+
    public void getPose(FramePoint positionToPack, FrameOrientation orientationToPack)
    {
       footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
@@ -340,12 +368,17 @@ public class Footstep
    {
       footstepPose.getPositionIncludingFrame(positionToPack);
    }
-   
+
    public void getOrientation(FrameOrientation orientationToPack)
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
    }
-   
+
+   public void getExpectedInitialPose(FramePose poseToPack)
+   {
+      poseToPack.setIncludingFrame(expectedInitialPose);
+   }
+
    public ReferenceFrame getTrajectoryFrame()
    {
       return footstepPose.getReferenceFrame();
@@ -389,7 +422,16 @@ public class Footstep
          }
       }
 
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints;
+      boolean sameExpectedInitialPose = true;
+      if (expectedInitialPose.containsNaN() && !otherFootstep.expectedInitialPose.containsNaN())
+         sameExpectedInitialPose = false;
+      else if (!expectedInitialPose.containsNaN() && otherFootstep.expectedInitialPose.containsNaN())
+         sameExpectedInitialPose = false;
+      else if (!expectedInitialPose.containsNaN())
+         sameExpectedInitialPose = expectedInitialPose.epsilonEquals(otherFootstep.expectedInitialPose, epsilon);
+      boolean sameBlendDuration = MathTools.epsilonEquals(swingTrajectoryBlendDuration, otherFootstep.swingTrajectoryBlendDuration, epsilon);
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameExpectedInitialPose && sameBlendDuration;
    }
 
    @Override

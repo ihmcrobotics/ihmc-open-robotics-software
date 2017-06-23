@@ -9,9 +9,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -38,11 +38,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
-   private final BooleanYoVariable yoSetDesiredAccelerationToZero;
-   private final BooleanYoVariable yoSetDesiredVelocityToZero;
+   private final YoBoolean yoSetDesiredAccelerationToZero;
+   private final YoBoolean yoSetDesiredVelocityToZero;
 
-   protected final BooleanYoVariable scaleSecondaryJointWeights;
-   protected final DoubleYoVariable secondaryJointWeightScale;
+   protected final YoBoolean scaleSecondaryJointWeights;
+   protected final YoDouble secondaryJointWeightScale;
 
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
@@ -50,10 +50,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
 
+   private final YoSE3PIDGainsInterface gains;
+
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper);
+      this.gains = gains;
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -63,11 +66,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
-      yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
-      yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
+      yoSetDesiredAccelerationToZero = new YoBoolean(namePrefix + "SetDesiredAccelerationToZero", registry);
+      yoSetDesiredVelocityToZero = new YoBoolean(namePrefix + "SetDesiredVelocityToZero", registry);
 
-      scaleSecondaryJointWeights = new BooleanYoVariable(namePrefix + "ScaleSecondaryJointWeights", registry);
-      secondaryJointWeightScale = new DoubleYoVariable(namePrefix + "SecondaryJointWeightScale", registry);
+      scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
+      secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
@@ -87,6 +90,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       spatialFeedbackControlCommand.setGains(gains);
+      ReferenceFrame linearGainsFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getPelvisZUpFrame();
+      spatialFeedbackControlCommand.setGainsFrames(null, linearGainsFrame);
       FramePose anklePoseInFoot = new FramePose(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
@@ -177,6 +182,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.get(tempLinearWeightVector);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
+      spatialFeedbackControlCommand.setGains(gains);
 
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);

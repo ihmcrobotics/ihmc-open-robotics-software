@@ -27,6 +27,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -45,6 +46,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHandTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getArmTrajectoryMessage());
+      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
    }
 
    /**

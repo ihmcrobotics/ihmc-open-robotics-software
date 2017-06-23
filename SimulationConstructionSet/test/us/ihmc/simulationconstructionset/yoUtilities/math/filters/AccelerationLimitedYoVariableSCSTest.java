@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AccelerationLimitedYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
@@ -31,8 +31,8 @@ public class AccelerationLimitedYoVariableSCSTest
    private static final double dt = 0.001;
    private static final double totalTime = 10.0;
 
-   DoubleYoVariable raw;
-   DoubleYoVariable alphaVariable;
+   YoDouble raw;
+   YoDouble alphaVariable;
    FilteredVelocityYoVariable rawRate;
    FilteredVelocityYoVariable rawAcceleration;
 
@@ -56,8 +56,8 @@ public class AccelerationLimitedYoVariableSCSTest
    {
       registry = new YoVariableRegistry("generic_registry");
 
-      raw = new DoubleYoVariable("raw", registry);
-      alphaVariable = new DoubleYoVariable("alpha", registry);
+      raw = new YoDouble("raw", registry);
+      alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(0.0); //set to zero to prevent smoothing of velocity
       rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
       rawAcceleration = new FilteredVelocityYoVariable("rawAcceleration", "", alphaVariable, rawRate, dt, registry);
@@ -122,16 +122,16 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = Double.POSITIVE_INFINITY;
       maxAcceleration = Double.POSITIVE_INFINITY;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
 
       try
       {
          @SuppressWarnings("unused")
-         DoubleYoVariable doubleYoVariable = new DoubleYoVariable(nameYo, registry);
+         YoDouble yoDouble = new YoDouble(nameYo, registry);
          fail();
       }
       catch (RuntimeException rte)
@@ -171,9 +171,9 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 5.0;
       maxAcceleration = 5.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
 
@@ -212,9 +212,9 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 2 * constant * totalTime;
       maxAcceleration = 2 * constant;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
 
@@ -258,13 +258,13 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 1.0;
       maxAcceleration = 1.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
 
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
+      YoDouble timeYo = new YoDouble("time", registry);
       YoFunctionGenerator sineFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
       sineFunction.setMode(YoFunctionGeneratorMode.SINE);
       frequency = 1.0;
@@ -311,13 +311,13 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 10000.0;
       maxAcceleration = 1000.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
 
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
+      YoDouble timeYo = new YoDouble("time", registry);
       amplitude = 1.0;
 
       double value = 0.0;
@@ -365,13 +365,13 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 10000.0;
       maxAcceleration = 1000.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
 
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
+      YoDouble timeYo = new YoDouble("time", registry);
       YoFunctionGenerator squareFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
       squareFunction.setMode(YoFunctionGeneratorMode.SQUARE);
       squareFunction.setFrequency(frequency);
@@ -408,14 +408,14 @@ public class AccelerationLimitedYoVariableSCSTest
 
       maxRate = 10000.0;
       maxAcceleration = 1000.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
-      DoubleYoVariable inputVariable = new DoubleYoVariable("inputVariable", registry);
+      YoDouble inputVariable = new YoDouble("inputVariable", registry);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, inputVariable, dt);
 
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
+      YoDouble timeYo = new YoDouble("time", registry);
       YoFunctionGenerator chirpFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
       chirpFunction.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);
       chirpFunction.setAmplitude(amplitude);
@@ -462,9 +462,9 @@ public class AccelerationLimitedYoVariableSCSTest
    {
       setupSCSStuff();
       
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
       
@@ -488,9 +488,9 @@ public class AccelerationLimitedYoVariableSCSTest
       maxRate = 10.0;
       maxAcceleration = 7.0;
       double dT = 1;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dT);
       processed.setMaximumRate(maxRate);
@@ -511,9 +511,9 @@ public class AccelerationLimitedYoVariableSCSTest
       
       maxRate = 1.0;
       maxAcceleration = 1.0;
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      YoDouble maxRateYo = new YoDouble("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
       
@@ -540,11 +540,11 @@ public class AccelerationLimitedYoVariableSCSTest
       scs.startOnAThread();
 
       YoVariableRegistry registry = scs.getRootRegistry();
-      DoubleYoVariable time = new DoubleYoVariable("time", registry);
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("maxRate", registry);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("maxAcceleration", registry);
+      YoDouble time = new YoDouble("time", registry);
+      YoDouble maxRateYo = new YoDouble("maxRate", registry);
+      YoDouble maxAccelerationYo = new YoDouble("maxAcceleration", registry);
 
-      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
+      YoDouble variable = new YoDouble("variable", registry);
 
       AccelerationLimitedYoVariable smoothedYoVariable = new AccelerationLimitedYoVariable("smoothedVariable", registry, maxRateYo, maxAccelerationYo, dt);
 

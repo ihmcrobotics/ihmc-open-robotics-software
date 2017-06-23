@@ -13,9 +13,9 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -32,15 +32,15 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final DiagnosticTaskExecutor diagnosticTaskExecutor;
 
    private final ArrayList<OneDoFJoint> controlledJoints = new ArrayList<>();
    private final Map<OneDoFJoint, PDController> jointPDControllerMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredPositionMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredVelocityMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointDesiredTauMap = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointDesiredPositionMap = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointDesiredVelocityMap = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointDesiredTauMap = new LinkedHashMap<>();
 
    private final DoubleProvider trajectoryTimeProvider;
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> jointTrajectories = new LinkedHashMap<>();
@@ -48,14 +48,14 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
    private DiagnosticDataReporter diagnosticDataReporterRunning = null;
 
-   private final BooleanYoVariable doIdleControl = new BooleanYoVariable("doIdleControl", registry);
-   private final DoubleYoVariable qdMaxIdle = new DoubleYoVariable("qdMaxIdle", registry);
-   private final DoubleYoVariable qddMaxIdle = new DoubleYoVariable("qddMaxIdle", registry);
-   private final DoubleYoVariable tauMaxIdle = new DoubleYoVariable("tauMaxIdle", registry);
+   private final YoBoolean doIdleControl = new YoBoolean("doIdleControl", registry);
+   private final YoDouble qdMaxIdle = new YoDouble("qdMaxIdle", registry);
+   private final YoDouble qddMaxIdle = new YoDouble("qddMaxIdle", registry);
+   private final YoDouble tauMaxIdle = new YoDouble("tauMaxIdle", registry);
 
-   private final BooleanYoVariable isDiagnosticComplete = new BooleanYoVariable("isDiagnosticComplete", registry);
-   private final BooleanYoVariable robotIsAlive = new BooleanYoVariable("robotIsAlive", registry);
-   private final DoubleYoVariable startTime = new DoubleYoVariable("diagnosticControllerStartTime", registry);
+   private final YoBoolean isDiagnosticComplete = new YoBoolean("isDiagnosticComplete", registry);
+   private final YoBoolean robotIsAlive = new YoBoolean("robotIsAlive", registry);
+   private final YoDouble startTime = new YoDouble("diagnosticControllerStartTime", registry);
 
    private final double controlDT;
 
@@ -154,9 +154,9 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          String jointName = joint.getName();
          
          PDController jointPDController = new PDController(jointName, registry);
-         DoubleYoVariable jointDesiredPosition = new DoubleYoVariable("q_d_" + jointName, registry);
-         DoubleYoVariable jointDesiredVelocity = new DoubleYoVariable("qd_d_" + jointName, registry);
-         DoubleYoVariable jointDesiredTau = new DoubleYoVariable("tau_d_" + jointName, registry);
+         YoDouble jointDesiredPosition = new YoDouble("q_d_" + jointName, registry);
+         YoDouble jointDesiredVelocity = new YoDouble("qd_d_" + jointName, registry);
+         YoDouble jointDesiredTau = new YoDouble("tau_d_" + jointName, registry);
          
          if (gainMap != null)
          {
@@ -263,8 +263,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(joint);
          jointTrajectory.compute(yoTime.getDoubleValue() - startTime.getDoubleValue());
 
-         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
-         DoubleYoVariable jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
+         YoDouble jointDesiredPosition = jointDesiredPositionMap.get(joint);
+         YoDouble jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
 
          jointDesiredPosition.set(jointTrajectory.getValue() + desiredJointPositionOffset);
          jointDesiredVelocity.set(jointTrajectory.getVelocity() + desiredJointVelocityOffset);
@@ -309,8 +309,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(joint);
          jointTrajectory.compute(trajectoryTimeProvider.getValue());
 
-         DoubleYoVariable jointDesiredPosition = jointDesiredPositionMap.get(joint);
-         DoubleYoVariable jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
+         YoDouble jointDesiredPosition = jointDesiredPositionMap.get(joint);
+         YoDouble jointDesiredVelocity = jointDesiredVelocityMap.get(joint);
          jointDesiredPosition.set(jointTrajectory.getValue());
          jointDesiredVelocity.set(0.0);
 

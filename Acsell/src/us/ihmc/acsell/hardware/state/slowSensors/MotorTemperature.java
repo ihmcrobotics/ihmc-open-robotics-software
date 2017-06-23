@@ -1,16 +1,16 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MotorTemperature implements AcsellSlowSensor
 {
-   private final DoubleYoVariable motorTemperature;
+   private final YoDouble motorTemperature;
    private final double conversionFactor;
    
    public MotorTemperature(String name, double conversionFactor, YoVariableRegistry parentRegistry)
    {
-      motorTemperature = new DoubleYoVariable(name + "MotorTemperature", parentRegistry);
+      motorTemperature = new YoDouble(name + "MotorTemperature", parentRegistry);
       this.conversionFactor = conversionFactor;
    }
 

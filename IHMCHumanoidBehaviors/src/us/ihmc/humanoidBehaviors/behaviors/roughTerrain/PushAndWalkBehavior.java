@@ -20,8 +20,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -46,9 +46,9 @@ public class PushAndWalkBehavior extends AbstractBehavior
    private final YoGraphicPosition desiredCapturePointViz;
    private final YoGraphicPosition capturePointViz;
 
-   private final BooleanYoVariable walking = new BooleanYoVariable("Walking", registry);
-   private final DoubleYoVariable errorThreshold = new DoubleYoVariable("ErrorThreshold", registry);
-   private final DoubleYoVariable errorFilterAlpha = new DoubleYoVariable("ErrorFilterAlpha", registry);
+   private final YoBoolean walking = new YoBoolean("Walking", registry);
+   private final YoDouble errorThreshold = new YoDouble("ErrorThreshold", registry);
+   private final YoDouble errorFilterAlpha = new YoDouble("ErrorFilterAlpha", registry);
    private final AlphaFilteredYoVariable filteredError = new AlphaFilteredYoVariable("FilteredError", registry, errorFilterAlpha);
    
    private final DoubleYoVariable yawErrorThreshold = new DoubleYoVariable("YawErrorThreshold", registry);

@@ -62,6 +62,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          + "\nfootstep list is finished. If the value is negative the defaultTransferDuration will be used.")
    public double finalTransferDuration = -1.0;
 
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -281,6 +284,24 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public ExecutionTiming getExecutionTiming()
    {
       return executionTiming;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    public FootstepDataListMessage(Random random)

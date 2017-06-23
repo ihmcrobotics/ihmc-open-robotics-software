@@ -15,7 +15,6 @@ import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 
 import us.ihmc.commons.Assertions;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -25,7 +24,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -861,24 +860,24 @@ public class QuadrupedSupportPolygonTest
       }
       
       QuadrupedSupportPolygon poly = new QuadrupedSupportPolygon(framePoints);
-      assertEquals("not 90", 90.0, Conversions.convertRadianToDegrees(poly.getNominalYaw()), 1e-7);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalPitch()), 1e-7);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalRoll()), 1e-7);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalYawHindLegs()), 1e-7);
+      assertEquals("not 90", 90.0, Math.toDegrees(poly.getNominalYaw()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalPitch()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalRoll()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalYawHindLegs()), 1e-7);
       poly.yawAboutCentroid(-Math.PI / 2);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalYaw()), 1e-7);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalPitch()), 1e-7);
-      assertEquals("not 0", 0.0, Conversions.convertRadianToDegrees(poly.getNominalRoll()), 1e-7);
-      assertEquals("not -90", -90.0, Conversions.convertRadianToDegrees(poly.getNominalYawHindLegs()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalYaw()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalPitch()), 1e-7);
+      assertEquals("not 0", 0.0, Math.toDegrees(poly.getNominalRoll()), 1e-7);
+      assertEquals("not -90", -90.0, Math.toDegrees(poly.getNominalYawHindLegs()), 1e-7);
       
       QuadrupedSupportPolygon poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       QuadrupedSupportPolygon poly2 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
       final QuadrupedSupportPolygon poly3 = new QuadrupedSupportPolygon();
       
       poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT);
-      assertEquals("not 135", 135.0, Conversions.convertRadianToDegrees(poly3.getNominalYaw()), 1e-7);
+      assertEquals("not 135", 135.0, Math.toDegrees(poly3.getNominalYaw()), 1e-7);
       poly3.yawAboutCentroid(Math.PI / 2);
-      assertEquals("not -135", -135.0, Conversions.convertRadianToDegrees(poly3.getNominalYaw()), 1e-7);
+      assertEquals("not -135", -135.0, Math.toDegrees(poly3.getNominalYaw()), 1e-7);
       
       poly3.removeFootstep(RobotQuadrant.FRONT_RIGHT);
       Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
@@ -924,11 +923,11 @@ public class QuadrupedSupportPolygonTest
       });
       
       QuadrupedSupportPolygon pitchedUp = createPitchedUpPolygon();
-      assertEquals("not -45", -45.0, Conversions.convertRadianToDegrees(pitchedUp.getNominalPitch()), 1e-7);
+      assertEquals("not -45", -45.0, Math.toDegrees(pitchedUp.getNominalPitch()), 1e-7);
       QuadrupedSupportPolygon pitchedDown = createPitchedDownPolygon();
-      assertEquals("not 45", 45.0, Conversions.convertRadianToDegrees(pitchedDown.getNominalPitch()), 1e-7);
+      assertEquals("not 45", 45.0, Math.toDegrees(pitchedDown.getNominalPitch()), 1e-7);
       QuadrupedSupportPolygon rolled = createRolledPolygon();
-      assertEquals("not -45", -45.0, Conversions.convertRadianToDegrees(rolled.getNominalRoll()), 1e-7);
+      assertEquals("not -45", -45.0, Math.toDegrees(rolled.getNominalRoll()), 1e-7);
       
       final QuadrupedSupportPolygon zeroedPolygon = createZeroedPolygon();
       Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()

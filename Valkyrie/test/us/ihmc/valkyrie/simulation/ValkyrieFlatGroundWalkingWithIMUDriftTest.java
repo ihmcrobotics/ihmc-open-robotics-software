@@ -10,8 +10,8 @@ import us.ihmc.avatar.DRCFlatGroundWalkingWithIMUDriftTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -40,12 +40,12 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
       YoVariable[] allVariables = track.getSimulationConstructionSet().getAllVariablesArray();
 
-      ArrayList<DoubleYoVariable> yawDriftAccelerationVariables = new ArrayList<>();
+      ArrayList<YoDouble> yawDriftAccelerationVariables = new ArrayList<>();
 
       for (YoVariable<?> yoVariable : allVariables)
       {
          if (yoVariable.getName().endsWith(OrientationConstantAcceleratingYawDriftCorruptor.SIMULATED_YAW_DRIFT_ACCELERATION))
-            yawDriftAccelerationVariables.add((DoubleYoVariable) yoVariable);
+            yawDriftAccelerationVariables.add((YoDouble) yoVariable);
       }
 
       double driftAccelerationMagnitude = 1.0;

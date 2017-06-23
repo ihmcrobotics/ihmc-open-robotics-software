@@ -31,6 +31,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public RobotSide robotSide;
    @RosExportedField(documentation = "Wether the end-effector should be loaded or unloaded.")
    public LoadBearingRequest request;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -67,6 +70,24 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public LoadBearingRequest getRequest()
    {
       return request;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

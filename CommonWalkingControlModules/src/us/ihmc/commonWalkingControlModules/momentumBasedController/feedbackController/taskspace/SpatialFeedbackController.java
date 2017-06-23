@@ -14,9 +14,9 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -38,7 +38,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoseUsingQuaternions yoDesiredPose;
    private final YoFramePoseUsingQuaternions yoCurrentPose;
@@ -104,6 +104,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private RigidBody base;
    private ReferenceFrame controlBaseFrame;
+   private ReferenceFrame angularGainsFrame;
+   private ReferenceFrame linearGainsFrame;
 
    private final RigidBody endEffector;
    private final YoSE3OffsetFrame controlFrame;
@@ -123,8 +125,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
-      DoubleYoVariable maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
-      DoubleYoVariable maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
+      YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
+      YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
       kpLinear = positionGains.createProportionalGainMatrix();
       kdLinear = positionGains.createDerivativeGainMatrix();
@@ -136,7 +138,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isSpatialFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isSpatialFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredPose = feedbackControllerToolbox.getPose(endEffector, DESIRED, isEnabled);
@@ -206,6 +208,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      angularGainsFrame = command.getAngularGainsFrame();
+      linearGainsFrame = command.getLinearGainsFrame();
 
       command.getControlFramePoseIncludingFrame(desiredPosition, desiredOrientation);
       controlFrame.setOffsetToParent(desiredPosition, desiredOrientation);
@@ -378,10 +382,21 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoErrorVector.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorVector.getYoAngularPart());
 
-      linearFeedbackTermToPack.changeFrame(controlFrame);
-      angularFeedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         linearFeedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         linearFeedbackTermToPack.changeFrame(controlFrame);
+
+      if (angularGainsFrame != null)
+         angularFeedbackTermToPack.changeFrame(angularGainsFrame);
+      else
+         angularFeedbackTermToPack.changeFrame(controlFrame);
+
       kpLinear.transform(linearFeedbackTermToPack.getVector());
       kpAngular.transform(angularFeedbackTermToPack.getVector());
+
+      linearFeedbackTermToPack.changeFrame(controlFrame);
+      angularFeedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -422,10 +437,21 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.limitLength(orientationGains.getMaximumDerivativeError());
       yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.changeFrame(controlFrame);
-      angularFeedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         linearFeedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         linearFeedbackTermToPack.changeFrame(controlFrame);
+
+      if (angularGainsFrame != null)
+         angularFeedbackTermToPack.changeFrame(angularGainsFrame);
+      else
+         angularFeedbackTermToPack.changeFrame(controlFrame);
+
       kdLinear.transform(linearFeedbackTermToPack.getVector());
       kdAngular.transform(angularFeedbackTermToPack.getVector());
+
+      linearFeedbackTermToPack.changeFrame(controlFrame);
+      angularFeedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -465,8 +491,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          linearFeedbackTermToPack.limitLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
 
-         linearFeedbackTermToPack.changeFrame(controlFrame);
+         if (linearGainsFrame != null)
+            linearFeedbackTermToPack.changeFrame(linearGainsFrame);
+         else
+            linearFeedbackTermToPack.changeFrame(controlFrame);
+
          kiLinear.transform(linearFeedbackTermToPack.getVector());
+
+         linearFeedbackTermToPack.changeFrame(controlFrame);
       }
 
       double maximumAngularIntegralError = orientationGains.getMaximumIntegralError();
@@ -489,8 +521,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.limitLength(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.set(angularFeedbackTermToPack);
 
-         angularFeedbackTermToPack.changeFrame(controlFrame);
+         if (angularGainsFrame != null)
+            angularFeedbackTermToPack.changeFrame(angularGainsFrame);
+         else
+            angularFeedbackTermToPack.changeFrame(controlFrame);
+
          kiAngular.transform(angularFeedbackTermToPack.getVector());
+
+         angularFeedbackTermToPack.changeFrame(controlFrame);
       }
    }
 

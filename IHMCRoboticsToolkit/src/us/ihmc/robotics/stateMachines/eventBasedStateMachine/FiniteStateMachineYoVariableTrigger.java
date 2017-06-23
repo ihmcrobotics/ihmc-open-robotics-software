@@ -1,12 +1,12 @@
 package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * Provides a wrapper allowing state machine events to be triggered by a changing EnumYoVariable.
+ * Provides a wrapper allowing state machine events to be triggered by a changing YoEnum.
  *
  * @param <E> the state machine event type.
  */
@@ -15,7 +15,7 @@ public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
    public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, ?> stateMachine, String name, YoVariableRegistry registry,
          final Class<E> enumType)
    {
-      final EnumYoVariable<E> yoVariable = new EnumYoVariable<>(name, registry, enumType, true);
+      final YoEnum<E> yoVariable = new YoEnum<>(name, registry, enumType, true);
       yoVariable.set(null);
 
       // Attach a change listener, firing state machine events for every callback.

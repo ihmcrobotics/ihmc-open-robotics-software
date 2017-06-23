@@ -22,10 +22,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -35,7 +35,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -50,7 +49,7 @@ public class HexapodSimulationController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final BooleanYoVariable useInverseDynamics = new BooleanYoVariable("useInverseDynamics", registry);
+   private final YoBoolean useInverseDynamics = new YoBoolean("useInverseDynamics", registry);
 
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;
@@ -62,8 +61,8 @@ public class HexapodSimulationController implements RobotController
    private final HexapodHighLevelControlManager highLevelController;
 
    private final HexapodReferenceFrames referenceFrames;
-   private LongYoVariable totalTimeToCompleteTick = new LongYoVariable("totalTimeToCompleteTick", registry);
-   private DoubleYoVariable totalTimeToCompleteTickInSeconds = new DoubleYoVariable("totalTimeToCompleteTickInSeconds", registry);
+   private YoLong totalTimeToCompleteTick = new YoLong("totalTimeToCompleteTick", registry);
+   private YoDouble totalTimeToCompleteTickInSeconds = new YoDouble("totalTimeToCompleteTickInSeconds", registry);
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFrameGraphics = new ArrayList<>();
    private ContactPointVisualizer contactPointVisualizer;

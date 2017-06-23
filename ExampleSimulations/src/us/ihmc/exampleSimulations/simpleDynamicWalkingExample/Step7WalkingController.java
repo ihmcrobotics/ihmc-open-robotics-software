@@ -14,12 +14,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -58,17 +57,17 @@ public class Step7WalkingController implements RobotController
    private PIDController controllerBodyPitchDoubleSupport, controllerBodyPitchSingleSupport;
    private PIDController controllerAnkleToeOff, controllerAnkleSwing;
 
-   private DoubleYoVariable desiredBodyZ, desiredBodyPitch;
-   private DoubleYoVariable desiredAnklePitchSwing, desiredAnklePitchToeOff;
+   private YoDouble desiredBodyZ, desiredBodyPitch;
+   private YoDouble desiredAnklePitchSwing, desiredAnklePitchToeOff;
 
-   private DoubleYoVariable kneeTau, hipTau, ankleTau;
+   private YoDouble kneeTau, hipTau, ankleTau;
 
    private Quaternion rotationToPack = new Quaternion();
    private Vector3D velocityToPack = new Vector3D();
 
    private boolean heelOnTheFloor, toeOnTheFloor;
-   private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", registry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);   
+   private final YoDouble minSupportTime = new YoDouble("minSupportTime", registry);
+   private final YoDouble swingTime = new YoDouble("swingTime", registry);
 
    // new stuff
    private FramePoint2d capturePoint, desiredICP;
@@ -76,26 +75,26 @@ public class Step7WalkingController implements RobotController
    private final YoFramePoint2d yoDesiredICP = new YoFramePoint2d("yoDesiredCapturePoint", worldFrame, registry);
    private final YoFramePoint yodesiredPositionSwingFoot = new YoFramePoint("yoDesiredPositionSwingFoot", worldFrame, registry);
    private final SideDependentList<YoFramePoint> yoFootPositions;
-   private final SideDependentList<DoubleYoVariable> distanceFootToCoPbasedWeights = new SideDependentList<>();
+   private final SideDependentList<YoDouble> distanceFootToCoPbasedWeights = new SideDependentList<>();
 
    private ParabolicCartesianTrajectoryGenerator swingTrajectory;
    private static final double groundClearance = 0.20;
    private BagOfBalls swingTrajectoryViz;
    private final int numOfBalls = 50;
 
-   private final DoubleYoVariable stepLengthFactor = new DoubleYoVariable("stepLengthFactor", registry);
-   private final DoubleYoVariable stepLengthCorrectionFactor = new DoubleYoVariable("stepLengthCorrectionFactor", registry);
-   private final DoubleYoVariable defaultStepLength = new DoubleYoVariable("defaultStepLength", registry);
-   private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
+   private final YoDouble stepLengthFactor = new YoDouble("stepLengthFactor", registry);
+   private final YoDouble stepLengthCorrectionFactor = new YoDouble("stepLengthCorrectionFactor", registry);
+   private final YoDouble defaultStepLength = new YoDouble("defaultStepLength", registry);
+   private final YoDouble maxStepLength = new YoDouble("maxStepLength", registry);
 
-   private final DoubleYoVariable desiredWalkingVelocity = new DoubleYoVariable("desiredWalkingVelocity", registry);
-   private final DoubleYoVariable alphaDesiredVelocity = new DoubleYoVariable("alphaDesiredVelocity", registry);
+   private final YoDouble desiredWalkingVelocity = new YoDouble("desiredWalkingVelocity", registry);
+   private final YoDouble alphaDesiredVelocity = new YoDouble("alphaDesiredVelocity", registry);
    private final AlphaFilteredYoVariable desiredWalkingVelocityFiltered = new AlphaFilteredYoVariable("desiredWalkingVelocitySmoothed", registry, alphaDesiredVelocity, desiredWalkingVelocity); // filter the velocity so that the transition from one to another is smoother
-   private final DoubleYoVariable desiredVelocityToICPFactorDistanceThreshold = new DoubleYoVariable("desiredVelocityToICPFactorDistanceThreshold", registry);
+   private final YoDouble desiredVelocityToICPFactorDistanceThreshold = new YoDouble("desiredVelocityToICPFactorDistanceThreshold", registry);
 
-   private final DoubleYoVariable kpSwingFoot = new DoubleYoVariable("kpSwingFoot", registry);
-   private final DoubleYoVariable kdSwingFoot = new DoubleYoVariable("kdSwingFoot", registry);
-   private final DoubleYoVariable kpCapturePoint = new DoubleYoVariable("kpCapturePoint", registry);
+   private final YoDouble kpSwingFoot = new YoDouble("kpSwingFoot", registry);
+   private final YoDouble kdSwingFoot = new YoDouble("kdSwingFoot", registry);
+   private final YoDouble kpCapturePoint = new YoDouble("kpCapturePoint", registry);
    
    // State Machine
    private enum States
@@ -119,7 +118,7 @@ public class Step7WalkingController implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         distanceFootToCoPbasedWeights.put(robotSide, new DoubleYoVariable(sidePrefix + "distanceFootToCoPbasedWeights", registry));
+         distanceFootToCoPbasedWeights.put(robotSide, new YoDouble(sidePrefix + "distanceFootToCoPbasedWeights", registry));
       }
 
       // Create the state machines
@@ -163,13 +162,13 @@ public class Step7WalkingController implements RobotController
       controllerBodyZ = new PIDController("bodyZ", registry);
       controllerBodyZ.setProportionalGain(1000.0);
       controllerBodyZ.setDerivativeGain(500.0);
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", registry);
       desiredBodyZ.set(1.5);
 
       controllerBodyPitchDoubleSupport = new PIDController("bodyPitch", registry);
       controllerBodyPitchDoubleSupport.setProportionalGain(500.0);
       controllerBodyPitchDoubleSupport.setDerivativeGain(50.0);
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", registry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", registry);
       desiredBodyPitch.set(0.0);
 
       controllerBodyPitchSingleSupport = new PIDController("bodyPitchSingleSupport", registry);
@@ -179,22 +178,22 @@ public class Step7WalkingController implements RobotController
       controllerAnkleToeOff = new PIDController("ankleToeOff", registry);
       controllerAnkleToeOff.setProportionalGain(200.0);
       controllerAnkleToeOff.setDerivativeGain(20.0);
-      desiredAnklePitchToeOff = new DoubleYoVariable("desiredAnklePitchToeOff", registry);
+      desiredAnklePitchToeOff = new YoDouble("desiredAnklePitchToeOff", registry);
       desiredAnklePitchToeOff.set(0.06);
 
       controllerAnkleSwing = new PIDController("ankleSwing", registry);
       controllerAnkleSwing.setProportionalGain(100.0);
       controllerAnkleSwing.setDerivativeGain(10.0);
-      desiredAnklePitchSwing = new DoubleYoVariable("desiredAnklePitchSwing", registry);
+      desiredAnklePitchSwing = new YoDouble("desiredAnklePitchSwing", registry);
       desiredAnklePitchSwing.set(-0.3);
 
       kpSwingFoot.set(20000.0);
       kdSwingFoot.set(200.0);
       kpCapturePoint.set(2.0);
       
-      hipTau = new DoubleYoVariable("hipTau", registry);
-      kneeTau = new DoubleYoVariable("kneeTau", registry);
-      ankleTau = new DoubleYoVariable("ankleTau", registry);
+      hipTau = new YoDouble("hipTau", registry);
+      kneeTau = new YoDouble("kneeTau", registry);
+      ankleTau = new YoDouble("ankleTau", registry);
    }
 
    /**
@@ -288,7 +287,7 @@ public class Step7WalkingController implements RobotController
    /**
     * Body pitch controllers
     */
-   private DoubleYoVariable controlBodyPitchDoubleSupport()
+   private YoDouble controlBodyPitchDoubleSupport()
    {
       robot.getBodyPitch(rotationToPack);
       double pitchFromQuaternion = rotationToPack.getPitch();
@@ -300,7 +299,7 @@ public class Step7WalkingController implements RobotController
       return hipTau;
    }
 
-   private DoubleYoVariable controlBodyPitchSingleSupport()
+   private YoDouble controlBodyPitchSingleSupport()
    {
       robot.getBodyPitch(rotationToPack);
       double pitchFromQuaternion = rotationToPack.getPitch();

@@ -11,11 +11,11 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -75,15 +75,15 @@ public class TaskspaceToJointspaceCalculator
    private final int numberOfDoF;
    private final int maxNumberOfConstraints = SpatialMotionVector.SIZE;
 
-   private final DoubleYoVariable jointAngleRegularizationWeight;
-   private final IntegerYoVariable exponentForPNorm;
-   private final EnumYoVariable<SecondaryObjective> currentSecondaryObjective;
+   private final YoDouble jointAngleRegularizationWeight;
+   private final YoInteger exponentForPNorm;
+   private final YoEnum<SecondaryObjective> currentSecondaryObjective;
 
-   private final DoubleYoVariable maximumJointVelocity;
-   private final DoubleYoVariable maximumJointAcceleration;
+   private final YoDouble maximumJointVelocity;
+   private final YoDouble maximumJointAcceleration;
 
-   private final DoubleYoVariable maximumTaskspaceAngularVelocityMagnitude;
-   private final DoubleYoVariable maximumTaskspaceLinearVelocityMagnitude;
+   private final YoDouble maximumTaskspaceAngularVelocityMagnitude;
+   private final YoDouble maximumTaskspaceLinearVelocityMagnitude;
 
    private final YoFramePose yoDesiredControlFramePose;
 
@@ -93,20 +93,20 @@ public class TaskspaceToJointspaceCalculator
    private final YoFrameVector yoAngularVelocityFromError;
    private final YoFrameVector yoLinearVelocityFromError;
 
-   private final DoubleYoVariable alphaSpatialVelocityFromError;
+   private final YoDouble alphaSpatialVelocityFromError;
    private final AlphaFilteredYoFrameVector filteredAngularVelocityFromError;
    private final AlphaFilteredYoFrameVector filteredLinearVelocityFromError;
 
    private final YoFramePoint yoBaseParentJointFramePosition;
    private final YoFrameQuaternion yoBaseParentJointFrameOrientation;
 
-   private final DoubleYoVariable alphaBaseParentJointPose;
+   private final YoDouble alphaBaseParentJointPose;
    private final AlphaFilteredYoFramePoint yoBaseParentJointFramePositionFiltered;
    private final AlphaFilteredYoFrameQuaternion yoBaseParentJointFrameOrientationFiltered;
 
-   private final BooleanYoVariable enableFeedbackControl;
-   private final DoubleYoVariable kpTaskspaceAngularError;
-   private final DoubleYoVariable kpTaskspaceLinearError;
+   private final YoBoolean enableFeedbackControl;
+   private final YoDouble kpTaskspaceAngularError;
+   private final YoDouble kpTaskspaceLinearError;
 
    private final FramePoint baseParentJointFramePosition = new FramePoint();
    private final FrameOrientation baseParentJointFrameOrientation = new FrameOrientation();
@@ -118,7 +118,7 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F subspaceSpatialError = new DenseMatrix64F(maxNumberOfConstraints, 1);
    private final DenseMatrix64F spatialDesiredVelocity = new DenseMatrix64F(maxNumberOfConstraints, 1);
 
-   private final DoubleYoVariable[] yoPrivilegedJointPositions;
+   private final YoDouble[] yoPrivilegedJointPositions;
    private final AlphaFilteredYoVariable[] yoPrivilegedJointPositionsFiltered;
 
    private final DenseMatrix64F privilegedJointVelocities;
@@ -161,15 +161,15 @@ public class TaskspaceToJointspaceCalculator
 
       inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, solver);
 
-      jointAngleRegularizationWeight = new DoubleYoVariable(namePrefix + "JointAngleRegularizationWeight", registry);
+      jointAngleRegularizationWeight = new YoDouble(namePrefix + "JointAngleRegularizationWeight", registry);
 
-      exponentForPNorm = new IntegerYoVariable(namePrefix + "ExponentForPNorm", registry);
+      exponentForPNorm = new YoInteger(namePrefix + "ExponentForPNorm", registry);
       exponentForPNorm.set(6);
 
-      currentSecondaryObjective = new EnumYoVariable<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);
+      currentSecondaryObjective = new YoEnum<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);
       currentSecondaryObjective.set(SecondaryObjective.TOWARD_RESTING_CONFIGURATION);
 
-      yoPrivilegedJointPositions = new DoubleYoVariable[numberOfDoF];
+      yoPrivilegedJointPositions = new YoDouble[numberOfDoF];
       yoPrivilegedJointPositionsFiltered = new AlphaFilteredYoVariable[numberOfDoF];
       privilegedJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
 
@@ -180,13 +180,13 @@ public class TaskspaceToJointspaceCalculator
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoF, 1);
       jointAnglesAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoF, 1);
 
-      maximumJointVelocity = new DoubleYoVariable(namePrefix + "MaximumJointVelocity", registry);
+      maximumJointVelocity = new YoDouble(namePrefix + "MaximumJointVelocity", registry);
       maximumJointVelocity.set(Double.POSITIVE_INFINITY);
-      maximumJointAcceleration = new DoubleYoVariable(namePrefix + "MaximumJointAcceleration", registry);
+      maximumJointAcceleration = new YoDouble(namePrefix + "MaximumJointAcceleration", registry);
       maximumJointAcceleration.set(Double.POSITIVE_INFINITY);
 
-      maximumTaskspaceAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "MaximumTaskspaceAngularVelocityMagnitude", registry);
-      maximumTaskspaceLinearVelocityMagnitude = new DoubleYoVariable(namePrefix + "MaximumTaskspaceLinearVelocityMagnitude", registry);
+      maximumTaskspaceAngularVelocityMagnitude = new YoDouble(namePrefix + "MaximumTaskspaceAngularVelocityMagnitude", registry);
+      maximumTaskspaceLinearVelocityMagnitude = new YoDouble(namePrefix + "MaximumTaskspaceLinearVelocityMagnitude", registry);
 
       maximumTaskspaceAngularVelocityMagnitude.set(Double.POSITIVE_INFINITY);
       maximumTaskspaceLinearVelocityMagnitude.set(Double.POSITIVE_INFINITY);
@@ -194,7 +194,7 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          String jointName = originalJoints[i].getName();
-         yoPrivilegedJointPositions[i] = new DoubleYoVariable("q_privileged_" + jointName, registry);
+         yoPrivilegedJointPositions[i] = new YoDouble("q_privileged_" + jointName, registry);
          yoPrivilegedJointPositionsFiltered[i] = new AlphaFilteredYoVariable("q_privileged_filt_" + jointName, registry, 0.99, yoPrivilegedJointPositions[i]);
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
          jointAnglesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
@@ -208,7 +208,7 @@ public class TaskspaceToJointspaceCalculator
       yoAngularVelocityFromError = new YoFrameVector(namePrefix + "AngularVelocityFromError", localControlFrame, registry);
       yoLinearVelocityFromError = new YoFrameVector(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
 
-      alphaSpatialVelocityFromError = new DoubleYoVariable(namePrefix + "AlphaSpatialVelocityFromError", registry);
+      alphaSpatialVelocityFromError = new YoDouble(namePrefix + "AlphaSpatialVelocityFromError", registry);
       filteredAngularVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredAngularVelocityFromError", "",
             registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
       filteredLinearVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredLinearVelocityFromError", "",
@@ -217,15 +217,15 @@ public class TaskspaceToJointspaceCalculator
       yoBaseParentJointFramePosition = new YoFramePoint(namePrefix + "BaseParentJointFrame", worldFrame, registry);
       yoBaseParentJointFrameOrientation = new YoFrameQuaternion(namePrefix + "BaseParentJointFrame", worldFrame, registry);
 
-      alphaBaseParentJointPose = new DoubleYoVariable(namePrefix + "AlphaBaseParentJointPose", registry);
+      alphaBaseParentJointPose = new YoDouble(namePrefix + "AlphaBaseParentJointPose", registry);
       yoBaseParentJointFramePositionFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "BaseParentJointFrameFiltered", "",
             registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
       yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix + "BaseParentJointFrameFiltered", "",
             yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
 
-      enableFeedbackControl = new BooleanYoVariable(namePrefix + "EnableFeedBackControl", registry);
-      kpTaskspaceAngularError = new DoubleYoVariable(namePrefix + "KpTaskspaceAngularError", registry);
-      kpTaskspaceLinearError = new DoubleYoVariable(namePrefix + "KpTaskspaceLinearError", registry);
+      enableFeedbackControl = new YoBoolean(namePrefix + "EnableFeedBackControl", registry);
+      kpTaskspaceAngularError = new YoDouble(namePrefix + "KpTaskspaceAngularError", registry);
+      kpTaskspaceLinearError = new YoDouble(namePrefix + "KpTaskspaceLinearError", registry);
 
       parentRegistry.addChild(registry);
    }

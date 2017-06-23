@@ -161,7 +161,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
+         toolboxCommunicator.disconnect();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }

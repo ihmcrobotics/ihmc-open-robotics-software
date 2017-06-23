@@ -26,10 +26,10 @@ import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -78,29 +78,29 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    // Inherited Variables
    private final double dt;
    private double initialStanceHeight;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final QuadrupedReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private boolean hasInitializedInheritedYoVariables = false;
-   private DoubleYoVariable q_z;
+   private YoDouble q_z;
 
    // PD Controllers
-   private final DoubleYoVariable kp_x = new DoubleYoVariable("kp_x", registry);
-   private final DoubleYoVariable kp_y = new DoubleYoVariable("kp_y", registry);
-   private final DoubleYoVariable kp_z = new DoubleYoVariable("kp_z", registry);
-   private final DoubleYoVariable kp_roll = new DoubleYoVariable("kp_roll", registry);
-   private final DoubleYoVariable kp_pitch = new DoubleYoVariable("kp_pitch", registry);
-   private final DoubleYoVariable kp_yaw = new DoubleYoVariable("kp_yaw", registry);
-   private final DoubleYoVariable kp_icp = new DoubleYoVariable("kp_icp", registry);
-   private final DoubleYoVariable kd_x = new DoubleYoVariable("kd_x", registry);
-   private final DoubleYoVariable kd_y = new DoubleYoVariable("kd_y", registry);
-   private final DoubleYoVariable kd_z = new DoubleYoVariable("kd_z", registry);
-   private final DoubleYoVariable kd_roll = new DoubleYoVariable("kd_roll", registry);
-   private final DoubleYoVariable kd_pitch = new DoubleYoVariable("kd_pitch", registry);
-   private final DoubleYoVariable kd_yaw = new DoubleYoVariable("kd_yaw", registry);
-   private final DoubleYoVariable kd_icp = new DoubleYoVariable("kd_icp", registry);
+   private final YoDouble kp_x = new YoDouble("kp_x", registry);
+   private final YoDouble kp_y = new YoDouble("kp_y", registry);
+   private final YoDouble kp_z = new YoDouble("kp_z", registry);
+   private final YoDouble kp_roll = new YoDouble("kp_roll", registry);
+   private final YoDouble kp_pitch = new YoDouble("kp_pitch", registry);
+   private final YoDouble kp_yaw = new YoDouble("kp_yaw", registry);
+   private final YoDouble kp_icp = new YoDouble("kp_icp", registry);
+   private final YoDouble kd_x = new YoDouble("kd_x", registry);
+   private final YoDouble kd_y = new YoDouble("kd_y", registry);
+   private final YoDouble kd_z = new YoDouble("kd_z", registry);
+   private final YoDouble kd_roll = new YoDouble("kd_roll", registry);
+   private final YoDouble kd_pitch = new YoDouble("kd_pitch", registry);
+   private final YoDouble kd_yaw = new YoDouble("kd_yaw", registry);
+   private final YoDouble kd_icp = new YoDouble("kd_icp", registry);
 
    private final QuadrantDependentList<YoFramePoint> footPositions = new QuadrantDependentList<YoFramePoint>();
    private final QuadrantDependentList<YoFramePoint> shoulderPositions = new QuadrantDependentList<YoFramePoint>();
@@ -117,7 +117,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint2d desiredICP = new YoFramePoint2d("desiredICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector2d desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector2d desiredRobotVelocity = new YoFrameVector2d("desiredRobotVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable desiredRobotAngularVelocityZ = new DoubleYoVariable("desiredRobotAngularVelocityZ", registry);
+   private final YoDouble desiredRobotAngularVelocityZ = new YoDouble("desiredRobotAngularVelocityZ", registry);
    private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
    /** ICP Action vector is a vector opposite and equal to the vector from the ICP to the center of pressure */
    private final YoFrameVector2d icpActionVector = new YoFrameVector2d("icpActionVector", ReferenceFrame.getWorldFrame(), registry);
@@ -155,26 +155,26 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FrameVector jointAxis = new FrameVector();
 
    // Walking
-   private final EnumYoVariable<QuadrupedGaitCycle> desiredGait = new EnumYoVariable<>("desiredGait", registry, QuadrupedGaitCycle.class);
-   private final EnumYoVariable<QuadrupedGaitCycle> nextGait = new EnumYoVariable<>("nextGait", registry, QuadrupedGaitCycle.class);
-   private final EnumYoVariable<QuadrupedGaitCycle> currentGait = new EnumYoVariable<>("currentGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> desiredGait = new YoEnum<>("desiredGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> nextGait = new YoEnum<>("nextGait", registry, QuadrupedGaitCycle.class);
+   private final YoEnum<QuadrupedGaitCycle> currentGait = new YoEnum<>("currentGait", registry, QuadrupedGaitCycle.class);
    private final QuadrantDependentList<YoPolynomial> swingZTrajectories = new QuadrantDependentList<>();
-   private final QuadrantDependentList<DoubleYoVariable> swingInitialZHeights = new QuadrantDependentList<>();
-   private final QuadrantDependentList<DoubleYoVariable> gaitCompletionAtStartOfSwing = new QuadrantDependentList<>();
-   private final DoubleYoVariable currentGaitPhaseStartTime = new DoubleYoVariable("currentPhaseStartTime", registry);
-   private final DoubleYoVariable currentGaitStartTime = new DoubleYoVariable("currentGaitStartTime", registry);
-   private final DoubleYoVariable currentGaitPhaseDuration = new DoubleYoVariable("currentPhaseDuration", registry);
-   private final QuadrantDependentList<DoubleYoVariable> swingDurations = new QuadrantDependentList<>();
-   private final QuadrantDependentList<DoubleYoVariable> currentSwingCompletions = new QuadrantDependentList<>();
-   private final EnumYoVariable<QuadrupedSupportConfiguration> previousGaitPhase = new EnumYoVariable<>("previousGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
-   private final EnumYoVariable<QuadrupedSupportConfiguration> currentGaitPhase = new EnumYoVariable<>("currentGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
-   private final EnumYoVariable<QuadrupedSupportConfiguration> nextGaitPhase = new EnumYoVariable<>("nextGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
-   private final DoubleYoVariable swingZHeight = new DoubleYoVariable("swingZHeight", registry);
-   private final DoubleYoVariable desiredGaitPeriod = new DoubleYoVariable("desiredGaitPeriod", registry);
-   private final DoubleYoVariable currentGaitCompletion = new DoubleYoVariable("currentGaitCompletion", registry);
-   private final DoubleYoVariable currentGaitPhaseCompletion = new DoubleYoVariable("currentPhaseCompletion", registry);
-   private final BooleanYoVariable gaitCompleted = new BooleanYoVariable("gaitCompleted", registry);
-   private final DoubleYoVariable swingImpactVelocityZ = new DoubleYoVariable("swingImpactVelocityZ", registry);
+   private final QuadrantDependentList<YoDouble> swingInitialZHeights = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoDouble> gaitCompletionAtStartOfSwing = new QuadrantDependentList<>();
+   private final YoDouble currentGaitPhaseStartTime = new YoDouble("currentPhaseStartTime", registry);
+   private final YoDouble currentGaitStartTime = new YoDouble("currentGaitStartTime", registry);
+   private final YoDouble currentGaitPhaseDuration = new YoDouble("currentPhaseDuration", registry);
+   private final QuadrantDependentList<YoDouble> swingDurations = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoDouble> currentSwingCompletions = new QuadrantDependentList<>();
+   private final YoEnum<QuadrupedSupportConfiguration> previousGaitPhase = new YoEnum<>("previousGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoEnum<QuadrupedSupportConfiguration> currentGaitPhase = new YoEnum<>("currentGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoEnum<QuadrupedSupportConfiguration> nextGaitPhase = new YoEnum<>("nextGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
+   private final YoDouble swingZHeight = new YoDouble("swingZHeight", registry);
+   private final YoDouble desiredGaitPeriod = new YoDouble("desiredGaitPeriod", registry);
+   private final YoDouble currentGaitCompletion = new YoDouble("currentGaitCompletion", registry);
+   private final YoDouble currentGaitPhaseCompletion = new YoDouble("currentPhaseCompletion", registry);
+   private final YoBoolean gaitCompleted = new YoBoolean("gaitCompleted", registry);
+   private final YoDouble swingImpactVelocityZ = new YoDouble("swingImpactVelocityZ", registry);
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuadrupedSupportPolygon targetSupportPolygon = new YoQuadrupedSupportPolygon("targetSupportPolygon", registry);
    private final YoQuadrupedSupportPolygon previousSupportPolygon = new YoQuadrupedSupportPolygon("previousSupportPolygon", registry);
@@ -212,8 +212,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private double ratioFromMidToClosest;
-   private final BooleanYoVariable isInFrontOfLeftTrotLine = new BooleanYoVariable("isInFrontOfLeftTrotLine", registry);
-   private final BooleanYoVariable isInFrontOfRightTrotLine = new BooleanYoVariable("isInFrontOfRightTrotLine", registry);
+   private final YoBoolean isInFrontOfLeftTrotLine = new YoBoolean("isInFrontOfLeftTrotLine", registry);
+   private final YoBoolean isInFrontOfRightTrotLine = new YoBoolean("isInFrontOfRightTrotLine", registry);
 
    // Swing PD Controllers
    private final YoFrameVector kp_swing = new YoFrameVector("kp_swing_", ReferenceFrame.getWorldFrame(), registry);
@@ -230,7 +230,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    }
 
    public QuadrupedVMCForceMultiGaitController(QuadrupedPhysicalProperties physicalProperties, FullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
-         DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
@@ -282,10 +282,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingZTrajectories.set(robotQuadrant, new YoPolynomial("swingZTrajectory" + robotQuadrant.getPascalCaseName(), ORDER_OF_SWING_Z_POLYNOMIAL, registry));
-         swingInitialZHeights.set(robotQuadrant, new DoubleYoVariable("swingInitialZHeights" + robotQuadrant.getPascalCaseName(), registry));
-         gaitCompletionAtStartOfSwing.set(robotQuadrant, new DoubleYoVariable("swingStartTime" + robotQuadrant.getPascalCaseName(), registry));
-         swingDurations.set(robotQuadrant, new DoubleYoVariable("swingDurations" + robotQuadrant.getPascalCaseName(), registry));
-         currentSwingCompletions.set(robotQuadrant, new DoubleYoVariable("currentSwingCompletions" + robotQuadrant.getPascalCaseName(), registry));
+         swingInitialZHeights.set(robotQuadrant, new YoDouble("swingInitialZHeights" + robotQuadrant.getPascalCaseName(), registry));
+         gaitCompletionAtStartOfSwing.set(robotQuadrant, new YoDouble("swingStartTime" + robotQuadrant.getPascalCaseName(), registry));
+         swingDurations.set(robotQuadrant, new YoDouble("swingDurations" + robotQuadrant.getPascalCaseName(), registry));
+         currentSwingCompletions.set(robotQuadrant, new YoDouble("currentSwingCompletions" + robotQuadrant.getPascalCaseName(), registry));
          desiredFootPositions.set(robotQuadrant, new YoFramePoint("desiredFootPosition" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
          desiredFootVelocities.set(robotQuadrant, new YoFrameVector("desiredFootVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
@@ -451,7 +451,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
             rootRegistry = rootRegistry.getParent();
          }
 
-         q_z = (DoubleYoVariable) rootRegistry.getVariable("root.babyBeastSimple", "q_z");
+         q_z = (YoDouble) rootRegistry.getVariable("root.babyBeastSimple", "q_z");
       }
    }
 

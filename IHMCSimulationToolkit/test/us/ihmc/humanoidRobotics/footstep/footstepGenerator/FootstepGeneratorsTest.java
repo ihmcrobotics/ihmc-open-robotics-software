@@ -2364,7 +2364,7 @@ public class FootstepGeneratorsTest
       assertEquals(message + " Foot pitch should be 0.", 0.0, footPose.getPitch(), 1e-10);
       FrameOrientation2d footOrientation = new FrameOrientation2d();
       footPose.getOrientation2dIncludingFrame(footOrientation);
-      double yawDiff = endOrientation.sub(footOrientation);
+      double yawDiff = endOrientation.difference(footOrientation);
       assertEquals(message + " Foot yaw and desired yaw difference should be 0.", 0.0, yawDiff, 1e-10);
    }
 

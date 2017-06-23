@@ -23,9 +23,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -76,13 +76,13 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
 
-      EnumYoVariable<RobotSide> supportLegFrameSide = new EnumYoVariable<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
+      YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
       SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");
-      DoubleYoVariable yoTime = robot.getYoTime();
+      YoDouble yoTime = robot.getYoTime();
       SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);

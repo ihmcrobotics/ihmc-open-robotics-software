@@ -1,18 +1,18 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StrainSensor implements AcsellSlowSensor
 {
-   private final DoubleYoVariable strainSensor;
+   private final YoDouble strainSensor;
    private double gain = 1, offset = 0;
    private final double conversionFactor;
 
    public StrainSensor(String name, int sensor, double conversionFactor, YoVariableRegistry registry)
    {
       this.conversionFactor = conversionFactor;
-      strainSensor = new DoubleYoVariable(name + "StrainSensor" + sensor, registry);
+      strainSensor = new YoDouble(name + "StrainSensor" + sensor, registry);
    }
 
    @Override

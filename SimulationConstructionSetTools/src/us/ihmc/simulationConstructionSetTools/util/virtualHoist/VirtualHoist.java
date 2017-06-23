@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -21,23 +21,23 @@ public class VirtualHoist implements RobotController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VirtualHoist");
 
-   private final BooleanYoVariable hoistOn = new BooleanYoVariable("hoistOn", registry);
-   private final BooleanYoVariable hoistUp = new BooleanYoVariable("hoistUp", registry);
-   private final BooleanYoVariable hoistDown = new BooleanYoVariable("hoistDown", registry);
+   private final YoBoolean hoistOn = new YoBoolean("hoistOn", registry);
+   private final YoBoolean hoistUp = new YoBoolean("hoistUp", registry);
+   private final YoBoolean hoistDown = new YoBoolean("hoistDown", registry);
 
-   private final List<DoubleYoVariable> cableLengths = new ArrayList<>();
-   private final DoubleYoVariable physicalCableLength = new DoubleYoVariable("hoistPhysicalCableLength", registry);
+   private final List<YoDouble> cableLengths = new ArrayList<>();
+   private final YoDouble physicalCableLength = new YoDouble("hoistPhysicalCableLength", registry);
 
-   private final List<DoubleYoVariable> cableForceMagnitudes = new ArrayList<>();
+   private final List<YoDouble> cableForceMagnitudes = new ArrayList<>();
 
-   private final DoubleYoVariable hoistUpDownSpeed = new DoubleYoVariable("hoistUpDownSpeed", registry);
+   private final YoDouble hoistUpDownSpeed = new YoDouble("hoistUpDownSpeed", registry);
 
-   private final DoubleYoVariable hoistStiffness = new DoubleYoVariable("hoistStiffness", registry);
-   private final DoubleYoVariable hoistDamping = new DoubleYoVariable("hoistDamping", registry);
+   private final YoDouble hoistStiffness = new YoDouble("hoistStiffness", registry);
+   private final YoDouble hoistDamping = new YoDouble("hoistDamping", registry);
 
    private final YoFramePoint teepeeLocation = new YoFramePoint("teepeeLocation", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable q_x, q_y, q_z;
+   private final YoDouble q_x, q_y, q_z;
 
    private final double updateDT;
 
@@ -52,8 +52,8 @@ public class VirtualHoist implements RobotController
          externalForcePoints.add(externalForcePoint);
          jointToAttachHoist.addExternalForcePoint(externalForcePoint);
 
-         cableLengths.add(new DoubleYoVariable("hoistCableLength" + i, registry));
-         cableForceMagnitudes.add(new DoubleYoVariable("hoistCableForceMagnitude" + i, registry));
+         cableLengths.add(new YoDouble("hoistCableLength" + i, registry));
+         cableForceMagnitudes.add(new YoDouble("hoistCableForceMagnitude" + i, registry));
       }
 
       physicalCableLength.set(0.5);
@@ -68,9 +68,9 @@ public class VirtualHoist implements RobotController
       hoistUp.set(false);
       hoistDown.set(false);
 
-      q_x = (DoubleYoVariable) robot.getVariable("q_x");
-      q_y = (DoubleYoVariable) robot.getVariable("q_y");
-      q_z = (DoubleYoVariable) robot.getVariable("q_z");
+      q_x = (YoDouble) robot.getVariable("q_x");
+      q_y = (YoDouble) robot.getVariable("q_y");
+      q_z = (YoDouble) robot.getVariable("q_z");
 
       teepeeLocation.set(0.0, 0.0, 1.25);
    }

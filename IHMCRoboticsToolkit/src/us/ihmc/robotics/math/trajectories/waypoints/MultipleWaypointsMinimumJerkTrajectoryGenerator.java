@@ -2,9 +2,9 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.QuinticPolynomialTrajectoryGenerator;
@@ -22,10 +22,10 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTrajectoryTime;
+   private final YoDouble currentTrajectoryTime;
 
-   private final IntegerYoVariable numberOfWaypoints;
-   private final IntegerYoVariable currentWaypointIndex;
+   private final YoInteger numberOfWaypoints;
+   private final YoInteger currentWaypointIndex;
 
    private final ArrayList<YoOneDoFTrajectoryPoint> waypoints;
 
@@ -51,11 +51,11 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      numberOfWaypoints = new IntegerYoVariable(namePrefix + "NumberOfWaypoints", registry);
+      numberOfWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
       numberOfWaypoints.set(0);
 
-      currentTrajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
+      currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
       subTrajectory = new QuinticPolynomialTrajectoryGenerator(namePrefix + "SubTrajectory", initialPositionProvider, initialVelocityProvider,
             finalPositionProvider, finalVelocityProvider, trajectoryTimeProvider, registry);

@@ -19,8 +19,8 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableClient implements LogPacketHandler
@@ -308,7 +308,11 @@ public class YoVariableClient implements LogPacketHandler
    {
       if (state == ClientState.RUNNING)
       {
-         variableChangedProducer.disconnect();
+         if(variableChangedProducer != null)
+         {
+            variableChangedProducer.disconnect();
+         }
+
          dataConsumerParticipant.remove();
          yoVariablesUpdatedListener.disconnected();
 

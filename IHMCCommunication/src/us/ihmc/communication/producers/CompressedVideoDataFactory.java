@@ -1,5 +1,7 @@
 package us.ihmc.communication.producers;
 
+import us.ihmc.communication.video.VideoCallback;
+
 public class CompressedVideoDataFactory
 {
    public enum Algorithm
@@ -20,11 +22,10 @@ public class CompressedVideoDataFactory
          return new JPEGCompressedVideoDataServer(handler);
       default:
          throw new RuntimeException("Unknown algorithm");
-
       }
    }
 
-   public static CompressedVideoDataClient createCompressedVideoDataClient(VideoStreamer videoStreamer)
+   public static CompressedVideoDataClient createCompressedVideoDataClient(VideoCallback videoStreamer)
    {
       switch (algorithm)
       {
@@ -36,5 +37,4 @@ public class CompressedVideoDataFactory
          throw new RuntimeException("Unknown algorithm");
       }
    }
-
 }

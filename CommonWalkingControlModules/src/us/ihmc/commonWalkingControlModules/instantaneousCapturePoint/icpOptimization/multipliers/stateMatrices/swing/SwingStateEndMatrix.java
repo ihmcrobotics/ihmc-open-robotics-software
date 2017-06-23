@@ -1,26 +1,35 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class SwingStateEndMatrix extends DenseMatrix64F
 {
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   private final DoubleYoVariable endOfSplineTime;
+   private final YoDouble startOfSplineTime;
+   private final YoDouble endOfSplineTime;
 
-   public SwingStateEndMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
-         DoubleYoVariable endOfSplineTime)
+   private final boolean blendFromInitial;
+   private final double minimumBlendingTime;
+
+   public SwingStateEndMatrix(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
+         YoDouble startOfSplineTime, YoDouble endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
+      this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
+
+      this.blendFromInitial = blendFromInitial;
+      this.minimumBlendingTime = minimumBlendingTime;
    }
 
    public void reset()
@@ -28,7 +37,7 @@ public class SwingStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+   public void compute(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          double omega0)
    {
       // recurse backward from upcoming corner point to current corner point, then project forward to end of spline
@@ -45,6 +54,28 @@ public class SwingStateEndMatrix extends DenseMatrix64F
 
       set(2, 0, projection);
       set(3, 0, omega0 * projection);
+
+      if (blendFromInitial)
+      {
+         double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
+
+         if (startOfSplineTime.getDoubleValue() >= minimumBlendingTime)
+         { // recurse backward from the upcoming corner point to the current corner point, then recurse back to the start of spline location
+            projection = Math.exp(-omega0 * (timeOnExitCMP + splineDurationOnEntryCMP));
+         }
+         else
+         { // haven't phased in completely yet, so its a combination of both recursion and projection
+            double phaseAtStart = startOfSplineTime.getDoubleValue() / minimumBlendingTime;
+
+            double recursionMultiplier = Math.exp(-omega0 * (timeOnExitCMP + splineDurationOnEntryCMP));
+            double projectionMultiplier = 0.0;
+
+            projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseAtStart);
+         }
+
+         set(0, 0, projection);
+         set(1, 0, omega0 * projection);
+      }
    }
 }
 

@@ -43,6 +43,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
 	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
+	compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
@@ -81,7 +82,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCStateEstimation")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotBehaviors")
 	compile ihmc.getProjectDependency(":Vicon")
@@ -94,7 +95,7 @@ dependencies {
 
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")
 	testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
 	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSetTools")

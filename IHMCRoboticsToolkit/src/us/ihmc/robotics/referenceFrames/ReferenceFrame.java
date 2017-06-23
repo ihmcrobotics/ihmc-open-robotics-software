@@ -853,19 +853,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
                   referenceFrame.transformToRoot.setIdentity();
                }
 
-               if (referenceFrame.preCorruptionTransform != null)
-               {
-                  referenceFrame.transformToRoot.multiply(referenceFrame.preCorruptionTransform);
-               }
-
                referenceFrame.transformToRoot.multiply(referenceFrame.transformToParent);
-
-               if (referenceFrame.postCorruptionTransform != null)
-               {
-                  referenceFrame.transformToRoot.multiply(referenceFrame.postCorruptionTransform);
-               }
-
-               referenceFrame.transformToRoot.normalizeRotationPart();
                referenceFrame.inverseTransformToRoot.setAndInvert(referenceFrame.transformToRoot);
 
                referenceFrame.transformToRootID = nextTransformToRootID;
@@ -1068,62 +1056,4 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       this.additionalNameBasedHashCode = additionalNameBasedHashCode;
    }
-
-   //////////////////////////////////////////////////////////////////////
-   /////// This needs to be extract to a new type of reference frame ////
-   //////////////////////////////////////////////////////////////////////
-
-   private RigidBodyTransform preCorruptionTransform, postCorruptionTransform;
-
-   /**
-    * Please avoid using the corruption methods until we know where they should be moved.
-    * <p>
-    * The big problem is that it makes the pose any reference frame uncertain as from anywhere it
-    * can easily be modified. It was initially created to understand unmodeled offsets in the
-    * kinematics of Atlas. It will probably still be needed in the future for the same reason, so
-    * let's not remove it but avoid using unless it is strictly necessary.
-    * </p>
-    * 
-    * @param preCorruptionTransform the corruption transform to prepend to this frame's transform to
-    *           parent.
-    */
-   @Deprecated
-   public void corruptTransformToParentPreMultiply(RigidBodyTransform preCorruptionTransform)
-   {
-      if (this.preCorruptionTransform == null)
-      {
-         this.preCorruptionTransform = new RigidBodyTransform();
-      }
-
-      this.preCorruptionTransform.set(preCorruptionTransform);
-      update();
-   }
-
-   /**
-    * Please avoid using the corruption methods until we know where they should be moved.
-    * <p>
-    * The big problem is that it makes the pose any reference frame uncertain as from anywhere it
-    * can easily be modified. It was initially created to understand unmodeled offsets in the
-    * kinematics of Atlas. It will probably still be needed in the future for the same reason, so
-    * let's not remove it but avoid using unless it is strictly necessary.
-    * </p>
-    * 
-    * @param postCorruptionTransform the corruption transform to append to this frame's transform to
-    *           parent.
-    */
-   @Deprecated
-   public void corruptTransformToParentPostMultiply(RigidBodyTransform postCorruptionTransform)
-   {
-      if (this.postCorruptionTransform == null)
-      {
-         this.postCorruptionTransform = new RigidBodyTransform();
-      }
-
-      this.postCorruptionTransform.set(postCorruptionTransform);
-      update();
-   }
-
-   //////////////////////////////////////////////////////////////////////
-   ////////////////// End of things to be extracted /////////////////////
-   //////////////////////////////////////////////////////////////////////
 }

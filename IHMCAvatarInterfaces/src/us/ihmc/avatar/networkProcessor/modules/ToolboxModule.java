@@ -33,9 +33,9 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -52,7 +52,7 @@ public abstract class ToolboxModule
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
-   protected final DoubleYoVariable yoTime = new DoubleYoVariable("localTime", registry);
+   protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
@@ -61,7 +61,7 @@ public abstract class ToolboxModule
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
    private final int thisDesitination;
 
-   protected final EnumYoVariable<PacketDestination> activeMessageSource = new EnumYoVariable<>("activeMessageSource", registry, PacketDestination.class, true);
+   protected final YoEnum<PacketDestination> activeMessageSource = new YoEnum<>("activeMessageSource", registry, PacketDestination.class, true);
 
    protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;
@@ -70,8 +70,8 @@ public abstract class ToolboxModule
    protected Runnable toolboxRunnable = null;
    protected final int updatePeriodMilliseconds = 1;
 
-   protected final DoubleYoVariable timeWithoutInputsBeforeGoingToSleep = new DoubleYoVariable("timeWithoutInputsBeforeGoingToSleep", registry);
-   protected final DoubleYoVariable timeOfLastInput = new DoubleYoVariable("timeOfLastInput", registry);
+   protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
+   protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
@@ -316,7 +316,7 @@ public abstract class ToolboxModule
       }
       executorService.shutdownNow();
       packetCommunicator.closeConnection();
-      packetCommunicator.close();
+      packetCommunicator.disconnect();
 
       if (yoVariableServer != null)
       {

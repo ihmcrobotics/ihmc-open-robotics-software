@@ -7,8 +7,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -29,7 +29,7 @@ public class Track implements FunctionToIntegrate
    private int numPointsPerTread, numTreads;
 
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable track_linear_velocity, track_linear_position, track_linear_force;
+   private final YoDouble track_linear_velocity, track_linear_position, track_linear_force;
 
    public Track(String name, Joint joint, Robot rob, Vector3D offset, RotationMatrix rotation, double trackLength, double trackRadius, double trackWidth,
                 int numPointsPerTread, int numTreads)
@@ -67,9 +67,9 @@ public class Track implements FunctionToIntegrate
       }
 
 
-      track_linear_velocity = new DoubleYoVariable(name + "_vel", registry);
-      track_linear_position = new DoubleYoVariable(name + "_pos", registry);
-      track_linear_force = new DoubleYoVariable(name + "_force", registry);
+      track_linear_velocity = new YoDouble(name + "_vel", registry);
+      track_linear_position = new YoDouble(name + "_pos", registry);
+      track_linear_force = new YoDouble(name + "_force", registry);
 
       this.setGroundContactOffsetsAndVelocities(0.0, 0.0);
       rob.addFunctionToIntegrate(this);
@@ -80,17 +80,17 @@ public class Track implements FunctionToIntegrate
       return name;
    }
 
-   public DoubleYoVariable getLinearVelocity()
+   public YoDouble getLinearVelocity()
    {
       return this.track_linear_velocity;
    }
 
-   public DoubleYoVariable getLinearPosition()
+   public YoDouble getLinearPosition()
    {
       return this.track_linear_velocity;
    }
 
-   public DoubleYoVariable getLinearForce()
+   public YoDouble getLinearForce()
    {
       return this.track_linear_velocity;
    }
@@ -352,9 +352,9 @@ public class Track implements FunctionToIntegrate
    }
 
    @Override
-   public DoubleYoVariable[] getOutputVariables()
+   public YoDouble[] getOutputVariables()
    {
-      return new DoubleYoVariable[] {track_linear_position};
+      return new YoDouble[] {track_linear_position};
    }
 
 

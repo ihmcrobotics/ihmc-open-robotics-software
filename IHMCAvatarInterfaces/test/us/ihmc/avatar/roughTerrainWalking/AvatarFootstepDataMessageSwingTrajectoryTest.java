@@ -25,8 +25,8 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -190,7 +190,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       String typeName = sidePrefix + "Foot" + TrajectoryType.class.getSimpleName();
 
       @SuppressWarnings("unchecked")
-      EnumYoVariable<TrajectoryType> currentTrajectoryType = (EnumYoVariable<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
+      YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
       YoVariable<?> currentWaypointIndex = scs.getVariable(linearNamespace, currentIndexName);
 
       assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());

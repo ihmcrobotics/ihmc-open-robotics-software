@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
@@ -18,7 +18,7 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
    }
 
    @Override
-   public void processImageToSend(BufferedImage bufferedImageToPack, Point3D cameraPositionToPack, Quaternion cameraOrientationToPack,
+   public void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack,
          IntrinsicParameters intrinsicParametersToPack)
    {
    }

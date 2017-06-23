@@ -21,6 +21,7 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
    private final double chestUserModeWeight = 50.0;
    private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 1;
@@ -284,5 +285,11 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public Vector3D getPelvisLinearWeight()
+   {
+      return pelvisLinearWeight;
    }
 }

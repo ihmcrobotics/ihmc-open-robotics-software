@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: </p>
@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  * @author not attributable
  * @version 1.0
  */
-public class InfiniteImpulseResponseFilteredYoVariable extends DoubleYoVariable
+public class InfiniteImpulseResponseFilteredYoVariable extends YoDouble
 {
    private final boolean DEBUG = true;
 

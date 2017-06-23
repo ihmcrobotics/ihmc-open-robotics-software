@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -14,14 +14,14 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
    private final YoVariableRegistry registry;
    private final ExecutionTimer yoWhiteBoardReadControllerWaitingGlobalTimer;
    
-   private final IntegerYoVariable numberOfNewDataSinceLastRead;
-   private final IntegerYoVariable ticksTillNextRead;
+   private final YoInteger numberOfNewDataSinceLastRead;
+   private final YoInteger ticksTillNextRead;
 
    private final YoWhiteBoard yoWhiteBoard;
    private final boolean blockUntilNewDataIsAvailable;
    private final int readEveryNTicks;
    private final IndexOrderChecker indexOrderChecker;
-   private final IntegerYoVariable previousMissedIndices;
+   private final YoInteger previousMissedIndices;
 
    private final boolean readOnInitialize;
 
@@ -30,7 +30,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
    {
       registry = new YoVariableRegistry(name + "YoWhiteBoardReadController");
       yoWhiteBoardReadControllerWaitingGlobalTimer = new ExecutionTimer("whiteBoardReadWait", registry);
-      numberOfNewDataSinceLastRead = new IntegerYoVariable("numberOfNewDataSinceLastRead", registry);
+      numberOfNewDataSinceLastRead = new YoInteger("numberOfNewDataSinceLastRead", registry);
 
       this.yoWhiteBoard = yoWhiteBoard;
       this.blockUntilNewDataIsAvailable = blockUntilNewDataIsAvailable;
@@ -41,7 +41,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
 
       if (readEveryNTicks != 1)
       {
-         ticksTillNextRead = new IntegerYoVariable("ticksTillNextRead", registry);
+         ticksTillNextRead = new YoInteger("ticksTillNextRead", registry);
 
          if (doNotReadFirstTime)
          {
@@ -60,7 +60,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
       }
 
       this.indexOrderChecker = new IndexOrderChecker(name, registry, 1);
-      this.previousMissedIndices = new IntegerYoVariable("previousMissedIndices", registry);
+      this.previousMissedIndices = new YoInteger("previousMissedIndices", registry);
       this.readOnInitialize = readOnInitialize;
    }
 

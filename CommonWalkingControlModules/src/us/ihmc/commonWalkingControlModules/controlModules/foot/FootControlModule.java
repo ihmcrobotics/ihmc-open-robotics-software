@@ -18,10 +18,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -49,7 +49,7 @@ public class FootControlModule
    private static final double coefficientOfFriction = 0.8;
 
    private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
-   private final EnumYoVariable<ConstraintType> requestedState;
+   private final YoEnum<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -57,10 +57,10 @@ public class FootControlModule
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   private final BooleanYoVariable holdPositionIfCopOnEdge;
+   private final YoBoolean holdPositionIfCopOnEdge;
    /** For testing purpose only. */
-   private final BooleanYoVariable alwaysHoldPosition;
-   private final BooleanYoVariable neverHoldPosition;
+   private final YoBoolean alwaysHoldPosition;
+   private final YoBoolean neverHoldPosition;
 
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
@@ -71,13 +71,13 @@ public class FootControlModule
    private final SupportState supportStateNew;
 
    private final FootSwitchInterface footSwitch;
-   private final DoubleYoVariable footLoadThresholdToHoldPosition;
+   private final YoDouble footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
    private final ToeOffCalculator toeOffCalculator;
 
-   private final BooleanYoVariable requestExploration;
-   private final BooleanYoVariable resetFootPolygon;
+   private final YoBoolean requestExploration;
+   private final YoBoolean resetFootPolygon;
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
@@ -99,20 +99,20 @@ public class FootControlModule
       this.robotSide = robotSide;
 
       footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
-      footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
+      footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      holdPositionIfCopOnEdge = new BooleanYoVariable(namePrefix + "HoldPositionIfCopOnEdge", registry);
+      holdPositionIfCopOnEdge = new YoBoolean(namePrefix + "HoldPositionIfCopOnEdge", registry);
       holdPositionIfCopOnEdge.set(walkingControllerParameters.doFancyOnToesControl());
-      alwaysHoldPosition = new BooleanYoVariable(namePrefix + "AlwaysHoldPosition", registry);
-      neverHoldPosition = new BooleanYoVariable(namePrefix + "NeverHoldPosition", registry);
+      alwaysHoldPosition = new YoBoolean(namePrefix + "AlwaysHoldPosition", registry);
+      neverHoldPosition = new YoBoolean(namePrefix + "NeverHoldPosition", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
-      DoubleYoVariable time = controllerToolbox.getYoTime();
+      YoDouble time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
-      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+      requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);
 
       setupContactStatesMap();
@@ -168,8 +168,8 @@ public class FootControlModule
 
       setupStateMachine(states);
 
-      requestExploration = new BooleanYoVariable(namePrefix + "RequestExploration", registry);
-      resetFootPolygon = new BooleanYoVariable(namePrefix + "ResetFootPolygon", registry);
+      requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
+      resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
    }
 
    private void setupContactStatesMap()

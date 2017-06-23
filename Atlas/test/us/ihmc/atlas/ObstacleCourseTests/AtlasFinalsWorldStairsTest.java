@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -40,7 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
@@ -71,8 +70,8 @@ public class AtlasFinalsWorldStairsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 70.3, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
-   @Test(timeout = 350000)
+	@ContinuousIntegrationTest(estimatedDuration = 70.0)
+   @Test
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -80,7 +79,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, false);
+      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
@@ -89,20 +88,19 @@ public class AtlasFinalsWorldStairsTest
       setupCameraForWalkingUpStairs();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       ReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.125);
       drcSimulationTestHelper.send(message);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
-
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -118,9 +116,8 @@ public class AtlasFinalsWorldStairsTest
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@Ignore("Improve the feet stability.")
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 151825)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -128,7 +125,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, false);
+      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
@@ -137,19 +134,19 @@ public class AtlasFinalsWorldStairsTest
       setupCameraForWalkingUpStairs();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);    // 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       ReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.15);
       drcSimulationTestHelper.send(message);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);    // 2.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
 
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -196,11 +193,6 @@ public class AtlasFinalsWorldStairsTest
 
       ArrayList<Point2D> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2D> rightFootPoint2ds = null;
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() + 0.0, startingLocation.getZ() + 0.0),
-              new Quaternion(orientation), leftFootPoint2ds));
-
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() + 0.0, startingLocation.getZ() + 0.0),
-              new Quaternion(orientation), rightFootPoint2ds));
 
       footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.25, startingLocation.getZ() + 0.0),
               new Quaternion(orientation), leftFootPoint2ds));
@@ -226,22 +218,22 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.45, startingLocation.getZ() + 0.45),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.65),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.68),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.65),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.68),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 0.85),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 0.91),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 0.85),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 0.91),
               new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.85),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91),
               new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.85),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91),
               new Quaternion(orientation), rightFootPoint2ds));
 
       return footstepDataList;
@@ -277,40 +269,35 @@ public class AtlasFinalsWorldStairsTest
 
       ArrayList<Point2D> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2D> rightFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() + 0.0, startingLocation.getZ() + 0.0),
+
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.27, startingLocation.getZ() + 0.0),
             new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() + 0.0, startingLocation.getZ() + 0.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.57, startingLocation.getZ() + 0.0),
             new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.25, startingLocation.getZ() + 0.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0),
             new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.55, startingLocation.getZ() + 0.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0),
             new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.90, startingLocation.getZ() + 0.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.1, startingLocation.getZ() + 0.25),
             new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.90, startingLocation.getZ() + 0.0),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.4, startingLocation.getZ() + 0.45),
             new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.08, startingLocation.getZ() + 0.32),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.69, startingLocation.getZ() + 0.68),
             new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.38, startingLocation.getZ() + 0.55),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.02, startingLocation.getZ() + 0.91),
             new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.67, startingLocation.getZ() + 0.78),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91),
             new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 1.01),
-            new Quaternion(orientation), rightFootPoint2ds));
-
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 1.01),
-            new Quaternion(orientation), leftFootPoint2ds));
-
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 1.01),
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91),
             new Quaternion(orientation), rightFootPoint2ds));
 
 

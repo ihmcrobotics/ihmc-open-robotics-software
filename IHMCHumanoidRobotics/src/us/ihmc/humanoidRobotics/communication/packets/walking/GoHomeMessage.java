@@ -48,6 +48,9 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    public RobotSide robotSide;
    @RosExportedField(documentation = "How long the trajectory will spline from the current desired to the home configuration.")
    public double trajectoryTime;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    public GoHomeMessage()
    {
@@ -99,6 +102,24 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    public double getTrajectoryTime()
    {
       return trajectoryTime;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

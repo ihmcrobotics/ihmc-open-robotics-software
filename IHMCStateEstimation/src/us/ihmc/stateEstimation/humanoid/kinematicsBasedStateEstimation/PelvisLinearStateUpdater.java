@@ -16,16 +16,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -64,7 +61,7 @@ public class PelvisLinearStateUpdater
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
 
-   private final DoubleYoVariable yoInitialComHeight = new DoubleYoVariable("initialComHeight", registry);
+   private final YoDouble yoInitialComHeight = new YoDouble("initialComHeight", registry);
    private final YoFramePoint yoInitialCenterOfMassPosition = new YoFramePoint("initialCenterOfMassPosition", worldFrame, registry);
    private final YoFramePoint yoInitialFootPosition = new YoFramePoint("initialFootPosition", worldFrame, registry);
 
@@ -76,24 +73,24 @@ public class PelvisLinearStateUpdater
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
    
    private final YoFrameVector totalGroundReactionForce = new YoFrameVector("totalGroundForce", worldFrame, registry);
-   private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
+   private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoFrameVector comAcceleration = new YoFrameVector("comAcceleration", worldFrame, registry);
 
-   private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
-   private final DoubleYoVariable alphaGRFAgainstIMUAndKinematicsForVelocity = new DoubleYoVariable("alphaGRFAgainstIMUAndKinematicsForVelocity", registry);
-   private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
+   private final YoDouble alphaIMUAgainstKinematicsForVelocity = new YoDouble("alphaIMUAgainstKinematicsForVelocity", registry);
+   private final YoDouble alphaGRFAgainstIMUAndKinematicsForVelocity = new YoDouble("alphaGRFAgainstIMUAndKinematicsForVelocity", registry);
+   private final YoDouble alphaIMUAgainstKinematicsForPosition = new YoDouble("alphaIMUAgainstKinematicsForPosition", registry);
 
-   private final BooleanYoVariable useGroundReactionForcesToComputeCenterOfMassVelocity = new BooleanYoVariable("useGRFToComputeCoMVelocity", registry);
-   private final IntegerYoVariable numberOfEndEffectorsTrusted = new IntegerYoVariable("numberOfEndEffectorsTrusted", registry);
+   private final YoBoolean useGroundReactionForcesToComputeCenterOfMassVelocity = new YoBoolean("useGRFToComputeCoMVelocity", registry);
+   private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
 
-   private final Map<RigidBody, DoubleYoVariable> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, DoubleYoVariable>();
-   private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
+   private final Map<RigidBody, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, YoDouble>();
+   private final YoDouble forceZInPercentThresholdToFilterFoot = new YoDouble("forceZInPercentThresholdToFilterFootUserParameter", registry);
 
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Map<RigidBody, Wrench> footWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final DoubleYoVariable delayTimeBeforeTrustingFoot = new DoubleYoVariable("delayTimeBeforeTrustingFoot", registry);
-   private final Map<RigidBody, GlitchFilteredBooleanYoVariable> haveFeetHitGroundFiltered = new LinkedHashMap<>();
-   private final Map<RigidBody, BooleanYoVariable> areFeetTrusted = new LinkedHashMap<>();
+   private final YoDouble delayTimeBeforeTrustingFoot = new YoDouble("delayTimeBeforeTrustingFoot", registry);
+   private final Map<RigidBody, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
+   private final Map<RigidBody, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final List<RigidBody> listOfTrustedFeet = new ArrayList<RigidBody>();
    private final List<RigidBody> listOfUnTrustedFeet = new ArrayList<RigidBody>();
 
@@ -104,18 +101,18 @@ public class PelvisLinearStateUpdater
 
    private final Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
 
-   private final BooleanYoVariable reinitialize = new BooleanYoVariable("reinitialize", registry);
-   private final BooleanYoVariable trustImuWhenNoFeetAreInContact = new BooleanYoVariable("trustImuWhenNoFeetAreInContact", registry);
+   private final YoBoolean reinitialize = new YoBoolean("reinitialize", registry);
+   private final YoBoolean trustImuWhenNoFeetAreInContact = new YoBoolean("trustImuWhenNoFeetAreInContact", registry);
 
    private enum SlippageCompensatorMode
    {
       LOAD_THRESHOLD, MIN_PELVIS_ACCEL
    };
 
-   private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode",
+   private final YoEnum<SlippageCompensatorMode> slippageCompensatorMode = new YoEnum<SlippageCompensatorMode>("slippageCompensatorMode",
          registry, SlippageCompensatorMode.class);
 
-   private final BooleanYoVariable requestStopEstimationOfPelvisLinearState = new BooleanYoVariable("userRequestStopEstimationOfPelvisLinearState", registry);
+   private final YoBoolean requestStopEstimationOfPelvisLinearState = new YoBoolean("userRequestStopEstimationOfPelvisLinearState", registry);
 
    private final PelvisKinematicsBasedLinearStateCalculator kinematicsBasedLinearStateCalculator;
    private final PelvisIMUBasedLinearStateCalculator imuBasedLinearStateCalculator;
@@ -140,7 +137,7 @@ public class PelvisLinearStateUpdater
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, Map<RigidBody, FootSwitchInterface> footSwitches, 
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, DoubleYoVariable yoTime,
+         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, YoDouble yoTime,
          StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -243,19 +240,19 @@ public class PelvisLinearStateUpdater
 
          String footPrefix = foot.getName();
 
-         final GlitchFilteredBooleanYoVariable hasFootHitTheGroundFiltered = new GlitchFilteredBooleanYoVariable("has" + footPrefix + "FootHitGroundFiltered",
+         final GlitchFilteredYoBoolean hasFootHitTheGroundFiltered = new GlitchFilteredYoBoolean("has" + footPrefix + "FootHitGroundFiltered",
                registry, windowSize);
          hasFootHitTheGroundFiltered.set(true);
          haveFeetHitGroundFiltered.put(foot, hasFootHitTheGroundFiltered);
 
-         BooleanYoVariable isFootTrusted = new BooleanYoVariable("is" + footPrefix + "FootTrusted", registry);
+         YoBoolean isFootTrusted = new YoBoolean("is" + footPrefix + "FootTrusted", registry);
          if (i == 0)
          {
             isFootTrusted.set(true);
          }
          areFeetTrusted.put(foot, isFootTrusted);
 
-         DoubleYoVariable footForceZInPercentOfTotalForce = new DoubleYoVariable(footPrefix + "FootForceZInPercentOfTotalForce", registry);
+         YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
 
          footWrenches.put(foot, new Wrench());

@@ -1,7 +1,5 @@
 package us.ihmc.communication.remote;
 
-
-
 public class DebugReflectiveTCPServer
 {
    private ReflectiveTCPServer server;
@@ -24,7 +22,6 @@ public class DebugReflectiveTCPServer
 
       return "1+1=" + bodyName;
    }
-
 
    public DebugReflectiveTCPServer()
    {
@@ -50,6 +47,5 @@ public class DebugReflectiveTCPServer
             ex.printStackTrace();
          }
       }
-
    }
 }

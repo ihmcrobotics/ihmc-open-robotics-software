@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.filters;
 
 
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -34,7 +34,7 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
    }
 
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           DoubleYoVariable maxRate, double dt, ReferenceFrame referenceFrame)
+           YoDouble maxRate, double dt, ReferenceFrame referenceFrame)
    {
       RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, dt);
       RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, dt);
@@ -58,7 +58,7 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
 
 
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           DoubleYoVariable maxRate, double dt, YoFrameVector2d unfilteredVector)
+           YoDouble maxRate, double dt, YoFrameVector2d unfilteredVector)
    {
       RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
       RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);

@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
+import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -104,10 +104,10 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
       compassZ.update(perfCompassZ.getDoubleValue());
    }
 
-   private void initializeGaussianNoise(NoisyDoubleYoVariable[] list, boolean isNoisy, double standardDeviation, boolean useBias, double bias, double biasMax,
+   private void initializeGaussianNoise(NoisyYoDouble[] list, boolean isNoisy, double standardDeviation, boolean useBias, double bias, double biasMax,
          double biasMin, double biasDelta, boolean setBiasRandomlyBetweenMinAndMax)
    {
-      for (NoisyDoubleYoVariable i : list)
+      for (NoisyYoDouble i : list)
       {
          i.setIsNoisy(isNoisy);
          i.setGaussianNoise(standardDeviation);

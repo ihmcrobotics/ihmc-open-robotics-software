@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -35,10 +35,10 @@ public class DiagnosticsWhenHangingHelper
    private FrameVector forceVector = new FrameVector();
    private FrameVector rCrossFVector = new FrameVector();
 
-   private final DoubleYoVariable totalMass;
-   private final DoubleYoVariable estimatedTorque, torqueOffset, appliedTorque;
+   private final YoDouble totalMass;
+   private final YoDouble estimatedTorque, torqueOffset, appliedTorque;
 
-   private final DoubleYoVariable torqueCorrectionAlpha;
+   private final YoDouble torqueCorrectionAlpha;
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
@@ -59,13 +59,13 @@ public class DiagnosticsWhenHangingHelper
       yoJointToCenterOfMass = new YoFrameVector(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
       yoForceVector = new YoFrameVector(parentJoint.getName() + "ForceVector", ReferenceFrame.getWorldFrame(), registry);
 
-      estimatedTorque = new DoubleYoVariable("tau_est_" + parentJoint.getName(), registry);
-      torqueOffset = new DoubleYoVariable("tau_off_" + parentJoint.getName(), registry);
-      appliedTorque = new DoubleYoVariable("tau_app_" + parentJoint.getName(), registry);
+      estimatedTorque = new YoDouble("tau_est_" + parentJoint.getName(), registry);
+      torqueOffset = new YoDouble("tau_off_" + parentJoint.getName(), registry);
+      appliedTorque = new YoDouble("tau_app_" + parentJoint.getName(), registry);
 
-      totalMass = new DoubleYoVariable("totalMass_" + parentJoint.getName(), registry);
+      totalMass = new YoDouble("totalMass_" + parentJoint.getName(), registry);
 
-      torqueCorrectionAlpha = new DoubleYoVariable("torqueCorrectionAlpha_" + parentJoint.getName(), registry);
+      torqueCorrectionAlpha = new YoDouble("torqueCorrectionAlpha_" + parentJoint.getName(), registry);
       torqueCorrectionAlpha.set(0.001);
    }
 
@@ -141,12 +141,12 @@ public class DiagnosticsWhenHangingHelper
       return appliedTorque.getDoubleValue();
    }
 
-   public DoubleYoVariable getEstimatedTorqueYoVariable()
+   public YoDouble getEstimatedTorqueYoVariable()
    {
       return estimatedTorque;
    }
 
-   public DoubleYoVariable getAppliedTorqueYoVariable()
+   public YoDouble getAppliedTorqueYoVariable()
    {
       return appliedTorque;
    }
@@ -198,7 +198,7 @@ public class DiagnosticsWhenHangingHelper
       estimatedTorque.add(torqueOffset);
    }
 
-   public DoubleYoVariable getTorqueOffsetVariable()
+   public YoDouble getTorqueOffsetVariable()
    {
       return torqueOffset;
    }
