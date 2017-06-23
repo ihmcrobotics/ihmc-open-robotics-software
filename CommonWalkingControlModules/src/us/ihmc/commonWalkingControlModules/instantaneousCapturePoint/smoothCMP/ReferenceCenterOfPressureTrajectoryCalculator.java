@@ -366,9 +366,9 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       currentBallCoP.changeFrame(worldFrame);
       currentToeCoP.changeFrame(worldFrame);
 
-      if (numberOfPointsPerFoot.getIntegerValue() == 3 && !currentToeCoP.containsNaN())
+      if (numberOfPointsPerFoot.getIntegerValue() > 2 && !currentToeCoP.containsNaN())
          swingCoPTrajectory.updateThreePointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP, currentToeCoP);
-      else if (numberOfPointsPerFoot.getIntegerValue() == 2 && !currentBallCoP.containsNaN())
+      else if (numberOfPointsPerFoot.getIntegerValue() > 1 && !currentBallCoP.containsNaN())
          swingCoPTrajectory.updateTwoPointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP);
       else
          swingCoPTrajectory.updateOnePointPerFoot(currentHeelCoP);
@@ -386,6 +386,8 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       boolean onlyOneUpcomingFootstep = numberOfUpcomingFootsteps == 1;
       isDoneWalking.set(onlyOneUpcomingFootstep);
 
+      // Compute stance foot CoP waypoints
+
       // Can happen if this method is the first to be called, so it should pretty much never happen.
       if (firstHeelCoPForSingleSupport.containsNaN())
          computeHeelCoPForSupportFoot(tmpCoP, supportSide, null, null);
@@ -397,9 +399,31 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       copLocationWaypoints.get(constantCoPIndex).setIncludingFrame(0, tmpCoP);
       computeFootstepCentroid(centroidOfUpcomingFootstep, upcomingFootstepsData.get(0).getFootstep());
       boolean isUpcomingFootstepLast = upcomingFootstepsData.size() == 1;
+
       computeBallCoPForSupportFoot(tmpCoP, supportSide, centroidOfUpcomingFootstep, isUpcomingFootstepLast);
       tmpCoP.changeFrame(supportSoleFrame);
       copLocationWaypoints.get(constantCoPIndex).setIncludingFrame(1, tmpCoP);
+
+      computeToeCoPForSupportFoot(tmpCoP, supportSide);
+      tmpCoP.changeFrame(supportSoleFrame);
+      copLocationWaypoints.get(constantCoPIndex).setIncludingFrame(2, tmpCoP);
+
+      // Compute swing CoP trajectory
+      FramePoint currentHeelCoP = copLocationWaypoints.get(0).get(0).getFrameTuple();
+      FramePoint currentBallCoP = copLocationWaypoints.get(0).get(1).getFrameTuple();
+      FramePoint currentToeCoP = copLocationWaypoints.get(0).get(2).getFrameTuple();
+      currentHeelCoP.changeFrame(worldFrame);
+      currentBallCoP.changeFrame(worldFrame);
+      currentToeCoP.changeFrame(worldFrame);
+
+      SwingCoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(0);
+      if (numberOfPointsPerFoot.getIntegerValue() > 2 && !currentToeCoP.containsNaN())
+         swingCoPTrajectory.updateThreePointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP, currentToeCoP);
+      else if (numberOfPointsPerFoot.getIntegerValue() > 1 && !currentBallCoP.containsNaN())
+         swingCoPTrajectory.updateTwoPointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP);
+      else
+         swingCoPTrajectory.updateOnePointPerFoot(currentHeelCoP);
+
       constantCoPIndex++;
 
       if (onlyOneUpcomingFootstep)
@@ -409,6 +433,15 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
          predictedSupportPolygon.update();
          computeFinalCoPBetweenSupportFeet(constantCoPIndex, supportFootPolygonsInSoleZUpFrames.get(supportSide), predictedSupportPolygon);
          setRemainingCoPsToDuplicateLastComputedCoP(constantCoPIndex);
+
+         FramePoint previousCoP = copLocationWaypoints.get(constantCoPIndex - 1).get(numberOfPointsPerFoot.getIntegerValue() - 1).getFrameTuple();
+         FramePoint heelCoP = copLocationWaypoints.get(constantCoPIndex).get(0).getFrameTuple();
+         previousCoP.changeFrame(worldFrame);
+         currentHeelCoP.changeFrame(worldFrame);
+
+         TransferCoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(1);
+         transferCoPTrajectory.update(orderOfSplineInterpolation.getEnumValue(), previousCoP, heelCoP);
+
          return;
       }
 
@@ -440,9 +473,22 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
             addPredictedContactPointsToPolygon(currentFootstep, predictedSupportPolygon);
             predictedSupportPolygon.update();
             computeFinalCoPBetweenSupportFeet(footIndex, supportFootPolygonsInSoleZUpFrames.get(firstSupportSide), predictedSupportPolygon);
+
+            FramePoint previousCoP = copLocationWaypoints.get(footIndex - 1).get(numberOfPointsPerFoot.getIntegerValue() - 1).getFrameTuple();
+            FramePoint currentHeelCoP = copLocationWaypoints.get(footIndex).get(0).getFrameTuple();
+            previousCoP.changeFrame(worldFrame);
+            currentHeelCoP.changeFrame(worldFrame);
+
+            TransferCoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(footIndex - 1);
+            transferCoPTrajectory.update(orderOfSplineInterpolation.getEnumValue(), previousCoP, currentHeelCoP);
          }
          else
          {
+            // compute CoP waypoints
+            computeToeCoPForFootstep(tmpCoP, currentFootstep);
+            tmpCoP.changeFrame(soleZUpFrames.get(firstSupportSide));
+            copLocationWaypoints.get(footIndex).setIncludingFrame(2, tmpCoP);
+
             computeBallCoPForFootstep(tmpCoP, currentFootstep, centroidOfNextFootstep, isUpcomingFootstepLast);
             tmpCoP.changeFrame(soleZUpFrames.get(firstSupportSide));
             copLocationWaypoints.get(footIndex).setIncludingFrame(1, tmpCoP);
@@ -451,6 +497,27 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
             computeHeelCoPForFootstep(tmpCoP, currentFootstep, centroidInSoleFrameOfPreviousSupportFoot, previousLastCoP);
             tmpCoP.changeFrame(soleZUpFrames.get(firstSupportSide));
             copLocationWaypoints.get(footIndex).setIncludingFrame(0, tmpCoP);
+
+            // compute CoP trajectories
+            FramePoint previousCoP = copLocationWaypoints.get(footIndex - 1).get(numberOfPointsPerFoot.getIntegerValue() - 1).getFrameTuple();
+            FramePoint currentHeelCoP = copLocationWaypoints.get(footIndex).get(0).getFrameTuple();
+            FramePoint currentBallCoP = copLocationWaypoints.get(footIndex).get(1).getFrameTuple();
+            FramePoint currentToeCoP = copLocationWaypoints.get(footIndex).get(2).getFrameTuple();
+            previousCoP.changeFrame(worldFrame);
+            currentHeelCoP.changeFrame(worldFrame);
+            currentBallCoP.changeFrame(worldFrame);
+            currentToeCoP.changeFrame(worldFrame);
+
+            TransferCoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(footIndex - 1);
+            transferCoPTrajectory.update(orderOfSplineInterpolation.getEnumValue(), previousCoP, currentHeelCoP);
+
+            SwingCoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(footIndex - 1);
+            if (numberOfPointsPerFoot.getIntegerValue() > 2 && !currentToeCoP.containsNaN())
+               swingCoPTrajectory.updateThreePointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP, currentToeCoP);
+            else if (numberOfPointsPerFoot.getIntegerValue() > 1 && !currentBallCoP.containsNaN())
+               swingCoPTrajectory.updateTwoPointsPerFoot(orderOfSplineInterpolation.getEnumValue(), currentHeelCoP, currentBallCoP);
+            else
+               swingCoPTrajectory.updateOnePointPerFoot(currentHeelCoP);
          }
 
          footIndex++;
