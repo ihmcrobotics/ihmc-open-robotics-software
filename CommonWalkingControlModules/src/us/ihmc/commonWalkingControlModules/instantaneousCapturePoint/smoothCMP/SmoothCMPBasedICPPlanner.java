@@ -15,7 +15,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -26,7 +25,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = true;
 
-   private final ReferenceCoPTrajectoryCalculator referenceCoPsCalculator;
+   private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ReferenceICPTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
@@ -51,13 +50,13 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.add(swingDurationShiftFraction);
       }
 
-      referenceCoPsCalculator = new ReferenceCoPTrajectoryCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                     this.numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                     swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
-                                                                     registry);
+      referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
+                                                                    this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                    swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
+                                                                    registry);
 
-      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, swingDurations, transferDurations, swingDurationAlphas, transferDurationAlphas,
-                                                                  registry);
+      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                  swingDurationAlphas, transferDurationAlphas, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
 
@@ -74,7 +73,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      referenceCoPsCalculator.createVisualizerForConstantCoPs(yoGraphicsList, artifactList);
+      referenceCoPGenerator.createVisualizerForConstantCoPs(yoGraphicsList, artifactList);
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
@@ -87,8 +86,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void clearPlan()
    {
-      referenceCoPsCalculator.clear();
-      //todo clear the others
+      referenceCoPGenerator.clear();
+      referenceCMPGenerator.reset();
 
       for (int i = 0; i < swingDurations.size(); i++)
       {
@@ -103,7 +102,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      referenceCoPsCalculator.addFootstepToPlan(footstep, timing);
+      referenceCoPGenerator.addFootstepToPlan(footstep, timing);
    }
 
    @Override
@@ -120,7 +119,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
 
-      //referenceCoPsCalculator.computeReferenceCoPsStartingFromDoubleSupport();
+      //referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport();
+      referenceCMPGenerator.initializeForTransfer(initialTime, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
       throw new RuntimeException("to implement");
    }
 
@@ -135,6 +135,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void initializeForSingleSupport(double initialTime)
    {
+      referenceCMPGenerator.initializeForSwing(initialTime, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
       throw new RuntimeException("to implement");
    }
 

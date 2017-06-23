@@ -43,6 +43,7 @@ public class CMPTrajectory
          availablePolynomials[i].reset();
 
       numberOfSegments.set(0);
+      trajectoryIndex.set(0);
       haveSetActiveSegments = false;
    }
 

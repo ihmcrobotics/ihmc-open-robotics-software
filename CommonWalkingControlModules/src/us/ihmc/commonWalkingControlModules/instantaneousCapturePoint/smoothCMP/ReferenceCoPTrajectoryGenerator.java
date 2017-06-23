@@ -34,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceCoPTrajectoryCalculator implements CoPPolynomialTrajectoryPlannerInterface
+public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryPlannerInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double COP_POINT_SIZE = 0.005;
@@ -114,11 +114,11 @@ public class ReferenceCoPTrajectoryCalculator implements CoPPolynomialTrajectory
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCoPTrajectoryCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
-                                           BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                           YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
-                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
-                                           List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
+   public ReferenceCoPTrajectoryGenerator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
+                                          BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                          List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
+                                          List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -293,10 +293,20 @@ public class ReferenceCoPTrajectoryCalculator implements CoPPolynomialTrajectory
          activeTrajectory.update(timeInState, desiredCoP, desiredCoPVelocity);
    }
 
+   public void getDesiredCenterOfPressure(FramePoint desiredCoPToPack)
+   {
+      desiredCoPToPack.setIncludingFrame(desiredCoP);
+   }
+
    public void getDesiredCenterOfPressure(FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack)
    {
       desiredCoPToPack.setIncludingFrame(desiredCoP);
       desiredCoPVelocityToPack.setIncludingFrame(desiredCoPVelocity);
+   }
+
+   public void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack)
+   {
+      desiredCoPToPack.set(desiredCoP);
    }
 
    public void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack, YoFrameVector desiredCoPVelocityToPack)
@@ -948,6 +958,16 @@ public class ReferenceCoPTrajectoryCalculator implements CoPPolynomialTrajectory
    {
       for (int i = 0; i < copLocationWaypoints.size(); i++)
          copLocationWaypoints.get(i).changeFrame(worldFrame);
+   }
+
+   public List<? extends CoPTrajectory> getTransferCoPTrajectories()
+   {
+      return transferCoPTrajectories;
+   }
+
+   public List<? extends CoPTrajectory> getSwingCoPTrajectories()
+   {
+      return swingCoPTrajectories;
    }
 
    @Override
