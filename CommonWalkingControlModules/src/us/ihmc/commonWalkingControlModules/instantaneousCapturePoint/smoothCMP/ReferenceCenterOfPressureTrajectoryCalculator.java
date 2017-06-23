@@ -896,80 +896,6 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
          copLocationWaypoints.get(footIndex).get(0).interpolate(tempCentroid3d, secondCoP, (chicken - 0.5) * 2.0);
    }
 
-   /*
-   @Override
-   public List<YoPolynomial3D> getPolynomialTrajectory()
-   {
-      convertCoPWayPointsToWorldFrame();
-      generatePolynomialCoefficients();
-   }
-   */
-
-   /*
-   private void generatePolynomialCoefficients()
-   {
-      copTrajectoryPolynomials.clear();
-      if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CUBIC)
-         generateCubicCoefficients();
-      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.NATURAL_CUBIC)
-         generateNaturalCubicCoefficients();
-      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.CLAMPED_CUBIC)
-         generateClampedCubicCoefficients();
-      else if (orderOfSplineInterpolation.getEnumValue() == CoPSplineType.LINEAR)
-         generateLinearCoefficients();
-   }
-   */
-
-   /*
-   private void generateCubicCoefficients()
-   {
-      Vector3D initialVelocity, initialAcceleration;
-      if (currentCoPVelocity != null)
-      {
-         currentCoPVelocity.changeFrame(worldFrame);
-         initialVelocity = currentCoPVelocity.getVector();
-      }
-      else
-         initialVelocity = new Vector3D();
-
-      if (currentCoPAcceleration != null)
-      {
-         currentCoPAcceleration.changeFrame(worldFrame);
-         initialAcceleration = currentCoPAcceleration.getVector();
-      }
-      else
-         initialAcceleration = new Vector3D();
-
-      for (int footIndex = 0; footIndex < upcomingFootstepsData.size())
-      for (int i = 0; i < copWayPoints.getNumberOfTrajectoryPoints() - 1; i++)
-      {
-         YoPolynomial3D piecewiseSpline = new YoPolynomial3D(namePrefix + "CoPSpline" + i, 2, registry);
-         FrameEuclideanTrajectoryPoint waypoint1 = copWayPoints.getTrajectoryPoint(i);
-         FrameEuclideanTrajectoryPoint waypoint2 = copWayPoints.getTrajectoryPoint(i + 1);
-         Point3DReadOnly point1 = waypoint1.getPositionCopy().getPoint();
-         Point3DReadOnly point2 = waypoint2.getPositionCopy().getPoint();
-         piecewiseSpline.setCubicThreeInitialConditionsFinalPosition(0.0, waypoint2.getTime(), point1, initialVelocity, initialAcceleration, point2);
-         copTrajectoryPolynomials.add(piecewiseSpline);
-         piecewiseSpline.compute(waypoint2.getTime());
-         initialVelocity.set(piecewiseSpline.getVelocity());
-         initialAcceleration.set(piecewiseSpline.getAcceleration());
-      }
-   }
-
-   private void generateLinearCoefficients()
-   {
-      for (int i = 0; i < copWayPoints.getNumberOfTrajectoryPoints() - 1; i++)
-      {
-         YoPolynomial3D piecewiseSpline = new YoPolynomial3D(namePrefix + "CoPSpline" + i, 2, registry);
-         FrameEuclideanTrajectoryPoint wayPoint1 = copWayPoints.getTrajectoryPoint(i);
-         FrameEuclideanTrajectoryPoint wayPoint2 = copWayPoints.getTrajectoryPoint(i + 1);
-         Point3D point1 = wayPoint1.getPositionCopy().getPoint();
-         Point3D point2 = wayPoint2.getPositionCopy().getPoint();
-         piecewiseSpline.setLinear(wayPoint1.getTime(), wayPoint2.getTime(), point1, point2);
-      }
-   }
-   */
-
    private void convertCoPWayPointsToWorldFrame()
    {
       for (int i = 0; i < copLocationWaypoints.size(); i++)
@@ -1028,18 +954,4 @@ public class ReferenceCenterOfPressureTrajectoryCalculator implements CoPPolynom
       this.finalCoPVelocity.setToZero(finalCoPVelocity.getReferenceFrame());
       this.finalCoPVelocity.setXY(finalCoPVelocity);
    }
-
-   private FrameEuclideanTrajectoryPoint convertToWorldFrameAndPackIntoTrajectoryPoint(double time, FramePoint2d position)
-   {
-      position.changeFrame(worldFrame);
-
-      return new FrameEuclideanTrajectoryPoint(time, position.toFramePoint(), new FrameVector(position.getReferenceFrame()));
-   }
-
-   private FrameEuclideanTrajectoryPoint convertToWorldFrameAndPackIntoTrajectoryPoint(double time, FramePoint position)
-   {
-      position.changeFrame(worldFrame);
-      return new FrameEuclideanTrajectoryPoint(time, position, new FrameVector(position.getReferenceFrame()));
-   }
-
 }
