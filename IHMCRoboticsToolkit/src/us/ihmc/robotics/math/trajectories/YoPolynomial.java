@@ -123,6 +123,17 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setLinearWithIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zf)
+   {
+      setXBoundary(t0, tFinal);
+      reshape(2);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate, zIntermediate);
+      setPositionRow(2, tFinal, zf);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setLinear(double t, double z, double zd)
    {
       reshape(2);
@@ -482,8 +493,20 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, double z0, double zIntermediate1, double zFinal)
+   {
+      setXBoundary(t0, tFinal);
+      reshape(4);
+      MathTools.checkIntervalContains(tIntermediate1, t0, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate1, zIntermediate1);
+      setPositionRow(2, tFinal, zFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                               double zIntermediate2, double zFinal)
+                                              double zIntermediate2, double zFinal)
    {
       setXBoundary(t0, tFinal);
       reshape(4);
