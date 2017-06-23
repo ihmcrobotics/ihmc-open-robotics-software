@@ -183,6 +183,15 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       setCubicUsingIntermediatePoints(t0, tIntermediate1, tIntermediate2, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zIntermediate2.getPoint(), zFinal.getPoint());
    }
 
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint z0, FramePoint zIntermediate1, FramePoint zFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zIntermediate1.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+
+      setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zFinal.getPoint());
+   }
+
    public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint z0,
                                                                           FramePoint zIntermediate, FramePoint zFinal, FrameVector zdFinal)
    {
@@ -221,6 +230,15 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
 
       setLinear(t0, tFinal, z0.getPoint(), zf.getPoint());
+   }
+
+   public void setLinearWithIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FramePoint zIntermediate, FramePoint zf)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zIntermediate.checkReferenceFrameMatch(referenceFrame);
+      zf.checkReferenceFrameMatch(referenceFrame);
+
+      setLinearWithIntermediatePoint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zf.getPoint());
    }
 
    public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zIntermediate0,

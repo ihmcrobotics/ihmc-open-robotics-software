@@ -50,6 +50,15 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
    private final List<YoDouble> maxCoPOffsets = new ArrayList<>();
    private final List<YoDouble> minCoPOffsets = new ArrayList<>();
 
+   private final List<YoDouble> swingDurations;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> swingDurationShiftFractions;
+
+   private final List<YoDouble> transferDurations;
+   private final List<YoDouble> transferSplitFractions;
+
+   private final YoBoolean useSegmentedSwing;
+
    private final SideDependentList<List<YoFrameVector2d>> copUserOffsets = new SideDependentList<>();
 
    private final YoDouble safeDistanceFromCoPToSupportEdges;
@@ -103,10 +112,18 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
     */
    public ReferenceCenterOfPressureWaypointCalculator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
                                                       BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                                      YoInteger numberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+                                                      YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                                      List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
+                                                      List<YoDouble> transferSplitFractions, YoBoolean useSegmentedSwing, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
+      this.swingDurations = swingDurations;
+      this.transferDurations = transferDurations;
+      this.swingSplitFractions = swingSplitFractions;
+      this.swingDurationShiftFractions = swingDurationShiftFractions;
+      this.transferSplitFractions = transferSplitFractions;
+      this.useSegmentedSwing = useSegmentedSwing;
 
       firstHeelCoPForSingleSupport.setToNaN();
 
@@ -603,6 +620,7 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
       }
 
    }
+
    private void computeBallCoP(FramePoint ballCoPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FrameConvexPolygon2d footSupportPolygon,
                                FramePoint2d centroidInSoleFrameOfUpcomingSupportFoot, boolean isUpcomingFootstepLast)
    {
@@ -720,8 +738,6 @@ public class ReferenceCenterOfPressureWaypointCalculator implements CoPPolynomia
          copLocationWaypoints.get(footIndex).get(0).interpolate(firstCoP, tempCentroid3d, chicken * 2.0);
       else
          copLocationWaypoints.get(footIndex).get(0).interpolate(tempCentroid3d, secondCoP, (chicken - 0.5) * 2.0);
-
-      copLocationWaypoints.get(footIndex).set(1, copLocationWaypoints.get(footIndex).get(0));
    }
 
    /*

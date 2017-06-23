@@ -69,14 +69,19 @@ public class SmoothCMPPlannerParameters
       return copOffsets;
    }
 
-   public double getTransferDurationAlpha()
+   public double getTransferSplitFraction()
    {
       return 0.5;
    }
 
-   public double getSwingDurationAlpha()
+   public double getSwingSplitFraction()
    {
       return 0.5;
+   }
+
+   public double getSwingDurationShiftFraction()
+   {
+      return 0.8;
    }
 
    public double getCoPSafeDistanceAwayFromSupportEdges()

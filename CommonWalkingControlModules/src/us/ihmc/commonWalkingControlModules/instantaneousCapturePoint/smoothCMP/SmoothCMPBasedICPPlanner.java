@@ -15,7 +15,12 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
@@ -25,6 +30,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ICPPlannerTrajectoryFromCMPPolynomialGenerator referenceICPGenerator;
 
+   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+   private final YoBoolean useSegmentedSwing;
+
    private final YoInteger numberOfFootstepsToConsider;
 
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -33,12 +41,27 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       super(bipedSupportPolygons, icpPlannerParameters);
 
-      numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
+      useSegmentedSwing = new YoBoolean(namePrefix + "UseSegmentedSwing", registry);
+      useSegmentedSwing.set(true);
+
+      int numberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
+      this.numberOfFootstepsToConsider = new YoInteger(namePrefix + "NumberOfFootstepsToConsider", registry);
+      this.numberOfFootstepsToConsider.set(numberOfFootstepsToConsider);
+
+      for (int i = 0; i < numberOfFootstepsToConsider; i++)
+      {
+         YoDouble swingDurationShiftFraction = new YoDouble("swingDurationShiftFraction" + i, registry);
+         swingDurationShiftFraction.set(plannerParameters.getSwingDurationShiftFraction());
+         swingDurationShiftFractions.add(swingDurationShiftFraction);
+      }
 
       referenceCoPsCalculator = new ReferenceCenterOfPressureWaypointCalculator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                numberOfFootstepsToConsider, parentRegistry);
+                                                                                this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                                swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
+                                                                                useSegmentedSwing, registry);
 
-      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator();
+      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, swingDurations, transferDurations, swingDurationAlphas, transferDurationAlphas,
+                                                                  useSegmentedSwing, registry);
 
       referenceICPGenerator = new ICPPlannerTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
 
@@ -98,6 +121,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void initializeForTransfer(double initialTime)
    {
+      isDoubleSupport.set(true);
+      this.initialTime.set(initialTime);
+
+      //referenceCoPsCalculator.computeReferenceCoPsStartingFromDoubleSupport();
       throw new RuntimeException("to implement");
    }
 
