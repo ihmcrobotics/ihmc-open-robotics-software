@@ -113,6 +113,17 @@ public class YoPolynomial
          a[i].setToNaN();
    }
 
+   public void set(YoPolynomial other)
+   {
+      numberOfCoefficients.set(other.getNumberOfCoefficients());
+
+      xInitial = other.getXInitial();
+      xFinal = other.getXFinal();
+
+      for (int i = 0; i < maximumNumberOfCoefficients; i++)
+         a[i].set(other.getCoefficient(i));
+   }
+
    public void setConstant(double z)
    {
       numberOfCoefficients.set(1);

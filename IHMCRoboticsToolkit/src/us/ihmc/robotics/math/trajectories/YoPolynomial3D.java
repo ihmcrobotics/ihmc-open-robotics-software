@@ -25,9 +25,9 @@ import us.ihmc.robotics.geometry.Direction;
  */
 public class YoPolynomial3D
 {
-   private final YoPolynomial xPolynomial;
-   private final YoPolynomial yPolynomial;
-   private final YoPolynomial zPolynomial;
+   protected final YoPolynomial xPolynomial;
+   protected final YoPolynomial yPolynomial;
+   protected final YoPolynomial zPolynomial;
 
    private final Point3DReadOnly position = new Point3DReadOnly()
    {
@@ -294,6 +294,14 @@ public class YoPolynomial3D
       for (int index = 0; index < 3; index++)
          getYoPolynomial(index).reset();
    }
+
+   public void set(YoPolynomial3D other)
+   {
+      xPolynomial.set(other.getYoPolynomialX());
+      yPolynomial.set(other.getYoPolynomialY());
+      zPolynomial.set(other.getYoPolynomialZ());
+   }
+
 
    public void setConstant(Point3DReadOnly z)
    {
