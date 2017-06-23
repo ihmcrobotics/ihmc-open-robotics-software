@@ -130,17 +130,6 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setLinearWithIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zf)
-   {
-      setXBoundary(t0, tFinal);
-      reshape(2);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate, zIntermediate);
-      setPositionRow(2, tFinal, zf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
    public void setLinear(double t, double z, double zd)
    {
       reshape(2);

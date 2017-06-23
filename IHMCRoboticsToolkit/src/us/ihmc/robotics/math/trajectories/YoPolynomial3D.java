@@ -363,12 +363,6 @@ public class YoPolynomial3D
                                                                                         zFinal.getElement(index), zdFinal.getElement(index));
    }
 
-   public void setLinearWithIntermediatePoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Point3DReadOnly zIntermediate, Point3DReadOnly zf)
-   {
-      for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setLinearWithIntermediatePoint(t0, tIntermediate, tFinal, z0.getElement(index), zIntermediate.getElement(index), zf.getElement(index));
-   }
-
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
    {
       for (int index = 0; index < 3; index++)

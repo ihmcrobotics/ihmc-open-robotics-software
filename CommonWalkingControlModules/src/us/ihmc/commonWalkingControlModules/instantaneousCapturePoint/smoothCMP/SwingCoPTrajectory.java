@@ -48,6 +48,8 @@ public class SwingCoPTrajectory
       swingShiftSegment.reset();
       swingToeShiftSegment.reset();
       swingConstantSegment.reset();
+
+      swingSegments.clear();
    }
 
    public void updateOnePointPerFoot(FramePoint cop)
@@ -63,25 +65,32 @@ public class SwingCoPTrajectory
       intermediatePoint.interpolate(heelCoP, ballCoP, swingSplitFraction.getDoubleValue());
 
       double shiftDuration = swingDurationShiftFraction.getDoubleValue() * swingDuration.getDoubleValue();
-      double constantDuration = (1.0 - swingDurationShiftFraction.getDoubleValue()) * swingDuration.getDoubleValue();
       double intermediateDuration = 0.5 * shiftDuration;
 
       switch (splineType)
       {
       case CUBIC:
-         swingShiftSegment.setCubicUsingIntermediatePoint(0.0, intermediateDuration, constantDuration, heelCoP, intermediatePoint, ballCoP);
+         swingShiftSegment.setCubicUsingIntermediatePoint(0.0, intermediateDuration, shiftDuration, heelCoP, intermediatePoint, ballCoP);
+         swingConstantSegment.setConstant(ballCoP);
+
+         swingSegments.add(swingShiftSegment);
+         swingSegments.add(swingConstantSegment);
+
+         numberOfSegments.set(2);
          break;
       default:
-         swingShiftSegment.setLinearWithIntermediatePoint(0.0, intermediateDuration, constantDuration, heelCoP, intermediatePoint, ballCoP);
+         swingShiftSegment.setLinear(0.0, intermediateDuration, heelCoP, intermediatePoint);
+         swingToeShiftSegment.setLinear(intermediateDuration, shiftDuration,  intermediatePoint, ballCoP);
+         swingConstantSegment.setConstant(ballCoP);
+
+         swingSegments.add(swingShiftSegment);
+         swingSegments.add(swingToeShiftSegment);
+         swingSegments.add(swingConstantSegment);
+
+         numberOfSegments.set(3);
          break;
       }
 
-      swingConstantSegment.setConstant(ballCoP);
-
-      swingSegments.add(swingShiftSegment);
-      swingSegments.add(swingConstantSegment);
-
-      numberOfSegments.set(2);
    }
 
    public void updateThreePointsPerFoot(CoPSplineType splineType, FramePoint heelCoP, FramePoint ballCoP, FramePoint toeCoP)

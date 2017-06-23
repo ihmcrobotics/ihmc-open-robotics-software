@@ -240,15 +240,6 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       setLinear(t0, tFinal, z0.getPoint(), zf.getPoint());
    }
 
-   public void setLinearWithIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FramePoint zIntermediate, FramePoint zf)
-   {
-      z0.checkReferenceFrameMatch(referenceFrame);
-      zIntermediate.checkReferenceFrameMatch(referenceFrame);
-      zf.checkReferenceFrameMatch(referenceFrame);
-
-      setLinearWithIntermediatePoint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zf.getPoint());
-   }
-
    public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zIntermediate0,
                         FrameVector zdIntermediate0, FramePoint zIntermediate1, FrameVector zdIntermediate1, FramePoint zf, FrameVector zdf)
    {
