@@ -279,6 +279,12 @@ public class YoPolynomial3D
          getYoPolynomial(index).setConstant(z.getElement(index));
    }
 
+   public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setCubic(t0, tFinal, z0.getElement(index), zFinal.getElement(index));
+   }
+
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)

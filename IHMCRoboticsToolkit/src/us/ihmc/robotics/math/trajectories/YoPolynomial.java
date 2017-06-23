@@ -376,6 +376,18 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setCubic(double t0, double tFinal, double z0, double zFinal)
+   {
+      setXBoundary(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, 0.0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, 0.0);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setCubic(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
       setXBoundary(t0, tFinal);
