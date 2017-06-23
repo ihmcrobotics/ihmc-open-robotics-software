@@ -7,6 +7,9 @@ import us.ihmc.commons.PrintTools;
 
 public class TaskNodeTree
 {
+   private int dimensionOfTask;
+   private ArrayList<String> taskNames;
+   
    private TaskNode rootNode;
    private TaskNode nearNode;
    private TaskNode newNode;
@@ -32,9 +35,44 @@ public class TaskNodeTree
    public TaskNodeTree(TaskNode rootNode)
    {
       this.rootNode = rootNode;
-      wholeNodes.add(this.rootNode);
+      this.wholeNodes.add(this.rootNode);
       
-      nodeRegion = new TaskNodeRegion(this.rootNode.getDimensionOfNodeData());
+      this.nodeRegion = new TaskNodeRegion(this.rootNode.getDimensionOfNodeData());
+      
+      this.dimensionOfTask = rootNode.getDimensionOfNodeData()-1;
+      
+      this.taskNames = new ArrayList<String>();
+      this.taskNames.add("time");
+      for(int i=1;i<this.dimensionOfTask+1;i++)
+         this.taskNames.add("Task "+i+" : "+"..");
+   }
+   
+   public TaskNodeTree(TaskNode rootNode, String... taskNames)
+   {
+      this.rootNode = rootNode;
+      this.wholeNodes.add(this.rootNode);
+      
+      this.nodeRegion = new TaskNodeRegion(this.rootNode.getDimensionOfNodeData());
+      
+      this.dimensionOfTask = rootNode.getDimensionOfNodeData()-1;
+      
+      this.taskNames = new ArrayList<String>();
+      this.taskNames.add("time");
+      if(this.dimensionOfTask != taskNames.length)
+         PrintTools.warn("Task dimension is incorrect");
+      else
+         for(int i=1;i<this.dimensionOfTask+1;i++)
+            this.taskNames.add("Task "+i+" : "+taskNames[i-1]);
+   }
+      
+   public String getTaskName(int indexOfDimension)
+   {
+      return taskNames.get(indexOfDimension);
+   }   
+   
+   public int getDimensionOfTask()
+   {
+      return dimensionOfTask;
    }
       
    public double getTrajectoryTime()
