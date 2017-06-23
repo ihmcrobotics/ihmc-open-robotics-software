@@ -57,9 +57,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -79,6 +76,9 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedLis
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -181,13 +181,16 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
       RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame,trajectoryFrames);
       bodyManagers.add(chestManager);
 
-      RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
-      bodyManagers.add(headManager);
+      if (head != null)
+      {
+         ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         bodyManagers.add(headManager);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -644,7 +647,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
-      
+
       feetManager.compute();
       legConfigurationManager.compute();
 
@@ -663,7 +666,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
-      
+
       comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
             isRecoveringFromPush, feetManager));
