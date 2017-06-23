@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -99,14 +100,27 @@ public abstract class PacketValidityChecker
 
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
+         String messageClassName = packetToCheck.getClass().getSimpleName();
          SE3TrajectoryPointMessage[] swingTrajectory = packetToCheck.getSwingTrajectory();
+
+         if (swingTrajectory == null)
+         {
+            String errorMessage = messageClassName + " has no swing trajectory but trajectory type was set to " + TrajectoryType.WAYPOINTS.toString() + ".";
+            return errorMessage;
+         }
+
+         if (swingTrajectory.length > Footstep.maxNumberOfSwingWaypoints)
+         {
+            String errorMessage = messageClassName + " has " + swingTrajectory.length + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
+            return errorMessage;
+         }
+
          double lastTime = 0.0;
          for (int waypointIdx = 0; waypointIdx < swingTrajectory.length; waypointIdx++)
          {
             double waypointTime = swingTrajectory[waypointIdx].getTime();
             if (waypointTime <= lastTime)
             {
-               String messageClassName = packetToCheck.getClass().getSimpleName();
                String errorMessage = messageClassName + "'s swing trajectory has non-increasing waypoint times.";
                return errorMessage;
             }
@@ -115,8 +129,25 @@ public abstract class PacketValidityChecker
 
          if (packetToCheck.getSwingDuration() > 0.0 && lastTime >= packetToCheck.getSwingDuration())
          {
-            String messageClassName = packetToCheck.getClass().getSimpleName();
             String errorMessage = messageClassName + "'s swing trajectory has waypoints with time larger then the swing time.";
+            return errorMessage;
+         }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() < 0.0)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is less than zero.";
+            return errorMessage;
+         }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialLocation() == null)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial location is undefined.";
+            return errorMessage;
+         }
+
+         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialOrientation() == null)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial orientation is undefined.";
             return errorMessage;
          }
       }
@@ -824,7 +855,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return PelvisHeightTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
-      TrajectoryPoint1DMessage previousTrajectoryPoint = null;
+      EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
@@ -835,8 +866,8 @@ public abstract class PacketValidityChecker
 
       for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         TrajectoryPoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
+         EuclideanTrajectoryPointMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
+         errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
             String messageClassName = pelvisHeightTrajectoryMessage.getClass().getSimpleName();
@@ -909,6 +940,34 @@ public abstract class PacketValidityChecker
       double subTrajectoryTime = se3TrajectoryPoint.getTime();
       if (previousSE3TrajectoryPoint != null)
          subTrajectoryTime -= previousSE3TrajectoryPoint.getTime();
+
+      errorType = ObjectValidityChecker.validateTrajectoryTime(subTrajectoryTime);
+      if (errorType != null)
+         return "SE3 waypoint time (relative to previous waypoint) " + errorType.getMessage();
+
+      return null;
+   }
+   
+   private static String validateEuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage se3TrajectoryPoint,
+         EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
+   {
+      String errorMessage = validatePacket(se3TrajectoryPoint, checkId);
+      if (errorMessage != null)
+         return errorMessage;
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.position);
+      if (errorType != null)
+         return "SE3 waypoint position field " + errorType.getMessage();
+
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.linearVelocity);
+      if (errorType != null)
+         return "SE3 waypoint linear velocity field " + errorType.getMessage();
+
+      double subTrajectoryTime = se3TrajectoryPoint.getTime();
+      if (previousTrajectoryPoint != null)
+         subTrajectoryTime -= previousTrajectoryPoint.getTime();
 
       errorType = ObjectValidityChecker.validateTrajectoryTime(subTrajectoryTime);
       if (errorType != null)

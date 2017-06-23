@@ -26,6 +26,7 @@ import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.AnytimePlannerStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PushAndWalkBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
@@ -48,10 +49,10 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -72,7 +73,7 @@ public class IHMCHumanoidBehaviorManager
          new IHMCCommunicationKryoNetClassList());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+   private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
 
@@ -122,8 +123,8 @@ public class IHMCHumanoidBehaviorManager
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
 
-      //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
-      //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
+      //      YoDouble minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
+      //      YoDouble icpError = capturePointUpdatable.getIcpError();
 
       SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = null;
       if (sensorInfo.getWristForceSensorNames() != null && !sensorInfo.getWristForceSensorNames().containsValue(null))
@@ -137,7 +138,7 @@ public class IHMCHumanoidBehaviorManager
             dispatcher.addUpdatable(wristSensorUpdatable);
          }
       }
-
+      
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
@@ -176,7 +177,7 @@ public class IHMCHumanoidBehaviorManager
     */
    private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
          LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
-         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
+         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
          CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -184,8 +185,8 @@ public class IHMCHumanoidBehaviorManager
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
       AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters, yoTime, wholeBodyControllerParameters, registry);
-      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-      EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
+      YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       // CREATE SERVICES
@@ -230,6 +231,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK,
                              new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, walkingControllerParameters, yoGraphicsListRegistry));
 
+      DRCRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
+      dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK, new CollaborativeBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters, yoGraphicsListRegistry));
+      
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
@@ -284,12 +288,12 @@ public class IHMCHumanoidBehaviorManager
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, CommunicationBridgeInterface outgoingCommunicationBridge,
+         HumanoidReferenceFrames referenceFrames, YoDouble yoTime, CommunicationBridgeInterface outgoingCommunicationBridge,
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-      EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
+      YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,

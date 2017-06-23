@@ -6,13 +6,14 @@ import java.io.File;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
 
 public class StandardAllCommandsExecutor implements AllCommandsExecutor
 {

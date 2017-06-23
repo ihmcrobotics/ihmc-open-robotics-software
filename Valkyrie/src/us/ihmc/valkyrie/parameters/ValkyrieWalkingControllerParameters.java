@@ -20,13 +20,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -940,13 +941,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
-      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SwingFoot", true, registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 100.0; // 150.0
+      double kpX = 150.0; // Might cause some shakies.
+      double kpY = 100.0; // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
+      double zetaXZ = runningOnRealRobot ? 0.8 : 0.7; // Might cause some shakies.
+      double zetaY = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
       double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7;
@@ -956,11 +959,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      gains.setPositionProportionalGains(kpXY, kpZ);
-      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionProportionalGains(kpX, kpY, kpZ);
+      gains.setPositionDampingRatios(zetaXZ, zetaY, zetaXZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationZ);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 

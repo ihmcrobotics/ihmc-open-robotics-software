@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class BooleanGlobalParameter extends GlobalParameter
 {
@@ -8,8 +8,8 @@ public class BooleanGlobalParameter extends GlobalParameter
    {
       super(listener);
 
-      yoVariable = new BooleanYoVariable(name, description, registry);
-      ((BooleanYoVariable)yoVariable).set(value);
+      yoVariable = new YoBoolean(name, description, registry);
+      ((YoBoolean)yoVariable).set(value);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -19,7 +19,7 @@ public class BooleanGlobalParameter extends GlobalParameter
    {
       super(parents, listener);
 
-      yoVariable = new BooleanYoVariable(name, description, registry);
+      yoVariable = new YoBoolean(name, description, registry);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -32,7 +32,7 @@ public class BooleanGlobalParameter extends GlobalParameter
 
    public boolean getValue()
    {
-      return ((BooleanYoVariable)yoVariable).getBooleanValue();
+      return ((YoBoolean)yoVariable).getBooleanValue();
    }
 
 
@@ -57,7 +57,7 @@ public class BooleanGlobalParameter extends GlobalParameter
       verifyNoParents();
 
       // check if the value is the same as the current value
-      if (value == ((BooleanYoVariable)yoVariable).getBooleanValue())
+      if (value == ((YoBoolean)yoVariable).getBooleanValue())
          return;
       else
          setBooleanValue(value, comment);
@@ -67,7 +67,7 @@ public class BooleanGlobalParameter extends GlobalParameter
    @Override
    public String getValueInStringFormat()
    {
-      String ret = Boolean.toString(((BooleanYoVariable)yoVariable).getBooleanValue());
+      String ret = Boolean.toString(((YoBoolean)yoVariable).getBooleanValue());
 
       return padWithSpaces(ret, numberOfCharactersForDisplay);
    }
@@ -76,8 +76,8 @@ public class BooleanGlobalParameter extends GlobalParameter
 
    protected void setBooleanValue(boolean newValue, String comment)
    {
-      boolean previousValue = ((BooleanYoVariable)yoVariable).getBooleanValue();
-      ((BooleanYoVariable)yoVariable).set(newValue);
+      boolean previousValue = ((YoBoolean)yoVariable).getBooleanValue();
+      ((YoBoolean)yoVariable).set(newValue);
 
       if (changedListener != null)
       {

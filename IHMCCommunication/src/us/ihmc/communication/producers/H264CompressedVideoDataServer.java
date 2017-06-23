@@ -14,12 +14,12 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.communication.net.ConnectionStateListener;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
+public class H264CompressedVideoDataServer implements ConnectionStateListener, CompressedVideoDataServer
 {
    private OpenH264Encoder encoder;
 
@@ -64,7 +64,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
    }
 
    @Override
-   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3D cameraPosition, final Quaternion cameraOrientation,
+   public synchronized void onFrame(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition, final QuaternionReadOnly cameraOrientation,
          IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
@@ -132,7 +132,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
             nal.get(data);
-            handler.newVideoPacketAvailable(videoSource, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
+            handler.onFrame(videoSource, data, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
          }
       }
       catch (IOException e)
@@ -143,26 +143,31 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
       prevTimeStamp = timeStamp;
    }
 
-   public synchronized void close()
+   @Override
+   public synchronized void dispose()
    {
       encoder.delete();
    }
 
+   @Override
    public boolean isConnected()
    {
       return handler.isConnected();
    }
 
+   @Override
    public synchronized void connected()
    {
       encoder.sendIntraFrame();
    }
 
+   @Override
    public synchronized void disconnected()
    {
       videoEnabled = false;
    }
 
+   @Override
    public synchronized void setVideoControlSettings(VideoControlSettings object)
    {
       if (object.isSendVideo())

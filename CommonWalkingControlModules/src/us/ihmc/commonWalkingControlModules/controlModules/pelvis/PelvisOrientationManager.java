@@ -14,10 +14,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -29,8 +29,8 @@ public class PelvisOrientationManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final GenericStateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
-   private final EnumYoVariable<PelvisOrientationControlMode> requestedState;
-   private final BooleanYoVariable enableUserPelvisControlDuringWalking = new BooleanYoVariable("EnableUserPelvisControlDuringWalking", registry);
+   private final YoEnum<PelvisOrientationControlMode> requestedState;
+   private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("EnableUserPelvisControlDuringWalking", registry);
 
    private final ControllerPelvisOrientationManager walkingManager;
    private final UserPelvisOrientationManager userManager;
@@ -41,10 +41,10 @@ public class PelvisOrientationManager
                                    HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisOrientationControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
       walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);

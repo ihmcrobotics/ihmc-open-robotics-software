@@ -7,8 +7,8 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedXGaitSettingsInputProvider
 {
@@ -34,21 +34,21 @@ public class QuadrupedXGaitSettingsInputProvider
    private final DoubleParameter endPhaseShiftLowerLimitParameter = parameterFactory.createDouble("endPhaseShiftLowerLimit", 0);
    private final DoubleParameter endPhaseShiftUpperLimitParameter = parameterFactory.createDouble("endPhaseShiftUpperLimit", 359);
 
-   private final DoubleYoVariable yoStanceLength;
-   private final DoubleYoVariable yoStanceWidth;
-   private final DoubleYoVariable yoStepGroundClearance;
-   private final DoubleYoVariable yoStepDuration;
-   private final DoubleYoVariable yoEndDoubleSupportDuration;
-   private final DoubleYoVariable yoEndPhaseShift;
+   private final YoDouble yoStanceLength;
+   private final YoDouble yoStanceWidth;
+   private final YoDouble yoStepGroundClearance;
+   private final YoDouble yoStepDuration;
+   private final YoDouble yoEndDoubleSupportDuration;
+   private final YoDouble yoEndPhaseShift;
 
    public QuadrupedXGaitSettingsInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
-      yoStanceLength = new DoubleYoVariable("stanceLengthInput", registry);
-      yoStanceWidth = new DoubleYoVariable("stanceWidthInput", registry);
-      yoStepGroundClearance = new DoubleYoVariable("stepGroundClearanceInput", registry);
-      yoStepDuration = new DoubleYoVariable("stepDurationInput", registry);
-      yoEndDoubleSupportDuration = new DoubleYoVariable("endDoubleSupportDurationInput", registry);
-      yoEndPhaseShift = new DoubleYoVariable("endPhaseShiftInput", registry);
+      yoStanceLength = new YoDouble("stanceLengthInput", registry);
+      yoStanceWidth = new YoDouble("stanceWidthInput", registry);
+      yoStepGroundClearance = new YoDouble("stepGroundClearanceInput", registry);
+      yoStepDuration = new YoDouble("stepDurationInput", registry);
+      yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
+      yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
 
       yoStanceLength.set(defaultStanceLengthParameter.get());
       yoStanceWidth.set(defaultStanceWidthParameter.get());

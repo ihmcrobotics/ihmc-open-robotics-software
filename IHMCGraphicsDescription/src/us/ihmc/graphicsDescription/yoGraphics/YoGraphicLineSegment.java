@@ -3,16 +3,16 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicLineSegment extends YoGraphicVector
 {
-   private final DoubleYoVariable startX, startY, startZ, endX, endY, endZ;
-   private final DoubleYoVariable vectorX, vectorY, vectorZ;
+   private final YoDouble startX, startY, startZ, endX, endY, endZ;
+   private final YoDouble vectorX, vectorY, vectorZ;
 
    public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
@@ -39,13 +39,13 @@ public class YoGraphicLineSegment extends YoGraphicVector
       }
    }
 
-   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
+   public YoGraphicLineSegment(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y, YoDouble z, double scaleFactor,
          AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
-   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable endX, DoubleYoVariable endY, DoubleYoVariable endZ, double scaleFactor,
+   public YoGraphicLineSegment(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble endX, YoDouble endY, YoDouble endZ, double scaleFactor,
          AppearanceDefinition appearance, boolean drawArrowhead)
    {
       this(name, baseX, baseY, baseZ, endX, endY, endZ, createDirectionVector(name, baseX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead);
@@ -57,7 +57,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
       return directionVector;
    }
 
-   private YoGraphicLineSegment(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable startZ, DoubleYoVariable endX, DoubleYoVariable endY, DoubleYoVariable endZ, YoFrameVector yoFrameVector,
+   private YoGraphicLineSegment(String name, YoDouble startX, YoDouble startY, YoDouble startZ, YoDouble endX, YoDouble endY, YoDouble endZ, YoFrameVector yoFrameVector,
          double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead);
@@ -98,9 +98,9 @@ public class YoGraphicLineSegment extends YoGraphicVector
    }
 
    @Override
-   public DoubleYoVariable[] getVariables()
+   public YoDouble[] getVariables()
    {
-      return new DoubleYoVariable[] { startX, startY, startZ, endX, endY, endZ };
+      return new YoDouble[] { startX, startY, startZ, endX, endY, endZ };
    }
 
    @Override

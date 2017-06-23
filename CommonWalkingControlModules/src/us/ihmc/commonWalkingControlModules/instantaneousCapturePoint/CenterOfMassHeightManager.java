@@ -1,293 +1,275 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
+/**
+ * this class manages the center of mass height or the pelvis height using the PelvisHeightTrajectoryCommand and PelvisTrajectoryCommand respectively
+ * PelvisTrajectoryCommand is considered a special user command which gets forwarded to PelvisHeightControlState,
+ * In this user mode, the controller won't change the height of the pelvis to ensure the legs don't reach singularities while swinging. You must
+ * take the robot's configuration into account while using this command. The PelvisTrajectoryCommand also allows the user to enable User Pelvis Control During Walking.
+ * If this is turned off, the controller will switch back to CenterOfMassHeightControlState during walking
+ * Only the Z component of the PelvisTrajectoryCommand is used to control the pelvis height.
+ *
+ * The PelvisHeightTrajectoryCommand uses a pdController to compute the Linear Momentum Z and sends a momentum command to the controller core
+ * If you want to the controller to manage the pelvis height while walking use the PelvisHeightTrajectoryCommand.
+ */
 public class CenterOfMassHeightManager
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final GenericStateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
+   private final YoEnum<PelvisHeightControlMode> requestedState;
 
-   private final BooleanYoVariable controlPelvisHeightInsteadOfCoMHeight = new BooleanYoVariable("controlPelvisHeightInsteadOfCoMHeight", registry);
+   /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
+   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
 
-   private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
-   private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
-   private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityFromTrajectory = new DoubleYoVariable("desiredCoMHeightVelocityFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationFromTrajectory = new DoubleYoVariable("desiredCoMHeightAccelerationFromTrajectory", registry);
-   //   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightCorrected = new DoubleYoVariable("desiredCoMHeightCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityCorrected = new DoubleYoVariable("desiredCoMHeightVelocityCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationCorrected = new DoubleYoVariable("desiredCoMHeightAccelerationCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
+   /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
+   private final PelvisHeightControlState pelvisHeightControlState;
 
-   private final PDController centerOfMassHeightController;
+   /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
+   private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
 
-   private final ReferenceFrame centerOfMassFrame;
-   private final CenterOfMassJacobian centerOfMassJacobian;
-   private final ReferenceFrame pelvisFrame;
-   private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
-
-   private final double gravity;
-   private final RigidBody pelvis;
+   private final FramePose tempPose = new FramePose();
+   private final FramePoint tempPosition = new FramePoint();
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
-      pelvisFrame = referenceFrames.getPelvisFrame();
-
-      gravity = controllerToolbox.getGravityZ();
-      pelvis = controllerToolbox.getFullRobotModel().getPelvis();
-
-      centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
-
-      // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
-      controlPelvisHeightInsteadOfCoMHeight.set(true);
-
-      YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
-      DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
-      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
-      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
-
-      double controlDT = controllerToolbox.getControlDT();
-      // TODO Need to extract the maximum velocity parameter.
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(null, maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
-      this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
-
       parentRegistry.addChild(registry);
+      YoDouble yoTime = controllerToolbox.getYoTime();
+      String namePrefix = getClass().getSimpleName();
+      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisHeightControlMode.class, yoTime, registry);
+      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
+
+      //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z
+      YoPDGains pdGains = walkingControllerParameters.createCoMHeightControlGains(registry);
+      YoSymmetricSE3PIDGains pidGains = new YoSymmetricSE3PIDGains("pelvisHeightManager", registry);
+      pidGains.setProportionalGains(pdGains.getKp(), pdGains.getKp(), pdGains.getKp());
+      pidGains.setDampingRatio(pdGains.getZeta());
+
+      //this affects tracking in sim, not sure if it will be needed for the real robot
+//      pidGains.setMaxFeedbackAndFeedbackRate(pdGains.getMaximumFeedback(), pdGains.getMaximumFeedbackRate());
+      pidGains.createDerivativeGainUpdater(true);
+
+      //User mode
+      pelvisHeightControlState = new PelvisHeightControlState(pidGains, controllerToolbox, walkingControllerParameters, registry);
+
+      //normal control
+      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+
+      setupStateMachine();
+      enableUserPelvisControlDuringWalking.set(false);
    }
 
-   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
+   private void setupStateMachine()
    {
-      SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
+      List<PelvisAndCenterOfMassHeightControlState> states = new ArrayList<>();
+      states.add(centerOfMassHeightControlState);
+      states.add(pelvisHeightControlState);
+
+      for (PelvisAndCenterOfMassHeightControlState fromState : states)
       {
-         RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
-         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         RigidBodyTransform ankleToSole = new RigidBodyTransform();
-         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
-         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+         for (PelvisAndCenterOfMassHeightControlState toState : states)
+         {
+            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
+         }
+         stateMachine.addState(fromState);
       }
-      
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
-
-      double doubleSupportPercentageIn = 0.3;
-      boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      SideDependentList<? extends ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
-      LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-            nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, centerOfMassFrame, pelvisFrame,
-            ankleZUpFrames, transformsFromAnkleToSole, yoTime, yoGraphicsListRegistry, registry);
-      centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
-      return centerOfMassTrajectoryGenerator;
-   }
-
-   public void setCoMHeightGains(double kp, double kd)
-   {
-      centerOfMassHeightController.setProportionalGain(kp);
-      centerOfMassHeightController.setDerivativeGain(kd);
    }
 
    public void initialize()
    {
+      requestState(centerOfMassHeightControlState.getStateEnum());
+   }
 
+   /**
+    * set the weights for user mode, CenterOfMassHeightControlState does not use this weight
+    * @param weight
+    */
+   public void setPelvisTaskspaceWeights(Vector3D weight)
+   {
+      pelvisHeightControlState.setWeights(weight);
+   }
+
+   public void compute()
+   {
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+   }
+
+   /**
+    * sets the height manager up for walking
+    * If we're in user mode and not allowed to stay that way while walking then switch out of user mode
+    */
+   public void prepareForLocomotion()
+   {
+      if (enableUserPelvisControlDuringWalking.getBooleanValue())
+         return;
+
+      if(stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.USER))
+      {
+         //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
+         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+         requestState(centerOfMassHeightControlState.getStateEnum());
+      }
+   }
+
+   private void requestState(PelvisHeightControlMode state)
+   {
+      if (stateMachine.getCurrentStateEnum() != state)
+      {
+         requestedState.set(state);
+      }
    }
 
    public void initializeDesiredHeightToCurrent()
    {
-      centerOfMassTrajectoryGenerator.initializeDesiredHeightToCurrent();
-      coMHeightTimeDerivativesSmoother.reset();
+      stateMachine.getCurrentState().initializeDesiredHeightToCurrent();
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
-   {
-      centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-   }
-
+   /**
+    * checks that the command is valid and switches to user mode
+    * The controller will try to achieve the pelvis height regardless of the robot configuration
+    * @param command - only the linear z portion of this command is used
+    */
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command);
+      enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+      stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+
+      tempPose.setToZero(tempPosition.getReferenceFrame());
+      tempPose.setPosition(tempPosition);
+
+      if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+      {
+         requestState(pelvisHeightControlState.getStateEnum());
+         return;
+      }
+      PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
    }
 
+   /**
+    * switches to center of mass height controller, this is the standard height manager
+    * the height in this command will be adjusted based on the legs
+    * @param command
+    */
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command);
+      if(command.isEnableUserPelvisControl())
+      {
+         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+
+         tempPose.setToZero(tempPosition.getReferenceFrame());
+         tempPose.setPosition(tempPosition);
+
+         if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
+         {
+            requestState(pelvisHeightControlState.getStateEnum());
+            return;
+         }
+         PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
+         return;
+      }
+
+      centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+      requestState(centerOfMassHeightControlState.getStateEnum());
    }
 
+   /**
+    * set the desired height to walkingControllerParameters.nominalHeightAboveAnkle()
+    * @param trajectoryTime
+    */
    public void goHome(double trajectoryTime)
    {
-      centerOfMassTrajectoryGenerator.goHome(trajectoryTime);
+      stateMachine.getCurrentState().goHome(trajectoryTime);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handleStopAllTrajectoryCommand(command);
+      stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
    }
 
    public void setSupportLeg(RobotSide supportLeg)
    {
-      centerOfMassTrajectoryGenerator.setSupportLeg(supportLeg);
+      centerOfMassHeightControlState.setSupportLeg(supportLeg);
+   }
+
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   {
+      centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+   }
+
+   /**
+    * The Desired acceleration of the COM. User mode returns 0, while the center of mass height manager returns the action from the internal pd controller over the height
+    * @return
+    */
+   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+         FeetManager feetManager)
+   {
+      return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
    }
 
    public boolean hasBeenInitializedWithNextStep()
    {
-      return centerOfMassTrajectoryGenerator.hasBeenInitializedWithNextStep();
+      return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
    }
 
-   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesToPack, boolean isInDoubleSupport)
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      centerOfMassTrajectoryGenerator.solve(coMHeightPartialDerivativesToPack, isInDoubleSupport);
+      return stateMachine.getCurrentState().getFeedbackControlCommand();
    }
 
-   // Temporary objects to reduce garbage collection.
-   private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
-   private final FramePoint comPosition = new FramePoint();
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FrameVector2d comXYVelocity = new FrameVector2d();
-   private final FrameVector2d comXYAcceleration = new FrameVector2d();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
-   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
-   private final FramePoint pelvisPosition = new FramePoint();
-   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
-
-   private final Twist currentPelvisTwist = new Twist();
-
-   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
-         FeetManager feetManager)
+   public FeedbackControlCommandList createFeedbackControlTemplate()
    {
-      solve(coMHeightPartialDerivatives, isInDoubleSupport);
-
-      comPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
-      comPosition.changeFrame(worldFrame);
-      comVelocity.changeFrame(worldFrame);
-
-      double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
-
-      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (PelvisHeightControlMode mode : PelvisHeightControlMode.values())
       {
-         pelvisPosition.setToZero(pelvisFrame);
-         pelvisPosition.changeFrame(worldFrame);
-         zCurrent = pelvisPosition.getZ();
-         pelvis.getBodyFixedFrame().getTwistOfFrame(currentPelvisTwist);
-         currentPelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
+         PelvisAndCenterOfMassHeightControlState state = stateMachine.getState(mode);
+         if (state != null && state.getFeedbackControlCommand() != null)
+            ret.addCommand(state.getFeedbackControlCommand());
       }
+      return ret;
+   }
 
-      // TODO: use current omega0 instead of previous
-      comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
-      if (desiredICPVelocity.containsNaN())
-      {
-         System.err.println("Desired ICP velocity contains NaN");
-         comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
-      }
-      else
-      {
-         comXYAcceleration.setIncludingFrame(desiredICPVelocity);
-      }
-      comXYAcceleration.sub(comXYVelocity);
-      comXYAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
-
-      // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-      comPosition.getFramePoint2d(comPositionAsFramePoint2d);
-      comXYTimeDerivatives.setCoMXYPosition(comPositionAsFramePoint2d);
-      comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
-      comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
-
-      coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
-
-      comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
-
-      //    correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing, false, false);
-
-      //    comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      //    desiredCoMHeightBeforeSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
-      //    desiredCoMHeightVelocityBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
-      //    desiredCoMHeightAccelerationBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
-
-      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-
-      if (feetManager != null)
-         feetManager.correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityCorrected.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationCorrected.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-
-      double zDesired = desiredCenterOfMassHeightPoint.getZ();
-      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
-      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
-
-      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
-
-      // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
-      if (isRecoveringFromPush)
-         zddDesired = Math.min(0.0, zddDesired);
-
-      double epsilon = 1e-12;
-      zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
-
-      return zddDesired;
+   /**
+    * The center of mass height manager can control the pelvis in taskspace or the height of the Center of mass. When controlling
+    * the pelvis height we don't need to control the height with a momentum command. If we are using the center of mass height control state
+    * we do. When used in conjunction with the balance manager this will enable the Z component of the MomentumRateCommand that is sent
+    * to the controller core
+    * @return
+    */
+   public boolean getControlHeightWithMomentum()
+   {
+      // GW: revert this from returning true always for now to fix a test.
+      return stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 }

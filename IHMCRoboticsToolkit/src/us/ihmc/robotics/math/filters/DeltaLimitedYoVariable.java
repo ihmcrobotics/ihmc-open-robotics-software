@@ -1,29 +1,29 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class DeltaLimitedYoVariable extends DoubleYoVariable
+public class DeltaLimitedYoVariable extends YoDouble
 {
-   private final DoubleYoVariable maxDelta;
-   private final DoubleYoVariable actual;
-   private final DoubleYoVariable desired;
-   private final BooleanYoVariable isLimitingActive;
+   private final YoDouble maxDelta;
+   private final YoDouble actual;
+   private final YoDouble desired;
+   private final YoBoolean isLimitingActive;
 
    public DeltaLimitedYoVariable(String name, YoVariableRegistry registry, double maxDelta)
    {
       super(name, registry);
 
-      this.maxDelta = new DoubleYoVariable(name + "MaxAllowedDelta", registry);
+      this.maxDelta = new YoDouble(name + "MaxAllowedDelta", registry);
       this.maxDelta.set(Math.abs(maxDelta));
-      this.actual = new DoubleYoVariable(name + "Actual", registry);
-      this.desired = new DoubleYoVariable(name + "Desired", registry);
-      this.isLimitingActive = new BooleanYoVariable(name + "IsLimitingActive", registry);
+      this.actual = new YoDouble(name + "Actual", registry);
+      this.desired = new YoDouble(name + "Desired", registry);
+      this.isLimitingActive = new YoBoolean(name + "IsLimitingActive", registry);
       isLimitingActive.set(false);
    }
 

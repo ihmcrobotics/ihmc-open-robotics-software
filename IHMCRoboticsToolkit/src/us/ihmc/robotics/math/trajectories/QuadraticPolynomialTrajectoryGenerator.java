@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class QuadraticPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator

@@ -1,16 +1,15 @@
 package us.ihmc.simulationConstructionSetTools.util.gui;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoVariableTogglerOutlet
 {
-   private final EnumYoVariable<ToggleMode> toggleMode;
+   private final YoEnum<ToggleMode> toggleMode;
 
    public YoVariableTogglerOutlet(String name, YoVariableRegistry parent)
    {
-      toggleMode = new EnumYoVariable<ToggleMode>(name, parent, ToggleMode.class);
+      toggleMode = new YoEnum<ToggleMode>(name, parent, ToggleMode.class);
       toggleMode.set(ToggleMode.NO_CHANGE);
    }
 

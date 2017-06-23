@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFactory
@@ -23,4 +24,7 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
 
 	public DefaultArmConfigurations getDefaultArmConfigurations();
+	
+   public DRCRobotSensorInformation getSensorInformation();
+	
 }

@@ -1,51 +1,50 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 
-
-public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class ElasticityCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final DoubleYoVariable stiffness;
-   private final DoubleYoVariable rawJointPosition;
-   private final DoubleYoVariable jointTau;
-   private final DoubleYoVariable maximumDeflection;
+   private final YoDouble stiffness;
+   private final YoDouble rawJointPosition;
+   private final YoDouble jointTau;
+   private final YoDouble maximumDeflection;
 
    public ElasticityCompensatorYoVariable(String name, YoVariableRegistry registry)
    {
       this(name, null, null, null, null, registry);
    }
 
-   public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, YoDouble stiffness, YoVariableRegistry registry)
    {
       this(name, stiffness, null, null, null, registry);
    }
 
-   public ElasticityCompensatorYoVariable(String name, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, YoDouble rawJointPosition, YoDouble jointTau, YoVariableRegistry registry)
    {
       this(name, null, null, rawJointPosition, jointTau, registry);
    }
 
-   public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, YoDouble stiffness, YoDouble rawJointPosition, YoDouble jointTau, YoVariableRegistry registry)
    {
       this(name, stiffness, null, rawJointPosition, jointTau, registry);
    }
 
-   public ElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable maximumDeflection, DoubleYoVariable rawJointPosition, DoubleYoVariable jointTau, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, YoDouble stiffness, YoDouble maximumDeflection, YoDouble rawJointPosition, YoDouble jointTau, YoVariableRegistry registry)
    {
       super(name, registry);
 
       if (maximumDeflection == null)
       {
-         maximumDeflection = new DoubleYoVariable(name + "MaxDeflection", registry);
+         maximumDeflection = new YoDouble(name + "MaxDeflection", registry);
          maximumDeflection.set(0.1);
       }
       this.maximumDeflection = maximumDeflection;
       
       if (stiffness == null)
-         stiffness = new DoubleYoVariable(name + "Stiffness", registry);
+         stiffness = new YoDouble(name + "Stiffness", registry);
       this.stiffness = stiffness;
 
       this.rawJointPosition = rawJointPosition;

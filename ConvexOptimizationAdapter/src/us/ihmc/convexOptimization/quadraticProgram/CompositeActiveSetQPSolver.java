@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class CompositeActiveSetQPSolver extends ConstrainedQPSolver
@@ -17,8 +17,8 @@ public class CompositeActiveSetQPSolver extends ConstrainedQPSolver
    //   ConstrainedQPSolver fullSolver = new OASESConstrainedQPSolver(registry);
    boolean[] linearInequalityActiveSet;
 
-   LongYoVariable fullSolverCount = new LongYoVariable("fullSolverCount", registry);
-   LongYoVariable simpleSolverIterations = new LongYoVariable("simpleSolverIterations", registry);
+   YoLong fullSolverCount = new YoLong("fullSolverCount", registry);
+   YoLong simpleSolverIterations = new YoLong("simpleSolverIterations", registry);
 
    public CompositeActiveSetQPSolver(YoVariableRegistry parentRegistry)
    {

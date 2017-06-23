@@ -8,8 +8,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -23,8 +23,8 @@ public class InverseDynamicsQPBoundCalculator
    private final HashMap<OneDoFJoint, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
    private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
 
-   private final HashMap<OneDoFJoint, DoubleYoVariable> filterAlphas = new HashMap<>();
-   private final HashMap<OneDoFJoint, DoubleYoVariable> velocityGains = new HashMap<>();
+   private final HashMap<OneDoFJoint, YoDouble> filterAlphas = new HashMap<>();
+   private final HashMap<OneDoFJoint, YoDouble> velocityGains = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
 
@@ -57,7 +57,7 @@ public class InverseDynamicsQPBoundCalculator
          jointLimitTypes.put(joint, JointLimitEnforcement.DEFAULT);
          jointLimitParameters.put(joint, new JointLimitParameters());
 
-         DoubleYoVariable filterAlpha = new DoubleYoVariable("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
+         YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
          filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
          AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
          AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
@@ -65,7 +65,7 @@ public class InverseDynamicsQPBoundCalculator
          filteredLowerLimits.put(joint, filteredLowerLimit);
          filteredUpperLimits.put(joint, filteredUpperLimit);
          
-         DoubleYoVariable velocityGain = new DoubleYoVariable("joint_limit_velocity_gain_" + joint.getName(), registry);
+         YoDouble velocityGain = new YoDouble("joint_limit_velocity_gain_" + joint.getName(), registry);
          velocityGains.put(joint, velocityGain);
       }
 

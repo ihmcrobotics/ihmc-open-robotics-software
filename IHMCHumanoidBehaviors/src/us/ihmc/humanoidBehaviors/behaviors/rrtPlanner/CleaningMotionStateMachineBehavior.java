@@ -19,7 +19,7 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -35,7 +35,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory;
    
-   DoubleYoVariable yoTime;
+   YoDouble yoTime;
    FullHumanoidRobotModel fullRobotModel;
    WholeBodyControllerParameters wholeBodyControllerParameters;
       
@@ -44,7 +44,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, DONE
    }
    
-   public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
+   public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime,
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("CleaningMotionStateMachineBehavior", CleaningMotionState.class, yoTime, communicationBridge);

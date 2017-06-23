@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.Box3d;
@@ -52,7 +52,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
    // graphics
    private final EnumMap<FaceName, Graphics3DInstruction> faceGraphics = new EnumMap<FaceName, Graphics3DInstruction>(FaceName.class);
-   private final EnumYoVariable<Direction> selectedDirection = EnumYoVariable.create("selectedDirection", "", Direction.class, yoVariableRegistry, true);
+   private final YoEnum<Direction> selectedDirection = YoEnum.create("selectedDirection", "", Direction.class, yoVariableRegistry, true);
    private static final Color defaultColor = Color.BLUE;
    private static final Color selectedColor = Color.RED;
 

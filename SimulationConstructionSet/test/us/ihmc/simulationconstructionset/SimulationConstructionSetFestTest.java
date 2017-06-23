@@ -12,10 +12,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.tools.thread.ThreadTools;
@@ -43,9 +43,9 @@ public class SimulationConstructionSetFestTest
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       YoVariableRegistry registryOne = new YoVariableRegistry("RegistryOne");
-      EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", registryOne, Axis.class);
+      YoEnum<Axis> enumForTests = new YoEnum<Axis>("enumForTests", registryOne, Axis.class);
       YoVariableRegistry registryTwo = new YoVariableRegistry("RegistryTwo");
-      BooleanYoVariable booleanForTests = new BooleanYoVariable("booleanForTests", registryTwo);
+      YoBoolean booleanForTests = new YoBoolean("booleanForTests", registryTwo);
       registryOne.addChild(registryTwo);
       scs.addYoVariableRegistry(registryOne);
 
@@ -128,7 +128,7 @@ public class SimulationConstructionSetFestTest
       testFixture.middleClickInNthGraph(2);
 
       testFixture.selectVariableAndSetValueInSearchTab("q_z", 1.31);
-      DoubleYoVariable q_z = (DoubleYoVariable) scs.getVariable("q_z");
+      YoDouble q_z = (YoDouble) scs.getVariable("q_z");
       assertEquals(1.31, q_z.getDoubleValue(), 1e-9);
 
       // Simulate and replay

@@ -7,7 +7,7 @@ import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 
 public class BCF2000Receiver implements Receiver
 {

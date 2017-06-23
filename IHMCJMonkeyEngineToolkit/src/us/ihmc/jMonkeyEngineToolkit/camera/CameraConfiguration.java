@@ -27,7 +27,6 @@ public class CameraConfiguration
    public double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
    // protected double clipNear = 0.1, clipFar = 100.0;
-   // protected YoVariable track_x_var, track_y_var, track_z_var, dolly_x_var, dolly_y_var, dolly_z_var;
 
    public CameraConfiguration(String name)
    {

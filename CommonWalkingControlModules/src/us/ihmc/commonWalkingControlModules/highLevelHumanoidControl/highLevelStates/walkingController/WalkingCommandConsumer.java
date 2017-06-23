@@ -44,9 +44,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,18 +56,18 @@ public class WalkingCommandConsumer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isAutomaticManipulationAbortEnabled = new BooleanYoVariable("isAutomaticManipulationAbortEnabled", registry);
-   private final BooleanYoVariable hasManipulationBeenAborted = new BooleanYoVariable("hasManipulationBeenAborted", registry);
-   private final DoubleYoVariable icpErrorThresholdToAbortManipulation = new DoubleYoVariable("icpErrorThresholdToAbortManipulation", registry);
-   private final DoubleYoVariable minimumDurationBetweenTwoManipulationAborts = new DoubleYoVariable("minimumDurationBetweenTwoManipulationAborts", registry);
-   private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
-   private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
-   private final DoubleYoVariable allowManipulationAbortAfterThisTime = new DoubleYoVariable("allowManipulationAbortAfterThisTime", registry);
+   private final YoBoolean isAutomaticManipulationAbortEnabled = new YoBoolean("isAutomaticManipulationAbortEnabled", registry);
+   private final YoBoolean hasManipulationBeenAborted = new YoBoolean("hasManipulationBeenAborted", registry);
+   private final YoDouble icpErrorThresholdToAbortManipulation = new YoDouble("icpErrorThresholdToAbortManipulation", registry);
+   private final YoDouble minimumDurationBetweenTwoManipulationAborts = new YoDouble("minimumDurationBetweenTwoManipulationAborts", registry);
+   private final YoDouble timeOfLastManipulationAbortRequest = new YoDouble("timeOfLastManipulationAbortRequest", registry);
+   private final YoDouble manipulationIgnoreInputsDurationAfterAbort = new YoDouble("manipulationIgnoreInputsDurationAfterAbort", registry);
+   private final YoDouble allowManipulationAbortAfterThisTime = new YoDouble("allowManipulationAbortAfterThisTime", registry);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
 
-   private final CommandInputManager commandInputManager;
+   private final CommandConsumerWithDelayBuffers commandConsumerWithDelayBuffers;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final PelvisOrientationManager pelvisOrientationManager;
@@ -85,7 +85,7 @@ public class WalkingCommandConsumer
       this.walkingMessageHandler = walkingMessageHandler;
       yoTime = controllerToolbox.getYoTime();
 
-      this.commandInputManager = commandInputManager;
+      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
       this.statusMessageOutputManager = statusMessageOutputManager;
 
       RigidBody head = controllerToolbox.getFullRobotModel().getHead();
@@ -127,95 +127,104 @@ public class WalkingCommandConsumer
    {
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
+   
+   public void update()
+   {
+      commandConsumerWithDelayBuffers.update();
+   }
 
    public void consumeHeadCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
-         headManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
+         headManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(NeckTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckTrajectoryCommand.class))
       {
-         headManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(NeckTrajectoryCommand.class));
+         headManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckTrajectoryCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
       {
-         headManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
+         headManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
-         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandInputManager.pollNewestCommand(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
          headManager.handleHybridTrajectoryCommand(command.getTaskspaceTrajectoryCommand(), command.getJointspaceTrajectoryCommand());
       }
    }
 
    public void consumeChestCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
-         chestManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
+         chestManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
-         chestManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
+         chestManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
       {
-         chestManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(SpineDesiredAccelerationCommand.class));
+         chestManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class));
       }
-      if (commandInputManager.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
-         ChestHybridJointspaceTaskspaceTrajectoryCommand command = commandInputManager.pollNewestCommand(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+         ChestHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
          chestManager.handleHybridTrajectoryCommand(command.getTaskspaceTrajectoryCommand(), command.getJointspaceTrajectoryCommand());
       }
    }
 
    public void consumePelvisHeightCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
       {
-         comHeightManager.handlePelvisHeightTrajectoryCommand(commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
+         comHeightManager.handlePelvisHeightTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
       }
    }
 
    public void consumeGoHomeMessages()
    {
-      if (!commandInputManager.isNewCommandAvailable(GoHomeCommand.class))
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(GoHomeCommand.class))
          return;
-
-      GoHomeCommand command = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
-
-      for (RobotSide robotSide : RobotSide.values)
+      
+      List<GoHomeCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(GoHomeCommand.class);
+      for(int i = 0; i < commands.size(); i++)
       {
-         if (command.getRequest(robotSide, BodyPart.ARM))
-            handManagers.get(robotSide).goHome(command.getTrajectoryTime());
-      }
-
-      if (command.getRequest(BodyPart.PELVIS))
-      {
-         pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
-         balanceManager.goHome();
-         comHeightManager.goHome(command.getTrajectoryTime());
-      }
-
-      if (command.getRequest(BodyPart.CHEST))
-      {
-         chestManager.goHome(command.getTrajectoryTime());
+         GoHomeCommand command = commands.get(i);
+         
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (command.getRequest(robotSide, BodyPart.ARM))
+               handManagers.get(robotSide).goHome(command.getTrajectoryTime());
+         }
+         
+         if (command.getRequest(BodyPart.PELVIS))
+         {
+            pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
+            balanceManager.goHome();
+            comHeightManager.goHome(command.getTrajectoryTime());
+         }
+         
+         if (command.getRequest(BodyPart.CHEST))
+         {
+            chestManager.goHome(command.getTrajectoryTime());
+         }
       }
    }
 
    public void consumePelvisCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
-      if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
       {
-         PelvisOrientationTrajectoryCommand newestCommand = commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
+         PelvisOrientationTrajectoryCommand newestCommand = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
          if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
             pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(newestCommand);
       }
 
-      if (commandInputManager.isNewCommandAvailable(PelvisTrajectoryCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
-         PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
+         PelvisTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisTrajectoryCommand.class);
          if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
          {
             if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
@@ -230,19 +239,19 @@ public class WalkingCommandConsumer
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
-         commandInputManager.flushCommands(HandTrajectoryCommand.class);
-         commandInputManager.flushCommands(ArmTrajectoryCommand.class);
-         commandInputManager.flushCommands(ArmDesiredAccelerationsCommand.class);
-         commandInputManager.flushCommands(HandComplianceControlParametersCommand.class);
-         commandInputManager.flushCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.flushCommands(HandTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.flushCommands(ArmTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.flushCommands(ArmDesiredAccelerationsCommand.class);
+         commandConsumerWithDelayBuffers.flushCommands(HandComplianceControlParametersCommand.class);
+         commandConsumerWithDelayBuffers.flushCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
          return;
       }
 
-      List<HandTrajectoryCommand> handTrajectoryCommands = commandInputManager.pollNewCommands(HandTrajectoryCommand.class);
-      List<ArmTrajectoryCommand> armTrajectoryCommands = commandInputManager.pollNewCommands(ArmTrajectoryCommand.class);
-      List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class);
-      List<HandComplianceControlParametersCommand> handComplianceCommands = commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class);
-      List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandInputManager.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      List<HandTrajectoryCommand> handTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandTrajectoryCommand.class);
+      List<ArmTrajectoryCommand> armTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmTrajectoryCommand.class);
+      List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
+      List<HandComplianceControlParametersCommand> handComplianceCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandComplianceControlParametersCommand.class);
+      List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
 
       if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
       {
@@ -288,9 +297,9 @@ public class WalkingCommandConsumer
       if (!currentState.isStateSafeToConsumeManipulationCommands())
          return;
 
-      if (commandInputManager.isNewCommandAvailable(AutomaticManipulationAbortCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AutomaticManipulationAbortCommand.class))
       {
-         AutomaticManipulationAbortCommand message = commandInputManager.pollNewestCommand(AutomaticManipulationAbortCommand.class);
+         AutomaticManipulationAbortCommand message = commandConsumerWithDelayBuffers.pollNewestCommand(AutomaticManipulationAbortCommand.class);
          isAutomaticManipulationAbortEnabled.set(message.isEnable());
       }
 
@@ -329,32 +338,42 @@ public class WalkingCommandConsumer
 
    public void consumeFootLoadBearingCommands(WalkingState currentState)
    {
-      if (!commandInputManager.isNewCommandAvailable(FootLoadBearingCommand.class))
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(FootLoadBearingCommand.class))
          return;
 
-      FootLoadBearingCommand command = commandInputManager.pollAndCompileCommands(FootLoadBearingCommand.class);
-      currentState.handleFootLoadBearingCommand(command);
+      List<FootLoadBearingCommand> footLoadBearingCommands = commandConsumerWithDelayBuffers.pollNewCommands(FootLoadBearingCommand.class);
+      for (int i = 0; i < footLoadBearingCommands.size(); i++)
+      {
+         FootLoadBearingCommand command = footLoadBearingCommands.get(i);
+         currentState.handleFootLoadBearingCommand(command);
+      }
    }
 
    public void consumeLoadBearingCommands()
    {
-      List<HandLoadBearingCommand> handLoadBearingCommands = commandInputManager.pollNewCommands(HandLoadBearingCommand.class);
+      List<HandLoadBearingCommand> handLoadBearingCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandLoadBearingCommand.class);
 
       for (int i = 0; i < handLoadBearingCommands.size(); i++)
       {
          HandLoadBearingCommand command = handLoadBearingCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).handleLoadBearingCommand(command);
+         {
+            ArmTrajectoryCommand armTrajectoryCommand = null;
+            if (command.isUseJointspaceCommand())
+               armTrajectoryCommand = command.getArmTrajectoryCommand();
+
+            handManagers.get(robotSide).handleLoadBearingCommand(command, armTrajectoryCommand);
+         }
       }
    }
 
    public void consumeStopAllTrajectoryCommands()
    {
-      if (!commandInputManager.isNewCommandAvailable(StopAllTrajectoryCommand.class))
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(StopAllTrajectoryCommand.class))
          return;
 
-      StopAllTrajectoryCommand command = commandInputManager.pollNewestCommand(StopAllTrajectoryCommand.class);
+      StopAllTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(StopAllTrajectoryCommand.class);
       for (RobotSide robotSide : RobotSide.values)
       {
          if (handManagers.get(robotSide) != null)
@@ -369,25 +388,25 @@ public class WalkingCommandConsumer
 
    public void consumeFootCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
-         walkingMessageHandler.handleFootTrajectoryCommand(commandInputManager.pollNewCommands(FootTrajectoryCommand.class));
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootTrajectoryCommand.class))
+         walkingMessageHandler.handleFootTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(FootTrajectoryCommand.class));
 
-      if (commandInputManager.isNewCommandAvailable(PauseWalkingCommand.class))
-         walkingMessageHandler.handlePauseWalkingCommand(commandInputManager.pollNewestCommand(PauseWalkingCommand.class));
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
 
-      if (commandInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class))
       {
-         walkingMessageHandler.handleFootstepDataListCommand(commandInputManager.pollNewestCommand(FootstepDataListCommand.class));
+         walkingMessageHandler.handleFootstepDataListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(FootstepDataListCommand.class));
       }
 
-      if (commandInputManager.isNewCommandAvailable(AdjustFootstepCommand.class))
-         walkingMessageHandler.handleAdjustFootstepCommand(commandInputManager.pollNewestCommand(AdjustFootstepCommand.class));
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AdjustFootstepCommand.class))
+         walkingMessageHandler.handleAdjustFootstepCommand(commandConsumerWithDelayBuffers.pollNewestCommand(AdjustFootstepCommand.class));
    }
 
-   public void consumeAbortWalkingCommands(BooleanYoVariable abortWalkingRequested)
+   public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)
    {
-      if (!commandInputManager.isNewCommandAvailable(AbortWalkingCommand.class))
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(AbortWalkingCommand.class))
          return;
-      abortWalkingRequested.set(commandInputManager.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
+      abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 }

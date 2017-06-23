@@ -24,9 +24,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -53,15 +53,15 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
    private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<EnumYoVariable<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<YoEnum<FootstepStatus.Status>> latestFootstepStatusEnum;
    private final SideDependentList<YoFramePose> actualFootStatusPoses;
    private final SideDependentList<YoFramePose> desiredFootStatusPoses;
 
-   private final EnumYoVariable <RobotSide> nextSideToSwing;
-   private final EnumYoVariable<RobotSide> currentlySwingingFoot;
+   private final YoEnum<RobotSide> nextSideToSwing;
+   private final YoEnum<RobotSide> currentlySwingingFoot;
 
-   private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
-   private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
+   private final YoInteger planarRegionsListCount = new YoInteger(prefix + "PlanarRegionsListCount", registry);
+   private final YoDouble headPitchToFindFucdicial = new YoDouble(prefix + "HeadPitchToFindFucdicial", registry);
 
    private final YoFramePose footstepPlannerInitialStancePose;
 
@@ -79,8 +79,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
 
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
+   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
 
    public FootStepPlannerToLocationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
    {
@@ -96,16 +96,16 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
       headPitchToFindFucdicial.set(1.0);
 
-      nextSideToSwing = new EnumYoVariable<RobotSide>(prefix + "nextSideToSwing", registry, RobotSide.class, true);
-      currentlySwingingFoot = new EnumYoVariable<RobotSide>(prefix + "currentlySwingingFoot", registry, RobotSide.class, true);
+      nextSideToSwing = new YoEnum<RobotSide>(prefix + "nextSideToSwing", registry, RobotSide.class, true);
+      currentlySwingingFoot = new YoEnum<RobotSide>(prefix + "currentlySwingingFoot", registry, RobotSide.class, true);
       footstepPlannerInitialStancePose = new YoFramePose(prefix + "footstepPlannerInitialStancePose", ReferenceFrame.getWorldFrame(), registry);
 
       footstepSentTimer = new Stopwatch();
       footstepSentTimer.start();
 
       latestFootstepStatus = new SideDependentList<>();
-      EnumYoVariable<FootstepStatus.Status> leftFootstepStatus = new EnumYoVariable<FootstepStatus.Status>(prefix + "leftFootstepStatus", registry, FootstepStatus.Status.class);
-      EnumYoVariable<FootstepStatus.Status> rightFootstepStatus = new EnumYoVariable<FootstepStatus.Status>(prefix + "rightFootstepStatus", registry, FootstepStatus.Status.class);
+      YoEnum<FootstepStatus.Status> leftFootstepStatus = new YoEnum<FootstepStatus.Status>(prefix + "leftFootstepStatus", registry, FootstepStatus.Status.class);
+      YoEnum<FootstepStatus.Status> rightFootstepStatus = new YoEnum<FootstepStatus.Status>(prefix + "rightFootstepStatus", registry, FootstepStatus.Status.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
       YoFramePose desiredLeftFootstepStatusPose = new YoFramePose(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);

@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
@@ -184,7 +184,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          @Override
          public void run()
          {
-            ThreadTools.sleep(Conversions.secondsToMilliseconds(180));
+            ThreadTools.sleep((long) Conversions.secondsToMilliseconds(180));
             timeNotElapsed.set(false);
          }
       };
@@ -207,10 +207,10 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          iteration++;
       }
 
-      controllerCommunicatorClient.close();
-      controllerCommunicatorServer.close();
-      rosAPI_communicator_client.close();
-      rosAPI_communicator_server.close();
+      controllerCommunicatorClient.disconnect();
+      controllerCommunicatorServer.disconnect();
+      rosAPI_communicator_client.disconnect();
+      rosAPI_communicator_server.disconnect();
    }
 
    private AvatarSimulation avatarSimulation;
@@ -279,8 +279,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          }
       }
 
-      packetCommunicatorClient.close();
-      packetCommunicatorServer.close();
+      packetCommunicatorClient.disconnect();
+      packetCommunicatorServer.disconnect();
    }
 
    private Packet createRandomPacket(Class<? extends Packet> clazz, Random random)

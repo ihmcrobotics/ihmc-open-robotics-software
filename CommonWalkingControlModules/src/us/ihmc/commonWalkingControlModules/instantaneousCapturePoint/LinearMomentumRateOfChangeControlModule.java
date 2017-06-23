@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -12,9 +13,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -41,8 +42,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final YoFrameVector angularMomentumRateWeight;
    protected final YoFrameVector linearMomentumRateWeight;
 
-   protected final EnumYoVariable<RobotSide> supportLegPreviousTick;
-   protected final BooleanYoVariable minimizeAngularMomentumRateZ;
+   protected final YoEnum<RobotSide> supportLegPreviousTick;
+   protected final YoBoolean minimizeAngularMomentumRateZ;
 
    protected final YoFrameVector controlledCoMAcceleration;
 
@@ -74,7 +75,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
-   protected final BooleanYoVariable desiredCMPinSafeArea;
+   protected final YoBoolean desiredCMPinSafeArea;
 
    private boolean controlHeightWithMomentum;
 
@@ -88,7 +89,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected RobotSide supportSide = null;
    protected RobotSide transferToSide = null;
 
-   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, 
+   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ,
          double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -114,10 +115,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
-      supportLegPreviousTick = EnumYoVariable.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
-      minimizeAngularMomentumRateZ = new BooleanYoVariable(namePrefix + "MinimizeAngularMomentumRateZ", registry);
+      supportLegPreviousTick = YoEnum.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
+      minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
+      desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);
 
       yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
       yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
@@ -272,6 +273,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       return groundReactionForce;
    }
 
+   private boolean desiredCMPcontainedNaN = false;
+
    public void compute(FramePoint2d desiredCMPPreviousValue, FramePoint2d desiredCMPToPack)
    {
       computeCMPInternal(desiredCMPPreviousValue);
@@ -280,8 +283,14 @@ public abstract class LinearMomentumRateOfChangeControlModule
       desiredCMP.changeFrame(worldFrame);
       if (desiredCMP.containsNaN())
       {
+         if (!desiredCMPcontainedNaN)
+            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
          desiredCMP.set(capturePoint);
-         System.err.println(getClass().getSimpleName() + ": desiredCMP contained NaN. Set it to capturePoint.");
+         desiredCMPcontainedNaN = true;
+      }
+      else
+      {
+         desiredCMPcontainedNaN = false;
       }
 
       desiredCMPToPack.setIncludingFrame(desiredCMP);

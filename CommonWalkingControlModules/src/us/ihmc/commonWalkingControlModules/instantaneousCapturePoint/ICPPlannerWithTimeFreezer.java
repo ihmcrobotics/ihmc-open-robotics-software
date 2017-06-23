@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -18,15 +18,15 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final String namePrefix = "icpPlanner";
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final BooleanYoVariable doTimeFreezing;
-   private final BooleanYoVariable isTimeBeingFrozen;
-   private final DoubleYoVariable timeDelay;
-   private final DoubleYoVariable capturePointPositionError;
-   private final DoubleYoVariable distanceToFreezeLine;
-   private final DoubleYoVariable previousTime;
-   private final DoubleYoVariable freezeTimeFactor;
-   private final DoubleYoVariable maxCapturePointErrorAllowedToBeginSwingPhase;
-   private final DoubleYoVariable maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
+   private final YoBoolean doTimeFreezing;
+   private final YoBoolean isTimeBeingFrozen;
+   private final YoDouble timeDelay;
+   private final YoDouble capturePointPositionError;
+   private final YoDouble distanceToFreezeLine;
+   private final YoDouble previousTime;
+   private final YoDouble freezeTimeFactor;
+   private final YoDouble maxCapturePointErrorAllowedToBeginSwingPhase;
+   private final YoDouble maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
 
    private final FramePoint2d tmpCapturePointPosition;
    private final FrameVector2d tmpCapturePointVelocity;
@@ -37,15 +37,15 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
-      this.timeDelay = new DoubleYoVariable(namePrefix + "TimeDelayFromFreezer", registry);
-      this.capturePointPositionError = new DoubleYoVariable(namePrefix + "CapturePointPositionError", registry);
-      this.distanceToFreezeLine = new DoubleYoVariable(namePrefix + "DistanceToFreezeLine", registry);
-      this.freezeTimeFactor = new DoubleYoVariable(namePrefix + "FreezeTimeFactor", registry);
-      this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable(namePrefix + "MaxCapturePointErrorAllowedToBeginSwingPhase", registry);
-      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable(namePrefix + "MaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
-      this.previousTime = new DoubleYoVariable(namePrefix + "PreviousTime", registry);
-      this.doTimeFreezing = new BooleanYoVariable(namePrefix + "DoTimeFreezing", registry);
-      this.isTimeBeingFrozen = new BooleanYoVariable(namePrefix + "IsTimeBeingFrozen", registry);
+      this.timeDelay = new YoDouble(namePrefix + "TimeDelayFromFreezer", registry);
+      this.capturePointPositionError = new YoDouble(namePrefix + "CapturePointPositionError", registry);
+      this.distanceToFreezeLine = new YoDouble(namePrefix + "DistanceToFreezeLine", registry);
+      this.freezeTimeFactor = new YoDouble(namePrefix + "FreezeTimeFactor", registry);
+      this.maxCapturePointErrorAllowedToBeginSwingPhase = new YoDouble(namePrefix + "MaxCapturePointErrorAllowedToBeginSwingPhase", registry);
+      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new YoDouble(namePrefix + "MaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
+      this.previousTime = new YoDouble(namePrefix + "PreviousTime", registry);
+      this.doTimeFreezing = new YoBoolean(namePrefix + "DoTimeFreezing", registry);
+      this.isTimeBeingFrozen = new YoBoolean(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
 

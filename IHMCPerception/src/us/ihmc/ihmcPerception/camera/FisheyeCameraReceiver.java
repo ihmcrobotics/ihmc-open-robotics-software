@@ -2,14 +2,14 @@ package us.ihmc.ihmcPerception.camera;
 
 import java.awt.image.BufferedImage;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -67,7 +67,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       }
 
       @Override
-      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation,
+      public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
             IntrinsicParameters intrinsicParameters)
       {
          if(DEBUG)
@@ -78,7 +78,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       }
 
       @Override
-      public void addNetStateListener(NetStateListener compressedVideoDataServer)
+      public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
       {
          packetCommunicator.attachStateListener(compressedVideoDataServer);
       }

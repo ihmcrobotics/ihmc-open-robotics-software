@@ -6,38 +6,29 @@ import java.util.Arrays;
 
 import javax.swing.JComboBox;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
-import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlLowLevelController;
 
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
 
-   private final ValkyrieSliderBoardType valkyrieSliderBoardType;
-   private final ValkyrieRobotModel valkyrieRobotModel;
-
-   public RemoteValkyrieVisualizer(ValkyrieSliderBoardType valkyrieSliderBoardType)
+   public RemoteValkyrieVisualizer()
    {
-      this.valkyrieSliderBoardType = valkyrieSliderBoardType;
-
       String host = NetworkParameters.getHost(NetworkParameterKeys.logger);
       System.out.println("Connecting to host " + host);
-      valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.setDisplayOneInNPackets(3);
@@ -52,17 +43,18 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    public void starting(final SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
       // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
-      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
+      createSliderBoard(scs, registry);
 
-      final EnumYoVariable<?> requestLowlLevelControlMode = (EnumYoVariable<?>) scs.getVariable(ValkyrieRosControlLowLevelController.class.getSimpleName(), "requestedLowLevelControlMode");
+      final YoEnum<?> requestLowlLevelControlMode = (YoEnum<?>) scs.getVariable(ValkyrieRosControlLowLevelController.class.getSimpleName(),
+                                                                                                "requestedLowLevelControlMode");
 
       final String[] enumValuesAsString = requestLowlLevelControlMode.getEnumValuesAsString();
-      for (int i =0; i < enumValuesAsString.length; i++)
+      for (int i = 0; i < enumValuesAsString.length; i++)
       {
          enumValuesAsString[i] = enumValuesAsString[i].replaceAll("_", " _");
          enumValuesAsString[i] = FormattingTools.underscoredToCamelCase(enumValuesAsString[i], true);
       }
-      final String[] comboBoxValues = new String[enumValuesAsString.length  + 1];
+      final String[] comboBoxValues = new String[enumValuesAsString.length + 1];
       System.arraycopy(enumValuesAsString, 0, comboBoxValues, 1, enumValuesAsString.length);
       comboBoxValues[0] = "Low-Level Control Mode";
       System.out.println(Arrays.deepToString(enumValuesAsString));
@@ -97,8 +89,17 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scs.addComboBox(requestControlModeComboBox);
    }
 
+   private void createSliderBoard(final SimulationConstructionSet scs, YoVariableRegistry registry)
+   {
+      SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
+      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
+      sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setSlider(2, "desiredICPOffsetY", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
+   }
+
    public static void main(String[] args)
    {
-      new RemoteValkyrieWalkingVisualizer();
+      new RemoteValkyrieVisualizer();
    }
 }

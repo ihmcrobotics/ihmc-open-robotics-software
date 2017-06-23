@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointAccelerationIntegrationCalculator
@@ -28,10 +28,10 @@ public class JointAccelerationIntegrationCalculator
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxVelocity = new TDoubleArrayList();
 
-   private final DoubleYoVariable defaultAlphaPositionIntegration = new DoubleYoVariable("defaultAlphaPositionIntegration", registry);
-   private final DoubleYoVariable defaultAlphaVelocityIntegration = new DoubleYoVariable("defaultAlphaVelocityIntegration", registry);
-   private final DoubleYoVariable defaultIntegrationMaxVelocity = new DoubleYoVariable("defaultIntegrationMaxVelocity", registry);
-   private final DoubleYoVariable defaultIntegrationMaxPositionError = new DoubleYoVariable("defaultIntegrationMaxPositionError", registry);
+   private final YoDouble defaultAlphaPositionIntegration = new YoDouble("defaultAlphaPositionIntegration", registry);
+   private final YoDouble defaultAlphaVelocityIntegration = new YoDouble("defaultAlphaVelocityIntegration", registry);
+   private final YoDouble defaultIntegrationMaxVelocity = new YoDouble("defaultIntegrationMaxVelocity", registry);
+   private final YoDouble defaultIntegrationMaxPositionError = new YoDouble("defaultIntegrationMaxPositionError", registry);
 
    private final double controlDT;
 

@@ -45,8 +45,9 @@ dependencies {
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     

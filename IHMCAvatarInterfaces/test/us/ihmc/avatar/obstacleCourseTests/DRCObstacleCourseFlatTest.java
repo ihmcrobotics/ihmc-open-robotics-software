@@ -15,6 +15,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -31,8 +33,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -138,7 +142,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
+      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -288,7 +292,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -389,7 +393,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -500,7 +504,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
@@ -943,7 +947,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
-      final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
+      FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
@@ -1216,5 +1221,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
 
-   protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
+   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullRobotModel fullRobotModel)
+   {
+      String pelvisName = fullRobotModel.getPelvis().getName();
+      String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();
+      String varName = YoFrameVariableNameTools.createZName(namePrefix, "");
+      return (YoDouble) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
+   }
 }

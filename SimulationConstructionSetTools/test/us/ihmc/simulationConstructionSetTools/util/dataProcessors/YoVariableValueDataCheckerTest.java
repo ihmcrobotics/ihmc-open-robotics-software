@@ -10,8 +10,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -42,7 +42,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -91,8 +91,8 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
-      DoubleYoVariable velocity = new DoubleYoVariable("velocity", registry);
+      YoDouble position = new YoDouble("position", registry);
+      YoDouble velocity = new YoDouble("velocity", registry);
 
 
       robot.addYoVariableRegistry(registry);
@@ -147,8 +147,8 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
-      DoubleYoVariable velocity = new DoubleYoVariable("velocity", registry);
+      YoDouble position = new YoDouble("position", registry);
+      YoDouble velocity = new YoDouble("velocity", registry);
 
 
       robot.addYoVariableRegistry(registry);
@@ -204,7 +204,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -251,7 +251,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -279,7 +279,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -305,7 +305,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -332,7 +332,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -374,7 +374,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -417,7 +417,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 
@@ -439,7 +439,7 @@ public class YoVariableValueDataCheckerTest
       Robot robot = new Robot("Derivative");
 
       YoVariableRegistry registry = new YoVariableRegistry("variables");
-      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+      YoDouble position = new YoDouble("position", registry);
 
       robot.addYoVariableRegistry(registry);
 

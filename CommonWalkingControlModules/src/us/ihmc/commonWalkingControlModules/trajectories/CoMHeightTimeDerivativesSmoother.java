@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import Jama.Matrix;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
 import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
@@ -26,57 +26,57 @@ public class CoMHeightTimeDerivativesSmoother
 
    private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
-   private final DoubleYoVariable inputComHeight = new DoubleYoVariable("inputComHeight", registry);
-   private final DoubleYoVariable inputComHeightVelocity = new DoubleYoVariable("inputComHeightVelocity", registry);
-   private final DoubleYoVariable inputComHeightAcceleration = new DoubleYoVariable("inputComHeightAcceleration", registry);
+   private final YoDouble inputComHeight = new YoDouble("inputComHeight", registry);
+   private final YoDouble inputComHeightVelocity = new YoDouble("inputComHeightVelocity", registry);
+   private final YoDouble inputComHeightAcceleration = new YoDouble("inputComHeightAcceleration", registry);
 
-   private final DoubleYoVariable smoothComHeight = new DoubleYoVariable("smoothComHeight", registry);
-   private final DoubleYoVariable smoothComHeightVelocity = new DoubleYoVariable("smoothComHeightVelocity", registry);
-   private final DoubleYoVariable smoothComHeightAcceleration = new DoubleYoVariable("smoothComHeightAcceleration", registry);
-   private final DoubleYoVariable smoothComHeightJerk = new DoubleYoVariable("smoothComHeightJerk", registry);
+   private final YoDouble smoothComHeight = new YoDouble("smoothComHeight", registry);
+   private final YoDouble smoothComHeightVelocity = new YoDouble("smoothComHeightVelocity", registry);
+   private final YoDouble smoothComHeightAcceleration = new YoDouble("smoothComHeightAcceleration", registry);
+   private final YoDouble smoothComHeightJerk = new YoDouble("smoothComHeightJerk", registry);
 
-   private final DoubleYoVariable comHeightGain = new DoubleYoVariable("comHeightGain", registry);
-   private final DoubleYoVariable comHeightVelocityGain = new DoubleYoVariable("comHeightVelocityGain", registry);
-   private final DoubleYoVariable comHeightAccelerationGain = new DoubleYoVariable("comHeightAccelerationGain", registry);
+   private final YoDouble comHeightGain = new YoDouble("comHeightGain", registry);
+   private final YoDouble comHeightVelocityGain = new YoDouble("comHeightVelocityGain", registry);
+   private final YoDouble comHeightAccelerationGain = new YoDouble("comHeightAccelerationGain", registry);
 
-   private final DoubleYoVariable eigenValueOneReal = new DoubleYoVariable("eigenValueOneReal", registry);
-   private final DoubleYoVariable eigenValueOneImag = new DoubleYoVariable("eigenValueOneImag", registry);
-   private final DoubleYoVariable eigenValueTwoReal = new DoubleYoVariable("eigenValueTwoReal", registry);
-   private final DoubleYoVariable eigenValueTwoImag = new DoubleYoVariable("eigenValueTwoImag", registry);
-   private final DoubleYoVariable eigenValueThreeReal = new DoubleYoVariable("eigenValueThreeReal", registry);
-   private final DoubleYoVariable eigenValueThreeImag = new DoubleYoVariable("eigenValueThreeImag", registry);
+   private final YoDouble eigenValueOneReal = new YoDouble("eigenValueOneReal", registry);
+   private final YoDouble eigenValueOneImag = new YoDouble("eigenValueOneImag", registry);
+   private final YoDouble eigenValueTwoReal = new YoDouble("eigenValueTwoReal", registry);
+   private final YoDouble eigenValueTwoImag = new YoDouble("eigenValueTwoImag", registry);
+   private final YoDouble eigenValueThreeReal = new YoDouble("eigenValueThreeReal", registry);
+   private final YoDouble eigenValueThreeImag = new YoDouble("eigenValueThreeImag", registry);
 
-   private final DoubleYoVariable maximumVelocity;
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   private final YoDouble maximumVelocity;
+   private final YoDouble maximumAcceleration;
+   private final YoDouble maximumJerk;
 
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
       this(null, null, null, dt, parentRegistry);
    }
 
-   public CoMHeightTimeDerivativesSmoother(DoubleYoVariable maximumVelocity, DoubleYoVariable maximumAcceleration, DoubleYoVariable maximumJerk, double dt,
+   public CoMHeightTimeDerivativesSmoother(YoDouble maximumVelocity, YoDouble maximumAcceleration, YoDouble maximumJerk, double dt,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
 
       if (maximumVelocity == null)
       {
-         maximumVelocity = new DoubleYoVariable("comHeightMaxVelocity", registry);
+         maximumVelocity = new YoDouble("comHeightMaxVelocity", registry);
          maximumVelocity.set(0.25); // Tried 0.25 on the real robot, looked good but need to be well tested.
       }
 
       if (maximumAcceleration == null)
       {
-         maximumAcceleration = new DoubleYoVariable("comHeightMaxAcceleration", registry);
+         maximumAcceleration = new YoDouble("comHeightMaxAcceleration", registry);
          maximumAcceleration.set(0.5 * 9.81);
       }
 
       if (maximumJerk == null)
       {
-         maximumJerk = new DoubleYoVariable("comHeightMaxJerk", registry);
+         maximumJerk = new YoDouble("comHeightMaxJerk", registry);
          maximumJerk.set(0.5 * 9.81 / 0.05);
       }
 

@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -18,21 +20,19 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingObjectBoxRobot;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingObjectBoxRobot;
-import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -77,10 +77,10 @@ public class ObjectDetectorFromCameraImagesTest
 
       int width = 800;
       int height = 800;
-      RenderedSceneHandler videoDataServer = new RenderedSceneHandler()
+      VideoDataServer videoDataServer = new VideoDataServer()
       {
          @Override
-         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+         public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
          {
             FloatingJoint cameraJoint = (FloatingJoint) simpleRobotWithCamera.getRootJoints().get(0);
 
@@ -108,14 +108,9 @@ public class ObjectDetectorFromCameraImagesTest
          }
 
          @Override
-         public boolean isReadyForNewData()
+         public boolean isConnected()
          {
             return true;
-         }
-
-         @Override
-         public void close()
-         {
          }
       };
 
@@ -126,17 +121,17 @@ public class ObjectDetectorFromCameraImagesTest
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
-      BooleanYoVariable objectTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
+      YoBoolean objectTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
 
-      DoubleYoVariable objectReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
-      DoubleYoVariable objectReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");
-      DoubleYoVariable objectReportedPoseWorldFrameZ = (DoubleYoVariable) scsForDetecting.getVariable("objectReportedPoseWorldFrameZ");
+      YoDouble objectReportedPoseWorldFrameX = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
+      YoDouble objectReportedPoseWorldFrameY = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");
+      YoDouble objectReportedPoseWorldFrameZ = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameZ");
 
-      DoubleYoVariable q_object_x = (DoubleYoVariable) scsForDetecting.getVariable("q_object_x");
-      DoubleYoVariable q_object_y = (DoubleYoVariable) scsForDetecting.getVariable("q_object_y");
-      DoubleYoVariable q_object_z = (DoubleYoVariable) scsForDetecting.getVariable("q_object_z");
+      YoDouble q_object_x = (YoDouble) scsForDetecting.getVariable("q_object_x");
+      YoDouble q_object_y = (YoDouble) scsForDetecting.getVariable("q_object_y");
+      YoDouble q_object_z = (YoDouble) scsForDetecting.getVariable("q_object_z");
 
-      final DoubleYoVariable time = simpleRobotWithCamera.getYoTime();
+      final YoDouble time = simpleRobotWithCamera.getYoTime();
 
       time.addVariableChangedListener(new VariableChangedListener()
       {

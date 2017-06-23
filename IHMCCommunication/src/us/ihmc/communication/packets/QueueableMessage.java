@@ -29,6 +29,9 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Tr
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
    public long previousMessageId = INVALID_MESSAGE_ID;
+   
+   /** the time to delay this message on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -66,6 +69,16 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Tr
    public ExecutionMode getExecutionMode()
    {
       return executionMode;
+   }
+   
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = (float) delayTime;
+   }
+   
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
    }
 
    /**

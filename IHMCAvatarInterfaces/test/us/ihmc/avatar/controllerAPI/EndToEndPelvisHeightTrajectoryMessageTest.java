@@ -91,6 +91,52 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 15.2)
+   @Test(timeout = 76000)
+   public void testSingleWaypointInUserMode() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      
+      Random random = new Random(564574L);
+      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      
+      double trajectoryTime = 1.0;
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      
+      FramePoint desiredRandomPelvisPosition = new FramePoint(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.05);
+      Point3D desiredPosition = new Point3D();
+      
+      desiredRandomPelvisPosition.get(desiredPosition);
+      System.out.println(desiredPosition);
+      
+      desiredRandomPelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      desiredRandomPelvisPosition.get(desiredPosition);
+      System.out.println(desiredPosition);
+      
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
+      
+      pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
+      drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
+      
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      assertTrue(success);
+      
+      double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
+      assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+   }
+
    @Before
    public void showMemoryUsageBeforeTest()
    {

@@ -53,10 +53,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -96,8 +96,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          ThreadTools.sleepForever();
       }
 
-      behaviorCommunicatorClient.close();
-      behaviorCommunicatorServer.close();
+      behaviorCommunicatorClient.disconnect();
+      behaviorCommunicatorServer.disconnect();
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)
@@ -125,7 +125,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private CommunicationBridge communicationBridge;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private HumanoidFloatingRootJointRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
@@ -147,7 +147,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      this.yoTime = new DoubleYoVariable("yoTime", registry);
+      this.yoTime = new YoDouble("yoTime", registry);
 
       behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(
             NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
@@ -337,14 +337,14 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class);
+      YoEnum<RobotSide> supportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class);
       supportLeg.set(RobotSide.LEFT);
 
       YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
 
       WholeBodyControllerParameters wholeBodyControllerParameters = this.getRobotModel();
 
-      BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
+      YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, supportLeg, referenceFrames, yoTime, yoDoubleSupport, communicationBridge,
             wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
@@ -506,7 +506,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
       FramePose2d ret = new FramePose2d();
-      ret.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }

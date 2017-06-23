@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.utilities;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -17,7 +17,7 @@ public class TaskSpaceStiffnessCalculator
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
    private final double lowPassCutoffFreq_Hz = 5.0;
-   private final DoubleYoVariable alphaLowPass;
+   private final YoDouble alphaLowPass;
 
    private final YoFramePoint yoForcePointPosition;
    private final YoFrameVector yoForcePointForce;
@@ -25,21 +25,21 @@ public class TaskSpaceStiffnessCalculator
    private final FilteredVelocityYoFrameVector yoForcePointVelocity;
    private final FilteredVelocityYoFrameVector yoForcePointForceRateOfChange;
 
-   private final DoubleYoVariable yoForceAlongDirectionOfMotion;
-   private final DoubleYoVariable yoForceRateOfChangeAlongDirectionOfMotion;
+   private final YoDouble yoForceAlongDirectionOfMotion;
+   private final YoDouble yoForceRateOfChangeAlongDirectionOfMotion;
 
-   private final DoubleYoVariable yoStiffnessAlongDirectionOfMotion;
-   private final DoubleYoVariable yoMaxStiffness;
+   private final YoDouble yoStiffnessAlongDirectionOfMotion;
+   private final YoDouble yoMaxStiffness;
 
    private final YoFrameVector yoCrossProductOfCurrentVelWithForce;
    private final YoFrameVector yoDirectionOfFreeMotion;
 
-   private final BooleanYoVariable addSimulatedSensorNoise;
+   private final YoBoolean addSimulatedSensorNoise;
 
 
    public TaskSpaceStiffnessCalculator(String namePrefix, double controlDT, YoVariableRegistry registry)
    {
-      alphaLowPass = new DoubleYoVariable(namePrefix + "Alpha", registry);
+      alphaLowPass = new YoDouble(namePrefix + "Alpha", registry);
       alphaLowPass.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lowPassCutoffFreq_Hz, controlDT));
 
       yoForcePointPosition = new YoFramePoint(namePrefix + "Position", world, registry);
@@ -50,16 +50,16 @@ public class TaskSpaceStiffnessCalculator
       yoForcePointForceRateOfChange = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix + "ForceRateOfChange", "", alphaLowPass,
             controlDT, registry, yoForcePointForce);
 
-      yoForceAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "ForceAlongDirOfMotion", registry);
-      yoForceRateOfChangeAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "DeltaForceAlongDirOfMotion", registry);
+      yoForceAlongDirectionOfMotion = new YoDouble(namePrefix + "ForceAlongDirOfMotion", registry);
+      yoForceRateOfChangeAlongDirectionOfMotion = new YoDouble(namePrefix + "DeltaForceAlongDirOfMotion", registry);
             
-      yoStiffnessAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "StiffnessAlongDirOfMotion", registry);
-      yoMaxStiffness = new DoubleYoVariable(namePrefix + "MaxStiffness", registry);
+      yoStiffnessAlongDirectionOfMotion = new YoDouble(namePrefix + "StiffnessAlongDirOfMotion", registry);
+      yoMaxStiffness = new YoDouble(namePrefix + "MaxStiffness", registry);
 
       yoCrossProductOfCurrentVelWithForce = new YoFrameVector(namePrefix + "VelocityCrossForce", world, registry);
       yoDirectionOfFreeMotion = new YoFrameVector(namePrefix + "DirOfFreeMotion", world, registry);
 
-      addSimulatedSensorNoise = new BooleanYoVariable(namePrefix + "AddSimulatedNoise", registry);
+      addSimulatedSensorNoise = new YoBoolean(namePrefix + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);
    }
 

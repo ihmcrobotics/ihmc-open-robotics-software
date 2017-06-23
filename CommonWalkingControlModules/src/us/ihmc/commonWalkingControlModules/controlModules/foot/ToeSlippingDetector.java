@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -20,18 +20,18 @@ public class ToeSlippingDetector
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable alpha;
+   private final YoDouble alpha;
    private final AlphaFilteredYoVariable toeForceFiltered;
    private final AlphaFilteredYoFrameVector toeLinearVelocityFiltered;
 
    private final YoFramePoint initialToePosition;
-   private final DoubleYoVariable toeSlippageDistance;
+   private final YoDouble toeSlippageDistance;
 
-   private final DoubleYoVariable forceMagnitudeThreshold;
-   private final DoubleYoVariable velocityThreshold;
-   private final DoubleYoVariable slippageDistanceThreshold;
+   private final YoDouble forceMagnitudeThreshold;
+   private final YoDouble velocityThreshold;
+   private final YoDouble slippageDistanceThreshold;
 
-   private final BooleanYoVariable isToeSlipping;
+   private final YoBoolean isToeSlipping;
 
    private final double dt;
    private final RigidBody foot;
@@ -45,19 +45,19 @@ public class ToeSlippingDetector
       this.footSwitch = footSwitch;
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      alpha = new DoubleYoVariable(namePrefix + "AlphaFilter", registry);
+      alpha = new YoDouble(namePrefix + "AlphaFilter", registry);
       toeForceFiltered = new AlphaFilteredYoVariable(namePrefix + "ToeForceFiltered", "", registry, alpha);
       toeLinearVelocityFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha,
                                                                                               worldFrame);
 
       initialToePosition = new YoFramePoint(namePrefix + "ToeInitial", worldFrame, registry);
-      toeSlippageDistance = new DoubleYoVariable(namePrefix + "ToeSlippageDistance", registry);
+      toeSlippageDistance = new YoDouble(namePrefix + "ToeSlippageDistance", registry);
 
-      forceMagnitudeThreshold = new DoubleYoVariable(namePrefix + "ForceMagnitudeThreshold", registry);
-      velocityThreshold = new DoubleYoVariable(namePrefix + "VelocityThreshold", registry);
-      slippageDistanceThreshold = new DoubleYoVariable(namePrefix + "SlippageDistanceThreshold", registry);
+      forceMagnitudeThreshold = new YoDouble(namePrefix + "ForceMagnitudeThreshold", registry);
+      velocityThreshold = new YoDouble(namePrefix + "VelocityThreshold", registry);
+      slippageDistanceThreshold = new YoDouble(namePrefix + "SlippageDistanceThreshold", registry);
 
-      isToeSlipping = new BooleanYoVariable(namePrefix + "IsToeSlipping", registry);
+      isToeSlipping = new YoBoolean(namePrefix + "IsToeSlipping", registry);
 
       parentRegistry.addChild(registry);
    }

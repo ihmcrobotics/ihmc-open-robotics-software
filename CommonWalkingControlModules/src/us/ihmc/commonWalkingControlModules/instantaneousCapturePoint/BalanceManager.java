@@ -32,11 +32,9 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -60,7 +58,7 @@ public class BalanceManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final ICPPlannerWithTimeFreezer icpPlanner;
+   private final ICPPlannerWithAngularMomentumOffset icpPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
@@ -81,9 +79,9 @@ public class BalanceManager
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
 
-   private final BooleanYoVariable editStepTimingForReachability = new BooleanYoVariable("editStepTimingForReachability", registry);
+   private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -109,14 +107,14 @@ public class BalanceManager
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable safeDistanceFromSupportEdgesToStopCancelICPPlan = new DoubleYoVariable("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
-   private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
+   private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
+   private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
-   private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
-   private final BooleanYoVariable controlHeightWithMomentum = new BooleanYoVariable("controlHeightWithMomentum", registry);
+   private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
-   private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
-   private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);
+   private final YoDouble maxICPErrorBeforeSingleSupportX = new YoDouble("maxICPErrorBeforeSingleSupportX", registry);
+   private final YoDouble maxICPErrorBeforeSingleSupportY = new YoDouble("maxICPErrorBeforeSingleSupportY", registry);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -167,10 +165,11 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
-      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
-      icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      icpPlanner = new ICPPlannerWithAngularMomentumOffset(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry,
+                                                           yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
@@ -201,13 +200,6 @@ public class BalanceManager
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
-      controlHeightWithMomentum.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override public void variableChanged(YoVariable<?> v)
-         {
-            linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(controlHeightWithMomentum.getBooleanValue());
-         }
-      });
 
       String graphicListName = getClass().getSimpleName();
 
@@ -285,6 +277,30 @@ public class BalanceManager
          dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
 
+   public boolean wasTimingAdjustedForReachability()
+   {
+      if (ENABLE_DYN_REACHABILITY)
+         return dynamicReachabilityCalculator.wasTimingAdjusted();
+      else
+         return false;
+   }
+
+   public double getCurrentTransferDurationAdjustedForReachability()
+   {
+      return icpPlanner.getTransferDuration(0);
+   }
+
+   public double getCurrentSwingDurationAdjustedForReachability()
+   {
+      return icpPlanner.getSwingDuration(0);
+   }
+
+   public double getNextTransferDurationAdjustedForReachability()
+   {
+      return icpPlanner.getTransferDuration(1);
+   }
+
+
    public boolean checkAndUpdateFootstep(Footstep footstep)
    {
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
@@ -319,11 +335,15 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
+   private final FramePoint copEstimate = new FramePoint();
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCoP(copEstimate);
 
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
+
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
@@ -369,10 +389,11 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
+      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       linearMomentumRateOfChangeControlModule.setOmega0(omega0);
-      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
+      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       linearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);

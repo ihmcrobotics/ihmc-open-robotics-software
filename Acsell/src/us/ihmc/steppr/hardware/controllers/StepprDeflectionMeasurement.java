@@ -3,9 +3,9 @@ package us.ihmc.steppr.hardware.controllers;
 import java.util.EnumMap;
 
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.hardware.StepprJoint;
 
@@ -16,10 +16,10 @@ public class StepprDeflectionMeasurement implements StepprController
 
    private final EnumMap<StepprJoint, OneDoFJoint> joints = new EnumMap<>(StepprJoint.class);
 
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> desiredForces = new EnumMap<>(StepprStandPrepSetpoints.class);
-   private final EnumMap<StepprStandPrepSetpoints, DoubleYoVariable> dampingValues = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> desiredForces = new EnumMap<>(StepprStandPrepSetpoints.class);
+   private final EnumMap<StepprStandPrepSetpoints, YoDouble> dampingValues = new EnumMap<>(StepprStandPrepSetpoints.class);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableForceOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableForceOutput", registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
@@ -31,8 +31,8 @@ public class StepprDeflectionMeasurement implements StepprController
 
       for (StepprStandPrepSetpoints setpoint : StepprStandPrepSetpoints.values)
       {
-         DoubleYoVariable desiredForce = new DoubleYoVariable(setpoint.getName() + "_tau_d", registry);
-         DoubleYoVariable damping = new DoubleYoVariable(setpoint.getName() + "_damping", registry);
+         YoDouble desiredForce = new YoDouble(setpoint.getName() + "_tau_d", registry);
+         YoDouble damping = new YoDouble(setpoint.getName() + "_damping", registry);
 
          desiredForce.set(0.0);
          damping.set(0.0);

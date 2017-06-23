@@ -18,10 +18,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -42,7 +42,8 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
 
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE_REACHABILITY = false;
    private static final double epsilon = 0.005;
 
    private final double transferTwiddleSizeDuration;
@@ -52,43 +53,43 @@ public class DynamicReachabilityCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable requiredAdjustmentSafetyFactor = new DoubleYoVariable("requiredAdjustmentSafetyFactor", registry);
-   private final DoubleYoVariable requiredAdjustmentFeedbackGain = new DoubleYoVariable("requiredAdjustmentFeedbackGain", registry);
-   private final DoubleYoVariable widthOfReachableRegion = new DoubleYoVariable("widthOfReachableRegion", registry);
+   private final YoDouble requiredAdjustmentSafetyFactor = new YoDouble("requiredAdjustmentSafetyFactor", registry);
+   private final YoDouble requiredAdjustmentFeedbackGain = new YoDouble("requiredAdjustmentFeedbackGain", registry);
+   private final YoDouble widthOfReachableRegion = new YoDouble("widthOfReachableRegion", registry);
 
-   private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
-   private final DoubleYoVariable maximumLegLength = new DoubleYoVariable("maximumLegLength", registry);
+   private final YoDouble minimumLegLength = new YoDouble("minimumLegLength", registry);
+   private final YoDouble maximumLegLength = new YoDouble("maximumLegLength", registry);
 
-   private final DoubleYoVariable maximumDesiredKneeBend = new DoubleYoVariable("maximumDesiredKneeBendForReachability", registry);
+   private final YoDouble maximumDesiredKneeBend = new YoDouble("maximumDesiredKneeBendForReachability", registry);
 
-   private final DoubleYoVariable stanceLegMinimumHeight = new DoubleYoVariable("stanceLegMinimumHeight", registry);
-   private final DoubleYoVariable stanceLegMaximumHeight = new DoubleYoVariable("stanceLegMaximumHeight", registry);
-   private final DoubleYoVariable swingLegMinimumHeight = new DoubleYoVariable("swingLegMinimumHeight", registry);
-   private final DoubleYoVariable swingLegMaximumHeight = new DoubleYoVariable("swingLegMaximumHeight", registry);
+   private final YoDouble stanceLegMinimumHeight = new YoDouble("stanceLegMinimumHeight", registry);
+   private final YoDouble stanceLegMaximumHeight = new YoDouble("stanceLegMaximumHeight", registry);
+   private final YoDouble swingLegMinimumHeight = new YoDouble("swingLegMinimumHeight", registry);
+   private final YoDouble swingLegMaximumHeight = new YoDouble("swingLegMaximumHeight", registry);
 
-   private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
-   private final BooleanYoVariable isModifiedStepReachable = new BooleanYoVariable("isModifiedStepReachable", registry);
+   private final YoBoolean isStepReachable = new YoBoolean("isStepReachable", registry);
+   private final YoBoolean isModifiedStepReachable = new YoBoolean("isModifiedStepReachable", registry);
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfTimingAdjustmentIterations", registry);
-   private final IntegerYoVariable numberOfAdjustments = new IntegerYoVariable("numberOfCoMAdjustments", registry);
-   private final IntegerYoVariable maximumNumberOfAdjustments = new IntegerYoVariable("maxNumberOfCoMAdjustments", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfTimingAdjustmentIterations", registry);
+   private final YoInteger numberOfAdjustments = new YoInteger("numberOfCoMAdjustments", registry);
+   private final YoInteger maximumNumberOfAdjustments = new YoInteger("maxNumberOfCoMAdjustments", registry);
 
-   private final DoubleYoVariable currentTransferAdjustment = new DoubleYoVariable("currentTransferAdjustment", registry);
-   private final DoubleYoVariable currentSwingAdjustment = new DoubleYoVariable("currentSwingAdjustment", registry);
-   private final DoubleYoVariable nextTransferAdjustment = new DoubleYoVariable("nextTransferAdjustment", registry);
+   private final YoDouble currentTransferAdjustment = new YoDouble("currentTransferAdjustment", registry);
+   private final YoDouble currentSwingAdjustment = new YoDouble("currentSwingAdjustment", registry);
+   private final YoDouble nextTransferAdjustment = new YoDouble("nextTransferAdjustment", registry);
 
-   private final ArrayList<DoubleYoVariable> higherSwingAdjustments = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> higherTransferAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> higherSwingAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> higherTransferAdjustments = new ArrayList<>();
 
    private final SideDependentList<YoFramePoint> hipMinimumLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
 
-   private final ArrayList<DoubleYoVariable> requiredParallelCoMAdjustments = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> achievedParallelCoMAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> requiredParallelCoMAdjustments = new ArrayList<>();
+   private final ArrayList<YoDouble> achievedParallelCoMAdjustments = new ArrayList<>();
 
-   private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
-   private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
-   private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
+   private final YoDouble currentTransferAlpha = new YoDouble("currentTransferAlpha", registry);
+   private final YoDouble currentSwingAlpha = new YoDouble("currentSwingAlpha", registry);
+   private final YoDouble nextTransferAlpha = new YoDouble("nextTransferAlpha", registry);
 
    private final ExecutionTimer reachabilityTimer = new ExecutionTimer("reachabilityTimer", registry);
 
@@ -108,6 +109,9 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
    private final SideDependentList<FramePoint> adjustedAnkleLocations = new SideDependentList<>();
    private final SideDependentList<FrameVector> hipOffsets = new SideDependentList<>();
+
+   private final SideDependentList<YoFramePoint> yoAnkleLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint> yoHipLocations = new SideDependentList<>();
 
    private Footstep nextFootstep;
    private boolean isInTransfer;
@@ -179,8 +183,15 @@ public class DynamicReachabilityCalculator
          adjustedAnkleLocations.put(robotSide, new FramePoint());
          hipOffsets.put(robotSide, new FrameVector());
 
-         YoFramePoint hipMaximumLocation = new YoFramePoint(robotSide.getShortLowerCaseName() + "PredictedHipMaximumPoint", worldFrame, registry);
-         YoFramePoint hipMinimumLocation = new YoFramePoint(robotSide.getShortLowerCaseName() + "PredictedHipMinimumPoint", worldFrame, registry);
+         String prefix = robotSide.getShortLowerCaseName();
+         if (VISUALIZE_REACHABILITY)
+         {
+            yoAnkleLocations.put(robotSide, new YoFramePoint(prefix + "AnkleLocation", worldFrame, registry));
+            yoHipLocations.put(robotSide, new YoFramePoint(prefix + "HipLocation", worldFrame, registry));
+         }
+
+         YoFramePoint hipMaximumLocation = new YoFramePoint(prefix + "PredictedHipMaximumPoint", worldFrame, registry);
+         YoFramePoint hipMinimumLocation = new YoFramePoint(prefix + "PredictedHipMinimumPoint", worldFrame, registry);
          hipMaximumLocations.put(robotSide, hipMaximumLocation);
          hipMinimumLocations.put(robotSide, hipMinimumLocation);
          
@@ -199,16 +210,16 @@ public class DynamicReachabilityCalculator
          higherSwingGradients.add(higherSwingGradient);
          higherTransferGradients.add(higherTransferGradient);
 
-         DoubleYoVariable higherSwingAdjustment = new DoubleYoVariable("higherSwingAdjustment" + i, registry);
-         DoubleYoVariable higherTransferAdjustment = new DoubleYoVariable("higherTransferAdjustment" + i, registry);
+         YoDouble higherSwingAdjustment = new YoDouble("higherSwingAdjustment" + i, registry);
+         YoDouble higherTransferAdjustment = new YoDouble("higherTransferAdjustment" + i, registry);
          higherSwingAdjustments.add(higherSwingAdjustment);
          higherTransferAdjustments.add(higherTransferAdjustment);
       }
 
       for (int i = 0; i < dynamicReachabilityParameters.getMaximumNumberOfCoMAdjustments(); i++)
       {
-         requiredParallelCoMAdjustments.add(new DoubleYoVariable("requiredParallelCoMAdjustment" + i, registry));
-         achievedParallelCoMAdjustments.add(new DoubleYoVariable("achievedParallelCoMAdjustment" + i, registry));
+         requiredParallelCoMAdjustments.add(new YoDouble("requiredParallelCoMAdjustment" + i, registry));
+         achievedParallelCoMAdjustments.add(new YoDouble("achievedParallelCoMAdjustment" + i, registry));
       }
 
 
@@ -295,6 +306,34 @@ public class DynamicReachabilityCalculator
 
       yoGraphicsList.setVisible(VISUALIZE);
 
+      if (VISUALIZE_REACHABILITY)
+      {
+         YoGraphicsList reachabilityGraphicsList = new YoGraphicsList(getClass().getSimpleName() + "Reachability");
+
+         double minLength = minimumLegLength.getDoubleValue();
+         double maxLength = maximumLegLength.getDoubleValue();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            YoGraphicPosition ballInside = new YoGraphicPosition(robotSide.getShortLowerCaseName() + "BallInside", yoAnkleLocations.get(robotSide), minLength, YoAppearance.Green());
+            YoGraphicPosition ballOutside = new YoGraphicPosition(robotSide.getShortLowerCaseName() + "BallOutside", yoAnkleLocations.get(robotSide), maxLength, YoAppearance.LightGreen());
+
+            YoGraphicPosition footViz = new YoGraphicPosition("foot", yoAnkleLocations.get(robotSide), 0.075, YoAppearance.Blue());
+            YoGraphicPosition hipViz = new YoGraphicPosition("hip", yoHipLocations.get(robotSide), 0.075, YoAppearance.Red());
+
+            ballInside.getAppearance().setTransparency(0.8);
+            ballOutside.getAppearance().setTransparency(0.95);
+
+            reachabilityGraphicsList.add(ballInside);
+            reachabilityGraphicsList.add(ballOutside);
+            reachabilityGraphicsList.add(footViz);
+            reachabilityGraphicsList.add(hipViz);
+         }
+
+         yoGraphicsListRegistry.registerYoGraphicsList(reachabilityGraphicsList);
+      }
+
+
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
@@ -325,12 +364,21 @@ public class DynamicReachabilityCalculator
       nextFootstep.getAnklePosition(upcomingStepLocation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
       upcomingStepLocation.changeFrame(worldFrame);
       stanceAnkleLocation.changeFrame(worldFrame);
+      if (VISUALIZE_REACHABILITY) yoAnkleLocations.get(swingSide).set(upcomingStepLocation);
+      if (VISUALIZE_REACHABILITY) yoAnkleLocations.get(stanceSide).set(stanceAnkleLocation);
 
       predictedCoMFrame.update();
       predictedPelvisFrame.update();
       for (RobotSide robotSide : RobotSide.values)
       {
          predictedHipFrames.get(robotSide).update();
+         if (VISUALIZE_REACHABILITY)
+         {
+            tempPoint.setToZero(predictedHipFrames.get(robotSide));
+            tempPoint.changeFrame(worldFrame);
+            yoHipLocations.get(robotSide).set(tempPoint);
+            yoHipLocations.get(robotSide).setZ(0.8);
+         }
       }
    }
 
@@ -637,6 +685,11 @@ public class DynamicReachabilityCalculator
       reachabilityTimer.stopMeasurement();
    }
 
+   public boolean wasTimingAdjusted()
+   {
+      return numberOfAdjustments.getIntegerValue() > 0;
+   }
+
    private boolean checkReachabilityInternal()
    {
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
@@ -648,12 +701,12 @@ public class DynamicReachabilityCalculator
 
       double minimumStanceLegLength, minimumStepLegLength;
       if (heightChange > dynamicReachabilityParameters.getThresholdForStepUp())
-      {
+      { // stepping up, so we should allow the upcoming stance leg length to bend as much as we want
          minimumStepLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStanceLegLength = minimumLegLength.getDoubleValue();
       }
       else if (heightChange < dynamicReachabilityParameters.getThresholdForStepDown())
-      {
+      { // stepping down, so we should allow the upcoming swing leg to bend as much as we want
          minimumStanceLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
@@ -770,7 +823,7 @@ public class DynamicReachabilityCalculator
       widthOfReachableRegion.sub(minimumStanceHipPosition);
 
       double requiredAdjustment;
-      double safetyMultiplier = requiredAdjustmentSafetyFactor.getDoubleValue() - 1.0;
+      double safetyMultiplier = requiredAdjustmentSafetyFactor.getDoubleValue();
 
       if (tempPoint.getX() > maximumStepHipPosition)
       {
@@ -972,7 +1025,7 @@ public class DynamicReachabilityCalculator
       double currentEndTransferDuration = (1.0 - currentTransferDurationAlpha) * currentTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSizeDuration * currentInitialTransferDuration;
+      double variation = -transferTwiddleSizeDuration * currentInitialTransferDuration;
       double modifiedTransferDurationAlpha = (currentInitialTransferDuration + variation) / (currentTransferDuration + variation);
 
       submitTransferTiming(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -982,7 +1035,7 @@ public class DynamicReachabilityCalculator
       currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSizeDuration * currentEndTransferDuration;
+      variation = -transferTwiddleSizeDuration * currentEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (currentEndTransferDuration + variation) / (currentTransferDuration + variation);
 
       submitTransferTiming(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1006,7 +1059,7 @@ public class DynamicReachabilityCalculator
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSizeDuration * nextInitialTransferDuration;
+      double variation = -transferTwiddleSizeDuration * nextInitialTransferDuration;
       double modifiedTransferDurationAlpha = (nextInitialTransferDuration + variation) / (nextTransferDuration + variation);
 
       submitTransferTiming(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1016,7 +1069,7 @@ public class DynamicReachabilityCalculator
       nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSizeDuration * nextEndTransferDuration;
+      variation = -transferTwiddleSizeDuration * nextEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (nextEndTransferDuration + variation) / (nextTransferDuration + variation);
 
       submitTransferTiming(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha);
@@ -1035,7 +1088,7 @@ public class DynamicReachabilityCalculator
    private void computeHigherTransferGradient(int stepIndex)
    {
       double originalDuration = originalTransferDurations.get(stepIndex);
-      double variation = transferTwiddleSizeDuration * originalDuration;
+      double variation = -transferTwiddleSizeDuration * originalDuration;
 
       submitTransferTiming(stepIndex, originalDuration + variation, -1.0);
       applyVariation(adjustedCoMPosition);
@@ -1058,7 +1111,7 @@ public class DynamicReachabilityCalculator
       double currentEndSwingDuration = (1.0 - currentSwingDurationAlpha) * currentSwingDuration;
 
       // compute initial swing duration gradient
-      double variation = swingTwiddleSizeDuration * currentInitialSwingDuration;
+      double variation = -swingTwiddleSizeDuration * currentInitialSwingDuration;
       double modifiedSwingDurationAlpha = (currentInitialSwingDuration + variation) / (currentSwingDuration + variation);
 
       submitSwingTiming(stepNumber, currentSwingDuration + variation, modifiedSwingDurationAlpha);
@@ -1068,7 +1121,7 @@ public class DynamicReachabilityCalculator
       currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end swing duration gradient
-      variation = swingTwiddleSizeDuration * currentEndSwingDuration;
+      variation = -swingTwiddleSizeDuration * currentEndSwingDuration;
       modifiedSwingDurationAlpha = 1.0 - (currentEndSwingDuration + variation) / (currentSwingDuration + variation);
 
       submitSwingTiming(stepNumber, currentSwingDuration + variation, modifiedSwingDurationAlpha);
@@ -1084,7 +1137,7 @@ public class DynamicReachabilityCalculator
    private void computeHigherSwingGradient(int stepIndex)
    {
       double duration = originalSwingDurations.get(stepIndex);
-      double variation = swingTwiddleSizeDuration * duration;
+      double variation = -swingTwiddleSizeDuration * duration;
 
       submitSwingTiming(stepIndex, duration + variation, -1.0);
       applyVariation(adjustedCoMPosition);

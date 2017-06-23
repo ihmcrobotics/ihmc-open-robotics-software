@@ -12,7 +12,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointWrenchSensorTest
 {
@@ -154,13 +154,13 @@ public class JointWrenchSensorTest
 
       String name = jointWrenchSensor.getName();
 
-      DoubleYoVariable forceX = (DoubleYoVariable) robot.getVariable(name + "_fX");
-      DoubleYoVariable forceY = (DoubleYoVariable) robot.getVariable(name + "_fY");
-      DoubleYoVariable forceZ = (DoubleYoVariable) robot.getVariable(name + "_fZ");
+      YoDouble forceX = (YoDouble) robot.getVariable(name + "_fX");
+      YoDouble forceY = (YoDouble) robot.getVariable(name + "_fY");
+      YoDouble forceZ = (YoDouble) robot.getVariable(name + "_fZ");
 
-      DoubleYoVariable torqueX = (DoubleYoVariable) robot.getVariable(name + "_tX");
-      DoubleYoVariable torqueY = (DoubleYoVariable) robot.getVariable(name + "_tY");
-      DoubleYoVariable torqueZ = (DoubleYoVariable) robot.getVariable(name + "_tZ");
+      YoDouble torqueX = (YoDouble) robot.getVariable(name + "_tX");
+      YoDouble torqueY = (YoDouble) robot.getVariable(name + "_tY");
+      YoDouble torqueZ = (YoDouble) robot.getVariable(name + "_tZ");
 
       assertEquals(jointForce.getX(), forceX.getDoubleValue(), 1e-7);
       assertEquals(jointForce.getY(), forceY.getDoubleValue(), 1e-7);

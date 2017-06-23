@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder implements VariableChangedListener
 {
    private final ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
-   private final IntegerYoVariable numVertices;
+   private final YoInteger numVertices;
    private final ReferenceFrame referenceFrame;
    private final FrameConvexPolygon2d convexPolygon2dForReading;
    private final FrameConvexPolygon2d convexPolygon2dForWriting;
@@ -27,7 +27,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
 
    public YoFrameConvexPolygon2d(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, int maxNumberOfVertices, YoVariableRegistry registry)
    {
-      this.numVertices = new IntegerYoVariable(namePrefix + "NumVertices" + nameSuffix, registry);
+      this.numVertices = new YoInteger(namePrefix + "NumVertices" + nameSuffix, registry);
       numVertices.addVariableChangedListener(this);
 
       this.referenceFrame = referenceFrame;
@@ -48,7 +48,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       this(namePrefix, "", referenceFrame, maxNumberOfVertices, registry);
    }
 
-   public YoFrameConvexPolygon2d(ArrayList<YoFramePoint2d> yoFramePoints, IntegerYoVariable yoNumVertices, ReferenceFrame referenceFrame)
+   public YoFrameConvexPolygon2d(ArrayList<YoFramePoint2d> yoFramePoints, YoInteger yoNumVertices, ReferenceFrame referenceFrame)
    {
       this.numVertices = yoNumVertices;
       numVertices.addVariableChangedListener(this);
@@ -189,7 +189,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       return numVertices.getIntegerValue();
    }
 
-   public IntegerYoVariable getYoNumberVertices()
+   public YoInteger getYoNumberVertices()
    {
       return numVertices;
    }

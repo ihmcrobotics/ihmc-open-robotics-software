@@ -3,11 +3,10 @@ package us.ihmc.exampleSimulations.simpleArm;
 
 import java.util.Random;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 /**
@@ -18,18 +17,18 @@ public class SimpleArmController extends SimpleRobotController
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SimpleRobotInputOutputMap robot;
-   private final DoubleYoVariable time;
+   private final YoDouble time;
 
    private static final Random random = new Random(94929438248L);
-   private DoubleYoVariable noiseMagnitude = new DoubleYoVariable("NoiseMagnitude", registry);
-   private DoubleYoVariable decay = new DoubleYoVariable("Decay", registry);
-   private DoubleYoVariable frequency = new DoubleYoVariable("Frequency", registry);
-   private DoubleYoVariable magnitude = new DoubleYoVariable("Magnitude", registry);
-   private DoubleYoVariable offset = new DoubleYoVariable("Offset", registry);
+   private YoDouble noiseMagnitude = new YoDouble("NoiseMagnitude", registry);
+   private YoDouble decay = new YoDouble("Decay", registry);
+   private YoDouble frequency = new YoDouble("Frequency", registry);
+   private YoDouble magnitude = new YoDouble("Magnitude", registry);
+   private YoDouble offset = new YoDouble("Offset", registry);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, DoubleYoVariable time)
+   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, YoDouble time)
    {
       this.time = time;
       this.robot = robot;

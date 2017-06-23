@@ -10,13 +10,13 @@ import static us.ihmc.robotics.MathTools.square;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {
-   private final DoubleYoVariable lengthAD, lengthBA, lengthCB, lengthDC;
-   private final DoubleYoVariable minA, maxA;
+   private final YoDouble lengthAD, lengthBA, lengthCB, lengthDC;
+   private final YoDouble minA, maxA;
 
    // Angles
    private double angleDAB, angleABC, angleBCD, angleCDA;
@@ -29,13 +29,13 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
 
    public YoVariableSideFourbarCalculatorWithDerivatives(String namePrefix, YoVariableRegistry registry)
    {
-      this.lengthAD = new DoubleYoVariable(namePrefix + "_lenghtAD", registry);
-      this.lengthBA = new DoubleYoVariable(namePrefix + "_lenghtBA", registry);
-      this.lengthCB = new DoubleYoVariable(namePrefix + "_lenghtCB", registry);
-      this.lengthDC = new DoubleYoVariable(namePrefix + "_lenghtDC", registry);
+      this.lengthAD = new YoDouble(namePrefix + "_lenghtAD", registry);
+      this.lengthBA = new YoDouble(namePrefix + "_lenghtBA", registry);
+      this.lengthCB = new YoDouble(namePrefix + "_lenghtCB", registry);
+      this.lengthDC = new YoDouble(namePrefix + "_lenghtDC", registry);
 
-      this.minA = new DoubleYoVariable(namePrefix + "_minLengthA", registry);
-      this.maxA = new DoubleYoVariable(namePrefix + "_maxLengthA", registry);
+      this.minA = new YoDouble(namePrefix + "_minLengthA", registry);
+      this.maxA = new YoDouble(namePrefix + "_maxLengthA", registry);
    }
 
    public void setSideLengths(double lengthAD, double lengthBA, double lengthCB, double lengthDC)

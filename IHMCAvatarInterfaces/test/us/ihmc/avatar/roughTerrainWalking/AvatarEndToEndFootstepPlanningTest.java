@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -40,18 +40,18 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -62,7 +62,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private CommunicationBridge communicationBridge;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private FullHumanoidRobotModel fullRobotModel;
 
@@ -84,7 +84,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       networkProcessor = new PacketRouter<>(PacketDestination.class);
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      this.yoTime = new DoubleYoVariable("yoTime", registry);
+      this.yoTime = new YoDouble("yoTime", registry);
 
       behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
@@ -151,8 +151,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          ThreadTools.sleepForever();
       }
 
-      behaviorCommunicatorClient.close();
-      behaviorCommunicatorServer.close();
+      behaviorCommunicatorClient.disconnect();
+      behaviorCommunicatorServer.disconnect();
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)
@@ -171,8 +171,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 200.0)
+   @Test
    public void testAnytimePlannerBehaviorOverRoughTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -219,8 +219,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 400.0)
+   @Test
    public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -237,6 +237,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       PlanarRegionsListDefinedEnvironment stairCaseEnvironment = new PlanarRegionsListDefinedEnvironment(completeStairCase, 0.02);
       setUpSimulationTestHelper(stairCaseEnvironment, DRCObstacleCourseStartingLocation.DEFAULT);
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(2.0, 0.0, 0.5), new Point3D(2.0, -8.0, 3.0));
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);

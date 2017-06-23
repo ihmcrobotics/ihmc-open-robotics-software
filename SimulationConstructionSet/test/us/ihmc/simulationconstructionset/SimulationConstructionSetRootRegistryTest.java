@@ -7,8 +7,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
@@ -26,7 +27,7 @@ public class SimulationConstructionSetRootRegistryTest
 
       YoVariableRegistry registryOne = new YoVariableRegistry("RegistryOne");
       robot.getRobotsYoVariableRegistry().addChild(registryOne);
-      DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registryOne);
+      YoDouble variableOne = new YoDouble("variableOne", registryOne);
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(SHOW_GUI);
@@ -67,11 +68,11 @@ public class SimulationConstructionSetRootRegistryTest
       YoVariableRegistry registryOne = new YoVariableRegistry("registryOne");
       YoVariableRegistry registryTwo = new YoVariableRegistry("registryTwo");
 
-      DoubleYoVariable variableOneA = new DoubleYoVariable("variableOneA", registryOne);
-      DoubleYoVariable variableOneB = new DoubleYoVariable("variableOneB", registryOne);
+      YoDouble variableOneA = new YoDouble("variableOneA", registryOne);
+      YoDouble variableOneB = new YoDouble("variableOneB", registryOne);
       
-      DoubleYoVariable variableTwoA = new DoubleYoVariable("variableTwoA", registryTwo);
-      DoubleYoVariable variableTwoB = new DoubleYoVariable("variableTwoB", registryTwo);
+      YoDouble variableTwoA = new YoDouble("variableTwoA", registryTwo);
+      YoDouble variableTwoB = new YoDouble("variableTwoB", registryTwo);
       
       robot.getRobotsYoVariableRegistry().addChild(registryOne);
       robot.getRobotsYoVariableRegistry().addChild(registryTwo);
@@ -113,32 +114,32 @@ public class SimulationConstructionSetRootRegistryTest
       
       YoVariableRegistry registryBeforeConstructionOne = new YoVariableRegistry("RegistryBeforeConstructionOne");
       robot.getRobotsYoVariableRegistry().addChild(registryBeforeConstructionOne);
-      DoubleYoVariable variableBeforeConstructionOne = new DoubleYoVariable("variableBeforeConstructionOne", registryBeforeConstructionOne);
+      YoDouble variableBeforeConstructionOne = new YoDouble("variableBeforeConstructionOne", registryBeforeConstructionOne);
       
       YoVariableRegistry registryBeforeConstructionOneOne = new YoVariableRegistry("RegistryBeforeConstructionOneOne");
       registryBeforeConstructionOne.addChild(registryBeforeConstructionOneOne);
-      DoubleYoVariable variableBeforeConstructionOneOne = new DoubleYoVariable("variableBeforeConstructionOneOne", registryBeforeConstructionOneOne);
+      YoDouble variableBeforeConstructionOneOne = new YoDouble("variableBeforeConstructionOneOne", registryBeforeConstructionOneOne);
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(SHOW_GUI);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
-      DoubleYoVariable variableAfterConstructionZero = new DoubleYoVariable("variableAfterConstructionZero", registryBeforeConstructionOne);
+      YoDouble variableAfterConstructionZero = new YoDouble("variableAfterConstructionZero", registryBeforeConstructionOne);
 
       YoVariableRegistry registryAfterConstructionOne = new YoVariableRegistry("RegistryAfterConstructionOne");
-      DoubleYoVariable variableAfterConstructionOne = new DoubleYoVariable("variableAfterConstructionOne", registryAfterConstructionOne);
+      YoDouble variableAfterConstructionOne = new YoDouble("variableAfterConstructionOne", registryAfterConstructionOne);
       scs.getRootRegistry().addChild(registryAfterConstructionOne);
-      DoubleYoVariable variableAfterConstructionTwo = new DoubleYoVariable("variableAfterConstructionTwo", registryAfterConstructionOne);
+      YoDouble variableAfterConstructionTwo = new YoDouble("variableAfterConstructionTwo", registryAfterConstructionOne);
       
       scs.startOnAThread();
       
-      DoubleYoVariable variableAfterThreadZero = new DoubleYoVariable("variableAfterThreadZero", registryAfterConstructionOne);
+      YoDouble variableAfterThreadZero = new YoDouble("variableAfterThreadZero", registryAfterConstructionOne);
 //      sleep(100000);
 
       YoVariableRegistry registryAfterThreadOne = new YoVariableRegistry("RegistryAfterThreadOne");
-      DoubleYoVariable variableAfterThreadOne = new DoubleYoVariable("variableAfterThreadOne", registryAfterThreadOne);
+      YoDouble variableAfterThreadOne = new YoDouble("variableAfterThreadOne", registryAfterThreadOne);
       registryAfterConstructionOne.addChild(registryAfterThreadOne);
-      DoubleYoVariable variableAfterThreadTwo = new DoubleYoVariable("variableAfterThreadTwo", registryAfterThreadOne);
+      YoDouble variableAfterThreadTwo = new YoDouble("variableAfterThreadTwo", registryAfterThreadOne);
 
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
       

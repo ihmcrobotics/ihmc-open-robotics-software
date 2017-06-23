@@ -4,26 +4,26 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
 {
-   private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet" + behaviorName, registry);
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-   private final BooleanYoVariable trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
+   private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet" + behaviorName, registry);
+   private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
+   private final YoBoolean trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
    private PelvisHeightTrajectoryMessage outgoingPelvisHeightTrajectoryMessage;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime;
 
-   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
-      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(getName() + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
    }
@@ -31,7 +31,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
       this.outgoingPelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessage;
-         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getLastTrajectoryPoint().getPosition() );
+         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getLastTrajectoryPoint().getZ());
       hasInputBeenSet.set(true);
    }
 

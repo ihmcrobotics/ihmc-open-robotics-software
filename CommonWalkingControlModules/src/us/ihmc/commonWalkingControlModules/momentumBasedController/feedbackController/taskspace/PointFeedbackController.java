@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -33,7 +33,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -80,6 +80,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private RigidBody base;
    private ReferenceFrame controlBaseFrame;
+   private ReferenceFrame linearGainsFrame;
 
    private final RigidBody endEffector;
 
@@ -99,11 +100,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, DESIRED, isEnabled);
@@ -166,6 +167,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
       controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
@@ -298,8 +300,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kp.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -329,8 +337,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kd.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -363,8 +377,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       ki.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**

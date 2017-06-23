@@ -1,28 +1,28 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoMinimumJerkTrajectory
 {
    public static final boolean DEBUG = false;
    
-   private final DoubleYoVariable X0, V0, A0, Xf, Vf, Af, T0, Tf;
+   private final YoDouble X0, V0, A0, Xf, Vf, Af, T0, Tf;
    private double C0, C1, C2, C3, C4, C5;
 
    public double pos, vel, acc;
 
    public YoMinimumJerkTrajectory(String name, YoVariableRegistry registry)
    {
-      X0 = new DoubleYoVariable(name + "_x0", registry);
-      V0 = new DoubleYoVariable(name + "_v0", registry);
-      A0 = new DoubleYoVariable(name + "_a0", registry);
-      T0 = new DoubleYoVariable(name + "_t0", registry);
+      X0 = new YoDouble(name + "_x0", registry);
+      V0 = new YoDouble(name + "_v0", registry);
+      A0 = new YoDouble(name + "_a0", registry);
+      T0 = new YoDouble(name + "_t0", registry);
 
-      Xf = new DoubleYoVariable(name + "_xf", registry);
-      Vf = new DoubleYoVariable(name + "_vf", registry);
-      Af = new DoubleYoVariable(name + "_af", registry);
-      Tf = new DoubleYoVariable(name + "_tf", registry);
+      Xf = new YoDouble(name + "_xf", registry);
+      Vf = new YoDouble(name + "_vf", registry);
+      Af = new YoDouble(name + "_af", registry);
+      Tf = new YoDouble(name + "_tf", registry);
    }
 
    public double getStartTime()
@@ -87,20 +87,20 @@ public class YoMinimumJerkTrajectory
       vals[2] = this.acc;
    }
 
-   public void computeTrajectory(double t, DoubleYoVariable pos)
+   public void computeTrajectory(double t, YoDouble pos)
    {
       computeTrajectory(t);
       pos.set(this.pos);
    }
 
-   public void computeTrajectory(double t, DoubleYoVariable pos, DoubleYoVariable vel)
+   public void computeTrajectory(double t, YoDouble pos, YoDouble vel)
    {
       computeTrajectory(t);
       pos.set(this.pos);
       vel.set(this.vel);
    }
 
-   public void computeTrajectory(double t, DoubleYoVariable pos, DoubleYoVariable vel, DoubleYoVariable acc)
+   public void computeTrajectory(double t, YoDouble pos, YoDouble vel, YoDouble acc)
    {
       computeTrajectory(t);
       pos.set(this.pos);

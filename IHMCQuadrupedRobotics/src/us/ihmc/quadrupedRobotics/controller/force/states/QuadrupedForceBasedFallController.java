@@ -17,11 +17,11 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -56,8 +56,8 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
 
    // YoVariables
-   private final BooleanYoVariable yoUseForceFeedbackControl;
-   private final EnumYoVariable<FallBehaviorType> fallBehaviorType = EnumYoVariable.create("fallBehaviorType", FallBehaviorType.class, registry);
+   private final YoBoolean yoUseForceFeedbackControl;
+   private final YoEnum<FallBehaviorType> fallBehaviorType = YoEnum.create("fallBehaviorType", FallBehaviorType.class, registry);
    private final YoEuclideanPositionGains yoPositionControllerGains;
 
    // Task space controller
@@ -95,7 +95,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       fullRobotModel = environment.getFullRobotModel();
 
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
-      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
 
       environment.getParentRegistry().addChild(registry);
    }

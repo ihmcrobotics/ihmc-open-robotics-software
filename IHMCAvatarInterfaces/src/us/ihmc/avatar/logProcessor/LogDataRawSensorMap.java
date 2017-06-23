@@ -5,9 +5,9 @@ import java.util.LinkedHashMap;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -25,11 +25,11 @@ public class LogDataRawSensorMap
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
-   private final LongYoVariable timestamp, visionSensorTimestamp;
+   private final YoLong timestamp, visionSensorTimestamp;
 
-   private final LinkedHashMap<String, DoubleYoVariable> rawJointPositionMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, DoubleYoVariable> rawJointVelocityMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, DoubleYoVariable> rawJointTauMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoDouble> rawJointPositionMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoDouble> rawJointVelocityMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoDouble> rawJointTauMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<String, YoFrameQuaternion> rawIMUOrientationMap = new LinkedHashMap<>();
    private final LinkedHashMap<String, YoFrameVector> rawIMUAngularVelocityMap = new LinkedHashMap<>();
@@ -39,47 +39,47 @@ public class LogDataRawSensorMap
    {
       stateEstimatorSensorDefinitions = buildStateEstimatorSensorDefinitions(fullRobotModel);
 
-      timestamp = (LongYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "timestamp");
-      visionSensorTimestamp = (LongYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "visionSensorTimestamp");
+      timestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "timestamp");
+      visionSensorTimestamp = (YoLong) yoVariableHolder.getVariable(sensorProcessingName, "visionSensorTimestamp");
       
       for (OneDoFJoint joint : stateEstimatorSensorDefinitions.getJointSensorDefinitions())
       {
          String jointName = joint.getName();
-         DoubleYoVariable rawJointPosition = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_" + jointName);
+         YoDouble rawJointPosition = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_" + jointName);
          rawJointPositionMap.put(jointName, rawJointPosition);
          
-         DoubleYoVariable rawJointVelocity = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_qd_" + jointName);
+         YoDouble rawJointVelocity = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_qd_" + jointName);
          rawJointVelocityMap.put(jointName, rawJointVelocity);
          
-         DoubleYoVariable rawJointTau = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_tau_" + jointName);
+         YoDouble rawJointTau = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_tau_" + jointName);
          rawJointTauMap.put(jointName, rawJointTau);
       }
       
       for (IMUDefinition imuDefinition : stateEstimatorSensorDefinitions.getIMUSensorDefinitions())
       {
          String imuName = imuDefinition.getName();
-         DoubleYoVariable qx = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qx" + imuName);
-         DoubleYoVariable qy = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qy" + imuName);
-         DoubleYoVariable qz = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qz" + imuName);
-         DoubleYoVariable qs = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qs" + imuName);
+         YoDouble qx = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qx" + imuName);
+         YoDouble qy = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qy" + imuName);
+         YoDouble qz = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qz" + imuName);
+         YoDouble qs = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, "raw_q_Qs" + imuName);
          if (qx != null && qy != null && qz != null && qs != null)
          {
             YoFrameQuaternion rawOrientation = new YoFrameQuaternion(qx, qy, qz, qs, null);
             rawIMUOrientationMap.put(imuName, rawOrientation);
          }
          
-         DoubleYoVariable qd_wx = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qd_w", imuName));
-         DoubleYoVariable qd_wy = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qd_w", imuName));
-         DoubleYoVariable qd_wz = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
+         YoDouble qd_wx = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qd_w", imuName));
+         YoDouble qd_wy = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qd_w", imuName));
+         YoDouble qd_wz = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
          if (qd_wx != null && qd_wy != null && qd_wz != null)
          {
             YoFrameVector rawAngularVelocity = new YoFrameVector(qd_wx, qd_wy, qd_wz, null);
             rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
          }
          
-         DoubleYoVariable qdd_x = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qdd_", imuName));
-         DoubleYoVariable qdd_y = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qdd_", imuName));
-         DoubleYoVariable qdd_z = (DoubleYoVariable) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
+         YoDouble qdd_x = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qdd_", imuName));
+         YoDouble qdd_y = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qdd_", imuName));
+         YoDouble qdd_z = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
          if (qdd_x != null && qdd_y != null && qdd_z != null)
          {
             YoFrameVector rawLinearAcceleration = new YoFrameVector(qdd_x, qdd_y, qdd_z, null);

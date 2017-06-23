@@ -6,9 +6,9 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -20,12 +20,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
 public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends AbstractReferenceFrameHolder
 {
-   private final DoubleYoVariable x, y; // This is where the data is stored. All operations must act on these numbers.
+   private final YoDouble x, y; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple2d; // This is only for assistance. The data is stored in the YoVariables, not in here!
    private final ReferenceFrame referenceFrame; // Redundant but allows to make sure the frame isn't changed
 
 
-   public YoFrameTuple2d(DoubleYoVariable xVariable, DoubleYoVariable yVariable, ReferenceFrame referenceFrame)
+   public YoFrameTuple2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame referenceFrame)
    {
       this.x = xVariable;
       this.y = yVariable;
@@ -41,8 +41,8 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
 
    public YoFrameTuple2d(String namePrefix, String nameSuffix, String description, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      x = new DoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry);
-      y = new DoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), description, registry);
+      x = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry);
+      y = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), description, registry);
       this.referenceFrame = referenceFrame;
       this.frameTuple2d = createEmptyFrameTuple2d();
       putYoValuesIntoFrameTuple2d();
@@ -119,12 +119,12 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       return y.getDoubleValue();
    }
 
-   public final DoubleYoVariable getYoX()
+   public final YoDouble getYoX()
    {
       return x;
    }
 
-   public final DoubleYoVariable getYoY()
+   public final YoDouble getYoY()
    {
       return y;
    }

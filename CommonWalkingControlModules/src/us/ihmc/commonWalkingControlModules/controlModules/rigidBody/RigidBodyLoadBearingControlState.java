@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -15,15 +15,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -42,6 +44,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private static final FrameVector zeroInWorld = new FrameVector(worldFrame, 0.0, 0.0, 0.0);
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
@@ -62,7 +65,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final PoseReferenceFrame desiredContactFrame;
 
    private final ContactablePlaneBody contactableBody;
-   private final DoubleYoVariable coefficientOfFriction;
+   private final YoDouble coefficientOfFriction;
    private final YoFrameVector contactNormal;
    private final ReferenceFrame contactFrame;
 
@@ -74,8 +77,11 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final FramePoint currentContactPosition = new FramePoint(worldFrame);
    private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
 
-   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, DoubleYoVariable yoTime,
-         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   private final YoBoolean hybridModeActive;
+   private final RigidBodyJointControlHelper jointControlHelper;
+
+   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
+         RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -90,7 +96,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
 
       String bodyName = bodyToControl.getName();
-      coefficientOfFriction = new DoubleYoVariable(bodyName + "CoefficientOfFriction", registry);
+      coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
       contactPoint = new YoFramePoint(bodyName + "ContactPoint", contactFrame, parentRegistry);
       contactPointInWorld = new YoFramePoint(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);
@@ -98,6 +104,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
       planeContactStateCommand.setId(NO_CONTACT_ID);
+
+      this.jointControlHelper = jointControlHelper;
+      String prefix = bodyName + "Loadbearing";
+      hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
 
       setupViz(graphicsListRegistry, bodyName);
    }
@@ -175,6 +185,12 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
 
+      if (hybridModeActive.getBooleanValue())
+      {
+         double timeInTrajectory = getTimeInTrajectory();
+         jointControlHelper.doAction(timeInTrajectory);
+      }
+
       updateGraphics();
    }
 
@@ -217,6 +233,36 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
    }
 
+   public boolean handleLoadbearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   {
+      setCoefficientOfFriction(command.getCoefficientOfFriction());
+      setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
+      setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
+      return true;
+   }
+
+   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   {
+      if (jointControlHelper == null)
+      {
+         PrintTools.warn(warningPrefix + "Can not use hybrid mode. Was not created with a jointspace helper.");
+         return false;
+      }
+
+      if (!handleCommandInternal(command))
+      {
+         return false;
+      }
+
+      if (!jointControlHelper.handleTrajectoryCommand(command, initialJointPositions))
+      {
+         return false;
+      }
+
+      hybridModeActive.set(true);
+      return true;
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -245,7 +291,24 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
+      if (hybridModeActive.getBooleanValue())
+      {
+         feedbackControlCommandList.clear();
+         feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+         return feedbackControlCommandList;
+      }
+
       return spatialFeedbackControlCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      feedbackControlCommandList.clear();
+      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      return feedbackControlCommandList;
    }
 
    @Override
@@ -273,7 +336,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public void clear()
    {
-      
+      hybridModeActive.set(false);
    }
-
 }

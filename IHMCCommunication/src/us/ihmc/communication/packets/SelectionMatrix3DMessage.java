@@ -49,6 +49,14 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       this.ySelected = selectionMatrix3D.isYSelected();
       this.zSelected = selectionMatrix3D.isZSelected();
    }
+   
+   public void set(SelectionMatrix3DMessage selectionMatrix3D)
+   {
+      this.selectionFrameId = selectionMatrix3D.selectionFrameId;  
+      this.xSelected = selectionMatrix3D.xSelected;          
+      this.ySelected = selectionMatrix3D.ySelected;          
+      this.zSelected = selectionMatrix3D.zSelected;          
+   }
 
    /**
     * Updates the selection of the axes of interest.

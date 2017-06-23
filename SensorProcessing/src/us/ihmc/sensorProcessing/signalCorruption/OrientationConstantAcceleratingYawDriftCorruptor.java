@@ -1,9 +1,8 @@
 package us.ihmc.sensorProcessing.signalCorruption;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalCorruptor<RotationMatrix>
 {
@@ -11,10 +10,10 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable yawDriftAcceleration;
-   private final DoubleYoVariable yawDriftVelocity;
-   private final DoubleYoVariable yawDriftAngle;
-   private final DoubleYoVariable corruptedIMUYawAngle;
+   private final YoDouble yawDriftAcceleration;
+   private final YoDouble yawDriftVelocity;
+   private final YoDouble yawDriftAngle;
+   private final YoDouble corruptedIMUYawAngle;
 
    private final RotationMatrix yawDriftRotation = new RotationMatrix();
    private final RotationMatrix tempRotation = new RotationMatrix();
@@ -27,10 +26,10 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
 
       this.dt = dt;
 
-      this.yawDriftAcceleration = new DoubleYoVariable(namePrefix + SIMULATED_YAW_DRIFT_ACCELERATION, registry);
-      this.yawDriftVelocity = new DoubleYoVariable(namePrefix + "SimulatedYawDriftVelocity", registry);
-      this.yawDriftAngle = new DoubleYoVariable(namePrefix + "SimulatedYawDriftAngle", registry);
-      this.corruptedIMUYawAngle = new DoubleYoVariable(namePrefix + "SimulatedCorruptedIMUYawAngle", registry);
+      this.yawDriftAcceleration = new YoDouble(namePrefix + SIMULATED_YAW_DRIFT_ACCELERATION, registry);
+      this.yawDriftVelocity = new YoDouble(namePrefix + "SimulatedYawDriftVelocity", registry);
+      this.yawDriftAngle = new YoDouble(namePrefix + "SimulatedYawDriftAngle", registry);
+      this.corruptedIMUYawAngle = new YoDouble(namePrefix + "SimulatedCorruptedIMUYawAngle", registry);
 
       parentRegistry.addChild(registry);
    }

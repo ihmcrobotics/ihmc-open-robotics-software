@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,11 +31,11 @@ public class StandingState extends WalkingState
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final KneeAngleManager kneeAngleManager;
+   private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
-   private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
+   private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
+   private final YoBoolean doPreparePelvisForLocomotion = new YoBoolean("doPreparePelvisForLocomotion", registry);
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -63,7 +63,7 @@ public class StandingState extends WalkingState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
@@ -95,7 +95,7 @@ public class StandingState extends WalkingState
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
 
       for (RobotSide robotSide : RobotSide.values)
-         kneeAngleManager.setStraight(robotSide);
+         legConfigurationManager.setStraight(robotSide);
    }
 
    @Override
@@ -111,7 +111,10 @@ public class StandingState extends WalkingState
       }
 
       if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
+      {
          pelvisOrientationManager.prepareForLocomotion();
+         comHeightManager.prepareForLocomotion();
+      }
 
       balanceManager.disablePelvisXYControl();
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);

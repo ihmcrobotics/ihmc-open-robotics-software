@@ -6,9 +6,9 @@ import java.util.Map;
 
 import net.java.games.input.Event;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -18,14 +18,14 @@ public class HexapodGamePadManager implements JoystickEventListener
 {
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
    
-   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode;
-   private final DoubleYoVariable desiredLinearVelocityX; 
-   private final DoubleYoVariable desiredLinearVelocityY; 
-   private final DoubleYoVariable desiredLinearVelocityZ; 
-   private final DoubleYoVariable currentOrientationPitch;
-   private final DoubleYoVariable currentOrientationRoll;
-   private final DoubleYoVariable desiredAngularVelocityZ;
-   private final DoubleYoVariable desiredBodyHeight;
+   private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode;
+   private final YoDouble desiredLinearVelocityX;
+   private final YoDouble desiredLinearVelocityY;
+   private final YoDouble desiredLinearVelocityZ;
+   private final YoDouble currentOrientationPitch;
+   private final YoDouble currentOrientationRoll;
+   private final YoDouble desiredAngularVelocityZ;
+   private final YoDouble desiredBodyHeight;
    
    public HexapodGamePadManager(Joystick device, YoVariableRegistry registry)
    {
@@ -38,15 +38,15 @@ public class HexapodGamePadManager implements JoystickEventListener
       
       device.setPollInterval(10);
       
-     desiredLinearVelocityX = (DoubleYoVariable) registry.getVariable("BODYdesiredLinearVelocityX");
-     desiredLinearVelocityY = (DoubleYoVariable) registry.getVariable("BODYdesiredLinearVelocityY");
-     desiredLinearVelocityZ = (DoubleYoVariable) registry.getVariable("BODYdesiredLinearVelocityZ");
-     desiredBodyHeight = (DoubleYoVariable) registry.getVariable("BODYdesiredBodyHeight");
+     desiredLinearVelocityX = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityX");
+     desiredLinearVelocityY = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityY");
+     desiredLinearVelocityZ = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityZ");
+     desiredBodyHeight = (YoDouble) registry.getVariable("BODYdesiredBodyHeight");
      
-     currentOrientationPitch = (DoubleYoVariable) registry.getVariable("BODYdesiredOrientationPitch");
-     currentOrientationRoll = (DoubleYoVariable) registry.getVariable("BODYdesiredOrientationRoll");
-     desiredAngularVelocityZ = (DoubleYoVariable) registry.getVariable("BODYdesiredAngularVelocityZ");
-     controllerCoreMode = (EnumYoVariable<WholeBodyControllerCoreMode>) registry.getVariable("controllerCoreMode");
+     currentOrientationPitch = (YoDouble) registry.getVariable("BODYdesiredOrientationPitch");
+     currentOrientationRoll = (YoDouble) registry.getVariable("BODYdesiredOrientationRoll");
+     desiredAngularVelocityZ = (YoDouble) registry.getVariable("BODYdesiredAngularVelocityZ");
+     controllerCoreMode = (YoEnum<WholeBodyControllerCoreMode>) registry.getVariable("controllerCoreMode");
      
      
       

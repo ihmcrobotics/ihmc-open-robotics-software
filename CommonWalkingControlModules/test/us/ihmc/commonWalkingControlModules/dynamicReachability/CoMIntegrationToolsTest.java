@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerS
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -26,7 +26,7 @@ public class CoMIntegrationToolsTest
    public void testTransferIntegration()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-      DoubleYoVariable omega0 = new DoubleYoVariable("Omega0", registry);
+      YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 
       double duration = 2.0;
@@ -95,7 +95,7 @@ public class CoMIntegrationToolsTest
    public void testSwingIntegration()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-      DoubleYoVariable omega0 = new DoubleYoVariable("Omega0", registry);
+      YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 
       double swingDuration = 2.0;
@@ -180,7 +180,7 @@ public class CoMIntegrationToolsTest
    public void testSwingIntegrationWithSpline()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-      DoubleYoVariable omega0 = new DoubleYoVariable("Omega0", registry);
+      YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 
       double swingDuration = 0.6;

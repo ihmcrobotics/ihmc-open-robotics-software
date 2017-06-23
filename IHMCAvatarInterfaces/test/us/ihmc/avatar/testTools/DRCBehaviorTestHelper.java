@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -39,8 +40,8 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,9 +63,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
    private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable yoTimeRobot;
-   private final DoubleYoVariable yoTimeBehaviorDispatcher;
-   private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
+   private final YoDouble yoTimeRobot;
+   private final YoDouble yoTimeBehaviorDispatcher;
+   private final YoDouble yoTimeLastFullRobotModelUpdate;
 
    private final DRCRobotModel drcRobotModel;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -98,19 +99,28 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
-
+   
+   
+   
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
          String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
          DRCRobotModel robotModel, boolean automaticallySimulate)
    {
-      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, automaticallySimulate);
+	   this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, automaticallySimulate);
+   }
+   
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
+	         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+	         DRCRobotModel robotModel, DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)	   
+   {
+      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, networkModuleParameters, automaticallySimulate);
 
       yoTimeRobot = getRobot().getYoTime();
-      yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
+      yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);
 
       this.drcRobotModel = robotModel;
       this.fullRobotModel = robotModel.createFullRobotModel();
-      yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
+      yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
       
       this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
@@ -182,7 +192,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return robotDataReceiver;
    }
 
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return yoTimeRobot;
    }
@@ -302,28 +312,28 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       if (mockUIPacketCommunicatorServer != null)
       {
-         mockUIPacketCommunicatorServer.close();
+         mockUIPacketCommunicatorServer.disconnect();
       }
       
       if (mockUIPacketCommunicatorClient != null)
       {
-         mockUIPacketCommunicatorClient.close();
+         mockUIPacketCommunicatorClient.disconnect();
       }
       
 
       if (behaviorCommunicatorClient != null)
       {
-         behaviorCommunicatorClient.close();
+         behaviorCommunicatorClient.disconnect();
       }
       
       if (behaviorCommunicatorServer != null)
       {
-         behaviorCommunicatorServer.close();
+         behaviorCommunicatorServer.disconnect();
       }
 
       if (controllerCommunicator != null)
       {
-         controllerCommunicator.close();
+         controllerCommunicator.disconnect();
       }
 
       super.destroySimulation();

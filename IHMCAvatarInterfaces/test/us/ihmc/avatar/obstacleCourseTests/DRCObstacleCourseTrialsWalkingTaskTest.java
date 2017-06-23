@@ -17,12 +17,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -150,7 +150,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
-         private final DoubleYoVariable q_y = (DoubleYoVariable) scs.getVariable("q_y");
+         private final YoDouble q_y = (YoDouble) scs.getVariable("q_y");
 
          @Override
          public void initializeProcessing()
@@ -189,7 +189,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
-      BooleanYoVariable doToeTouchdownIfPossible = (BooleanYoVariable) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
+      YoBoolean doToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
       doToeTouchdownIfPossible.set(true);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);

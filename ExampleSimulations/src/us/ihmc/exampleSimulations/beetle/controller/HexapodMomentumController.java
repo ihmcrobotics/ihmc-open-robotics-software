@@ -8,8 +8,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -36,7 +36,7 @@ public class HexapodMomentumController
    private final HexapodReferenceFrames referenceFrames;
    private final FramePoint desiredComPosition = new FramePoint();
    private final StraightLineCartesianTrajectoryGenerator trajectoryGenerator;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CenterOfMassJacobian comJacobian;
    private final YoFramePoint yoCurrentCenterOfMassPosition;
    private final YoFramePoint yoCurrentCenterOfFeetPosition;
@@ -53,7 +53,7 @@ public class HexapodMomentumController
       this.referenceFrames = referenceFrames;
       this.dt = dt;
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      yoTime = new DoubleYoVariable(prefix + "yoTime", registry);
+      yoTime = new YoDouble(prefix + "yoTime", registry);
       yoLinearMomentumRateOfChange = new YoFrameVector(prefix + "desiredLinearMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);  
       yoAngularMomentumRateOfChange = new YoFrameVector(prefix + "desiredAngularMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);
       trajectoryGenerator = new StraightLineCartesianTrajectoryGenerator("comTrajectoryGenerator", ReferenceFrame.getWorldFrame(), 3.0, 10.0, yoTime, registry);

@@ -18,11 +18,11 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -125,37 +125,37 @@ public class ICPPlanner
 
    private final String namePrefix = "icpPlanner";
 
-   private final BooleanYoVariable isStanding = new BooleanYoVariable(namePrefix + "IsStanding", registry);
-   private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(namePrefix + "IsInitialTransfer", registry);
-   private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable(namePrefix + "IsDoubleSupport", registry);
+   private final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
+   private final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
+   private final YoBoolean isDoubleSupport = new YoBoolean(namePrefix + "IsDoubleSupport", registry);
 
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
    /** Desired position for the Instantaneous Capture Point (ICP) */
-   private final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
+   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    /** Desired velocity for the Instantaneous Capture Point (ICP) */
-   private final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
+   protected final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
    /** Desired acceleration for the Instantaneous Capture Point (ICP) */
-   private final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
+   protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
-   private final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
+   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
-   private final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
+   protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
    private final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
-   private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
+   protected final YoDouble omega0 = new YoDouble(namePrefix + "Omega0", registry);
 
    /** Time at which the current state was initialized. */
-   private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "CurrentStateInitialTime", registry);
+   private final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
    /** Time spent in the current state. */
-   private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
+   protected final YoDouble timeInCurrentState = new YoDouble(namePrefix + "TimeInCurrentState", registry);
    /** Time remaining before the end of the current state. */
-   private final DoubleYoVariable timeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
+   protected final YoDouble timeInCurrentStateRemaining = new YoDouble(namePrefix + "RemainingTime", registry);
 
-   private final BooleanYoVariable useTwoConstantCMPsPerSupport = new BooleanYoVariable(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
+   private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
    /**
     * Repartition of the swing duration around the exit corner point:
@@ -169,9 +169,9 @@ public class ICPPlanner
     * {@code useTwoConstantCMPsPerSupport == true}.
     * </p>
     */
-   private final DoubleYoVariable defaultSwingDurationAlpha = new DoubleYoVariable(namePrefix + "DefaultSwingDurationAlpha",
+   private final YoDouble defaultSwingDurationAlpha = new YoDouble(namePrefix + "DefaultSwingDurationAlpha",
                                                                             "Repartition of the swing duration around the exit corner point.", registry);
-   private final ArrayList<DoubleYoVariable> swingDurationAlphas = new ArrayList<>();
+   private final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
 
    /**
     * Repartition of the transfer duration around the entry corner point:
@@ -182,11 +182,11 @@ public class ICPPlanner
     * corner point.
     * </ul>
     */
-   private final DoubleYoVariable defaultTransferDurationAlpha = new DoubleYoVariable(namePrefix + "DefaultTransferDurationAlpha",
+   private final YoDouble defaultTransferDurationAlpha = new YoDouble(namePrefix + "DefaultTransferDurationAlpha",
                                                                                "Repartition of the transfer duration around the entry corner point.", registry);
-   private final ArrayList<DoubleYoVariable> transferDurationAlphas = new ArrayList<>();
+   private final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
 
-   private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
+   private final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
 
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state
@@ -196,16 +196,16 @@ public class ICPPlanner
     * when the robot is getting stuck at the end of transfer.
     * </p>
     */
-   private final DoubleYoVariable velocityDecayDurationWhenDone = new DoubleYoVariable(namePrefix + "VelocityDecayDurationWhenDone", registry);
+   private final YoDouble velocityDecayDurationWhenDone = new YoDouble(namePrefix + "VelocityDecayDurationWhenDone", registry);
    /**
     * Output of the linear reduction being applied on the desired ICP velocity when the current
     * state is done.
     * <p>
     * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
     * when the robot is getting stuck at the end of transfer.
-    * </p>
+    true* </p>
     */
-   private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
+   private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
 
    private final YoFramePointInMultipleFrames singleSupportInitialICP;
    private final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
@@ -218,28 +218,28 @@ public class ICPPlanner
    private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
    private final FramePoint2d singleSupportFinalCoM = new FramePoint2d();
 
-   private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
-   private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
+   private final YoBoolean requestedHoldPosition = new YoBoolean(namePrefix + "RequestedHoldPosition", registry);
+   private final YoBoolean isHoldingPosition = new YoBoolean(namePrefix + "IsHoldingPosition", registry);
    private final YoFramePoint icpPositionToHold = new YoFramePoint(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
 
-   private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
-   private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
+   private final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    private final List<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final List<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
 
-   private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
-   private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   private final DoubleYoVariable defaultFinalTransferDuration = new DoubleYoVariable(namePrefix + "DefaultFinalTransferDuration", registry);
-   private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(namePrefix + "FinalTransferDuration", registry);
-   private final DoubleYoVariable finalTransferDurationAlpha = new DoubleYoVariable(namePrefix + "FinalTransferDurationAlpha", registry);
+   private final List<YoDouble> swingDurations = new ArrayList<>();
+   private final List<YoDouble> transferDurations = new ArrayList<>();
+   private final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
+   private final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
 
    private final ICPPlannerTrajectoryGenerator icpDoubleSupportTrajectoryGenerator;
    private final ICPPlannerSegmentedTrajectoryGenerator icpSingleSupportTrajectoryGenerator;
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   protected final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
@@ -313,18 +313,18 @@ public class ICPPlanner
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
       {
-         DoubleYoVariable swingDuration = new DoubleYoVariable(namePrefix + "SwingDuration" + i, registry);
+         YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
-         DoubleYoVariable transferDuration = new DoubleYoVariable(namePrefix + "TransferDuration" + i, registry);
+         YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
 
-         DoubleYoVariable transferDurationAlpha = new DoubleYoVariable(namePrefix + "TransferDurationAlpha" + i,
+         YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          transferDurationAlpha.setToNaN();
          transferDurationAlphas.add(transferDurationAlpha);
-         DoubleYoVariable swingDurationAlpha = new DoubleYoVariable(namePrefix + "SwingDurationAlpha" + i,
+         YoDouble swingDurationAlpha = new YoDouble(namePrefix + "SwingDurationAlpha" + i,
                "Repartition of the transfer duration around the entry corner point.", registry);
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);
@@ -1486,11 +1486,21 @@ public class ICPPlanner
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
+      {
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      }
+      else if (entryCornerPoints.get(1).containsNaN())
+      {
+         tempFinalICP.setToZero(midFeetZUpFrame);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
       else
+      {
          entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
-      tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
    }
 
    private final FramePoint2d tempFinalCoM = new FramePoint2d();

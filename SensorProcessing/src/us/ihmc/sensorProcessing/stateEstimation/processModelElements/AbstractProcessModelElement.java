@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 
@@ -20,7 +20,7 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
    protected final LinkedHashMap<ControlFlowInputPort<?>, DenseMatrix64F> inputMatrixBlocks;
    private final DenseMatrix64F processNoiseCovarianceBlock;
    private final DenseMatrix64F scaledProcessNoiseCovarianceMatrixBlock;
-   private final DoubleYoVariable covarianceMatrixScaling;
+   private final YoDouble covarianceMatrixScaling;
    private final TimeDomain timeDomain;
    private final boolean isTimeVariant;
    private final ControlFlowOutputPort<?> outputState;
@@ -35,7 +35,7 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
       this.inputMatrixBlocks = new LinkedHashMap<ControlFlowInputPort<?>, DenseMatrix64F>();
       this.processNoiseCovarianceBlock = new DenseMatrix64F(size, size);
       this.scaledProcessNoiseCovarianceMatrixBlock = new DenseMatrix64F(size, size);
-      this.covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
+      this.covarianceMatrixScaling = new YoDouble(name + "CovScaling", registry);
       this.covarianceMatrixScaling.set(1.0);
       this.timeDomain = timeDomain;
       this.isTimeVariant = isTimeVariant;

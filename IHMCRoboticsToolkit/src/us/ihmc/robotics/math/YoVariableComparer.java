@@ -1,20 +1,20 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoVariableComparer
 {
-   private final EnumYoVariable<CompareStatus> status;
-   private final DoubleYoVariable yoVariableA;
-   private final DoubleYoVariable yoVariableB;
-   private final DoubleYoVariable difference;
-   private final DoubleYoVariable threshold;
+   private final YoEnum<CompareStatus> status;
+   private final YoDouble yoVariableA;
+   private final YoDouble yoVariableB;
+   private final YoDouble difference;
+   private final YoDouble threshold;
    private final double nonChangingThreshold;
    private ThresholdType compareType;
 
-   public YoVariableComparer(DoubleYoVariable variableA, DoubleYoVariable variableB, String name, ThresholdType thresholdType, DoubleYoVariable threshold,
+   public YoVariableComparer(YoDouble variableA, YoDouble variableB, String name, ThresholdType thresholdType, YoDouble threshold,
          YoVariableRegistry registry)
    {
       this.yoVariableA = variableA;
@@ -22,11 +22,11 @@ public class YoVariableComparer
       this.compareType = thresholdType;
       this.threshold = threshold;
       this.nonChangingThreshold = Double.NaN;
-      this.status = new EnumYoVariable<CompareStatus>(name + "_status", registry, CompareStatus.class);
-      this.difference = new DoubleYoVariable(name, registry);
+      this.status = new YoEnum<CompareStatus>(name + "_status", registry, CompareStatus.class);
+      this.difference = new YoDouble(name, registry);
    }
    
-   public YoVariableComparer(DoubleYoVariable variableA, DoubleYoVariable variableB, String name, ThresholdType thresholdType, double threshold,
+   public YoVariableComparer(YoDouble variableA, YoDouble variableB, String name, ThresholdType thresholdType, double threshold,
          YoVariableRegistry registry)
    {
       this.yoVariableA = variableA;
@@ -34,8 +34,8 @@ public class YoVariableComparer
       this.compareType = thresholdType;
       this.threshold = null;
       this.nonChangingThreshold = threshold;
-      this.difference = new DoubleYoVariable(name, registry);
-      this.status = new EnumYoVariable<CompareStatus>(name + "_status", registry, CompareStatus.class);
+      this.difference = new YoDouble(name, registry);
+      this.status = new YoEnum<CompareStatus>(name + "_status", registry, CompareStatus.class);
    }
 
    public void update()

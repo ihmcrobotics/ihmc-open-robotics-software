@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.filters;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: </p>
@@ -25,17 +25,17 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  * @author not attributable
  * @version 1.0
  */
-public class TwoVariableTransitionFilter extends DoubleYoVariable
+public class TwoVariableTransitionFilter extends YoDouble
 {
-   private final DoubleYoVariable transitionStartTime;
-   private final DoubleYoVariable time;
+   private final YoDouble transitionStartTime;
+   private final YoDouble time;
    private double lengthOfTransitionTime = 0.0;
 
-   public TwoVariableTransitionFilter(String name, YoVariableRegistry registry, DoubleYoVariable time)
+   public TwoVariableTransitionFilter(String name, YoVariableRegistry registry, YoDouble time)
    {
       super(name, registry);
 
-      transitionStartTime = new DoubleYoVariable("transStartTime_" + name, registry);
+      transitionStartTime = new YoDouble("transStartTime_" + name, registry);
 
       //    alpha = new YoVariable("alpha_" + name, registry);
 
@@ -90,7 +90,7 @@ public class TwoVariableTransitionFilter extends DoubleYoVariable
    {
       YoVariableRegistry reg = new YoVariableRegistry("main");
 
-      DoubleYoVariable time = new DoubleYoVariable("time", "", null);
+      YoDouble time = new YoDouble("time", "", null);
 
       TwoVariableTransitionFilter testVariable = new TwoVariableTransitionFilter("testVariable", reg, time);
 

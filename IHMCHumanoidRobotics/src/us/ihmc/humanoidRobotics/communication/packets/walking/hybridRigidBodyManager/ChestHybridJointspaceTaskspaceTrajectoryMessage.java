@@ -46,6 +46,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMe
    public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage chestHybridJointspaceTaskspaceMessage)
    {
       this(chestHybridJointspaceTaskspaceMessage.getChestTrajectoryMessage(), chestHybridJointspaceTaskspaceMessage.getSpineTrajectoryMessage());
+      setExecutionDelayTime(chestHybridJointspaceTaskspaceMessage.getExecutionDelayTime());
    }
 
    /**

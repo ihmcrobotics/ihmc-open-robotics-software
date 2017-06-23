@@ -10,7 +10,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
@@ -33,7 +33,7 @@ public class AtlasUIPacketLoader
 
       final PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, Conversions.megabytesToBytes(500), Conversions.megabytesToBytes(500), netClassList);
       packetCommunicator.connect();
-      packetCommunicator.attachStateListener(new NetStateListener()
+      packetCommunicator.attachStateListener(new ConnectionStateListener()
       {
          private DataInputStream fileDataInputStream;
          private BufferedReader timingReader;
@@ -106,7 +106,7 @@ public class AtlasUIPacketLoader
 
                fileDataInputStream.close();
 
-               packetCommunicator.close();
+               packetCommunicator.disconnect();
             }
             catch (IOException e)
             {

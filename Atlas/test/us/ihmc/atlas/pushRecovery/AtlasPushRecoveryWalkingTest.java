@@ -35,9 +35,10 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushLeftEarlySwing();
    }
 
+   // Moved one of the old push recovery tests to fast so it is checked from time to time.
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.2)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
+   @Test
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftInitialTransferState();

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 /**
@@ -23,11 +23,11 @@ public class YoFourPointCubicSpline1D
    /** Internal solver used to compute the polynomial coefficients. */
    private final YoPolynomial spline;
    /** Current value of the trajectory. */
-   private final DoubleYoVariable y;
+   private final YoDouble y;
    /** Current first derivative value of the trajectory. */
-   private final DoubleYoVariable yDot;
+   private final YoDouble yDot;
    /** Current second derivative value of the trajectory. */
-   private final DoubleYoVariable yDDot;
+   private final YoDouble yDDot;
 
    private final Point2D start = new Point2D();
    private final Point2D end = new Point2D();
@@ -52,9 +52,9 @@ public class YoFourPointCubicSpline1D
    public YoFourPointCubicSpline1D(String namePrefix, YoVariableRegistry parentRegistry)
    {
       spline = new YoPolynomial(namePrefix + "CubicSpline", numberOfCoefficients, registry);
-      y = new DoubleYoVariable(namePrefix + "Value", registry);
-      yDot = new DoubleYoVariable(namePrefix + "Dot", registry);
-      yDDot = new DoubleYoVariable(namePrefix + "DDot", registry);
+      y = new YoDouble(namePrefix + "Value", registry);
+      yDot = new YoDouble(namePrefix + "Dot", registry);
+      yDDot = new YoDouble(namePrefix + "DDot", registry);
 
       parentRegistry.addChild(registry);
    }

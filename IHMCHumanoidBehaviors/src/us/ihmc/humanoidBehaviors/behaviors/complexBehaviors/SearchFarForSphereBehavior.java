@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarState>
 {
@@ -29,7 +29,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final boolean requireUserValidation;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public SearchFarForSphereBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+   public SearchFarForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
          HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {

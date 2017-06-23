@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactiveElement
 {
@@ -21,30 +21,30 @@ public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactive
    }
 
    //UI SIDE YOVARS
-   public final IntegerYoVariable minHue = new IntegerYoVariable("minHue", userInterfaceWritableRegistry);
-   public final IntegerYoVariable minSat = new IntegerYoVariable("minSat", userInterfaceWritableRegistry);
-   public final IntegerYoVariable minVal = new IntegerYoVariable("minVal", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxHue = new IntegerYoVariable("maxHue", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxSat = new IntegerYoVariable("maxSat", userInterfaceWritableRegistry);
-   public final IntegerYoVariable maxVal = new IntegerYoVariable("maxVal", userInterfaceWritableRegistry);
+   public final YoInteger minHue = new YoInteger("minHue", userInterfaceWritableRegistry);
+   public final YoInteger minSat = new YoInteger("minSat", userInterfaceWritableRegistry);
+   public final YoInteger minVal = new YoInteger("minVal", userInterfaceWritableRegistry);
+   public final YoInteger maxHue = new YoInteger("maxHue", userInterfaceWritableRegistry);
+   public final YoInteger maxSat = new YoInteger("maxSat", userInterfaceWritableRegistry);
+   public final YoInteger maxVal = new YoInteger("maxVal", userInterfaceWritableRegistry);
    
-   public final IntegerYoVariable userInterfaceSideCount = new IntegerYoVariable("userInterfaceSideCount", userInterfaceWritableRegistry);
-   public final BooleanYoVariable abortClicked = new BooleanYoVariable("abortClicked", userInterfaceWritableRegistry);
-   public final BooleanYoVariable validClicked = new BooleanYoVariable("validClicked", userInterfaceWritableRegistry);
+   public final YoInteger userInterfaceSideCount = new YoInteger("userInterfaceSideCount", userInterfaceWritableRegistry);
+   public final YoBoolean abortClicked = new YoBoolean("abortClicked", userInterfaceWritableRegistry);
+   public final YoBoolean validClicked = new YoBoolean("validClicked", userInterfaceWritableRegistry);
 
    //BEHAVIOR SIDE YOVARS
-   public final EnumYoVariable<PickUpBallBehaviorState> currentState = new EnumYoVariable<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
+   public final YoEnum<PickUpBallBehaviorState> currentState = new YoEnum<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
          PickUpBallBehaviorState.class);
-   public final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
-   public final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);
-   public final BooleanYoVariable abortAcknowledged = new BooleanYoVariable("abortAcknowledged", machineWritableRegistry);
-   public final BooleanYoVariable searchingForBall = new BooleanYoVariable("searchingForBall", machineWritableRegistry);
-   public final BooleanYoVariable foundBall = new BooleanYoVariable("foundBall", machineWritableRegistry);
-   public final DoubleYoVariable ballX = new DoubleYoVariable("ballX", machineWritableRegistry);
-   public final DoubleYoVariable ballY = new DoubleYoVariable("ballY", machineWritableRegistry);
-   public final DoubleYoVariable ballZ = new DoubleYoVariable("ballZ", machineWritableRegistry);
-   public final DoubleYoVariable ballRadius = new DoubleYoVariable("ballRadius", machineWritableRegistry);
-   public final BooleanYoVariable validAcknowledged = new BooleanYoVariable("validAcknowledged", machineWritableRegistry);
-   public final BooleanYoVariable waitingForValidation = new BooleanYoVariable("waitingForValidation", machineWritableRegistry);
+   public final YoInteger machineSideCount = new YoInteger("machineSideCount", machineWritableRegistry);
+   public final YoInteger abortCount = new YoInteger("abortCount", machineWritableRegistry);
+   public final YoBoolean abortAcknowledged = new YoBoolean("abortAcknowledged", machineWritableRegistry);
+   public final YoBoolean searchingForBall = new YoBoolean("searchingForBall", machineWritableRegistry);
+   public final YoBoolean foundBall = new YoBoolean("foundBall", machineWritableRegistry);
+   public final YoDouble ballX = new YoDouble("ballX", machineWritableRegistry);
+   public final YoDouble ballY = new YoDouble("ballY", machineWritableRegistry);
+   public final YoDouble ballZ = new YoDouble("ballZ", machineWritableRegistry);
+   public final YoDouble ballRadius = new YoDouble("ballRadius", machineWritableRegistry);
+   public final YoBoolean validAcknowledged = new YoBoolean("validAcknowledged", machineWritableRegistry);
+   public final YoBoolean waitingForValidation = new YoBoolean("waitingForValidation", machineWritableRegistry);
 
 }

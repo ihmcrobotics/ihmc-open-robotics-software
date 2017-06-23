@@ -18,12 +18,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -106,13 +106,13 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
       JPanel initializationPanel = new JPanel();
       initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
-      final BooleanYoVariable enabledOutput = (BooleanYoVariable)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
-      final BooleanYoVariable startStandPrep = (BooleanYoVariable)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
-      final EnumYoVariable requestedHighLevelState = (EnumYoVariable) yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
-      final DoubleYoVariable controlRatio = (DoubleYoVariable) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
+      final YoBoolean enabledOutput = (YoBoolean)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
+      final YoBoolean startStandPrep = (YoBoolean)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
+      final YoEnum requestedHighLevelState = (YoEnum) yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
+      final YoDouble controlRatio = (YoDouble) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
       
-      final DoubleYoVariable leftFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
-      final DoubleYoVariable rightFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
+      final YoDouble leftFootForce = (YoDouble)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
+      final YoDouble rightFootForce = (YoDouble)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
             
       final JButton enabledOutputButton = new JButton("Enable torque output");
       enabledOutputButton.addActionListener(new ActionListener()

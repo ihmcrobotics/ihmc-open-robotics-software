@@ -64,9 +64,9 @@ import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacke
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ButtonData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DebrisData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
@@ -184,7 +184,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -274,6 +276,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(PelvisTrajectoryMessage.class);
       registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
+      registerPacketClass(MessageOfMessages.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
@@ -281,6 +284,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(ChestHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(HeadHybridJointspaceTaskspaceTrajectoryMessage.class);
+      registerPacketClass(ClearDelayQueueMessage.class);
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);
@@ -306,6 +310,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
+      registerPacketField(Class.class);
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);

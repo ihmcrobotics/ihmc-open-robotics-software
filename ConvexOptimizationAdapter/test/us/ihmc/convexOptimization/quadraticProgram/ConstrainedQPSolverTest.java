@@ -10,7 +10,7 @@ import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -34,6 +34,7 @@ public class ConstrainedQPSolverTest
       DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
 
       ConstrainedQPSolver[] optimizers = createSolvers();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
       for (int repeat = 0; repeat < 10000; repeat++)
       {
@@ -43,6 +44,16 @@ public class ConstrainedQPSolverTest
             optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
             Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
          }
+         DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
+
+         solver.clear();
+         solver.setQuadraticCostFunction(Q, f, 0.0);
+         solver.setLinearInequalityConstraints(Ain, bin);
+         solver.setLinearEqualityConstraints(Aeq, beq);
+         solver.solve(x);
+         //solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
+
+         Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
       }
 
       //TODO: Need more test cases. Can't trust these QP solvers without them...
@@ -86,6 +97,34 @@ public class ConstrainedQPSolverTest
                assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
             }
          }
+
+         if (optimizers.length > 0)
+         {
+            DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+
+            solver.clear();
+            solver.setQuadraticCostFunction(Q, f, 0.0);
+            solver.setLinearInequalityConstraints(Ain, bin);
+            solver.setLinearEqualityConstraints(Aeq, beq);
+            solver.solve(x);
+            //solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
+            Assert.assertArrayEquals("repeat = " + repeat + ", Java solver", x.getData(), new double[] {-7.75, 8.5, -0.75}, 1e-10);
+
+            DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+            CommonOps.mult(Aeq, x, bEqualityVerify);
+
+            // Verify Ax=b Equality constraints hold:
+            JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+
+            // Verify Ax<b Inequality constraints hold:
+            DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+            CommonOps.mult(Ain, x, bInequalityVerify);
+
+            for (int j = 0; j < bInequalityVerify.getNumRows(); j++)
+            {
+               assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
+            }
+         }
       }
    }
 
@@ -106,7 +145,7 @@ public class ConstrainedQPSolverTest
       bin.set(0, -1.0);
       bin.set(0, -2.0);
 
-      DenseMatrix64F f = new DenseMatrix64F(0);
+      DenseMatrix64F f = new DenseMatrix64F(1, 1);
       DenseMatrix64F Aeq = new DenseMatrix64F(0, 1);
       DenseMatrix64F beq = new DenseMatrix64F(0, 1);
 
@@ -121,7 +160,23 @@ public class ConstrainedQPSolverTest
          boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
          if (!correct)
             PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
+         Assert.assertTrue(correct);
       }
+
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
+      PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+
+      solver.clear();
+      solver.setQuadraticCostFunction(Q, f, 0.0);
+      solver.setLinearInequalityConstraints(Ain, bin);
+      solver.setLinearEqualityConstraints(Aeq, beq);
+      solver.solve(x);
+
+      //solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
+      boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
+      if (!correct)
+         PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
+      Assert.assertTrue(correct);
    }
 
    private ConstrainedQPSolver[] createSolvers()
