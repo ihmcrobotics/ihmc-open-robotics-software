@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
@@ -19,6 +20,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    private double height;
 
    private final Point3D temporaryPoint = new Point3D();
+   private final Vector3D temporaryVector = new Vector3D();
 
    public static enum CylinderFaces
    {
@@ -61,8 +63,8 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       if (this != cylinder3d)
       {
          setPose(cylinder3d);
-         this.height = cylinder3d.height;
-         this.radius = cylinder3d.radius;
+         height = cylinder3d.height;
+         radius = cylinder3d.radius;
       }
    }
 
@@ -84,25 +86,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public void setHeight(double height)
    {
       this.height = height;
-   }
-
-   public Plane3D getPlane(CylinderFaces face)
-   {
-      Plane3D plane;
-      switch (face)
-      {
-      case TOP:
-         plane = new Plane3D(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
-         break;
-      case BOTTOM:
-         plane = new Plane3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
-         break;
-      default:
-         throw (new RuntimeException("Unrecognized cylinder face"));
-      }
-
-      transformToWorld(plane);
-      return plane;
    }
 
    @Override
@@ -131,6 +114,25 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public boolean epsilonEquals(Cylinder3d other, double epsilon)
    {
       return MathTools.epsilonEquals(height, other.height, epsilon) && MathTools.epsilonEquals(radius, other.radius, epsilon);
+   }
+
+   public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
+   {
+      return intersectionWith(line.getPoint(), line.getDirection(), firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
+                               Point3DBasics secondIntersectionToPack)
+   {
+      transformToLocal(pointOnLine, temporaryPoint);
+      transformToLocal(lineDirection, temporaryVector);
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndCylinder3D(height, radius, temporaryPoint, temporaryVector,
+                                                                                             firstIntersectionToPack, secondIntersectionToPack);
+      if (firstIntersectionToPack != null && numberOfIntersections >= 1)
+         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+      if (secondIntersectionToPack != null && numberOfIntersections == 2)
+         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+      return numberOfIntersections;
    }
 
    @Override
@@ -172,7 +174,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
          double distanceSquaredToTop = (height - z) * (height - z);
          double distanceSquaredToBottom = z * z;
 
-         if ((distanceSquaredToSide < distanceSquaredToTop) && (distanceSquaredToSide < distanceSquaredToBottom))
+         if (distanceSquaredToSide < distanceSquaredToTop && distanceSquaredToSide < distanceSquaredToBottom)
          {
             double xyLength = Math.sqrt(xyLengthSquared);
             if (xyLength > 1e-10)
@@ -215,46 +217,61 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    @Override
    protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryPoint.set(x, y, z);
-      orthogonalProjectionShapeFrame(temporaryPoint);
-      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
+      double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
+
+      if (xyLengthSquared <= radius * radius)
+      {
+         if (z < 0.0)
+            return -z;
+         else if (z > height)
+            return z - height;
+         else
+         { // The query is inside the cylinder. Returning a negative distance.
+            double dz = -Math.min(z, height - z);
+            double dr = Math.sqrt(xyLengthSquared) - radius;
+            return dz > dr ? dz : dr;
+         }
+      }
+      else
+      {
+         double dz = Math.min(-z, z - height);
+         double dr = Math.sqrt(xyLengthSquared) - radius;
+         return Math.sqrt(EuclidCoreTools.normSquared(dr, dz));
+      }
    }
 
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilonToGrowObject)
    {
-      temporaryPoint.set(x, y, z);
-
-      if (temporaryPoint.getZ() < 0.0 - epsilonToGrowObject)
-         return false;
-      if (temporaryPoint.getZ() > height + epsilonToGrowObject)
+      if (z < -epsilonToGrowObject && z > height + epsilonToGrowObject)
          return false;
 
       double radiusSquared = (radius + epsilonToGrowObject) * (radius + epsilonToGrowObject);
-      double xySquared = temporaryPoint.getX() * temporaryPoint.getX() + temporaryPoint.getY() * temporaryPoint.getY();
-
-      if (xySquared > radiusSquared)
-         return false;
-
-      return true;
+      return EuclidCoreTools.normSquared(x, y) <= radiusSquared;
    }
 
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      z = MathTools.clamp(z, 0.0, height);
-
       double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
-      if (xyLengthSquared > radius * radius)
+
+      if (xyLengthSquared <= radius * radius)
       {
-         double xyLength = Math.sqrt(xyLengthSquared);
-         double scale = radius / xyLength;
+         if (z < 0.0)
+            projectionToPack.set(x, y, 0.0);
+         else if (z > height)
+            projectionToPack.set(x, y, height);
+      }
+      else
+      {
+         double scale = radius / Math.sqrt(xyLengthSquared);
 
          x *= scale;
          y *= scale;
-      }
+         z = MathTools.clamp(z, 0.0, height);
 
-      projectionToPack.set(x, y, z);
+         projectionToPack.set(x, y, z);
+      }
    }
 
    private final Point3D tempPointInWorldForProjectingToBottom = new Point3D();
@@ -264,7 +281,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
     * Projects the pointToProject to the bottom of a curved surface given the surfaceNormal defining
     * how the curved surface is contacting another surface, as when the two surfaces roll on each
     * other.
-    * 
+    *
     * @param surfaceNormal defining another surface in which this object is in rolling contact on
     *           the other surface.
     * @param pointToProject point to project to the bottom of the curved surface.
@@ -292,7 +309,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       double x = normalInShapeFrame.getX();
       double y = normalInShapeFrame.getY();
 
-      if ((Math.abs(x) < 1e-7) && (Math.abs(y) < 1e-7))
+      if (Math.abs(x) < 1e-7 && Math.abs(y) < 1e-7)
          return false;
 
       tempVectorInShapeFrameForProjectingToBottom.set(x, normalInShapeFrame.getY());
