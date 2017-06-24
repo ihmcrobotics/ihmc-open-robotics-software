@@ -1,55 +1,44 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
-   private Vector3D radius;
+   private final Vector3D radius = new Vector3D();
 
-   private final Point3D tempPoint3d;
-
-   public Ellipsoid3d(Ellipsoid3d ellipsoid)
+   public Ellipsoid3d(Ellipsoid3d other)
    {
-      setPose(ellipsoid);
-      radius = new Vector3D(ellipsoid.getXRadius(), ellipsoid.getYRadius(), ellipsoid.getZRadius());
-      
-      tempPoint3d = new Point3D();
+      setPose(other);
+      radius.set(other.radius);
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
    {
-      radius = new Vector3D(xRadius, yRadius, zRadius);
-      
-      tempPoint3d = new Point3D();
+      radius.set(xRadius, yRadius, zRadius);
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
       setPose(transform);
-      radius = new Vector3D(xRadius, yRadius, zRadius);
-      
-      tempPoint3d = new Point3D();
+      radius.set(xRadius, yRadius, zRadius);
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius, Pose3D pose)
    {
       setPose(pose);
-      radius = new Vector3D(xRadius, yRadius, zRadius);
-      
-      tempPoint3d = new Point3D();
+      radius.set(xRadius, yRadius, zRadius);
    }
 
    public void getCenter(Point3DBasics centerToPack)
    {
       getPosition(centerToPack);
    }
-   
+
    public void getRadii(Vector3DBasics radiiToPack)
    {
       radiiToPack.set(radius);
@@ -88,80 +77,78 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    @Override
    protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      tempPoint3d.set(x, y, z);
-      double scaledX = tempPoint3d.getX() / radius.getX();
-      double scaledY = tempPoint3d.getY() / radius.getY();
-      double scaledZ = tempPoint3d.getZ() / radius.getZ();
-      
-      double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
-      boolean isInside1 = sumOfSquares <= 1.0;
-      
+      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
+
+      boolean isInside = sumOfSquares <= 1.0;
+
       if (sumOfSquares > 1e-10)
       {
          double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
-         scaledX = scaledX * scaleFactor;
-         scaledY = scaledY * scaleFactor;
-         scaledZ = scaledZ * scaleFactor;
+         closestPointToPack.set(x, y, z);
+         closestPointToPack.scale(scaleFactor);
       }
       else
       {
-         scaledX = 1.0;
-         scaledY = 0.0;
-         scaledZ = 0.0;
+         closestPointToPack.setToZero();
+         closestPointToPack.setX(radius.getX());
       }
-      
-      closestPointToPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
-      
-      double normalX = 2.0 * closestPointToPack.getX() / (radius.getX() * radius.getX());
-      double normalY = 2.0 * closestPointToPack.getY() / (radius.getY() * radius.getY());
-      double normalZ = 2.0 * closestPointToPack.getZ() / (radius.getZ() * radius.getZ());
-      
-      normalToPack.set(normalX, normalY, normalZ);
+
+      double rxSquared = radius.getX() * radius.getX();
+      double rySquared = radius.getY() * radius.getY();
+      double rzSquared = radius.getZ() * radius.getZ();
+
+      normalToPack.set(closestPointToPack);
+      normalToPack.scale(1.0 / rxSquared, 1.0 / rySquared, 1.0 / rzSquared);
       normalToPack.normalize();
-      return isInside1;
+      return isInside;
+   }
+
+   public double computeSumOfScaledSquared(double x, double y, double z)
+   {
+      return EuclidCoreTools.normSquared(x / radius.getX(), y / radius.getY(), z / radius.getZ());
    }
 
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      tempPoint3d.set(x, y, z);
-      double scaledX = tempPoint3d.getX() / radius.getX();
-      double scaledY = tempPoint3d.getY() / radius.getY();
-      double scaledZ = tempPoint3d.getZ() / radius.getZ();
-      
-      double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
-      
-      return sumOfSquares <= 1.0 + epsilon;
+      double scaledX = x / (radius.getX() + epsilon);
+      double scaledY = y / (radius.getY() + epsilon);
+      double scaledZ = z / (radius.getZ() + epsilon);
+
+      return EuclidCoreTools.normSquared(scaledX, scaledY, scaledZ) <= 1.0;
    }
 
    @Override
    protected double distanceShapeFrame(double x, double y, double z)
    {
-      tempPoint3d.set(x, y, z);
-      orthogonalProjectionShapeFrame(tempPoint3d);
-      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, tempPoint3d);
+      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
+
+      if (sumOfSquares > 1e-10)
+      {
+         double scaleFactor = 1.0 - 1.0 / Math.sqrt(sumOfSquares);
+         return Math.sqrt(EuclidCoreTools.normSquared(x, y, z)) * scaleFactor;
+      }
+      else
+      {
+         return x - radius.getX();
+      }
    }
 
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      double scaledX = x / radius.getX();
-      double scaledY = y / radius.getY();
-      double scaledZ = z / radius.getZ();
-      
-      double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
+      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
+
       boolean isInside = sumOfSquares <= 1.0;
-      
+
       if (!isInside)
       {
          double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
-         scaledX = scaledX * scaleFactor;
-         scaledY = scaledY * scaleFactor;
-         scaledZ = scaledZ * scaleFactor;
-         projectionToPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
+         projectionToPack.set(x, y, z);
+         projectionToPack.scale(scaleFactor);
       }
    }
-   
+
    @Override
    public void set(Ellipsoid3d other)
    {
@@ -176,26 +163,26 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    public void setToZero()
    {
       super.setToZero();
-      radius.set(0.0, 0.0, 0.0);
+      radius.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
       super.setToNaN();
-      radius.set(Double.NaN, Double.NaN, Double.NaN);
+      radius.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      return super.containsNaN() || Double.isNaN(radius.getX()) || Double.isNaN(radius.getY()) || Double.isNaN(radius.getZ());
+      return super.containsNaN() || radius.containsNaN();
    }
 
    @Override
    public boolean epsilonEquals(Ellipsoid3d other, double epsilon)
    {
-      return radius.epsilonEquals(other.radius, epsilon);
+      return radius.epsilonEquals(other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
 
    @Override
