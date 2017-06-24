@@ -83,6 +83,16 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPToPack.set(desiredCMP);
    }
 
+   public List<CMPTrajectory> getTransferCMPTrajectories()
+   {
+      return transferCMPTrajectories;
+   }
+
+   public List<CMPTrajectory> getSwingCMPTrajectories()
+   {
+      return swingCMPTrajectories;
+   }
+
    public void setNumberOfRegisteredSteps(int numberOfRegisteredSteps)
    {
       this.numberOfRegisteredSteps = numberOfRegisteredSteps;
