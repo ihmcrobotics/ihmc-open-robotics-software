@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static us.ihmc.euclid.tools.TransformationTools.*;
+
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
@@ -61,17 +63,13 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     * @param point
     * @return distance from the point to this Shape3d.
     */
-   public final double distance(Point3DBasics point)
+   public final double distance(Point3DReadOnly point)
    {
-      transformToLocal(point);
-      double distance = distanceShapeFrame(point);
-      transformToWorld(point);
-      return distance;
-   }
+      double xLocal = computeTransformedX(shapePose, false, point);
+      double yLocal = computeTransformedY(shapePose, false, point);
+      double zLocal = computeTransformedZ(shapePose, false, point);
 
-   protected final double distanceShapeFrame(Point3DReadOnly point)
-   {
-      return distanceShapeFrame(point.getX(), point.getY(), point.getZ());
+      return distanceShapeFrame(xLocal, yLocal, zLocal);
    }
 
    protected abstract double distanceShapeFrame(double x, double y, double z);
