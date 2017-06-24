@@ -146,12 +146,9 @@ public class Box3d extends Shape3d<Box3d>
    {
       if (!isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
       {
-         double dx = EuclidCoreTools.max(-x - 0.5 * size.getX(), 0.0, x - 0.5 * size.getX());
-         double dy = EuclidCoreTools.max(-y - 0.5 * size.getY(), 0.0, y - 0.5 * size.getY());
-         double dz = EuclidCoreTools.max(-z - 0.5 * size.getZ(), 0.0, z - 0.5 * size.getZ());
-         //         double dx = Math.max(0.0, Math.abs(x) - 0.5 * size.getX());
-         //         double dy = Math.max(0.0, Math.abs(y) - 0.5 * size.getY());
-         //         double dz = Math.max(0.0, Math.abs(z) - 0.5 * size.getZ());
+         double dx = Math.max(0.0, Math.abs(x) - 0.5 * size.getX());
+         double dy = Math.max(0.0, Math.abs(y) - 0.5 * size.getY());
+         double dz = Math.max(0.0, Math.abs(z) - 0.5 * size.getZ());
          return Math.sqrt(EuclidCoreTools.normSquared(dx, dy, dz));
       }
       else
@@ -167,18 +164,12 @@ public class Box3d extends Shape3d<Box3d>
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      if (!isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
-      {
-         projectionToPack.setX(MathTools.clamp(x, 0.5 * size.getX()));
-         projectionToPack.setY(MathTools.clamp(y, 0.5 * size.getY()));
-         projectionToPack.setZ(MathTools.clamp(z, 0.5 * size.getZ()));
-      }
-      else
-      {
-         projectionToPack.setX(Math.copySign(0.5 * size.getX(), x));
-         projectionToPack.setY(Math.copySign(0.5 * size.getY(), y));
-         projectionToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
-      }
+      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
+         return;
+
+      projectionToPack.setX(MathTools.clamp(x, 0.5 * size.getX()));
+      projectionToPack.setY(MathTools.clamp(y, 0.5 * size.getY()));
+      projectionToPack.setZ(MathTools.clamp(z, 0.5 * size.getZ()));
    }
 
    @Override
@@ -190,32 +181,49 @@ public class Box3d extends Shape3d<Box3d>
    @Override
    protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      if (closestPointToPack != null)
-      {
-         orthogonalProjectionShapeFrame(x, y, z, closestPointToPack);
-      }
-
       if (isInsideOrOnSurfaceShapeFrame(x, y, z, 1.0e-12))
       {
+         double dx = Math.abs(Math.abs(x) - 0.5 * size.getX());
+         double dy = Math.abs(Math.abs(y) - 0.5 * size.getY());
+         double dz = Math.abs(Math.abs(z) - 0.5 * size.getZ());
+
+         if (closestPointToPack != null)
+         {
+            closestPointToPack.set(x, y, z);
+
+            if (dx < dy)
+            {
+               if (dx < dz)
+                  closestPointToPack.setX(Math.copySign(0.5 * size.getX(), x));
+               else
+                  closestPointToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
+            }
+            else
+            {
+               if (dy < dz)
+                  closestPointToPack.setY(Math.copySign(0.5 * size.getY(), y));
+               else
+                  closestPointToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
+            }
+         }
+
          if (normalToPack != null)
          {
-            double distanceX = Math.abs(x - 0.5 * size.getX());
-            double distanceY = Math.abs(y - 0.5 * size.getY());
-            double distanceZ = Math.abs(z - 0.5 * size.getZ());
+            normalToPack.setToZero();
 
-            normalToPack.set(Math.copySign(1.0, x), 0.0, 0.0);
-
-            double distance = distanceX;
-
-            if (distanceY < distance)
+            if (dx < dy)
             {
-               distance = distanceY;
-               normalToPack.set(0.0, Math.copySign(1.0, y), 0.0);
+               if (dx < dz)
+                  normalToPack.setX(Math.copySign(1.0, x));
+               else
+                  normalToPack.setZ(Math.copySign(1.0, z));
             }
-
-            if (distanceZ < distance)
+            else
             {
-               normalToPack.set(0.0, 0.0, Math.copySign(1.0, z));
+               if (dy < dz)
+                  normalToPack.setY(Math.copySign(1.0, y));
+               else
+                  normalToPack.setZ(Math.copySign(1.0, z));
             }
          }
 
@@ -223,6 +231,11 @@ public class Box3d extends Shape3d<Box3d>
       }
       else
       {
+         if (closestPointToPack != null)
+         {
+            orthogonalProjectionShapeFrame(x, y, z, closestPointToPack);
+         }
+
          if (normalToPack != null)
          {
             normalToPack.setX(x - MathTools.clamp(x, 0.5 * size.getX()));
