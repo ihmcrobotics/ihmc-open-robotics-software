@@ -30,11 +30,10 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
 public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 {
-   private final QuaternionBasedTransform shapePose;
+   private final RigidBodyTransform shapePose = new RigidBodyTransform();
 
    public Shape3d()
    {
-      shapePose = new QuaternionBasedTransform();
    }
 
    @Override
@@ -248,11 +247,6 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose.multiply(transform);
    }
 
-   public final void interpolate(Shape3d<S> shape1, Shape3d<S> shape2, double alpha)
-   {
-      shapePose.interpolate(shape1.shapePose, shape2.shapePose, alpha);
-   }
-
    public String getPoseString()
    {
       return shapePose.toString();
@@ -351,22 +345,22 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 
    public final double getYaw()
    {
-      return shapePose.getQuaternion().getYaw();
+      return shapePose.getRotationMatrix().getYaw();
    }
 
    public final double getPitch()
    {
-      return shapePose.getQuaternion().getPitch();
+      return shapePose.getRotationMatrix().getPitch();
    }
 
    public final double getRoll()
    {
-      return shapePose.getQuaternion().getRoll();
+      return shapePose.getRotationMatrix().getRoll();
    }
 
-   public QuaternionReadOnly getOrientation()
+   public RotationMatrixReadOnly getOrientation()
    {
-      return shapePose.getQuaternion();
+      return shapePose.getRotationMatrix();
    }
 
    public Tuple3DReadOnly getPosition()
