@@ -6,14 +6,19 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -26,10 +31,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private final static int POSITION = 0;
    private final static int VELOCITY = 1;
    private final static int ACCELERATION = 2;
-   
 
-   private final List<YoPolynomial3D> cmpPolynomialTrajectories = new ArrayList<>();
-   
+   private final static int defaultSize = 1000;
+
    private final List<FramePoint> desiredICPBoundaryPositions = new ArrayList<>();
    
    private final DenseMatrix64F coefficientsCombinedVector = new DenseMatrix64F();
@@ -43,69 +47,207 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
 
    double [] icpQuantityDesiredCurrent = new double[3];
    
-   private DenseMatrix64F generalizedAlphaPrimeMatrix = new DenseMatrix64F();
-   private DenseMatrix64F generalizedBetaPrimeMatrix = new DenseMatrix64F();
-   private DenseMatrix64F generalizedGammaPrimeMatrix = new DenseMatrix64F();
-   private DenseMatrix64F generalizedAlphaBetaPrimeMatrix = new DenseMatrix64F();
+   private DenseMatrix64F generalizedAlphaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F generalizedBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F generalizedGammaPrimeMatrix = new DenseMatrix64F(1, 1);
+   private DenseMatrix64F generalizedAlphaBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
 
-   private DenseMatrix64F identityMatrix = new DenseMatrix64F();
-   private DenseMatrix64F backwardIterationMatrix = new DenseMatrix64F();
-   private DenseMatrix64F finalConstraintMatrix = new DenseMatrix64F();
-   private DenseMatrix64F tPowersMatrix = new DenseMatrix64F();
-   private DenseMatrix64F polynomialCoefficientVector = new DenseMatrix64F();
+   private DenseMatrix64F identityMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F backwardIterationMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F finalConstraintMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F tPowersMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private DenseMatrix64F polynomialCoefficientVector = new DenseMatrix64F(defaultSize, defaultSize);
    
-   private DenseMatrix64F icpDesiredInitialVector = new DenseMatrix64F(10000, 1);
-   private DenseMatrix64F icpDesiredFinalVector = new DenseMatrix64F(10000, 1);
+   private final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
+   private final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
 
+   
+   private DenseMatrix64F icpPositionDesiredInitialMatrix = new DenseMatrix64F(defaultSize, 3);
+   private DenseMatrix64F icpPositionDesiredFinalMatrix = new DenseMatrix64F(defaultSize, 3);
+   
    // Pre-allocated helper matrices
-   private final DenseMatrix64F M1 = new DenseMatrix64F(10000, 10000);
-   private final DenseMatrix64F M2 = new DenseMatrix64F(10000, 10000);
-   private final DenseMatrix64F M3 = new DenseMatrix64F(10000, 10000);
-   
-   private final int numberOfSegments;
+   private final DenseMatrix64F M1 = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F M2 = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F M3 = new DenseMatrix64F(defaultSize, defaultSize);
 
-   private YoInteger numberOfFootstepsToConsider;
-   private YoInteger numberOfFootstepsToConsiderForAngularMomentum;
+   private final YoBoolean isStanding;
 
-   public ReferenceICPTrajectoryFromCMPPolynomialGenerator(YoDouble omega0, ReferenceFrame trajectoryFrame, List<YoPolynomial3D> cmpPolynomialTrajectories)
+   private final YoInteger totalNumberOfSegments;
+   private final YoInteger numberOfFootstepsToConsider;
+
+   private int numberOfFootstepsRegistered;
+
+   private final List<YoFramePolynomial3D> cmpTrajectories = new ArrayList<>();
+
+   public ReferenceICPTrajectoryFromCMPPolynomialGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
+                                                           ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
-      numberOfSegments = cmpPolynomialTrajectories.size();
-      
-      icpDesiredInitialVector.reshape(numberOfSegments, 3);
-      icpDesiredFinalVector.reshape(numberOfSegments, 3);
-      
-      for(int i = 0; i < cmpPolynomialTrajectories.size(); ++i)
-      {
-         this.cmpPolynomialTrajectories.add(cmpPolynomialTrajectories.get(i));
-      }
-   }
-
-   public void setNumberOfFootstepsToConsider(YoInteger numberOfFootstepsToConsider)
-   {
+      this.trajectoryFrame = trajectoryFrame;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
+      this.isStanding = isStanding;
+
+      totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
    }
 
-   public void setNumberOfFootstepsToConsiderForAngularMomentum(YoInteger numberOfFootstepsToConsiderForAngularMomentum)
+   public void setNumberOfFootstepsRegistered(int numberOfFootstepsRegistered)
    {
-      this.numberOfFootstepsToConsiderForAngularMomentum = numberOfFootstepsToConsiderForAngularMomentum;
+      this.numberOfFootstepsRegistered = numberOfFootstepsRegistered;
    }
 
+   public void reset()
+   {
+      cmpTrajectories.clear();
+      totalNumberOfSegments.set(0);
+   }
+
+   public void initializeForTransfer(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
+   {
+      reset();
+
+      int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
+      {
+         CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
+         int cmpSegments = transferCMPTrajectory.getNumberOfSegments();
+         for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+         {
+            cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+            totalNumberOfSegments.increment();
+         }
+
+         CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
+         cmpSegments = swingCMPTrajectory.getNumberOfSegments();
+         for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+         {
+            cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+            totalNumberOfSegments.increment();
+         }
+      }
+
+      CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
+      int cmpSegments = transferCMPTrajectory.getNumberOfSegments();
+      for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+      {
+         cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+         totalNumberOfSegments.increment();
+      }
+
+      icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
+      icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
+   }
+
+   public void initializeForSwing(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
+   {
+      reset();
+
+      CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
+      int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
+      for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+      {
+         cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+         totalNumberOfSegments.increment();
+      }
+
+      int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
+      for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
+      {
+         CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
+         cmpSegments = transferCMPTrajectory.getNumberOfSegments();
+         for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+         {
+            cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+            totalNumberOfSegments.increment();
+         }
+
+         swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
+         cmpSegments = swingCMPTrajectory.getNumberOfSegments();
+         for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+         {
+            cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+            totalNumberOfSegments.increment();
+         }
+      }
+
+      CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
+      cmpSegments = transferCMPTrajectory.getNumberOfSegments();
+      for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
+      {
+         cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+         totalNumberOfSegments.increment();
+      }
+
+      icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
+      icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
+   }
+
+   @Override
    public void initialize()
    {
       calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar();
    }
 
-   public void computeFromCMPTrajectory(List<YoPolynomial3D> cmpPolynomialTrajectories)
-   {
-   }
-
+   @Override
    public void compute(double time)
    {
-      initialize();
-      calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpPositionDesiredCurrent, POSITION, time);
-      calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpVelocityDesiredCurrent, VELOCITY, time);
-      calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpAccelerationDesiredCurrent, ACCELERATION, time);
+      if (!isStanding.getBooleanValue())
+      {
+         initialize();
+
+         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpPositionDesiredCurrent, POSITION, time);
+         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpVelocityDesiredCurrent, VELOCITY, time);
+         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpAccelerationDesiredCurrent, ACCELERATION, time);
+      }
+   }
+
+   public void getDesiredICP(YoFramePoint desiredICPToPack)
+   {
+      desiredICPToPack.set(icpPositionDesiredFinal);
+   }
+
+   @Override
+   public void getPosition(FramePoint positionToPack)
+   {
+      positionToPack.set(icpPositionDesiredCurrent);
+   }
+
+   @Override
+   public void getVelocity(FrameVector velocityToPack)
+   {
+      velocityToPack.set(icpVelocityDesiredCurrent);
+   }
+
+   @Override
+   public void getAcceleration(FrameVector accelerationToPack)
+   {
+      accelerationToPack.set(icpAccelerationDesiredCurrent);
+   }
+
+   @Override
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
+   }
+
+   @Override
+   public void showVisualization()
+   {
+
+   }
+
+   @Override
+   public void hideVisualization()
+   {
+
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      // TODO Auto-generated method stub
+      return false;
    }
 
    // SCALAR FORMULATION
@@ -119,7 +261,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       for(Direction dir : Direction.values())
       {
-         YoPolynomial cmpPolynomial = cmpPolynomialTrajectories.get(FIRST_SEGMENT).getYoPolynomial(dir.ordinal());
+         YoPolynomial cmpPolynomial = cmpTrajectories.get(FIRST_SEGMENT).getYoPolynomial(dir.ordinal());
          double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, dir.ordinal());
          
          icpQuantityDesiredCurrent[dir.ordinal()] = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(icpDerivativeOrder, cmpPolynomial, icpPositionDesiredFinal, time);
@@ -134,11 +276,11 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       setICPTerminalConditionScalar();
       
-      for(int i = numberOfSegments-1; i >= 0; i--)
+      for(int i = totalNumberOfSegments.getIntegerValue() - 1; i >= 0; i--)
       {
          for(Direction dir : Direction.values())
          {
-            YoPolynomial cmpPolynomial = cmpPolynomialTrajectories.get(i).getYoPolynomial(dir.ordinal());
+            YoPolynomial cmpPolynomial = cmpTrajectories.get(i).getYoPolynomial(dir.ordinal());
             double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
             double time = 0.0;
             
@@ -165,11 +307,11 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
     */
    private void setICPTerminalConditionScalar()
    {
-      for(int i = 0; i < 3; i++)
+      for(int i = 0; i < Direction.size; i++)
       {
-         YoPolynomial cmPolynomialFinalSegment = cmpPolynomialTrajectories.get(numberOfSegments-1).getYoPolynomial(i);
+         YoPolynomial cmPolynomialFinalSegment = cmpTrajectories.get(totalNumberOfSegments.getIntegerValue() - 1).getYoPolynomial(i);
          cmPolynomialFinalSegment.compute(cmPolynomialFinalSegment.getXFinal());
-         icpDesiredFinalVector.set(numberOfSegments-1, i, cmPolynomialFinalSegment.getPosition());
+         icpPositionDesiredFinalMatrix.set(totalNumberOfSegments.getIntegerValue() - 1, i, cmPolynomialFinalSegment.getPosition());
       }
    }
    
@@ -187,7 +329,19 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private double calculateICPQuantityFromCorrespondingCMPPolynomialScalar(int icpDerivativeOrder, YoPolynomial cmpPolynomial, double icpPositionDesiredFinal, double time)
    {            
       DenseMatrix64F polynomialCoefficientVector =  cmpPolynomial.getCoefficientsVector();
-      
+
+      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
+
+      generalizedAlphaPrimeMatrix.reshape(1, numberOfCoefficients);
+      generalizedBetaPrimeMatrix.reshape(1, numberOfCoefficients);
+      generalizedAlphaBetaPrimeMatrix.reshape(1, numberOfCoefficients);
+      generalizedGammaPrimeMatrix.reshape(1, 1);
+
+      generalizedAlphaPrimeMatrix.zero();
+      generalizedBetaPrimeMatrix.zero();
+      generalizedAlphaBetaPrimeMatrix.zero();
+      generalizedGammaPrimeMatrix.zero();
+
       calculateGeneralizedAlphaPrimeOnCMPSegment(generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
       calculateGeneralizedBetaPrimeOnCMPSegment(generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
       calculateGeneralizedGammaPrimeOnCMPSegment(generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
@@ -213,20 +367,18 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private double calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
                                              DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
    {
-      double icpQuantityDesired = 0.0;
-      
-      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), generalizedAlphaBetaPrimeMatrix.getNumCols());
+      //fixme yeah this is wrong
+      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
       M1.zero();
-      M2.reshape(generalizedGammaPrimeMatrix.getNumRows(), generalizedGammaPrimeMatrix.getNumCols());
-      M2.zero();
-      
+
       CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
-      CommonOps.scale(icpPositionDesiredFinal, generalizedGammaPrimeMatrix, M2);
+
+      M2.set(generalizedGammaPrimeMatrix);
+      CommonOps.scale(icpPositionDesiredFinal, M2);
       
       CommonOps.addEquals(M1, M2);
       
-      icpQuantityDesired = M1.get(0, 0);
-      return icpQuantityDesired;
+      return M1.get(0, 0);
    }
 
    /**
@@ -249,13 +401,13 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       
       tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
       tPowersDerivativeVectorTranspose.zero();
-      
+
       for(int i = 0; i < numberOfCoefficients; i++)
       {
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i+alphaDerivativeOrder, time));
+         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
          CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
          
-         double scalar = Math.pow(1.0/omega0.getDoubleValue(), i);
+         double scalar = Math.pow(1.0 / omega0.getDoubleValue(), i);
          CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
       }
    }
@@ -281,7 +433,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       
       tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
       tPowersDerivativeVectorTranspose.zero();
-      
+
       for(int i = 0; i < numberOfCoefficients; i++)
       {
          tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, time));
@@ -307,11 +459,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {      
       double timeTrajectory = cmpPolynomial.getXFinal();
       
-      generalizedGammaPrime.reshape(1, 1);
-      generalizedGammaPrime.zero();
-      
-      double [] ddGamaPrimeValue = {Math.pow(omega0.getDoubleValue(), gammaDerivativeOrder)*Math.exp(omega0.getDoubleValue() * (time - timeTrajectory))};
-      generalizedGammaPrime.setData(ddGamaPrimeValue);
+      double ddGamaPrimeValue = Math.pow(omega0.getDoubleValue(), gammaDerivativeOrder)*Math.exp(omega0.getDoubleValue() * (time - timeTrajectory));
+      generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
    } 
 
    
@@ -358,45 +507,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    }
    
    
-   public void getPosition(FramePoint positionToPack)
-   {
-      positionToPack.set(icpPositionDesiredCurrent);
-   }
-   
-   public void getVelocity(FrameVector velocityToPack)
-   {
-      velocityToPack.set(icpVelocityDesiredCurrent);
-   }
 
-   public void getAcceleration(FrameVector accelerationToPack)
-   {
-      accelerationToPack.set(icpAccelerationDesiredCurrent);
-   }
-
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
-   }
-
-   public void showVisualization()
-   {
-      
-   }
-
-   public void hideVisualization()
-   {
-      
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-   
    // TODO: FIRST IMPLEMENTATION --> check whether still usable
 // desiredICPCurrent: desired ICP at time; modified.
 // TODO: take care of frame matching

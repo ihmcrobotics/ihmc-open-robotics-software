@@ -117,7 +117,7 @@ public class YoPolynomial
    {
       reset();
 
-      numberOfCoefficients.set(other.getNumberOfCoefficients());
+      reshape(other.getNumberOfCoefficients());
 
       xInitial = other.getXInitial();
       xFinal = other.getXFinal();

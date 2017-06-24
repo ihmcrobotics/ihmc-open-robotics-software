@@ -58,7 +58,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, this.numberOfFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, transferDurationAlphas, registry);
 
-      referenceICPGenerator = new ReferenceICPTrajectoryFromCMPPolynomialGenerator(omega0, null, null);
+      referenceICPGenerator = new ReferenceICPTrajectoryFromCMPPolynomialGenerator(namePrefix, omega0, this.numberOfFootstepsToConsider, isStanding, worldFrame,
+                                                                                   registry);
 
       parentRegistry.addChild(registry);
 
@@ -88,6 +89,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       referenceCoPGenerator.clear();
       referenceCMPGenerator.reset();
+      referenceICPGenerator.reset();
 
       for (int i = 0; i < swingDurations.size(); i++)
       {
