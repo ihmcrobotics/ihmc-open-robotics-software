@@ -43,15 +43,7 @@ public class Box3dTest
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Box3d box3d = new Box3d(transform, length, width, height);
 
-         try
-         {
-            testHelper.runSimpleTests(box3d, random, numberOfPoints);
-         }
-         catch (AssertionError e)
-         {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage());
-         }
+         testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
 
    }
