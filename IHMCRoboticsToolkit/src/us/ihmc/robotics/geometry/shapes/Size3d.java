@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import java.io.Serializable;
 
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 /**
@@ -121,5 +122,11 @@ class Size3d implements Vector3DBasics, Serializable
    public double getZ()
    {
       return height;
+   }
+
+   @Override
+   public String toString()
+   {
+      return EuclidCoreIOTools.getTuple3DString(this);
    }
 }
