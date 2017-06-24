@@ -4,11 +4,11 @@ import static us.ihmc.euclid.tools.EuclidCoreTools.*;
 import static us.ihmc.robotics.MathTools.*;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.GeometryTools;
 
 public class Sphere3d extends Shape3d<Sphere3d>
 {
@@ -72,12 +72,12 @@ public class Sphere3d extends Shape3d<Sphere3d>
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      double distance = Math.sqrt(normSquared(x, y, z));
+      double distanceSquared = normSquared(x, y, z);
 
-      if (distance >= Epsilons.ONE_TRILLIONTH)
+      if (distanceSquared >= radius * radius)
       {
          projectionToPack.set(x, y, z);
-         projectionToPack.scale(radius / distance);
+         projectionToPack.scale(radius / Math.sqrt(distanceSquared));
       }
    }
 
@@ -91,14 +91,23 @@ public class Sphere3d extends Shape3d<Sphere3d>
 
    private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      normalToPack.set(x, y, z);
-      GeometryTools.normalizeSafelyZUp(normalToPack);
+      double distanceSquared = EuclidCoreTools.normSquared(x, y, z);
+
+      if (distanceSquared > Epsilons.ONE_TRILLIONTH)
+      {
+         normalToPack.set(x, y, z);
+         normalToPack.scale(1.0 / distanceSquared);
+      }
+      else
+      {
+         normalToPack.set(0.0, 0.0, 1.0);
+      }
    }
 
    @Override
    public boolean epsilonEquals(Sphere3d other, double epsilon)
    {
-      return MathTools.epsilonEquals(radius, other.radius, epsilon);
+      return MathTools.epsilonEquals(radius, other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
 
    @Override
