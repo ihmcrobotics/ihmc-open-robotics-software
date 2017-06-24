@@ -128,7 +128,7 @@ public class YoPolynomial
 
    public void setConstant(double z)
    {
-      numberOfCoefficients.set(1);
+      reshape(1);
       coefficientVector.set(0, 0, z);
       setYoVariables();
    }
@@ -649,13 +649,18 @@ public class YoPolynomial
       return dPos;
    }
 
-   // Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
+   /**
+    *  Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
+    * @param order
+    * @param x
+    * @return
+    */
    public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
    {
       setXPowers(xPowers, x);
       
       int derivativeCoefficient = 0;
-      for(int i = order; i < xPowers.length; i++)
+      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          derivativeCoefficient = getDerivativeCoefficient(order, i);
          xPowersDerivativeVector.set(i, derivativeCoefficient*xPowers[i - order]);
@@ -741,6 +746,7 @@ public class YoPolynomial
       this.coefficientVector.reshape(numberOfCoefficientsRequired, 1);
       this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
       this.constraintVector.reshape(numberOfCoefficientsRequired, 1);
+      this.xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
       numberOfCoefficients.set(numberOfCoefficientsRequired);
 
       for (int i = numberOfCoefficientsRequired; i < maximumNumberOfCoefficients; i++)
