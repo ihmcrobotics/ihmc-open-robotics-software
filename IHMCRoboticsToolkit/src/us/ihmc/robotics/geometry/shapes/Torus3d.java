@@ -1,13 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static us.ihmc.euclid.tools.EuclidCoreTools.*;
+
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 
@@ -18,12 +18,6 @@ public class Torus3d extends Shape3d<Torus3d>
 {
    private double radius;
    private double tubeRadius;
-
-   private final Point3D temporaryPoint = new Point3D();
-   private final Vector3D temporaryVector = new Vector3D();
-
-   private final Vector3D originToRadiusTemporaryVector = new Vector3D();
-   private final Vector3D tubeCenterToPointTemporaryVector = new Vector3D();
 
    private static final double SMALLEST_ALLOWABLE_THICKNESS = 5e-3;
    private static final double SMALLEST_ALLOWABLE_RADIUS_MINUS_THICKNESS = 1e-4;
@@ -156,95 +150,97 @@ public class Torus3d extends Shape3d<Torus3d>
    @Override
    protected double distanceShapeFrame(double x, double y, double z)
    {
-      temporaryPoint.set(x, y, z);
-      orthogonalProjectionShapeFrame(temporaryPoint);
+      double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
 
-      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint);
+      if (xyLengthSquared < 1.0e-12)
+      {
+         return Math.sqrt(EuclidCoreTools.normSquared(radius, z)) - tubeRadius;
+      }
+      else
+      {
+         double xyScale = radius / Math.sqrt(xyLengthSquared);
+
+         double closestTubeCenterX = x * xyScale;
+         double closestTubeCenterY = y * xyScale;
+
+         return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestTubeCenterX, closestTubeCenterY, 0.0) - tubeRadius;
+      }
    }
 
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      temporaryVector.set(x, y, 0.0);
+      double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
 
-      if (temporaryVector.length() < Epsilons.ONE_TRILLIONTH)
-      {
-         return tubeRadius >= radius;
-      }
+      double outerRadius = radius + tubeRadius + epsilon;
+      double innerRadius = radius - tubeRadius - epsilon;
 
-      temporaryVector.normalize();
-      temporaryVector.scale(radius);
+      if (xyLengthSquared > outerRadius * outerRadius || xyLengthSquared < innerRadius * innerRadius)
+         return false;
 
-      temporaryPoint.set(temporaryVector);
+      double xyScale = radius / Math.sqrt(xyLengthSquared);
 
-      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, temporaryPoint) <= tubeRadius + epsilon;
+      double closestTubeCenterX = x * xyScale;
+      double closestTubeCenterY = y * xyScale;
+
+      return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestTubeCenterX, closestTubeCenterY, 0.0) <= tubeRadius + epsilon;
    }
 
    private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      computeCompositeVectorsForPoint(x, y, z, originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector);
+      double xyLengthSquared = normSquared(x, y);
 
-      tubeCenterToPointTemporaryVector.normalize();
-      normalToPack.set(tubeCenterToPointTemporaryVector);
+      if (xyLengthSquared < 1.0e-12)
+      {
+         normalToPack.set(-radius, 0.0, z);
+      }
+      else
+      {
+         double xyScale = 1.0 - radius / Math.sqrt(xyLengthSquared);
+         normalToPack.set(x * xyScale, y * xyScale, z);
+      }
+
+      normalToPack.normalize();
    }
 
    @Override
    protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
    {
-      computeCompositeVectorsForPoint(projectionToPack, originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector);
+      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
+         return;
 
-      if (tubeCenterToPointTemporaryVector.length() > tubeRadius)
-         tubeCenterToPointTemporaryVector.scale(tubeRadius / tubeCenterToPointTemporaryVector.length());
-      tubeCenterToPointTemporaryVector.add(originToRadiusTemporaryVector);
+      double xyLengthSquared = normSquared(x, y);
+      double closestTubeCenterX, closestTubeCenterY;
+      double tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ;
 
-      projectionToPack.set(tubeCenterToPointTemporaryVector);
-   }
-
-   /**
-    * Compute the vector, R, from the center point of the torus to the radius of the torus in the XY
-    * direction of the given point. Computes the vector from the closest point in the middle of the
-    * torus tube (at R) to the given point.
-    * 
-    * @param pointToCheck the point in world coordinates for which to compute the origin-to-radius
-    *           and tube-center-to-point vectors.
-    * @param originToRadiusVectorToPack the vector from the center point of the torus to the radius
-    *           of the torus in the XY direction of the given point.
-    * @param tubeCenterToPointVectorToPack the vector from the closest point in the middle of the
-    *           torus tube (at R) to the given point.
-    */
-   protected void computeCompositeVectorsForPoint(Point3DReadOnly pointToCheck, Vector3DBasics originToRadiusVectorToPack,
-                                                  Vector3DBasics tubeCenterToPointVectorToPack)
-   {
-      computeCompositeVectorsForPoint(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), originToRadiusVectorToPack, tubeCenterToPointVectorToPack);
-   }
-
-   protected void computeCompositeVectorsForPoint(double x, double y, double z, Vector3DBasics originToRadiusVectorToPack,
-                                                  Vector3DBasics tubeCenterToPointVectorToPack)
-   {
-      temporaryPoint.set(x, y, z);
-
-      double pointX = temporaryPoint.getX(), pointY = temporaryPoint.getY(), pointZ = temporaryPoint.getZ();
-      originToRadiusVectorToPack.set(pointX, pointY, 0.0);
-      double distance = originToRadiusVectorToPack.length();
-
-      if (distance == 0.0)
+      if (xyLengthSquared < 1.0e-12)
       {
-         if (pointZ == 0.0)
-         {
-            originToRadiusVectorToPack.setX(radius - tubeRadius);
-         }
-         else
-         {
-            originToRadiusVectorToPack.setX(radius);
-         }
+         double scale = tubeRadius / Math.sqrt(normSquared(radius, z));
+         closestTubeCenterX = radius;
+         closestTubeCenterY = 0.0;
 
-         distance = originToRadiusVectorToPack.length();
+         tubeCenterToSurfaceX = -radius * scale;
+         tubeCenterToSurfaceY = 0.0;
+         tubeCenterToSurfaceZ = z * scale;
+      }
+      else
+      {
+         double xyScale = radius / Math.sqrt(xyLengthSquared);
+         closestTubeCenterX = x * xyScale;
+         closestTubeCenterY = y * xyScale;
+
+         tubeCenterToSurfaceX = x - closestTubeCenterX;
+         tubeCenterToSurfaceY = y - closestTubeCenterY;
+         tubeCenterToSurfaceZ = z;
+
+         double scale = tubeRadius / Math.sqrt(normSquared(tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ));
+
+         tubeCenterToSurfaceX *= scale;
+         tubeCenterToSurfaceY *= scale;
+         tubeCenterToSurfaceZ *= scale;
       }
 
-      originToRadiusVectorToPack.scale(radius / distance);
-
-      temporaryPoint.sub(originToRadiusVectorToPack);
-
-      tubeCenterToPointVectorToPack.set(temporaryPoint);
+      projectionToPack.set(closestTubeCenterX, closestTubeCenterY, 0.0);
+      projectionToPack.add(tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ);
    }
 }
