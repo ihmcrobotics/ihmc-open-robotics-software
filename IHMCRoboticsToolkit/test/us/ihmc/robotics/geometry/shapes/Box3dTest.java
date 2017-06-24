@@ -219,8 +219,8 @@ public class Box3dTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeVertices()
    {
       Random random = new Random(6234L);
@@ -309,7 +309,7 @@ public class Box3dTest
             }
             else
             {
-               assertEquals(point.distance(projectedPoint), box.distance(point), epsilon);
+               assertEquals(point.distance(projectedPoint), Math.abs(box.distance(point)), epsilon);
                EuclidCoreTestTools.assertTuple3DEquals(projectedPoint, closestPoint, epsilon);
             }
 
