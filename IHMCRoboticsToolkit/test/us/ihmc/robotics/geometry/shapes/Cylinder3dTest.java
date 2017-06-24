@@ -79,35 +79,35 @@ public class Cylinder3dTest
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
-         
+
          assertEquals(cylinder3d.getRadius(), radius, 1e-7);
          assertEquals(cylinder3d.getHeight(), height, 1e-7);
-         
+
          cylinder3d.setRadius(5.0);
          cylinder3d.setHeight(10.0);
-         
+
          assertEquals(cylinder3d.getRadius(), 5.0, 1e-7);
          assertEquals(cylinder3d.getHeight(), 10.0, 1e-7);
-         
+
          RigidBodyTransform rbt = new RigidBodyTransform();
          cylinder3d.getPose(rbt);
-         
-         Point3D point = new  Point3D();
+
+         Point3D point = new Point3D();
          rbt.getTranslation(point);
-         
-         Point3D point1 = new  Point3D();
+
+         Point3D point1 = new Point3D();
          transform.getTranslation(point1);
-         
+
          assertEquals(point.getX(), point1.getX(), 1e-7);
          assertEquals(point.getY(), point1.getY(), 1e-7);
          assertEquals(point.getZ(), point1.getZ(), 1e-7);
-         
+
          Quaternion quat1 = new Quaternion();
          rbt.getRotation(quat1);
-         
+
          Quaternion quat2 = new Quaternion();
          transform.getRotation(quat2);
-         
+
          assertEquals(quat1.getX(), quat2.getX(), 1e-7);
          assertEquals(quat1.getY(), quat2.getY(), 1e-7);
          assertEquals(quat1.getZ(), quat2.getZ(), 1e-7);
@@ -240,8 +240,8 @@ public class Cylinder3dTest
 
    private void assertPointEquals(Point3D expectedPoint, Point3D actualPoint)
    {
-      String failMessage = "Expected <(" + expectedPoint.getX() + "," + expectedPoint.getY() + "," + expectedPoint.getZ() + ")>, but was <(" + actualPoint.getX() + ","
-                           + actualPoint.getY() + "," + actualPoint.getZ() + ")>";
+      String failMessage = "Expected <(" + expectedPoint.getX() + "," + expectedPoint.getY() + "," + expectedPoint.getZ() + ")>, but was <("
+            + actualPoint.getX() + "," + actualPoint.getY() + "," + actualPoint.getZ() + ")>";
       assertEquals(failMessage, expectedPoint.getX(), actualPoint.getX(), eps);
       assertEquals(failMessage, expectedPoint.getY(), actualPoint.getY(), eps);
       assertEquals(failMessage, expectedPoint.getZ(), actualPoint.getZ(), eps);
