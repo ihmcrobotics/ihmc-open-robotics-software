@@ -27,7 +27,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       this.box = box;
       this.appearance = appearance;
 
-      box.computeBoundingBox3D(boundingBox);
+      box.getBoundingBox3D(boundingBox);
 
       addGraphics();
    }
