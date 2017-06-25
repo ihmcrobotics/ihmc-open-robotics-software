@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry.shapes;
 
 import static us.ihmc.euclid.tools.EuclidCoreTools.*;
 
-import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -138,36 +137,6 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
-   {
-      surfaceNormalAt(x, y, z, normalToPack);
-      closestPointToPack.set(x, y, z);
-      orthogonalProjectionShapeFrame(closestPointToPack);
-
-      return isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TEN_MILLIONTH);
-   }
-
-   @Override
-   protected double distanceShapeFrame(double x, double y, double z)
-   {
-      double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
-
-      if (xyLengthSquared < 1.0e-12)
-      {
-         return Math.sqrt(EuclidCoreTools.normSquared(radius, z)) - tubeRadius;
-      }
-      else
-      {
-         double xyScale = radius / Math.sqrt(xyLengthSquared);
-
-         double closestTubeCenterX = x * xyScale;
-         double closestTubeCenterY = y * xyScale;
-
-         return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestTubeCenterX, closestTubeCenterY, 0.0) - tubeRadius;
-      }
-   }
-
-   @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
       double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
@@ -186,61 +155,66 @@ public class Torus3d extends Shape3d<Torus3d>
       return EuclidGeometryTools.distanceBetweenPoint3Ds(x, y, z, closestTubeCenterX, closestTubeCenterY, 0.0) <= tubeRadius + epsilon;
    }
 
-   private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
-   {
-      double xyLengthSquared = normSquared(x, y);
-
-      if (xyLengthSquared < 1.0e-12)
-      {
-         normalToPack.set(-radius, 0.0, z);
-      }
-      else
-      {
-         double xyScale = 1.0 - radius / Math.sqrt(xyLengthSquared);
-         normalToPack.set(x * xyScale, y * xyScale, z);
-      }
-
-      normalToPack.normalize();
-   }
-
    @Override
-   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
+   protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
-         return;
-
       double xyLengthSquared = normSquared(x, y);
-      double closestTubeCenterX, closestTubeCenterY;
-      double tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ;
 
       if (xyLengthSquared < 1.0e-12)
       {
-         double scale = tubeRadius / Math.sqrt(normSquared(radius, z));
-         closestTubeCenterX = radius;
-         closestTubeCenterY = 0.0;
+         double xzLength = Math.sqrt(normSquared(radius, z));
 
-         tubeCenterToSurfaceX = -radius * scale;
-         tubeCenterToSurfaceY = 0.0;
-         tubeCenterToSurfaceZ = z * scale;
+         if (closestPointToPack != null)
+         {
+            double scale = tubeRadius / xzLength;
+            double closestTubeCenterX = radius;
+            double closestTubeCenterY = 0.0;
+
+            double tubeCenterToSurfaceX = -radius * scale;
+            double tubeCenterToSurfaceY = 0.0;
+            double tubeCenterToSurfaceZ = z * scale;
+
+            closestPointToPack.set(closestTubeCenterX, closestTubeCenterY, 0.0);
+            closestPointToPack.add(tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ);
+         }
+
+         if (normalToPack != null)
+         {
+            normalToPack.set(-radius, 0.0, z);
+            normalToPack.scale(1.0 / xzLength);
+         }
+
+         return xzLength - tubeRadius;
       }
       else
       {
          double xyScale = radius / Math.sqrt(xyLengthSquared);
-         closestTubeCenterX = x * xyScale;
-         closestTubeCenterY = y * xyScale;
 
-         tubeCenterToSurfaceX = x - closestTubeCenterX;
-         tubeCenterToSurfaceY = y - closestTubeCenterY;
-         tubeCenterToSurfaceZ = z;
+         double closestTubeCenterX = x * xyScale;
+         double closestTubeCenterY = y * xyScale;
 
-         double scale = tubeRadius / Math.sqrt(normSquared(tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ));
+         double dx = x - closestTubeCenterX;
+         double dy = y - closestTubeCenterY;
+         double dz = z;
 
-         tubeCenterToSurfaceX *= scale;
-         tubeCenterToSurfaceY *= scale;
-         tubeCenterToSurfaceZ *= scale;
+         double distance = Math.sqrt(normSquared(dx, dy, dz));
+
+         double distanceInv = 1.0 / distance;
+
+         if (closestPointToPack != null)
+         {
+            closestPointToPack.set(dx, dy, dz);
+            closestPointToPack.scale(tubeRadius * distanceInv);
+            closestPointToPack.add(closestTubeCenterX, closestTubeCenterY, 0.0);
+         }
+
+         if (normalToPack != null)
+         {
+            normalToPack.set(dx, dy, dz);
+            normalToPack.scale(distanceInv);
+         }
+
+         return distance - tubeRadius;
       }
-
-      projectionToPack.set(closestTubeCenterX, closestTubeCenterY, 0.0);
-      projectionToPack.add(tubeCenterToSurfaceX, tubeCenterToSurfaceY, tubeCenterToSurfaceZ);
    }
 }

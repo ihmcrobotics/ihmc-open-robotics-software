@@ -65,14 +65,12 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final double distance(Point3DReadOnly point)
    {
-      double xLocal = computeTransformedX(shapePose, false, point);
-      double yLocal = computeTransformedY(shapePose, false, point);
-      double zLocal = computeTransformedZ(shapePose, false, point);
+      double xLocal = computeTransformedX(shapePose, true, point);
+      double yLocal = computeTransformedY(shapePose, true, point);
+      double zLocal = computeTransformedZ(shapePose, true, point);
 
-      return distanceShapeFrame(xLocal, yLocal, zLocal);
+      return evaluateQuery(xLocal, yLocal, zLocal, null, null);
    }
-
-   protected abstract double distanceShapeFrame(double x, double y, double z);
 
    /**
     * Determine whether the given point is on or inside the surface of this shape.
@@ -80,7 +78,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     * @param pointToCheck
     * @return true if the point is inside or on the surface, false otherwise.
     */
-   public final boolean isInsideOrOnSurface(Point3DBasics pointToCheck)
+   public final boolean isInsideOrOnSurface(Point3DReadOnly pointToCheck)
    {
       return isInsideOrOnSurface(pointToCheck, Epsilons.ONE_TRILLIONTH);
    }
@@ -94,20 +92,16 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     * @param epsilon
     * @return
     */
-   public final boolean isInsideOrOnSurface(Point3DBasics pointToCheck, double epsilonToGrowObject)
+   public final boolean isInsideOrOnSurface(Point3DReadOnly pointToCheck, double epsilonToGrowObject)
    {
-      transformToLocal(pointToCheck);
-      boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(pointToCheck, epsilonToGrowObject);
-      transformToWorld(pointToCheck);
-      return isInsideOrOnSurface;
+      double xLocal = computeTransformedX(shapePose, true, pointToCheck);
+      double yLocal = computeTransformedY(shapePose, true, pointToCheck);
+      double zLocal = computeTransformedZ(shapePose, true, pointToCheck);
+
+      return isInsideOrOnSurfaceShapeFrame(xLocal, yLocal, zLocal, epsilonToGrowObject);
    }
 
-   protected final boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilonToGrowObject)
-   {
-      return isInsideOrOnSurfaceShapeFrame(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), epsilonToGrowObject);
-   }
-
-   protected abstract boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilonToGrowObject);
+   protected abstract boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon);
 
    /**
     * Find the closest point on the surface of this shape to the given point. If the given point is
@@ -119,17 +113,21 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final void orthogonalProjection(Point3DBasics pointToCheckAndPack)
    {
-      transformToLocal(pointToCheckAndPack);
-      orthogonalProjectionShapeFrame(pointToCheckAndPack);
-      transformToWorld(pointToCheckAndPack);
-   }
+      double xOriginal = pointToCheckAndPack.getX();
+      double yOriginal = pointToCheckAndPack.getY();
+      double zOriginal = pointToCheckAndPack.getZ();
 
-   protected final void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
-   {
-      orthogonalProjectionShapeFrame(pointToCheckAndPack.getX(), pointToCheckAndPack.getY(), pointToCheckAndPack.getZ(), pointToCheckAndPack);
-   }
+      double xLocal = computeTransformedX(shapePose, true, pointToCheckAndPack);
+      double yLocal = computeTransformedY(shapePose, true, pointToCheckAndPack);
+      double zLocal = computeTransformedZ(shapePose, true, pointToCheckAndPack);
 
-   protected abstract void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack);
+      boolean isInside = evaluateQuery(xLocal, yLocal, zLocal, pointToCheckAndPack, null) <= 0.0;
+
+      if (isInside)
+         pointToCheckAndPack.set(xOriginal, yOriginal, zOriginal);
+      else
+         transformToWorld(pointToCheckAndPack);
+   }
 
    /**
     * Returns true if inside the Shape3d. If inside, must pack the intersection and normal. If not
@@ -142,29 +140,37 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     * @param normalToPack
     * @return true if the point is inside, false otherwise.
     */
-   public final boolean checkIfInside(Point3DBasics pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
+   public final boolean checkIfInside(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
-      transformToLocal(pointToCheck);
-      boolean isInside = checkIfInsideShapeFrame(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
-      //TODO: This modifies pointToCheck and transforms back. Should we make a temp variable instead, or are we trying to be Thread safe here?
-      transformToWorld(pointToCheck);
+      double xLocal = computeTransformedX(shapePose, true, pointToCheck);
+      double yLocal = computeTransformedY(shapePose, true, pointToCheck);
+      double zLocal = computeTransformedZ(shapePose, true, pointToCheck);
+
+      boolean isInside = evaluateQuery(xLocal, yLocal, zLocal, closestPointOnSurfaceToPack, normalToPack) <= 0.0;
+
       if (closestPointOnSurfaceToPack != null)
-      {
          transformToWorld(closestPointOnSurfaceToPack);
-      }
+
       if (normalToPack != null)
-      {
          transformToWorld(normalToPack);
-      }
+
       return isInside;
    }
 
-   protected final boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
-   {
-      return checkIfInsideShapeFrame(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), closestPointOnSurfaceToPack, normalToPack);
-   }
-
-   protected abstract boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack);
+   /**
+    * Internal generic method used for the public API of any {@code Shape3d}.
+    * 
+    * @param x the x-coordinate of the query expressed in the local frame of this shape.
+    * @param y the y-coordinate of the query expressed in the local frame of this shape.
+    * @param z the z-coordinate of the query expressed in the local frame of this shape.
+    * @param closestPointOnSurfaceToPack closest point to the query expressed in the local frame of
+    *           this shape. Modified. Can be {@code null}.
+    * @param normalAtClosestPointToPack normal of the shape surface at the closest point. Modified.
+    *           Can be {@code null}.
+    * @return the distance from the query to the closest point on the shape surface. The returned
+    *         value is expected to be negative when the query is inside the shape.
+    */
+   protected abstract double evaluateQuery(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack);
 
    @Override
    public final void applyTransform(Transform transform)
