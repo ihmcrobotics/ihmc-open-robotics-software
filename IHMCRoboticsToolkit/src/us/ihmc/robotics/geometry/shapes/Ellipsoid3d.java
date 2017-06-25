@@ -11,20 +11,8 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
    private final Vector3D radius = new Vector3D();
 
-   public Ellipsoid3d(Ellipsoid3d other)
-   {
-      setPose(other);
-      radius.set(other.radius);
-   }
-
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
    {
-      radius.set(xRadius, yRadius, zRadius);
-   }
-
-   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
-   {
-      setPose(transform);
       radius.set(xRadius, yRadius, zRadius);
    }
 
@@ -34,54 +22,28 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
       radius.set(xRadius, yRadius, zRadius);
    }
 
-   public void getCenter(Point3DBasics centerToPack)
+   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
-      getPosition(centerToPack);
+      setPose(transform);
+      radius.set(xRadius, yRadius, zRadius);
    }
 
-   public void getRadii(Vector3DBasics radiiToPack)
+   public Ellipsoid3d(Ellipsoid3d other)
    {
-      radiiToPack.set(radius);
-   }
-
-   public double getXRadius()
-   {
-      return radius.getX();
-   }
-
-   public void setXRadius(double xRadius)
-   {
-      radius.setX(xRadius);
-   }
-
-   public double getYRadius()
-   {
-      return radius.getY();
-   }
-
-   public void setYRadius(double yRadius)
-   {
-      radius.setY(yRadius);
-   }
-
-   public double getZRadius()
-   {
-      return radius.getZ();
-   }
-
-   public void setZRadius(double zRadius)
-   {
-      radius.setZ(zRadius);
+      setPose(other);
+      radius.set(other.radius);
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   public boolean containsNaN()
    {
-      double scaledX = x / (radius.getX() + epsilon);
-      double scaledY = y / (radius.getY() + epsilon);
-      double scaledZ = z / (radius.getZ() + epsilon);
+      return super.containsNaN() || radius.containsNaN();
+   }
 
-      return EuclidCoreTools.normSquared(scaledX, scaledY, scaledZ) <= 1.0;
+   @Override
+   public boolean epsilonEquals(Ellipsoid3d other, double epsilon)
+   {
+      return radius.epsilonEquals(other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
 
    @Override
@@ -127,6 +89,41 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
       }
    }
 
+   public void getCenter(Point3DBasics centerToPack)
+   {
+      getPosition(centerToPack);
+   }
+
+   public void getRadii(Vector3DBasics radiiToPack)
+   {
+      radiiToPack.set(radius);
+   }
+
+   public double getXRadius()
+   {
+      return radius.getX();
+   }
+
+   public double getYRadius()
+   {
+      return radius.getY();
+   }
+
+   public double getZRadius()
+   {
+      return radius.getZ();
+   }
+
+   @Override
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   {
+      double scaledX = x / (radius.getX() + epsilon);
+      double scaledY = y / (radius.getY() + epsilon);
+      double scaledZ = z / (radius.getZ() + epsilon);
+
+      return EuclidCoreTools.normSquared(scaledX, scaledY, scaledZ) <= 1.0;
+   }
+
    @Override
    public void set(Ellipsoid3d other)
    {
@@ -138,13 +135,6 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   public void setToZero()
-   {
-      super.setToZero();
-      radius.setToZero();
-   }
-
-   @Override
    public void setToNaN()
    {
       super.setToNaN();
@@ -152,15 +142,25 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   public boolean containsNaN()
+   public void setToZero()
    {
-      return super.containsNaN() || radius.containsNaN();
+      super.setToZero();
+      radius.setToZero();
    }
 
-   @Override
-   public boolean epsilonEquals(Ellipsoid3d other, double epsilon)
+   public void setXRadius(double xRadius)
    {
-      return radius.epsilonEquals(other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
+      radius.setX(xRadius);
+   }
+
+   public void setYRadius(double yRadius)
+   {
+      radius.setY(yRadius);
+   }
+
+   public void setZRadius(double zRadius)
+   {
+      radius.setZ(zRadius);
    }
 
    @Override
