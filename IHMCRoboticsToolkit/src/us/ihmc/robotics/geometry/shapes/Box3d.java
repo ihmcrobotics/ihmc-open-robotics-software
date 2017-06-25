@@ -35,81 +35,32 @@ public class Box3d extends Shape3d<Box3d>
       set(other);
    }
 
-   public Box3d(RigidBodyTransform pose, double[] dimensions)
-   {
-      this(pose, dimensions[0], dimensions[1], dimensions[2]);
-   }
-
    public Box3d(double lengthX, double widthY, double heightZ)
    {
-      size.setLengthWidthHeight(lengthX, widthY, heightZ);
-   }
-
-   public Box3d(RigidBodyTransform pose, double length, double width, double height)
-   {
-      setPose(pose);
-      size.setLengthWidthHeight(length, width, height);
-   }
-
-   public Box3d(Pose3D pose, double length, double width, double height)
-   {
-      setPose(pose);
-      size.setLengthWidthHeight(length, width, height);
+      setSize(lengthX, widthY, heightZ);
    }
 
    public Box3d(Point3DReadOnly position, QuaternionReadOnly orientation, double length, double width, double height)
    {
       setPose(position, orientation);
-      size.setLengthWidthHeight(length, width, height);
+      setSize(length, width, height);
    }
 
-   public void getCenter(Point3DBasics centerToPack)
+   public Box3d(Pose3D pose, double length, double width, double height)
    {
-      getPosition(centerToPack);
+      setPose(pose);
+      setSize(length, width, height);
    }
 
-   public double getSizeX()
+   public Box3d(RigidBodyTransform pose, double length, double width, double height)
    {
-      return size.getX();
+      setPose(pose);
+      setSize(length, width, height);
    }
 
-   public double getSizeY()
+   public Box3d(RigidBodyTransform pose, double[] size)
    {
-      return size.getY();
-   }
-
-   public double getSizeZ()
-   {
-      return size.getZ();
-   }
-
-   public double getLength()
-   {
-      return size.getLength();
-   }
-
-   public double getWidth()
-   {
-      return size.getWidth();
-   }
-
-   public double getHeight()
-   {
-      return size.getHeight();
-   }
-
-   @Override
-   public void setToZero()
-   {
-      super.setToZero();
-      size.setToZero();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      super.setToNaN();
-      size.setToNaN();
+      this(pose, size[0], size[1], size[2]);
    }
 
    @Override
@@ -122,29 +73,6 @@ public class Box3d extends Shape3d<Box3d>
    public boolean epsilonEquals(Box3d other, double epsilon)
    {
       return super.epsilonEqualsPose(other, epsilon) && size.epsilonEquals(other.size, epsilon);
-   }
-
-   @Override
-   public void set(Box3d other)
-   {
-      setPose(other);
-      size.set(other.size);
-   }
-
-   public void setSize(double lengthX, double widthY, double heightZ)
-   {
-      size.setLengthWidthHeight(lengthX, widthY, heightZ);
-   }
-
-   public void scale(double scale)
-   {
-      size.scale(scale);
-   }
-
-   @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
-   {
-      return Math.abs(x) <= 0.5 * size.getX() + epsilon && Math.abs(y) <= 0.5 * size.getY() + epsilon && Math.abs(z) <= 0.5 * size.getZ() + epsilon;
    }
 
    @Override
@@ -228,7 +156,7 @@ public class Box3d extends Shape3d<Box3d>
       }
    }
 
-   public void computeBoundingBox3D(BoundingBox3D boundingBoxToPack)
+   public void getBoundingBox3D(BoundingBox3D boundingBoxToPack)
    {
       boundingBoxToPack.setToNaN();
 
@@ -237,6 +165,70 @@ public class Box3d extends Shape3d<Box3d>
          getVertex(vertexIndex, temporaryPoint);
          boundingBoxToPack.updateToIncludePoint(temporaryPoint);
       }
+   }
+
+   public void getCenter(Point3DBasics centerToPack)
+   {
+      getPosition(centerToPack);
+   }
+
+   public double getHeight()
+   {
+      return size.getHeight();
+   }
+
+   public double getLength()
+   {
+      return size.getLength();
+   }
+
+   public double getSizeX()
+   {
+      return size.getX();
+   }
+
+   public double getSizeY()
+   {
+      return size.getY();
+   }
+
+   public double getSizeZ()
+   {
+      return size.getZ();
+   }
+
+   public void getVertex(int vertexIndex, Point3DBasics vertexToPack)
+   {
+      if (vertexIndex < 0 || vertexIndex >= 8)
+         throw new IndexOutOfBoundsException("The vertex index has to be in [0, 7], was: " + vertexIndex);
+
+      vertexToPack.setX((vertexIndex & 1) == 0 ? size.getX() : -size.getX());
+      vertexToPack.setY((vertexIndex & 2) == 0 ? size.getY() : -size.getY());
+      vertexToPack.setZ((vertexIndex & 4) == 0 ? size.getZ() : -size.getZ());
+      vertexToPack.scale(0.5);
+      transformToWorld(vertexToPack, vertexToPack);
+   }
+
+   public Point3D[] getVertices()
+   {
+      Point3D[] vertices = new Point3D[8];
+      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
+         getVertex(vertexIndex, vertices[vertexIndex] = new Point3D());
+      return vertices;
+   }
+
+   public void getVertices(Point3DBasics[] verticesToPack)
+   {
+      if (verticesToPack.length < 8)
+         throw new RuntimeException("Array is too small, has to be at least 8 element long, was: " + verticesToPack.length);
+
+      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
+         getVertex(vertexIndex, verticesToPack[vertexIndex]);
+   }
+
+   public double getWidth()
+   {
+      return size.getWidth();
    }
 
    public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
@@ -265,33 +257,41 @@ public class Box3d extends Shape3d<Box3d>
       return numberOfIntersections;
    }
 
-   public void getVertex(int vertexIndex, Point3DBasics vertexToPack)
+   @Override
+   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      if (vertexIndex < 0 || vertexIndex >= 8)
-         throw new IndexOutOfBoundsException("The vertex index has to be in [0, 7], was: " + vertexIndex);
-
-      vertexToPack.setX((vertexIndex & 1) == 0 ? size.getX() : -size.getX());
-      vertexToPack.setY((vertexIndex & 2) == 0 ? size.getY() : -size.getY());
-      vertexToPack.setZ((vertexIndex & 4) == 0 ? size.getZ() : -size.getZ());
-      vertexToPack.scale(0.5);
-      transformToWorld(vertexToPack, vertexToPack);
+      return Math.abs(x) <= 0.5 * size.getX() + epsilon && Math.abs(y) <= 0.5 * size.getY() + epsilon && Math.abs(z) <= 0.5 * size.getZ() + epsilon;
    }
 
-   public void getVertices(Point3DBasics[] verticesToPack)
+   public void scale(double scale)
    {
-      if (verticesToPack.length < 8)
-         throw new RuntimeException("Array is too small, has to be at least 8 element long, was: " + verticesToPack.length);
-
-      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
-         getVertex(vertexIndex, verticesToPack[vertexIndex]);
+      size.scale(scale);
    }
 
-   public Point3D[] getVertices()
+   @Override
+   public void set(Box3d other)
    {
-      Point3D[] vertices = new Point3D[8];
-      for (int vertexIndex = 0; vertexIndex < 8; vertexIndex++)
-         getVertex(vertexIndex, vertices[vertexIndex] = new Point3D());
-      return vertices;
+      setPose(other);
+      size.set(other.size);
+   }
+
+   public void setSize(double lengthX, double widthY, double heightZ)
+   {
+      size.setLengthWidthHeight(lengthX, widthY, heightZ);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      super.setToNaN();
+      size.setToNaN();
+   }
+
+   @Override
+   public void setToZero()
+   {
+      super.setToZero();
+      size.setToZero();
    }
 
    @Override
