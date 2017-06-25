@@ -1,9 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -120,6 +117,7 @@ public class Shape3dTestHelper
       Point3D newProjection = new Point3D();
       Vector3D newNormal = new Vector3D();
       boolean isInside = shape3d.checkIfInside(pointOnSurface, newProjection, newNormal);
+      assertTrue(shape3d.isInsideOrOnSurface(newProjection));
 
       if (newProjection.containsNaN())
       {
@@ -156,7 +154,17 @@ public class Shape3dTestHelper
       assertFalse(isInsideCheck);
 
       boolean insideOrOnSurface = shape3d.isInsideOrOnSurface(pointALittleInside);
+      boolean isNormalWayDifferent = false;
+
       if (!insideOrOnSurface)
+      { // When dealing with sharp edges, the point can jump on the other side of the shape even when shifting only by a little.
+         // If that's the case, computing the normal for this point should reveal that by having the normal having a much different orientation.
+         Vector3D problematicNormal = new Vector3D();
+         shape3d.checkIfInside(pointALittleInside, null, problematicNormal);
+         isNormalWayDifferent = problematicNormal.angle(surfaceNormal) > Math.toRadians(90.0);
+      }
+
+      if (!insideOrOnSurface && !isNormalWayDifferent)
       {
          System.out.println(shape3d);
          System.out.println("pointOnSurface = " + pointOnSurface);
@@ -167,7 +175,8 @@ public class Shape3dTestHelper
          shape3d.checkIfInside(pointOnSurface, newProjection, newNormal);
          System.out.println("newNormal = " + newNormal);
       }
-      assertTrue(insideOrOnSurface);
+
+      assertTrue(insideOrOnSurface || isNormalWayDifferent);
    }
 
 }

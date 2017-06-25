@@ -75,40 +75,6 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
-   {
-      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
-
-      boolean isInside = sumOfSquares <= 1.0;
-
-      if (sumOfSquares > 1e-10)
-      {
-         double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
-         closestPointToPack.set(x, y, z);
-         closestPointToPack.scale(scaleFactor);
-      }
-      else
-      {
-         closestPointToPack.setToZero();
-         closestPointToPack.setX(radius.getX());
-      }
-
-      double rxSquared = radius.getX() * radius.getX();
-      double rySquared = radius.getY() * radius.getY();
-      double rzSquared = radius.getZ() * radius.getZ();
-
-      normalToPack.set(closestPointToPack);
-      normalToPack.scale(1.0 / rxSquared, 1.0 / rySquared, 1.0 / rzSquared);
-      normalToPack.normalize();
-      return isInside;
-   }
-
-   public double computeSumOfScaledSquared(double x, double y, double z)
-   {
-      return EuclidCoreTools.normSquared(x / radius.getX(), y / radius.getY(), z / radius.getZ());
-   }
-
-   @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
       double scaledX = x / (radius.getX() + epsilon);
@@ -119,33 +85,45 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected double distanceShapeFrame(double x, double y, double z)
+   protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
+      double sumOfSquares = EuclidCoreTools.normSquared(x / radius.getX(), y / radius.getY(), z / radius.getZ());
+      double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
 
-      if (sumOfSquares > 1e-10)
+      if (sumOfSquares > 1.0e-10)
       {
-         double scaleFactor = 1.0 - 1.0 / Math.sqrt(sumOfSquares);
-         return Math.sqrt(EuclidCoreTools.normSquared(x, y, z)) * scaleFactor;
+         if (closestPointToPack != null)
+         {
+            closestPointToPack.set(x, y, z);
+            closestPointToPack.scale(scaleFactor);
+         }
+
+         if (normalToPack != null)
+         {
+            double xScale = 1.0 / (radius.getX() * radius.getX() * scaleFactor);
+            double yScale = 1.0 / (radius.getY() * radius.getY() * scaleFactor);
+            double zScale = 1.0 / (radius.getZ() * radius.getZ() * scaleFactor);
+
+            normalToPack.set(x, y, z);
+            normalToPack.scale(xScale, yScale, zScale);
+            normalToPack.normalize();
+         }
+
+         return Math.sqrt(EuclidCoreTools.normSquared(x, y, z)) * (1.0 - scaleFactor);
       }
       else
       {
-         return x - radius.getX();
-      }
-   }
+         if (closestPointToPack != null)
+         {
+            closestPointToPack.set(0.0, 0.0, radius.getZ());
+         }
 
-   @Override
-   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
-   {
-      double sumOfSquares = computeSumOfScaledSquared(x, y, z);
+         if (normalToPack != null)
+         {
+            normalToPack.set(0.0, 0.0, 1.0);
+         }
 
-      boolean isInside = sumOfSquares <= 1.0;
-
-      if (!isInside)
-      {
-         double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
-         projectionToPack.set(x, y, z);
-         projectionToPack.scale(scaleFactor);
+         return z - radius.getZ();
       }
    }
 

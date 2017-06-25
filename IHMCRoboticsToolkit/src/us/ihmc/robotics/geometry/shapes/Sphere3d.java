@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import static us.ihmc.euclid.tools.EuclidCoreTools.*;
-import static us.ihmc.robotics.MathTools.*;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -60,48 +59,42 @@ public class Sphere3d extends Shape3d<Sphere3d>
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      return normSquared(x, y, z) <= square(radius + epsilon);
+      double radiusWithEpsilon = radius + epsilon;
+      return normSquared(x, y, z) <= radiusWithEpsilon * radiusWithEpsilon;
    }
 
    @Override
-   protected double distanceShapeFrame(double x, double y, double z)
+   protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      return Math.sqrt(normSquared(x, y, z)) - radius;
-   }
+      double distance = Math.sqrt(EuclidCoreTools.normSquared(x, y, z));
 
-   @Override
-   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
-   {
-      double distanceSquared = normSquared(x, y, z);
-
-      if (distanceSquared >= radius * radius)
+      if (closestPointToPack != null)
       {
-         projectionToPack.set(x, y, z);
-         projectionToPack.scale(radius / Math.sqrt(distanceSquared));
+         if (distance > Epsilons.ONE_TRILLIONTH)
+         {
+            closestPointToPack.set(x, y, z);
+            closestPointToPack.scale(radius / distance);
+         }
+         else
+         {
+            closestPointToPack.set(0.0, 0.0, radius);
+         }
       }
-   }
 
-   @Override
-   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
-   {
-      surfaceNormalAt(x, y, z, normalToPack);
-      closestPointToPack.setAndScale(radius, normalToPack);
-      return isInsideOrOnSurfaceShapeFrame(x, y, z, Epsilons.ONE_TRILLIONTH);
-   }
-
-   private void surfaceNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
-   {
-      double distanceSquared = EuclidCoreTools.normSquared(x, y, z);
-
-      if (distanceSquared > Epsilons.ONE_TRILLIONTH)
+      if (normalToPack != null)
       {
-         normalToPack.set(x, y, z);
-         normalToPack.scale(1.0 / distanceSquared);
+         if (distance > Epsilons.ONE_TRILLIONTH)
+         {
+            normalToPack.set(x, y, z);
+            normalToPack.scale(1.0 / distance);
+         }
+         else
+         {
+            normalToPack.set(0.0, 0.0, 1.0);
+         }
       }
-      else
-      {
-         normalToPack.set(0.0, 0.0, 1.0);
-      }
+
+      return distance - radius;
    }
 
    @Override

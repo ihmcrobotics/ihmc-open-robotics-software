@@ -142,46 +142,17 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected double distanceShapeFrame(double x, double y, double z)
-   {
-      if (!isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
-      {
-         double dx = Math.max(0.0, Math.abs(x) - 0.5 * size.getX());
-         double dy = Math.max(0.0, Math.abs(y) - 0.5 * size.getY());
-         double dz = Math.max(0.0, Math.abs(z) - 0.5 * size.getZ());
-         return Math.sqrt(EuclidCoreTools.normSquared(dx, dy, dz));
-      }
-      else
-      {
-         double distance = Double.NEGATIVE_INFINITY;
-         distance = Math.max(distance, Math.abs(x) - 0.5 * size.getX());
-         distance = Math.max(distance, Math.abs(y) - 0.5 * size.getY());
-         distance = Math.max(distance, Math.abs(z) - 0.5 * size.getZ());
-         return distance;
-      }
-   }
-
-   @Override
-   protected void orthogonalProjectionShapeFrame(double x, double y, double z, Point3DBasics projectionToPack)
-   {
-      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0))
-         return;
-
-      projectionToPack.setX(MathTools.clamp(x, 0.5 * size.getX()));
-      projectionToPack.setY(MathTools.clamp(y, 0.5 * size.getY()));
-      projectionToPack.setZ(MathTools.clamp(z, 0.5 * size.getZ()));
-   }
-
-   @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
       return Math.abs(x) <= 0.5 * size.getX() + epsilon && Math.abs(y) <= 0.5 * size.getY() + epsilon && Math.abs(z) <= 0.5 * size.getZ() + epsilon;
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      if (isInsideOrOnSurfaceShapeFrame(x, y, z, 1.0e-12))
+      boolean isInside = isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0);
+
+      if (isInside)
       {
          double dx = Math.abs(Math.abs(x) - 0.5 * size.getX());
          double dy = Math.abs(Math.abs(y) - 0.5 * size.getY());
@@ -227,25 +198,33 @@ public class Box3d extends Shape3d<Box3d>
             }
          }
 
-         return true;
+         return -EuclidCoreTools.min(dx, dy, dz);
       }
       else
       {
+
+         double xClamped = MathTools.clamp(x, 0.5 * size.getX());
+         double yClamped = MathTools.clamp(y, 0.5 * size.getY());
+         double zClamped = MathTools.clamp(z, 0.5 * size.getZ());
+
+         double dx = x - xClamped;
+         double dy = y - yClamped;
+         double dz = z - zClamped;
+
+         double distance = Math.sqrt(EuclidCoreTools.normSquared(dx, dy, dz));
+
          if (closestPointToPack != null)
          {
-            orthogonalProjectionShapeFrame(x, y, z, closestPointToPack);
+            closestPointToPack.set(xClamped, yClamped, zClamped);
          }
 
          if (normalToPack != null)
          {
-            normalToPack.setX(x - MathTools.clamp(x, 0.5 * size.getX()));
-            normalToPack.setY(y - MathTools.clamp(y, 0.5 * size.getY()));
-            normalToPack.setZ(z - MathTools.clamp(z, 0.5 * size.getZ()));
-
-            normalToPack.normalize();
+            normalToPack.set(dx, dy, dz);
+            normalToPack.scale(1.0 / distance);
          }
 
-         return false;
+         return distance;
       }
    }
 
