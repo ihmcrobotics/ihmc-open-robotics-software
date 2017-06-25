@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 
@@ -13,7 +14,7 @@ import us.ihmc.robotics.MathTools;
  */
 public class Ramp3d extends Shape3d<Ramp3d>
 {
-   private final Size3d size;
+   private final Size3d size = new Size3d();
 
    private double rampLength;
    private double angleOfRampIncline;
@@ -21,32 +22,24 @@ public class Ramp3d extends Shape3d<Ramp3d>
    public Ramp3d(Ramp3d ramp3d)
    {
       setPose(ramp3d);
-      size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
-
-      updateRamp();
+      setSize(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
    }
 
    public Ramp3d(double width, double length, double height)
    {
-      size = new Size3d(length, width, height);
-
-      updateRamp();
+      setSize(length, width, height);
    }
 
    public Ramp3d(RigidBodyTransform transform, double width, double length, double height)
    {
       setPose(transform);
-      size = new Size3d(length, width, height);
-
-      updateRamp();
+      setSize(length, width, height);
    }
 
    public Ramp3d(Pose3D pose, double width, double length, double height)
    {
       setPose(pose);
-      size = new Size3d(length, width, height);
-
-      updateRamp();
+      setSize(length, width, height);
    }
 
    @Override
@@ -55,16 +48,8 @@ public class Ramp3d extends Shape3d<Ramp3d>
       if (this != ramp3d)
       {
          setPose(ramp3d);
-         size.set(ramp3d.size);
-
-         updateRamp();
+         setSize(ramp3d.size);
       }
-   }
-
-   private void updateRamp()
-   {
-      rampLength = Math.sqrt(EuclidCoreTools.normSquared(size.getLength(), size.getHeight()));
-      angleOfRampIncline = Math.atan(size.getHeight() / size.getLength());
    }
 
    public double getWidth()
@@ -75,7 +60,6 @@ public class Ramp3d extends Shape3d<Ramp3d>
    public void setWidth(double width)
    {
       size.setWidth(width);
-      updateRamp();
    }
 
    public double getHeight()
@@ -100,12 +84,29 @@ public class Ramp3d extends Shape3d<Ramp3d>
       updateRamp();
    }
 
+   public void setSize(Tuple3DReadOnly size)
+   {
+      setSize(size.getX(), size.getY(), size.getZ());
+   }
+
+   public void setSize(double length, double width, double height)
+   {
+      size.setLengthWidthHeight(length, width, height);
+      updateRamp();
+   }
+
+   private void updateRamp()
+   {
+      rampLength = Math.sqrt(EuclidCoreTools.normSquared(size.getLength(), size.getHeight()));
+      angleOfRampIncline = Math.atan(size.getHeight() / size.getLength());
+   }
+
    public double getRampLength()
    {
       return rampLength;
    }
 
-   public void getSurfaceNormal(Vector3DBasics surfaceNormalToPack)
+   public void getRampSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
       surfaceNormalToPack.set(-size.getHeight() / rampLength, 0.0, size.getLength() / rampLength);
       transformToWorld(surfaceNormalToPack);
@@ -370,10 +371,9 @@ public class Ramp3d extends Shape3d<Ramp3d>
       if (x > size.getLength() + epsilon)
          return false;
 
-      if (y < -0.5 * size.getWidth() - epsilon)
-         return false;
+      double halfWidth = 0.5 * size.getWidth() + epsilon;
 
-      if (y > 0.5 * size.getWidth() + epsilon)
+      if (y < -halfWidth || y > halfWidth)
          return false;
 
       double rampDirectionX = size.getLength() / rampLength;
