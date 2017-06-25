@@ -86,7 +86,7 @@ public class Ramp3dTest
    {
       Ramp3d ramp = new Ramp3d(1.0, 1.0, 1.0);
       Vector3D surfaceNormal = new Vector3D();
-      ramp.getSurfaceNormal(surfaceNormal);
+      ramp.getRampSurfaceNormal(surfaceNormal);
       assertEquals("not equal", surfaceNormal.getX(), -1.0 / Math.sqrt(2.0), 1e-14);
       assertEquals("not equal", surfaceNormal.getY(), 0.0, 1e-14);
       assertEquals("not equal", surfaceNormal.getZ(), 1.0 / Math.sqrt(2.0), 1e-14);
@@ -179,7 +179,7 @@ public class Ramp3dTest
       {
          Ramp3d ramp = createRandomRamp(random);
          Vector3D surfaceNormal = new Vector3D();
-         ramp.getSurfaceNormal(surfaceNormal);
+         ramp.getRampSurfaceNormal(surfaceNormal);
 
          double insideRamp = 0.1;
          double minX = insideRamp;
