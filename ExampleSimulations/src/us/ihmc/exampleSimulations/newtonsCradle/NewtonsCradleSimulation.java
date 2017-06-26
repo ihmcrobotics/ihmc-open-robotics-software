@@ -187,7 +187,7 @@ public class NewtonsCradleSimulation
       CombinedTerrainObject3D boxTerrain = new CombinedTerrainObject3D("BoxTerrain");
       Box3d box = new Box3d(2.0, 1.0, 0.1);
       box.setPosition(new Point3D(0.0, 1.0, 0.0));
-      box.setYawPitchRoll(0.0, groundAngle, 0.0);
+      box.setOrientationYawPitchRoll(0.0, groundAngle, 0.0);
       boxTerrain.addRotatableBox(box, YoAppearance.Blue());
 
       LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(boxRobot, boxRobot.getRobotsYoVariableRegistry());

@@ -30,6 +30,12 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
+/**
+ * 
+ * @author Sylvain Bertrand
+ *
+ * @param <S>
+ */
 public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 {
    protected final RigidBodyTransform shapePose = new RigidBodyTransform();
@@ -38,22 +44,38 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
    {
    }
 
+   /**
+    * Returns true if inside the Shape3d. If inside, must pack the intersection and normal. If not
+    * inside, packing those is optional. But if they are not packed when outside, then they should
+    * be set to NaN. If they are set to NaN and you really do wish to see where they would project
+    * to, then call orthogonalProjection.
+    *
+    * @param pointToCheck
+    * @param intersectionToPack
+    * @param normalToPack
+    * @return true if the point is inside, false otherwise.
+    */
+   public final boolean checkIfInside(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
+   {
+      double xLocal = computeTransformedX(shapePose, true, pointToCheck);
+      double yLocal = computeTransformedY(shapePose, true, pointToCheck);
+      double zLocal = computeTransformedZ(shapePose, true, pointToCheck);
+
+      boolean isInside = evaluateQuery(xLocal, yLocal, zLocal, closestPointOnSurfaceToPack, normalToPack) <= 0.0;
+
+      if (closestPointOnSurfaceToPack != null)
+         transformToWorld(closestPointOnSurfaceToPack);
+
+      if (normalToPack != null)
+         transformToWorld(normalToPack);
+
+      return isInside;
+   }
+
    @Override
    public boolean containsNaN()
    {
       return shapePose.containsNaN();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      shapePose.setToNaN();
-   }
-
-   @Override
-   public void setToZero()
-   {
-      shapePose.setToZero();
    }
 
    /**
@@ -71,6 +93,26 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 
       return evaluateQuery(xLocal, yLocal, zLocal, null, null);
    }
+
+   public boolean epsilonEqualsPose(Shape3d<S> other, double epsilon)
+   {
+      return shapePose.epsilonEquals(other.shapePose, epsilon);
+   }
+
+   /**
+    * Internal generic method used for the public API of any {@code Shape3d}.
+    * 
+    * @param x the x-coordinate of the query expressed in the local frame of this shape.
+    * @param y the y-coordinate of the query expressed in the local frame of this shape.
+    * @param z the z-coordinate of the query expressed in the local frame of this shape.
+    * @param closestPointOnSurfaceToPack closest point to the query expressed in the local frame of
+    *           this shape. Modified. Can be {@code null}.
+    * @param normalAtClosestPointToPack normal of the shape surface at the closest point. Modified.
+    *           Can be {@code null}.
+    * @return the distance from the query to the closest point on the shape surface. The returned
+    *         value is expected to be negative when the query is inside the shape.
+    */
+   protected abstract double evaluateQuery(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack);
 
    /**
     * Determine whether the given point is on or inside the surface of this shape.
@@ -129,177 +171,9 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
          transformToWorld(pointToCheckAndPack);
    }
 
-   /**
-    * Returns true if inside the Shape3d. If inside, must pack the intersection and normal. If not
-    * inside, packing those is optional. But if they are not packed when outside, then they should
-    * be set to NaN. If they are set to NaN and you really do wish to see where they would project
-    * to, then call orthogonalProjection.
-    *
-    * @param pointToCheck
-    * @param intersectionToPack
-    * @param normalToPack
-    * @return true if the point is inside, false otherwise.
-    */
-   public final boolean checkIfInside(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
+   public final void setOrientation(AxisAngleReadOnly axisAngle4d)
    {
-      double xLocal = computeTransformedX(shapePose, true, pointToCheck);
-      double yLocal = computeTransformedY(shapePose, true, pointToCheck);
-      double zLocal = computeTransformedZ(shapePose, true, pointToCheck);
-
-      boolean isInside = evaluateQuery(xLocal, yLocal, zLocal, closestPointOnSurfaceToPack, normalToPack) <= 0.0;
-
-      if (closestPointOnSurfaceToPack != null)
-         transformToWorld(closestPointOnSurfaceToPack);
-
-      if (normalToPack != null)
-         transformToWorld(normalToPack);
-
-      return isInside;
-   }
-
-   /**
-    * Internal generic method used for the public API of any {@code Shape3d}.
-    * 
-    * @param x the x-coordinate of the query expressed in the local frame of this shape.
-    * @param y the y-coordinate of the query expressed in the local frame of this shape.
-    * @param z the z-coordinate of the query expressed in the local frame of this shape.
-    * @param closestPointOnSurfaceToPack closest point to the query expressed in the local frame of
-    *           this shape. Modified. Can be {@code null}.
-    * @param normalAtClosestPointToPack normal of the shape surface at the closest point. Modified.
-    *           Can be {@code null}.
-    * @return the distance from the query to the closest point on the shape surface. The returned
-    *         value is expected to be negative when the query is inside the shape.
-    */
-   protected abstract double evaluateQuery(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack);
-
-   @Override
-   public final void applyTransform(Transform transform)
-   {
-      transform.transform(shapePose);
-   }
-
-   @Override
-   public final void applyInverseTransform(Transform transform)
-   {
-      transform.inverseTransform(shapePose);
-   }
-
-   public boolean epsilonEqualsPose(Shape3d<S> other, double epsilon)
-   {
-      return shapePose.epsilonEquals(other.shapePose, epsilon);
-   }
-
-   public void setPose(Shape3d<S> other)
-   {
-      shapePose.set(other.shapePose);
-   }
-
-   // Pose API
-
-   public final void setX(double x)
-   {
-      shapePose.setTranslationX(x);
-   }
-
-   public final void setY(double y)
-   {
-      shapePose.setTranslationY(y);
-   }
-
-   public final void setZ(double z)
-   {
-      shapePose.setTranslationZ(z);
-   }
-
-   public final double getX()
-   {
-      return shapePose.getTranslationX();
-   }
-
-   public final double getY()
-   {
-      return shapePose.getTranslationY();
-   }
-
-   public final double getZ()
-   {
-      return shapePose.getTranslationZ();
-   }
-
-   public final void setPosition(double x, double y, double z)
-   {
-      shapePose.setTranslation(x, y, z);
-   }
-
-   public final void translate(Tuple3DReadOnly translation)
-   {
-      shapePose.prependTranslation(translation);
-   }
-
-   public final void translate(double x, double y, double z)
-   {
-      shapePose.prependTranslation(x, y, z);
-   }
-
-   public final void appendTransform(RigidBodyTransform transform)
-   {
-      shapePose.multiply(transform);
-   }
-
-   public final void appendTransform(QuaternionBasedTransform transform)
-   {
-      shapePose.multiply(transform);
-   }
-
-   public String getPoseString()
-   {
-      return shapePose.toString();
-   }
-
-   public final void setPose(Pose3D pose)
-   {
-      pose.get(shapePose);
-   }
-
-   public final void setPose(RigidBodyTransform transform)
-   {
-      shapePose.set(transform);
-   }
-
-   public final void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
-   {
-      shapePose.set(orientation, position);
-   }
-
-   public final void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
-   {
-      shapePose.set(orientation, position);
-   }
-
-   public final void setPosition(Tuple3DReadOnly position)
-   {
-      shapePose.setTranslation(position);
-   }
-
-   public final void setXY(Point2DReadOnly point)
-   {
-      shapePose.setTranslationX(point.getX());
-      shapePose.setTranslationY(point.getY());
-   }
-
-   public final void getPose(RigidBodyTransform transformToPack)
-   {
-      transformToPack.set(shapePose);
-   }
-
-   public final void getPose(Pose3D poseToPack)
-   {
-      poseToPack.set(shapePose);
-   }
-
-   public final void getPosition(Tuple3DBasics tupleToPack)
-   {
-      shapePose.getTranslation(tupleToPack);
+      shapePose.setRotation(axisAngle4d);
    }
 
    public final void setOrientation(QuaternionReadOnly quaternion)
@@ -312,54 +186,84 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose.setRotation(matrix3d);
    }
 
-   public final void setOrientation(AxisAngleReadOnly axisAngle4d)
-   {
-      shapePose.setRotation(axisAngle4d);
-   }
-
-   public final void getOrientation(RotationMatrix matrixToPack)
-   {
-      shapePose.getRotation(matrixToPack);
-   }
-
-   public final void getOrientation(QuaternionBasics quaternionToPack)
-   {
-      shapePose.getRotation(quaternionToPack);
-   }
-
-   public final void getOrientation(AxisAngleBasics axisAngleToPack)
-   {
-      shapePose.getRotation(axisAngleToPack);
-   }
-
-   public final void setYawPitchRoll(double[] yawPitchRoll)
-   {
-      shapePose.setRotationYawPitchRoll(yawPitchRoll);
-   }
-
-   public final void setYawPitchRoll(double yaw, double pitch, double roll)
+   public final void setOrientationYawPitchRoll(double yaw, double pitch, double roll)
    {
       shapePose.setRotationYawPitchRoll(yaw, pitch, roll);
    }
 
-   public final void getYawPitchRoll(double[] yawPitchRollToPack)
+   public final void setOrientationYawPitchRoll(double[] yawPitchRoll)
    {
-      shapePose.getRotationYawPitchRoll(yawPitchRollToPack);
+      shapePose.setRotationYawPitchRoll(yawPitchRoll);
    }
 
-   public final double getYaw()
+   public final void setPose(Pose3D pose)
    {
-      return shapePose.getRotationMatrix().getYaw();
+      pose.get(shapePose);
    }
 
-   public final double getPitch()
+   public final void setPose(RigidBodyTransform transform)
    {
-      return shapePose.getRotationMatrix().getPitch();
+      shapePose.set(transform);
    }
 
-   public final double getRoll()
+   public void setPose(Shape3d<S> other)
    {
-      return shapePose.getRotationMatrix().getRoll();
+      shapePose.set(other.shapePose);
+   }
+
+   public final void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
+   {
+      shapePose.set(orientation, position);
+   }
+
+   public final void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   {
+      shapePose.set(orientation, position);
+   }
+
+   public final void setPosition(double x, double y, double z)
+   {
+      shapePose.setTranslation(x, y, z);
+   }
+
+   public final void setPosition(Tuple3DReadOnly position)
+   {
+      shapePose.setTranslation(position);
+   }
+
+   public final void setPositionX(double x)
+   {
+      shapePose.setTranslationX(x);
+   }
+
+   public final void setPositionXY(Point2DReadOnly point)
+   {
+      shapePose.setTranslationX(point.getX());
+      shapePose.setTranslationY(point.getY());
+   }
+
+   public final void setPositionY(double y)
+   {
+      shapePose.setTranslationY(y);
+   }
+
+   public final void setPositionZ(double z)
+   {
+      shapePose.setTranslationZ(z);
+   }
+
+   // Pose transform
+
+   @Override
+   public void setToNaN()
+   {
+      shapePose.setToNaN();
+   }
+
+   @Override
+   public void setToZero()
+   {
+      shapePose.setToZero();
    }
 
    public RotationMatrixReadOnly getOrientation()
@@ -367,101 +271,139 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return shapePose.getRotationMatrix();
    }
 
+   public final void getOrientation(AxisAngleBasics axisAngleToPack)
+   {
+      shapePose.getRotation(axisAngleToPack);
+   }
+
+   public final void getOrientation(QuaternionBasics quaternionToPack)
+   {
+      shapePose.getRotation(quaternionToPack);
+   }
+
+   public final void getOrientation(RotationMatrix matrixToPack)
+   {
+      shapePose.getRotation(matrixToPack);
+   }
+
+   public final double getOrientationPitch()
+   {
+      return shapePose.getRotationMatrix().getPitch();
+   }
+
+   public final double getOrientationRoll()
+   {
+      return shapePose.getRotationMatrix().getRoll();
+   }
+
+   public final double getOrientationYaw()
+   {
+      return shapePose.getRotationMatrix().getYaw();
+   }
+
+   public final void getOrientationYawPitchRoll(double[] yawPitchRollToPack)
+   {
+      shapePose.getRotationYawPitchRoll(yawPitchRollToPack);
+   }
+
+   public final void getPose(Pose3D poseToPack)
+   {
+      poseToPack.set(shapePose);
+   }
+
+   public final void getPose(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(shapePose);
+   }
+
+   public String getPoseString()
+   {
+      return shapePose.toString();
+   }
+
    public Tuple3DReadOnly getPosition()
    {
       return shapePose.getTranslationVector();
    }
 
-   // Pose transform
-
-   public final void transformToWorld(Transformable transformable)
+   public final void getPosition(Tuple3DBasics tupleToPack)
    {
-      transformable.applyTransform(shapePose);
+      shapePose.getTranslation(tupleToPack);
    }
 
-   public final void transformToWorld(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+   public final double getPositionX()
    {
-      shapePose.transform(pointOriginal, pointTransformed);
+      return shapePose.getTranslationX();
    }
 
-   public final void transformToWorld(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+   public final double getPositionY()
    {
-      shapePose.transform(vectorOriginal, vectorTransformed);
+      return shapePose.getTranslationY();
    }
 
-   public final void transformToWorld(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+   public final double getPositionZ()
    {
-      shapePose.transform(quaternionOriginal, quaternionTransformed);
+      return shapePose.getTranslationZ();
    }
 
-   public final void transformToWorld(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+   public final void appendTransform(QuaternionBasedTransform transform)
    {
-      shapePose.transform(vectorOriginal, vectorTransformed);
+      shapePose.multiply(transform);
    }
 
-   public final void transformToWorld(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
+   public final void appendTransform(RigidBodyTransform transform)
    {
-      shapePose.transform(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
+      shapePose.multiply(transform);
    }
 
-   public final void transformToWorld(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
+   public final void appendTranslation(double x, double y, double z)
    {
-      shapePose.transform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+      shapePose.appendTranslation(x, y, z);
    }
 
-   public final void transformToWorld(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
+   public final void appendTranslation(Tuple3DReadOnly translation)
    {
-      shapePose.transform(matrixOriginal, matrixTransformed);
+      shapePose.appendTranslation(translation);
    }
 
-   public final void transformToWorld(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
+   public final void appendYawRotation(double yaw)
    {
-      shapePose.transform(matrixOriginal, matrixTransformed);
+      shapePose.appendYawRotation(yaw);
    }
 
-   public final void transformToWorld(RigidBodyTransform original, RigidBodyTransform transformed)
+   public final void appendPitchRotation(double pitch)
    {
-      shapePose.transform(original, transformed);
+      shapePose.appendPitchRotation(pitch);
    }
 
-   public final void transformToWorld(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+   public final void appendRollRotation(double roll)
    {
-      shapePose.transform(original, transformed);
+      shapePose.appendRollRotation(roll);
    }
 
-   public final void transformToLocal(Transformable transformable)
+   public final void prependTranslation(double x, double y, double z)
    {
-      transformable.applyInverseTransform(shapePose);
+      shapePose.prependTranslation(x, y, z);
    }
 
-   public final void transformToLocal(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+   public final void prependTranslation(Tuple3DReadOnly translation)
    {
-      shapePose.inverseTransform(pointOriginal, pointTransformed);
+      shapePose.prependTranslation(translation);
    }
 
-   public final void transformToLocal(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+   public final void prependYawRotation(double yaw)
    {
-      shapePose.inverseTransform(vectorOriginal, vectorTransformed);
+      shapePose.prependYawRotation(yaw);
    }
 
-   public final void transformToLocal(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+   public final void prependPitchRotation(double pitch)
    {
-      shapePose.inverseTransform(quaternionOriginal, quaternionTransformed);
+      shapePose.prependPitchRotation(pitch);
    }
 
-   public final void transformToLocal(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+   public final void prependRollRotation(double roll)
    {
-      shapePose.inverseTransform(vectorOriginal, vectorTransformed);
-   }
-
-   public final void transformToLocal(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
-   {
-      shapePose.inverseTransform(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
-   }
-
-   public final void transformToLocal(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
-   {
-      shapePose.inverseTransform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+      shapePose.prependRollRotation(roll);
    }
 
    public final void transformToLocal(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
@@ -469,9 +411,24 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose.inverseTransform(matrixOriginal, matrixTransformed);
    }
 
-   public final void transformToLocal(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
+   public final void transformToLocal(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
    {
-      shapePose.inverseTransform(matrixOriginal, matrixTransformed);
+      shapePose.inverseTransform(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
+   }
+
+   public final void transformToLocal(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+   {
+      shapePose.inverseTransform(pointOriginal, pointTransformed);
+   }
+
+   public final void transformToLocal(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+   {
+      shapePose.inverseTransform(original, transformed);
+   }
+
+   public final void transformToLocal(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+   {
+      shapePose.inverseTransform(quaternionOriginal, quaternionTransformed);
    }
 
    public final void transformToLocal(RigidBodyTransform original, RigidBodyTransform transformed)
@@ -479,8 +436,96 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose.inverseTransform(original, transformed);
    }
 
-   public final void transformToLocal(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+   public final void transformToLocal(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
    {
-      shapePose.inverseTransform(original, transformed);
+      shapePose.inverseTransform(matrixOriginal, matrixTransformed);
    }
+
+   public final void transformToLocal(Transformable transformable)
+   {
+      transformable.applyInverseTransform(shapePose);
+   }
+
+   public final void transformToLocal(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
+   {
+      shapePose.inverseTransform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+   }
+
+   public final void transformToLocal(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+   {
+      shapePose.inverseTransform(vectorOriginal, vectorTransformed);
+   }
+
+   public final void transformToLocal(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+   {
+      shapePose.inverseTransform(vectorOriginal, vectorTransformed);
+   }
+
+   public final void transformToWorld(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
+   {
+      shapePose.transform(matrixOriginal, matrixTransformed);
+   }
+
+   public final void transformToWorld(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
+   {
+      shapePose.transform(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
+   }
+
+   public final void transformToWorld(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+   {
+      shapePose.transform(pointOriginal, pointTransformed);
+   }
+
+   public final void transformToWorld(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+   {
+      shapePose.transform(original, transformed);
+   }
+
+   public final void transformToWorld(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+   {
+      shapePose.transform(quaternionOriginal, quaternionTransformed);
+   }
+
+   public final void transformToWorld(RigidBodyTransform original, RigidBodyTransform transformed)
+   {
+      shapePose.transform(original, transformed);
+   }
+
+   public final void transformToWorld(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
+   {
+      shapePose.transform(matrixOriginal, matrixTransformed);
+   }
+
+   public final void transformToWorld(Transformable transformable)
+   {
+      transformable.applyTransform(shapePose);
+   }
+
+   public final void transformToWorld(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
+   {
+      shapePose.transform(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+   }
+
+   public final void transformToWorld(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+   {
+      shapePose.transform(vectorOriginal, vectorTransformed);
+   }
+
+   public final void transformToWorld(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+   {
+      shapePose.transform(vectorOriginal, vectorTransformed);
+   }
+
+   @Override
+   public final void applyInverseTransform(Transform transform)
+   {
+      transform.inverseTransform(shapePose);
+   }
+
+   @Override
+   public final void applyTransform(Transform transform)
+   {
+      transform.transform(shapePose);
+   }
+
 }
