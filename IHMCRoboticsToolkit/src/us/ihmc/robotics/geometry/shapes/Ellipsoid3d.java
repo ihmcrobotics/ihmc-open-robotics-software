@@ -1,11 +1,16 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TransformationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
@@ -62,9 +67,9 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 
          if (normalToPack != null)
          {
-            double xScale = 1.0 / (radius.getX() * radius.getX() * scaleFactor);
-            double yScale = 1.0 / (radius.getY() * radius.getY() * scaleFactor);
-            double zScale = 1.0 / (radius.getZ() * radius.getZ() * scaleFactor);
+            double xScale = 1.0 / (radius.getX() * radius.getX());
+            double yScale = 1.0 / (radius.getY() * radius.getY());
+            double zScale = 1.0 / (radius.getZ() * radius.getZ());
 
             normalToPack.set(x, y, z);
             normalToPack.scale(xScale, yScale, zScale);
@@ -112,6 +117,32 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    public double getZRadius()
    {
       return radius.getZ();
+   }
+
+   public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
+   {
+      return intersectionWith(line.getPoint(), line.getDirection(), firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
+                               Point3DBasics secondIntersectionToPack)
+   {
+      double xLocal = TransformationTools.computeTransformedX(shapePose, true, pointOnLine);
+      double yLocal = TransformationTools.computeTransformedY(shapePose, true, pointOnLine);
+      double zLocal = TransformationTools.computeTransformedZ(shapePose, true, pointOnLine);
+
+      double dxLocal = TransformationTools.computeTransformedX(shapePose, true, lineDirection);
+      double dyLocal = TransformationTools.computeTransformedY(shapePose, true, lineDirection);
+      double dzLocal = TransformationTools.computeTransformedZ(shapePose, true, lineDirection);
+
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndEllipsoid3D(radius.getX(), radius.getY(), radius.getZ(), xLocal, yLocal,
+                                                                                              zLocal, dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
+                                                                                              secondIntersectionToPack);
+      if (firstIntersectionToPack != null && numberOfIntersections >= 1)
+         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+      if (secondIntersectionToPack != null && numberOfIntersections == 2)
+         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+      return numberOfIntersections;
    }
 
    @Override

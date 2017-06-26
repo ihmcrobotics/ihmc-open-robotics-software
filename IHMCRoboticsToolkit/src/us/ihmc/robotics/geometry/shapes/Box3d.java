@@ -5,9 +5,9 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TransformationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -21,9 +21,33 @@ import us.ihmc.robotics.MathTools;
 public class Box3d extends Shape3d<Box3d>
 {
    private final Point3D temporaryPoint = new Point3D();
-   private final Vector3D temporaryVector = new Vector3D();
 
-   private final Size3d size = new Size3d();
+   private final Size3d halfSize = new Size3d();
+   private final Size3d size = new Size3d()
+   {
+      private static final long serialVersionUID = 3115155959997000188L;
+
+      @Override
+      public final void setX(double x)
+      {
+         super.setX(x);
+         halfSize.setX(0.5 * x);
+      }
+
+      @Override
+      public final void setY(double y)
+      {
+         super.setY(y);
+         halfSize.setY(0.5 * y);
+      }
+
+      @Override
+      public final void setZ(double z)
+      {
+         super.setZ(z);
+         halfSize.setZ(0.5 * z);
+      }
+   };
 
    public Box3d()
    {
@@ -82,9 +106,9 @@ public class Box3d extends Shape3d<Box3d>
 
       if (isInside)
       {
-         double dx = Math.abs(Math.abs(x) - 0.5 * size.getX());
-         double dy = Math.abs(Math.abs(y) - 0.5 * size.getY());
-         double dz = Math.abs(Math.abs(z) - 0.5 * size.getZ());
+         double dx = Math.abs(Math.abs(x) - halfSize.getX());
+         double dy = Math.abs(Math.abs(y) - halfSize.getY());
+         double dz = Math.abs(Math.abs(z) - halfSize.getZ());
 
          if (closestPointToPack != null)
          {
@@ -93,16 +117,16 @@ public class Box3d extends Shape3d<Box3d>
             if (dx < dy)
             {
                if (dx < dz)
-                  closestPointToPack.setX(Math.copySign(0.5 * size.getX(), x));
+                  closestPointToPack.setX(Math.copySign(halfSize.getX(), x));
                else
-                  closestPointToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
+                  closestPointToPack.setZ(Math.copySign(halfSize.getZ(), z));
             }
             else
             {
                if (dy < dz)
-                  closestPointToPack.setY(Math.copySign(0.5 * size.getY(), y));
+                  closestPointToPack.setY(Math.copySign(halfSize.getY(), y));
                else
-                  closestPointToPack.setZ(Math.copySign(0.5 * size.getZ(), z));
+                  closestPointToPack.setZ(Math.copySign(halfSize.getZ(), z));
             }
          }
 
@@ -131,9 +155,9 @@ public class Box3d extends Shape3d<Box3d>
       else
       {
 
-         double xClamped = MathTools.clamp(x, 0.5 * size.getX());
-         double yClamped = MathTools.clamp(y, 0.5 * size.getY());
-         double zClamped = MathTools.clamp(z, 0.5 * size.getZ());
+         double xClamped = MathTools.clamp(x, halfSize.getX());
+         double yClamped = MathTools.clamp(y, halfSize.getY());
+         double zClamped = MathTools.clamp(z, halfSize.getZ());
 
          double dx = x - xClamped;
          double dy = y - yClamped;
@@ -239,16 +263,23 @@ public class Box3d extends Shape3d<Box3d>
    public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
                                Point3DBasics secondIntersectionToPack)
    {
-      double minX = -0.5 * size.getX();
-      double minY = -0.5 * size.getY();
-      double minZ = -0.5 * size.getZ();
-      double maxX = 0.5 * size.getX();
-      double maxY = 0.5 * size.getY();
-      double maxZ = 0.5 * size.getZ();
-      transformToLocal(pointOnLine, temporaryPoint);
-      transformToLocal(lineDirection, temporaryVector);
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndBoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ, temporaryPoint,
-                                                                                                temporaryVector, firstIntersectionToPack,
+      double minX = -halfSize.getX();
+      double minY = -halfSize.getY();
+      double minZ = -halfSize.getZ();
+      double maxX = halfSize.getX();
+      double maxY = halfSize.getY();
+      double maxZ = halfSize.getZ();
+
+      double xLocal = TransformationTools.computeTransformedX(shapePose, true, pointOnLine);
+      double yLocal = TransformationTools.computeTransformedY(shapePose, true, pointOnLine);
+      double zLocal = TransformationTools.computeTransformedZ(shapePose, true, pointOnLine);
+
+      double dxLocal = TransformationTools.computeTransformedX(shapePose, true, lineDirection);
+      double dyLocal = TransformationTools.computeTransformedY(shapePose, true, lineDirection);
+      double dzLocal = TransformationTools.computeTransformedZ(shapePose, true, lineDirection);
+
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndBoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ, xLocal, yLocal, zLocal,
+                                                                                                dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
                                                                                                 secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
          transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
@@ -260,7 +291,7 @@ public class Box3d extends Shape3d<Box3d>
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
    {
-      return Math.abs(x) <= 0.5 * size.getX() + epsilon && Math.abs(y) <= 0.5 * size.getY() + epsilon && Math.abs(z) <= 0.5 * size.getZ() + epsilon;
+      return Math.abs(x) <= halfSize.getX() + epsilon && Math.abs(y) <= halfSize.getY() + epsilon && Math.abs(z) <= halfSize.getZ() + epsilon;
    }
 
    public void scale(double scale)
