@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TransformationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,14 +19,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
 {
    private double radius;
    private double height;
-
-   private final Point3D temporaryPoint = new Point3D();
-   private final Vector3D temporaryVector = new Vector3D();
-
-   public static enum CylinderFaces
-   {
-      TOP, BOTTOM
-   }
 
    public Cylinder3d()
    {
@@ -124,9 +117,15 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
                                Point3DBasics secondIntersectionToPack)
    {
-      transformToLocal(pointOnLine, temporaryPoint);
-      transformToLocal(lineDirection, temporaryVector);
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndCylinder3D(height, radius, temporaryPoint, temporaryVector,
+      double xLocal = TransformationTools.computeTransformedX(shapePose, true, pointOnLine);
+      double yLocal = TransformationTools.computeTransformedY(shapePose, true, pointOnLine);
+      double zLocal = TransformationTools.computeTransformedZ(shapePose, true, pointOnLine);
+
+      double dxLocal = TransformationTools.computeTransformedX(shapePose, true, lineDirection);
+      double dyLocal = TransformationTools.computeTransformedY(shapePose, true, lineDirection);
+      double dzLocal = TransformationTools.computeTransformedZ(shapePose, true, lineDirection);
+
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndCylinder3D(height, radius, xLocal, yLocal, zLocal, dxLocal, dyLocal, dzLocal,
                                                                                              firstIntersectionToPack, secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
          transformToWorld(firstIntersectionToPack, firstIntersectionToPack);

@@ -3,10 +3,14 @@ package us.ihmc.robotics.geometry.shapes;
 import static us.ihmc.euclid.tools.EuclidCoreTools.*;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TransformationTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
 public class Sphere3d extends Shape3d<Sphere3d>
@@ -54,6 +58,31 @@ public class Sphere3d extends Shape3d<Sphere3d>
    {
       setPose(sphere3d);
       radius = sphere3d.radius;
+   }
+
+   public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
+   {
+      return intersectionWith(line.getPoint(), line.getDirection(), firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
+                               Point3DBasics secondIntersectionToPack)
+   {
+      double xLocal = TransformationTools.computeTransformedX(shapePose, true, pointOnLine);
+      double yLocal = TransformationTools.computeTransformedY(shapePose, true, pointOnLine);
+      double zLocal = TransformationTools.computeTransformedZ(shapePose, true, pointOnLine);
+
+      double dxLocal = TransformationTools.computeTransformedX(shapePose, true, lineDirection);
+      double dyLocal = TransformationTools.computeTransformedY(shapePose, true, lineDirection);
+      double dzLocal = TransformationTools.computeTransformedZ(shapePose, true, lineDirection);
+
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndEllipsoid3D(radius, radius, radius, xLocal, yLocal, zLocal, dxLocal, dyLocal,
+                                                                                              dzLocal, firstIntersectionToPack, secondIntersectionToPack);
+      if (firstIntersectionToPack != null && numberOfIntersections >= 1)
+         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+      if (secondIntersectionToPack != null && numberOfIntersections == 2)
+         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+      return numberOfIntersections;
    }
 
    @Override
