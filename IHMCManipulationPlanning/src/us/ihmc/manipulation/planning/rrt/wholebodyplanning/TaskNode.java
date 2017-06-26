@@ -151,7 +151,7 @@ public abstract class TaskNode implements TaskNodeInterface
          }
          else
          {
-            value = getNormalizedNodeData(i)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
+            value = (getNormalizedNodeData(i)+0.5)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
          }
          nodeData.setQ(i, value);
       }
