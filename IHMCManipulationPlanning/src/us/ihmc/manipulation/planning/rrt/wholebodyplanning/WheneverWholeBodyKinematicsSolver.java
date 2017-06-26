@@ -300,9 +300,6 @@ public class WheneverWholeBodyKinematicsSolver
       return true;
    }
 
-   
-   
-   
    private void updateInternal()
    {
       // Updating the reference frames and twist calculator.
@@ -498,7 +495,9 @@ public class WheneverWholeBodyKinematicsSolver
 
    protected boolean isDone()
    {
-      // This toolbox should run until if falls asleep.
+      /*
+       * blank.
+       */
       return false;
    }
 

@@ -1,15 +1,15 @@
 package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
 
 public class TaskNodeTree
-{
-   private int dimensionOfTask;
-   private ArrayList<String> taskNames;
-   
+{      
    private TaskNode rootNode;
    private TaskNode nearNode;
    private TaskNode newNode;
@@ -23,14 +23,18 @@ public class TaskNodeTree
    private TaskNodeRegion nodeRegion;
    
    /*
-    * If matricRatioTimeToTask is 0.3, the matric will be obtained as much as (getTimeGap*0.3 + getTaskDisplacement*0.7).
+    * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as much as (getTimeGap*0.3 + getTaskDisplacement*0.7).
     */   
-   private double matricRatioTimeToTask = 0.5;
+   private double matricRatioTimeToTask = 0.1;
    
-   private double maximumDisplacementOfStep = 0.5;
-   private double maximumTimeGapOfStep = 1.0;
+   private double maximumDisplacementOfStep = 0.3;
+   private double maximumTimeGapOfStep = 0.3;
    
+   private int dimensionOfTask;
+
+   private ArrayList<String> taskNames;
    
+   private double trajectoryTime;
    
    public TaskNodeTree(TaskNode rootNode)
    {
@@ -44,7 +48,7 @@ public class TaskNodeTree
       this.taskNames = new ArrayList<String>();
       this.taskNames.add("time");
       for(int i=1;i<this.dimensionOfTask+1;i++)
-         this.taskNames.add("Task "+i+" : "+"..");
+         this.taskNames.add("Task_"+i+"_"+"..");
    }
    
    public TaskNodeTree(TaskNode rootNode, String... taskNames)
@@ -62,7 +66,7 @@ public class TaskNodeTree
          PrintTools.warn("Task dimension is incorrect");
       else
          for(int i=1;i<this.dimensionOfTask+1;i++)
-            this.taskNames.add("Task "+i+" : "+taskNames[i-1]);
+            this.taskNames.add("Task_"+i+"_"+taskNames[i-1]);
    }
       
    public String getTaskName(int indexOfDimension)
@@ -77,29 +81,23 @@ public class TaskNodeTree
       
    public double getTrajectoryTime()
    {
-      return nodeRegion.getUpperLimit().getQ(0);
+      trajectoryTime = nodeRegion.getTrajectoryTime();
+      return trajectoryTime;
    }
       
-   public void setRandomNodeData(TaskNode node, int index)
+   private void setRandomNodeData(TaskNode node, int index)
    {
       Random randomManager = new Random();
-      double value = randomManager.nextDouble() * (nodeRegion.getUpperLimit().getQ(index) - nodeRegion.getLowerLimit().getQ(index)) + nodeRegion.getLowerLimit().getQ(index);
+      double value = randomManager.nextDouble() * (nodeRegion.getUpperLimit(index) - nodeRegion.getLowerLimit(index)) + nodeRegion.getLowerLimit(index);
       node.setNodeData(index, value);
    }
     
-   public void setRandomNodeData(TaskNode node)
+   private void setRandomNodeData(TaskNode node)
    {
       for(int i=0;i<node.getDimensionOfNodeData();i++)
          setRandomNodeData(node, i);
    }
-   
-   
-   
-   
-   
-   
-   
-   
+      
    public void setMatricRatioTimeToTask(double ratio)
    {
       matricRatioTimeToTask = ratio;
@@ -109,10 +107,24 @@ public class TaskNodeTree
    {
       for(int i=0;i<numberOfExpanding;i++)
       {
-         PrintTools.info("expanding process "+i);
+         PrintTools.info("expanding process "+i);         
          expandingTree();
       }
    }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    
    private double getTaskDisplacement(TaskNode nodeOne, TaskNode nodeTwo)
    {
@@ -149,7 +161,7 @@ public class TaskNodeTree
    
    private TaskNode createNode()
    {
-      return new TaskNode(rootNode.getDimensionOfNodeData());
+      return rootNode.createNode();
    }
    
    private void expandingTree()
@@ -257,22 +269,6 @@ public class TaskNodeTree
       }
    }
    
-   
-   
-   
-   
-   
-   
-   
-
-   
-   
-   
-   
-   
-   
-   
-   
    public TaskNodeRegion getTaskNodeRegion()
    {
       return nodeRegion;
@@ -291,5 +287,87 @@ public class TaskNodeTree
    public ArrayList<TaskNode> getFailNodes()
    {
       return failNodes;
+   }
+   
+   public void saveNodes()
+   {
+      String fileName = "/home/shadylady/tree.txt";
+      BufferedWriter bw = null;
+      FileWriter fw = null;
+      
+      try {
+         String savingContent = "";
+         
+         for(int i=0;i<getWholeNodes().size();i++)
+         {
+            String convertedNodeData = "";            
+            
+            convertedNodeData = convertedNodeData + "1\t";
+            for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
+            {
+               convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getNodeData(j));               
+            }
+            
+            if(getWholeNodes().get(i).getParentNode() == null)
+            {
+               for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
+               {
+                  convertedNodeData = convertedNodeData + "0\t";               
+               }
+            }
+            else
+            {
+               for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
+               {
+                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getParentNode().getNodeData(j));               
+               }   
+            }
+            convertedNodeData = convertedNodeData + "\n";
+            
+            savingContent = savingContent + convertedNodeData;
+         }
+         
+         for(int i=0;i<getFailNodes().size();i++)
+         {
+            String convertedNodeData = "";            
+            
+            convertedNodeData = convertedNodeData + "2\t";
+            for(int j=0;j<getFailNodes().get(i).getDimensionOfNodeData();j++)
+            {
+               convertedNodeData = convertedNodeData + String.format("%.3f\t", getFailNodes().get(i).getNodeData(j));               
+            }
+            convertedNodeData = convertedNodeData + "\n";
+            
+            savingContent = savingContent + convertedNodeData;
+         }
+         
+         
+         fw = new FileWriter(fileName);
+         bw = new BufferedWriter(fw);
+         bw.write(savingContent);
+
+         System.out.println("Save Done");
+
+      } catch (IOException e) {
+
+         e.printStackTrace();
+
+      } finally {
+
+         try {
+
+            if (bw != null)
+               bw.close();
+
+            if (fw != null)
+               fw.close();
+
+         } catch (IOException ex) {
+
+            ex.printStackTrace();
+
+         }
+
+      }
    }
 }

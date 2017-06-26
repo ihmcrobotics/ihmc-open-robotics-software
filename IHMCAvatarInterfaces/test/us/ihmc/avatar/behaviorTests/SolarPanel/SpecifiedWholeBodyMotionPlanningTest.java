@@ -121,7 +121,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       setupKinematicsToolboxModule();
    }
    
-   //@Test
+//   @Test
    public void wheneverWholeBodyKinematicsSolverTest() throws SimulationExceededMaximumTimeException, IOException
    {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -167,7 +167,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    } 
       
    @Test
-   public void taskNodeTest() throws SimulationExceededMaximumTimeException, IOException
+   public void taskNodeTreeTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -178,30 +178,75 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
       
-      
-      
       taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, 10.0);
-      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.92);
-      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.1), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, Math.PI*(-0.2), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
       taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
       
       System.out.println(taskNodeTree.getTrajectoryTime());
       
-      taskNodeTree.expandTree(10);
-      
-      for(int i=0;i<taskNodeTree.getWholeNodes().size();i++)
-      {
-         taskNodeTree.getWholeNodes().get(i).printNodeData();
-      }
+      taskNodeTree.expandTree(100);
       
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       
       TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
+      taskNodeTreeVisualizer.visualize();
+   
+      taskNodeTree.saveNodes();
       
       PrintTools.info("END");     
    } 
-    
+   
+   public void variousEndEffectorPathTest() throws SimulationExceededMaximumTimeException, IOException
+   {
       
+   }
+   
+   
+    
+//   @Test
+   public void poseForNodeTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+            
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
+      wbikTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
+      
+      wbikTester.initialize();      
+      wbikTester.holdCurrentTrajectoryMessages();
+      
+      TaskNode3D.nodeTester = wbikTester;
+      
+      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      
+      TaskNode3D rootNode = new TaskNode3D(0.0, initialPelvisHeight, 0.0, 0.0);      
+      
+      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
+      
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, 10.0);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
+      
+      System.out.println(taskNodeTree.getTrajectoryTime());
+      
+      taskNodeTree.expandTree(100);
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
+      taskNodeTreeVisualizer.visualize();
+   
+      taskNodeTree.saveNodes();
+      
+      PrintTools.info("END");     
+   } 
    
    
    

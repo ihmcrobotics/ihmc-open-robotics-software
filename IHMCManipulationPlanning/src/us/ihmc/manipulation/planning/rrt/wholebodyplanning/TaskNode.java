@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 
-public class TaskNode
+public abstract class TaskNode implements TaskNodeInterface
 {
    private NodeData nodeData;
+   private NodeData normalizedNodeData;
    private ArrayList<TaskNode> childNodes;
    private TaskNode parentNode;
       
+   protected boolean isValid = true;  
+   
    public TaskNode()
    {
 
@@ -20,6 +23,7 @@ public class TaskNode
       this.nodeData = node.nodeData;
       this.childNodes = node.childNodes;
       this.parentNode = node.parentNode;
+      this.normalizedNodeData = node.normalizedNodeData;
    }
 
    public TaskNode(double[] rootData)
@@ -27,12 +31,14 @@ public class TaskNode
       this.nodeData = new NodeData(rootData.length);
       this.nodeData.q = rootData;
       this.childNodes = new ArrayList<TaskNode>();
+      this.normalizedNodeData = new NodeData(rootData.length);
    }
 
    public TaskNode(int dimensionOfData)
    {
       this.nodeData = new NodeData(dimensionOfData);
       this.childNodes = new ArrayList<TaskNode>();
+      this.normalizedNodeData = new NodeData(dimensionOfData);
    }
 
    public final int getDimensionOfNodeData()
@@ -44,6 +50,11 @@ public class TaskNode
    {
       return nodeData.getQ(index);
    }
+   
+   public final double getNormalizedNodeData(int index)
+   {
+      return normalizedNodeData.getQ(index);
+   }
 
    public final double getDistance(TaskNode targetNode)
    {
@@ -53,6 +64,11 @@ public class TaskNode
    public final void setNodeData(int index, double data)
    {
       nodeData.setQ(index, data);
+   }
+   
+   public final void setNormalizedNodeData(int index, double data)
+   {
+      normalizedNodeData.setQ(index, data);
    }
    
    public final void setNodeData(TaskNode copyNode)
@@ -100,8 +116,50 @@ public class TaskNode
       return getNodeData(0);
    }
    
-   public boolean isValidNode()
+   public void setIsValidNode(boolean value)
    {
-      return true;
+      isValid = value;
    }
+   
+   public void convertDataToNormalizedData(TaskNodeRegion nodeRegion)
+   {
+      normalizedNodeData = new NodeData(getDimensionOfNodeData());
+      for(int i=0;i<getDimensionOfNodeData();i++)
+      {
+         double normalizedValue = 0;
+         if(i==0)
+         {
+            normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.getTrajectoryTime();
+         }
+         else
+         {
+            normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.sizeOfRegion(i);               
+         }
+         normalizedNodeData.setQ(i, normalizedValue);
+      }
+   }
+   
+   public void convertNormalizedDataToData(TaskNodeRegion nodeRegion)
+   {
+      nodeData = new NodeData(getDimensionOfNodeData());
+      for(int i=0;i<getDimensionOfNodeData();i++)
+      {
+         double value = 0;
+         if(i==0)
+         {
+            value = getNormalizedNodeData(i)*nodeRegion.getTrajectoryTime() + nodeRegion.getLowerLimit(i);
+         }
+         else
+         {
+            value = getNormalizedNodeData(i)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
+         }
+         nodeData.setQ(i, value);
+      }
+   }
+   
+   @Override
+   public abstract boolean isValidNode();
+
+   @Override
+   public abstract TaskNode createNode();
 }
