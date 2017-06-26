@@ -12,7 +12,7 @@ import us.ihmc.robotics.MathTools;
 /**
  * Ramp where the center of ramp start side is origin. 0 to X -Y/2 +Y/2 0 to Z
  */
-public class Ramp3d extends Shape3d<Ramp3d>
+public class Ramp3d extends Shape3D<Ramp3d>
 {
    private final Size3d size = new Size3d();
 

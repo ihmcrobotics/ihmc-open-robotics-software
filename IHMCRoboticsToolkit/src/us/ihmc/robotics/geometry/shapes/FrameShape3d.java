@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3d<G>> extends AbstractFrameObject<F, G>
+public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends AbstractFrameObject<F, G>
 {
    public FrameShape3d(G shape3d)
    {

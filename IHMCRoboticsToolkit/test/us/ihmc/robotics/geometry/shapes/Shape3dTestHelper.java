@@ -18,7 +18,7 @@ public class Shape3dTestHelper
 
    }
 
-   public void runSimpleTests(Shape3d<?> shape3d, Random random, int numberOfPoints)
+   public void runSimpleTests(Shape3D<?> shape3d, Random random, int numberOfPoints)
    {
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -71,7 +71,7 @@ public class Shape3dTestHelper
 
    }
 
-   private void runSomeTestsWithPointOutside(Shape3d<?> shape3d, Point3D pointOutside)
+   private void runSomeTestsWithPointOutside(Shape3D<?> shape3d, Point3D pointOutside)
    {
       // Check to make sure the point is actually outside:
       Point3D pointOnSurface = new Point3D();
@@ -91,7 +91,7 @@ public class Shape3dTestHelper
 
    }
 
-   private void runSomeTestsWithPointInside(Shape3d<?> shape3d, Point3D pointInside)
+   private void runSomeTestsWithPointInside(Shape3D<?> shape3d, Point3D pointInside)
    {
       // Check to make sure the point is actually inside:
       Point3D pointOnSurface = new Point3D();
@@ -105,7 +105,7 @@ public class Shape3dTestHelper
       runSomeTestsWithPointOnSurface(shape3d, pointOnSurface, surfaceNormal);
    }
 
-   private void runSomeTestsWithPointOnSurface(Shape3d<?> shape3d, Point3D pointOnSurface, Vector3D surfaceNormal)
+   private void runSomeTestsWithPointOnSurface(Shape3D<?> shape3d, Point3D pointOnSurface, Vector3D surfaceNormal)
    {
       // If the surface normal is NaN, then that means it was projected or something. If it does not contain NaN, then it should be checked for validity.
       if (surfaceNormal.containsNaN())

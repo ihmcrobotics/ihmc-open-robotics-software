@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
+public class Ellipsoid3d extends Shape3D<Ellipsoid3d>
 {
    private final Vector3D radius = new Vector3D();
 

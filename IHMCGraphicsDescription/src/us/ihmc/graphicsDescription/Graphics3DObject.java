@@ -52,7 +52,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.shapes.Shape3d;
+import us.ihmc.robotics.geometry.shapes.Shape3D;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -68,12 +68,12 @@ public class Graphics3DObject
 
    private boolean changeable = false;
 
-   public Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance)
+   public Graphics3DObject(Shape3D<?> shape, AppearanceDefinition appearance)
    {
       this(shape, appearance, null);
    }
 
-   public Graphics3DObject(Shape3d<?> shape)
+   public Graphics3DObject(Shape3D<?> shape)
    {
       this(shape, null, null);
    }
@@ -83,7 +83,7 @@ public class Graphics3DObject
       this(null, null, graphics3DInstructions);
    }
 
-   private Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   private Graphics3DObject(Shape3D<?> shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
       if (graphics3DInstructions != null)
       {
@@ -478,12 +478,12 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape)
+   public PrimitiveGraphics3DInstruction add(Shape3D<?> shape)
    {
       return add(shape, DEFAULT_APPEARANCE);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape, AppearanceDefinition app)
+   public PrimitiveGraphics3DInstruction add(Shape3D<?> shape, AppearanceDefinition app)
    {
       if (shape instanceof Sphere3d)
       {

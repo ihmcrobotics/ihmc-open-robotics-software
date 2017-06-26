@@ -13,7 +13,7 @@ import us.ihmc.robotics.MathTools;
 /**
  * The torus is built in the XY plane, around the z axis
  */
-public class Torus3d extends Shape3d<Torus3d>
+public class Torus3d extends Shape3D<Torus3d>
 {
    private double radius;
    private double tubeRadius;

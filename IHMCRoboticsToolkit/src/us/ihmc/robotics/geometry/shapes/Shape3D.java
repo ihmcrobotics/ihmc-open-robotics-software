@@ -31,16 +31,15 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
 /**
- * 
- * @author Sylvain Bertrand
+ * Base implementation for 3D shapes.
  *
  * @param <S>
  */
-public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
+public abstract class Shape3D<S extends Shape3D<S>> implements GeometryObject<S>
 {
    protected final RigidBodyTransform shapePose = new RigidBodyTransform();
 
-   public Shape3d()
+   public Shape3D()
    {
    }
 
@@ -94,7 +93,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       return evaluateQuery(xLocal, yLocal, zLocal, null, null);
    }
 
-   public boolean epsilonEqualsPose(Shape3d<S> other, double epsilon)
+   public boolean epsilonEqualsPose(Shape3D<S> other, double epsilon)
    {
       return shapePose.epsilonEquals(other.shapePose, epsilon);
    }
@@ -206,7 +205,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       shapePose.set(transform);
    }
 
-   public void setPose(Shape3d<S> other)
+   public void setPose(Shape3D<S> other)
    {
       shapePose.set(other.shapePose);
    }
