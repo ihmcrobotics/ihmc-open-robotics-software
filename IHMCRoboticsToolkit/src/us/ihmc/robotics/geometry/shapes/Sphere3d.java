@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class Sphere3d extends Shape3d<Sphere3d>
+public class Sphere3d extends Shape3D<Sphere3d>
 {
    private double radius;
 

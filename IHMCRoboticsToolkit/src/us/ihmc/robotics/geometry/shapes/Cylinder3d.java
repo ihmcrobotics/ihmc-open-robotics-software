@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class Cylinder3d extends Shape3d<Cylinder3d>
+public class Cylinder3d extends Shape3D<Cylinder3d>
 {
    private double radius;
    private double height;

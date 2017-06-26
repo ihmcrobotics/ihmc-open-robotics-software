@@ -18,7 +18,7 @@ import us.ihmc.robotics.MathTools;
 /**
  * Box where base frame is in the center.
  */
-public class Box3d extends Shape3d<Box3d>
+public class Box3d extends Shape3D<Box3d>
 {
    private final Point3D temporaryPoint = new Point3D();
 
