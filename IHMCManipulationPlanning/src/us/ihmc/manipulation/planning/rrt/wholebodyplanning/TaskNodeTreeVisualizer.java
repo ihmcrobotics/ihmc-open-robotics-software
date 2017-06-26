@@ -22,6 +22,8 @@ public class TaskNodeTreeVisualizer
    private final SimulationConstructionSet scs;
    private TaskNodeTree taskNodeTree;
    
+   private static boolean showNormalized = true;
+   
    public TaskNodeTreeVisualizer(SimulationConstructionSet scs, TaskNodeTree taskNodeTree)
    {
       this.scs = scs;
@@ -86,9 +88,20 @@ public class TaskNodeTreeVisualizer
    private YoArtifactLineSegment2d createBranch(TaskNode taskNode, int indexOfDimension, String prefix)
    {        
       YoFrameLineSegment2d yoLine = new YoFrameLineSegment2d(""+prefix+"_line", "", ReferenceFrame.getWorldFrame(), registry);
-            
-      FramePoint2d nodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getNodeData(0), taskNode.getNodeData(indexOfDimension), ""+prefix+"_this");
-      FramePoint2d parentNodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getParentNode().getNodeData(0), taskNode.getParentNode().getNodeData(indexOfDimension), ""+prefix+"_parent");
+          
+      FramePoint2d nodePoint;
+      FramePoint2d parentNodePoint;
+      
+      if(showNormalized)
+      {
+         nodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getNormalizedNodeData(0), taskNode.getNormalizedNodeData(indexOfDimension), ""+prefix+"_this");
+         parentNodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getParentNode().getNormalizedNodeData(0), taskNode.getParentNode().getNormalizedNodeData(indexOfDimension), ""+prefix+"_parent");
+      }
+      else
+      {
+         nodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getNodeData(0), taskNode.getNodeData(indexOfDimension), ""+prefix+"_this");
+         parentNodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getParentNode().getNodeData(0), taskNode.getParentNode().getNodeData(indexOfDimension), ""+prefix+"_parent");   
+      }      
       
       yoLine.set(nodePoint, parentNodePoint);
       
@@ -100,8 +113,17 @@ public class TaskNodeTreeVisualizer
    private YoArtifactOval createNode(TaskNode taskNode, int indexOfDimension, String prefix, boolean isValid)
    {        
       YoFramePoint yoPoint = new YoFramePoint(""+prefix, ReferenceFrame.getWorldFrame(), registry);
-      yoPoint.setX(taskNode.getNodeData(0));
-      yoPoint.setY(taskNode.getNodeData(indexOfDimension));
+      if(showNormalized)
+      {
+         yoPoint.setX(taskNode.getNormalizedNodeData(0));
+         yoPoint.setY(taskNode.getNormalizedNodeData(indexOfDimension));
+      }
+      else
+      {
+         yoPoint.setX(taskNode.getNodeData(0));
+         yoPoint.setY(taskNode.getNodeData(indexOfDimension));   
+      }
+      
       
       DoubleYoVariable radius = new DoubleYoVariable(""+prefix, registry);
       

@@ -29,11 +29,22 @@ public class TaskNode3D extends TaskNode
        */
       
       
+      double scaledDistance = 0;
+      scaledDistance = scaledDistance + (getNodeData(0) - 5.0)*(getNodeData(0) - 5.0);
+      scaledDistance = scaledDistance + (getNodeData(1) - 0.0)*(getNodeData(1) - 0.0);
+      scaledDistance = scaledDistance + (getNodeData(2) - 0.0)*(getNodeData(2) - 0.0);
+      scaledDistance = scaledDistance + (getNodeData(3) - 0.0)*(getNodeData(3) - 0.0);
       
+      scaledDistance = Math.sqrt(scaledDistance);
       
-      
-      
-      
+      if(scaledDistance < 0.4)
+      {
+         setIsValidNode(false);
+      }
+      else
+      {
+         setIsValidNode(true);
+      }
       
       
       

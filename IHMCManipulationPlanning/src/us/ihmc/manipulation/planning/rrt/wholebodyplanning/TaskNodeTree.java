@@ -23,7 +23,7 @@ public class TaskNodeTree
    private TaskNodeRegion nodeRegion;
    
    /*
-    * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as much as (getTimeGap*0.3 + getTaskDisplacement*0.7).
+    * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
     */   
    private double matricRatioTimeToTask = 0.5;
    
@@ -85,18 +85,18 @@ public class TaskNodeTree
       return trajectoryTime;
    }
       
-   private void setRandomNodeData(TaskNode node, int index)
-   {
-      Random randomManager = new Random();
-      double value = randomManager.nextDouble() * (nodeRegion.getUpperLimit(index) - nodeRegion.getLowerLimit(index)) + nodeRegion.getLowerLimit(index);
-      node.setNodeData(index, value);
-   }
-    
-   private void setRandomNodeData(TaskNode node)
-   {
-      for(int i=0;i<node.getDimensionOfNodeData();i++)
-         setRandomNodeData(node, i);
-   }
+//   private void setRandomNodeData(TaskNode node, int index)
+//   {
+//      Random randomManager = new Random();
+//      double value = randomManager.nextDouble() * (nodeRegion.getUpperLimit(index) - nodeRegion.getLowerLimit(index)) + nodeRegion.getLowerLimit(index);
+//      node.setNodeData(index, value);
+//   }
+//    
+//   private void setRandomNodeData(TaskNode node)
+//   {
+//      for(int i=0;i<node.getDimensionOfNodeData();i++)
+//         setRandomNodeData(node, i);
+//   }
       
    private void setRandomNormalizedNodeData(TaskNode node, int index)
    {
@@ -119,8 +119,6 @@ public class TaskNodeTree
          setRandomNormalizedNodeData(node, i);
    }
    
-   
-   
    public void setMatricRatioTimeToTask(double ratio)
    {
       matricRatioTimeToTask = ratio;
@@ -135,20 +133,6 @@ public class TaskNodeTree
       }
    }
    
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
    private double getNormalizedTaskDisplacement(TaskNode nodeOne, TaskNode nodeTwo)
    {
       double squaredDisplacement = 0;
@@ -157,7 +141,7 @@ public class TaskNodeTree
       {
          double nodeOneValue = nodeOne.getNormalizedNodeData(i);
          double nodeTwoValue = nodeTwo.getNormalizedNodeData(i);
-         squaredDisplacement = (nodeOneValue - nodeTwoValue) * (nodeOneValue - nodeTwoValue);
+         squaredDisplacement = squaredDisplacement + (nodeOneValue - nodeTwoValue) * (nodeOneValue - nodeTwoValue);
       }      
       
       return Math.sqrt(squaredDisplacement);
@@ -231,10 +215,13 @@ public class TaskNodeTree
       double timeGap = getNormalizedTimeGap(this.nearNode, this.randomNode);
       double displacement = getNormalizedTaskDisplacement(this.nearNode, this.randomNode); 
       
+      double expandedTime;
       double expandingTimeGap;
-      double expandingDisplacement;
-      
-      // timeGap Clamping
+      double expandingDisplacement;      
+            
+      /*
+       *  timeGap Clamping
+       */
       if(timeGap > maximumTimeGapOfStep)
       {
          expandingTimeGap = maximumTimeGapOfStep;
@@ -242,37 +229,56 @@ public class TaskNodeTree
       else
       {
          expandingTimeGap = timeGap;         
-      }      
+      }
+      
+      /*
+       *  maximumDisplacementOfStep
+       *  check the expandedTime is over 1.0 and if then, Clamping again.
+       */
+      expandedTime = nearNode.getNormalizedNodeData(0) + expandingTimeGap;
+      if(expandedTime > 1.0)
+      {
+         expandedTime = 1.0;
+         expandingTimeGap = expandedTime - nearNode.getNormalizedNodeData(0);
+      }
+      
+      /*
+       *  1st displacement Clamping under expandingTimeGap.
+       */
       expandingDisplacement = displacement*expandingTimeGap/timeGap;
       
-      // displacement Clamping
+      /*
+       *  2nd displacement Clamping
+       */
       if(expandingDisplacement > maximumDisplacementOfStep)
       {
          expandingDisplacement = maximumDisplacementOfStep;
          expandingTimeGap = timeGap*maximumDisplacementOfStep/displacement;
       }
       
-      // set
+      /*
+       *  set
+       */
       newNode.setNormalizedNodeData(0, nearNode.getNormalizedNodeData(0) + expandingTimeGap);
       for(int i=1;i<newNode.getDimensionOfNodeData();i++)
       {
          double iDisplacement = (this.randomNode.getNormalizedNodeData(i) - nearNode.getNormalizedNodeData(i))/displacement*expandingDisplacement;
          newNode.setNormalizedNodeData(i, nearNode.getNormalizedNodeData(i) + iDisplacement);
-         PrintTools.info("expandingDisplacement "+expandingTimeGap + " " + expandingDisplacement + " " + iDisplacement);
+//         PrintTools.info("expandingDisplacement "+ displacement + " " + expandingDisplacement + " " + iDisplacement +" "+(this.randomNode.getNormalizedNodeData(i) - nearNode.getNormalizedNodeData(i)));
       }     
       
-      for (int i = 0; i < this.randomNode.getDimensionOfNodeData(); i++)
-      {
-         PrintTools.info("randomNode "+randomNode.getNormalizedNodeData(i) + " ");
-      }
-      for (int i = 0; i < nearNode.getDimensionOfNodeData(); i++)
-      {
-         PrintTools.info("nearNode "+nearNode.getNormalizedNodeData(i) + " ");
-      }
-      for (int i = 0; i < newNode.getDimensionOfNodeData(); i++)
-      {
-         PrintTools.info("newNode "+newNode.getNormalizedNodeData(i) + " ");
-      }
+//      for (int i = 0; i < this.randomNode.getDimensionOfNodeData(); i++)
+//      {
+//         PrintTools.info("randomNode "+randomNode.getNormalizedNodeData(i) + " ");
+//      }
+//      for (int i = 0; i < nearNode.getDimensionOfNodeData(); i++)
+//      {
+//         PrintTools.info("nearNode "+nearNode.getNormalizedNodeData(i) + " ");
+//      }
+//      for (int i = 0; i < newNode.getDimensionOfNodeData(); i++)
+//      {
+//         PrintTools.info("newNode "+newNode.getNormalizedNodeData(i) + " ");
+//      }
       
       this.newNode = newNode;
    }
@@ -287,7 +293,7 @@ public class TaskNodeTree
          PrintTools.info("this new Configuration is added on tree");      
          for (int i = 0; i < this.newNode.getDimensionOfNodeData(); i++)
          {
-            PrintTools.info("randomNode "+newNode.getNodeData(i) + " ");
+//            PrintTools.info("randomNode "+newNode.getNodeData(i) + " ");
          }
       }
       else
