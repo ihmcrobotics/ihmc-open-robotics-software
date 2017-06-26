@@ -2,8 +2,6 @@ package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 
 import java.awt.Color;
 
-import javax.swing.JSplitPane;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -12,14 +10,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.tools.thread.ThreadTools;
 
 public class WholeBodyPlanningVisualizer
 {
@@ -136,8 +132,7 @@ public class WholeBodyPlanningVisualizer
 //         yoPointInho.set(currentPosition);
 //      
 //         scs.tickAndUpdate();
-//      }
-      
+//      }      
 //      scs.startOnAThread();
 //      ThreadTools.sleepForever();
       

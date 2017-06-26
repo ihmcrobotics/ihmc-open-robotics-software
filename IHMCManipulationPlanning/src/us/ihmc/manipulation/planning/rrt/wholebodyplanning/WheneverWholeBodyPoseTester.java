@@ -3,12 +3,17 @@ package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-public class WheneverWholeBodyPoseTester
+public abstract class WheneverWholeBodyPoseTester
 {
-   FullHumanoidRobotModel fullRobotModel;
-   RobotCollisionModel robotCollisionModel;
+   private FullHumanoidRobotModel fullRobotModel;
+   private RobotCollisionModel robotCollisionModel;
    
-   public void WheneverWholeBodyPoseTester(FullHumanoidRobotModel fullRobotModel)
+   protected boolean isCollisionFree = true;
+   protected boolean isFeasibleIKSolution = true;
+   
+   protected boolean isValidPose = true;
+   
+   public WheneverWholeBodyPoseTester(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
    }
@@ -18,8 +23,36 @@ public class WheneverWholeBodyPoseTester
       this.fullRobotModel = fullRobotModel;      
    }
    
+   public RobotCollisionModel getRobotCollisionModel()
+   {
+      return robotCollisionModel;
+   }
+   
+   public FullHumanoidRobotModel getFullHumanoidRobotModel()
+   {            
+      return fullRobotModel;
+   }
+   
+   private void update()
+   {
+      robotCollisionModel = new RobotCollisionModel(fullRobotModel);
+      addEnvironmentCollisionModel();
+      
+      robotCollisionModel.update();
+      isCollisionFree = robotCollisionModel.getCollisionResult();
+   }
+   
    public boolean isValidPose()
    {
-      return true;
+      update();
+      
+      if(isCollisionFree && isFeasibleIKSolution)
+         isValidPose = true;
+      else
+         isValidPose = false;
+      
+      return isValidPose;
    }
+   
+   public abstract void addEnvironmentCollisionModel();
 }

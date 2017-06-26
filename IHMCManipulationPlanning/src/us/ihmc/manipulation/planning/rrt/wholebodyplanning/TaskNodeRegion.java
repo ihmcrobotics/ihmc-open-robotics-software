@@ -2,28 +2,55 @@ package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 
 public class TaskNodeRegion
 {
-   private NodeData upperLimit;
-   private NodeData lowerLimit;
+   private double[] upperLimit;
+   private double[] lowerLimit;
+   
+   private double trajectoryTime;
+   private static double intentionalTimeRatio = 1.2; 
    
    public TaskNodeRegion(int size)
    {
-      upperLimit = new NodeData(size);
-      lowerLimit = new NodeData(size);
+      upperLimit = new double[size];
+      lowerLimit = new double[size];
+   }
+   
+   public double getIntentionalTimeRatio()
+   {
+      return intentionalTimeRatio;
    }
    
    public void setRandomRegion(int index, double lowerValue, double upperValue)
    {
-      upperLimit.setQ(index, upperValue);
-      lowerLimit.setQ(index, lowerValue);
+      if(index == 0)
+      {
+         upperLimit[index] = upperValue*intentionalTimeRatio;
+         trajectoryTime = upperValue;
+      }
+      else
+      { 
+         upperLimit[index] =  upperValue;
+      }      
+      
+      lowerLimit[index] = lowerValue;
    }
    
-   public NodeData getUpperLimit()
+   public double getUpperLimit(int index)
    {
-      return upperLimit;
+      return upperLimit[index];
    }
    
-   public NodeData getLowerLimit()
+   public double getLowerLimit(int index)
    {
-      return lowerLimit;
+      return lowerLimit[index];
+   }
+   
+   public double sizeOfRegion(int index)
+   {
+      return Math.abs(getUpperLimit(index) - getLowerLimit(index));
+   }
+      
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
    }
 }

@@ -1,8 +1,10 @@
 package us.ihmc.manipulation.planning.rrt.wholebodyplanning;
 
+import us.ihmc.commons.PrintTools;
+
 public class TaskNode3D extends TaskNode
 {   
-   private boolean isValidNode;  
+   public static WheneverWholeBodyKinematicsSolver nodeTester;
    
    
    public TaskNode3D()
@@ -19,18 +21,34 @@ public class TaskNode3D extends TaskNode
       setNodeData(3, chestPitch);
    }
    
-
-   
-
-   
-   public void setIsValidNode(boolean value)
-   {
-      isValidNode = value;
-   }
-   
    @Override
    public boolean isValidNode()
-   {      
-      return isValidNode;
+   {
+      /*
+       * using whenever 
+       */
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      return isValid;
    }
+
+   @Override
+   public TaskNode createNode()
+   {
+      return new TaskNode3D();
+   }
+
+   
+
+   
 }
