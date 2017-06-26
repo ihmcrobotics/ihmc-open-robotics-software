@@ -185,7 +185,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       System.out.println(taskNodeTree.getTrajectoryTime());
       
-      taskNodeTree.expandTree(100);
+      taskNodeTree.expandTree(50);
       
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       

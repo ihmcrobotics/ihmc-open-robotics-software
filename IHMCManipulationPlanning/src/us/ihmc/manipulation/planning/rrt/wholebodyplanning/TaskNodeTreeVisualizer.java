@@ -87,8 +87,8 @@ public class TaskNodeTreeVisualizer
    {        
       YoFrameLineSegment2d yoLine = new YoFrameLineSegment2d(""+prefix+"_line", "", ReferenceFrame.getWorldFrame(), registry);
             
-      FramePoint2d nodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getTime(), taskNode.getNodeData(indexOfDimension), ""+prefix+"_this");
-      FramePoint2d parentNodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getParentNode().getTime(), taskNode.getParentNode().getNodeData(indexOfDimension), ""+prefix+"_parent");
+      FramePoint2d nodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getNodeData(0), taskNode.getNodeData(indexOfDimension), ""+prefix+"_this");
+      FramePoint2d parentNodePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), taskNode.getParentNode().getNodeData(0), taskNode.getParentNode().getNodeData(indexOfDimension), ""+prefix+"_parent");
       
       yoLine.set(nodePoint, parentNodePoint);
       
@@ -100,7 +100,7 @@ public class TaskNodeTreeVisualizer
    private YoArtifactOval createNode(TaskNode taskNode, int indexOfDimension, String prefix, boolean isValid)
    {        
       YoFramePoint yoPoint = new YoFramePoint(""+prefix, ReferenceFrame.getWorldFrame(), registry);
-      yoPoint.setX(taskNode.getTime());
+      yoPoint.setX(taskNode.getNodeData(0));
       yoPoint.setY(taskNode.getNodeData(indexOfDimension));
       
       DoubleYoVariable radius = new DoubleYoVariable(""+prefix, registry);
