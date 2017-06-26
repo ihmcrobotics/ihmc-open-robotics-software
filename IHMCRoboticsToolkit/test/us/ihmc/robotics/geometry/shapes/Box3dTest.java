@@ -429,7 +429,7 @@ public class Box3dTest
          double yaw = random.nextDouble();
          double pitch = random.nextDouble();
          double roll = random.nextDouble();
-         box.setYawPitchRoll(yaw, pitch, roll);
+         box.setOrientationYawPitchRoll(yaw, pitch, roll);
 
          RotationMatrix rotation = new RotationMatrix();
          box.getOrientation(rotation);

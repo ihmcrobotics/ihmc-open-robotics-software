@@ -29,7 +29,7 @@ public class Sphere3d extends Shape3d<Sphere3d>
 
    public Sphere3d(Sphere3d sphere3d)
    {
-      this(sphere3d.getX(), sphere3d.getY(), sphere3d.getZ(), sphere3d.getRadius());
+      this(sphere3d.getPositionX(), sphere3d.getPositionY(), sphere3d.getPositionZ(), sphere3d.getRadius());
    }
 
    public Sphere3d(Point3DReadOnly center, double radius)
