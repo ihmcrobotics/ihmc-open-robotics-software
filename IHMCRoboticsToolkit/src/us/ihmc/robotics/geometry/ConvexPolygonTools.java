@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -786,6 +787,41 @@ public class ConvexPolygonTools
                                                                                               connectingEdge2);
 
       return ret;
+   }
+
+   public static int cutPolygonWithLine(FrameLine2d cuttingLine, FrameConvexPolygon2d polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
+                                        RobotSide sideOfLineToCut)
+   {
+      lineIntersector2d.intersectWithLine(polygonToCut, cuttingLine);
+
+      if (lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.NO_INTERSECTION ||
+            lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.POINT_INTERSECTION)
+      {
+         return -1;
+      }
+      else
+      {
+         int numberOfVerticesRemoved = 0;
+         int index = 0;
+         while (index < polygonToCut.getNumberOfVertices())
+         {
+            Point2DReadOnly vertex = polygonToCut.getConvexPolygon2d().getVertex(index);
+            if (cuttingLine.getLine2d().isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
+            {
+               polygonToCut.removeVertex(index);
+               polygonToCut.update();
+               numberOfVerticesRemoved++;
+            }
+            else
+            {
+               index++;
+            }
+         }
+         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointOne());
+         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointTwo());
+         polygonToCut.update();
+         return numberOfVerticesRemoved;
+      }
    }
 
    public static int cutPolygonWithLine(FrameLine2d cuttingLine, FrameConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
