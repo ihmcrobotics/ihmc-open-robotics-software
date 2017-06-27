@@ -20,10 +20,10 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNode3D;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNodeTree;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.TaskNodeTreeVisualizer;
-import us.ihmc.manipulation.planning.rrt.wholebodyplanning.WheneverWholeBodyKinematicsSolver;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode3D;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.TaskNodeTreeVisualizer;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -122,7 +122,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    }
    
 //   @Test
-   public void wheneverWholeBodyKinematicsSolverTest() throws SimulationExceededMaximumTimeException, IOException
+   public void testForWheneverWholeBodyKinematicsSolver() throws SimulationExceededMaximumTimeException, IOException
    {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -166,8 +166,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
       
-   @Test
-   public void taskNodeTreeTest() throws SimulationExceededMaximumTimeException, IOException
+//   @Test
+   public void testForTaskNodeTree() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -197,15 +197,19 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
    
-   public void variousEndEffectorPathTest() throws SimulationExceededMaximumTimeException, IOException
+   @Test
+   public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
       
    }
    
-   
-    
 //   @Test
-   public void poseForNodeTest() throws SimulationExceededMaximumTimeException, IOException
+   public void testForposeForNode() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -248,7 +252,16 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
    
-   
+//   @Test
+   public void testForCleaningPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      
+   }
    
    
    
