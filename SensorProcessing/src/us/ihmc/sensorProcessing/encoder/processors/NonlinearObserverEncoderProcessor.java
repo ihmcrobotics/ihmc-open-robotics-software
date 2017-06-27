@@ -1,28 +1,27 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NonlinearObserverEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final DoubleYoVariable discretePosition;
-   private final DoubleYoVariable error, alpha1, alpha2;
+   private final YoDouble discretePosition;
+   private final YoDouble error, alpha1, alpha2;
 
-   private final DoubleYoVariable previousTime;
+   private final YoDouble previousTime;
    
-   public NonlinearObserverEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public NonlinearObserverEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
-      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
+      this.previousTime = new YoDouble(name + "PrevTime", registry);
 
-      this.discretePosition = new DoubleYoVariable(name + "DiscretePosition", registry);
-      this.error = new DoubleYoVariable(name + "Error", registry);
+      this.discretePosition = new YoDouble(name + "DiscretePosition", registry);
+      this.error = new YoDouble(name + "Error", registry);
 
-      this.alpha1 = new DoubleYoVariable(name + "Alpha1", registry);
-      this.alpha2 = new DoubleYoVariable(name + "Alpha2", registry);
+      this.alpha1 = new YoDouble(name + "Alpha1", registry);
+      this.alpha2 = new YoDouble(name + "Alpha2", registry);
 
       alpha1.set(0.03);
       alpha2.set(1.0);

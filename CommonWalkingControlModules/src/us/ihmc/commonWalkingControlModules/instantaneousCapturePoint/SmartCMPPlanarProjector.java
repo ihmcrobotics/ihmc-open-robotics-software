@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SmartCMPPlanarProjector extends CMPProjector
 {
-   private final BooleanYoVariable cmpProjected;
+   private final YoBoolean cmpProjected;
 
    private final FramePoint2d projectedCMP = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
@@ -16,7 +16,7 @@ public class SmartCMPPlanarProjector extends CMPProjector
 
    public SmartCMPPlanarProjector(YoVariableRegistry parentRegistry)
    {
-      cmpProjected = new BooleanYoVariable("cmpProjected", registry);
+      cmpProjected = new YoBoolean("cmpProjected", registry);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);

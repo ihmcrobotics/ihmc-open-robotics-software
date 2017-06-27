@@ -4,10 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * See Merry, van De Molengraft, Steinbuch - 2010 - Velocity and acceleration estimation for optical incremental encoders
@@ -20,8 +19,8 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private final int fitOrder;
    private final int skipFactor;
 
-   private final IntegerYoVariable[] positions;    // ordered from oldest to newest
-   private final DoubleYoVariable[] timestamps;
+   private final YoInteger[] positions;    // ordered from oldest to newest
+   private final YoDouble[] timestamps;
 
    private final DenseMatrix64F a;
    private final DenseMatrix64F p;
@@ -31,7 +30,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
-   public PolynomialFittingEncoderProcessor(String name, IntegerYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents,
+   public PolynomialFittingEncoderProcessor(String name, YoInteger rawPosition, YoDouble time, double distancePerTick, int nEncoderEvents,
            int fitOrder, int skipFactor, YoVariableRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
@@ -43,13 +42,13 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
       this.fitOrder = fitOrder;
       this.skipFactor = skipFactor;
 
-      positions = new IntegerYoVariable[nEncoderEvents];
-      timestamps = new DoubleYoVariable[nEncoderEvents];
+      positions = new YoInteger[nEncoderEvents];
+      timestamps = new YoDouble[nEncoderEvents];
 
       for (int i = 0; i < nEncoderEvents; i++)
       {
-         positions[i] = new IntegerYoVariable(name + "Pos" + i, registry);
-         timestamps[i] = new DoubleYoVariable(name + "Time" + i, registry);
+         positions[i] = new YoInteger(name + "Pos" + i, registry);
+         timestamps[i] = new YoDouble(name + "Time" + i, registry);
       }
 
       a = new DenseMatrix64F(nEncoderEvents, fitOrder + 1);
@@ -65,14 +64,14 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    public void initialize()
    {
       int currentPosition = rawTicks.getIntegerValue();
-      for (IntegerYoVariable position : positions)
+      for (YoInteger position : positions)
       {
          position.set(currentPosition);
       }
 
       final double epsilonTimeInit = 1e-10;
       double initTime = time.getDoubleValue() - (nEncoderEvents) * epsilonTimeInit;
-      for (DoubleYoVariable timeStamp : timestamps)
+      for (YoDouble timeStamp : timestamps)
       {
          timeStamp.set(initTime);
          initTime += epsilonTimeInit;

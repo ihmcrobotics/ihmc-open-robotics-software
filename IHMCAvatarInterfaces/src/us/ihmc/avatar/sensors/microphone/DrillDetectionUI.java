@@ -27,8 +27,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 
 public class DrillDetectionUI
@@ -55,7 +55,7 @@ public class DrillDetectionUI
    private int dataSize = 0;
    private int numBands;
    YoVariableRegistry registry = new YoVariableRegistry("registry");
-   ArrayList<DoubleYoVariable> bandValues = new ArrayList<>();
+   ArrayList<YoDouble> bandValues = new ArrayList<>();
    boolean shouldZero = true;
    double[] zeroValues;
    private final TimeSeriesCollection dataset;
@@ -70,7 +70,7 @@ public class DrillDetectionUI
       numBands = detectionAlgorithm.getNumReturnedBands();
       dataset = new TimeSeriesCollection();
       for (int i = 0; i < numBands; i++){
-         DoubleYoVariable iVariable = new DoubleYoVariable(i+"AverageBandMagnitude", registry);
+         YoDouble iVariable = new YoDouble(i+"AverageBandMagnitude", registry);
          bandValues.add(iVariable);
          dataset.addSeries(new TimeSeries(i+"th Band"));
       }

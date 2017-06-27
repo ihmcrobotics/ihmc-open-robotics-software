@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -23,19 +23,19 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
@@ -92,19 +92,19 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationOneCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
@@ -161,21 +161,21 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationProjectForwardTwoCMPFirstSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
@@ -223,22 +223,22 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPSecondSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
@@ -286,22 +286,22 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationTwoCMPThirdSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
@@ -348,22 +348,22 @@ public class InitialICPVelocityCurrentMultiplierTest
    public void testCalculationOneCMPSwing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
       double omega = 3.0;
       int maxSteps = 5;
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);

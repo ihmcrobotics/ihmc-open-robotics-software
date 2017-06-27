@@ -11,11 +11,11 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -47,15 +47,15 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final SideDependentList<ForceSensorDefinition> wristForceSensorDefinitions;
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
-   private final BooleanYoVariable calibrateWristForceSensors;
-   private final SideDependentList<DoubleYoVariable> wristSubtreeMass;
+   private final YoBoolean calibrateWristForceSensors;
+   private final SideDependentList<YoDouble> wristSubtreeMass;
    private final SideDependentList<YoFrameVector> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector> wristTorquesSubtreeWeightCancelled;
 
    private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
 
-   private final BooleanYoVariable calibrateFootForceSensors;
+   private final YoBoolean calibrateFootForceSensors;
    private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
@@ -109,7 +109,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          footForceCalibrationOffsets = new SideDependentList<>();
          footTorqueCalibrationOffsets = new SideDependentList<>();
 
-         calibrateFootForceSensors = new BooleanYoVariable("calibrateFootForceSensors", registry);
+         calibrateFootForceSensors = new YoBoolean("calibrateFootForceSensors", registry);
          calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
@@ -161,7 +161,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          wristSubtreeMass = new SideDependentList<>();
          wristsubtreeCenterOfMassFrames = new SideDependentList<>();
 
-         calibrateWristForceSensors = new BooleanYoVariable("calibrateWristForceSensors", registry);
+         calibrateWristForceSensors = new YoBoolean("calibrateWristForceSensors", registry);
          calibrateWristForceSensors.set(stateEstimatorParameters.requestWristForceSensorCalibrationAtStart());
 
          for (RobotSide robotSide : RobotSide.values)
@@ -182,7 +182,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);
             wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
-            DoubleYoVariable handMass = new DoubleYoVariable(namePrefix + "SubtreeMass", registry);
+            YoDouble handMass = new YoDouble(namePrefix + "SubtreeMass", registry);
             wristSubtreeMass.put(robotSide, handMass);
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }

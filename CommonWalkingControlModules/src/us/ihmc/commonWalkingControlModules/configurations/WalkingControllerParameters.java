@@ -25,7 +25,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -153,6 +153,26 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getECMPProximityForToeOff()
    {
       return 0.0;
+   }
+
+   /**
+    * Whether or not the location of the CoP in the trailing foot must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the CoP location.
+    */
+   public boolean checkCoPLocationToTriggerToeOff()
+   {
+      return false;
+   }
+
+   /**
+    * Maximum distance of the CoP in the trailing foot to the toe off support polygon before allowing toe off.
+    *
+    * @return CoP distance (m).
+    */
+   public double getCoPProximityForToeOff()
+   {
+      return 0.03;
    }
 
    /**
@@ -482,6 +502,38 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return getDefaultTransferTime();
    }
+
+   /**
+    * Ramps up the maximum loading of the normal force of the toe contact points over time, if returns true. If returns false, it simply
+    * immediately sets the normal force maximum to infinity.
+    *
+    * @return whether or not to ramp up.
+    */
+   public boolean rampUpAllowableToeLoadAfterContact()
+   {
+      return false;
+   }
+
+   /**
+    * Defines the duration spent ramping up the allowable normal toe contact force if {@link #rampUpAllowableToeLoadAfterContact()} is true.
+    *
+    * @return duration (s)
+    */
+   public double getToeLoadingDuration()
+   {
+      return 0.2;
+   }
+
+   /**
+    * The maximum normal force allowed in the toe if {@link #rampUpAllowableToeLoadAfterContact()} is true at the time returned by
+    * {@link #getToeLoadingDuration()}. After this time, the maximum normal force goes to infinity.
+    * @return
+    */
+   public double getFullyLoadedToeForce()
+   {
+      return 1.0e3;
+   }
+
 
    /**
     * This is the default transfer time used in the walking controller to shift the weight to the initial stance foot

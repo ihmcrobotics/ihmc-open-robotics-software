@@ -19,8 +19,8 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -53,7 +53,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
 
    // Yo variables
-   private final BooleanYoVariable yoUseForceFeedbackControl;
+   private final YoBoolean yoUseForceFeedbackControl;
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -88,7 +88,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
-      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
 
       // Calculate the robot length
       referenceFrames.updateFrames();

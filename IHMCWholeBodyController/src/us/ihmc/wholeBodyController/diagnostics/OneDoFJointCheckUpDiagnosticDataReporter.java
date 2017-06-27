@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -66,10 +66,10 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
    private final AtomicBoolean isDoneExportingData = new AtomicBoolean(false);
 
    public OneDoFJointCheckUpDiagnosticDataReporter(String loggerName, OneDoFJoint joint, DiagnosticParameters diagnosticParameters,
-         DoubleYoVariable processedPositionQualityMean, DoubleYoVariable processedPositionQualityStandardDeviation, DoubleYoVariable processedPositionDelayMean, DoubleYoVariable processedPositionDelayStandardDeviation,
-         DoubleYoVariable rawVelocityQualityMean, DoubleYoVariable rawVelocityQualityStandardDeviation, DoubleYoVariable rawVelocityDelayMean, DoubleYoVariable rawVelocityDelayStandardDeviation,
-         DoubleYoVariable processedVelocityQualityMean, DoubleYoVariable processedVelocityQualityStandardDeviation, DoubleYoVariable processedVelocityDelayMean, DoubleYoVariable processedVelocityDelayStandardDeviation,
-         DoubleYoVariable forceTrackingQualityMean, DoubleYoVariable forceTrackingQualityStandardDeviation, DoubleYoVariable forceTrackingDelayMean, DoubleYoVariable forceTrackingDelayStandardDeviation,
+         YoDouble processedPositionQualityMean, YoDouble processedPositionQualityStandardDeviation, YoDouble processedPositionDelayMean, YoDouble processedPositionDelayStandardDeviation,
+         YoDouble rawVelocityQualityMean, YoDouble rawVelocityQualityStandardDeviation, YoDouble rawVelocityDelayMean, YoDouble rawVelocityDelayStandardDeviation,
+         YoDouble processedVelocityQualityMean, YoDouble processedVelocityQualityStandardDeviation, YoDouble processedVelocityDelayMean, YoDouble processedVelocityDelayStandardDeviation,
+         YoDouble forceTrackingQualityMean, YoDouble forceTrackingQualityStandardDeviation, YoDouble forceTrackingDelayMean, YoDouble forceTrackingDelayStandardDeviation,
          OneDoFJointFourierAnalysis fourierAnalysis, YoFunctionGenerator functionGenerator)
    {
       logger = Logger.getLogger(loggerName);

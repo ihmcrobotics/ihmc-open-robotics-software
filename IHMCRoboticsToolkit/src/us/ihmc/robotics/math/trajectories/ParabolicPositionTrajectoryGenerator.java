@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -15,9 +15,9 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    private final YoVariableRegistry registry;
    private final YoMinimumJerkTrajectory minimumJerkTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
-   protected final DoubleYoVariable groundClearance;
-   private final DoubleYoVariable stepTime;
-   private final DoubleYoVariable timeIntoStep;
+   protected final YoDouble groundClearance;
+   private final YoDouble stepTime;
+   private final YoDouble timeIntoStep;
    private final DoubleProvider stepTimeProvider;
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
    private final PositionProvider initialPositionProvider;
@@ -29,9 +29,9 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
       this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
-      this.groundClearance = new DoubleYoVariable("groundClearance", registry);
-      this.stepTime = new DoubleYoVariable("stepTime", registry);
-      this.timeIntoStep = new DoubleYoVariable("timeIntoStep", registry);
+      this.groundClearance = new YoDouble("groundClearance", registry);
+      this.stepTime = new YoDouble("stepTime", registry);
+      this.timeIntoStep = new YoDouble("timeIntoStep", registry);
       parentRegistry.addChild(registry);
 
       this.stepTimeProvider = stepTimeProvider;

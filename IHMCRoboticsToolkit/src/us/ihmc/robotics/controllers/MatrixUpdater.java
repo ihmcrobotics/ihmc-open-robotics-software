@@ -1,8 +1,8 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public final class MatrixUpdater implements VariableChangedListener
 {

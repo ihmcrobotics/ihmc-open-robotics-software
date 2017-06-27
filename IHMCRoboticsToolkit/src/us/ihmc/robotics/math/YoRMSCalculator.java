@@ -2,19 +2,19 @@ package us.ihmc.robotics.math;
 
 import static us.ihmc.robotics.MathTools.square;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoRMSCalculator
 {
-   private final DoubleYoVariable rms;
-   private final IntegerYoVariable nUpdates;
+   private final YoDouble rms;
+   private final YoInteger nUpdates;
 
    public YoRMSCalculator(String prefix, YoVariableRegistry registry)
    {
-      rms = new DoubleYoVariable(prefix + "Rms", registry);
-      nUpdates = new IntegerYoVariable(prefix + "RmsNUpdates", registry);
+      rms = new YoDouble(prefix + "Rms", registry);
+      nUpdates = new YoInteger(prefix + "RmsNUpdates", registry);
    }
 
    public void update(double input)

@@ -28,9 +28,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -59,18 +59,18 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final GetUserValidationBehavior userValidationExampleBehavior;
    private final ReferenceFrame midZupFrame;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
-   private final EnumYoVariable<RobotSide> nextSideToSwing;
+   private final YoEnum<RobotSide> nextSideToSwing;
 
    private final String prefix = getClass().getSimpleName();
-   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
-   private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
+   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
+   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
+   private final YoInteger maxNumberOfStepsToTake = new YoInteger(prefix + "NumberOfStepsToTake", registry);
 
    private final FullRobotModel fullRobotModel;
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                               HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);
@@ -78,7 +78,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
 
-      nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
+      nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
       coactiveBehaviorsNetworkManager = communicationBridge;

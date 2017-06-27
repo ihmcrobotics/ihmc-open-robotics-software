@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -10,7 +10,7 @@ public class RobotJointLimitWatcher implements RobotController
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry("JointLimits");
 
-   protected final DoubleYoVariable[] variablesToTrack;
+   protected final YoDouble[] variablesToTrack;
    protected final YoVariableLimitChecker[] limitCheckers;
    
    protected final OneDoFJoint[] oneDoFJoints;
@@ -25,13 +25,13 @@ public class RobotJointLimitWatcher implements RobotController
       
       int numberOfJoints = oneDoFJoints.length;
 
-      variablesToTrack = new DoubleYoVariable[numberOfJoints];
+      variablesToTrack = new YoDouble[numberOfJoints];
       limitCheckers = new YoVariableLimitChecker[numberOfJoints];
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
-         variablesToTrack[i] = new DoubleYoVariable(oneDoFJoint.getName(), doNotRegister);
+         variablesToTrack[i] = new YoDouble(oneDoFJoint.getName(), doNotRegister);
 
          double thresholdPercentage = 0.02;
          double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();

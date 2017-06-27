@@ -10,9 +10,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -30,12 +30,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    private final String namePrefix;
    private final String nameSuffix;
 
-   private final DoubleYoVariable x, y, z; // This is where the data is stored. All operations must act on these numbers.
+   private final YoDouble x, y, z; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple; // This is only for assistance. The data is stored in the YoVariables, not in here!
    /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameTuple} will work properly. */
    private final ReferenceFrame referenceFrame; // Redundant but allows to make sure the frame isn't changed
 
-   public YoFrameTuple(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame referenceFrame)
+   public YoFrameTuple(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame referenceFrame)
    {
       this.namePrefix = StringUtils.getCommonPrefix(xVariable.getName(), yVariable.getName(), zVariable.getName());
       this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(xVariable.getName(), yVariable.getName(), zVariable.getName());
@@ -52,9 +52,9 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      x = new DoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
-      y = new DoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
-      z = new DoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
+      x = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
+      y = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
+      z = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
       this.referenceFrame = referenceFrame;
       this.frameTuple = createEmptyFrameTuple();
    }
@@ -215,17 +215,17 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       return frameTuple.getElement(index);
    }
 
-   public final DoubleYoVariable getYoX()
+   public final YoDouble getYoX()
    {
       return x;
    }
 
-   public final DoubleYoVariable getYoY()
+   public final YoDouble getYoY()
    {
       return y;
    }
 
-   public final DoubleYoVariable getYoZ()
+   public final YoDouble getYoZ()
    {
       return z;
    }

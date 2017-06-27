@@ -12,8 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -46,7 +46,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final YoFramePoint objectCenterOfMassInWorld;
    private final YoFrameVector objectForceInWorld;
 
-   private final DoubleYoVariable objectMass;
+   private final YoDouble objectMass;
 
    private final double gravity;
    private InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -73,7 +73,7 @@ public class ProvidedMassMatrixToolRigidBody
       this.toolBody = new RigidBody(name + "Body", toolJoint, new Matrix3D(), 0.0, new RigidBodyTransform());
 
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);
-      objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
+      objectMass = new YoDouble(name + "ObjectMass", registry);
       objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
 
       this.objectCenterOfMassInWorld = new YoFramePoint(name + "CoMInWorld", ReferenceFrame.getWorldFrame(), registry);

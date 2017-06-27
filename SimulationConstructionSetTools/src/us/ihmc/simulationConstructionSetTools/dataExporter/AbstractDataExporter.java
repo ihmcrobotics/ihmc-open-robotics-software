@@ -6,8 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -33,7 +33,7 @@ public abstract class AbstractDataExporter implements ActionListener
 
    private final Class<?> rootClassForDirectory;
 
-   public AbstractDataExporter(SimulationConstructionSet scs, String name, DoubleYoVariable timeYoVariable, Class<?> rootClassForDirectory,
+   public AbstractDataExporter(SimulationConstructionSet scs, String name, YoDouble timeYoVariable, Class<?> rootClassForDirectory,
          String subdirectoryName)
    {
       this.scs = scs;

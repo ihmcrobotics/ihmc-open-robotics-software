@@ -10,8 +10,8 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,16 +21,16 @@ import us.ihmc.robotics.time.YoStopwatch;
 public class TestICPOptimizationBehavior extends AbstractBehavior
 {
    private final HumanoidReferenceFrames referenceFrames;
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("BehaviorSwingTime", registry);
-   private final DoubleYoVariable sleepTime = new DoubleYoVariable("BehaviorSleepTime", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable("BehaviorTransferTime", registry);
-   private final DoubleYoVariable stepLength = new DoubleYoVariable("BehaviorStepLength", registry);
-   private final BooleanYoVariable stepInPlace = new BooleanYoVariable("StepInPlace", registry);
-   private final BooleanYoVariable abortBehavior = new BooleanYoVariable("AbortBehavior", registry);
+   private final YoDouble swingTime = new YoDouble("BehaviorSwingTime", registry);
+   private final YoDouble sleepTime = new YoDouble("BehaviorSleepTime", registry);
+   private final YoDouble transferTime = new YoDouble("BehaviorTransferTime", registry);
+   private final YoDouble stepLength = new YoDouble("BehaviorStepLength", registry);
+   private final YoBoolean stepInPlace = new YoBoolean("StepInPlace", registry);
+   private final YoBoolean abortBehavior = new YoBoolean("AbortBehavior", registry);
 
    private final YoStopwatch timer;
 
-   public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime)
+   public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
       super(communicationBridge);
       this.referenceFrames = referenceFrames;

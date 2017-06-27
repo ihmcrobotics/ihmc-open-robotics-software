@@ -2,8 +2,8 @@ package us.ihmc.acsell.hardware.state;
 
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,28 +23,28 @@ public class AcsellAnkleJointState
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable q_y;
-   private final DoubleYoVariable qd_y;
-   private final DoubleYoVariable q_calc_y;
-   private final DoubleYoVariable qd_calc_y;
-   private final DoubleYoVariable tau_y;
+   private final YoDouble q_y;
+   private final YoDouble qd_y;
+   private final YoDouble q_calc_y;
+   private final YoDouble qd_calc_y;
+   private final YoDouble tau_y;
 
-   private final DoubleYoVariable q_x;
-   private final DoubleYoVariable qd_x;
-   private final DoubleYoVariable q_calc_x;
-   private final DoubleYoVariable qd_calc_x;
-   private final DoubleYoVariable tau_x;
+   private final YoDouble q_x;
+   private final YoDouble qd_x;
+   private final YoDouble q_calc_x;
+   private final YoDouble qd_calc_x;
+   private final YoDouble tau_x;
 
-   private final DoubleYoVariable q_rightActuator_calc;
-   private final DoubleYoVariable q_leftActuator_calc;
-   private final DoubleYoVariable qd_rightActuator_calc;
-   private final DoubleYoVariable qd_leftActuator_calc;
-   private final DoubleYoVariable tau_rightActuator;
-   private final DoubleYoVariable tau_leftActuator;
+   private final YoDouble q_rightActuator_calc;
+   private final YoDouble q_leftActuator_calc;
+   private final YoDouble qd_rightActuator_calc;
+   private final YoDouble qd_leftActuator_calc;
+   private final YoDouble tau_rightActuator;
+   private final YoDouble tau_leftActuator;
    
 
-   private final DoubleYoVariable tau_strain_Left;
-   private final DoubleYoVariable tau_strain_Right;
+   private final YoDouble tau_strain_Left;
+   private final YoDouble tau_strain_Right;
 
    private final double motorAngle[] = new double[2];
 
@@ -62,27 +62,27 @@ public class AcsellAnkleJointState
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Ankle";
       this.registry = new YoVariableRegistry(name);
 
-      this.q_y = new DoubleYoVariable(name + "_q_y", registry);
-      this.qd_y = new DoubleYoVariable(name + "_qd_y", registry);
-      this.q_calc_y = new DoubleYoVariable(name + "_q_calc_y", registry);
-      this.qd_calc_y = new DoubleYoVariable(name + "_qd_calc_y", registry);
-      this.tau_y = new DoubleYoVariable(name + "_tau_yPredictedCurrent", registry);
+      this.q_y = new YoDouble(name + "_q_y", registry);
+      this.qd_y = new YoDouble(name + "_qd_y", registry);
+      this.q_calc_y = new YoDouble(name + "_q_calc_y", registry);
+      this.qd_calc_y = new YoDouble(name + "_qd_calc_y", registry);
+      this.tau_y = new YoDouble(name + "_tau_yPredictedCurrent", registry);
 
-      this.q_x = new DoubleYoVariable(name + "_q_x", registry);
-      this.qd_x = new DoubleYoVariable(name + "_qd_x", registry);
-      this.q_calc_x = new DoubleYoVariable(name + "_q_calc_x", registry);
-      this.qd_calc_x = new DoubleYoVariable(name + "_qd_calc_x", registry);
-      this.tau_x = new DoubleYoVariable(name + "_tau_xPredictedCurrent", registry);
+      this.q_x = new YoDouble(name + "_q_x", registry);
+      this.qd_x = new YoDouble(name + "_qd_x", registry);
+      this.q_calc_x = new YoDouble(name + "_q_calc_x", registry);
+      this.qd_calc_x = new YoDouble(name + "_qd_calc_x", registry);
+      this.tau_x = new YoDouble(name + "_tau_xPredictedCurrent", registry);
 
-      this.q_leftActuator_calc = new DoubleYoVariable(name + "_q_m_leftActuator_calc", registry);
-      this.q_rightActuator_calc = new DoubleYoVariable(name + "_q_m_rightActuator_calc", registry);
-      this.qd_leftActuator_calc = new DoubleYoVariable(name + "_qd_m_leftActuator_calc", registry);
-      this.qd_rightActuator_calc = new DoubleYoVariable(name + "_qd_m_rightActuator_calc", registry);
-      this.tau_leftActuator = new DoubleYoVariable(name + "_tau_leftActuator", registry);
-      this.tau_rightActuator = new DoubleYoVariable(name + "_tau_rightActuator", registry);
+      this.q_leftActuator_calc = new YoDouble(name + "_q_m_leftActuator_calc", registry);
+      this.q_rightActuator_calc = new YoDouble(name + "_q_m_rightActuator_calc", registry);
+      this.qd_leftActuator_calc = new YoDouble(name + "_qd_m_leftActuator_calc", registry);
+      this.qd_rightActuator_calc = new YoDouble(name + "_qd_m_rightActuator_calc", registry);
+      this.tau_leftActuator = new YoDouble(name + "_tau_leftActuator", registry);
+      this.tau_rightActuator = new YoDouble(name + "_tau_rightActuator", registry);
       
-      this.tau_strain_Left = new DoubleYoVariable(name + "LeftActuator_tauMeasuredStrain", registry);
-      this.tau_strain_Right = new DoubleYoVariable(name + "RightActuator_tauMeasuredStrain", registry);
+      this.tau_strain_Left = new YoDouble(name + "LeftActuator_tauMeasuredStrain", registry);
+      this.tau_strain_Right = new YoDouble(name + "RightActuator_tauMeasuredStrain", registry);
 
       parentRegistry.addChild(registry);
    }

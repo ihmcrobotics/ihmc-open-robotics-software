@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -24,7 +24,7 @@ public class JointTorqueFromForceSensorVisualizer
    private final List<RigidBody> allRigidBodies;
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Map<RigidBody, GeometricJacobian> jacobians;
-   private final Map<OneDoFJoint, DoubleYoVariable> jointTorques;
+   private final Map<OneDoFJoint, YoDouble> jointTorques;
 
    public JointTorqueFromForceSensorVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
    {
@@ -47,7 +47,7 @@ public class JointTorqueFromForceSensorVisualizer
             if (!jointTorques.containsKey(joint))
             {
                String variableName = "tau_forceSensor_" + joint.getName();
-               jointTorques.put(joint, new DoubleYoVariable(variableName, registry));
+               jointTorques.put(joint, new YoDouble(variableName, registry));
             }
          }
       }

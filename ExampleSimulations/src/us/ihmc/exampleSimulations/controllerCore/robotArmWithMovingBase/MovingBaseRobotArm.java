@@ -17,8 +17,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -102,7 +102,7 @@ public class MovingBaseRobotArm extends Robot
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
    private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslationVector(), this);
-   private final DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummy", new YoVariableRegistry("dummy"));
+   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoVariableRegistry("dummy"));
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 

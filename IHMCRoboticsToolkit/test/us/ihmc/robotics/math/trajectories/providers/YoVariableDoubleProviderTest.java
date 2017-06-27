@@ -6,14 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoVariableDoubleProviderTest
 {
    private YoVariableRegistry registry;
-   private DoubleYoVariable yoValue;
+   private YoDouble yoValue;
    private static double value1 = Math.random();
    private static double value2 = Math.random();
    private static final double EPSILON = 1e-14;
@@ -22,7 +21,7 @@ public class YoVariableDoubleProviderTest
    public void setUp()
    {
       registry = new YoVariableRegistry("registry");
-      yoValue = new DoubleYoVariable("value", "a DoubleYoVariable in paradise", registry);
+      yoValue = new YoDouble("value", "a YoDouble in paradise", registry);
       yoValue.set(value1);
    }
 

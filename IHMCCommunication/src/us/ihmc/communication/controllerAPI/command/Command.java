@@ -66,6 +66,15 @@ public interface Command<C extends Command<C, M>, M extends Packet<M>> extends S
    }
    
    /**
+    * tells the controller if this command supports delayed execution
+    * @return
+    */
+   public default boolean isDelayedExecutionSupported()
+   {
+      return false;
+   }
+   
+   /**
     * returns the expected execution time of this command. The execution time will be computed when the controller 
     * receives the command using the controllers time plus the execution delay time.
     * This is used when {@code getExecutionDelayTime} is non-zero

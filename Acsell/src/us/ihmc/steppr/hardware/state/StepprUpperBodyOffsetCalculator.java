@@ -7,8 +7,8 @@ import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 
@@ -36,9 +36,9 @@ public class StepprUpperBodyOffsetCalculator
    private final Vector3D accel = new Vector3D();
    private final Vector3D mag = new Vector3D();
 
-   private final DoubleYoVariable q_calc_torso_x;
-   private final DoubleYoVariable q_calc_torso_y;
-   private final DoubleYoVariable q_calc_torso_z;
+   private final YoDouble q_calc_torso_x;
+   private final YoDouble q_calc_torso_y;
+   private final YoDouble q_calc_torso_z;
 
    private final AlphaFilteredYoVariable torso_yaw;
    private final AlphaFilteredYoVariable torso_pitch;
@@ -47,15 +47,15 @@ public class StepprUpperBodyOffsetCalculator
    private final AlphaFilteredYoVariable xsens_pitch;
    private final AlphaFilteredYoVariable xsens_roll;
 
-   private final DoubleYoVariable pYawMagnet;
+   private final YoDouble pYawMagnet;
 
-   private final DoubleYoVariable torsoMagX;
-   private final DoubleYoVariable torsoMagY;
-   private final DoubleYoVariable torsoMagZ;
+   private final YoDouble torsoMagX;
+   private final YoDouble torsoMagY;
+   private final YoDouble torsoMagZ;
 
-   private final DoubleYoVariable torsoAccelX;
-   private final DoubleYoVariable torsoAccelY;
-   private final DoubleYoVariable torsoAccelZ;
+   private final YoDouble torsoAccelX;
+   private final YoDouble torsoAccelY;
+   private final YoDouble torsoAccelZ;
 
    private double[] yawPitchRoll = new double[3];
 
@@ -68,9 +68,9 @@ public class StepprUpperBodyOffsetCalculator
       this.torsoZ = backZ;
       this.xsens = xsens;
 
-      q_calc_torso_x = new DoubleYoVariable("q_calc_torso_x", registry);
-      q_calc_torso_y = new DoubleYoVariable("q_calc_torso_y", registry);
-      q_calc_torso_z = new DoubleYoVariable("q_calc_torso_z", registry);
+      q_calc_torso_x = new YoDouble("q_calc_torso_x", registry);
+      q_calc_torso_y = new YoDouble("q_calc_torso_y", registry);
+      q_calc_torso_z = new YoDouble("q_calc_torso_z", registry);
 
       double alphaOrientation = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, dt);
       torso_yaw = new AlphaFilteredYoVariable("torso_yaw", registry, alphaOrientation);
@@ -81,14 +81,14 @@ public class StepprUpperBodyOffsetCalculator
       xsens_pitch = new AlphaFilteredYoVariable("xsens_pitch", registry, alphaOrientation);
       xsens_roll = new AlphaFilteredYoVariable("xsens_roll", registry, alphaOrientation);
 
-      pYawMagnet = new DoubleYoVariable("pYawMagnet", registry);
+      pYawMagnet = new YoDouble("pYawMagnet", registry);
 
-      torsoMagX = new DoubleYoVariable("torsoMagX", registry);
-      torsoMagY = new DoubleYoVariable("torsoMagY", registry);
-      torsoMagZ = new DoubleYoVariable("torsoMagZ", registry);
-      torsoAccelX = new DoubleYoVariable("torsoAccelX", registry);
-      torsoAccelY = new DoubleYoVariable("torsoAccelY", registry);
-      torsoAccelZ = new DoubleYoVariable("torsoAccelZ", registry);
+      torsoMagX = new YoDouble("torsoMagX", registry);
+      torsoMagY = new YoDouble("torsoMagY", registry);
+      torsoMagZ = new YoDouble("torsoMagZ", registry);
+      torsoAccelX = new YoDouble("torsoAccelX", registry);
+      torsoAccelY = new YoDouble("torsoAccelY", registry);
+      torsoAccelZ = new YoDouble("torsoAccelZ", registry);
 
       parentRegistry.addChild(registry);
    }

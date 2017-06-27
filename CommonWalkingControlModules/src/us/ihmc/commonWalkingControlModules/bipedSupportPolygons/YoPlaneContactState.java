@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -25,22 +26,23 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final YoVariableRegistry registry;
    private final RigidBody rigidBody;
    private final ReferenceFrame planeFrame;
-   private final BooleanYoVariable inContact;
-   private final DoubleYoVariable coefficientOfFriction;
+   private final YoBoolean inContact;
+   private final YoDouble coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
+   private final HashMap<YoContactPoint, YoDouble> maxContactPointNormalForces = new HashMap<>();
    private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
    private final YoFramePoint2d contactPointCentroid;
 
-   private final BooleanYoVariable hasContactStateChanged;
+   private final YoBoolean hasContactStateChanged;
 
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
-      this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
+      this.inContact = new YoBoolean(namePrefix + "InContact", registry);
+      this.coefficientOfFriction = new YoDouble(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
       this.rigidBody = rigidBody;
       this.planeFrame = planeFrame;
@@ -55,6 +57,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), this, registry);
          contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
+
+         YoDouble maxContactPointNormalForce = new YoDouble(namePrefix + "MaxContactPointNormalForce" + i, registry);
+         maxContactPointNormalForce.set(Double.POSITIVE_INFINITY);
+         maxContactPointNormalForces.put(contactPoint, maxContactPointNormalForce);
       }
       inContact.set(true);
 
@@ -63,7 +69,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, registry);
       contactPointCentroid.setToNaN();
 
-      hasContactStateChanged = new BooleanYoVariable(namePrefix + "HasChanged", registry);
+      hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);
    }
 
    private final FramePoint tempContactPointPosition = new FramePoint();
@@ -81,6 +87,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       if (!inContact())
          return;
 
+      int contactedPointIndex = 0;
       for (int i = 0; i < getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
@@ -88,6 +95,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          {
             contactPoint.getPosition(tempContactPointPosition);
             planeContactStateCommandToPack.addPointInContact(tempContactPointPosition);
+
+            YoDouble maxForce = maxContactPointNormalForces.get(contactPoint);
+            planeContactStateCommandToPack.setMaxContactPointNormalForce(contactedPointIndex, maxForce.getDoubleValue());
+            contactedPointIndex++;
          }
       }
    }
@@ -135,6 +146,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       {
          this.contactNormalFrameVector.setIncludingFrame(normalContactVector);
       }
+   }
+
+   public void setMaxContactPointNormalForce(YoContactPoint contactPoint, double maxNormalForce)
+   {
+      maxContactPointNormalForces.get(contactPoint).set(maxNormalForce);
    }
 
    @Override

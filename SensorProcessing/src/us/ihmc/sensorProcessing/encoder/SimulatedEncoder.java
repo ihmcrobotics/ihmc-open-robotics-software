@@ -1,15 +1,14 @@
 package us.ihmc.sensorProcessing.encoder;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SimulatedEncoder
 {
    private final double encoderTicksPerUnitOfPosition;
-   private DoubleYoVariable positionFromEncoder;
-   private IntegerYoVariable encoderTicks;
+   private YoDouble positionFromEncoder;
+   private YoInteger encoderTicks;
 
    public SimulatedEncoder(double encoderTicksPerUnitOfPosition, String name, YoVariableRegistry parentRegistry)
    {
@@ -18,8 +17,8 @@ public class SimulatedEncoder
 
       YoVariableRegistry registry = new YoVariableRegistry("simulatedEncoder_" + name);
 
-      positionFromEncoder = new DoubleYoVariable("positionFromEncoder_" + name, registry);
-      encoderTicks = new IntegerYoVariable("encoderTicks_" + name, registry);
+      positionFromEncoder = new YoDouble("positionFromEncoder_" + name, registry);
+      encoderTicks = new YoInteger("encoderTicks_" + name, registry);
 
       this.encoderTicksPerUnitOfPosition = encoderTicksPerUnitOfPosition;
       parentRegistry.addChild(registry);

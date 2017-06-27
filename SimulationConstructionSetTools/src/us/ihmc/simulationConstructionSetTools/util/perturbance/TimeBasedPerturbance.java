@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.util.perturbance;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -28,9 +28,9 @@ public class TimeBasedPerturbance implements RobotController
    private double yNegForce = 0.0;
    private double yPosForce = 0.0;
    
-   private final DoubleYoVariable perturbanceDuration = new DoubleYoVariable("perturbanceDuration", registry);
-   private final DoubleYoVariable timeToDoPerturbance = new DoubleYoVariable("timeToDoPerturbance", registry);
-   private final DoubleYoVariable time;
+   private final YoDouble perturbanceDuration = new YoDouble("perturbanceDuration", registry);
+   private final YoDouble timeToDoPerturbance = new YoDouble("timeToDoPerturbance", registry);
+   private final YoDouble time;
 
    /**
     * Perturbs the robot along the x or y axis after a certain amount of time after the start of the simulation
@@ -40,7 +40,7 @@ public class TimeBasedPerturbance implements RobotController
     * @param yoGraphicsListRegistry
     * @param name
     */
-   public TimeBasedPerturbance(ForcePerturbable perturbable, DoubleYoVariable time, double timeToDoPerturbance, YoGraphicsListRegistry yoGraphicsListRegistry, String name)
+   public TimeBasedPerturbance(ForcePerturbable perturbable, YoDouble time, double timeToDoPerturbance, YoGraphicsListRegistry yoGraphicsListRegistry, String name)
    {
       this.perturbable = perturbable;
       this.name = name;

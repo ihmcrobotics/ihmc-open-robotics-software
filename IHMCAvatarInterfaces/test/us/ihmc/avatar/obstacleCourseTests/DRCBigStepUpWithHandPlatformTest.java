@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -117,8 +117,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       
       // Make sure that the hands are on the target...
       FloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
-      DoubleYoVariable leftArmZForce = (DoubleYoVariable) robot.getVariable("gc_l_arm_wrx_0_fZ");
-      DoubleYoVariable rightArmZForce = (DoubleYoVariable) robot.getVariable("gc_r_arm_wrx_0_fZ");
+      YoDouble leftArmZForce = (YoDouble) robot.getVariable("gc_l_arm_wrx_0_fZ");
+      YoDouble rightArmZForce = (YoDouble) robot.getVariable("gc_r_arm_wrx_0_fZ");
       assertTrue(leftArmZForce.getDoubleValue() > 50.0);
       assertTrue(rightArmZForce.getDoubleValue() > 50.0);
       

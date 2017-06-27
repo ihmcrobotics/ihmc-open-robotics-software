@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
-   private final DoubleYoVariable desiredHeadingDot = new DoubleYoVariable("desiredHeadingDot", registry);
+   private final YoDouble desiredHeading = new YoDouble("desiredHeading", registry);
+   private final YoDouble desiredHeadingDot = new YoDouble("desiredHeadingDot", registry);
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
    private final DesiredHeadingFrame predictedHeadingFrame = new DesiredHeadingFrame();

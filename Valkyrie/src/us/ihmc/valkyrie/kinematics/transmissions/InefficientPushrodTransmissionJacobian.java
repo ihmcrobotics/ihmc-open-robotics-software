@@ -8,14 +8,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
-
 
 public class InefficientPushrodTransmissionJacobian implements PushrodTransmissionJacobian
 {
@@ -80,10 +79,10 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable jTopJoint5 = new DoubleYoVariable("jTopJoint5", registry);
-   private final DoubleYoVariable jTopJoint6 = new DoubleYoVariable("jTopJoint6", registry);
-   private final DoubleYoVariable jBottomJoint5 = new DoubleYoVariable("jBottomJoint5", registry);
-   private final DoubleYoVariable jBottomJoint6 = new DoubleYoVariable("jBottomJoint6", registry);
+   private final YoDouble jTopJoint5 = new YoDouble("jTopJoint5", registry);
+   private final YoDouble jTopJoint6 = new YoDouble("jTopJoint6", registry);
+   private final YoDouble jBottomJoint5 = new YoDouble("jBottomJoint5", registry);
+   private final YoDouble jBottomJoint6 = new YoDouble("jBottomJoint6", registry);
 
    private final YoGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
    
@@ -404,7 +403,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    }
    
-   private void setJacobianElement(DoubleYoVariable jacobianElement, FrameVector rCrossFVector, Axis jointAxis)
+   private void setJacobianElement(YoDouble jacobianElement, FrameVector rCrossFVector, Axis jointAxis)
    {
       if (jointAxis == Axis.X)
       {

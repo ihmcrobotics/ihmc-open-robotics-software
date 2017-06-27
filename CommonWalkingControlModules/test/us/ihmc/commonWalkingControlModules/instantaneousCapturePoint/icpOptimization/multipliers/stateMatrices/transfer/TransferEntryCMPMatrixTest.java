@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
@@ -22,12 +22,12 @@ public class TransferEntryCMPMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("swingSplitFraction1", registry);
-      swingSplitFractions.add(doubleYoVariable);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble yoDouble = new YoDouble("swingSplitFraction1", registry);
+      swingSplitFractions.add(yoDouble);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction1", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction = new YoDouble("transferSplitFraction1", registry);
       transferSplitFractions.add(transferSplitFraction);
 
       TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
@@ -47,22 +47,22 @@ public class TransferEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction1", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction = new YoDouble("swingSplitFraction1", registry);
       swingSplitFractions.add(swingSplitFraction);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
 
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -136,22 +136,22 @@ public class TransferEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction1", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction = new YoDouble("swingSplitFraction1", registry);
       swingSplitFractions.add(swingSplitFraction);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
 
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 

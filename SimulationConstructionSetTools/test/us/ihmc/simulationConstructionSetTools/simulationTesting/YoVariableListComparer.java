@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableListComparer
 {

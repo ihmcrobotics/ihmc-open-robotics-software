@@ -21,8 +21,8 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationException;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -36,8 +36,8 @@ public class WholeBodyInverseKinematicsSolver
 
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesSolution = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointPositionsSolution = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointVelocitiesSolution = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointPositionsSolution = new HashMap<>();
 
    private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] controlledOneDoFJoints;
@@ -59,8 +59,8 @@ public class WholeBodyInverseKinematicsSolver
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-         DoubleYoVariable jointVelocitySolution = new DoubleYoVariable("qd_qp_" + joint.getName(), registry);
-         DoubleYoVariable jointPositionSolution = new DoubleYoVariable("q_qp_" + joint.getName(), registry);
+         YoDouble jointVelocitySolution = new YoDouble("qd_qp_" + joint.getName(), registry);
+         YoDouble jointPositionSolution = new YoDouble("q_qp_" + joint.getName(), registry);
          jointVelocitySolution.set(Double.NaN);
          jointPositionSolution.set(Double.NaN);
          jointVelocitiesSolution.put(joint, jointVelocitySolution);

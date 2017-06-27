@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 
 /**
  * Used to apply a torque to the point
@@ -16,7 +15,7 @@ public class ExternalTorque implements java.io.Serializable
 
     // torque in inertial frame
     private final YoFrameVector torque;
-    public DoubleYoVariable x, y, z;
+    public YoDouble x, y, z;
 
     protected final String name;
     protected Joint parentJoint;

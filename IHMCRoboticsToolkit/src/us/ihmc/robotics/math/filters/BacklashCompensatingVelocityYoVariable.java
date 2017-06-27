@@ -1,36 +1,35 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
-
-public class BacklashCompensatingVelocityYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class BacklashCompensatingVelocityYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private final double dt;
 
-   private final DoubleYoVariable alphaVariable;
-   private final DoubleYoVariable position;
+   private final YoDouble alphaVariable;
+   private final YoDouble position;
 
-   private final DoubleYoVariable lastPosition;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoDouble lastPosition;
+   private final YoBoolean hasBeenCalled;
 
-   private final EnumYoVariable<BacklashState> backlashState;
-   private final DoubleYoVariable slopTime;
+   private final YoEnum<BacklashState> backlashState;
+   private final YoDouble slopTime;
 
-   private final DoubleYoVariable timeInState;
+   private final YoDouble timeInState;
 
-   public BacklashCompensatingVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable, double dt,
-         DoubleYoVariable slopTime, YoVariableRegistry registry)
+   public BacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable, double dt,
+         YoDouble slopTime, YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
-      backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
+      backlashState = new YoEnum<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
-      timeInState = new DoubleYoVariable(name + "TimeInState", registry);
+      timeInState = new YoDouble(name + "TimeInState", registry);
 
       position = positionVariable;
 
@@ -39,20 +38,20 @@ public class BacklashCompensatingVelocityYoVariable extends DoubleYoVariable imp
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }
 
-   public BacklashCompensatingVelocityYoVariable(String name, String description, DoubleYoVariable alphaVariable, double dt, DoubleYoVariable slopTime,
+   public BacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, double dt, YoDouble slopTime,
          YoVariableRegistry registry)
    {
       super(name, description, registry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
-      backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
+      backlashState = new YoEnum<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
-      timeInState = new DoubleYoVariable(name + "timeInState", registry);
+      timeInState = new YoDouble(name + "timeInState", registry);
 
       this.position = null;
 
@@ -61,7 +60,7 @@ public class BacklashCompensatingVelocityYoVariable extends DoubleYoVariable imp
 
       this.dt = dt;
 
-      lastPosition = new DoubleYoVariable(name + "_lastPosition", registry);
+      lastPosition = new YoDouble(name + "_lastPosition", registry);
 
       reset();
    }

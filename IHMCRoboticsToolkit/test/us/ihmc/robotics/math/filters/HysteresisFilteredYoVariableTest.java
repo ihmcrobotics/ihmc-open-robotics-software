@@ -7,13 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HysteresisFilteredYoVariableTest
 {
    YoVariableRegistry registry = new YoVariableRegistry("TestHysteresisFilteredYoVariable");
-   private DoubleYoVariable guideLineHysteresis = new DoubleYoVariable("guideLineHyst", registry);
+   private YoDouble guideLineHysteresis = new YoDouble("guideLineHyst", registry);
    private HysteresisFilteredYoVariable filteredYoVariable = new HysteresisFilteredYoVariable("test", registry, guideLineHysteresis);
    private double epsilon = 1e-7;
 

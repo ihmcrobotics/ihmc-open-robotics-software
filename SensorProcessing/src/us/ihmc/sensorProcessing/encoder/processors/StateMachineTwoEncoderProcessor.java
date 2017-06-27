@@ -1,10 +1,9 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * <p>Title: </p>
@@ -20,20 +19,20 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
  */
 public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final EnumYoVariable<EncoderState> state;
-   private final DoubleYoVariable previousPosition, previousTime;
-   private final DoubleYoVariable previousPositionTwoBack, previousTimeTwoBack;
+   private final YoEnum<EncoderState> state;
+   private final YoDouble previousPosition, previousTime;
+   private final YoDouble previousPositionTwoBack, previousTimeTwoBack;
 
 
-   public StateMachineTwoEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineTwoEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
-      this.state = EnumYoVariable.create(name + "EncoderState", EncoderState.class, registry);
-      this.previousPosition = new DoubleYoVariable(name + "PrevPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
-      this.previousPositionTwoBack = new DoubleYoVariable(name + "PrevPos2", registry);
-      this.previousTimeTwoBack = new DoubleYoVariable(name + "PrevTime2", registry);
+      this.state = YoEnum.create(name + "EncoderState", EncoderState.class, registry);
+      this.previousPosition = new YoDouble(name + "PrevPos", registry);
+      this.previousTime = new YoDouble(name + "PrevTime", registry);
+      this.previousPositionTwoBack = new YoDouble(name + "PrevPos2", registry);
+      this.previousTimeTwoBack = new YoDouble(name + "PrevTime2", registry);
    }
    
    public void initialize()

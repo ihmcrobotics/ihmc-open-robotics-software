@@ -2,18 +2,18 @@ package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoAngularAccelerationWeights
 {
-   private final DoubleYoVariable yawAccelerationWeight, pitchAccelerationWeight, rollAccelerationWeight;
+   private final YoDouble yawAccelerationWeight, pitchAccelerationWeight, rollAccelerationWeight;
 
    public YoAngularAccelerationWeights(String prefix, YoVariableRegistry registry)
    {
-      yawAccelerationWeight = new DoubleYoVariable(prefix + "_YawAccelerationWeight", registry);
-      pitchAccelerationWeight = new DoubleYoVariable(prefix + "_PitchAccelerationWeight", registry);
-      rollAccelerationWeight = new DoubleYoVariable(prefix + "_RollAccelerationWeight", registry);
+      yawAccelerationWeight = new YoDouble(prefix + "_YawAccelerationWeight", registry);
+      pitchAccelerationWeight = new YoDouble(prefix + "_PitchAccelerationWeight", registry);
+      rollAccelerationWeight = new YoDouble(prefix + "_RollAccelerationWeight", registry);
    }
 
    public void reset()

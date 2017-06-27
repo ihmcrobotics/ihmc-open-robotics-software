@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class IntGlobalParameter extends GlobalParameter
 {
@@ -8,8 +8,8 @@ public class IntGlobalParameter extends GlobalParameter
    {
       super(listener);
 
-      yoVariable = new IntegerYoVariable(name, description, registry);
-      ((IntegerYoVariable)yoVariable).set(value);
+      yoVariable = new YoInteger(name, description, registry);
+      ((YoInteger)yoVariable).set(value);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -19,7 +19,7 @@ public class IntGlobalParameter extends GlobalParameter
    {
       super(parents, listener);
 
-      yoVariable = new IntegerYoVariable(name, description, registry);
+      yoVariable = new YoInteger(name, description, registry);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -27,7 +27,7 @@ public class IntGlobalParameter extends GlobalParameter
 
    public int getValue()
    {
-      return ((IntegerYoVariable)yoVariable).getIntegerValue();
+      return ((YoInteger)yoVariable).getIntegerValue();
    }
 
    protected int getNumberOfCharactersForDisplay()
@@ -55,7 +55,7 @@ public class IntGlobalParameter extends GlobalParameter
    {
       verifyNoParents();
 
-      if (value == ((IntegerYoVariable)yoVariable).getIntegerValue())
+      if (value == ((YoInteger)yoVariable).getIntegerValue())
          return;
       else
          set(value, comment);
@@ -65,7 +65,7 @@ public class IntGlobalParameter extends GlobalParameter
    @Override
    public String getValueInStringFormat()
    {
-      String ret = Integer.toString(((IntegerYoVariable)yoVariable).getIntegerValue());
+      String ret = Integer.toString(((YoInteger)yoVariable).getIntegerValue());
 
       return padWithSpaces(ret, numberOfCharactersForDisplay);
    }
@@ -74,8 +74,8 @@ public class IntGlobalParameter extends GlobalParameter
 
    private void setIntegerValue(int newValue, String comment)
    {
-      int previousValue = ((IntegerYoVariable)yoVariable).getIntegerValue();
-      ((IntegerYoVariable)yoVariable).set(newValue);
+      int previousValue = ((YoInteger)yoVariable).getIntegerValue();
+      ((YoInteger)yoVariable).set(newValue);
 
       if (changedListener != null)
       {

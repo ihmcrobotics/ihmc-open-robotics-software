@@ -7,8 +7,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities implements LinearSolver<DenseMatrix64F>
 {
@@ -16,13 +16,13 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    private final DenseMatrix64F pseudoInverse = new DenseMatrix64F(1, 1);
 
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable mu;
-   private final DoubleYoVariable firstSingularValueThreshold;
-   private final DoubleYoVariable secondSingularValueThreshold;
-   private final DoubleYoVariable singularValueAlpha;
-   private final DoubleYoVariable yoMinSingularValue;
-   private final DoubleYoVariable[] yoSingularValues;
-   private final DoubleYoVariable[] yoSingularValuesInverse;
+   private final YoDouble mu;
+   private final YoDouble firstSingularValueThreshold;
+   private final YoDouble secondSingularValueThreshold;
+   private final YoDouble singularValueAlpha;
+   private final YoDouble yoMinSingularValue;
+   private final YoDouble[] yoSingularValues;
+   private final YoDouble[] yoSingularValuesInverse;
 
    private final DenseMatrix64F tempV;
    
@@ -33,28 +33,28 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      mu = new DoubleYoVariable(namePrefix + "Mu", registry);
-      firstSingularValueThreshold = new DoubleYoVariable(namePrefix + "FirstSingularValueThreshold", registry);
-      secondSingularValueThreshold = new DoubleYoVariable(namePrefix + "SecondSingularValueThreshold", registry);
-      singularValueAlpha = new DoubleYoVariable(namePrefix + "SingularValueAlpha", registry);
-      yoMinSingularValue = new DoubleYoVariable(namePrefix + "MinSingularValue", registry);
+      mu = new YoDouble(namePrefix + "Mu", registry);
+      firstSingularValueThreshold = new YoDouble(namePrefix + "FirstSingularValueThreshold", registry);
+      secondSingularValueThreshold = new YoDouble(namePrefix + "SecondSingularValueThreshold", registry);
+      singularValueAlpha = new YoDouble(namePrefix + "SingularValueAlpha", registry);
+      yoMinSingularValue = new YoDouble(namePrefix + "MinSingularValue", registry);
 
       mu.set(0.003);
       firstSingularValueThreshold.set(5.0e-3);
       secondSingularValueThreshold.set(1.0e-5);
 
-      yoSingularValues = new DoubleYoVariable[Math.max(maxRows, maxCols)];
-      yoSingularValuesInverse = new DoubleYoVariable[Math.max(maxRows, maxCols)];
+      yoSingularValues = new YoDouble[Math.max(maxRows, maxCols)];
+      yoSingularValuesInverse = new YoDouble[Math.max(maxRows, maxCols)];
 
       for (int i = 0; i < yoSingularValues.length; i++)
       {
-         yoSingularValues[i] = new DoubleYoVariable(namePrefix + "SingularValue_" + i, registry);
+         yoSingularValues[i] = new YoDouble(namePrefix + "SingularValue_" + i, registry);
          yoSingularValues[i].set(Double.NaN);
       }
 
       for (int i = 0; i < yoSingularValuesInverse.length; i++)
       {
-         yoSingularValuesInverse[i] = new DoubleYoVariable(namePrefix + "SingularValueInverse_" + i, registry);
+         yoSingularValuesInverse[i] = new YoDouble(namePrefix + "SingularValueInverse_" + i, registry);
          yoSingularValuesInverse[i].set(Double.NaN);
       }
 

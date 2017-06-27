@@ -17,11 +17,11 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -42,13 +42,13 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   protected final IntegerYoVariable maximumNumberOfNodesToExpand = new IntegerYoVariable("maximumNumberOfNodesToExpand", registry);
-   protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
-   protected final DoubleYoVariable timeout = new DoubleYoVariable("Timeout", registry);
-   protected final LongYoVariable planningStartTime = new LongYoVariable("planningStartTime", registry);
+   protected final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
+   protected final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
+   protected final YoDouble timeout = new YoDouble("Timeout", registry);
+   protected final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
    protected final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-   protected final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
+   protected final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
    protected BipedalFootstepPlannerNode startNode, bestGoalNode;
    protected FootstepPlan footstepPlan = null;
 
