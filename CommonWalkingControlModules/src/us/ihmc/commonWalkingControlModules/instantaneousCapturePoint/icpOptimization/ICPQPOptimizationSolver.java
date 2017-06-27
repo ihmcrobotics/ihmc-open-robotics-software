@@ -3,12 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DenseMatrixBool;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
-import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -27,6 +25,7 @@ public class ICPQPOptimizationSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double deltaInside = 0.0001;
+   private static final boolean CHECK_CONSTRAINTS = true;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
@@ -111,8 +110,8 @@ public class ICPQPOptimizationSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private static final boolean useQuadProg = true;
-   private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleDiagonalActiveSetQPSolver();
+   private static final boolean useQuadProg = false;
+   private final JavaQuadProgSolver activeSetSolver = new JavaQuadProgSolver();
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
@@ -253,8 +252,10 @@ public class ICPQPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
+      /*
       if (!useQuadProg)
          activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
+      */
    }
 
    /**
@@ -636,8 +637,10 @@ public class ICPQPOptimizationSolver
     */
    public void resetOnContactChange()
    {
+      /*
       if (!useQuadProg)
          activeSetSolver.resetActiveConstraints();
+         */
    }
 
    /**
@@ -727,7 +730,32 @@ public class ICPQPOptimizationSolver
       {
          throw noConvergenceException;
       }
+
+      if (CHECK_CONSTRAINTS)
+         checkConstraints();
    }
+
+   private final DenseMatrix64F dummyVector = new DenseMatrix64F(10, 1);
+   private final DenseMatrixBool lessThan = new DenseMatrixBool(10, 1);
+   private void checkConstraints()
+   {
+      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+      {
+         dummyVector.reshape(reachabilityConstraint.Aineq.numRows, 1);
+         lessThan.reshape(reachabilityConstraint.Aineq.numRows, 1);
+         CommonOps.mult(reachabilityConstraint.Aineq, footstepLocationSolution, dummyVector);
+         CommonOps.elementLessThan(dummyVector, reachabilityConstraint.bineq, lessThan);
+
+         for (int i = 0; i < reachabilityConstraint.Aineq.numRows; i++)
+         {
+            /*
+            if (!lessThan.get(i))
+               throw new RuntimeException("Reachability  constraint not satisfied");
+               */
+         }
+      }
+   }
+
 
    /**
     * Adds the minimization of step adjustment task to the quadratic program.<br>
