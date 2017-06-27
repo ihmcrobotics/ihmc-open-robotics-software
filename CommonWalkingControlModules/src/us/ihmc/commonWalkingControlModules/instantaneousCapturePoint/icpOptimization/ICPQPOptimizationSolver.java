@@ -25,7 +25,6 @@ public class ICPQPOptimizationSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double deltaInside = 0.0001;
-   private static final boolean CHECK_CONSTRAINTS = true;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
@@ -730,32 +729,7 @@ public class ICPQPOptimizationSolver
       {
          throw noConvergenceException;
       }
-
-      if (CHECK_CONSTRAINTS)
-         checkConstraints();
    }
-
-   private final DenseMatrix64F dummyVector = new DenseMatrix64F(10, 1);
-   private final DenseMatrixBool lessThan = new DenseMatrixBool(10, 1);
-   private void checkConstraints()
-   {
-      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
-      {
-         dummyVector.reshape(reachabilityConstraint.Aineq.numRows, 1);
-         lessThan.reshape(reachabilityConstraint.Aineq.numRows, 1);
-         CommonOps.mult(reachabilityConstraint.Aineq, footstepLocationSolution, dummyVector);
-         CommonOps.elementLessThan(dummyVector, reachabilityConstraint.bineq, lessThan);
-
-         for (int i = 0; i < reachabilityConstraint.Aineq.numRows; i++)
-         {
-            /*
-            if (!lessThan.get(i))
-               throw new RuntimeException("Reachability  constraint not satisfied");
-               */
-         }
-      }
-   }
-
 
    /**
     * Adds the minimization of step adjustment task to the quadratic program.<br>
