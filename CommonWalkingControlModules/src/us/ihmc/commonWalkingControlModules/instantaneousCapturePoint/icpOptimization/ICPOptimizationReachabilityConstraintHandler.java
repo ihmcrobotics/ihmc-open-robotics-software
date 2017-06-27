@@ -34,7 +34,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final YoFrameLineSegment2d adjustmentLineSegment;
 
    public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
-                                                       String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                       String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoDouble forwardLimit = new YoDouble(yoNamePrefix + "ForwardReachabilityLimit", registry);
       YoDouble backwardLimit = new YoDouble(yoNamePrefix + "BackwardReachabilityLimit", registry);
@@ -78,6 +78,10 @@ public class ICPOptimizationReachabilityConstraintHandler
          YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ReachabilityRegionViz", contractedReachabilityPolygon, Color.BLUE, false);
          YoArtifactLineSegment2d adjustmentGraphic = new YoArtifactLineSegment2d("AdjustmentViz", adjustmentLineSegment, Color.GREEN);
          YoArtifactLineSegment2d adjustmentClippingGraphic = new YoArtifactLineSegment2d("AdjustmentClippingViz", motionLimitLine, Color.RED);
+
+         reachabilityGraphic.setVisible(visualize);
+         adjustmentGraphic.setVisible(visualize);
+         adjustmentClippingGraphic.setVisible(visualize);
 
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), reachabilityGraphic);
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), adjustmentGraphic);
