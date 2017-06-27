@@ -148,15 +148,17 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       SimulationConstructionSet scs;
       double t, temp, phaseTime;
       ArrayList<FootstepDataMessage> footstepList;
-      Point3D fromPoint = new Point3D(), toPoint = new Point3D(), nextToPoint = new Point3D(), supportPoint = new Point3D(), comLoc = new Point3D(),
-            swFootLoc = new Point3D();
-      double swFootMass = 1.0;
-      Vector3D swFootVelo = new Vector3D(), swFootVeloIni = new Vector3D(), swFootVeloFi = new Vector3D(), comVelo = new Vector3D();
+      Point3D fromPoint = new Point3D(), toPoint = new Point3D(), supportPoint = new Point3D(), comLoc = new Point3D(), comLocIn = new Point3D(),
+            comLocFi = new Point3D(), swFootLoc = new Point3D();
+      Vector3D swFootVelo = new Vector3D(), swFootVeloIn = new Vector3D(), swFootVeloFi = new Vector3D(), comVelo = new Vector3D(), comVeloIn = new Vector3D(),
+            comVeloFi = new Vector3D();
       Vector3D swVectorAngMom = new Vector3D();
-      Point3D entryCMP = new Point3D(-0.03, 0.0, 0.0);
-      Point3D exitCMP = new Point3D(0.03, 0.0, 0.0);
       boolean transferPhase;
-      YoPolynomial3D swTraj;
+      YoPolynomial3D swTraj, comTraj;
+      Point3D entryCMP = new Point3D(-0.01, 0.0, 0.0);
+      Point3D exitCMP = new Point3D(0.01, 0.0, 0.0);      
+      double swFootMass = 1.0;
+      double footLift = 0.1;
 
       public AngularMomentumSpy(DRCSimulationTestHelper simulationTestHelper)
       {
@@ -168,6 +170,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
          comEstimatedAngularMomentum = new YoFrameVector("CoMEstiamtedAngularMomentum", worldFrame, scsRegistry);
          scs = drcSimulationTestHelper.getSimulationConstructionSet();
          swTraj = new YoPolynomial3D("SwingFootTraj", 4, scsRegistry);
+         comTraj = new YoPolynomial3D("CoMTraj", 4, scsRegistry);
       }
 
       @Override
@@ -206,38 +209,44 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
             toPoint = footstepList.get(index).getLocation();
             supportPoint = footstepList.get(index - 1).getLocation();
 
-            double tphase = (t - temp + phaseTime) / (phaseTime);
+            double tphase = (t - temp + phaseTime);
             if (transferPhase)
             {
-               comLoc.set(fromPoint);
-               comLoc.add(exitCMP);
-               comLoc.scale((1.0 - tphase)/tphase);
-               comLoc.add(supportPoint);
-               comLoc.add(entryCMP);
-               comLoc.scale(tphase);
-               comVelo.set(toPoint);
-               comVelo.sub(fromPoint);
-               comVelo.scale(1.0/phaseTime);
+               comLocIn.set(fromPoint);
+               comLocIn.add(exitCMP);
+               comLocFi.set(supportPoint);
+               comLocFi.add(entryCMP);
+               comVeloIn.set(swFootVeloFi);
+               comVeloIn.scale(-1.0);
+               comVeloFi.setToZero();
+               comTraj.setCubic(0.0, phaseTime, comLocIn, comVeloIn, comLocFi, comVeloFi);
+               comTraj.compute(tphase);
+               comLoc.set(comTraj.getPosition());
+               comVelo.set(comTraj.getVelocity());
                swFootLoc.set(fromPoint);
                swFootVelo.setToZero();
             }
             else
             {
-               comLoc.set(entryCMP);
-               comLoc.scale((1.0 - tphase)/tphase);
-               comLoc.add(exitCMP);
-               comLoc.scale(tphase);
-               comLoc.add(supportPoint);
-               comVelo.set(exitCMP);
-               comVelo.sub(entryCMP);
-               comVelo.scale(1.0/phaseTime);
-               swFootLoc.set(fromPoint);
-               swFootLoc.scale((1.0 - tphase)/tphase);
-               swFootLoc.add(toPoint);
-               swFootLoc.scale(tphase);
-               swFootVelo.set(toPoint);
-               swFootVelo.sub(fromPoint);
-               swFootVelo.scale(1.0/phaseTime);
+               comLocIn.set(supportPoint);
+               comLocIn.add(entryCMP);
+               comLocFi.set(supportPoint);
+               comLocFi.add(exitCMP);
+               comVeloIn.setToZero();
+               comVeloFi.setToZero();
+               comTraj.setCubic(0.0, phaseTime, comLocIn, comVeloIn, comLocFi, comVeloFi);
+               comTraj.compute(tphase);
+               comLoc.set(comTraj.getPosition());
+               comVelo.set(comTraj.getVelocity());
+               swFootVeloIn.set(0.0, 0.0, 0.0);
+               swFootVeloFi.set(fromPoint);
+               swFootVeloFi.sub(toPoint);
+               swFootVeloFi.scale(1.0/phaseTime);
+               swTraj.setCubic(0, phaseTime, fromPoint, swFootVeloIn, toPoint, swFootVeloFi);
+               swTraj.compute(tphase);
+               swFootLoc.set(swTraj.getPosition());
+               swFootLoc.add(0.0, 0.0, footLift * 4 * tphase * (1.0 - tphase/phaseTime)/phaseTime);
+               swFootVelo.set(swTraj.getVelocity());
             }
             
             comLoc.add(0.0, 0.0, 0.33);
