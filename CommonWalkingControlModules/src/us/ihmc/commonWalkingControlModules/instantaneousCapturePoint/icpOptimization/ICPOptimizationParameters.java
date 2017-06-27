@@ -278,6 +278,10 @@ public abstract class ICPOptimizationParameters
    }
 
 
+   public boolean getLimitReachabilityFromAdjustment()
+   {
+      return true;
+   }
 
 
    /**
