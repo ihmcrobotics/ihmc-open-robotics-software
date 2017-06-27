@@ -17,9 +17,9 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantC
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -34,7 +34,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private static int STEP_SEQUENCE_CAPACITY = 100;
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
-   private final DoubleYoVariable robotTimestamp;
+   private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
    private final double mass;
@@ -113,10 +113,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
-   private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
-   private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
-   private final BooleanYoVariable onLiftOffTriggered = new BooleanYoVariable("onLiftOffTriggered", registry);
-   private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
+   private final YoDouble haltTime = new YoDouble("haltTime", registry);
+   private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
+   private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
+   private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream)

@@ -2,20 +2,19 @@ package us.ihmc.simulationConstructionSetTools.joystick;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
-
 
 public class DoubleYoVariableJoystickEventListener implements JoystickEventListener
 {
-   private final DoubleYoVariable variable;
+   private final YoDouble variable;
    private final Component component;
    private final double min;
    private final double max;
    private final double deadZone;
    private final int sign;
 
-   public DoubleYoVariableJoystickEventListener(DoubleYoVariable variable, Component component, double min, double max, double deadZone, boolean signFlip)
+   public DoubleYoVariableJoystickEventListener(YoDouble variable, Component component, double min, double max, double deadZone, boolean signFlip)
    {
       if (variable == null)
          throw new RuntimeException("variable is null");

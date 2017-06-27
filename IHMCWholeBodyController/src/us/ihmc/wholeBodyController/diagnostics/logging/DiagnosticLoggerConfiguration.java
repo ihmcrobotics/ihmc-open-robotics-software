@@ -22,16 +22,16 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticLoggerConfiguration
 {
-   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName)
+   public static void setupLogging(YoDouble yoTime, Class<?> clazz, String robotName)
    {
       setupLogging(yoTime, clazz, robotName, false);
    }
 
-   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName, boolean useInternetDate)
+   public static void setupLogging(YoDouble yoTime, Class<?> clazz, String robotName, boolean useInternetDate)
    {
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 

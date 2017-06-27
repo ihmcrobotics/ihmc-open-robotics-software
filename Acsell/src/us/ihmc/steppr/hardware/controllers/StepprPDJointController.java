@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 
@@ -16,10 +16,10 @@ public class StepprPDJointController implements StepprController
 
    protected final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    protected final ArrayList<PDController> controllers = new ArrayList<>();
-   protected final ArrayList<DoubleYoVariable> desiredPositions = new ArrayList<>();
-   protected final ArrayList<DoubleYoVariable> desiredVelocities = new ArrayList<>();
-   protected final ArrayList<DoubleYoVariable> tauFFs = new ArrayList<>();
-   protected final ArrayList<DoubleYoVariable> damping = new ArrayList<>();
+   protected final ArrayList<YoDouble> desiredPositions = new ArrayList<>();
+   protected final ArrayList<YoDouble> desiredVelocities = new ArrayList<>();
+   protected final ArrayList<YoDouble> tauFFs = new ArrayList<>();
+   protected final ArrayList<YoDouble> damping = new ArrayList<>();
 
 
    @Override
@@ -29,10 +29,10 @@ public class StepprPDJointController implements StepprController
       {
          joints.add(joint);
          controllers.add(new PDController(joint.getName(), registry));
-         desiredPositions.add(new DoubleYoVariable(joint.getName() + "_q_d", registry));
-         desiredVelocities.add(new DoubleYoVariable(joint.getName() + "_qd_d", registry));
-         tauFFs.add(new DoubleYoVariable(joint.getName() + "_tau_ff", registry));
-         damping.add(new DoubleYoVariable(joint.getName() + "_damping", registry));
+         desiredPositions.add(new YoDouble(joint.getName() + "_q_d", registry));
+         desiredVelocities.add(new YoDouble(joint.getName() + "_qd_d", registry));
+         tauFFs.add(new YoDouble(joint.getName() + "_tau_ff", registry));
+         damping.add(new YoDouble(joint.getName() + "_damping", registry));
       }
 
    }

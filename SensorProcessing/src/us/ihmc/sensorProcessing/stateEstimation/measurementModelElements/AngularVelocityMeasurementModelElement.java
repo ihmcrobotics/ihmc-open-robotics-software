@@ -9,12 +9,11 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class AngularVelocityMeasurementModelElement extends AbstractMeasurementModelElement

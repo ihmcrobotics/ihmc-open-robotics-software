@@ -9,9 +9,8 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ElasticityCompensatorYoVariableTest
 {
@@ -25,9 +24,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, registry);
       
       try
@@ -59,9 +58,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, registry);
       try
       {
@@ -91,9 +90,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, rawJointPosition, jointTau, registry);
       
       for (int i = 0; i < 1000; i++)
@@ -115,9 +114,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       
       for (int i = 0; i < 1000; i++)
@@ -138,9 +137,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       stiffness.set(0.0);
       
@@ -169,9 +168,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       elasticityCompensatorYoVariable.setMaximuDeflection(0.0);
       
@@ -194,9 +193,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       double maximumDeflection = 0.1;
       
@@ -221,9 +220,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       elasticityCompensatorYoVariable.setMaximuDeflection(Double.POSITIVE_INFINITY);
       
@@ -247,9 +246,9 @@ public class ElasticityCompensatorYoVariableTest
       
       String name = "compensator";
       YoVariableRegistry registry = new YoVariableRegistry("");
-      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
-      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
-      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      YoDouble stiffness = new YoDouble("stiffness", registry);
+      YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
+      YoDouble jointTau = new YoDouble("jointTau", registry);
       ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
       
       for (int i = 0; i < 10000; i++)

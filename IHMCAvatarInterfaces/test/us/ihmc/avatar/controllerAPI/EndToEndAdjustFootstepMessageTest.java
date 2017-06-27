@@ -24,8 +24,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -141,10 +141,10 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
                footPrefix + "State");
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
                "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -191,7 +191,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    @SuppressWarnings("unchecked")
    private static RobotSide findUpcomingFootstepSide(int index, SimulationConstructionSet scs)
    {
-      return ((EnumYoVariable<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
+      return ((YoEnum<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
    private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
@@ -201,23 +201,23 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
+      YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
+      YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
+      YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint position = new YoFramePoint(x, y, z, ReferenceFrame.getWorldFrame());
 
-      DoubleYoVariable yaw = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
-      DoubleYoVariable pitch = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
-      DoubleYoVariable roll = (DoubleYoVariable) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
+      YoDouble yaw = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
+      YoDouble pitch = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
+      YoDouble roll = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
       YoFrameOrientation orientation = new YoFrameOrientation(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
       return new YoFramePose(position, orientation);
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<ConstraintType> footConstraintType;
+      private final YoEnum<ConstraintType> footConstraintType;
 
-      public SingleSupportStartCondition(EnumYoVariable<ConstraintType> footConstraintType)
+      public SingleSupportStartCondition(YoEnum<ConstraintType> footConstraintType)
       {
          this.footConstraintType = footConstraintType;
       }
@@ -231,11 +231,11 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingStateEnum> walkingState;
+      private final YoEnum<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;

@@ -3,9 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,21 +31,21 @@ public class Step5WalkingController implements RobotController
    private PIDController controllerKneePitchSwing, controllerKneePitchStraighten;
    private PIDController controllerAnkleStraighten, controllerAnkleToeOff, controllerAnkleSwing;
 
-   private DoubleYoVariable desiredBodyZ, desiredKneePitchSwing, desiredKneePitchStraighten;
-   private DoubleYoVariable desiredHipPitch, desiredBodyPitch;
-   private DoubleYoVariable desiredAnklePitchSwing , desiredAnklePitchToeOff, desiredAnklePitchStraighten;
+   private YoDouble desiredBodyZ, desiredKneePitchSwing, desiredKneePitchStraighten;
+   private YoDouble desiredHipPitch, desiredBodyPitch;
+   private YoDouble desiredAnklePitchSwing , desiredAnklePitchToeOff, desiredAnklePitchStraighten;
 
-   private DoubleYoVariable ankleTauToeOff;
-   private DoubleYoVariable kneeTau;
-   private DoubleYoVariable hipTau;
-   private DoubleYoVariable ankleTau;
+   private YoDouble ankleTauToeOff;
+   private YoDouble kneeTau;
+   private YoDouble hipTau;
+   private YoDouble ankleTau;
 
    private Quaternion rotationToPack = new Quaternion();
    private Vector3D velocityToPack = new Vector3D();
       
    private boolean heelOnTheFloor, toeOnTheFloor;
-   private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", controllerRegistry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", controllerRegistry);
+   private final YoDouble minSupportTime = new YoDouble("minSupportTime", controllerRegistry);
+   private final YoDouble swingTime = new YoDouble("swingTime", controllerRegistry);
    
 
    // State Machine
@@ -72,13 +71,13 @@ public class Step5WalkingController implements RobotController
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(1000.0);
       controllerBodyZ.setDerivativeGain(500.0); 
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", controllerRegistry);
       desiredBodyZ.set(1.5); 
 
       controllerBodyPitch = new PIDController("bodyPitch", controllerRegistry);
       controllerBodyPitch.setProportionalGain(500.0);
       controllerBodyPitch.setDerivativeGain(50.0);
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(0.0);
       
       controllerBodyPitchSingleSupport = new PIDController("bodyPitchSingleSupport", controllerRegistry);
@@ -88,44 +87,44 @@ public class Step5WalkingController implements RobotController
       controllerHipPitch = new PIDController("hipPitch", controllerRegistry);
       controllerHipPitch.setProportionalGain(700.0);
       controllerHipPitch.setDerivativeGain(70.0);
-      desiredHipPitch = new DoubleYoVariable("desiredHipPitch", controllerRegistry);
+      desiredHipPitch = new YoDouble("desiredHipPitch", controllerRegistry);
       desiredHipPitch.set(-0.6);
       
       controllerKneePitchSwing = new PIDController("kneePitchSwing", controllerRegistry); 
       controllerKneePitchSwing.setProportionalGain(25000.0);
       controllerKneePitchSwing.setDerivativeGain(2000.0);
-      desiredKneePitchSwing = new DoubleYoVariable("desiredKneePitchSwing", controllerRegistry);
+      desiredKneePitchSwing = new YoDouble("desiredKneePitchSwing", controllerRegistry);
       desiredKneePitchSwing.set(1.3); 
       
       controllerKneePitchStraighten = new PIDController("kneePitchStraighten", controllerRegistry);
       controllerKneePitchStraighten.setProportionalGain(10000.0);
       controllerKneePitchStraighten.setDerivativeGain(1000.0);
-      desiredKneePitchStraighten = new DoubleYoVariable("desiredKneePitchStraighten", controllerRegistry);
+      desiredKneePitchStraighten = new YoDouble("desiredKneePitchStraighten", controllerRegistry);
       desiredKneePitchStraighten.set(0.0);  
       
       controllerAnkleStraighten = new PIDController("ankleStraighten", controllerRegistry);
       controllerAnkleStraighten.setProportionalGain(50.0);
       controllerAnkleStraighten.setDerivativeGain(5.0); 
-      desiredAnklePitchStraighten = new DoubleYoVariable("desiredAnklePitchStraighten", controllerRegistry);
+      desiredAnklePitchStraighten = new YoDouble("desiredAnklePitchStraighten", controllerRegistry);
       desiredAnklePitchStraighten.set(0.2);
          
       controllerAnkleToeOff = new PIDController("ankleToeOff", controllerRegistry); 
       controllerAnkleToeOff.setProportionalGain(500.0);
       controllerAnkleToeOff.setDerivativeGain(50.0);
-      desiredAnklePitchToeOff = new DoubleYoVariable("desiredAnklePitchToeOff", controllerRegistry);
+      desiredAnklePitchToeOff = new YoDouble("desiredAnklePitchToeOff", controllerRegistry);
       desiredAnklePitchToeOff.set(0.08);  
       
       controllerAnkleSwing = new PIDController("ankleSwing", controllerRegistry);
       controllerAnkleSwing.setProportionalGain(100.0);
       controllerAnkleSwing.setDerivativeGain(10.0);
-      desiredAnklePitchSwing = new DoubleYoVariable("desiredAnklePitchSwing", controllerRegistry);
+      desiredAnklePitchSwing = new YoDouble("desiredAnklePitchSwing", controllerRegistry);
       desiredAnklePitchSwing.set(-0.65);
       
-      hipTau = new DoubleYoVariable("hipTau", controllerRegistry);
-      kneeTau = new DoubleYoVariable("kneeTau", controllerRegistry);
-      ankleTau = new DoubleYoVariable("ankleTau", controllerRegistry);
+      hipTau = new YoDouble("hipTau", controllerRegistry);
+      kneeTau = new YoDouble("kneeTau", controllerRegistry);
+      ankleTau = new YoDouble("ankleTau", controllerRegistry);
       
-      ankleTauToeOff = new DoubleYoVariable("ankleTauToeOff", controllerRegistry);
+      ankleTauToeOff = new YoDouble("ankleTauToeOff", controllerRegistry);
       ankleTauToeOff.set(200.0);
       
       // Create the state machines:
@@ -249,7 +248,7 @@ public class Step5WalkingController implements RobotController
       }
    }
 
-   private DoubleYoVariable controlBodyPitch()
+   private YoDouble controlBodyPitch()
    {
       rob.getBodyPitch(rotationToPack);
       double pitchFromQuaternion = rotationToPack.getPitch();
@@ -261,7 +260,7 @@ public class Step5WalkingController implements RobotController
       return hipTau;
    }
    
-   private DoubleYoVariable controlBodyPitchSingleSupport()
+   private YoDouble controlBodyPitchSingleSupport()
    {
       rob.getBodyPitch(rotationToPack);
       double pitchFromQuaternion = rotationToPack.getPitch();
@@ -354,13 +353,13 @@ public class Step5WalkingController implements RobotController
    {
       
       private final RobotSide robotSide;
-      //      private final DoubleYoVariable startTime;
+      //      private final YoDouble startTime;
       
       public SwingState(RobotSide robotSide, States stateEnum)
       {
          super(States.SWING);
          this.robotSide = robotSide;    
-         //         startTime = new DoubleYoVariable("startTime", controllerRegistry); //TODO timer =)
+         //         startTime = new YoDouble("startTime", controllerRegistry); //TODO timer =)
       }
 
       public void doAction()
@@ -467,7 +466,7 @@ public class Step5WalkingController implements RobotController
    // Swing To Straighten (TIMER)  -- not actually needed, but timers seem like a useful thing
    //   public class SwingToStraightenCondition implements StateTransitionCondition
    //   {
-   //      public SwingToStraightenCondition(DoubleYoVariable startTime)
+   //      public SwingToStraightenCondition(YoDouble startTime)
    //      {
    //      }
    //      

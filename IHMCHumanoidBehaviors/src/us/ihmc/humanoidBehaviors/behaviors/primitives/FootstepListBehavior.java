@@ -18,8 +18,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,14 +32,14 @@ public class FootstepListBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-   private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
-   private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
-   private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
-   private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
-   private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
-   private final BooleanYoVariable isRobotDoneWalking = new BooleanYoVariable("isRobotDoneWalking", registry);
-   private final BooleanYoVariable hasRobotStartedWalking = new BooleanYoVariable("hasRobotStartedWalking", registry);
+   private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
+   private final YoInteger numberOfFootsteps = new YoInteger("numberOfFootsteps" + behaviorName, registry);
+   private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
+   private final YoBoolean isStopped = new YoBoolean("isStopped", registry);
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);
+   private final YoBoolean hasLastStepBeenReached = new YoBoolean("hasLastStepBeenReached", registry);
+   private final YoBoolean isRobotDoneWalking = new YoBoolean("isRobotDoneWalking", registry);
+   private final YoBoolean hasRobotStartedWalking = new YoBoolean("hasRobotStartedWalking", registry);
 
 
    private double defaultSwingTime;

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.math.trajectories.Finishable;
 
 public class CartesianTrajectoryBasedFootSwitch implements TrajectoryBasedFootSwitch
@@ -9,14 +9,14 @@ public class CartesianTrajectoryBasedFootSwitch implements TrajectoryBasedFootSw
    private final String name;
    private final Finishable trajectoryGenerator;
 
-   private final BooleanYoVariable isSwinging;
+   private final YoBoolean isSwinging;
 
    public CartesianTrajectoryBasedFootSwitch(String name, Finishable trajectoryGenerator, YoVariableRegistry registry)
    {
       this.name = name;
       this.trajectoryGenerator = trajectoryGenerator;
 
-      isSwinging = new BooleanYoVariable(name, registry);
+      isSwinging = new YoBoolean(name, registry);
    }
 
    @Override

@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -83,7 +83,7 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
    Vector3D comOffsetFoot = new Vector3D(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
-   public DoubleYoVariable qd_x;
+   public YoDouble qd_x;
    private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 + 0.024;
 
    /**

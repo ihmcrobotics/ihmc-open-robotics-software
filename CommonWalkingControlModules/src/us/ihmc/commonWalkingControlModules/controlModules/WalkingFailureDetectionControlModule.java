@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -25,11 +25,11 @@ public class WalkingFailureDetectionControlModule
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable isUsingNextFootstep;
-   private final BooleanYoVariable isFallDetectionActivated;
-   private final DoubleYoVariable icpDistanceFromFootPolygon;
-   private final DoubleYoVariable icpDistanceFromFootPolygonThreshold;
-   private final BooleanYoVariable isRobotFalling;
+   private final YoBoolean isUsingNextFootstep;
+   private final YoBoolean isFallDetectionActivated;
+   private final YoDouble icpDistanceFromFootPolygon;
+   private final YoDouble icpDistanceFromFootPolygonThreshold;
+   private final YoBoolean isRobotFalling;
    private final FrameVector2d fallingDirection = new FrameVector2d();
 
    public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
@@ -47,18 +47,18 @@ public class WalkingFailureDetectionControlModule
       // Just for allocating memory for the nextFootstepPolygon
       nextFootstepPolygon.setIncludingFrameAndUpdate(footPolygons.get(RobotSide.LEFT));
 
-      isUsingNextFootstep = new BooleanYoVariable("isFallDetectionUsingNextFootstep", registry);
+      isUsingNextFootstep = new YoBoolean("isFallDetectionUsingNextFootstep", registry);
       isUsingNextFootstep.set(false);
 
       updateCombinedPolygon();
 
-      isFallDetectionActivated = new BooleanYoVariable("isFallDetectionActivated", registry);
+      isFallDetectionActivated = new YoBoolean("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
 
-      icpDistanceFromFootPolygonThreshold = new DoubleYoVariable("icpDistanceFromFootPolygonThreshold", registry);
+      icpDistanceFromFootPolygonThreshold = new YoDouble("icpDistanceFromFootPolygonThreshold", registry);
       icpDistanceFromFootPolygonThreshold.set(0.05);
-      icpDistanceFromFootPolygon = new DoubleYoVariable("icpDistanceFromFootPolygon", registry);
-      isRobotFalling = new BooleanYoVariable("isRobotFalling", registry);
+      icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
+      isRobotFalling = new YoBoolean("isRobotFalling", registry);
 
       parentRegistry.addChild(registry);
    }

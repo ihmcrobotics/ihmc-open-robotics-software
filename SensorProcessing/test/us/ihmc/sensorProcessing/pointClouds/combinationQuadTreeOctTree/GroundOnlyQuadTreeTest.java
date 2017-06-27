@@ -26,7 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;

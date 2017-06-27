@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -29,22 +29,22 @@ public class RotationVerificator
     * Check if the error between cop and desired cop perpendicular the line of
     * rotation is above a threshold
     */
-   private final DoubleYoVariable perpendicularCopError;
-   private final DoubleYoVariable perpendicluarCopErrorThreshold;
-   private final BooleanYoVariable perpendicularCopErrorAboveThreshold;
+   private final YoDouble perpendicularCopError;
+   private final YoDouble perpendicluarCopErrorThreshold;
+   private final YoBoolean perpendicularCopErrorAboveThreshold;
 
    /**
     * Check if the angle between cop error vector and the perpendicular error
     * is below a threshold
     */
-   private final DoubleYoVariable angleBetweenCopErrorAndLine;
-   private final DoubleYoVariable angleThreshold;
-   private final BooleanYoVariable angleOkay;
+   private final YoDouble angleBetweenCopErrorAndLine;
+   private final YoDouble angleThreshold;
+   private final YoBoolean angleOkay;
 
    /**
     * Check if desired cop is in area that will be cut off
     */
-   private final BooleanYoVariable desiredCopOnCorrectSide;
+   private final YoBoolean desiredCopOnCorrectSide;
 
    public RotationVerificator(String namePrefix,
          ContactablePlaneBody foot,
@@ -58,15 +58,15 @@ public class RotationVerificator
 
       yoCopError = new YoFrameVector2d(namePrefix + "CopError", "", soleFrame, registry);
 
-      perpendicularCopError = new DoubleYoVariable(namePrefix + "PerpendicularCopError", registry);
+      perpendicularCopError = new YoDouble(namePrefix + "PerpendicularCopError", registry);
       perpendicluarCopErrorThreshold = explorationParameters.getPerpendicluarCopErrorThreshold();
-      perpendicularCopErrorAboveThreshold = new BooleanYoVariable(namePrefix + "PerpendicularCopErrorAboveThreshold", registry);
+      perpendicularCopErrorAboveThreshold = new YoBoolean(namePrefix + "PerpendicularCopErrorAboveThreshold", registry);
 
-      angleBetweenCopErrorAndLine = new DoubleYoVariable(namePrefix + "AngleBetweenCopErrorAndLine", registry);
+      angleBetweenCopErrorAndLine = new YoDouble(namePrefix + "AngleBetweenCopErrorAndLine", registry);
       angleThreshold = explorationParameters.getCopAllowedAreaOpeningAngle();
-      angleOkay = new BooleanYoVariable(namePrefix + "AngleOkay", registry);
+      angleOkay = new YoBoolean(namePrefix + "AngleOkay", registry);
 
-      desiredCopOnCorrectSide = new BooleanYoVariable(namePrefix + "DesiredCopOnCorrectSide", registry);
+      desiredCopOnCorrectSide = new YoBoolean(namePrefix + "DesiredCopOnCorrectSide", registry);
    }
 
    private final FrameVector2d copError2d = new FrameVector2d();

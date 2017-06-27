@@ -6,9 +6,7 @@ import java.util.HashSet;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -27,8 +25,8 @@ import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 public class AtlasSDFViewer
 {
    private static final boolean SHOW_ELLIPSOIDS = false;
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
-   private static final boolean SHOW_IMU_FRAMES = true;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
+   private static final boolean SHOW_IMU_FRAMES = false;
 
    public static void main(String[] args)
    {
@@ -51,8 +49,8 @@ public class AtlasSDFViewer
       }
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
-      
-      
+
+
 
       SelectedListener selectedListener = new SelectedListener()
       {
@@ -66,7 +64,7 @@ public class AtlasSDFViewer
       scs.attachSelectedListener(selectedListener);
 
 
-      
+
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }
@@ -135,8 +133,9 @@ public class AtlasSDFViewer
       for (OneDegreeOfFreedomJoint joint : joints)
       {
          Graphics3DObject linkGraphics = new Graphics3DObject();
-         linkGraphics.addCoordinateSystem(0.1);
-         linkGraphics.combine(joint.getLink().getLinkGraphics());
+         linkGraphics.addCoordinateSystem(0.3);
+         if (joint.getLink().getLinkGraphics() != null)
+            linkGraphics.combine(joint.getLink().getLinkGraphics());
          joint.getLink().setLinkGraphics(linkGraphics);
       }
    }

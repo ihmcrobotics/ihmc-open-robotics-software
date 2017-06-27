@@ -32,7 +32,7 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
    {
       startPose.checkReferenceFrameMatch(endPose);
       FramePoint2d endPosition = new FramePoint2d();
-      endPose.getPosition(endPosition);
+      endPose.getPositionIncludingFrame(endPosition);
       double heading = AngleTools.calculateHeading(startPose, endPosition, headingOffset, noTranslationTolerance);
       FrameOrientation2d intermediateOrientation = new FrameOrientation2d(startPose.getReferenceFrame(), heading);
       TurningOverheadPath turningPath = new TurningOverheadPath(startPose, intermediateOrientation);
@@ -40,7 +40,7 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(intermediatePose, endPosition);
       intermediatePose = straightPath.getPoseAtS(1.0);
       FrameOrientation2d endOrientation = new FrameOrientation2d();
-      endPose.getOrientation(endOrientation);
+      endPose.getOrientationIncludingFrame(endOrientation);
       TurningOverheadPath endTurningPath = new TurningOverheadPath(intermediatePose, endOrientation);
 
       List<OverheadPath> paths = new ArrayList<OverheadPath>();

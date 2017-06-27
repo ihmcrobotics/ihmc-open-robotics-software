@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.CommonNames;
 
@@ -22,9 +22,9 @@ public enum ValkyrieRealRobotFingerJoint
       this.name = name;
    }
    
-   public DoubleYoVariable getRelatedControlVariable(RobotSide robotSide, YoVariableRegistry registry)
+   public YoDouble getRelatedControlVariable(RobotSide robotSide, YoVariableRegistry registry)
    {
-      return (DoubleYoVariable) registry.getVariable(robotSide.getCamelCaseNameForMiddleOfExpression() + name + CommonNames.q_d);
+      return (YoDouble) registry.getVariable(robotSide.getCamelCaseNameForMiddleOfExpression() + name + CommonNames.q_d);
    }
 
    @Override

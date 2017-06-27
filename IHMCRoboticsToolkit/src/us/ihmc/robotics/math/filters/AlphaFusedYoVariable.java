@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @author jrebula
@@ -26,22 +26,22 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  *         slowSignal is lower.
  *         </p>
  */
-public class AlphaFusedYoVariable extends DoubleYoVariable
+public class AlphaFusedYoVariable extends YoDouble
 {
    private final double alpha;
 
-   private final DoubleYoVariable alphaVariable;
+   private final YoDouble alphaVariable;
 
-   private final DoubleYoVariable slowSignal;
-   private final DoubleYoVariable fastSignal;
-   private final DoubleYoVariable steadyStateOffset;
+   private final YoDouble slowSignal;
+   private final YoDouble fastSignal;
+   private final YoDouble steadyStateOffset;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -49,15 +49,15 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
       this.slowSignal = null;
       this.fastSignal = null;
 
-      steadyStateOffset = new DoubleYoVariable(name + "_off", yoVariableRegistry);
+      steadyStateOffset = new YoDouble(name + "_off", yoVariableRegistry);
 
       reset();
    }
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha, DoubleYoVariable slowSignal, DoubleYoVariable fastSignal)
+   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = alpha;
       this.alphaVariable = null;
@@ -65,16 +65,16 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
       this.slowSignal = slowSignal;
       this.fastSignal = fastSignal;
 
-      steadyStateOffset = new DoubleYoVariable(name + "_off", yoVariableRegistry);
+      steadyStateOffset = new YoDouble(name + "_off", yoVariableRegistry);
 
       reset();
    }
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, DoubleYoVariable alphaVariable, DoubleYoVariable slowSignal,
-         DoubleYoVariable fastSignal)
+   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
+         YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", yoVariableRegistry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
 
       this.alpha = 0.0;
       this.alphaVariable = alphaVariable;
@@ -82,7 +82,7 @@ public class AlphaFusedYoVariable extends DoubleYoVariable
       this.slowSignal = slowSignal;
       this.fastSignal = fastSignal;
 
-      steadyStateOffset = new DoubleYoVariable(name + "_off", yoVariableRegistry);
+      steadyStateOffset = new YoDouble(name + "_off", yoVariableRegistry);
 
       reset();
    }

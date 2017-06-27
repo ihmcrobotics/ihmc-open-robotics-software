@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -36,13 +36,13 @@ public class GroundContactForceOptimizationControlModule
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
-   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinGCFOptimization", registry);
+   private final YoDouble rhoMin = new YoDouble("rhoMinGCFOptimization", registry);
 
    private final BasisVectorVisualizer basisVectorVisualizer;
 
    private final GroundContactForceQPSolver qpSolver;
-   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
-   private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
+   private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
+   private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    private final YoFrameVector desiredLinearMomentumRate;
    private final YoFrameVector desiredAngularMomentumRate;

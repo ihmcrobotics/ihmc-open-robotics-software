@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -18,14 +18,14 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable alphaForJointTorqueForStateChanges = new DoubleYoVariable("alphaJointTorqueForStateChanges", registry);
+   private final YoDouble alphaForJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
 
    private final ArrayList<OneDoFJoint> allJoints = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new LinkedHashMap<>();
 
    private final AtomicBoolean hasHighLevelControllerStateChanged = new AtomicBoolean(false);
-   private final DoubleYoVariable timeAtHighLevelControllerStateChange = new DoubleYoVariable("timeAtControllerStateChange", registry);
-   private final DoubleYoVariable slopTime = new DoubleYoVariable("slopTimeForSmoothedJointTorques", registry);
+   private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
+   private final YoDouble slopTime = new YoDouble("slopTimeForSmoothedJointTorques", registry);
 
    private final DRCOutputWriter drcOutputWriter;
 

@@ -20,10 +20,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajecto
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -39,15 +39,15 @@ public class HeadOrientationManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final GenericStateMachine<HeadControlMode, HeadControlState> stateMachine;
-   private final EnumYoVariable<HeadControlMode> requestedState = new EnumYoVariable<>("headRequestedControlMode", registry, HeadControlMode.class, true);
+   private final YoEnum<HeadControlMode> requestedState = new YoEnum<>("headRequestedControlMode", registry, HeadControlMode.class, true);
 
    private final TaskspaceHeadControlState taskspaceHeadControlState;
    private final JointspaceHeadControlState jointspaceHeadControlState;
    private final HeadUserControlModeState headUserControlModeState;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean("hasHeadOrientationManagerBeenInitialized", registry);
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;

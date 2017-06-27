@@ -2,26 +2,26 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterface
 {
    private static final String[] directionNames = new String[] {"x", "y", "z"};
 
-   private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] integralGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable[] dampingRatios;
+   private final YoDouble[] proportionalGains = new YoDouble[3];
+   private final YoDouble[] derivativeGains = new YoDouble[3];
+   private final YoDouble[] integralGains = new YoDouble[3];
+   private final YoDouble[] dampingRatios;
 
-   private final DoubleYoVariable maxIntegralError;
-   private final DoubleYoVariable maxDerivativeError;
-   private final DoubleYoVariable maxProportionalError;
+   private final YoDouble maxIntegralError;
+   private final YoDouble maxDerivativeError;
+   private final YoDouble maxProportionalError;
 
-   private final DoubleYoVariable maxFeedback;
-   private final DoubleYoVariable maxFeedbackRate;
+   private final YoDouble maxFeedback;
+   private final YoDouble maxFeedbackRate;
 
    public YoAxisAngleOrientationGains(String prefix, YoVariableRegistry registry)
    {
@@ -36,19 +36,19 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
 
       for (int i = 0; i < 3; i++)
       {
-         proportionalGains[i] = new DoubleYoVariable(baseProportionalGainName + directionNames[i], registry);
-         derivativeGains[i] = new DoubleYoVariable(baseDerivativeGainName + directionNames[i], registry);
-         integralGains[i] = new DoubleYoVariable(baseIntegralGainName + directionNames[i], registry);
+         proportionalGains[i] = new YoDouble(baseProportionalGainName + directionNames[i], registry);
+         derivativeGains[i] = new YoDouble(baseDerivativeGainName + directionNames[i], registry);
+         integralGains[i] = new YoDouble(baseIntegralGainName + directionNames[i], registry);
       }
 
       if (createDampingRatio)
       {
          String baseDampingRatioName = prefix + "OrientationZeta";
 
-         dampingRatios = new DoubleYoVariable[3];
+         dampingRatios = new YoDouble[3];
          for (int i = 0; i < 3; i++)
          {
-            dampingRatios[i] = new DoubleYoVariable(baseDampingRatioName + directionNames[i], registry);
+            dampingRatios[i] = new YoDouble(baseDampingRatioName + directionNames[i], registry);
          }
       }
       else
@@ -56,12 +56,12 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
          dampingRatios = null;
       }
 
-      maxIntegralError = new DoubleYoVariable(prefix + "OrientationMaxIntegralError", registry);
-      maxDerivativeError = new DoubleYoVariable(prefix + "OrientationMaxDerivativeError", registry);
-      maxProportionalError = new DoubleYoVariable(prefix + "OrientationMaxProportionalError", registry);
+      maxIntegralError = new YoDouble(prefix + "OrientationMaxIntegralError", registry);
+      maxDerivativeError = new YoDouble(prefix + "OrientationMaxDerivativeError", registry);
+      maxProportionalError = new YoDouble(prefix + "OrientationMaxProportionalError", registry);
 
-      maxFeedback = new DoubleYoVariable(prefix + "OrientationMaxFeedback", registry);
-      maxFeedbackRate = new DoubleYoVariable(prefix + "OrientationMaxFeedbackRate", registry);
+      maxFeedback = new YoDouble(prefix + "OrientationMaxFeedback", registry);
+      maxFeedbackRate = new YoDouble(prefix + "OrientationMaxFeedbackRate", registry);
 
       maxFeedback.set(Double.POSITIVE_INFINITY);
       maxFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -232,25 +232,25 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maxFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maxFeedbackRate;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumDerivativeError()
+   public YoDouble getYoMaximumDerivativeError()
    {
       return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumProportionalError()
+   public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
    }

@@ -2,9 +2,9 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchUpdater;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -14,8 +14,8 @@ public class FootSwitchUpdaterBasedOnGroundContactPoints implements FootSwitchUp
    
    private final FootSwitchOutputReadOnly footSwitchOutput;
 
-   private final QuadrantDependentList<BooleanYoVariable> rawFootContacts = new QuadrantDependentList<>();
-   private final QuadrantDependentList<GlitchFilteredBooleanYoVariable> glitchFilteredFootContacts = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoBoolean> rawFootContacts = new QuadrantDependentList<>();
+   private final QuadrantDependentList<GlitchFilteredYoBoolean> glitchFilteredFootContacts = new QuadrantDependentList<>();
    
    public FootSwitchUpdaterBasedOnGroundContactPoints(FootSwitchOutputReadOnly footSwitchOutputReadOnly, YoVariableRegistry parentRegistry)
    {
@@ -24,10 +24,10 @@ public class FootSwitchUpdaterBasedOnGroundContactPoints implements FootSwitchUp
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         GlitchFilteredBooleanYoVariable filteredBoolean = new GlitchFilteredBooleanYoVariable(prefix + "FilteredContact", parentRegistry, FILTER_WINDOW_SIZE);
+         GlitchFilteredYoBoolean filteredBoolean = new GlitchFilteredYoBoolean(prefix + "FilteredContact", parentRegistry, FILTER_WINDOW_SIZE);
          glitchFilteredFootContacts.set(quadrant, filteredBoolean);
          
-         BooleanYoVariable rawBoolean = new BooleanYoVariable(prefix + "rawContact", parentRegistry);
+         YoBoolean rawBoolean = new YoBoolean(prefix + "rawContact", parentRegistry);
          rawFootContacts.set(quadrant, rawBoolean);
       }
    }

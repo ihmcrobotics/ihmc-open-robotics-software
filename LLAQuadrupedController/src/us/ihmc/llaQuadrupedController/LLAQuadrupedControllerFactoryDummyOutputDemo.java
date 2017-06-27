@@ -28,8 +28,8 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -72,7 +72,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
        */
       YoVariableRegistry registry = new YoVariableRegistry("LLAQuadruped");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
+      YoDouble controllerTime = new YoDouble("controllerTime", registry);
 
       /*
        * Create packet communicators
@@ -173,7 +173,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
       
       
 
-      DoubleYoVariable robotTimestamp = runtimeEnvironment.getRobotTimestamp();
+      YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
       for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
       {

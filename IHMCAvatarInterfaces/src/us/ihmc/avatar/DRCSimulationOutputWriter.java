@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
+import us.ihmc.robotics.math.filters.DelayedYoDouble;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -24,8 +24,8 @@ public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter impl
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> rawJointTorques = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> rawJointTorques = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, DelayedYoDouble> delayedJointTorques = new LinkedHashMap<>();
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
@@ -45,8 +45,8 @@ public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter impl
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
          double tau = revoluteJoint.getTau();
-         DoubleYoVariable rawJointTorque = rawJointTorques.get(revoluteJoint);
-         DelayedDoubleYoVariable delayedJointTorque = delayedJointTorques.get(revoluteJoint);
+         YoDouble rawJointTorque = rawJointTorques.get(revoluteJoint);
+         DelayedYoDouble delayedJointTorque = delayedJointTorques.get(revoluteJoint);
 
          if (rawJointTorque != null)
          {
@@ -80,10 +80,10 @@ public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter impl
          OneDoFJoint oneDoFJoint = joints[i];
          String jointName = oneDoFJoint.getName();
 
-         DoubleYoVariable rawJointTorque = new DoubleYoVariable("tau_desired_" + jointName, registry);
+         YoDouble rawJointTorque = new YoDouble("tau_desired_" + jointName, registry);
          rawJointTorques.put(oneDoFJoint, rawJointTorque);
 
-         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("tau_delayed_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
+         DelayedYoDouble delayedJointTorque = new DelayedYoDouble("tau_delayed_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
          delayedJointTorques.put(oneDoFJoint, delayedJointTorque);
       }
    }

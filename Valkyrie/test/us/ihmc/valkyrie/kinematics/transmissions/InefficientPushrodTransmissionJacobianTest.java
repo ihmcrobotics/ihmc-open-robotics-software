@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -29,8 +29,8 @@ public class InefficientPushrodTransmissionJacobianTest
       Robot robot = new Robot("testPushrodTransmission");
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
-      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+      YoDouble pitch = new YoDouble("pitch", registry);
+      YoDouble roll = new YoDouble("roll", registry);
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry, null);
@@ -52,8 +52,8 @@ public class InefficientPushrodTransmissionJacobianTest
       Robot robot = new Robot("testPushrodTransmission");
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
+      YoDouble roll = new YoDouble("roll", registry);
+      YoDouble pitch = new YoDouble("pitch", registry);
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry, null);
@@ -73,8 +73,8 @@ public class InefficientPushrodTransmissionJacobianTest
       Robot robot = new ValkyrieAnkleRobot();
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
-      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+      YoDouble pitch = new YoDouble("pitch", registry);
+      YoDouble roll = new YoDouble("roll", registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry;
       if (visualizeAndKeepUp)
@@ -173,8 +173,8 @@ public class InefficientPushrodTransmissionJacobianTest
       Robot robot = new ValkyrieWaistRobot();      
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
+      YoDouble roll = new YoDouble("roll", registry);
+      YoDouble pitch = new YoDouble("pitch", registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry;
       if (visualizeAndKeepUp)
@@ -286,8 +286,8 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-   private void computeAndPrint(InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission, DoubleYoVariable topJointAngle,
-                                DoubleYoVariable bottomJointAngle, double[][] jacobian, SimulationConstructionSet scs)
+   private void computeAndPrint(InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission, YoDouble topJointAngle,
+                                YoDouble bottomJointAngle, double[][] jacobian, SimulationConstructionSet scs)
    {
       inefficientButReadablePushrodTransmission.computeJacobian(jacobian, topJointAngle.getDoubleValue(), bottomJointAngle.getDoubleValue());
 

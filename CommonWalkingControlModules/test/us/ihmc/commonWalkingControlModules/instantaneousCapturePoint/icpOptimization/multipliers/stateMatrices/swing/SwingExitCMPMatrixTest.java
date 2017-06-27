@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
@@ -24,16 +24,16 @@ public class SwingExitCMPMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction = new YoDouble("swingSplitFraction", registry);
       swingSplitFractions.add(swingSplitFraction);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction = new YoDouble("transferSplitFraction", registry);
       transferSplitFractions.add(transferSplitFraction);
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
 
       SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, false,
             minimumBlendingTime);
@@ -53,23 +53,23 @@ public class SwingExitCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction = new YoDouble("swingSplitFraction", registry);
       swingSplitFractions.add(swingSplitFraction);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
@@ -144,23 +144,23 @@ public class SwingExitCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      YoDouble endOfSplineTime = new YoDouble("endOfSplineTime", registry);
+      YoDouble totalTrajectoryTime = new YoDouble("totalTrajectoryTime", registry);
 
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction = new YoDouble("swingSplitFraction", registry);
       swingSplitFractions.add(swingSplitFraction);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 

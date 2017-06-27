@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoJointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
 {
-   private final DoubleYoVariable alphaPosition;
-   private final DoubleYoVariable alphaVelocity;
-   private final DoubleYoVariable maxPositionError;
-   private final DoubleYoVariable maxVelocity;
+   private final YoDouble alphaPosition;
+   private final YoDouble alphaVelocity;
+   private final YoDouble maxPositionError;
+   private final YoDouble maxVelocity;
 
    /**
     * Creates a new sets of parameters for acceleration integration.
@@ -23,10 +23,10 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     */
    public YoJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry)
    {
-      alphaPosition = new DoubleYoVariable(namePrefix + "AlphaPosition", registry);
-      alphaVelocity = new DoubleYoVariable(namePrefix + "AlphaVelocity", registry);
-      maxPositionError = new DoubleYoVariable(namePrefix + "MaxPositionError", registry);
-      maxVelocity = new DoubleYoVariable(namePrefix + "MaxVelocity", registry);
+      alphaPosition = new YoDouble(namePrefix + "AlphaPosition", registry);
+      alphaVelocity = new YoDouble(namePrefix + "AlphaVelocity", registry);
+      maxPositionError = new YoDouble(namePrefix + "MaxPositionError", registry);
+      maxVelocity = new YoDouble(namePrefix + "MaxVelocity", registry);
 
       reset();
    }

@@ -11,9 +11,9 @@ import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -25,15 +25,15 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
 
    protected final YoVariableRegistry registry;
 
-   private final LongYoVariable lastReceivedTime;
-   private final LongYoVariable timeSincePreviousPacket;
+   private final YoLong lastReceivedTime;
+   private final YoLong timeSincePreviousPacket;
 
-   private final LongYoVariable stateCollectionStartTime;
-   private final LongYoVariable stateCollectionFinishTime;
+   private final YoLong stateCollectionStartTime;
+   private final YoLong stateCollectionFinishTime;
 
    protected final EnumMap<ACTUATOR, AcsellActuatorState> actuatorStates;
    private final AcsellPowerDistributionADCState powerDistributionState;
-   private final DoubleYoVariable totalMotorPower;
+   private final YoDouble totalMotorPower;
    protected final AcsellXSensState xsens;
 
    protected final EnumMap<JOINT, AcsellJointState> jointStates;
@@ -43,16 +43,16 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
    public AcsellState(String name, double dt, AcsellRobot robot, YoVariableRegistry parentRegistry)
    {
       registry  = new YoVariableRegistry(name);
-      lastReceivedTime = new LongYoVariable("lastReceivedTime", registry);
-      timeSincePreviousPacket = new LongYoVariable("timeSincePreviousPacket", registry);
-      stateCollectionStartTime = new LongYoVariable("stateCollectionStartTime", registry);
-      stateCollectionFinishTime = new LongYoVariable("stateCollectionFinishTime", registry);
+      lastReceivedTime = new YoLong("lastReceivedTime", registry);
+      timeSincePreviousPacket = new YoLong("timeSincePreviousPacket", registry);
+      stateCollectionStartTime = new YoLong("stateCollectionStartTime", registry);
+      stateCollectionFinishTime = new YoLong("stateCollectionFinishTime", registry);
 
       if(robot==AcsellRobot.WANDERER)
          this.powerDistributionState = new WandererPowerDistributionADCState("powerDistribution", registry);
       else
          this.powerDistributionState = new StepprPowerDistributionADCState("powerDistribution", registry);
-      totalMotorPower = new DoubleYoVariable("totalMotorPower", registry);
+      totalMotorPower = new YoDouble("totalMotorPower", registry);
       xsens = new AcsellXSensState("xsens", robot, registry);
       
       actuatorStates = createActuators();

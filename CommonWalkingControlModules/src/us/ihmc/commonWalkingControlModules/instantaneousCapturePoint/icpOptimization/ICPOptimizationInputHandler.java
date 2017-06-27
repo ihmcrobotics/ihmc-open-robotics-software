@@ -13,8 +13,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -39,10 +39,10 @@ public class ICPOptimizationInputHandler
 
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
-   private final List<DoubleYoVariable> transferDurations;
-   private final List<DoubleYoVariable> swingDurations;
-   private final List<DoubleYoVariable> transferSplitFractions;
-   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<YoDouble> transferDurations;
+   private final List<YoDouble> swingDurations;
+   private final List<YoDouble> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
 
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
@@ -58,8 +58,8 @@ public class ICPOptimizationInputHandler
 
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
-         List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations, List<DoubleYoVariable> transferSplitFractions,
-         List<DoubleYoVariable> swingSplitFractions, boolean visualize, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         List<YoDouble> transferDurations, List<YoDouble> swingDurations, List<YoDouble> transferSplitFractions,
+         List<YoDouble> swingSplitFractions, boolean visualize, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.transferDurations = transferDurations;
       this.swingDurations = swingDurations;

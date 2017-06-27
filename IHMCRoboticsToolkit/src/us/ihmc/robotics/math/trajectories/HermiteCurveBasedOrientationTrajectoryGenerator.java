@@ -4,9 +4,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,6 +15,9 @@ import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
@@ -37,12 +37,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class HermiteCurveBasedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable trajectoryTimeScale;
-   private final IntegerYoVariable piInteger;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble trajectoryTimeScale;
+   private final YoInteger piInteger;
 
-   private final DoubleYoVariable[] cumulativeBeziers;
+   private final YoDouble[] cumulativeBeziers;
 
    private final YoFrameQuaternion[] controlQuaternions;
    private final YoFrameVector[] controlAngularVelocities;
@@ -63,7 +63,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Does not need to match the dt at which the trajectory will be updated.
     */
-   private final double dtForFiniteDifference = 1.0e-4;
+   private final double dtForFiniteDifference = 1.0e-3;
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -76,19 +76,19 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       super(allowMultipleFrames, referenceFrame);
 
       registry = new YoVariableRegistry(name);
-      trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", registry);
-      trajectoryTimeScale = new DoubleYoVariable(name + "TrajectoryTimeScale", registry);
-      piInteger = new IntegerYoVariable(name + "PiInteger", registry);
-      currentTime = new DoubleYoVariable(name + "Time", registry);
+      trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
+      trajectoryTimeScale = new YoDouble(name + "TrajectoryTimeScale", registry);
+      piInteger = new YoInteger(name + "PiInteger", registry);
+      currentTime = new YoDouble(name + "Time", registry);
       trajectoryFrame = referenceFrame;
 
-      cumulativeBeziers = new DoubleYoVariable[4];
+      cumulativeBeziers = new YoDouble[4];
       controlQuaternions = new YoFrameQuaternion[4];
       controlAngularVelocities = new YoFrameVector[4];
 
       for (int i = 1; i <= 3; i++)
       {
-         cumulativeBeziers[i] = new DoubleYoVariable(name + "CumulativeBezier" + i, registry);
+         cumulativeBeziers[i] = new YoDouble(name + "CumulativeBezier" + i, registry);
       }
 
       String initialOrientationName = "InitialOrientation";
@@ -378,7 +378,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final Quaternion qInterpolatedNext = new Quaternion();
 
    private final Vector4D qDot = new Vector4D();
-   private final Vector4D qDDotOld = new Vector4D();
    private final Vector4D qDDot = new Vector4D();
 
    @Override
@@ -420,8 +419,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       currentOrientation.set(qInterpolated);
       currentAngularVelocity.set(tempAngularVelocity);
       currentAngularAcceleration.set(tempAngularAcceleration);
-
-      qDDotOld.set(qDDot);
    }
 
    private final Quaternion tempQuatForInterpolation = new Quaternion();
@@ -450,7 +447,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       double timeCube = timeSquare * time;
 
       cumulativeBeziers[1].set(1 - MathTools.pow(1 - time, 3));
-      cumulativeBeziers[2].set(3.0 * timeSquare - 2 * timeCube);
+      cumulativeBeziers[2].set(3.0 * timeSquare - 2.0 * timeCube);
       cumulativeBeziers[3].set(timeCube);
    }
 

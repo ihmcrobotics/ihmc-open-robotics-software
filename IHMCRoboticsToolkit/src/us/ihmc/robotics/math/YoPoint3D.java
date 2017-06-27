@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class YoPoint3D implements Point3DBasics
 {
-   private final DoubleYoVariable x;
-   private final DoubleYoVariable y;
-   private final DoubleYoVariable z;
+   private final YoDouble x;
+   private final YoDouble y;
+   private final YoDouble z;
    
-    public YoPoint3D(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable)
+    public YoPoint3D(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable)
    {
       this.x = xVariable;
       this.y = yVariable;
@@ -20,16 +20,16 @@ public class YoPoint3D implements Point3DBasics
    
     public YoPoint3D(String namePrefix, YoVariableRegistry registry)
     {
-       x = new DoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, ""), registry);
-       y = new DoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, ""), registry);
-       z = new DoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, ""), registry);
+       x = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, ""), registry);
+       y = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, ""), registry);
+       z = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, ""), registry);
     }
     
    public YoPoint3D(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      x = new DoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
-      y = new DoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
-      z = new DoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
+      x = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
+      y = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
+      z = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
    }
    
    @Override

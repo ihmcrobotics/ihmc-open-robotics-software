@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -26,7 +26,7 @@ public class FootControlHelper
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FrameVector fullyConstrainedNormalContactVector;
-   private final BooleanYoVariable isDesiredCoPOnEdge;
+   private final YoBoolean isDesiredCoPOnEdge;
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
@@ -56,7 +56,7 @@ public class FootControlHelper
          partialFootholdControlModule = null;
       }
 
-      isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
+      isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 

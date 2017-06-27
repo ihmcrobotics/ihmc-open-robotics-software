@@ -8,9 +8,9 @@ import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -56,9 +56,9 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
       for (OneDoFJoint joint : oneDoFJoints)
       {
          String jointName = joint.getName();
-         DoubleYoVariable qd = (DoubleYoVariable) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
-         DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
-         DoubleYoVariable tau_d = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
+         YoDouble qd = (YoDouble) logYoVariableHolder.getVariable(qd_prefix + jointName + qd_suffix);
+         YoDouble tau = (YoDouble) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
+         YoDouble tau_d = (YoDouble) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
 
          if (qd == null)
          {
@@ -90,10 +90,10 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
       for (OneDoFJoint joint : oneDoFJoints)
       {
          String jointName = joint.getName();
-         DoubleYoVariable rawJointPosition = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_q_" + jointName);
-         DoubleYoVariable rawJointVelocity = (DoubleYoVariable) logYoVariableHolder.getVariable("raw_qd_" + jointName);
-         DoubleYoVariable processedJointPosition = (DoubleYoVariable) logYoVariableHolder.getVariable("q_" + jointName);
-         DoubleYoVariable processedJointVelocity = (DoubleYoVariable) logYoVariableHolder.getVariable("qd_" + jointName);
+         YoDouble rawJointPosition = (YoDouble) logYoVariableHolder.getVariable("raw_q_" + jointName);
+         YoDouble rawJointVelocity = (YoDouble) logYoVariableHolder.getVariable("raw_qd_" + jointName);
+         YoDouble processedJointPosition = (YoDouble) logYoVariableHolder.getVariable("q_" + jointName);
+         YoDouble processedJointVelocity = (YoDouble) logYoVariableHolder.getVariable("qd_" + jointName);
 
          if (rawJointPosition == null)
          {
@@ -161,8 +161,8 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
       {
          String jointName = joint.getName();
 
-         DoubleYoVariable tau = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
-         DoubleYoVariable tau_d = (DoubleYoVariable) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
+         YoDouble tau = (YoDouble) logYoVariableHolder.getVariable(tau_prefix + jointName + tau_suffix);
+         YoDouble tau_d = (YoDouble) logYoVariableHolder.getVariable(tau_d_prefix + jointName + tau_d_suffix);
 
          if (tau == null)
          {

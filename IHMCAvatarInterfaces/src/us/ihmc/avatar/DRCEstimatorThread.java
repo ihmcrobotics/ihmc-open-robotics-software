@@ -27,9 +27,9 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotController.RobotController;
@@ -87,14 +87,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final SensorReader sensorReader;
 
-   private final LongYoVariable estimatorTime = new LongYoVariable("estimatorTime", estimatorRegistry);
-   private final LongYoVariable estimatorTick = new LongYoVariable("estimatorTick", estimatorRegistry);
-   private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", estimatorRegistry);
+   private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
+   private final YoLong estimatorTick = new YoLong("estimatorTick", estimatorRegistry);
+   private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
 
-   private final LongYoVariable startClockTime = new LongYoVariable("startTime", estimatorRegistry);
+   private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
 
-   private final LongYoVariable actualEstimatorDT = new LongYoVariable("actualEstimatorDT", estimatorRegistry);
+   private final YoLong actualEstimatorDT = new YoLong("actualEstimatorDT", estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;

@@ -6,8 +6,8 @@ import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -40,7 +40,7 @@ public class HexapodBodySpatialManager
    private final YoFrameVector yoDesiredBodyLinearVelocity;
    private final YoFrameVector yoDesiredBodyAngularVelocity;
    private final YoFramePoint yoDesiredBodyPosition;
-   private final DoubleYoVariable desiredBodyHeight;
+   private final YoDouble desiredBodyHeight;
    private final AlphaFilteredYoVariable filteredBodyHeight;
 
    private final Vector3D linearWeight = new Vector3D();
@@ -60,7 +60,7 @@ public class HexapodBodySpatialManager
       yoDesiredBodyLinearVelocity = new YoFrameVector(prefix + "desiredLinearVelocity", bodyZUpFrame, registry);
       yoDesiredBodyOrientation = new YoFrameOrientation(prefix + "desiredOrientation", ReferenceFrame.getWorldFrame(), registry);
       yoDesiredBodyAngularVelocity = new YoFrameVector(prefix + "desiredAngularVelocity", bodyFixedFrame, registry);
-      desiredBodyHeight = new DoubleYoVariable(prefix + "desiredBodyHeight", registry);
+      desiredBodyHeight = new YoDouble(prefix + "desiredBodyHeight", registry);
       double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controllerDt);
       filteredBodyHeight = new AlphaFilteredYoVariable("filteredDesiredBodyHeight", registry, alpha, desiredBodyHeight);
 

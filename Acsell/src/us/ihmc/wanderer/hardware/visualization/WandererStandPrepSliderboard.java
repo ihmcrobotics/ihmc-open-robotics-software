@@ -8,15 +8,15 @@ import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.IndexChangedListener;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -32,17 +32,17 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
 {
    private final boolean CONTROL_TREADMILL_WITH_JOYSTICK = true;  
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("WandererStandPrepSliderBoard");
-   private final EnumYoVariable<WandererStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
+   private final YoEnum<WandererStandPrepSetpoints> selectedJointPair = new YoEnum<>("selectedJointPair", sliderBoardRegistry,
          WandererStandPrepSetpoints.class);
 
-   private final DoubleYoVariable selectedJoint_q_d = new DoubleYoVariable("selectedJoint_q_d", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kp = new DoubleYoVariable("selectedJoint_kp", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
-   private final DoubleYoVariable selectedJoint_positionerror = new DoubleYoVariable("selectedJoint_positionerror", sliderBoardRegistry);
-   //private final DoubleYoVariable maxDesiredVelocityX = new DoubleYoVariable("maxDesiredVelocityX", sliderBoardRegistry);
-   private final DoubleYoVariable desiredVelX_Setpoint = new DoubleYoVariable("DesiredVelocityX_setpoint", sliderBoardRegistry);
-   private final DoubleYoVariable desiredVelX_Adjust = new DoubleYoVariable("DesiredVelocityX_adjustment", sliderBoardRegistry);
+   private final YoDouble selectedJoint_q_d = new YoDouble("selectedJoint_q_d", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kp = new YoDouble("selectedJoint_kp", sliderBoardRegistry);
+   private final YoDouble selectedJoint_kd = new YoDouble("selectedJoint_kd", sliderBoardRegistry);
+   private final YoDouble selectedJoint_damping = new YoDouble("selectedJoint_damping", sliderBoardRegistry);
+   private final YoDouble selectedJoint_positionerror = new YoDouble("selectedJoint_positionerror", sliderBoardRegistry);
+   //private final YoDouble maxDesiredVelocityX = new YoDouble("maxDesiredVelocityX", sliderBoardRegistry);
+   private final YoDouble desiredVelX_Setpoint = new YoDouble("DesiredVelocityX_setpoint", sliderBoardRegistry);
+   private final YoDouble desiredVelX_Adjust = new YoDouble("DesiredVelocityX_adjustment", sliderBoardRegistry);
    
    private final EnumMap<WandererStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(WandererStandPrepSetpoints.class);
    
@@ -82,7 +82,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
 
       
       final YoVariable<?> motorPowerStateRequest = registry.getVariable("WandererSetup", "motorPowerStateRequest");
-      BooleanYoVariable requestPowerOff = new BooleanYoVariable("requestPowerOff", registry);
+      YoBoolean requestPowerOff = new YoBoolean("requestPowerOff", registry);
       requestPowerOff.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -172,7 +172,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       final double minVelocityX = -0.40;
       
       
-      final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      final YoDouble desiredVelocityX = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if(desiredVelocityX==null || joystickUpdater==null)
          return;
 
@@ -208,17 +208,17 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
           }
        });
       
-      DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
+      YoDouble desiredVelocityY = (YoDouble) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
     		  -0.2+desiredVelocityY_Bias, 0.2+desiredVelocityY_Bias, deadZone, true));
 
-      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+      YoDouble desiredHeadingDot = (YoDouble) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
     		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
       
-      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
+      YoBoolean walk = (YoBoolean) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addJoystickEventListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
       
       if (treadmillManager!=null)
@@ -227,21 +227,21 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
 
    private class StandPrepVariables
    {
-      private final DoubleYoVariable q_d;
-      private final DoubleYoVariable kp;
-      private final DoubleYoVariable kd;
-      private final DoubleYoVariable damping;
-      private final DoubleYoVariable positionerror;
+      private final YoDouble q_d;
+      private final YoDouble kp;
+      private final YoDouble kd;
+      private final YoDouble damping;
+      private final YoDouble positionerror;
 
       public StandPrepVariables(WandererStandPrepSetpoints setpoint, YoVariableHolder variableHolder)
       {
          String prefix = setpoint.getName();
          String ajoint = setpoint.getJoints()[0].getSdfName();
-         q_d = (DoubleYoVariable) variableHolder.getVariable("WandererStandPrep", prefix + "_q_d");
-         kp = (DoubleYoVariable) variableHolder.getVariable("WandererStandPrep", prefix + "_kp");
-         kd = (DoubleYoVariable) variableHolder.getVariable("WandererStandPrep", prefix + "_kd");
-         damping = (DoubleYoVariable) variableHolder.getVariable("WandererStandPrep", prefix + "_damping");
-         positionerror = (DoubleYoVariable) variableHolder.getVariable("WandererStandPrep", "positionError_" + ajoint);
+         q_d = (YoDouble) variableHolder.getVariable("WandererStandPrep", prefix + "_q_d");
+         kp = (YoDouble) variableHolder.getVariable("WandererStandPrep", prefix + "_kp");
+         kd = (YoDouble) variableHolder.getVariable("WandererStandPrep", prefix + "_kd");
+         damping = (YoDouble) variableHolder.getVariable("WandererStandPrep", prefix + "_damping");
+         positionerror = (YoDouble) variableHolder.getVariable("WandererStandPrep", "positionError_" + ajoint);
       }
 
       public void update()

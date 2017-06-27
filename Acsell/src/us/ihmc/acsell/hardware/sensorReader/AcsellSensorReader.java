@@ -11,8 +11,8 @@ import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -50,7 +50,7 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
    private final Vector3D angularVelocity = new Vector3D();
    private final Vector3D linearAcceleration = new Vector3D();
 
-   private final LongYoVariable corruptedPackets;
+   private final YoLong corruptedPackets;
    
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
@@ -95,7 +95,7 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
          }
       }
       
-      this.corruptedPackets = new LongYoVariable("corruptedPackets", sensorReaderRegistry);
+      this.corruptedPackets = new YoLong("corruptedPackets", sensorReaderRegistry);
    }
 
    @Override

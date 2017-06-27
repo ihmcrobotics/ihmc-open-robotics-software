@@ -3,10 +3,9 @@ package us.ihmc.robotics.math.functionGenerator;
 import java.util.Random;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * User: pneuhaus
@@ -17,18 +16,18 @@ public class YoRandomPulseGenerator
 {
    private YoVariableRegistry registry;
 
-   private DoubleYoVariable time;
+   private YoDouble time;
 
-   private final DoubleYoVariable percentChancePerSecond;
-   private final DoubleYoVariable amplitudeMax;
-   private final DoubleYoVariable amplitudeUsed;
-   private final DoubleYoVariable durationMax, durationUsed;
-   private final DoubleYoVariable timeStartPulse;
-   private final DoubleYoVariable timeLastRolledTheDie;
+   private final YoDouble percentChancePerSecond;
+   private final YoDouble amplitudeMax;
+   private final YoDouble amplitudeUsed;
+   private final YoDouble durationMax, durationUsed;
+   private final YoDouble timeStartPulse;
+   private final YoDouble timeLastRolledTheDie;
 
-   private final BooleanYoVariable pulseStarted;
-   private final DoubleYoVariable value;
-   private final DoubleYoVariable randomNumber;
+   private final YoBoolean pulseStarted;
+   private final YoDouble value;
+   private final YoDouble randomNumber;
 
    private final Random random = new Random();//(1776L);
 
@@ -37,21 +36,21 @@ public class YoRandomPulseGenerator
       this(name, null, parentRegistry);
    }
 
-   public YoRandomPulseGenerator(String name, DoubleYoVariable time, YoVariableRegistry parentRegistry)
+   public YoRandomPulseGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name + "YoPulseGen");
 
-      percentChancePerSecond = new DoubleYoVariable(name + "PercentChancePerSecond", registry);
-      amplitudeMax = new DoubleYoVariable(name + "AmplitudeMax", registry);
-      amplitudeUsed = new DoubleYoVariable(name + "AmplitudeUsed", registry);
-      durationMax = new DoubleYoVariable(name + "DurationMax", registry);
-      durationUsed = new DoubleYoVariable(name + "DurationUsed", registry);
+      percentChancePerSecond = new YoDouble(name + "PercentChancePerSecond", registry);
+      amplitudeMax = new YoDouble(name + "AmplitudeMax", registry);
+      amplitudeUsed = new YoDouble(name + "AmplitudeUsed", registry);
+      durationMax = new YoDouble(name + "DurationMax", registry);
+      durationUsed = new YoDouble(name + "DurationUsed", registry);
 
-      timeStartPulse = new DoubleYoVariable(name + "TimeStartPulse", registry);
-      timeLastRolledTheDie = new DoubleYoVariable(name + "TimeLastRolledTheDie", registry);
-      pulseStarted = new BooleanYoVariable(name + "PulseStarted", registry);
-      value = new DoubleYoVariable(name + "Value", registry);
-      randomNumber = new DoubleYoVariable(name + "RandomNumber", registry);
+      timeStartPulse = new YoDouble(name + "TimeStartPulse", registry);
+      timeLastRolledTheDie = new YoDouble(name + "TimeLastRolledTheDie", registry);
+      pulseStarted = new YoBoolean(name + "PulseStarted", registry);
+      value = new YoDouble(name + "Value", registry);
+      randomNumber = new YoDouble(name + "RandomNumber", registry);
 
       this.time = time;
 

@@ -1,25 +1,25 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecursionMultipliers
 {
-   private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
+   private final ArrayList<YoDouble> entryMultipliers = new ArrayList<>();
+   private final ArrayList<YoDouble> exitMultipliers = new ArrayList<>();
 
-   private final DoubleYoVariable finalICPMultiplier;
+   private final YoDouble finalICPMultiplier;
 
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public RecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<DoubleYoVariable> swingSplitFractions,
-         List<DoubleYoVariable> transferSplitFractions, YoVariableRegistry parentRegistry)
+   public RecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<YoDouble> swingSplitFractions,
+         List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.swingSplitFractions = swingSplitFractions;
@@ -27,14 +27,14 @@ public class RecursionMultipliers
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      finalICPMultiplier = new DoubleYoVariable(namePrefix + "FinalICPRecursionMultiplier", registry);
+      finalICPMultiplier = new YoDouble(namePrefix + "FinalICPRecursionMultiplier", registry);
 
       finalICPMultiplier.setToNaN();
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         DoubleYoVariable entryMultiplier = new DoubleYoVariable(namePrefix + "CMPEntryRecursionMultiplier" + i, registry);
-         DoubleYoVariable exitMultiplier = new DoubleYoVariable(namePrefix + "CMPExitRecursionMultiplier" + i, registry);
+         YoDouble entryMultiplier = new YoDouble(namePrefix + "CMPEntryRecursionMultiplier" + i, registry);
+         YoDouble exitMultiplier = new YoDouble(namePrefix + "CMPExitRecursionMultiplier" + i, registry);
          entryMultiplier.setToNaN();
          exitMultiplier.setToNaN();
          entryMultipliers.add(entryMultiplier);
@@ -55,7 +55,7 @@ public class RecursionMultipliers
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations,
          boolean useTwoCMPs, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -76,7 +76,7 @@ public class RecursionMultipliers
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations, double omega0)
    {
       double recursionTime = 0.0;
 
@@ -115,7 +115,7 @@ public class RecursionMultipliers
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
+         List<YoDouble> doubleSupportDurations, List<YoDouble> singleSupportDurations, double omega0)
    {
       double recursionTime = 0.0;
 

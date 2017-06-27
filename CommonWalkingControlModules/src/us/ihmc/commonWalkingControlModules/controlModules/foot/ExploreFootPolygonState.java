@@ -10,12 +10,12 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -30,7 +30,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       SPRIAL, LINES, FAST_LINE
    };
 
-   private final EnumYoVariable<ExplorationMethod> explorationMethod;
+   private final YoEnum<ExplorationMethod> explorationMethod;
 
    private final HoldPositionState internalHoldPositionState;
 
@@ -45,40 +45,40 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    private final FootSwitchInterface footSwitch;
 
-   private final DoubleYoVariable lastShrunkTime, spiralAngle;
+   private final YoDouble lastShrunkTime, spiralAngle;
    private final double dt;
 
    /**
     * This is the amount of time after touch down during which no foothold exploration is done
     */
-   private final DoubleYoVariable recoverTime;
+   private final YoDouble recoverTime;
 
    /**
     * This is the amount of time the line exploration uses to go to a corner
     */
-   private final DoubleYoVariable timeToGoToCorner;
+   private final YoDouble timeToGoToCorner;
 
    /**
     * This is the amount of time the line exploration will keep the cop in a corner
     */
-   private final DoubleYoVariable timeToStayInCorner;
+   private final YoDouble timeToStayInCorner;
 
    /**
     * The weight the cop command gets for the qp solver
     */
-   private final DoubleYoVariable copCommandWeight;
+   private final YoDouble copCommandWeight;
    private final YoFrameVector2d copCommandWeightVector;
 
-   private final IntegerYoVariable yoCurrentCorner;
+   private final YoInteger yoCurrentCorner;
 
-   private final DoubleYoVariable timeBeforeExploring;
+   private final YoDouble timeBeforeExploring;
 
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper);
       String footName = contactableFoot.getName();
 
-      explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
+      explorationMethod = new YoEnum<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
       explorationMethod.set(ExplorationMethod.LINES);
 
       dt = controllerToolbox.getControlDT();
@@ -96,8 +96,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
 
-      lastShrunkTime = new DoubleYoVariable(footName + "LastShrunkTime", registry);
-      spiralAngle = new DoubleYoVariable(footName + "SpiralAngle", registry);
+      lastShrunkTime = new YoDouble(footName + "LastShrunkTime", registry);
+      spiralAngle = new YoDouble(footName + "SpiralAngle", registry);
 
       recoverTime = explorationParameters.getRecoverTime();
       timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
@@ -130,7 +130,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      yoCurrentCorner = new IntegerYoVariable(footName + "CurrentCornerExplored", registry);
+      yoCurrentCorner = new YoInteger(footName + "CurrentCornerExplored", registry);
    }
 
    public void setWeight(double weight)

@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -81,9 +81,9 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         WalkingStateEnum walkingState = ((EnumYoVariable<WalkingStateEnum>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingState")).getEnumValue();
+         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingState")).getEnumValue();
          assertEquals(WalkingStateEnum.STANDING, walkingState);
-         ConstraintType footState = ((EnumYoVariable<ConstraintType>)scs.getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootState")).getEnumValue();
+         ConstraintType footState = ((YoEnum<ConstraintType>)scs.getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }
    }

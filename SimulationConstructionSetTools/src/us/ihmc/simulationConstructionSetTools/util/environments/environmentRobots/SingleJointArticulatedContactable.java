@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -18,7 +18,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
    private final Robot robot;
    
    private final ArrayList<GroundContactPoint> allGroundContactPoints = new ArrayList<GroundContactPoint>();
-   private final ArrayList<BooleanYoVariable> contactsAvailable = new ArrayList<BooleanYoVariable>();
+   private final ArrayList<YoBoolean> contactsAvailable = new ArrayList<YoBoolean>();
 
    public SingleJointArticulatedContactable(String name, Robot robot)
    {
@@ -39,7 +39,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
          getJoint().addGroundContactPoint(groupIdentifier, contactPoint);
          allGroundContactPoints.add(contactPoint);
 
-         BooleanYoVariable contactAvailable = new BooleanYoVariable("contact_" + name + "_" + i + "_avail", robot.getRobotsYoVariableRegistry());
+         YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + i + "_avail", robot.getRobotsYoVariableRegistry());
          contactAvailable.set(true);
          contactsAvailable.add(contactAvailable);
 
@@ -63,7 +63,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
    {
       for (int i = 0; i < allGroundContactPoints.size(); i++)
       {
-         BooleanYoVariable contactAvailable = contactsAvailable.get(i);
+         YoBoolean contactAvailable = contactsAvailable.get(i);
 
          if (contactAvailable.getBooleanValue())
          {
@@ -83,7 +83,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       {
          if (groundContactPoint == allGroundContactPoints.get(i))
          {
-            BooleanYoVariable contactAvailable = contactsAvailable.get(i);
+            YoBoolean contactAvailable = contactsAvailable.get(i);
             if (!contactAvailable.getBooleanValue())
             {
                contactAvailable.set(true);

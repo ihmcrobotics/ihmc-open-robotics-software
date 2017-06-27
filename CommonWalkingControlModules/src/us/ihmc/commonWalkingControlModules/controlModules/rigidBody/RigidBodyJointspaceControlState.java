@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
@@ -22,7 +22,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final double[] jointsHomeConfiguration;
 
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
-         DoubleYoVariable yoTime, RigidBodyJointControlHelper jointControlHelper, YoVariableRegistry parentRegistry)
+         YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;

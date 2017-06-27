@@ -6,10 +6,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,16 +21,16 @@ import java.util.List;
 
 public class ICPTimingOptimizationController extends ICPOptimizationController
 {
-   private final DoubleYoVariable timingAdjustmentWeight = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentWeight", registry);
-   private final DoubleYoVariable gradientThresholdForAdjustment = new DoubleYoVariable(yoNamePrefix + "GradientThresholdForAdjustment", registry);
-   private final DoubleYoVariable gradientDescentGain = new DoubleYoVariable(yoNamePrefix + "GradientDescentGain", registry);
+   private final YoDouble timingAdjustmentWeight = new YoDouble(yoNamePrefix + "TimingAdjustmentWeight", registry);
+   private final YoDouble gradientThresholdForAdjustment = new YoDouble(yoNamePrefix + "GradientThresholdForAdjustment", registry);
+   private final YoDouble gradientDescentGain = new YoDouble(yoNamePrefix + "GradientDescentGain", registry);
 
-   private final DoubleYoVariable timingAdjustmentAttenuation = new DoubleYoVariable(yoNamePrefix + "TimingAdjustmentAttenuation", registry);
-   private final DoubleYoVariable timingSolutionLowerBound = new DoubleYoVariable(yoNamePrefix + "TimingSolutionLowerBound", registry);
-   private final DoubleYoVariable timingSolutionUpperBound = new DoubleYoVariable(yoNamePrefix + "TimingSolutionUpperBound", registry);
+   private final YoDouble timingAdjustmentAttenuation = new YoDouble(yoNamePrefix + "TimingAdjustmentAttenuation", registry);
+   private final YoDouble timingSolutionLowerBound = new YoDouble(yoNamePrefix + "TimingSolutionLowerBound", registry);
+   private final YoDouble timingSolutionUpperBound = new YoDouble(yoNamePrefix + "TimingSolutionUpperBound", registry);
 
-   private final DoubleYoVariable timingDeadline = new DoubleYoVariable(yoNamePrefix + "TimingDeadline", registry);
-   private final BooleanYoVariable finishedOnTime = new BooleanYoVariable(yoNamePrefix + "FinishedOnTime", registry);
+   private final YoDouble timingDeadline = new YoDouble(yoNamePrefix + "TimingDeadline", registry);
+   private final YoBoolean finishedOnTime = new YoBoolean(yoNamePrefix + "FinishedOnTime", registry);
 
    private final double variationSizeToComputeTimingGradient;
    private final int maxNumberOfGradientIterations;
@@ -38,16 +38,16 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final double minimumSwingDuration;
    private static final double percentCostRequiredDecrease = 0.05;
 
-   private final DoubleYoVariable referenceSwingDuration = new DoubleYoVariable(yoNamePrefix + "ReferenceSwingDuration", registry);
+   private final YoDouble referenceSwingDuration = new YoDouble(yoNamePrefix + "ReferenceSwingDuration", registry);
 
-   private final List<DoubleYoVariable> swingTimings = new ArrayList<>();
-   private final List<DoubleYoVariable> timingAdjustments = new ArrayList<>();
-   private final List<DoubleYoVariable> costToGos = new ArrayList<>();
-   private final List<DoubleYoVariable> costToGoGradients = new ArrayList<>();
+   private final List<YoDouble> swingTimings = new ArrayList<>();
+   private final List<YoDouble> timingAdjustments = new ArrayList<>();
+   private final List<YoDouble> costToGos = new ArrayList<>();
+   private final List<YoDouble> costToGoGradients = new ArrayList<>();
 
-   private final IntegerYoVariable numberOfGradientIterations = new IntegerYoVariable("numberOfGradientIterations", registry);
-   private final IntegerYoVariable numberOfGradientReductionIterations = new IntegerYoVariable("numberOfGradientReductionIterations", registry);
-   private final DoubleYoVariable estimatedMinimumCostSwingTime = new DoubleYoVariable("estimatedMinimumCostSwingTime", registry);
+   private final YoInteger numberOfGradientIterations = new YoInteger("numberOfGradientIterations", registry);
+   private final YoInteger numberOfGradientReductionIterations = new YoInteger("numberOfGradientReductionIterations", registry);
+   private final YoDouble estimatedMinimumCostSwingTime = new YoDouble("estimatedMinimumCostSwingTime", registry);
 
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();
 
@@ -79,10 +79,10 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
       for (int i = 0; i < maxNumberOfGradientIterations; i++)
       {
-         DoubleYoVariable swingTiming = new DoubleYoVariable(yoNamePrefix + "SwingTiming" + i, registry);
-         DoubleYoVariable timingAdjustment = new DoubleYoVariable(yoNamePrefix + "TimingAdjustment" + i, registry);
-         DoubleYoVariable costToGo = new DoubleYoVariable(yoNamePrefix + "CostToGo" + i, registry);
-         DoubleYoVariable costToGoGradient = new DoubleYoVariable(yoNamePrefix + "CostToGoGradient" + i, registry);
+         YoDouble swingTiming = new YoDouble(yoNamePrefix + "SwingTiming" + i, registry);
+         YoDouble timingAdjustment = new YoDouble(yoNamePrefix + "TimingAdjustment" + i, registry);
+         YoDouble costToGo = new YoDouble(yoNamePrefix + "CostToGo" + i, registry);
+         YoDouble costToGoGradient = new YoDouble(yoNamePrefix + "CostToGoGradient" + i, registry);
 
          swingTimings.add(swingTiming);
          timingAdjustments.add(timingAdjustment);
@@ -224,7 +224,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       if (noConvergenceException != null)
          return noConvergenceException;
 
-      DoubleYoVariable swingDuration = swingDurations.get(0);
+      YoDouble swingDuration = swingDurations.get(0);
       swingDuration.add(variationSize);
 
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);

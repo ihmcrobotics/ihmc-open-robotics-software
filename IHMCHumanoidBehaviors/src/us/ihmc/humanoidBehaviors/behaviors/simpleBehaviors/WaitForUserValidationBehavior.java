@@ -5,18 +5,18 @@ import java.util.concurrent.Executors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WaitForUserValidationBehavior extends AbstractBehavior
 {
 
-   private BooleanYoVariable validClicked;
-   private BooleanYoVariable validAcknoledged;
+   private YoBoolean validClicked;
+   private YoBoolean validAcknoledged;
 
    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-   public WaitForUserValidationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, BooleanYoVariable validClicked,
-         BooleanYoVariable validAcknoledged)
+   public WaitForUserValidationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoBoolean validClicked,
+         YoBoolean validAcknoledged)
    {
       super(outgoingCommunicationBridge);
       this.validAcknoledged = validAcknoledged;

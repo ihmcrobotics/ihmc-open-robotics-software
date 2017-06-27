@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ public class SwingEntryCMPMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
 
       SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false, minimumBlendingTime);
 
@@ -44,15 +44,15 @@ public class SwingEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
 
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction", registry));
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
+      swingSplitFractions.add(new YoDouble("swingSplitFraction", registry));
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, false, minimumBlendingTime);
 
@@ -102,15 +102,15 @@ public class SwingEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+      YoDouble startOfSplineTime = new YoDouble("startOfSplineTime", registry);
 
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction", registry));
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
+      swingSplitFractions.add(new YoDouble("swingSplitFraction", registry));
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       SwingEntryCMPMatrix swingEntryCMPMatrix = new SwingEntryCMPMatrix(swingSplitFractions, startOfSplineTime, true, minimumBlendingTime);
 

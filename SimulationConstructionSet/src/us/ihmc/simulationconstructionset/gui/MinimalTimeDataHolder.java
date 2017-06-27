@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 
 public class MinimalTimeDataHolder implements TimeDataHolder
 {

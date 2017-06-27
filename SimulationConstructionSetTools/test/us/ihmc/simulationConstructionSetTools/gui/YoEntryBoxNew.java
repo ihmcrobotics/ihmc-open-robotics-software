@@ -19,8 +19,8 @@ import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayPanel;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
 import us.ihmc.simulationconstructionset.gui.YoEntryBoxTransferHandler;

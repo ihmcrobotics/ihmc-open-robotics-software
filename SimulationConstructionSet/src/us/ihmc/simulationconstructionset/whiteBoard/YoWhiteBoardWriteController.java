@@ -2,15 +2,15 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 
 import java.io.IOException;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class YoWhiteBoardWriteController implements RobotController, OutputProcessor
 {
    private final YoVariableRegistry registry;
-   private final IntegerYoVariable ticksTillNextWrite;
+   private final YoInteger ticksTillNextWrite;
    
    private final YoWhiteBoard yoWhiteBoard;
    private final int writeEveryNTicks;
@@ -27,7 +27,7 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
       this.writeEveryNTicks = writeEveryNTicks;
       if (writeEveryNTicks != 1)
       {
-         ticksTillNextWrite = new IntegerYoVariable("ticksTillNextWrite", registry);
+         ticksTillNextWrite = new YoInteger("ticksTillNextWrite", registry);
          ticksTillNextWrite.set(0);
       }
       else

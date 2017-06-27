@@ -22,10 +22,10 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
@@ -46,11 +46,11 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final YoVariableServer yoVaribleServer;
    private final BehaviorStateMachine<E> stateMachine;
 
-   private final EnumYoVariable<E> requestedBehavior;
+   private final YoEnum<E> requestedBehavior;
 
    private final BehaviorTypeSubscriber<E> desiredBehaviorSubscriber;
    private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
@@ -62,12 +62,12 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+   private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
    private E stopBehavior;
    private E currentBehavior;
 
-   public BehaviorDispatcher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
+   public BehaviorDispatcher(YoDouble yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
          BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum,
          E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -77,7 +77,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       this.yoVaribleServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      this.requestedBehavior = new EnumYoVariable<E>("requestedBehavior", registry, behaviourEnum, true);
+      this.requestedBehavior = new YoEnum<E>("requestedBehavior", registry, behaviourEnum, true);
 
       this.robotDataReceiver = robotDataReceiver;
       this.desiredBehaviorSubscriber = desiredBehaviorSubscriber;

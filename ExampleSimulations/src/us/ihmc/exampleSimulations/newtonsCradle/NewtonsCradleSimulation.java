@@ -11,7 +11,7 @@ import us.ihmc.exampleSimulations.collidingArms.SingleCylinderRobotDescription;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;

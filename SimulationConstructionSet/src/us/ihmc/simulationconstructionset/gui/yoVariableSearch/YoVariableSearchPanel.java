@@ -28,10 +28,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
 import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
@@ -208,7 +208,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
             }
             else
             {
-               entryBox.addVariable(new DoubleYoVariable("null", null));
+               entryBox.addVariable(new YoDouble("null", null));
                entryBoxDescriptionArea.setText("");
             }
          }

@@ -3,16 +3,16 @@ package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateTransition<E extends Enum<E>>
 {
    private final E nextStateEnum;
    private final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
-   private ArrayList<DoubleYoVariable> timePassedYoVariables;
+   private ArrayList<YoDouble> timePassedYoVariables;
    private final ArrayList<StateTransitionAction> actions = new ArrayList<StateTransitionAction>();
 
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition, StateTransitionAction action)
+   public StateTransition(E nextStateEnum, YoDouble timePassedYoVariable, StateTransitionCondition condition, StateTransitionAction action)
    {
       if (nextStateEnum == null)
          throw new RuntimeException("Cannot create StateTransition with null nextStateEnum!");
@@ -31,7 +31,7 @@ public class StateTransition<E extends Enum<E>>
       this(nextStateEnum, null, condition, action);
    }
 
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable)
+   public StateTransition(E nextStateEnum, YoDouble timePassedYoVariable)
    {
       this(nextStateEnum, timePassedYoVariable, null, null);
    }
@@ -75,10 +75,10 @@ public class StateTransition<E extends Enum<E>>
          stateTransitionConditions.add(transitionCondition);
    }
 
-   public void addTimePassedCondition(DoubleYoVariable timePassedYoVariable)
+   public void addTimePassedCondition(YoDouble timePassedYoVariable)
    {
       if (timePassedYoVariables == null)
-         timePassedYoVariables = new ArrayList<DoubleYoVariable>();
+         timePassedYoVariables = new ArrayList<YoDouble>();
       if (timePassedYoVariable != null)
          timePassedYoVariables.add(timePassedYoVariable);
    }
@@ -97,7 +97,7 @@ public class StateTransition<E extends Enum<E>>
       if (timePassedYoVariables == null)
          return nextStateEnum;
 
-      for (DoubleYoVariable timePassedYoVariable : timePassedYoVariables)
+      for (YoDouble timePassedYoVariable : timePassedYoVariables)
       {
          if (timeInState < timePassedYoVariable.getDoubleValue())
          {

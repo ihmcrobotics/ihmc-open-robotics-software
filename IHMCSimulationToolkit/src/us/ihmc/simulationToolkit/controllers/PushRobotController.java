@@ -10,10 +10,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -27,16 +27,16 @@ public class PushRobotController implements RobotController
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable pushDuration;
-   private final DoubleYoVariable pushForceMagnitude;
+   private final YoDouble pushDuration;
+   private final YoDouble pushForceMagnitude;
    private final YoFrameVector pushDirection;
    private final YoFrameVector pushForce;
-   private final DoubleYoVariable pushTimeSwitch;
-   private final IntegerYoVariable pushNumber;
-   private final BooleanYoVariable isBeingPushed;
-   private final DoubleYoVariable pushDelay;
+   private final YoDouble pushTimeSwitch;
+   private final YoInteger pushNumber;
+   private final YoBoolean isBeingPushed;
+   private final YoDouble pushDelay;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private StateTransitionCondition pushCondition = null;
    private final ExternalForcePoint forcePoint;
@@ -55,14 +55,14 @@ public class PushRobotController implements RobotController
       registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(jointNameToApplyForce + "_externalForcePoint", forcePointOffset, pushableRobot);
       
-      pushDuration = new DoubleYoVariable(jointNameToApplyForce + "_pushDuration", registry);
-      pushForceMagnitude = new DoubleYoVariable(jointNameToApplyForce + "_pushMagnitude", registry);
+      pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
+      pushForceMagnitude = new YoDouble(jointNameToApplyForce + "_pushMagnitude", registry);
       pushDirection = new YoFrameVector(jointNameToApplyForce + "_pushDirection", worldFrame, registry);
       pushForce = new YoFrameVector(jointNameToApplyForce + "_pushForce", worldFrame, registry);
-      pushTimeSwitch = new DoubleYoVariable(jointNameToApplyForce + "_pushTimeSwitch", registry);
-      pushNumber = new IntegerYoVariable(jointNameToApplyForce + "_pushNumber", registry);
-      isBeingPushed = new BooleanYoVariable(jointNameToApplyForce + "_isBeingPushed", registry);
-      pushDelay = new DoubleYoVariable(jointNameToApplyForce + "_pushDelay", registry);
+      pushTimeSwitch = new YoDouble(jointNameToApplyForce + "_pushTimeSwitch", registry);
+      pushNumber = new YoInteger(jointNameToApplyForce + "_pushNumber", registry);
+      isBeingPushed = new YoBoolean(jointNameToApplyForce + "_isBeingPushed", registry);
+      pushDelay = new YoDouble(jointNameToApplyForce + "_pushDelay", registry);
       
       pushableRobot.getJoint(jointNameToApplyForce).addExternalForcePoint(forcePoint);
       pushableRobot.setController(this);

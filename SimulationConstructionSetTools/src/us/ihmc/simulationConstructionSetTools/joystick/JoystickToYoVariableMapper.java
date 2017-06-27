@@ -5,10 +5,10 @@ import java.util.HashMap;
 
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class JoystickToYoVariableMapper
@@ -27,7 +27,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         DoubleYoVariable yoVariable = (DoubleYoVariable) yoVariableHolder.getVariable(variableName);
+         YoDouble yoVariable = (YoDouble) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             DoubleYoVariableJoystickEventListener joystickEventListener = new DoubleYoVariableJoystickEventListener(yoVariable, component, minValue, maxValue, deadZone, invert);
@@ -45,7 +45,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         BooleanYoVariable yoVariable = (BooleanYoVariable) yoVariableHolder.getVariable(variableName);
+         YoBoolean yoVariable = (YoBoolean) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             BooleanYoVariableJoystickEventListener joystickEventListener = new BooleanYoVariableJoystickEventListener(yoVariable, component, toggle, flip);
@@ -64,7 +64,7 @@ public class JoystickToYoVariableMapper
    {
       if (component != null)
       {
-         EnumYoVariable<T> yoVariable = (EnumYoVariable<T>) yoVariableHolder.getVariable(variableName);
+         YoEnum<T> yoVariable = (YoEnum<T>) yoVariableHolder.getVariable(variableName);
          if (yoVariable != null)
          {
             EnumYoVariableJoystickEventListener<T> joystickEventListener = new EnumYoVariableJoystickEventListener<T>(yoVariable, component, enumToSwitchTo);

@@ -18,8 +18,8 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -111,14 +111,14 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-      BooleanYoVariable userUpdateDesiredPelvisPose = (BooleanYoVariable) scs.getVariable("userUpdateDesiredPelvisPose");
-      BooleanYoVariable userDoPelvisPose = (BooleanYoVariable) scs.getVariable("userDoPelvisPose");
-      DoubleYoVariable userDesiredPelvisPoseYaw = (DoubleYoVariable) scs.getVariable("userDesiredPelvisPoseYaw");
-      DoubleYoVariable userDesiredPelvisPoseTrajectoryTime = (DoubleYoVariable) scs.getVariable("userDesiredPelvisPoseTrajectoryTime");
-      DoubleYoVariable icpErrorX = (DoubleYoVariable) scs.getVariable("icpErrorX");
-      DoubleYoVariable icpErrorY = (DoubleYoVariable) scs.getVariable("icpErrorY");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+      YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.getVariable("userUpdateDesiredPelvisPose");
+      YoBoolean userDoPelvisPose = (YoBoolean) scs.getVariable("userDoPelvisPose");
+      YoDouble userDesiredPelvisPoseYaw = (YoDouble) scs.getVariable("userDesiredPelvisPoseYaw");
+      YoDouble userDesiredPelvisPoseTrajectoryTime = (YoDouble) scs.getVariable("userDesiredPelvisPoseTrajectoryTime");
+      YoDouble icpErrorX = (YoDouble) scs.getVariable("icpErrorX");
+      YoDouble icpErrorY = (YoDouble) scs.getVariable("icpErrorY");
 
       drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
 
@@ -200,9 +200,9 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private void verifyDesiredICPIsContinous(SimulationConstructionSet scs)
    {
-      DoubleYoVariable desiredICPX = (DoubleYoVariable) scs.getVariable("desiredICPX");
-      DoubleYoVariable desiredICPY = (DoubleYoVariable) scs.getVariable("desiredICPY");
-      DoubleYoVariable t = (DoubleYoVariable) scs.getVariable("t");
+      YoDouble desiredICPX = (YoDouble) scs.getVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) scs.getVariable("desiredICPY");
+      YoDouble t = (YoDouble) scs.getVariable("t");
 
       scs.gotoInPointNow();
       while(Math.abs(desiredICPX.getDoubleValue()) < 1e-4)
