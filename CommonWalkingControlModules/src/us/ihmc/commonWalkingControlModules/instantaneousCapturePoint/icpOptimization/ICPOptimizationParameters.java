@@ -300,7 +300,19 @@ public abstract class ICPOptimizationParameters
     */
    public double getTimingAdjustmentGradientDescentWeight()
    {
-      return 0.1;
+      return 0.0001;
+   }
+
+   /**
+    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
+    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
+    * quadratic program to compute the total cost to go.
+    *
+    * @return weight
+    */
+   public double getTimingAdjustmentGradientDescentRegularizationWeight()
+   {
+      return 0.001;
    }
 
    /**

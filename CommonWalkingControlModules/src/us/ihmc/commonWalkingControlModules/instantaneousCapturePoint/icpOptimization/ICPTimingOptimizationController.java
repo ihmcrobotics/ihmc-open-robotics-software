@@ -25,9 +25,10 @@ import java.util.List;
 
 public class ICPTimingOptimizationController extends ICPOptimizationController
 {
-   private static final double footVelocityScalarWeight = 1.0;
+   private static final double footVelocityScalarWeight = 0.0;
 
    private final YoDouble timingAdjustmentWeight = new YoDouble(yoNamePrefix + "TimingAdjustmentWeight", registry);
+   private final YoDouble timingAdjustmentRegularizationWeight = new YoDouble(yoNamePrefix + "TimingAdjustmentRegularizationWeight", registry);
    private final YoDouble gradientThresholdForAdjustment = new YoDouble(yoNamePrefix + "GradientThresholdForAdjustment", registry);
    private final YoDouble gradientDescentGain = new YoDouble(yoNamePrefix + "GradientDescentGain", registry);
 
@@ -64,6 +65,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final FrameVector2d requiredSwingFootVelocity = new FrameVector2d();
    private final FrameVector2d requiredFootstepPosition = new FrameVector2d();
 
+   private double previousSwingDurationSolution;
+
    public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
@@ -80,6 +83,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
 
       timingAdjustmentWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentWeight());
+      timingAdjustmentRegularizationWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentRegularizationWeight());
       gradientThresholdForAdjustment.set(icpOptimizationParameters.getGradientThresholdForTimingAdjustment());
       gradientDescentGain.set(icpOptimizationParameters.getGradientDescentGain());
       timingAdjustmentAttenuation.set(icpOptimizationParameters.getTimingAdjustmentAttenuation());
@@ -202,6 +206,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       qpSolverTimer.stopMeasurement();
 
       extractSolutionsFromSolver(numberOfFootstepsToConsider, omega0, noConvergenceException);
+
+      previousSwingDurationSolution = swingDurations.get(0).getDoubleValue();
 
       controllerTimer.stopMeasurement();
    }
@@ -421,35 +427,35 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       return null;
    }
 
-   public double computeTotalCostToGo()
-   {
-      double solverCostToGo = solver.getCostToGo();
-      double timingCostToGo = timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
-
-      return solverCostToGo + timingCostToGo;
-   }
-
    public double computeTimeAdjustmentCostToGo()
    {
-      return timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
+      double adjustmentWeight = timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
+      double regularizationWeight = timingAdjustmentRegularizationWeight.getDoubleValue() / controlDT *
+            Math.pow(swingDurations.get(0).getDoubleValue() - previousSwingDurationSolution, 2.0);
+
+      return adjustmentWeight + regularizationWeight;
    }
 
-   private final FrameVector tmpVector = new FrameVector();
+   private final FramePoint tempPoint = new FramePoint();
+   private final FrameVector tempVector = new FrameVector();
+
    public double computeFootVelocityCostToGo()
    {
       RobotSide swingSide = supportSide.getEnumValue().getOppositeSide();
       ReferenceFrame ankleFrame = contactableFeet.get(swingSide).getFrameAfterParentJoint();
 
-      currentSwingFootPosition.setToZero(ankleFrame);
+      tempPoint.setToZero(ankleFrame);
       footstepSolutions.get(0).getFrameTuple2d(requiredFootstepPosition);
 
       Twist footTwist = contactableFeet.get(swingSide).getRigidBody().getParentJoint().getFrameAfterJoint().getTwistOfFrame();
-      footTwist.getLinearPart(tmpVector);
-      currentSwingFootVelocity.setByProjectionOntoXYPlane(tmpVector);
+      footTwist.getLinearPart(tempVector);
 
-      currentSwingFootPosition.changeFrame(worldFrame);
+      tempVector.changeFrame(worldFrame);
+      currentSwingFootVelocity.setByProjectionOntoXYPlane(tempVector);
+
+      tempPoint.changeFrame(worldFrame);
+      currentSwingFootPosition.setByProjectionOntoXYPlane(tempPoint);
       requiredFootstepPosition.changeFrame(worldFrame);
-      currentSwingFootVelocity.changeFrame(worldFrame);
 
       requiredSwingFootVelocity.set(requiredFootstepPosition);
       requiredSwingFootVelocity.sub(currentSwingFootPosition);
