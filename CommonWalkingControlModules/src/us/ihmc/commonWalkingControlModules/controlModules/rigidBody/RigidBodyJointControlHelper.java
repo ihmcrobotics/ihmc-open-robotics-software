@@ -12,15 +12,15 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class RigidBodyJointControlHelper
 {
@@ -166,8 +166,9 @@ public class RigidBodyJointControlHelper
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
+         boolean generatorDone = generator.isDone() || generator.getLastWaypointTime() <= timeInTrajectory;
 
-         if (!trajectoryDone.getBooleanValue() && generator.isDone())
+         if (!trajectoryDone.getBooleanValue() && generatorDone)
          {
             allDone = fillAndReinitializeTrajectories(jointIdx) && allDone;
          }
