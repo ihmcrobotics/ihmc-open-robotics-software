@@ -114,6 +114,8 @@ public abstract class ICPOptimizationController
    protected final YoDouble transferSplitFractionUnderDisturbance = new YoDouble(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
    protected final YoDouble magnitudeForBigAdjustment = new YoDouble(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
+   private final YoBoolean limitReachabilityFromAdjustment = new YoBoolean(yoNamePrefix + "LimitReachabilityFromAdjustment", registry);
+
    protected final boolean useTwoCMPs;
    protected final boolean useFootstepRegularization;
    protected final boolean useFeedbackRegularization;
@@ -186,7 +188,8 @@ public abstract class ICPOptimizationController
       solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
+                                                                                       registry, yoGraphicsListRegistry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
             yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
@@ -216,6 +219,8 @@ public abstract class ICPOptimizationController
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
+      limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
@@ -738,8 +743,8 @@ public abstract class ICPOptimizationController
       controllerFeedbackCMP.set(tempPoint2d);
       controllerFeedbackCMP.add(tempVector2d);
 
-      updateReachabilityRegionFromAdjustment();
-
+      if (limitReachabilityFromAdjustment.getBooleanValue())
+         updateReachabilityRegionFromAdjustment();
    }
 
 
