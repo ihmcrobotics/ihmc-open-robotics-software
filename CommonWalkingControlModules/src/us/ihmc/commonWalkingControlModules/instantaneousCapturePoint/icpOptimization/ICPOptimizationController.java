@@ -186,7 +186,7 @@ public abstract class ICPOptimizationController
       solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
             yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
@@ -444,7 +444,7 @@ public abstract class ICPOptimizationController
       doingBigAdjustment.set(false);
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
@@ -479,7 +479,7 @@ public abstract class ICPOptimizationController
       inputHandler.initializeForDoubleSupport(stateMultiplierCalculator, numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(),
             useTwoCMPs, transferToSide, omega0);
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
    }
 
    /**
@@ -509,7 +509,7 @@ public abstract class ICPOptimizationController
 
       inputHandler.initializeForSingleSupport(stateMultiplierCalculator, numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
    }
 
    protected int initializeOnContactChange(double initialTime)
@@ -598,7 +598,11 @@ public abstract class ICPOptimizationController
       solver.resetFootstepConditions();
 
       if (localUseStepAdjustment && (!isInTransfer.getBooleanValue() || ALLOW_ADJUSTMENT_IN_TRANSFER))
+      {
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider);
+         reachabilityConstraintHandler.updateReachabilityConstraint(solver);
+      }
+
 
       submitFeedbackTaskConditionsToSolver();
       submitAngularMomentumTaskConditionsToSolver();
@@ -733,8 +737,16 @@ public abstract class ICPOptimizationController
       solutionHandler.getControllerReferenceCMP(tempPoint2d);
       controllerFeedbackCMP.set(tempPoint2d);
       controllerFeedbackCMP.add(tempVector2d);
+
+      updateReachabilityRegionFromAdjustment();
+
    }
 
+
+   private void updateReachabilityRegionFromAdjustment()
+   {
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(supportSide.getEnumValue(), upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+   }
 
 
    protected void scaleStepRegularizationWeightWithTime()
