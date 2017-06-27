@@ -257,7 +257,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       double timeInTrajectory = getTimeInTrajectory();
 
-      if (!trajectoryDone.getBooleanValue() && (orientationTrajectoryGenerator.isDone() || positionTrajectoryGenerator.isDone()))
+      boolean orientationDone = orientationTrajectoryGenerator.isDone() || orientationTrajectoryGenerator.getLastWaypointTime() <= timeInTrajectory;
+      boolean positionDone = positionTrajectoryGenerator.isDone() || positionTrajectoryGenerator.getLastWaypointTime() <= timeInTrajectory;
+
+      if (!trajectoryDone.getBooleanValue() && (orientationDone || positionDone))
          fillAndReinitializeTrajectories();
 
       positionTrajectoryGenerator.compute(timeInTrajectory);
