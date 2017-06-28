@@ -38,7 +38,6 @@ public class TaskNode3D extends TaskNode
       if(getParentNode() != null)
       {
          nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
-         
          for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
          {         
             double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
@@ -68,9 +67,9 @@ public class TaskNode3D extends TaskNode
       nodeTester.putTrajectoryMessages();
       
       setIsValidNode(nodeTester.isSolved());
-            
-      setConfigurationJoints(nodeTester.getFullRobotModelCopy().getOneDoFJoints());
       
+      setConfigurationJoints(nodeTester.getFullRobotModelCopy());
+     
       return isValid;
    }
 

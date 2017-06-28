@@ -28,6 +28,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWhole
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.trajectory.EndEffectorLinearTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -170,7 +171,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
       
       // create initial robot configuration
-      wbikTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
+      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());      
       
       wbikTester.initialize();      
       wbikTester.holdCurrentTrajectoryMessages();
@@ -237,12 +238,14 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       PrintTools.info(""+wbikTester.isSolved());      
       
-      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
-      createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
+      
       
       /*
        * Show up
        */
+      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
+      createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
+      
       wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
             
@@ -323,7 +326,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       sdfFullRobotModel.updateFrames();
       
       WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      wbikTester.updateRobotConfigurationData(sdfFullRobotModel.getOneDoFJoints(), sdfFullRobotModel.getRootJoint());
+      
+      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
                   
       TaskNode3D.nodeTester = wbikTester;
 
@@ -375,7 +379,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       System.out.println(node4.isValidNode());
       System.out.println(node5.isValidNode());
       System.out.println(node6.isValidNode());
-      
+            
       PrintTools.info("END");     
    } 
    
