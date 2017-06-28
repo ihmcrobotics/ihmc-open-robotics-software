@@ -35,40 +35,40 @@ public class TaskNode3D extends TaskNode
        * using @code WheneverWholeBodyKinematicsSolver.
        * set initial configuration
        */
-      if(getParentNode() != null)
-      {
-         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
-         for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
-         {         
-            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
-         }
-         
-      }
-      else
-      {         
-      }
-
-      nodeTester.initialize();
-      nodeTester.holdCurrentTrajectoryMessages();
-      
-      /*
-       * set whole body tasks.
-       */            
-      nodeTester.setDesiredHandPose(RobotSide.RIGHT, endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
-      nodeTester.setHandSelectionMatrixFree(RobotSide.LEFT);
-      
-      Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(getNodeData(2));
-      desiredChestOrientation.appendPitchRotation(getNodeData(3));
-      nodeTester.setDesiredChestOrientation(desiredChestOrientation);
-            
-      nodeTester.setDesiredPelvisHeight(getNodeData(1));
-      
-      nodeTester.putTrajectoryMessages();
-      
-      setIsValidNode(nodeTester.isSolved());
-      
-      setConfigurationJoints(nodeTester.getFullRobotModelCopy());
+//      if(getParentNode() != null)
+//      {
+//         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
+//         for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
+//         {         
+//            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
+//         }
+//         
+//      }
+//      else
+//      {         
+//      }
+//
+//      nodeTester.initialize();
+//      nodeTester.holdCurrentTrajectoryMessages();
+//      
+//      /*
+//       * set whole body tasks.
+//       */            
+//      nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
+//      nodeTester.setHandSelectionMatrixFree(endEffectorTrajectory.getAnotherRobotSide());
+//      
+//      Quaternion desiredChestOrientation = new Quaternion();
+//      desiredChestOrientation.appendYawRotation(getNodeData(2));
+//      desiredChestOrientation.appendPitchRotation(getNodeData(3));
+//      nodeTester.setDesiredChestOrientation(desiredChestOrientation);
+//            
+//      nodeTester.setDesiredPelvisHeight(getNodeData(1));
+//      
+//      nodeTester.putTrajectoryMessages();
+//      
+//      //setIsValidNode(nodeTester.isSolved());
+//      
+//      setConfigurationJoints(nodeTester.getFullRobotModelCopy());
      
       return isValid;
    }

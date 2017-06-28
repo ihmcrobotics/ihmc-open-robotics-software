@@ -129,7 +129,12 @@ public class TaskNodeTree
       for(int i=0;i<numberOfExpanding;i++)
       {
          PrintTools.info("expanding process "+i);         
-         expandingTree();
+         if(expandingTree())
+         {
+            
+            PrintTools.info("expanding is done "+i);
+            break;
+         }
       }
    }
    
@@ -171,12 +176,25 @@ public class TaskNodeTree
       return rootNode.createNode();
    }
    
-   private void expandingTree()
+   /*
+    * As long as the tree does not reach the trajectory time, this method returns false.
+    */
+   private boolean expandingTree()
    {
       updateRandomConfiguration();
       updateNearestNode();
       updateNewConfiguration();
-      connectNewConfiguration();
+      if(connectNewConfiguration())
+      {
+         if(this.newNode.getTime() == getTrajectoryTime())
+            return true;
+         else
+            return false;
+      }
+      else
+      {
+         return false;
+      }
    }
    
    private void updateRandomConfiguration()
@@ -283,7 +301,10 @@ public class TaskNodeTree
       this.newNode = newNode;
    }
    
-   private void connectNewConfiguration()
+   /*
+    * When the new configuration is valid, return true.
+    */
+   private boolean connectNewConfiguration()
    {
       this.newNode.convertNormalizedDataToData(nodeRegion);
       this.newNode.setParentNode(this.nearNode);
@@ -296,12 +317,14 @@ public class TaskNodeTree
          {
 //            PrintTools.info("randomNode "+newNode.getNodeData(i) + " ");
          }
+         return true;
       }
       else
       {
          this.newNode.clearParentNode();
          failNodes.add(this.newNode);
          PrintTools.info("this new Configuration cannot be added on tree");
+         return false;
       }
    }
    
