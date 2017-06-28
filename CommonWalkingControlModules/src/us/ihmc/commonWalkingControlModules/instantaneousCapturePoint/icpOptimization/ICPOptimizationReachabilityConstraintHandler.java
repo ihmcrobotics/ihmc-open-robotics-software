@@ -134,7 +134,13 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLine.setVector(adjustmentDirection);
 
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
-      ConvexPolygonTools.cutPolygonWithLine(motionLine, polygon2d, lineIntersector2d, supportSide);
+
+      RobotSide cuttingSide;
+      if (supportSide == RobotSide.LEFT)
+         cuttingSide = supportSide;
+      else
+         cuttingSide = supportSide.getOppositeSide();
+      ConvexPolygonTools.cutPolygonWithLine(motionLine, polygon2d, lineIntersector2d, cuttingSide);
 
       adjustmentLineSegment.set(referenceLocation, adjustedLocation);
       motionLimitLine.set(lineIntersector2d.getIntersectionPointOne(), lineIntersector2d.getIntersectionPointTwo());
