@@ -32,7 +32,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
       yoVariableServer.setSendKeepAlive(true);
       footstepPlannerVisualizer.setTickAndUpdatable(yoVariableServer);
 
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, graphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       try
       {
          yoVariableServer.start();

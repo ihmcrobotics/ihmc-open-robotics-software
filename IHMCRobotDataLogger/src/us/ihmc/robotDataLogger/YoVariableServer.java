@@ -22,8 +22,6 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
@@ -313,11 +311,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      if(fullRobotModel != null)
+      if(rootBody != null)
       {
-         mainBodies.add(fullRobotModel.getElevator());
+         mainBodies.add(rootBody);
       }
       mainRegistry = registry;
       mainYoGraphicsListRegistry = yoGraphicsListRegistry;
