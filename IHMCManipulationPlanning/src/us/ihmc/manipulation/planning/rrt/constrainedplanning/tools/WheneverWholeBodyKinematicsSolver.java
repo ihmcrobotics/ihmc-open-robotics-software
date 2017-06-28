@@ -144,11 +144,15 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
    
-   private static int updateCnt = 0;
-   private static int numberOfTest = 0;
-   private boolean isSolved = false;
    private static int maximumCntForUpdateInternal = 500;
+   private static int cntForUpdateInternal = 0;
    
+   private static int numberOfTest = 0;
+   
+   private boolean isSolved = false;
+   
+   
+      
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
@@ -189,9 +193,10 @@ public class WheneverWholeBodyKinematicsSolver
          isFootInSupport.put(robotSide, new BooleanYoVariable("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
       }
-
    }
-
+   
+   
+   
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
@@ -266,7 +271,7 @@ public class WheneverWholeBodyKinematicsSolver
    {
       userFeedbackCommands.clear();
       isSolved = false;
-      updateCnt = 0;
+      cntForUpdateInternal = 0;
       solutionQualityOld.set(100);
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
@@ -349,7 +354,7 @@ public class WheneverWholeBodyKinematicsSolver
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
       
       if(DEBUG)
-         PrintTools.info(""+updateCnt+" cur SQ "+solutionQuality.getDoubleValue() + " old "+solutionQualityOld.getDoubleValue() +" "+isSolutionStable +" "+isSolutionGoodEnough +" "+isGoodSolutionCur);
+         PrintTools.info(""+cntForUpdateInternal+" cur SQ "+solutionQuality.getDoubleValue() + " old "+solutionQualityOld.getDoubleValue() +" "+isSolutionStable +" "+isSolutionGoodEnough +" "+isGoodSolutionCur);
       
       if(isGoodSolutionCur)
       {
@@ -358,7 +363,7 @@ public class WheneverWholeBodyKinematicsSolver
       }
       
       solutionQualityOld.set(solutionQuality.getDoubleValue());
-      updateCnt++;
+      cntForUpdateInternal++;
    }
    
    public boolean isSolved()
@@ -483,6 +488,10 @@ public class WheneverWholeBodyKinematicsSolver
       imuDefinitions = desiredFullRobotModel.getIMUDefinitions();
       forceSensorDefinitions = desiredFullRobotModel.getForceSensorDefinitions();      
       
+      PrintTools.info("joints.length "+joints.length);
+      
+     
+      
       RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
 
       currentRobotConfigurationData.setRootOrientation(new Quaternion(rootJoint.getRotationForReading()));
@@ -510,7 +519,8 @@ public class WheneverWholeBodyKinematicsSolver
    
    public FullHumanoidRobotModel getFullRobotModelCopy()
    {
-      KinematicsToolboxOutputStatus currentOutputStatus = new KinematicsToolboxOutputStatus(oneDoFJoints);      
+      KinematicsToolboxOutputStatus currentOutputStatus = new KinematicsToolboxOutputStatus(oneDoFJoints);
+
       for (int i = 0; i < oneDoFJoints.length; i++)
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
       
@@ -747,7 +757,7 @@ public class WheneverWholeBodyKinematicsSolver
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(printFullRobotModel);
       currentReferenceFrames.updateFrames();
       
-      for (int i = 0; i < printFullRobotModel.getOneDoFJoints().length; i++)
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {         
          double jointPosition = printFullRobotModel.getOneDoFJoints()[i].getQ();         
          System.out.println(printFullRobotModel.getOneDoFJoints()[i].getName() +" "+jointPosition);
@@ -758,7 +768,6 @@ public class WheneverWholeBodyKinematicsSolver
           ReferenceFrame desiredHandReferenceFrame = printFullRobotModel.getHand(robotSide).getBodyFixedFrame();
           FramePose desiredHandFramePose = new FramePose(desiredHandReferenceFrame);
             
-//          System.out.println(desiredHandFramePose);
           desiredHandFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Hand");
           System.out.println(desiredHandFramePose);
@@ -769,7 +778,6 @@ public class WheneverWholeBodyKinematicsSolver
           ReferenceFrame desiredFootReferenceFrame = printFullRobotModel.getFoot(robotSide).getBodyFixedFrame();
           FramePose desiredFootFramePose = new FramePose(desiredFootReferenceFrame);
           
-//          System.out.println(desiredFootFramePose);
           desiredFootFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Foot");
           System.out.println(desiredFootFramePose);

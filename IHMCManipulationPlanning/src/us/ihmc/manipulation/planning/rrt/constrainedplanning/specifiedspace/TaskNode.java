@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -167,10 +168,12 @@ public abstract class TaskNode implements TaskNodeInterface
       }
    }
    
-   protected void setConfigurationJoints(OneDoFJoint[] configurationJoints)
+   protected void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configurationJoints = configurationJoints;
+      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
       
+//      for(int i=0;i<this.configurationJoints.length;i++)
+//         this.configurationJoints[i] = robot.getOneDoFJoints()[i];
       
    }
    
