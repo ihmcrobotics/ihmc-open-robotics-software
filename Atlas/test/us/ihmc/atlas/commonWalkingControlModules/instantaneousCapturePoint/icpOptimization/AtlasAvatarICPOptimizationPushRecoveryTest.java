@@ -39,8 +39,7 @@ public class AtlasAvatarICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
       AtlasAvatarICPOptimizationPushRecoveryTest test = new AtlasAvatarICPOptimizationPushRecoveryTest();
       try
       {
-         //test.testPushICPOptimizationNoPush();
-         test.testPushICPOptimizationForwardPushInSwing();
+         test.testPushICPOptimizationOutwardPushInSwing();
       }
       catch(SimulationExceededMaximumTimeException e)
       {

@@ -27,7 +27,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public abstract class LinearMomentumRateOfChangeControlModule
@@ -48,7 +47,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final YoFrameVector controlledCoMAcceleration;
 
    protected final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   protected final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
    protected final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
    protected final SelectionMatrix6D linearXYSelectionMatrix = new SelectionMatrix6D();
    protected final SelectionMatrix6D linearXYAndAngularZSelectionMatrix = new SelectionMatrix6D();
@@ -384,4 +382,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
    public abstract ICPOptimizationController getICPOptimizationController();
+
+   public abstract double getOptimizedTimeRemaining();
 }
