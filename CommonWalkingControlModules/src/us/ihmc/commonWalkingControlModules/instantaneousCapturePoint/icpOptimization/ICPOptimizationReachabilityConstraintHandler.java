@@ -115,8 +115,8 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(RobotSide supportSide, ArrayList<YoFramePoint2d> upcomingFootstepLocations,
-                                                   ArrayList<FramePoint2d> footstepSolutions, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2d> footstepSolutions,
+                                                   boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
@@ -134,7 +134,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLine.setVector(adjustmentDirection);
 
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
-      ConvexPolygonTools.cutPolygonWithLine(motionLine, polygon2d, lineIntersector2d, supportSide);
+      ConvexPolygonTools.cutPolygonWithLine(motionLine, polygon2d, lineIntersector2d, RobotSide.LEFT);
 
       adjustmentLineSegment.set(referenceLocation, adjustedLocation);
       motionLimitLine.set(lineIntersector2d.getIntersectionPointOne(), lineIntersector2d.getIntersectionPointTwo());

@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class Handshake implements IDLStruct<Handshake>
+public class Handshake
 {
     public Handshake()
     {
@@ -33,11 +30,11 @@ public class Handshake implements IDLStruct<Handshake>
         
         
     }
-    @Override
+
     public void set(Handshake other)
     {
         	dt_ = other.dt_;
-        	registries_.set(other.registries_);variables_.set(other.variables_);joints_.set(other.joints_);graphicObjects_.set(other.graphicObjects_);artifacts_.set(other.artifacts_);enumTypes_.set(other.enumTypes_);summary_.set(other.summary_);
+            registries_.set(other.registries_);	variables_.set(other.variables_);	joints_.set(other.joints_);	graphicObjects_.set(other.graphicObjects_);	artifacts_.set(other.artifacts_);	enumTypes_.set(other.enumTypes_);	us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(summary_, other.summary_);
     }
 
     public void setDt(double dt)
@@ -102,195 +99,7 @@ public class Handshake implements IDLStruct<Handshake>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 1024; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinition.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 32767; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinition.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 128; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.JointDefinition.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 2048; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessage.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 2048; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessage.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 1024; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.EnumType.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.Summary.getMaxCdrSerializedSize(current_alignment);
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(Handshake data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(Handshake data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getRegistries().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinition.getCdrSerializedSize(data.getRegistries().get(a), current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getVariables().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinition.getCdrSerializedSize(data.getVariables().get(a), current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getJoints().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.JointDefinition.getCdrSerializedSize(data.getJoints().get(a), current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getGraphicObjects().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessage.getCdrSerializedSize(data.getGraphicObjects().get(a), current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getArtifacts().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessage.getCdrSerializedSize(data.getArtifacts().get(a), current_alignment);}
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getEnumTypes().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.EnumType.getCdrSerializedSize(data.getEnumTypes().get(a), current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.Summary.getCdrSerializedSize(data.getSummary(), current_alignment);
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_6(dt_);
-
-	    if(registries_.size() <= 1024)
-	    cdr.write_type_e(registries_);else
-	        throw new RuntimeException("registries field exceeds the maximum length");
-
-	    if(variables_.size() <= 32767)
-	    cdr.write_type_e(variables_);else
-	        throw new RuntimeException("variables field exceeds the maximum length");
-
-	    if(joints_.size() <= 128)
-	    cdr.write_type_e(joints_);else
-	        throw new RuntimeException("joints field exceeds the maximum length");
-
-	    if(graphicObjects_.size() <= 2048)
-	    cdr.write_type_e(graphicObjects_);else
-	        throw new RuntimeException("graphicObjects field exceeds the maximum length");
-
-	    if(artifacts_.size() <= 2048)
-	    cdr.write_type_e(artifacts_);else
-	        throw new RuntimeException("artifacts field exceeds the maximum length");
-
-	    if(enumTypes_.size() <= 1024)
-	    cdr.write_type_e(enumTypes_);else
-	        throw new RuntimeException("enumTypes field exceeds the maximum length");
-
-	    cdr.write_type_a(summary_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	dt_ = cdr.read_type_6();	
-
-	    	cdr.read_type_e(registries_);	
-
-	    	cdr.read_type_e(variables_);	
-
-	    	cdr.read_type_e(joints_);	
-
-	    	cdr.read_type_e(graphicObjects_);	
-
-	    	cdr.read_type_e(artifacts_);	
-
-	    	cdr.read_type_e(enumTypes_);	
-
-	    	cdr.read_type_a(summary_);	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_6("dt", dt_);
-			    
-			    ser.write_type_e("registries", registries_);
-			    
-			    ser.write_type_e("variables", variables_);
-			    
-			    ser.write_type_e("joints", joints_);
-			    
-			    ser.write_type_e("graphicObjects", graphicObjects_);
-			    
-			    ser.write_type_e("artifacts", artifacts_);
-			    
-			    ser.write_type_e("enumTypes", enumTypes_);
-			    
-			    ser.write_type_a("summary", summary_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			dt_ = ser.read_type_6("dt");	
-	    	    
-	    			ser.read_type_e("registries", registries_);	
-	    	    
-	    			ser.read_type_e("variables", variables_);	
-	    	    
-	    			ser.read_type_e("joints", joints_);	
-	    	    
-	    			ser.read_type_e("graphicObjects", graphicObjects_);	
-	    	    
-	    			ser.read_type_e("artifacts", artifacts_);	
-	    	    
-	    			ser.read_type_e("enumTypes", enumTypes_);	
-	    	    
-	    			ser.read_type_a("summary", summary_);	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)
