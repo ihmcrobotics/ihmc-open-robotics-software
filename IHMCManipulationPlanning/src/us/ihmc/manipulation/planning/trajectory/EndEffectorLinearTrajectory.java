@@ -4,16 +4,23 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
 {
    private ArrayList<LinearTrajectory> trajectories = new ArrayList<LinearTrajectory>();
    private double trajectoryTime = 0;
    private Pose initialPose;
+   private RobotSide robotSideOfEndEffector;
    
    public EndEffectorLinearTrajectory()
    {
       
+   }
+   
+   public void setRobotSideOfEndEffector(RobotSide robotSide)
+   {
+      robotSideOfEndEffector = robotSide;
    }
    
    public void clearTrajectories()
@@ -84,5 +91,20 @@ public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
       LinearTrajectory lastTrajectory = trajectories.get(trajectories.size()-1);
       
       return lastTrajectory.getPose(lastTrajectory.getTrajectoryTime());
+   }
+
+   @Override
+   public RobotSide getRobotSide()
+   {
+      return robotSideOfEndEffector;
+   }
+
+   @Override
+   public RobotSide getAnotherRobotSide()
+   {
+      if(robotSideOfEndEffector == RobotSide.RIGHT)
+         return RobotSide.LEFT;
+      else
+         return RobotSide.RIGHT;
    }
 }

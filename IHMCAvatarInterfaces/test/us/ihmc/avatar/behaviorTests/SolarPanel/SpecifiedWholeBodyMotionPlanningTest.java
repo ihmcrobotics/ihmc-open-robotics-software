@@ -150,6 +150,33 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    }
    
 //   @Test
+   public void testForEndEffectorTrajectory() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+   
+      drcBehaviorTestHelper.updateRobotModel();
+       
+      Pose pose1 = new Pose(new Point3D(1.0, 1.0, 1.0), new Quaternion());
+      Pose pose2 = new Pose(new Point3D(1.0, 2.0, 1.0), new Quaternion());
+      Pose pose3 = new Pose(new Point3D(1.0, 2.0, 2.0), new Quaternion());
+      Pose pose4 = new Pose(new Point3D(2.0, 2.0, 2.0), new Quaternion());
+       
+      EndEffectorLinearTrajectory constrainedEndEffectorPose = new EndEffectorLinearTrajectory();
+       
+      constrainedEndEffectorPose.setInitialPose(pose1);
+      constrainedEndEffectorPose.addLinearTrajectory(pose2, 1.0);
+      constrainedEndEffectorPose.addLinearTrajectory(pose3, 1.0);
+      constrainedEndEffectorPose.addLinearTrajectory(pose4, 1.0);      
+       
+      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(-1.0));
+      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.0));
+      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.5));
+       
+      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(5.5));
+   }
+   
+//   @Test
    public void testForWheneverWholeBodyKinematicsSolver() throws SimulationExceededMaximumTimeException, IOException
    {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -236,9 +263,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info(""+wbikTester.isSolved());      
-      
-      
+      PrintTools.info(""+wbikTester.isSolved());   
       
       /*
        * Show up
@@ -252,12 +277,12 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
       
-//   @Test
+   @Test
    public void testForTaskNodeTree() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
+   
       drcBehaviorTestHelper.updateRobotModel();
             
       TaskNode3D rootNode = new TaskNode3D();
@@ -284,33 +309,6 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    } 
    
 //   @Test
-   public void testForEndEffectorTrajectory() throws SimulationExceededMaximumTimeException, IOException
-   {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      
-      Pose pose1 = new Pose(new Point3D(1.0, 1.0, 1.0), new Quaternion());
-      Pose pose2 = new Pose(new Point3D(1.0, 2.0, 1.0), new Quaternion());
-      Pose pose3 = new Pose(new Point3D(1.0, 2.0, 2.0), new Quaternion());
-      Pose pose4 = new Pose(new Point3D(2.0, 2.0, 2.0), new Quaternion());
-      
-      EndEffectorLinearTrajectory constrainedEndEffectorPose = new EndEffectorLinearTrajectory();
-      
-      constrainedEndEffectorPose.setInitialPose(pose1);
-      constrainedEndEffectorPose.addLinearTrajectory(pose2, 1.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose3, 1.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose4, 1.0);      
-      
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(-1.0));
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.0));
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.5));
-      
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(5.5));
-   }
-   
-   @Test
    public void testForposeForNode() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -346,8 +344,9 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       constrainedEndEffectorPose.addLinearTrajectory(pose2, 3.0);
       constrainedEndEffectorPose.addLinearTrajectory(pose3, 3.0);
       constrainedEndEffectorPose.addLinearTrajectory(pose4, 3.0); 
+      constrainedEndEffectorPose.setRobotSideOfEndEffector(RobotSide.RIGHT);
             
-      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorPose;
+      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorPose;      
       
       /*
        * Tree expanding.
@@ -391,8 +390,48 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       drcBehaviorTestHelper.updateRobotModel();
       
+      /*
+       * Initiate tester.
+       */
+      
+      
+      /*
+       * Motion planning node.
+       * 
+       * Input @param.
+       * solar panel position and orientation.
+       * cleaning path. - robot side, via points, type(linear, circular_not yet).
+       * trajectory time for initial position to root node pose.
+       * finding initial node.
+       * 
+       * 
+       * Output @param.
+       * wholebody trajectory message.
+       * -> hand trajectory message(end effector) is obtained from end effector path.
+       * -> chest and pelvis trajectory message is obtained from planner.
+       */
       
    }
       
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    
 }
