@@ -147,7 +147,7 @@ public class WheneverWholeBodyKinematicsSolver
    private static int updateCnt = 0;
    private static int numberOfTest = 0;
    private boolean isSolved = false;
-   private static int maximumCntForUpdateInternal = 200;
+   private static int maximumCntForUpdateInternal = 500;
    
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
@@ -267,6 +267,7 @@ public class WheneverWholeBodyKinematicsSolver
       userFeedbackCommands.clear();
       isSolved = false;
       updateCnt = 0;
+      solutionQualityOld.set(100);
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
@@ -276,6 +277,13 @@ public class WheneverWholeBodyKinematicsSolver
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
 
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {         
+         double jointPosition = oneDoFJoints[i].getQ();      
+         if(DEBUG)
+            System.out.println(oneDoFJoints[i].getName() +" "+jointPosition);
+      }
+      
       for (RobotSide robotSide : RobotSide.values)
          isFootInSupport.get(robotSide).set(true);
 
@@ -292,8 +300,6 @@ public class WheneverWholeBodyKinematicsSolver
          PrintTools.info("Initial posture ");      
       HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       desiredReferenceFrames.updateFrames(); 
-      if(DEBUG)
-         printOutRobotModel(desiredFullRobotModel, worldFrame);
       if(DEBUG)
          printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
       
@@ -362,7 +368,11 @@ public class WheneverWholeBodyKinematicsSolver
       {
          updateInternal();
          if(isSolved)
+         {
+            if(DEBUG)
+               printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
             return isSolved;
+         }
       }
       return false;
    }
@@ -483,6 +493,11 @@ public class WheneverWholeBodyKinematicsSolver
       updateRobotConfigurationData(currentRobotConfigurationData);
    }
    
+   public void updateRobotConfigurationDataJointsOnly(OneDoFJoint[] joints)
+   {
+      latestRobotConfigurationDataReference.get().setJointState(joints);
+   }
+   
    private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
@@ -491,6 +506,23 @@ public class WheneverWholeBodyKinematicsSolver
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
+   }
+   
+   public FullHumanoidRobotModel getFullRobotModelCopy()
+   {
+      KinematicsToolboxOutputStatus currentOutputStatus = new KinematicsToolboxOutputStatus(oneDoFJoints);      
+      for (int i = 0; i < oneDoFJoints.length; i++)
+         oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
+      
+      currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
+      
+      KinematicsToolboxOutputConverter currentOutputConverter;      
+      currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+      
+      currentOutputConverter.updateFullRobotModel(currentOutputStatus);
+      FullHumanoidRobotModel fullRobotModelCopy = currentOutputConverter.getFullRobotModel();      
+      
+      return fullRobotModelCopy;
    }
 
    protected boolean isDone()
@@ -523,12 +555,10 @@ public class WheneverWholeBodyKinematicsSolver
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
       currentReferenceFrames.updateFrames();
       
-      if(DEBUG)
-         PrintTools.info("Posture to be hold is ");      
-      if(DEBUG)
-         printOutRobotModel(currentFullRobotModel, worldFrame);
-      if(DEBUG)
-         printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
+//      if(DEBUG)
+//         PrintTools.info("Posture to be hold is ");      
+//      if(DEBUG)
+//         printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
       
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -720,6 +750,7 @@ public class WheneverWholeBodyKinematicsSolver
       for (int i = 0; i < printFullRobotModel.getOneDoFJoints().length; i++)
       {         
          double jointPosition = printFullRobotModel.getOneDoFJoints()[i].getQ();         
+         System.out.println(printFullRobotModel.getOneDoFJoints()[i].getName() +" "+jointPosition);
       }
       
       for(RobotSide robotSide : RobotSide.values)
@@ -727,7 +758,7 @@ public class WheneverWholeBodyKinematicsSolver
           ReferenceFrame desiredHandReferenceFrame = printFullRobotModel.getHand(robotSide).getBodyFixedFrame();
           FramePose desiredHandFramePose = new FramePose(desiredHandReferenceFrame);
             
-          System.out.println(desiredHandFramePose);
+//          System.out.println(desiredHandFramePose);
           desiredHandFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Hand");
           System.out.println(desiredHandFramePose);
@@ -738,7 +769,7 @@ public class WheneverWholeBodyKinematicsSolver
           ReferenceFrame desiredFootReferenceFrame = printFullRobotModel.getFoot(robotSide).getBodyFixedFrame();
           FramePose desiredFootFramePose = new FramePose(desiredFootReferenceFrame);
           
-          System.out.println(desiredFootFramePose);
+//          System.out.println(desiredFootFramePose);
           desiredFootFramePose.changeFrame(frame);
           PrintTools.info(""+ robotSide +" Foot");
           System.out.println(desiredFootFramePose);
@@ -756,15 +787,6 @@ public class WheneverWholeBodyKinematicsSolver
       PrintTools.info("Chest");   
       System.out.println(desiredChestFrameOrientation);
    }
-   
-   
-   
-   
-   
-   
-   
-   
-   
    
    
 }

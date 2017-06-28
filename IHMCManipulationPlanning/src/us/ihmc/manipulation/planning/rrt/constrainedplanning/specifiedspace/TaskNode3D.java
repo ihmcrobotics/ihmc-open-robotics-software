@@ -1,11 +1,17 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
+import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
+import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TaskNode3D extends TaskNode
 {   
    public static WheneverWholeBodyKinematicsSolver nodeTester;
+   public static EndEffectorTrajectory endEffectorTrajectory;
    
    
    public TaskNode3D()
@@ -26,33 +32,44 @@ public class TaskNode3D extends TaskNode
    public boolean isValidNode()
    {
       /*
-       * using whenever 
+       * using @code WheneverWholeBodyKinematicsSolver.
+       * set initial configuration
        */
-      
-      
-      /*
-       * Dummy constraint
-       */
-      double scaledDistance = 0;
-      scaledDistance = scaledDistance + (getNodeData(0) - 5.0)*(getNodeData(0) - 5.0);
-      scaledDistance = scaledDistance + (getNodeData(1) - 0.0)*(getNodeData(1) - 0.0);
-      scaledDistance = scaledDistance + (getNodeData(2) - 0.0)*(getNodeData(2) - 0.0);
-      scaledDistance = scaledDistance + (getNodeData(3) - 0.0)*(getNodeData(3) - 0.0);
-      
-      scaledDistance = Math.sqrt(scaledDistance);
-      
-      if(scaledDistance < 0.4)
+      if(getParentNode() != null)
       {
-         setIsValidNode(false);
+         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
+         
+         for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
+         {         
+            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
+         }
+         
       }
       else
-      {
-         setIsValidNode(true);
+      {         
       }
+
+      nodeTester.initialize();
+      nodeTester.holdCurrentTrajectoryMessages();
       
+      /*
+       * set whole body tasks.
+       */            
+      nodeTester.setDesiredHandPose(RobotSide.RIGHT, endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
+      nodeTester.setHandSelectionMatrixFree(RobotSide.LEFT);
       
+      Quaternion desiredChestOrientation = new Quaternion();
+      desiredChestOrientation.appendYawRotation(getNodeData(2));
+      desiredChestOrientation.appendPitchRotation(getNodeData(3));
+      nodeTester.setDesiredChestOrientation(desiredChestOrientation);
+            
+      nodeTester.setDesiredPelvisHeight(getNodeData(1));
       
+      nodeTester.putTrajectoryMessages();
       
+      setIsValidNode(nodeTester.isSolved());
+            
+      setConfigurationJoints(nodeTester.getFullRobotModelCopy().getOneDoFJoints());
       
       return isValid;
    }

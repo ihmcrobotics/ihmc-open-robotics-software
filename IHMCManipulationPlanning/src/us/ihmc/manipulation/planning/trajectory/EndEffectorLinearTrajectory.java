@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.transformables.Pose;
 
-public class LinearlyConstrainedEndEffectorPose implements ConstrainedEndEffectorPose
+public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
 {
    private ArrayList<LinearTrajectory> trajectories = new ArrayList<LinearTrajectory>();
    private double trajectoryTime = 0;
    private Pose initialPose;
    
-   public LinearlyConstrainedEndEffectorPose()
+   public EndEffectorLinearTrajectory()
    {
       
    }

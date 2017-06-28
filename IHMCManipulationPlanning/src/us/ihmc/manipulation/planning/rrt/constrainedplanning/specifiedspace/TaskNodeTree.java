@@ -286,6 +286,7 @@ public class TaskNodeTree
    private void connectNewConfiguration()
    {
       this.newNode.convertNormalizedDataToData(nodeRegion);
+      this.newNode.setParentNode(this.nearNode);
       if(this.newNode.isValidNode())
       {
          nearNode.addChildNode(this.newNode);
@@ -298,6 +299,7 @@ public class TaskNodeTree
       }
       else
       {
+         this.newNode.clearParentNode();
          failNodes.add(this.newNode);
          PrintTools.info("this new Configuration cannot be added on tree");
       }
