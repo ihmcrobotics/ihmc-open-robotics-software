@@ -171,27 +171,15 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             }
          }
          //         assertTrue(goodFinalAngularAcceleration);
-         if (traj.isSolvable(trajectoryTime, initialAngularVelocity.getVectorCopy(), finalAngularVelocity.getVectorCopy()))
+         if (!(goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity))
          {
-            if (!(goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity))
-            {
-               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
-            }
-
-            assertTrue(goodInitialOrientation);
-            assertTrue(goodFinalOrientation);
-            assertTrue(goodInitialVelocity);
-            assertTrue(goodFinalAngularVelocity);
+            printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
          }
-         else
-         {
-            if (goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity)
-            {
-               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
-            }
 
-            assertFalse(goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity);
-         }
+         assertTrue(goodInitialOrientation);
+         assertTrue(goodFinalOrientation);
+         assertTrue(goodInitialVelocity);
+         assertTrue(goodFinalAngularVelocity);
       }
    }
 
@@ -235,8 +223,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          FrameVector previousAngularVelocity = new FrameVector();
          FrameVector previousAngularAcceleration = new FrameVector();
 
-         double maxVelocity = 4.0;
-         double maxAcceleration = 8.0;
+         double maxVelocity = 2.0;
+         double maxAcceleration = 1.0;
          double maxJerk = 60.0;
 
          traj.compute(0.0);
@@ -342,9 +330,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          FrameVector previousAngularVelocity = new FrameVector();
          FrameVector previousAngularAcceleration = new FrameVector();
 
-         double maxVelocity = 10.0;
-         double maxAcceleration = 2000.0;
-         double maxJerk = 100000.0;
+         double maxVelocity = 20.0;
+         double maxAcceleration = 50.0;
+         double maxJerk = 3000.0;
 
          traj.compute(0.0);
          traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
