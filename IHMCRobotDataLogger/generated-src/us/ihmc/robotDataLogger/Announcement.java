@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public class Announcement implements IDLStruct<Announcement>
+public class Announcement
 {
     public Announcement()
     {
@@ -27,7 +24,7 @@ public class Announcement implements IDLStruct<Announcement>
         
         
     }
-    @Override
+
     public void set(Announcement other)
     {
         	identifier_.setLength(0);
@@ -37,12 +34,13 @@ public class Announcement implements IDLStruct<Announcement>
         	    	dataIP_[b] = other.dataIP_[b];	
 
         	}
+        	
         	dataPort_ = other.dataPort_;
         	name_.setLength(0);
         	name_.append(other.name_);
         	hostName_.setLength(0);
         	hostName_.append(other.hostName_);
-        	cameras_.set(other.cameras_);modelFileDescription_.set(other.modelFileDescription_);log_ = other.log_;
+            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(modelFileDescription_, other.modelFileDescription_);log_ = other.log_;
 
     }
 
@@ -142,167 +140,7 @@ public class Announcement implements IDLStruct<Announcement>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 127; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncement.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescription.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(Announcement data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(Announcement data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
-
-	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getHostName().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getCameras().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncement.getCdrSerializedSize(data.getCameras().get(a), current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescription.getCdrSerializedSize(data.getModelFileDescription(), current_alignment);
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    if(identifier_.length() <= 255)
-	    cdr.write_type_d(identifier_);else
-	        throw new RuntimeException("identifier field exceeds the maximum length");
-
-	    for(int a = 0; a < dataIP_.length; ++a)
-	    {
-	        	cdr.write_type_9(dataIP_[a]);	
-	    }
-
-	    cdr.write_type_3(dataPort_);
-
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
-
-	    if(hostName_.length() <= 255)
-	    cdr.write_type_d(hostName_);else
-	        throw new RuntimeException("hostName field exceeds the maximum length");
-
-	    if(cameras_.size() <= 127)
-	    cdr.write_type_e(cameras_);else
-	        throw new RuntimeException("cameras field exceeds the maximum length");
-
-	    cdr.write_type_a(modelFileDescription_);
-
-	    cdr.write_type_7(log_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	cdr.read_type_d(identifier_);	
-
-	    	for(int a = 0; a < dataIP_.length; ++a)
-	    	{
-	    	    	dataIP_[a] = cdr.read_type_9();	
-	    	}
-	    	
-
-	    	dataPort_ = cdr.read_type_3();	
-
-	    	cdr.read_type_d(name_);	
-
-	    	cdr.read_type_d(hostName_);	
-
-	    	cdr.read_type_e(cameras_);	
-
-	    	cdr.read_type_a(modelFileDescription_);	
-
-	    	log_ = cdr.read_type_7();	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_d("identifier", identifier_);
-			    
-			    ser.write_type_f("dataIP", dataIP_);
-			    
-			    ser.write_type_3("dataPort", dataPort_);
-			    
-			    ser.write_type_d("name", name_);
-			    
-			    ser.write_type_d("hostName", hostName_);
-			    
-			    ser.write_type_e("cameras", cameras_);
-			    
-			    ser.write_type_a("modelFileDescription", modelFileDescription_);
-			    
-			    ser.write_type_7("log", log_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			ser.read_type_d("identifier", identifier_);	
-	    	    
-	    			ser.read_type_f("dataIP", dataIP_);	
-	    	    
-	    			dataPort_ = ser.read_type_3("dataPort");	
-	    	    
-	    			ser.read_type_d("name", name_);	
-	    	    
-	    			ser.read_type_d("hostName", hostName_);	
-	    	    
-	    			ser.read_type_e("cameras", cameras_);	
-	    	    
-	    			ser.read_type_a("modelFileDescription", modelFileDescription_);	
-	    	    
-	    			log_ = ser.read_type_7("log");	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)
@@ -315,9 +153,9 @@ public class Announcement implements IDLStruct<Announcement>
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_);
                 
-                	for(int c = 0; c < dataIP_.length; ++c)
+                	for(int d = 0; d < dataIP_.length; ++d)
                 	{
-                	    returnedValue &= this.dataIP_[c] == otherMyClass.dataIP_[c];
+                	    returnedValue &= this.dataIP_[d] == otherMyClass.dataIP_[d];
 
                 	}        
         returnedValue &= this.dataPort_ == otherMyClass.dataPort_;
