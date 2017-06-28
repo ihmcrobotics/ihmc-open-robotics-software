@@ -12,6 +12,5 @@ public interface AngularMomentumTrajectory
    public void update(double timeInState, FrameVector desiredAngularMomentumToPack);
    public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack);
    public List<YoFramePolynomial3D> getPolynomials();
-   public void set(List<AngularMomentumTrajectoryPoint> samplePoints);
    public int getNumberOfSegments();
 }
