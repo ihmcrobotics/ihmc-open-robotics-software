@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit LogProperties.idl instead.
 *
 */
-public class Model implements IDLStruct<Model>
+public class Model
 {
     public Model()
     {
@@ -24,7 +21,7 @@ public class Model implements IDLStruct<Model>
         	resourceDirectoriesList_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
         
     }
-    @Override
+
     public void set(Model other)
     {
         	loader_.setLength(0);
@@ -35,7 +32,7 @@ public class Model implements IDLStruct<Model>
         	name_.append(other.name_);
         	resourceBundle_.setLength(0);
         	resourceBundle_.append(other.resourceBundle_);
-        	resourceDirectoriesList_.set(other.resourceDirectoriesList_);
+            resourceDirectoriesList_.set(other.resourceDirectoriesList_);	
     }
 
         public void setLoader(String loader)
@@ -115,129 +112,7 @@ public class Model implements IDLStruct<Model>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 255; ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-	    }
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(Model data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(Model data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getLoader().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getPath().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getResourceBundle().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getResourceDirectoriesList().size(); ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getResourceDirectoriesList().get(a).length() + 1;
-	    }
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    if(loader_.length() <= 255)
-	    cdr.write_type_d(loader_);else
-	        throw new RuntimeException("loader field exceeds the maximum length");
-
-	    if(path_.length() <= 255)
-	    cdr.write_type_d(path_);else
-	        throw new RuntimeException("path field exceeds the maximum length");
-
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
-
-	    if(resourceBundle_.length() <= 255)
-	    cdr.write_type_d(resourceBundle_);else
-	        throw new RuntimeException("resourceBundle field exceeds the maximum length");
-
-	    if(resourceDirectoriesList_.size() <= 255)
-	    cdr.write_type_e(resourceDirectoriesList_);else
-	        throw new RuntimeException("resourceDirectoriesList field exceeds the maximum length");
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	cdr.read_type_d(loader_);	
-
-	    	cdr.read_type_d(path_);	
-
-	    	cdr.read_type_d(name_);	
-
-	    	cdr.read_type_d(resourceBundle_);	
-
-	    	cdr.read_type_e(resourceDirectoriesList_);	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_d("loader", loader_);
-			    
-			    ser.write_type_d("path", path_);
-			    
-			    ser.write_type_d("name", name_);
-			    
-			    ser.write_type_d("resourceBundle", resourceBundle_);
-			    
-			    ser.write_type_e("resourceDirectoriesList", resourceDirectoriesList_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			ser.read_type_d("loader", loader_);	
-	    	    
-	    			ser.read_type_d("path", path_);	
-	    	    
-	    			ser.read_type_d("name", name_);	
-	    	    
-	    			ser.read_type_d("resourceBundle", resourceBundle_);	
-	    	    
-	    			ser.read_type_e("resourceDirectoriesList", resourceDirectoriesList_);	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

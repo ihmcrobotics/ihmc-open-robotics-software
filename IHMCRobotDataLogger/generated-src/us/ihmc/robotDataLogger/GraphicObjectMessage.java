@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
+public class GraphicObjectMessage
 {
     public GraphicObjectMessage()
     {
@@ -24,13 +21,13 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
         
         
     }
-    @Override
+
     public void set(GraphicObjectMessage other)
     {
         	type_ = other.type_;
         	name_.setLength(0);
         	name_.append(other.name_);
-        	yoVariableIndex_.set(other.yoVariableIndex_);constants_.set(other.constants_);appearance_.set(other.appearance_);listName_.setLength(0);
+            yoVariableIndex_.set(other.yoVariableIndex_);	constants_.set(other.constants_);	us.ihmc.robotDataLogger.AppearanceDefinitionMessagePubSubType.staticCopy(appearance_, other.appearance_);listName_.setLength(0);
         	listName_.append(other.listName_);
 
     }
@@ -103,139 +100,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (1024 * 2) + CDR.alignment(current_alignment, 2);
-
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (128 * 8) + CDR.alignment(current_alignment, 8);
-
-
-	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(GraphicObjectMessage data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(GraphicObjectMessage data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (data.getYoVariableIndex().size() * 2) + CDR.alignment(current_alignment, 2);
-
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (data.getConstants().size() * 8) + CDR.alignment(current_alignment, 8);
-
-
-	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getCdrSerializedSize(data.getAppearance(), current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getListName().length() + 1;
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_3(type_);
-
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
-
-	    if(yoVariableIndex_.size() <= 1024)
-	    cdr.write_type_e(yoVariableIndex_);else
-	        throw new RuntimeException("yoVariableIndex field exceeds the maximum length");
-
-	    if(constants_.size() <= 128)
-	    cdr.write_type_e(constants_);else
-	        throw new RuntimeException("constants field exceeds the maximum length");
-
-	    cdr.write_type_a(appearance_);
-
-	    if(listName_.length() <= 255)
-	    cdr.write_type_d(listName_);else
-	        throw new RuntimeException("listName field exceeds the maximum length");
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	type_ = cdr.read_type_3();	
-
-	    	cdr.read_type_d(name_);	
-
-	    	cdr.read_type_e(yoVariableIndex_);	
-
-	    	cdr.read_type_e(constants_);	
-
-	    	cdr.read_type_a(appearance_);	
-
-	    	cdr.read_type_d(listName_);	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_3("type", type_);
-			    
-			    ser.write_type_d("name", name_);
-			    
-			    ser.write_type_e("yoVariableIndex", yoVariableIndex_);
-			    
-			    ser.write_type_e("constants", constants_);
-			    
-			    ser.write_type_a("appearance", appearance_);
-			    
-			    ser.write_type_d("listName", listName_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			type_ = ser.read_type_3("type");	
-	    	    
-	    			ser.read_type_d("name", name_);	
-	    	    
-	    			ser.read_type_e("yoVariableIndex", yoVariableIndex_);	
-	    	    
-	    			ser.read_type_e("constants", constants_);	
-	    	    
-	    			ser.read_type_a("appearance", appearance_);	
-	    	    
-	    			ser.read_type_d("listName", listName_);	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)
