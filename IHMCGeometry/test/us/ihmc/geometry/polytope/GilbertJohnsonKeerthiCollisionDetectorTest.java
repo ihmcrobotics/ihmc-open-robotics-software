@@ -10,11 +10,11 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class GilbertJohnsonKeerthiCollisionDetectorTest
 {
@@ -172,7 +172,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
          for (int j = 0; j < numberOfPointsToTests; j++)
          {
-            Point3D pointToProject = RandomGeometry.nextPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
+            Point3D pointToProject = EuclidCoreRandomTools.generateRandomPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
             ConvexPolytope randomPointPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointToProject);
 
             Point3D closestPointOnPolytope = new Point3D();
