@@ -20,14 +20,18 @@ public interface AngularMomentumTrajectoryGeneratorInterface
    void clear();
 
    void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
+   
+   void addAngularMomentumWaypointsToPlan(List<AngularMomentumTrajectoryPoint> waypointList);
 
+   void addAngularMomentumWaypointToPlan(AngularMomentumTrajectoryPoint waypoint);
+   
    int getNumberOfFootstepsRegistered();
 
    void update(double currentTime);
 
-   void getDesiredAngularMomentum(FramePoint desiredAngMomToPack);
+   void getDesiredAngularMomentum(FrameVector desiredAngMomToPack);
 
-   void getDesiredAngularMomentum(FramePoint desiredAngMomToPack, FrameVector desiredTorqueToPack);
+   void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack);
 
    void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack);
 
