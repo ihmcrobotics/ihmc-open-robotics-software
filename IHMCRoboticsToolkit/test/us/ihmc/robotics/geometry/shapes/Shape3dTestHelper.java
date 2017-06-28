@@ -24,8 +24,8 @@ public class Shape3dTestHelper
       {
          Point3D point = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
 
-         boolean pointIsInside = shape3d.isInsideOrOnSurface(point, -1e-5);
-         boolean pointIsOutside = !(shape3d.isInsideOrOnSurface(point, 1e-5));
+         boolean pointIsInside = shape3d.isInsideEpsilon(point, -1e-5);
+         boolean pointIsOutside = !(shape3d.isInsideEpsilon(point, 1e-5));
 
          if (pointIsInside && pointIsOutside)
             fail();

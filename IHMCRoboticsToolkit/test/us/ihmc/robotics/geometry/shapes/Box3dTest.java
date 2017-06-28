@@ -176,7 +176,7 @@ public class Box3dTest
 
       for (Point3D vertex : vertices)
       {
-         assertTrue(box.isInsideOrOnSurface(vertex, 1e-14));
+         assertTrue(box.isInsideEpsilon(vertex, 1e-14));
       }
    }
 
@@ -209,12 +209,12 @@ public class Box3dTest
             offset.scale(RandomNumbers.nextDouble(random, epsilon, maxScale));
             Point3D testPoint = new Point3D(vertex);
             testPoint.add(offset);
-            assertFalse(box.isInsideOrOnSurface(testPoint, epsilon));
+            assertFalse(box.isInsideEpsilon(testPoint, epsilon));
 
             Point3D projection = new Point3D(testPoint);
             box.orthogonalProjection(projection);
             EuclidCoreTestTools.assertTuple3DEquals(vertex, projection, epsilon);
-            assertTrue(box.isInsideOrOnSurface(projection, epsilon));
+            assertTrue(box.isInsideEpsilon(projection, epsilon));
          }
       }
    }
@@ -301,8 +301,8 @@ public class Box3dTest
             // check distance stuff:
             double epsilon = 1e-14;
             assertEquals(box.distance(closestPoint), 0.0, epsilon);
-            assertTrue(box.isInsideOrOnSurface(closestPoint, epsilon));
-            assertTrue(box.isInsideOrOnSurface(projectedPoint, epsilon));
+            assertTrue(box.isInsideEpsilon(closestPoint, epsilon));
+            assertTrue(box.isInsideEpsilon(projectedPoint, epsilon));
             if (box.isInsideOrOnSurface(point))
             {
                EuclidCoreTestTools.assertTuple3DEquals(point, projectedPoint, 1e-10);

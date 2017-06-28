@@ -102,7 +102,7 @@ public class Box3d extends Shape3D<Box3d>
    @Override
    protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      boolean isInside = isInsideOrOnSurfaceShapeFrame(x, y, z, 0.0);
+      boolean isInside = isInsideEpsilonShapeFrame(x, y, z, 0.0);
 
       if (isInside)
       {
@@ -230,7 +230,7 @@ public class Box3d extends Shape3D<Box3d>
       vertexToPack.setY((vertexIndex & 2) == 0 ? size.getY() : -size.getY());
       vertexToPack.setZ((vertexIndex & 4) == 0 ? size.getZ() : -size.getZ());
       vertexToPack.scale(0.5);
-      transformToWorld(vertexToPack, vertexToPack);
+      transformToWorld(vertexToPack);
    }
 
    public Point3D[] getVertices()
@@ -282,14 +282,14 @@ public class Box3d extends Shape3D<Box3d>
                                                                                                 dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
                                                                                                 secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
-         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+         transformToWorld(firstIntersectionToPack);
       if (secondIntersectionToPack != null && numberOfIntersections == 2)
-         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+         transformToWorld(secondIntersectionToPack);
       return numberOfIntersections;
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       return Math.abs(x) <= halfSize.getX() + epsilon && Math.abs(y) <= halfSize.getY() + epsilon && Math.abs(z) <= halfSize.getZ() + epsilon;
    }

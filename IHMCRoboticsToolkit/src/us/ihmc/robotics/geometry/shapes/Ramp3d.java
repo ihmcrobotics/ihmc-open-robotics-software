@@ -363,7 +363,7 @@ public class Ramp3d extends Shape3D<Ramp3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       if (z < -epsilon)
          return false;

@@ -85,7 +85,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideOrOnSurface(pointToCheck.getPoint(), epsilon);
+      return getGeometryObject().isInsideEpsilon(pointToCheck.getPoint(), epsilon);
    }
 
    /**

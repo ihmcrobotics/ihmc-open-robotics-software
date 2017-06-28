@@ -156,8 +156,8 @@ public class Ramp3dTest
       assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {1.0, 0.3, 0.8})));
 
       // With finite epsilon
-      assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) + 0.001));
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) - 0.001));
+      assertTrue(ramp3d.isInsideEpsilon(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) + 0.001));
+      assertFalse(ramp3d.isInsideEpsilon(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) - 0.001));
 
       // With default epsilon and translation
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -276,21 +276,21 @@ public class Ramp3dTest
 
          // points below the ramp surface (z < 0 in angled frame) are inside
          pointToTest.set(random.nextDouble() * rampLength, (random.nextDouble() - 0.5) * ramp.getWidth(), random.nextDouble() * epsilon);
-         assertTrue(ramp.isInsideOrOnSurface(transformFromAngledToWorldFrame(ramp, pointToTest), epsilon));
+         assertTrue(ramp.isInsideEpsilon(transformFromAngledToWorldFrame(ramp, pointToTest), epsilon));
 
          // points barely inside the side (y < 0.5*width in ramp frame and x and z so that they fit into the triangular sides)
          pointInsideRampSide(pointToTest, ramp, epsilon);
-         assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
+         assertTrue(ramp.isInsideEpsilon(pointToTest, epsilon));
 
          // points barely above the base (small positive z in ramp frame and x and z so that they fit into the rectangular sides) are inside
          pointToTest.set(random.nextDouble() * ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * epsilon);
          ramp.transformToWorld(pointToTest);
-         assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
+         assertTrue(ramp.isInsideEpsilon(pointToTest, epsilon));
 
          // points barely inside of the 'backboard', ie x = length
          pointToTest.set(random.nextDouble() * epsilon + ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * ramp.getHeight());
          ramp.transformToWorld(pointToTest);
-         assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
+         assertTrue(ramp.isInsideEpsilon(pointToTest, epsilon));
       }
    }
 

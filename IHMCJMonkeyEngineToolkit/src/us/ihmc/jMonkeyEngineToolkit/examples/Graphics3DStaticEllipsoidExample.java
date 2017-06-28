@@ -55,7 +55,7 @@ public class Graphics3DStaticEllipsoidExample
    {
       for (Ellipsoid3d ellipsoid : ellipsoids)
       {
-         if (ellipsoid.isInsideOrOnSurface(point, epsilon)) return true;
+         if (ellipsoid.isInsideEpsilon(point, epsilon)) return true;
       }
 
       return false;
@@ -65,7 +65,7 @@ public class Graphics3DStaticEllipsoidExample
    {
       for (Ellipsoid3d ellipsoid : ellipsoids)
       {
-         if (ellipsoid.isInsideOrOnSurface(point, epsilon)) return true;
+         if (ellipsoid.isInsideEpsilon(point, epsilon)) return true;
       }
 
       return false;
