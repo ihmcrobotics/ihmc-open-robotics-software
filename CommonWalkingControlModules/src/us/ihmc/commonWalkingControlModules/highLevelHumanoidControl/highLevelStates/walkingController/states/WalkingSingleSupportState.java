@@ -49,6 +49,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final YoDouble remainingSwingTimeAccordingToPlan = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
    private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
+   private final YoDouble optimizedRemainingSwingTime = new YoDouble("optimizedRemainingSwingTime", registry);
    private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
@@ -75,6 +76,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+
+      setYoVariablesToNaN();
+   }
+
+   private void setYoVariablesToNaN()
+   {
+      optimizedRemainingSwingTime.setToNaN();
+      estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
+      remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
 
@@ -257,6 +267,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.changeFrame(worldFrame);
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
+
+      setYoVariablesToNaN();
    }
 
    private final FramePoint2d filteredDesiredCoP = new FramePoint2d(worldFrame);
@@ -296,11 +308,22 @@ public class WalkingSingleSupportState extends SingleSupportState
    private double requestSwingSpeedUpIfNeeded()
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
-      estimatedRemainingSwingTimeUnderDisturbance.set(balanceManager.estimateTimeRemainingForSwingUnderDisturbance());
-
-      if (estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue() > 1.0e-3)
+      
+      double remainingTime;
+      if (balanceManager.useICPTimingOptimization())
       {
-         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
+         remainingTime = balanceManager.getOptimizedTimeRemaining();
+         optimizedRemainingSwingTime.set(remainingTime);
+      }
+      else
+      {
+         remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
+      }
+
+      if (remainingTime > 1.0e-3)
+      {
+         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / remainingTime;
          return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
       }
       else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
