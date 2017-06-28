@@ -6,6 +6,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,7 +25,10 @@ import java.util.List;
 
 public class ICPTimingOptimizationController extends ICPOptimizationController
 {
+   private static final double footVelocityScalarWeight = 0.0;
+
    private final YoDouble timingAdjustmentWeight = new YoDouble(yoNamePrefix + "TimingAdjustmentWeight", registry);
+   private final YoDouble timingAdjustmentRegularizationWeight = new YoDouble(yoNamePrefix + "TimingAdjustmentRegularizationWeight", registry);
    private final YoDouble gradientThresholdForAdjustment = new YoDouble(yoNamePrefix + "GradientThresholdForAdjustment", registry);
    private final YoDouble gradientDescentGain = new YoDouble(yoNamePrefix + "GradientDescentGain", registry);
 
@@ -31,6 +38,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    private final YoDouble timingDeadline = new YoDouble(yoNamePrefix + "TimingDeadline", registry);
    private final YoBoolean finishedOnTime = new YoBoolean(yoNamePrefix + "FinishedOnTime", registry);
+
+   private final YoDouble footVelocityWeight = new YoDouble(yoNamePrefix + "FootVelocityWeight", registry);
 
    private final double variationSizeToComputeTimingGradient;
    private final int maxNumberOfGradientIterations;
@@ -51,6 +60,13 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();
 
+   private final FramePoint2d currentSwingFootPosition = new FramePoint2d();
+   private final FrameVector2d currentSwingFootVelocity = new FrameVector2d();
+   private final FrameVector2d requiredSwingFootVelocity = new FrameVector2d();
+   private final FrameVector2d requiredFootstepPosition = new FrameVector2d();
+
+   private double previousSwingDurationSolution;
+
    public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
@@ -67,10 +83,13 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
 
       timingAdjustmentWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentWeight());
+      timingAdjustmentRegularizationWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentRegularizationWeight());
       gradientThresholdForAdjustment.set(icpOptimizationParameters.getGradientThresholdForTimingAdjustment());
       gradientDescentGain.set(icpOptimizationParameters.getGradientDescentGain());
       timingAdjustmentAttenuation.set(icpOptimizationParameters.getTimingAdjustmentAttenuation());
       timingDeadline.set(icpOptimizationParameters.getMaximumDurationForOptimization());
+
+      footVelocityWeight.set(footVelocityScalarWeight);
 
       variationSizeToComputeTimingGradient = icpOptimizationParameters.getVariationSizeToComputeTimingGradient();
       maxNumberOfGradientIterations = icpOptimizationParameters.getMaximumNumberOfGradientIterations();
@@ -188,6 +207,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
       extractSolutionsFromSolver(numberOfFootstepsToConsider, omega0, noConvergenceException);
 
+      previousSwingDurationSolution = swingDurations.get(0).getDoubleValue();
+
       controllerTimer.stopMeasurement();
    }
 
@@ -218,7 +239,13 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       submitSolverTaskConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
 
       NoConvergenceException noConvergenceException = solveQP();
-      double costToGoUnvaried = computeTotalCostToGo();
+      double solverCostToGo = solver.getCostToGo();
+      double timeAdjustmentCostToGo = computeTimeAdjustmentCostToGo();
+      double footVelocityCostToGo = computeFootVelocityCostToGo();
+
+      //double costToGoUnvaried = computeTotalCostToGo();
+      double costToGoUnvaried = solverCostToGo + timeAdjustmentCostToGo + footVelocityCostToGo;
+
       double variationSize = variationSizeToComputeTimingGradient;
 
       if (noConvergenceException != null)
@@ -233,7 +260,14 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       if (noConvergenceException != null)
          return noConvergenceException;
 
-      double costToGoWithVariation = computeTotalCostToGo();
+
+      double solverCostToGoWithVariation = solver.getCostToGo();
+      double timeAdjustmentCostToGoWithVariation = computeTimeAdjustmentCostToGo();
+      double footVelocityCostToGoWithVariation = computeFootVelocityCostToGo();
+
+      //double costToGoWithVariation = computeTotalCostToGo();
+      double costToGoWithVariation = solverCostToGoWithVariation + timeAdjustmentCostToGoWithVariation + footVelocityCostToGoWithVariation;
+
       double averageCostToGo = 0.5 * (costToGoWithVariation + costToGoUnvaried);
       double costToGoGradient = (costToGoWithVariation - costToGoUnvaried) / variationSize;
       swingDuration.sub(variationSize);
@@ -286,7 +320,12 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
          if (noConvergenceException != null)
             return noConvergenceException;
 
-         costToGoUnvaried = computeTotalCostToGo();
+         solverCostToGo = solver.getCostToGo();
+         timeAdjustmentCostToGo = computeTimeAdjustmentCostToGo();
+         footVelocityCostToGo = computeFootVelocityCostToGo();
+
+         //costToGoUnvaried = computeTotalCostToGo();
+         costToGoUnvaried = solverCostToGo + timeAdjustmentCostToGo + footVelocityCostToGo;
 
          int reductionNumber = 0;
          while (costToGoUnvaried >= averageCostToGo + percentCostRequiredDecrease * Math.signum(averageCostToGo) * averageCostToGo)
@@ -330,7 +369,12 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
             if (noConvergenceException != null)
                return noConvergenceException;
 
-            costToGoUnvaried = computeTotalCostToGo();
+            solverCostToGo = solver.getCostToGo();
+            timeAdjustmentCostToGo = computeTimeAdjustmentCostToGo();
+            footVelocityCostToGo = computeFootVelocityCostToGo();
+
+            //costToGoUnvaried = computeTotalCostToGo();
+            costToGoUnvaried = solverCostToGo + timeAdjustmentCostToGo + footVelocityCostToGo;
 
             swingTimings.get(iterationNumber).set(swingDuration.getDoubleValue());
             costToGos.get(iterationNumber).set(costToGoUnvaried);
@@ -351,7 +395,12 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
          if (noConvergenceException != null)
             return noConvergenceException;
 
-         costToGoWithVariation = computeTotalCostToGo();
+         solverCostToGoWithVariation = solver.getCostToGo();
+         timeAdjustmentCostToGoWithVariation = computeTimeAdjustmentCostToGo();
+         footVelocityCostToGoWithVariation = computeFootVelocityCostToGo();
+
+         //costToGoWithVariation = computeTotalCostToGo();
+         costToGoWithVariation = solverCostToGoWithVariation + timeAdjustmentCostToGoWithVariation + footVelocityCostToGoWithVariation;
 
          averageCostToGo = 0.5 * (costToGoWithVariation + costToGoUnvaried);
          costToGoGradient = (costToGoWithVariation - costToGoUnvaried) / variationSize;
@@ -378,11 +427,50 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       return null;
    }
 
-   public double computeTotalCostToGo()
+   public double computeTimeAdjustmentCostToGo()
    {
-      double solverCostToGo = solver.getCostToGo();
-      double timingCostToGo = timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
+      double adjustmentWeight = timingAdjustmentWeight.getDoubleValue() * Math.pow(swingDurations.get(0).getDoubleValue() - referenceSwingDuration.getDoubleValue(), 2.0);
+      double regularizationWeight = timingAdjustmentRegularizationWeight.getDoubleValue() / controlDT *
+            Math.pow(swingDurations.get(0).getDoubleValue() - previousSwingDurationSolution, 2.0);
 
-      return solverCostToGo + timingCostToGo;
+      return adjustmentWeight + regularizationWeight;
+   }
+
+   private final FramePoint tempPoint = new FramePoint();
+   private final FrameVector tempVector = new FrameVector();
+
+   public double computeFootVelocityCostToGo()
+   {
+      RobotSide swingSide = supportSide.getEnumValue().getOppositeSide();
+      ReferenceFrame ankleFrame = contactableFeet.get(swingSide).getFrameAfterParentJoint();
+
+      tempPoint.setToZero(ankleFrame);
+      footstepSolutions.get(0).getFrameTuple2d(requiredFootstepPosition);
+
+      Twist footTwist = contactableFeet.get(swingSide).getRigidBody().getParentJoint().getFrameAfterJoint().getTwistOfFrame();
+      footTwist.getLinearPart(tempVector);
+
+      tempVector.changeFrame(worldFrame);
+      currentSwingFootVelocity.setByProjectionOntoXYPlane(tempVector);
+
+      tempPoint.changeFrame(worldFrame);
+      currentSwingFootPosition.setByProjectionOntoXYPlane(tempPoint);
+      requiredFootstepPosition.changeFrame(worldFrame);
+
+      requiredSwingFootVelocity.set(requiredFootstepPosition);
+      requiredSwingFootVelocity.sub(currentSwingFootPosition);
+      requiredSwingFootVelocity.scale(1.0 / timeRemainingInState.getDoubleValue());
+
+      currentSwingFootVelocity.sub(requiredSwingFootVelocity);
+
+      double velocityDiffSquared = currentSwingFootVelocity.dot(currentSwingFootVelocity);
+
+      return footVelocityWeight.getDoubleValue() * velocityDiffSquared;
+   }
+
+   public double getOptimizedTimeRemaining()
+   {
+      computeTimeRemainingInState();
+      return timeRemainingInState.getDoubleValue();
    }
 }

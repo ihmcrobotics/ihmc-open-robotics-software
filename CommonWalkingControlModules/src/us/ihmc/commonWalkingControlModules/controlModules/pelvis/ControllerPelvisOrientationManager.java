@@ -10,8 +10,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -26,6 +24,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerPelvisOrientationManager extends PelvisOrientationControlState
 {
@@ -197,16 +197,17 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
+   @Override
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
 
       pelvisOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
-      tempOrientation.changeFrame(desiredPelvisFrame);
-      tempAngularVelocity.setToZero(desiredPelvisFrame);
 
-      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
+      tempOrientation.changeFrame(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
+
       tempOrientation.setToZero(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
       pelvisOrientationOffsetTrajectoryGenerator.initialize();

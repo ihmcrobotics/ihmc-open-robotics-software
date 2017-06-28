@@ -70,9 +70,9 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -456,10 +456,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getSimpleRobotName()
    {
-      if (selectedVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
-         return "Atlas";
-      else
-         return "AtlasNoForearms"; // This String is notably used in the UI to figure out if Atlas has the forearms on.
+      return "Atlas";
    }
 
    @Override

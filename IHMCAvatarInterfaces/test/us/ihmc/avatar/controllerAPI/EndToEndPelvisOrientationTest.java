@@ -23,11 +23,11 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -39,6 +39,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInterface
 {
@@ -50,6 +52,37 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private SimulationConstructionSet scs;
+
+   public void testGoHome() throws SimulationExceededMaximumTimeException
+   {
+      double epsilon = 1.0e-5;
+      double yaw = Math.toRadians(15.0);
+      double trajectoryTime = 0.5;
+
+      Quaternion orientation = new Quaternion();
+      orientation.appendYawRotation(yaw);
+      ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
+
+      humanoidReferenceFrames.updateFrames();
+      FrameOrientation pelvisOrientation = new FrameOrientation(midFootZUpGroundFrame, orientation);
+      pelvisOrientation.changeFrame(worldFrame);
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
+      drcSimulationTestHelper.send(message);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
+
+      String pelvisName = fullRobotModel.getPelvis().getName();
+      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, message.taskspaceTrajectoryPoints[0], scs, epsilon);
+
+      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime);
+      drcSimulationTestHelper.send(goHomeMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
+
+      humanoidReferenceFrames.updateFrames();
+      FrameOrientation homeOrientation = new FrameOrientation(midFootZUpGroundFrame, new Quaternion());
+      homeOrientation.changeFrame(worldFrame);
+      SO3TrajectoryPointMessage home = new SO3TrajectoryPointMessage(trajectoryTime, homeOrientation.getQuaternion(), zeroVector);
+      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, home, scs, epsilon);
+   }
 
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {

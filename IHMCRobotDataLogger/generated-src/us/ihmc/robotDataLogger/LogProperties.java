@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit LogProperties.idl instead.
 *
 */
-public class LogProperties implements IDLStruct<LogProperties>
+public class LogProperties
 {
     public LogProperties()
     {
@@ -26,16 +23,16 @@ public class LogProperties implements IDLStruct<LogProperties>
         
         
     }
-    @Override
+
     public void set(LogProperties other)
     {
         	version_.setLength(0);
         	version_.append(other.version_);
         	name_.setLength(0);
         	name_.append(other.name_);
-        	variables_.set(other.variables_);model_.set(other.model_);timestamp_.setLength(0);
+           	us.ihmc.robotDataLogger.VariablesPubSubType.staticCopy(variables_, other.variables_);us.ihmc.robotDataLogger.ModelPubSubType.staticCopy(model_, other.model_);timestamp_.setLength(0);
         	timestamp_.append(other.timestamp_);
-        	cameras_.set(other.cameras_);video_.set(other.video_);
+            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.VideoPubSubType.staticCopy(video_, other.video_);
     }
 
         public void setVersion(String version)
@@ -119,145 +116,7 @@ public class LogProperties implements IDLStruct<LogProperties>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += us.ihmc.robotDataLogger.Variables.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += us.ihmc.robotDataLogger.Model.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 255; ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.Camera.getMaxCdrSerializedSize(current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.Video.getMaxCdrSerializedSize(current_alignment);
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(LogProperties data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(LogProperties data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getVersion().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
-
-	    current_alignment += us.ihmc.robotDataLogger.Variables.getCdrSerializedSize(data.getVariables(), current_alignment);
-	    current_alignment += us.ihmc.robotDataLogger.Model.getCdrSerializedSize(data.getModel(), current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getTimestamp().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getCameras().size(); ++a)
-	    {
-	        current_alignment += us.ihmc.robotDataLogger.Camera.getCdrSerializedSize(data.getCameras().get(a), current_alignment);}
-
-	    current_alignment += us.ihmc.robotDataLogger.Video.getCdrSerializedSize(data.getVideo(), current_alignment);
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    if(version_.length() <= 255)
-	    cdr.write_type_d(version_);else
-	        throw new RuntimeException("version field exceeds the maximum length");
-
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
-
-	    cdr.write_type_a(variables_);
-
-	    cdr.write_type_a(model_);
-
-	    if(timestamp_.length() <= 255)
-	    cdr.write_type_d(timestamp_);else
-	        throw new RuntimeException("timestamp field exceeds the maximum length");
-
-	    if(cameras_.size() <= 255)
-	    cdr.write_type_e(cameras_);else
-	        throw new RuntimeException("cameras field exceeds the maximum length");
-
-	    cdr.write_type_a(video_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	cdr.read_type_d(version_);	
-
-	    	cdr.read_type_d(name_);	
-
-	    	cdr.read_type_a(variables_);	
-
-	    	cdr.read_type_a(model_);	
-
-	    	cdr.read_type_d(timestamp_);	
-
-	    	cdr.read_type_e(cameras_);	
-
-	    	cdr.read_type_a(video_);	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_d("version", version_);
-			    
-			    ser.write_type_d("name", name_);
-			    
-			    ser.write_type_a("variables", variables_);
-			    
-			    ser.write_type_a("model", model_);
-			    
-			    ser.write_type_d("timestamp", timestamp_);
-			    
-			    ser.write_type_e("cameras", cameras_);
-			    
-			    ser.write_type_a("video", video_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			ser.read_type_d("version", version_);	
-	    	    
-	    			ser.read_type_d("name", name_);	
-	    	    
-	    			ser.read_type_a("variables", variables_);	
-	    	    
-	    			ser.read_type_a("model", model_);	
-	    	    
-	    			ser.read_type_d("timestamp", timestamp_);	
-	    	    
-	    			ser.read_type_e("cameras", cameras_);	
-	    	    
-	    			ser.read_type_a("video", video_);	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)
