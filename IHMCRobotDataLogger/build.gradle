@@ -82,7 +82,6 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
-   compile ihmc.getProjectDependency(":IHMCRobotModels")
     
         testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
     
