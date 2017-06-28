@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.transformables.Pose;
  * 170627 Inho Lee.
  */
 
-public interface ConstrainedEndEffectorPose
+public interface EndEffectorTrajectory
 {   
    public double getTrajectoryTime();
    public Pose getEndEffectorPose(double time);

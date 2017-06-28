@@ -3,6 +3,9 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public abstract class TaskNode implements TaskNodeInterface
 {
@@ -10,8 +13,10 @@ public abstract class TaskNode implements TaskNodeInterface
    private NodeData normalizedNodeData;
    private ArrayList<TaskNode> childNodes;
    private TaskNode parentNode;
-      
+   
    protected boolean isValid = true;  
+   
+   protected OneDoFJoint[] configurationJoints;   
    
    public TaskNode()
    {
@@ -99,6 +104,11 @@ public abstract class TaskNode implements TaskNodeInterface
    {
       parentNode = node;
    }
+   
+   public final void clearParentNode()
+   {
+      parentNode = null;
+   }
 
    public final TaskNode getParentNode()
    {
@@ -155,6 +165,18 @@ public abstract class TaskNode implements TaskNodeInterface
          }
          nodeData.setQ(i, value);
       }
+   }
+   
+   protected void setConfigurationJoints(OneDoFJoint[] configurationJoints)
+   {
+      this.configurationJoints = configurationJoints;
+      
+      
+   }
+   
+   public OneDoFJoint[] getOneDoFJoints()
+   {
+      return configurationJoints;
    }
    
    @Override
