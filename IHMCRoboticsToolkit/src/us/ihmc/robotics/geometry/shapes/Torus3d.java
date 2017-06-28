@@ -137,7 +137,7 @@ public class Torus3d extends Shape3D<Torus3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       double xyLengthSquared = EuclidCoreTools.normSquared(x, y);
 

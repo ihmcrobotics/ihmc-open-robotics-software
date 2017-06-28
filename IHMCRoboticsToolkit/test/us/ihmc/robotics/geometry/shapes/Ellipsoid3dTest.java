@@ -130,10 +130,10 @@ public class Ellipsoid3dTest
 
       Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius, transform);
 
-      assertTrue(ellipsoid.isInsideOrOnSurface(new Point3D(0.0, 8.0, 0.0), 0.001));
-      assertTrue(ellipsoid.isInsideOrOnSurface(new Point3D(0.0, 7.9, 0.0), 0.001));
-      assertFalse(ellipsoid.isInsideOrOnSurface(new Point3D(0.0, 8.2, 0.0), 0.001));
-      assertFalse(ellipsoid.isInsideOrOnSurface(new Point3D(0.2, 8.2, 0.2), 0.001));
+      assertTrue(ellipsoid.isInsideEpsilon(new Point3D(0.0, 8.0, 0.0), 0.001));
+      assertTrue(ellipsoid.isInsideEpsilon(new Point3D(0.0, 7.9, 0.0), 0.001));
+      assertFalse(ellipsoid.isInsideEpsilon(new Point3D(0.0, 8.2, 0.0), 0.001));
+      assertFalse(ellipsoid.isInsideEpsilon(new Point3D(0.2, 8.2, 0.2), 0.001));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -79,14 +79,14 @@ public class Sphere3d extends Shape3D<Sphere3d>
       int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndEllipsoid3D(radius, radius, radius, xLocal, yLocal, zLocal, dxLocal, dyLocal,
                                                                                               dzLocal, firstIntersectionToPack, secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
-         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+         transformToWorld(firstIntersectionToPack);
       if (secondIntersectionToPack != null && numberOfIntersections == 2)
-         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+         transformToWorld(secondIntersectionToPack);
       return numberOfIntersections;
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       double radiusWithEpsilon = radius + epsilon;
       return normSquared(x, y, z) <= radiusWithEpsilon * radiusWithEpsilon;

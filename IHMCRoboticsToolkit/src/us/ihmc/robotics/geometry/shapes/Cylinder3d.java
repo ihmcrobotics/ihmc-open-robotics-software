@@ -125,14 +125,14 @@ public class Cylinder3d extends Shape3D<Cylinder3d>
       int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndCylinder3D(height, radius, xLocal, yLocal, zLocal, dxLocal, dyLocal, dzLocal,
                                                                                              firstIntersectionToPack, secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
-         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+         transformToWorld(firstIntersectionToPack);
       if (secondIntersectionToPack != null && numberOfIntersections == 2)
-         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+         transformToWorld(secondIntersectionToPack);
       return numberOfIntersections;
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       if (z < -epsilon || z > height + epsilon)
          return false;

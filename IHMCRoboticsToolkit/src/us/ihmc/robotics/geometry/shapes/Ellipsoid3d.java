@@ -139,14 +139,14 @@ public class Ellipsoid3d extends Shape3D<Ellipsoid3d>
                                                                                               zLocal, dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
                                                                                               secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
-         transformToWorld(firstIntersectionToPack, firstIntersectionToPack);
+         transformToWorld(firstIntersectionToPack);
       if (secondIntersectionToPack != null && numberOfIntersections == 2)
-         transformToWorld(secondIntersectionToPack, secondIntersectionToPack);
+         transformToWorld(secondIntersectionToPack);
       return numberOfIntersections;
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(double x, double y, double z, double epsilon)
+   protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
       double scaledX = x / (radius.getX() + epsilon);
       double scaledY = y / (radius.getY() + epsilon);
