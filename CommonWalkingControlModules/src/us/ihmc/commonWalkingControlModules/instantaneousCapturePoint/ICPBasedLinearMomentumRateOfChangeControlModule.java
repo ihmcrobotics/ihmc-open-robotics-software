@@ -63,27 +63,42 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       }
    }
 
+   @Override
    public void clearPlan(){}
 
+   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing){}
 
+   @Override
    public void setFinalTransferDuration(double finalTransferDuration){}
 
+   @Override
    public void initializeForStanding(){}
 
+   @Override
    public void initializeForSingleSupport(){}
 
+   @Override
    public void initializeForTransfer(){}
 
+   @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeInSwing) {}
 
+   @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       return false;
    }
 
+   @Override
    public ICPOptimizationController getICPOptimizationController()
    {
       return null;
+   }
+
+   @Override
+   public double getOptimizedTimeRemaining()
+   {
+      throw new RuntimeException("This method is not implemented in planner based momentum control module.");
    }
 }
